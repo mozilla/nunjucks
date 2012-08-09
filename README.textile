@@ -10,8 +10,7 @@ h2. Status
 This is very early code. The parser is mostly complete but the code generator is just beginning and does not work yet. You can play around with the parser with this:
 
 
-bc..
-    var parser = require('./parser');
+bc. var parser = require('./parser');
     var nodes = require('./nodes');
     var n = parser.parse("Hello {{ username }}! {% if sick %}Feel better!{% endif %}")
     nodes.printNodes(n);
