@@ -5,23 +5,16 @@ I'm tired of the lack of good templating systems for large js apps. EJS is ugly 
 
 I hope that Nunjucks can be better. It is heavily jinja2 inspired because I think it is a great solution for templating. Nunjucks does not claim to be a direct port of jinja2, but most things will work the same in both projects.
 
-h2. Status
-
-This is very early code. The parser is mostly complete and the code generator is being worked on. The parser supports variables, blocks, filters, and a bunch more. The code generator currently supports variable lookups, ifs, and literals. It will generate code for more advanced stuff soon.
-
-You can play around with the parser with this:
-
-bc. var parser = require('./parser');
-var nodes = require('./nodes');
-var n = parser.parse("Hello {{ username }}! {% if sick %}Feel better!{% endif %}")
-nodes.printNodes(n);
-
-That will give you a nicely formatted print out of the AST generated from the parser.
+h2. Using
 
 Here is an example template that works with the current code:
  
 bc.. Hello {{ username }}, are you feeling ok?
-    
+
+{{ messages('black') }} {# Call a function #}
+{{ header|title|big }} {# Use a few filters #}
+
+{# Conditionals #}    
 {% if sick %}
   no
 {% elif throwing %}
@@ -34,11 +27,24 @@ bc.. Hello {{ username }}, are you feeling ok?
 
 p. To compile templates, you can create a Template directly or load one from an environment object. Right now the environment just loads the template from the disk relative to the current location.
 
-bc.. var tmpl = new Template('Hello {{ username }}');
+bc.. var e = require('./environment');
+var tmpl = new e.Template('Hello {{ username }}');
 console.log(tmpl.render({ username: "james" }));
 
 // From an environment
-var env = new Environment();
+var env = new e.Environment();
 var tmpl = env.get_template('test.html');
 console.log(tmpl.render({ username: "james" }));
 
+h2. Status
+
+This is very early code. The parser is mostly complete and the code generator is being worked on. The biggest missing features are specific blocks like @import@, @block@, @extends@, etc.
+
+You can play around with the parser with this:
+
+bc. var parser = require('./parser');
+var nodes = require('./nodes');
+var n = parser.parse("Hello {{ username }}! {% if sick %}Feel better!{% endif %}")
+nodes.printNodes(n);
+
+That will give you a nicely formatted print out of the AST generated from the parser.
