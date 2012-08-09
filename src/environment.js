@@ -27,5 +27,5 @@ Template.prototype.render = function(ctx) {
         this.tmpl_cache = tmpl;
     }
 
-    return tmpl.execute(ctx);
+    return tmpl.execute(ctx, this.env);
 };

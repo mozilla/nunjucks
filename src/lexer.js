@@ -2,7 +2,7 @@
 var util = require('util');
 
 var whitespaceChars = " \n\t\r";
-var delimChars = "()[]{}%*-+/#";
+var delimChars = "()[]{}%*-+/#,:|";
 var integerRe = /^[-+]?[0-9]+/;
 
 var BLOCK_START = "{%";
@@ -21,11 +21,30 @@ var TOKEN_VARIABLE_START = "variable-start";
 var TOKEN_VARIABLE_END = "variable-end";
 var TOKEN_COMMENT_START = "comment-start";
 var TOKEN_COMMENT_END = "comment-end";
+var TOKEN_LEFT_PAREN = "left-paren";
+var TOKEN_RIGHT_PAREN = "right-paren";
+var TOKEN_LEFT_BRACKET = "left-bracket";
+var TOKEN_RIGHT_BRACKET = "right-bracket";
+var TOKEN_LEFT_CURLY = "left-curly";
+var TOKEN_RIGHT_CURLY = "right-curly";
+var TOKEN_OPERATOR = "operator";
+var TOKEN_COMMA = "comma";
+var TOKEN_COLON = "colon";
+var TOKEN_PIPE = "pipe";
 var TOKEN_INT = "int";
 var TOKEN_FLOAT = "float";
 var TOKEN_BOOLEAN = "boolean";
 var TOKEN_SYMBOL = "symbol";
 var TOKEN_SPECIAL = "special";
+
+function token(type, value, lineno, colno) {
+    return {
+        type: type,
+        value: value,
+        lineno: lineno,
+        colno: colno
+    };
+}
 
 function Tokenizer(str) {
     this.str = str;
@@ -40,13 +59,8 @@ function Tokenizer(str) {
 Tokenizer.prototype.nextToken = function() {
     var lineno = this.lineno;
     var colno = this.colno;
-    var whitespace = this._extract(whitespaceChars);
 
-    if(whitespace) {
-        // First, check for whitespace
-        return [TOKEN_WHITESPACE, whitespace, lineno, colno];
-    }
-    else if(this.in_code) {
+    if(this.in_code) {
         // Otherwise, if we are in a block parse it as code
         var cur = this.current();
         var tok;
@@ -55,9 +69,13 @@ Tokenizer.prototype.nextToken = function() {
             // We have nothing else to parse
             return null;
         }
-        else if(cur == '"') {
+        else if(cur == "\"" || cur == "'") {
             // We've hit a string
-            return [TOKEN_STRING, this.parseString(), lineno, colno];
+            return token(TOKEN_STRING, this.parseString(), lineno, colno);
+        }
+        else if((tok = this._extract(whitespaceChars))) {
+            // We hit some whitespace
+            return token(TOKEN_WHITESPACE, tok, lineno, colno);
         }
         else if((tok = this._extractString(BLOCK_END))) {
             // Special check for the block end tag
@@ -67,34 +85,49 @@ Tokenizer.prototype.nextToken = function() {
             // breaks on delimiters so we can assume the token parsing
             // doesn't consume these elsewhere
             this.in_code = false;
-            return [TOKEN_BLOCK_END, tok, lineno, colno];
+            return token(TOKEN_BLOCK_END, tok, lineno, colno);
         }
         else if((tok = this._extractString(VARIABLE_END))) {
             // Special check for variable end tag (see above)
             this.in_code = false;
-            return [TOKEN_VARIABLE_END, tok, lineno, colno];
+            return token(TOKEN_VARIABLE_END, tok, lineno, colno);
         }
         else if(delimChars.indexOf(cur) != -1) {
             // We've hit a delimiter (a special char like a bracket)
             this.forward();
-            return [TOKEN_SPECIAL, cur, lineno, colno];
+            var type;
+
+            switch(cur) {
+            case "(": type = TOKEN_LEFT_PAREN; break;
+            case ")": type = TOKEN_RIGHT_PAREN; break;
+            case "[": type = TOKEN_LEFT_BRACKET; break;
+            case "]": type = TOKEN_RIGHT_BRACKET; break;
+            case "{": type = TOKEN_LEFT_CURLY; break;
+            case "}": type = TOKEN_RIGHT_CURLY; break;
+            case ",": type = TOKEN_COMMA; break;
+            case ":": type = TOKEN_COLON; break;
+            case "|": type = TOKEN_PIPE; break;
+            default: type = TOKEN_OPERATOR;
+            }
+
+            return token(type, cur, lineno, colno);
         }
         else {
             // We are not at whitespace or a delimiter, so extract the
             // text and parse it
             tok = this._extractUntil(whitespaceChars + delimChars);
 
-            if(tok.match(/^[-+]?[0-9]+\\.[0-9]*$/)) {
-                return [TOKEN_FLOAT, tok, lineno, colno];
+            if(tok.match(/^[-+]?[0-9]+\.[0-9]*$/)) {
+                return token(TOKEN_FLOAT, tok, lineno, colno);
             }
             else if(tok.match(/^[-+]?[0-9]+$/)) {
-                return [TOKEN_INT, tok, lineno, colno];
+                return token(TOKEN_INT, tok, lineno, colno);
             }
             else if(tok.match(/^(true|false)$/)) {
-                return [TOKEN_BOOLEAN, tok, lineno, colno];
+                return token(TOKEN_BOOLEAN, tok, lineno, colno);
             }
             else if(tok) {
-                return [TOKEN_SYMBOL, tok, lineno, colno];
+                return token(TOKEN_SYMBOL, tok, lineno, colno);
             }
             else {
                 throw new Error("Unexpected value while parsing: " + tok);
@@ -102,7 +135,7 @@ Tokenizer.prototype.nextToken = function() {
         }
     }
     else {
-        // Lastly, parse out the template text, breaking on tag
+        // Parse out the template text, breaking on tag
         // delimiters because we need to look for block/variable start
         // tags
         var beginChars = BLOCK_START[0] + VARIABLE_START[0] + COMMENT_START[0];
@@ -113,17 +146,17 @@ Tokenizer.prototype.nextToken = function() {
         }
         else if((tok = this._extractString(BLOCK_START))) {
             this.in_code = true;
-            return [TOKEN_BLOCK_START, tok, lineno, colno];
+            return token(TOKEN_BLOCK_START, tok, lineno, colno);
         }
         else if((tok = this._extractString(VARIABLE_START))) {
             this.in_code = true;
-            return [TOKEN_VARIABLE_START, tok, lineno, colno];
+            return token(TOKEN_VARIABLE_START, tok, lineno, colno);
         }
         else if((tok = this._extractString(COMMENT_START))) {
-            return [TOKEN_COMMENT_START, tok, lineno, colno];
+            return token(TOKEN_COMMENT_START, tok, lineno, colno);
         }
         else if((tok = this._extractString(COMMENT_END))) {
-            return [TOKEN_COMMENT_END, tok, lineno, colno];
+            return token(TOKEN_COMMENT_END, tok, lineno, colno);
         }
         else {
             tok = "";
@@ -152,7 +185,7 @@ Tokenizer.prototype.nextToken = function() {
                 }
             }
 
-            return [TOKEN_DATA, tok, lineno, colno];
+            return token(TOKEN_DATA, tok, lineno, colno);
         }
     }
 
@@ -160,6 +193,34 @@ Tokenizer.prototype.nextToken = function() {
 };
 
 Tokenizer.prototype.parseString = function() {
+    this.forward();
+    
+    var lineno = this.lineno;
+    var colno = this.colno;
+    var str = "";
+    
+    while(this.current() != "\"" && this.current() != "'") {
+        var cur = this.current();
+
+        if(cur == "\\") {
+            this.forward();
+            switch(this.current()) {
+            case "n": str += "\n"; break;
+            case "t": str += "\t"; break;
+            case "r": str += "\r"; break;
+            default:
+                str += this.current();
+            }
+            this.forward();
+        }
+        else {
+            str += cur;
+            this.forward();
+        }
+    }
+
+    this.forward();
+    return str;
 };
 
 Tokenizer.prototype._matches = function(str) {
@@ -287,5 +348,30 @@ Tokenizer.prototype.previous = function() {
 module.exports = {
     lex: function(src) {
         return new Tokenizer(src);
-    }
+    },
+
+    TOKEN_STRING: TOKEN_STRING,
+    TOKEN_WHITESPACE: TOKEN_WHITESPACE,
+    TOKEN_DATA: TOKEN_DATA,
+    TOKEN_BLOCK_START: TOKEN_BLOCK_START,
+    TOKEN_BLOCK_END: TOKEN_BLOCK_END,
+    TOKEN_VARIABLE_START: TOKEN_VARIABLE_START,
+    TOKEN_VARIABLE_END: TOKEN_VARIABLE_END,
+    TOKEN_COMMENT_START: TOKEN_COMMENT_START,
+    TOKEN_COMMENT_END: TOKEN_COMMENT_END,
+    TOKEN_LEFT_PAREN: TOKEN_LEFT_PAREN,
+    TOKEN_RIGHT_PAREN: TOKEN_RIGHT_PAREN,
+    TOKEN_LEFT_BRACKET: TOKEN_LEFT_BRACKET,
+    TOKEN_RIGHT_BRACKET: TOKEN_RIGHT_BRACKET,
+    TOKEN_LEFT_CURLY: TOKEN_LEFT_CURLY,
+    TOKEN_RIGHT_CURLY: TOKEN_RIGHT_CURLY,
+    TOKEN_OPERATOR: TOKEN_OPERATOR,
+    TOKEN_COMMA: TOKEN_COMMA,
+    TOKEN_COLON: TOKEN_COLON,
+    TOKEN_PIPE: TOKEN_PIPE,
+    TOKEN_INT: TOKEN_INT,
+    TOKEN_FLOAT: TOKEN_FLOAT,
+    TOKEN_BOOLEAN: TOKEN_BOOLEAN,
+    TOKEN_SYMBOL: TOKEN_SYMBOL,
+    TOKEN_SPECIAL: TOKEN_SPECIAL
 };
