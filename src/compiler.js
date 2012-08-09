@@ -1,4 +1,5 @@
 
+var _ = require('underscore');
 var parser = require('./parser');
 var nodes = require('./nodes');
 var Object = require('./object');
@@ -23,6 +24,47 @@ var Compiler = Object.extend({
         });        
     },
 
+    _compileAggregate: function(node, startChar, endChar) {
+        this.emit(startChar);
+
+        for(var i=0; i<node.children.length; i++) {
+            if(i > 0) {
+                this.emit(',');
+            }
+
+            this.compile(node.children[i]);
+        }
+
+        this.emit(endChar);
+    },
+
+    _compileExpression: function(node) {
+        this.assertType(node,
+                        nodes.Literal,
+                        nodes.Symbol,
+                        nodes.Group,
+                        nodes.Array,
+                        nodes.Dict,
+                        nodes.FunCall,
+                        nodes.Filter);
+        this.compile(node);
+    },
+
+    assertType: function(node /*, types */) {
+        var types = _.toArray(arguments).slice(1);
+        var success = false;
+        
+        _.each(types, function(type) {
+            if(node instanceof type) {
+                success = true;
+            }
+        });
+
+        if(!success) {
+            throw new Error("invalid type: " + node.typename);
+        }
+    },
+
     compileNodeList: function(node) {
         this._compileChildren(node);
     },
@@ -44,9 +86,47 @@ var Compiler = Object.extend({
         this.emit('context.lookup("' + node.value + '")');
     },
 
+    compileGroup: function(node) {
+        this._compileAggregate(node, '(', ')');
+    },
+
+    compileArray: function(node) {
+        this._compileAggregate(node, '[', ']');
+    },
+
+    compileDict: function(node) {
+        this._compileAggregate(node, '{', '}');
+    },
+
+    compilePair: function(node) {
+        var key = node.getKey();
+        var val = node.getValue();
+
+        if(key instanceof nodes.Symbol) {
+            key = new nodes.Literal(key.lineno, key.colno, key.value);
+        }
+        else if(!(key instanceof nodes.Literal &&
+                  typeof node.value == "string")) {
+            throw new Error("Dict keys must be strings or names");
+        }
+
+        this.compile(key);
+        this.emit(': ');
+        this._compileExpression(val);
+    },
+
+    compileFunCall: function(node) {
+        this._compileExpression(node.name);
+        this._compileAggregate(node, '(', ')');
+    },
+
+    compileFilter: function(node) {
+        this.compileFunCall(node);
+    },
+
     compileIf: function(node) {
         this.emit('if(');
-        this.compile(node.cond);
+        this._compileExpression(node.cond);
         this.emitLine(') {');
         this.compile(node.body);
 
@@ -88,42 +168,27 @@ var Compiler = Object.extend({
     }
 });
 
-var Context = Object.extend({
-    init: function(ctx) {
-        this.ctx = ctx;
-    },
+// var fs = require("fs");
+// var c = new Compiler();
+// var src = fs.readFileSync("test.html", "utf-8");
+// c.compile(parser.parse(src));
 
-    lookup: function(name) {
-        if(!(name in this.ctx)) {
-            throw new Error("'" + name + "' is undefined");
-        }
-        return this.ctx[name];
-    }
-});
+// var tmpl = c.getCode();
 
+// console.log(tmpl);
 
-function render(tmpl, context) {
-    context = new Context(context);
-    eval(tmpl);
-    return output;
-}
-
-var fs = require("fs");
-var c = new Compiler();
-var src = fs.readFileSync("test.html", "utf-8");
-c.compile(parser.parse(src));
-
-var tmpl = c.getCode();
-
-console.log(tmpl);
-
-console.log(render(tmpl, { username: "James Long",
-                           sick: false,
-                           throwing: false,
-                           pooping: false }));
+// console.log(render(tmpl, { username: "James Long",
+//                            sick: true,
+//                            throwing: false,
+//                            pooping: false }));
 
 module.exports = {
-    render: render,
+    compile: function(src) {
+        var c = new Compiler();
+        c.compile(parser.parse(src));
+        return c.getCode();
+    },
+
     Compiler: Compiler
 };
 

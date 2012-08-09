@@ -387,7 +387,7 @@ var Parser = Object.extend({
 //     console.log(util.inspect(t));
 // }
 
-// var p = new Parser(lexer.lex("1 2 {% if hello %}poop{% endif %}"));
+// var p = new Parser(lexer.lex("{{ foo(1, 2, 3) }}"));
 // var n = p.parse();
 // nodes.printNodes(n);
 

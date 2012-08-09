@@ -32,12 +32,13 @@ bc.. Hello {{ username }}, are you feeling ok?
   GOOD!
 {% endif %}
 
-p. To compile templates, you have to use the lower-level API right now (very subject to change, a high-level API is coming soon):
+p. To compile templates, you can create a Template directly or load one from an environment object. Right now the environment just loads the template from the disk relative to the current location.
 
-bc. var parser = require('./parser');
-var compiler = require('./compiler');
-var c = new compiler.Compiler();
-c.compiler(parser.parse('Hello {{ user }}'));
+bc.. var tmpl = new Template('Hello {{ username }}');
+console.log(tmpl.render({ username: "james" }));
 
-var tmpl = c.getCode();
-console.log(compiler.render(tmpl, { user: 'James' }));
+// From an environment
+var env = new Environment();
+var tmpl = env.get_template('test.html');
+console.log(tmpl.render({ username: "james" }));
+
