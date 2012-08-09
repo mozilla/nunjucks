@@ -121,7 +121,11 @@ var Compiler = Object.extend({
     },
 
     compileFilter: function(node) {
-        this.compileFunCall(node);
+        var name = node.name;
+        this.assertType(name, nodes.Symbol);
+
+        this.emit('env.get_filter("' + name.value + '")');
+        this._compileAggregate(node, '(', ')');
     },
 
     compileIf: function(node) {
@@ -149,8 +153,11 @@ var Compiler = Object.extend({
     },
 
     compileRoot: function(node) {
+        this.emitLine('(function (env, context) {');
         this.emitLine('var output = "";');
         this._compileChildren(node);
+        this.emitLine('return output;');
+        this.emitLine('})');
     },
 
     compile: function (node) {

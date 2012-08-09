@@ -357,7 +357,9 @@ var Parser = Object.extend({
                 this.advanceAfterVariableEnd();
                 buf.push(new nodes.Output(tok.lineno, tok.colno, [e]));
             }
-            else {
+            else if(tok.type != lexer.TOKEN_COMMENT) {
+                // Ignore comments, otherwise this should be an error
+                // 
                 // Most likely, if there's whitespace we're really
                 // interested in the next token
                 this.skipWhitespace();

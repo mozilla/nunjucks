@@ -19,8 +19,7 @@ var TOKEN_BLOCK_START = "block-start";
 var TOKEN_BLOCK_END = "block-end";
 var TOKEN_VARIABLE_START = "variable-start";
 var TOKEN_VARIABLE_END = "variable-end";
-var TOKEN_COMMENT_START = "comment-start";
-var TOKEN_COMMENT_END = "comment-end";
+var TOKEN_COMMENT = "comment";
 var TOKEN_LEFT_PAREN = "left-paren";
 var TOKEN_RIGHT_PAREN = "right-paren";
 var TOKEN_LEFT_BRACKET = "left-bracket";
@@ -54,6 +53,7 @@ function Tokenizer(str) {
     this.colno = 0;
 
     this.in_code = false;
+    this.in_comment = false;
 }
 
 Tokenizer.prototype.nextToken = function() {
@@ -137,8 +137,11 @@ Tokenizer.prototype.nextToken = function() {
     else {
         // Parse out the template text, breaking on tag
         // delimiters because we need to look for block/variable start
-        // tags
-        var beginChars = BLOCK_START[0] + VARIABLE_START[0] + COMMENT_START[0];
+        // tags (don't use the full delimChars for optimization)
+        var beginChars = (BLOCK_START[0] + 
+                          VARIABLE_START[0] + 
+                          COMMENT_START[0] +
+                          COMMENT_END[0]);
         var tok;
 
         if(this.is_finished()) {
@@ -152,15 +155,15 @@ Tokenizer.prototype.nextToken = function() {
             this.in_code = true;
             return token(TOKEN_VARIABLE_START, tok, lineno, colno);
         }
-        else if((tok = this._extractString(COMMENT_START))) {
-            return token(TOKEN_COMMENT_START, tok, lineno, colno);
-        }
-        else if((tok = this._extractString(COMMENT_END))) {
-            return token(TOKEN_COMMENT_END, tok, lineno, colno);
-        }
         else {
-            tok = "";
+            tok = '';
             var data;
+            var in_comment = false;
+
+            if(this._matches(COMMENT_START)) {
+                in_comment = true;
+                tok = this._extractString(COMMENT_START);
+            }
 
             // Continually consume text, breaking on the tag delimiter
             // characters and checking to see if it's a start tag.
@@ -177,15 +180,29 @@ Tokenizer.prototype.nextToken = function() {
                     // If it is a start tag, stop looping
                     break;
                 }
+                else if(this._matches(COMMENT_END)) {
+                    if(!in_comment) {
+                        throw new Error("unexpected end of comment");
+                    }
+                    tok += this._extractString(COMMENT_END);
+                    break;
+                }
                 else {
-                    // It is not a start tag, so add the character and
-                    // continue on
+                    // It does not match any tag, so add the character and
+                    // carry on
                     tok += this.current();
                     this.forward();
                 }
             }
 
-            return token(TOKEN_DATA, tok, lineno, colno);
+            if(data === null && in_comment) {
+                throw new Error("expected end of comment, got end of file");
+            }
+
+            return token(in_comment ? TOKEN_COMMENT : TOKEN_DATA,
+                         tok,
+                         lineno,
+                         colno);
         }
     }
 
@@ -357,8 +374,7 @@ module.exports = {
     TOKEN_BLOCK_END: TOKEN_BLOCK_END,
     TOKEN_VARIABLE_START: TOKEN_VARIABLE_START,
     TOKEN_VARIABLE_END: TOKEN_VARIABLE_END,
-    TOKEN_COMMENT_START: TOKEN_COMMENT_START,
-    TOKEN_COMMENT_END: TOKEN_COMMENT_END,
+    TOKEN_COMMENT: TOKEN_COMMENT,
     TOKEN_LEFT_PAREN: TOKEN_LEFT_PAREN,
     TOKEN_RIGHT_PAREN: TOKEN_RIGHT_PAREN,
     TOKEN_LEFT_BRACKET: TOKEN_LEFT_BRACKET,
