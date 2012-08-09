@@ -12,16 +12,28 @@ var Compiler = Object.extend({
         this.codebuf.push(code);
     },
 
-    compileNodeList: function(node) {
+    emitLine: function(code) {
+        this.emit(code + "\n");
+    },
+
+    _compileChildren: function(node) {
         var _this = this;
         node.iterChildren(function(n) {
             _this.compile(n);
-        });
+        });        
+    },
+
+    compileNodeList: function(node) {
+        this._compileChildren(node);
     },
 
     compileLiteral: function(node) {
         if(typeof node.value == "string") {
-            this.emit('"' + node.value.replace(/"/g, '\\"') + '"');
+            var val = node.value.replace(/"/g, '\\"');
+            val = val.replace(/\n/g, "\\n");
+            val = val.replace(/\r/g, "\\r");
+            val = val.replace(/\t/g, "\\t");
+            this.emit('"' + val  + '"');
         }
         else {
             this.emit(node.value.toString());
@@ -29,7 +41,21 @@ var Compiler = Object.extend({
     },
 
     compileSymbol: function(node) {
-        this.emit(node.value);
+        this.emit('context.lookup("' + node.value + '")');
+    },
+
+    compileIf: function(node) {
+        this.emit('if(');
+        this.compile(node.cond);
+        this.emitLine(') {');
+        this.compile(node.body);
+
+        if(node.else_) {
+            this.emitLine('}\nelse {');
+            this.compile(node.else_);
+        }
+
+        this.emitLine('}');
     },
 
     compileTemplateData: function(node) {
@@ -37,12 +63,14 @@ var Compiler = Object.extend({
     },
 
     compileOutput: function(node) {
-        var _this = this;
         this.emit('output += ');
-        node.iterChildren(function(n) {
-            _this.compile(n);
-        });
+        this._compileChildren(node);
         this.emit(';\n');
+    },
+
+    compileRoot: function(node) {
+        this.emitLine('var output = "";');
+        this._compileChildren(node);
     },
 
     compile: function (node) {
@@ -55,16 +83,49 @@ var Compiler = Object.extend({
         }
     },
 
-    compileRoot: function(node) {
-        this.compile(node);
+    getCode: function() {
         return this.codebuf.join("");
     }
 });
 
+var Context = Object.extend({
+    init: function(ctx) {
+        this.ctx = ctx;
+    },
+
+    lookup: function(name) {
+        if(!(name in this.ctx)) {
+            throw new Error("'" + name + "' is undefined");
+        }
+        return this.ctx[name];
+    }
+});
+
+
+function render(tmpl, context) {
+    context = new Context(context);
+    eval(tmpl);
+    return output;
+}
+
 var fs = require("fs");
 var c = new Compiler();
 var src = fs.readFileSync("test.html", "utf-8");
-console.log(c.compileRoot(parser.parse(src)));
+c.compile(parser.parse(src));
+
+var tmpl = c.getCode();
+
+console.log(tmpl);
+
+console.log(render(tmpl, { username: "James Long",
+                           sick: false,
+                           throwing: false,
+                           pooping: false }));
+
+module.exports = {
+    render: render,
+    Compiler: Compiler
+};
 
 /*
  * This template:

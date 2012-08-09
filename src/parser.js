@@ -25,13 +25,8 @@ var Parser = Object.extend({
     },
 
     peekToken: function () {
-        if(this.peeked) {
-            return this.peeked;
-        }
-
-        var tok = this.tokens.nextToken();
-        this.peeked = tok;
-        return tok;
+        this.peeked = this.peeked || this.tokens.nextToken();
+        return this.peeked;
     },
 
     pushToken: function(tok) {
@@ -338,7 +333,7 @@ var Parser = Object.extend({
         return ret;
     },
 
-    parse: function () {
+    parseNodes: function () {
         var tok;
         var buf = [];
 
@@ -371,7 +366,15 @@ var Parser = Object.extend({
             }
         }
 
-        return new nodes.NodeList(0, 0, buf);
+        return buf;
+    },
+
+    parse: function() {
+        return new nodes.NodeList(0, 0, this.parseNodes());
+    },
+
+    parseAsRoot: function() {
+        return new nodes.Root(0, 0, this.parseNodes());
     }
 });
 
@@ -384,13 +387,13 @@ var Parser = Object.extend({
 //     console.log(util.inspect(t));
 // }
 
-// var p = new Parser(lexer.lex("1 {{ one }} 2"));
+// var p = new Parser(lexer.lex("1 2 {% if hello %}poop{% endif %}"));
 // var n = p.parse();
 // nodes.printNodes(n);
 
 module.exports = {
     parse: function(src) {
         var p = new Parser(lexer.lex(src));
-        return p.parse();
+        return p.parseAsRoot();
     }
 };

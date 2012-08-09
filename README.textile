@@ -7,7 +7,9 @@ I hope that Nunjucks can be better. It is heavily jinja2 inspired because I thin
 
 h2. Status
 
-This is very early code. The parser is mostly complete but the code generator is just beginning and does not work yet. You can play around with the parser with this:
+This is very early code. The parser is mostly complete and the code generator is being worked on. The parser supports variables, blocks, filters, and a bunch more. The code generator currently supports variable lookups, ifs, and literals. It will generate code for more advanced stuff soon.
+
+You can play around with the parser with this:
 
 bc. var parser = require('./parser');
 var nodes = require('./nodes');
@@ -15,6 +17,27 @@ var n = parser.parse("Hello {{ username }}! {% if sick %}Feel better!{% endif %}
 nodes.printNodes(n);
 
 That will give you a nicely formatted print out of the AST generated from the parser.
-    
-    
-    
+
+Here is an example template that works with the current code:
+ 
+bc. Hello {{ username }}, are you feeling ok?
+ 
+{% if sick %}
+  no
+{% elif throwing %}
+  THROWING UP?!
+{% elif pooping %}
+  STOP POOPING
+{% else %}
+  GOOD!
+{% endif %}
+
+To compile templates, you have to use the lower-level API right now (very subject to change, a high-level API is coming soon):
+
+bc. var parser = require('./parser');
+var compiler = require('./compiler');
+var c = new compiler.Compiler();
+c.compiler(parser.parse('Hello {{ user }}'));
+
+var tmpl = c.getCode();
+console.log(compiler.render(tmpl, { user: 'James' }));

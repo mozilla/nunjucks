@@ -44,6 +44,7 @@ var Value = Expr.extend("Value", {
 });
 
 // Concrete nodes
+var Root = Node.extend("Root");
 var NodeList = Node.extend("NodeList");
 var Literal = Value.extend("Literal");
 var Symbol = Value.extend("Symbol");
@@ -100,7 +101,7 @@ function printNodes(node, indent) {
                 }
             }
 
-            if(i == lines.length-1) {
+            if(i === lines.length-1) {
                 util.print(lines[i]);
             }
             else {
@@ -142,6 +143,7 @@ function printNodes(node, indent) {
 
 module.exports = {
     Node: Node,
+    Root: Root,
     NodeList: NodeList,
     Expr: Expr,
     Value: Value,

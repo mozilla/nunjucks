@@ -1,4 +1,11 @@
-1 {{ 332423 }} 2
+Hello {{ username }}, are you feeling ok?
 
-
-Hello
+{% if sick %}
+  no
+{% elif throwing %}
+  THROWING UP?!
+{% elif pooping %}
+  STOP POOPING
+{% else %}
+  GOOD!
+{% endif %}
