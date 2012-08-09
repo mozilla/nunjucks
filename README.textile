@@ -20,7 +20,7 @@ That will give you a nicely formatted print out of the AST generated from the pa
 
 Here is an example template that works with the current code:
  
-bc. Hello {{ username }}, are you feeling ok?
+bc.. Hello {{ username }}, are you feeling ok?
     
 {% if sick %}
   no
