@@ -32,7 +32,7 @@ bc.. Hello {{ username }}, are you feeling ok?
   GOOD!
 {% endif %}
 
-To compile templates, you have to use the lower-level API right now (very subject to change, a high-level API is coming soon):
+p. To compile templates, you have to use the lower-level API right now (very subject to change, a high-level API is coming soon):
 
 bc. var parser = require('./parser');
 var compiler = require('./compiler');
