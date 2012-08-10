@@ -15,17 +15,33 @@ var Parser = Object.extend({
         this.breakOnBlocks = null;
     },
 
-    nextToken: function () {
+    nextToken: function (withWhitespace) {
+        var tok;
+
         if(this.peeked) {
-            var tok = this.peeked;
-            this.peeked = null;
-            return tok;
+            if(!withWhitespace && this.peeked.type == lexer.TOKEN_WHITESPACE) {
+                this.peeked = null;
+            }
+            else {
+                tok = this.peeked;
+                this.peeked = null;
+                return tok;
+            }
         }
-        return this.tokens.nextToken();
+
+        tok = this.tokens.nextToken();
+
+        if(!withWhitespace) {
+            while(tok && tok.type == lexer.TOKEN_WHITESPACE) {
+                tok = this.tokens.nextToken();
+            }
+        }
+        
+        return tok;
     },
 
     peekToken: function () {
-        this.peeked = this.peeked || this.tokens.nextToken();
+        this.peeked = this.peeked || this.nextToken();
         return this.peeked;
     },
 
@@ -37,13 +53,17 @@ var Parser = Object.extend({
     },
 
     fail: function (msg, lineno, colno) {
-        if(!lineno || !colno) {
+        if((!lineno || !colno) && this.peekToken()) {
             var tok = this.peekToken();
             lineno = tok.lineno;
             colno = tok.colno;
         }
 
-        throw new Error('[' + lineno + ',' + colno + '] ' + msg);
+        if(lineno && colno) {
+            msg = '[' + lineno + ',' + colno + '] ' + msg;
+        }
+
+        throw new Error(msg);
     },
 
     skip: function(type) {
@@ -78,16 +98,12 @@ var Parser = Object.extend({
             name = this.nextToken().value;
         }
 
-        this.skipWhitespace();
-
         if(!this.skip(lexer.TOKEN_BLOCK_END)) {
             this.fail("expected block end in " + name + " statement");
         }
     },
 
     advanceAfterVariableEnd: function() {
-        this.skipWhitespace();
-
         if(!this.skip(lexer.TOKEN_VARIABLE_END)) {
             this.fail("expected variable end");
         }
@@ -105,7 +121,6 @@ var Parser = Object.extend({
 
         var node = new nodes.If(iftok.lineno, iftok.colno);
 
-        this.skipWhitespace();
         node.cond = this.parseExpression();
         this.advanceAfterBlockEnd(iftok.value);
 
@@ -131,8 +146,6 @@ var Parser = Object.extend({
     },
 
     parseStatement: function () {
-        this.skipWhitespace();
-
         var tok = this.peekToken();
         var node;
 
@@ -146,18 +159,65 @@ var Parser = Object.extend({
         }
 
         switch(tok.value) {
+            case 'raw': node = this.parseRaw(); break;
             case 'if': node = this.parseIf(); break;
-            //case 'for': node = this.parseFor(); break;
+            // case 'for': node = this.parseFor(); break;
             // case 'block': parseBlock();
             // case 'extends': parseExtends();
-            default:
+            default: this.fail('unknown block tag: ' + tok.value);
         }
 
         return node;
     },
 
+    parseRaw: function() {
+        this.advanceAfterBlockEnd();
+        var str = '';
+        var begun = this.peekToken();
+
+        while(1) {
+            // Passing true gives us all the whitespace tokens as
+            // well, which are usually ignored.
+            var tok = this.nextToken(true);
+
+            if(!tok) {
+                this.fail("expected endraw, got end of file");
+            }
+
+            if(tok.type == lexer.TOKEN_BLOCK_START) {
+                // We need to look for the `endraw` block statement,
+                // which involves a lookahead so carefully keep track
+                // of whitespace
+                var ws = null;
+                var name = this.nextToken(true);
+
+                if(name.type == lexer.TOKEN_WHITESPACE) {
+                    ws = name;
+                    name = this.nextToken();
+                }
+
+                if(name.type == lexer.TOKEN_SYMBOL &&
+                   name.value == 'endraw') {
+                    this.advanceAfterBlockEnd(name.value);
+                    break;
+                }
+                else {
+                    str += tok.value;
+                    if(ws) {
+                        str += ws.value;
+                    }
+                    str += name.value;
+                }
+            }
+            else {
+                str += tok.value;
+            }
+        }
+
+        return new nodes.TemplateData(begun.lineno, begun.colno, str);
+    },
+
     parseExpression: function (no_filters) {
-        this.skipWhitespace();
         var tok = this.nextToken();
         var val = null;
         var node = null;
@@ -191,7 +251,6 @@ var Parser = Object.extend({
         else if(tok.type == lexer.TOKEN_SYMBOL) {
             node = new nodes.Symbol(tok.lineno, tok.colno, tok.value);
 
-            this.skipWhitespace();
             tok = this.peekToken();
 
             if(tok.type == lexer.TOKEN_LEFT_PAREN) {
@@ -214,7 +273,6 @@ var Parser = Object.extend({
             if(!no_filters) {
                 while(1) {
                     // Check for filters
-                    this.skipWhitespace();
                     tok = this.peekToken();
 
                     if(tok.type != lexer.TOKEN_PIPE) {
@@ -261,7 +319,6 @@ var Parser = Object.extend({
     },
 
     parseAggregate: function() {
-        this.skipWhitespace();
         var tok = this.nextToken();
         var node;
 
@@ -277,8 +334,6 @@ var Parser = Object.extend({
         }
 
         while(1) {
-            this.skipWhitespace();
-
             var type = this.peekToken().type;
             if(type == lexer.TOKEN_RIGHT_PAREN ||
                type == lexer.TOKEN_RIGHT_BRACKET ||
@@ -291,7 +346,6 @@ var Parser = Object.extend({
                 if(!this.skip(lexer.TOKEN_COMMA)) {
                     throw new Error("parseAggregate: expected comma after expression");
                 }
-                this.skipWhitespace();
             }
 
             if(node instanceof nodes.Dict) {
@@ -300,11 +354,9 @@ var Parser = Object.extend({
 
                 // We expect a key/value pair for dicts, separated by a
                 // colon
-                this.skipWhitespace();
                 if(!this.skip(lexer.TOKEN_COLON)) {
                     throw new Error("parseAggregate: expected colon after dict key");
                 }
-                this.skipWhitespace();
 
                 // TODO: check for errors
                 var value = this.parseExpression();
@@ -359,10 +411,6 @@ var Parser = Object.extend({
             }
             else if(tok.type != lexer.TOKEN_COMMENT) {
                 // Ignore comments, otherwise this should be an error
-                // 
-                // Most likely, if there's whitespace we're really
-                // interested in the next token
-                this.skipWhitespace();
                 throw new Error("Unexpected token at top-level: " +
                                 this.peekToken().type);
             }
@@ -389,7 +437,7 @@ var Parser = Object.extend({
 //     console.log(util.inspect(t));
 // }
 
-// var p = new Parser(lexer.lex("{{ foo(1, 2, 3) }}"));
+// var p = new Parser(lexer.lex('{{ user }}'));
 // var n = p.parse();
 // nodes.printNodes(n);
 

@@ -1,3 +1,3 @@
 
 test: 
-	mocha -R tap tests
+	mocha -b -R tap tests
