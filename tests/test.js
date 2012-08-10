@@ -90,12 +90,6 @@ function toNodes(ast) {
     }
 }
 
-function node(type, arg1, arg2, arg3, arg4) {
-    // We don't care about line/col numbers so it's annoying to
-    // specify them all the time
-    return new type(0, 0, arg1, arg2, arg3, arg4);
-}
-
 describe('lexer', function() {
     var tok, tmpl, tokens;
 
