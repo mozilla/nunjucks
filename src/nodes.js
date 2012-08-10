@@ -67,10 +67,10 @@ var Pair = Node.extend("Pair", {
 var Dict = Expr.extend("Dict");
 
 var If = Node.extend("If", {
-    init: function(lineno, colno) {
-        this.cond = null;
-        this.body = null;
-        this.else_ = null;
+    init: function(lineno, colno, cond, body, else_) {
+        this.cond = cond;
+        this.body = body;
+        this.else_ = else_;
         this.parent(lineno, colno);
     }
 });

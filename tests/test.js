@@ -4,12 +4,11 @@ var _ = require('underscore');
 var lexer = require('../src/lexer');
 var parser = require('../src/parser');
 var compiler = require('../src/compiler');
-
-var tok, tmpl, tokens;
+var nodes = require('../src/nodes');
 
 function _hasTokens(ws, tokens, types) {
     _.each(types, function(type) {
-        tok = tokens.nextToken();
+        var tok = tokens.nextToken();
 
         if(!ws) {
             while(tok && tok.type == lexer.TOKEN_WHITESPACE) {
@@ -35,7 +34,71 @@ function hasTokensWithWS(tokens /*, types */) {
     return _hasTokens(true, tokens, _.toArray(arguments).slice(1));
 }
 
+function _isAST(node1, node2) {
+    node1.typename.should.equal(node2.typename);
+    node1.numChildren().should.equal(node2.numChildren());
+
+    if(node1.value) {
+        node1.value.should.equal(node2.value);
+    }
+
+    if(node1 instanceof nodes.If) {
+        isAST(node1.cond, node2.cond);
+        isAST(node1.body, node2.body);
+        isAST(node1.else_, node2.else_);
+    }
+    else {
+        if(node1 instanceof nodes.FunCall) {
+            isAST(node1.name, node2.name);
+        }
+
+        for(var i=0; i<node1.children.length; i++) {
+            isAST(node1.children[i], node2.children[i]);
+        }
+    }
+}
+
+function isAST(node1, ast) {
+    // Compare the ASTs, the second one is an AST literal so transform
+    // it into a real one
+    return _isAST(node1, toNodes(ast));
+}
+
+function toNodes(ast) {
+    // We'll be doing a lot of AST comparisons, so this defines a kind
+    // of "AST literal" that you can specify with arrays. This
+    // transforms it into a real AST.
+
+    var type = ast[0];
+    var dummy = Object.create(type.prototype);
+
+    // Translate the array into a constructor call for the specific
+    // type (requires special knowledge of the function signatures)
+    if(dummy instanceof nodes.Value ||
+       dummy instanceof nodes.Pair ||
+       dummy instanceof nodes.If) {
+        return new type(0, 0, ast[1], ast[2], ast[3]);
+    }
+    else if(dummy instanceof nodes.FunCall) {
+        return new type(0,
+                        0,
+                        ast[1],
+                        ast.slice(2));
+    }
+    else {
+        return new type(0, 0, ast.slice(1));
+    }
+}
+
+function node(type, arg1, arg2, arg3, arg4) {
+    // We don't care about line/col numbers so it's annoying to
+    // specify them all the time
+    return new type(0, 0, arg1, arg2, arg3, arg4);
+}
+
 describe('lexer', function() {
+    var tok, tmpl, tokens;
+
     it('should parse template data', function() {
         tok = lexer.lex('3').nextToken();
         tok.type.should.equal(lexer.TOKEN_DATA);
@@ -186,7 +249,7 @@ describe('lexer', function() {
                   lexer.TOKEN_INT,
                   lexer.TOKEN_OPERATOR,
                   lexer.TOKEN_INT,
-                  lexer.TOKEN_VARIABLE_END);                         
+                  lexer.TOKEN_VARIABLE_END);
     }),
 
     it('should parse comments', function() {
@@ -195,5 +258,14 @@ describe('lexer', function() {
                   lexer.TOKEN_DATA,
                   lexer.TOKEN_COMMENT,
                   lexer.TOKEN_DATA);
+    });
+});
+
+describe('parser', function() {
+    it('should parse templates', function() {
+        isAST(parser.parse('hello {{ foo }}'),
+              [nodes.Root,
+               [nodes.Output, [nodes.TemplateData, 'hello ']],
+               [nodes.Output, [nodes.Symbol, 'foo']]]);
     });
 });
