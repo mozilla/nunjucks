@@ -59,11 +59,11 @@ var Template = Object.extend({
     }
 });
 
-var env = new Environment();
-var tmpl = env.get_template('test.html');
-console.log(compiler.compile(tmpl.src));
-console.log("OUTPUT ---");
-console.log(tmpl.render({ username: "James" }));
+// var env = new Environment();
+// var tmpl = env.get_template('test.html');
+// console.log(compiler.compile(tmpl.src));
+// console.log("OUTPUT ---");
+// console.log(tmpl.render({ username: "James" }));
 
 module.exports = {
     Environment: Environment,

@@ -1,10 +1,12 @@
 
 var should = require('should');
 var _ = require('underscore');
+var util = require('util');
 var lexer = require('../src/lexer');
 var parser = require('../src/parser');
 var compiler = require('../src/compiler');
 var nodes = require('../src/nodes');
+var env = require('../src/environment');
 
 function _hasTokens(ws, tokens, types) {
     _.each(types, function(type) {
@@ -35,25 +37,39 @@ function hasTokensWithWS(tokens /*, types */) {
 }
 
 function _isAST(node1, node2) {
-    node1.typename.should.equal(node2.typename);
-    node1.numChildren().should.equal(node2.numChildren());
+    // Compare ASTs
+    // TODO: spend more than 30 seconds on this, clean up
 
-    if(node1.value) {
-        node1.value.should.equal(node2.value);
+    node2.typename.should.equal(node1.typename);
+
+    var prefix = node2.typename + ': num-children: ';
+    (prefix + node2.numChildren()).should.equal(
+        (prefix + node1.numChildren())
+    );
+
+    if(node2.value) {
+        node2.value.should.equal(node1.value);
     }
 
-    if(node1 instanceof nodes.If) {
-        isAST(node1.cond, node2.cond);
-        isAST(node1.body, node2.body);
-        isAST(node1.else_, node2.else_);
+    if(node2 instanceof nodes.If) {
+        _isAST(node2.cond, node1.cond);
+        _isAST(node2.body, node1.body);
+
+        if(node2.else_) {
+            //node1.else_.should.not.equal(null);
+            _isAST(node2.else_, node1.else_);
+        }
+        else {
+            node1.else_.should.equal(null);
+        }
     }
     else {
-        if(node1 instanceof nodes.FunCall) {
-            isAST(node1.name, node2.name);
+        if(node2 instanceof nodes.FunCall) {
+            _isAST(node2.name, node1.name);
         }
 
-        for(var i=0; i<node1.children.length; i++) {
-            isAST(node1.children[i], node2.children[i]);
+        for(var i=0; i<node2.children.length; i++) {
+            _isAST(node2.children[i], node1.children[i]);
         }
     }
 }
@@ -65,6 +81,10 @@ function isAST(node1, ast) {
 }
 
 function toNodes(ast) {
+    if(!(ast && _.isArray(ast))) {
+        return ast;
+    }
+
     // We'll be doing a lot of AST comparisons, so this defines a kind
     // of "AST literal" that you can specify with arrays. This
     // transforms it into a real AST.
@@ -74,20 +94,32 @@ function toNodes(ast) {
 
     // Translate the array into a constructor call for the specific
     // type (requires special knowledge of the function signatures)
+    //
+    // TODO: spend more than 30 seconds on this code and clean up
     if(dummy instanceof nodes.Value ||
        dummy instanceof nodes.Pair ||
        dummy instanceof nodes.If) {
-        return new type(0, 0, ast[1], ast[2], ast[3]);
+        return new type(0,
+                        0,
+                        toNodes(ast[1]),
+                        toNodes(ast[2]),
+                        toNodes(ast[3]));
     }
     else if(dummy instanceof nodes.FunCall) {
         return new type(0,
                         0,
-                        ast[1],
-                        ast.slice(2));
+                        toNodes(ast[0]),
+                        _.map(ast.slice(1), toNodes));
     }
     else {
-        return new type(0, 0, ast.slice(1));
+        return new type(0, 0, _.map(ast.slice(1), toNodes));
     }
+}
+
+function render(str, ctx) {
+    ctx = ctx || {};
+    var t = new env.Template(str);
+    return t.render(ctx);
 }
 
 describe('lexer', function() {
@@ -256,10 +288,129 @@ describe('lexer', function() {
 });
 
 describe('parser', function() {
-    it('should parse templates', function() {
-        isAST(parser.parse('hello {{ foo }}'),
+    it('should parse basic types', function() {
+        isAST(parser.parse('{{ 1 }}'),
+              [nodes.Root,
+               [nodes.Output,
+                [nodes.Literal, 1]]]);
+
+        isAST(parser.parse('{{ 4.567 }}'),
+              [nodes.Root,
+               [nodes.Output,
+                [nodes.Literal, 4.567]]]);
+
+        isAST(parser.parse('{{ "foo" }}'),
+              [nodes.Root,
+               [nodes.Output,
+                [nodes.Literal, 'foo']]]);
+
+        isAST(parser.parse("{{ 'foo' }}"),
+              [nodes.Root,
+               [nodes.Output,
+                [nodes.Literal, 'foo']]]);
+
+        isAST(parser.parse("{{ true }}"),
+              [nodes.Root,
+               [nodes.Output,
+                [nodes.Literal, true]]]);
+
+        isAST(parser.parse("{{ false }}"),
+              [nodes.Root,
+               [nodes.Output,
+                [nodes.Literal, false]]]);
+
+        isAST(parser.parse("{{ foo }}"),
+              [nodes.Root,
+               [nodes.Output,
+                [nodes.Symbol, 'foo']]]);
+    });
+
+    it('should parse aggregate types', function() {
+        isAST(parser.parse("{{ [1,2,3] }}"),
+              [nodes.Root,
+               [nodes.Output,
+                [nodes.Array,
+                 [nodes.Literal, 1],
+                 [nodes.Literal, 2],
+                 [nodes.Literal, 3]]]]);
+
+        isAST(parser.parse("{{ (1,2,3) }}"),
+              [nodes.Root,
+               [nodes.Output,
+                [nodes.Group,
+                 [nodes.Literal, 1],
+                 [nodes.Literal, 2],
+                 [nodes.Literal, 3]]]]);
+
+        isAST(parser.parse("{{ {foo: 1, 'two': 2} }}"),
+              [nodes.Root,
+               [nodes.Output,
+                [nodes.Dict,
+                 [nodes.Pair,
+                  [nodes.Symbol, 'foo'],
+                  [nodes.Literal, 1]],
+                 [nodes.Pair,
+                  [nodes.Literal, 'two'],
+                  [nodes.Literal, 2]]]]]);
+    });
+
+    it('should parse variables', function() {
+        isAST(parser.parse('hello {{ foo }}, how are you'),
               [nodes.Root,
                [nodes.Output, [nodes.TemplateData, 'hello ']],
-               [nodes.Output, [nodes.Symbol, 'foo']]]);
+               [nodes.Output, [nodes.Symbol, 'foo']],
+               [nodes.Output, [nodes.TemplateData, ', how are you']]]);
+    });
+
+    it('should parse blocks', function() {
+        var n = parser.parse('want some {% if hungry %}pizza{% else %}' +
+                             'water{% endif %}?');
+        var ifn = n.children[1];
+        ifn.typename.should.equal('If');
+    });
+
+    it('should throw errors', function() {
+        (function() {
+            parser.parse('hello {{ foo');
+        }).should.throw(/expected variable end/);
+
+        (function() {
+            parser.parse('hello {% if');
+        }).should.throw(/expected expression/);
+
+        (function() {
+            parser.parse('hello {% if sdf zxc');
+        }).should.throw(/expected block end/);
+
+        (function() {
+            parser.parse('hello {% bar %} dsfsdf');
+        }).should.throw(/unknown block tag/);
+    });
+});
+
+describe('compiler', function() {
+    it('should compile templates', function() {
+        var s = render('Hello world');
+        s.should.equal('Hello world');
+
+        s = render('Hello world, {{ name }}',
+                   { name: 'James' });
+        s.should.equal('Hello world, James');
+
+        s = render('Hello world, {{name}}{{suffix}}, how are you',
+                   { name: 'James',
+                     suffix: ' Long'});
+        s.should.equal('Hello world, James Long, how are you');
+    });
+
+    it('should compile if blocks', function() {
+        var tmpl = ('Give me some {% if hungry %}pizza' + 
+                    '{% else %}water{% endif %}');
+
+        var s = render(tmpl, { hungry: true });
+        s.should.equal('Give me some pizza');
+
+        s = render(tmpl, { hungry: false });
+        s.should.equal('Give me some water');
     });
 });

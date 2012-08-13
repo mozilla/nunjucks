@@ -68,7 +68,7 @@ var Parser = Object.extend({
 
     skip: function(type) {
         var tok = this.nextToken();
-        if(tok.type != type) {
+        if(!tok || tok.type != type) {
             this.pushToken(tok);
             return false;
         }
@@ -222,7 +222,10 @@ var Parser = Object.extend({
         var val = null;
         var node = null;
 
-        if(tok.type == lexer.TOKEN_STRING) {
+        if(!tok) {
+            this.fail('expected expression, got end of file');
+        }
+        else if(tok.type == lexer.TOKEN_STRING) {
             val = tok.value;
         }
         else if(tok.type == lexer.TOKEN_INT) {
@@ -253,7 +256,7 @@ var Parser = Object.extend({
 
             tok = this.peekToken();
 
-            if(tok.type == lexer.TOKEN_LEFT_PAREN) {
+            if(tok && tok.type == lexer.TOKEN_LEFT_PAREN) {
                 // Function call
                 var list = this.parseAggregate();
                 node = new nodes.FunCall(tok.lineno,
@@ -275,7 +278,7 @@ var Parser = Object.extend({
                     // Check for filters
                     tok = this.peekToken();
 
-                    if(tok.type != lexer.TOKEN_PIPE) {
+                    if(!tok || tok.type != lexer.TOKEN_PIPE) {
                         break;
                     }
 
