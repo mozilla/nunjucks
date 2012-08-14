@@ -110,7 +110,30 @@ var Parser = Object.extend({
     },
 
     parseFor: function() {
+        var forTok = this.peekToken();
+        if(!this.skipSymbol('for')) {
+            this.fail("parseFor: expected for");
+        }
 
+        var node = new nodes.For(forTok.lineno, forTok.colno);
+        
+        node.name = this.parseExpression();
+
+        if(!node.name instanceof nodes.Symbol) {
+            this.fail('variable name expected');
+        }
+
+        if(!this.skipSymbol('in')) {
+            this.fail('expected "in" keyword');
+        }
+
+        node.arr = this.parseExpression();
+        this.advanceAfterBlockEnd(forTok.value);
+
+        node.body = this.parseUntilBlocks('endfor');
+        this.advanceAfterBlockEnd();
+
+        return node;
     },
 
     parseIf: function() {
@@ -161,7 +184,7 @@ var Parser = Object.extend({
         switch(tok.value) {
             case 'raw': node = this.parseRaw(); break;
             case 'if': node = this.parseIf(); break;
-            // case 'for': node = this.parseFor(); break;
+            case 'for': node = this.parseFor(); break;
             // case 'block': parseBlock();
             // case 'extends': parseExtends();
             default: this.fail('unknown block tag: ' + tok.value);
@@ -221,6 +244,17 @@ var Parser = Object.extend({
         var tok = this.nextToken();
         var val = null;
         var node = null;
+        
+        // HACK: until we get operators working, allow negatives
+        var negate = false;
+        if(tok && 
+           tok.type == lexer.TOKEN_OPERATOR &&
+           tok.value == '-' &&
+           (this.peekToken().type == lexer.TOKEN_INT ||
+            this.peekToken().type == lexer.TOKEN_FLOAT)) {
+            negate = true;
+            tok = this.nextToken();
+        }
 
         if(!tok) {
             this.fail('expected expression, got end of file');
@@ -230,9 +264,15 @@ var Parser = Object.extend({
         }
         else if(tok.type == lexer.TOKEN_INT) {
             val = parseInt(tok.value, 10);
+            if(negate) {
+                val = -val;
+            }
         }
         else if(tok.type == lexer.TOKEN_FLOAT) {
             val = parseFloat(tok.value);
+            if(negate) {
+                val = -val;
+            }
         }
         else if(tok.type == lexer.TOKEN_BOOLEAN) {
             if(tok.value == "true") {
@@ -415,7 +455,7 @@ var Parser = Object.extend({
             else if(tok.type != lexer.TOKEN_COMMENT) {
                 // Ignore comments, otherwise this should be an error
                 throw new Error("Unexpected token at top-level: " +
-                                this.peekToken().type);
+                                tok.type);
             }
         }
 
@@ -440,7 +480,7 @@ var Parser = Object.extend({
 //     console.log(util.inspect(t));
 // }
 
-// var p = new Parser(lexer.lex('{{ user }}'));
+// var p = new Parser(lexer.lex('{% for i in [1,2,3] %}hello{% endfor %}'));
 // var n = p.parse();
 // nodes.printNodes(n);
 

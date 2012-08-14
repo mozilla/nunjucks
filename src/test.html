@@ -1,1 +1,4 @@
-Hello {{ username|title }}, are you feeling ok?
+
+{% for x in [1,2,3,4,5]|batch(2, '.') %}
+  {{ x }}
+{% endfor %}

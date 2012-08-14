@@ -75,6 +75,15 @@ var If = Node.extend("If", {
     }
 });
 
+var For = Node.extend("For", {
+    init: function(lineno, colno, arr, name, body) {
+        this.arr = arr;
+        this.name = name;
+        this.body = body;
+        this.parent(lineno, colno);
+    }
+});
+
 var FunCall = Node.extend("FunCall", {
     init: function(lineno, colno, name, args) {
         this.name = name;
@@ -88,6 +97,7 @@ var Output = Node.extend("Output");
 var TemplateData = Literal.extend("TemplateData");
 
 function printNodes(node, indent) {
+    // TODO: spend more then 30 seconds and clean this up 
     indent = indent || 0;
 
     function print(str, inline) {
@@ -120,6 +130,12 @@ function printNodes(node, indent) {
             printNodes(node, indent+2);
         });
     }
+    else if(node instanceof For) {
+        print("\n");
+        printNodes(node.name, indent+2);
+        printNodes(node.arr, indent+2);
+        printNodes(node.body, indent+2);
+    }
     else if(node instanceof If) {
         print("\n");
         printNodes(node.cond, indent+2);
@@ -135,9 +151,9 @@ function printNodes(node, indent) {
         print(util.inspect(node, true, null) + "\n", true);
         node.children = children;
 
-        for(var i=0; i<node.numChildren(); i++) {
-            printNodes(node.getChild(i), indent+2);
-        }
+        node.iterChildren(function(node) {
+            printNodes(node, indent+2);
+        });
     }
 }
 
@@ -156,6 +172,7 @@ module.exports = {
     Output: Output,
     TemplateData: TemplateData,
     If: If,
+    For: For,
     FunCall: FunCall,
     Filter: Filter,
 

@@ -6,7 +6,7 @@ var lexer = require('../src/lexer');
 var parser = require('../src/parser');
 var compiler = require('../src/compiler');
 var nodes = require('../src/nodes');
-var env = require('../src/environment');
+var render = require('./util').render;
 
 function _hasTokens(ws, tokens, types) {
     _.each(types, function(type) {
@@ -114,12 +114,6 @@ function toNodes(ast) {
     else {
         return new type(0, 0, _.map(ast.slice(1), toNodes));
     }
-}
-
-function render(str, ctx) {
-    ctx = ctx || {};
-    var t = new env.Template(str);
-    return t.render(ctx);
 }
 
 describe('lexer', function() {
@@ -381,6 +375,10 @@ describe('parser', function() {
         (function() {
             parser.parse('hello {% if sdf zxc');
         }).should.throw(/expected block end/);
+
+        // (function() {
+        //     parser.parse('hello {% if sdf %} data');
+        // }).should.throw(/expected block end/);
 
         (function() {
             parser.parse('hello {% bar %} dsfsdf');

@@ -49,7 +49,7 @@ var Template = Object.extend({
             tmpl = this.tmpl_cache;
         }
         else {
-            tmpl = compiler.compile(this.src);
+            tmpl = compiler.compile(this.src, this.env);
             this.tmpl_cache = tmpl;
         }
 
