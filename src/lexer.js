@@ -53,7 +53,6 @@ function Tokenizer(str) {
     this.colno = 0;
 
     this.in_code = false;
-    this.in_comment = false;
 }
 
 Tokenizer.prototype.nextToken = function() {
@@ -174,9 +173,10 @@ Tokenizer.prototype.nextToken = function() {
             while((data = this._extractUntil(beginChars)) !== null) {
                 tok += data;
 
-                if(this._matches(BLOCK_START) ||
-                   this._matches(VARIABLE_START) ||
-                   this._matches(COMMENT_START)) {
+                if((this._matches(BLOCK_START) ||
+                    this._matches(VARIABLE_START) ||
+                    this._matches(COMMENT_START)) &&
+                  !in_comment) {
                     // If it is a start tag, stop looping
                     break;
                 }

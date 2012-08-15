@@ -30,6 +30,8 @@ var Compiler = Object.extend({
         this.codebuf = [];
         this.env = env;
         this.lastId = 0;
+        this.buffer = null;
+        this.isChild = false;
     },
 
     emit: function(code) {
@@ -38,6 +40,21 @@ var Compiler = Object.extend({
 
     emitLine: function(code) {
         this.emit(code + "\n");
+    },
+
+    emitFuncBegin: function(name) {
+        this.buffer = this.tmpid();
+        this.emitLine('function ' + name + '(env, context) {');
+        this.emitLine('var ' + this.buffer + ' = "";');
+    },
+
+    emitFuncEnd: function(noReturn) {
+        if(!noReturn) {
+            this.emitLine('return ' + this.buffer + ';');
+        }
+
+        this.emitLine('}');
+        this.buffer = null;
     },
 
     tmpid: function() {
@@ -49,7 +66,7 @@ var Compiler = Object.extend({
         var _this = this;
         node.iterChildren(function(n) {
             _this.compile(n, frame);
-        });        
+        });
     },
 
     _compileAggregate: function(node, frame, startChar, endChar) {
@@ -81,7 +98,7 @@ var Compiler = Object.extend({
     assertType: function(node /*, types */) {
         var types = _.toArray(arguments).slice(1);
         var success = false;
-        
+
         _.each(types, function(type) {
             if(node instanceof type) {
                 success = true;
@@ -187,7 +204,7 @@ var Compiler = Object.extend({
         this.emitLine(';');
 
         frame.add_variable(v);
-        
+
         this.emitLine('for(var ' + i + '=0; ' + i + ' < ' + arr + '.length; ' +
                       i + '++) {');
         this.emitLine('var ' + v + ' = ' + arr + '[' + i + '];');
@@ -197,12 +214,36 @@ var Compiler = Object.extend({
         frame.remove_variable(v);
     },
 
+    compileBlock: function(node, frame) {
+        this.emitLine(this.buffer + ' += context.getBlock("' +
+                      node.name.value + '")(env, context);');
+    },
+
+    compileExtends: function(node, frame) {
+        if(this.isChild) {
+            throw new Error('cannot extend multiple times');
+        }
+        
+        this.emit('parentTemplate = env.get_template(');
+        this._compileExpression(node.template);
+        this.emitLine(');');
+
+        var k = this.tmpid();
+
+        this.emitLine('for(var ' + k + ' in parentTemplate.blocks) {');
+        this.emitLine('context.addBlock(' + k +
+                      ', parentTemplate.blocks[' + k + ']);');
+        this.emitLine('}');
+
+        this.isChild = true;
+    },
+
     compileTemplateData: function(node, frame) {
         this.compileLiteral(node, frame);
     },
 
     compileOutput: function(node, frame) {
-        this.emit('output += ');
+        this.emit(this.buffer + ' += ');
         this._compileChildren(node, frame);
         this.emit(';\n');
     },
@@ -214,11 +255,31 @@ var Compiler = Object.extend({
 
         frame = new Frame();
 
-        this.emitLine('(function (env, context) {');
-        this.emitLine('var output = "";');
+        this.emitLine('(function () {');
+
+        this.emitFuncBegin('root');
         this._compileChildren(node, frame);
-        this.emitLine('return output;');
-        this.emitLine('})');
+        if(this.isChild) {
+            this.emitLine('return ' +
+                          'parentTemplate.rootRenderFunc(env, context);');
+        }
+        this.emitFuncEnd(this.isChild);
+
+        var blocks = node.findAll(nodes.Block);
+        _.each(blocks, function(block) {
+            var name = block.name.value;
+            this.emitFuncBegin('b_' + name);
+            this.compile(block.body, frame);
+            this.emitFuncEnd();
+        }, this);
+
+        this.emitLine('return {');
+        _.each(blocks, function(block) {
+            var name = 'b_' + block.name.value;
+            this.emitLine(name + ': ' + name + ',');
+        }, this);
+        this.emitLine('root: root\n};');
+        this.emitLine('})()');
     },
 
     compile: function (node, frame) {

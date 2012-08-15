@@ -136,16 +136,55 @@ var Parser = Object.extend({
         return node;
     },
 
+    parseBlock: function() {
+        var tag = this.peekToken();
+        if(!this.skipSymbol('block')) {
+            throw new Error('parseBlock: expected block');
+        }
+
+        var node = new nodes.Block(tag.lineno, tag.colno);
+
+        node.name = this.parseExpression();
+        if(!node.name instanceof nodes.Symbol) {
+            this.fail('variable name expected');
+        }
+
+        this.advanceAfterBlockEnd(tag.value);
+
+        node.body = this.parseUntilBlocks('endblock');
+        this.advanceAfterBlockEnd();
+
+        return node;
+    },
+
+    parseExtends: function() {
+        var tag = this.peekToken();
+        if(!this.skipSymbol('extends')) {
+            throw new Error('parseBlock: expected block');
+        }
+
+        var node = new nodes.Extends(tag.lineno, tag.colno);
+
+        node.template = this.parseExpression();
+        if(!(node.template instanceof nodes.Literal &&
+             _.isString(node.template.value))) {
+            this.fail('parseExtends: string expected');
+        }
+
+        this.advanceAfterBlockEnd(tag.value);
+        return node;
+    },
+
     parseIf: function() {
-        var iftok = this.peekToken();
+        var tag = this.peekToken();
         if(!this.skipSymbol('if') && !this.skipSymbol('elif')) {
             throw new Error("parseIf: expected if or elif");
         }
 
-        var node = new nodes.If(iftok.lineno, iftok.colno);
+        var node = new nodes.If(tag.lineno, tag.colno);
 
         node.cond = this.parseExpression();
-        this.advanceAfterBlockEnd(iftok.value);
+        this.advanceAfterBlockEnd(tag.value);
 
         node.body = this.parseUntilBlocks('elif', 'else', 'endif');
         var tok = this.peekToken();
@@ -185,8 +224,8 @@ var Parser = Object.extend({
             case 'raw': node = this.parseRaw(); break;
             case 'if': node = this.parseIf(); break;
             case 'for': node = this.parseFor(); break;
-            // case 'block': parseBlock();
-            // case 'extends': parseExtends();
+            case 'block': node = this.parseBlock(); break;
+            case 'extends': node = this.parseExtends(); break;
             default: this.fail('unknown block tag: ' + tok.value);
         }
 
@@ -480,9 +519,9 @@ var Parser = Object.extend({
 //     console.log(util.inspect(t));
 // }
 
-// var p = new Parser(lexer.lex('{% for i in [1,2,3] %}hello{% endfor %}'));
-// var n = p.parse();
-// nodes.printNodes(n);
+var p = new Parser(lexer.lex('{% extends "hello.html" %} {% block content %}hello {{ user }}{% endblock %}'));
+var n = p.parse();
+nodes.printNodes(n);
 
 module.exports = {
     parse: function(src) {

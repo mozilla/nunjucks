@@ -1,5 +1,6 @@
 
 var fs = require('fs');
+var _ = require('underscore');
 var Object = require('./object');
 var compiler = require('./compiler');
 var builtin_filters = require('./filters');
@@ -23,8 +24,13 @@ var Environment = Object.extend({
 });
 
 var Context = Object.extend({
-    init: function(ctx) {
+    init: function(ctx, blocks) {
         this.ctx = ctx;
+        this.blocks = {};
+
+        _.each(blocks, function(block, name) {
+            this.addBlock(name, block);
+        }, this);
     },
 
     lookup: function(name) {
@@ -32,38 +38,57 @@ var Context = Object.extend({
             throw new Error("'" + name + "' is undefined");
         }
         return this.ctx[name];
+    },
+
+    addBlock: function(name, block) {
+        this.blocks[name] = this.blocks[name] || [];
+        this.blocks[name].push(block);
+    },
+
+    getBlock: function(name) {
+        if(!this.blocks[name]) {
+            throw new Error('unknown block "' + name + '"');
+        }
+
+        return this.blocks[name][0];
     }
 });
 
 var Template = Object.extend({
-    init: function (src, env) {
-        this.src = src;
+    init: function (str, env) {
         this.env = env || new Environment();
-        this.tmpl_cache = null;
+        this.tmplObj = null;
+
+        var src = compiler.compile(str, this.env);
+        var props = eval(src);
+        
+        this.blocks = this._getBlocks(props);
+        this.rootRenderFunc = props.root;
     },
 
     render: function(ctx) {
-        var tmpl;
+        var context = new Context(ctx, this.blocks);
+        return this.rootRenderFunc(this.env, context);
+    },
 
-        if(this.tmpl_cache) {
-            tmpl = this.tmpl_cache;
-        }
-        else {
-            tmpl = compiler.compile(this.src, this.env);
-            this.tmpl_cache = tmpl;
+    _getBlocks: function(props) {
+        var blocks = {};
+
+        for(var k in props) {
+            if(k.slice(0, 2) == 'b_') {
+                blocks[k.slice(2)] = props[k];
+            }
         }
 
-        var context = new Context(ctx);
-        var f = eval(tmpl);
-        return f(this.env, context);
+        return blocks;
     }
 });
 
-// var env = new Environment();
-// var tmpl = env.get_template('test.html');
-// console.log(compiler.compile(tmpl.src));
-// console.log("OUTPUT ---");
-// console.log(tmpl.render({ username: "James" }));
+var env = new Environment();
+var tmpl = env.get_template('test.html');
+console.log(compiler.compile(fs.readFileSync('test.html', 'utf-8')));
+console.log("OUTPUT ---");
+console.log(tmpl.render({ username: "James" }));
 
 module.exports = {
     Environment: Environment,

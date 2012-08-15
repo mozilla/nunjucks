@@ -3,6 +3,7 @@ var util = require('util');
 var _ = require('underscore');
 var Object = require('./object');
 
+// TODO: Don't use a children array, but rather a single node "body"
 var Node = Object.extend("Node", {
     init: function(lineno, colno, children) {
         if(children && !_.isArray(children)) {
@@ -13,6 +14,32 @@ var Node = Object.extend("Node", {
         this.children = children || [];
         this.lineno = lineno;
         this.colno = colno;
+    },
+
+    findAll: function(type) {
+        var res = [];
+
+        // TODO: clean this up
+        for(var k in this) {
+            var obj = this[k];
+
+            if(_.isArray(obj)) {
+                _.each(obj, function(n) {
+                    if(n instanceof type) {
+                        res.push(n);
+                    }
+
+                    if(n instanceof Node) {
+                        res = res.concat(n.findAll(type));
+                    }
+                });
+            }
+            else if(obj instanceof Node) {
+                res = res.concat(obj.findAll(type));
+            }
+        }
+
+        return res;
     },
 
     addChild: function(node) {
@@ -93,6 +120,21 @@ var FunCall = Node.extend("FunCall", {
 
 var Filter = FunCall.extend("Filter");
 
+var Block = Node.extend("Block", {
+    init: function(lineno, colno, name, body) {
+        this.name = name;
+        this.body = body;
+        this.parent(lineno, colno);
+    }
+});
+
+var Extends = Node.extend("Extends", {
+    init: function(lineno, colno, template) {
+        this.template = template;
+        this.parent(lineno, colno);
+    }
+});
+
 var Output = Node.extend("Output");
 var TemplateData = Literal.extend("TemplateData");
 
@@ -145,6 +187,11 @@ function printNodes(node, indent) {
             printNodes(node.else_, indent+2);
         }
     }
+    else if(node instanceof Block) {
+        print("\n");
+        printNodes(node.name, indent+2);
+        printNodes(node.body, indent+2);
+    }
     else {
         var children = node.children;
         delete node.children;
@@ -175,6 +222,8 @@ module.exports = {
     For: For,
     FunCall: FunCall,
     Filter: Filter,
+    Block: Block,
+    Extends: Extends,
 
     printNodes: printNodes
 };
