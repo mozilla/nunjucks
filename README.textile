@@ -85,4 +85,7 @@ This is very close to a 0.1 beta release. It is mostly feature-complete with all
 * Implement the "include" tag
 * Allow referencing: {{ foo.bar }} and {{ foo["bar"] }}
 * Better express integration
+* Make template loading asynchronous (requires different generated code too)
+* Support precompiled templates
+* Implement caching
 * Write more tests, fix bugs
