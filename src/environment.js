@@ -4,9 +4,17 @@ var _ = require('underscore');
 var Object = require('./object');
 var compiler = require('./compiler');
 var builtin_filters = require('./filters');
+var builtin_loaders = require('./loaders');
 
 var Environment = Object.extend({
-    init: function() {
+    init: function(loaders) {
+        if(!loaders) {
+            this.loaders = [new builtin_loaders.FileSystemLoader()];
+        }
+        else {
+            this.loaders = _.isArray(loaders) ? loaders : [loaders];
+        }
+
         this.filters = builtin_filters;
     },
 
@@ -19,7 +27,43 @@ var Environment = Object.extend({
     },
 
     get_template: function(name) {
-        return new Template(fs.readFileSync(name, 'utf-8'), this);
+        var src = null;
+
+        for(var i=0; i<this.loaders.length; i++) {
+            if((src = this.loaders[i].getSource(name))) {
+                break;
+            }
+        }
+
+        if(!src) {
+            throw new Error('template not found: ' + name);
+        }
+
+        return new Template(src, this);
+    },
+
+    express: function(app) {
+        var env = this;
+
+        app.render = function(name, ctx, k) {
+            var context = {};
+
+            if(_.isFunction(ctx)) {
+                k = ctx;
+                ctx = {};
+            }
+
+            context = _.extend(context, app.locals);
+
+            if(ctx._locals) {
+                context = _.extend(context, ctx._locals);
+            }
+
+            context = _.extend(context, ctx);
+
+            var res = env.get_template(name).render(ctx);
+            k(null, res);            
+        };
     }
 });
 
@@ -51,6 +95,20 @@ var Context = Object.extend({
         }
 
         return this.blocks[name][0];
+    },
+
+    getSuper: function(env, name, block) {
+        var idx = _.indexOf(this.blocks[name] || [], block);
+        var blk = this.blocks[name][idx + 1];
+        var context = this;
+
+        return function() {
+            if(idx == -1 || !blk) {
+                throw new Error('no super block available for "' + name + '"');
+            }
+
+            return blk(env, context);
+        };
     }
 });
 
@@ -84,11 +142,12 @@ var Template = Object.extend({
     }
 });
 
-var env = new Environment();
-var tmpl = env.get_template('test.html');
-console.log(compiler.compile(fs.readFileSync('test.html', 'utf-8')));
-console.log("OUTPUT ---");
-console.log(tmpl.render({ username: "James" }));
+// var env = new Environment();
+// console.log(compiler.compile(fs.readFileSync('test.html', 'utf-8')));
+
+// var tmpl = env.get_template('test.html');
+// console.log("OUTPUT ---");
+// console.log(tmpl.render({ username: "James" }));
 
 module.exports = {
     Environment: Environment,

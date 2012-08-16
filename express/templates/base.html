@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>A quick app</title>
+
+    <style>
+      body {
+        background-color: #ccccff;
+      }
+
+      .footer {
+        margin-top: 5em;
+        font-size: .75em;
+      }
+    </style>
+  </head>
+  <body>
+    {% block content %}{% endblock %}
+
+    <div class="footer">
+      {% block footer %}(c) James Long 2012{% endblock %}
+    </div>
+  </body>
+</html>

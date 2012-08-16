@@ -131,7 +131,7 @@ var Compiler = Object.extend({
         var name = node.value;
 
         if(frame.find_variable(name)) {
-            this.emit(name);
+            this.emit('l_' + name);
         }
         else {
             this.emit('context.lookup("' + name + '")');
@@ -195,7 +195,7 @@ var Compiler = Object.extend({
     },
 
     compileFor: function(node, frame) {
-        var v = node.name.value;
+        var v = 'l_' + node.name.value;
         var i = this.tmpid();
         var arr = this.tmpid();
 
@@ -203,7 +203,7 @@ var Compiler = Object.extend({
         this._compileExpression(node.arr, frame);
         this.emitLine(';');
 
-        frame.add_variable(v);
+        frame.add_variable(node.name.value);
 
         this.emitLine('for(var ' + i + '=0; ' + i + ' < ' + arr + '.length; ' +
                       i + '++) {');
@@ -269,7 +269,14 @@ var Compiler = Object.extend({
         _.each(blocks, function(block) {
             var name = block.name.value;
             this.emitFuncBegin('b_' + name);
+            this.emitLine('var l_super = context.getSuper(env, ' + 
+                          '"' + name + '", ' +
+                          'b_' + name + ');');
+
+            frame.add_variable('super');
             this.compile(block.body, frame);
+            frame.remove_variable('super');
+
             this.emitFuncEnd();
         }, this);
 

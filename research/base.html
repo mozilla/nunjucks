@@ -1,6 +1,8 @@
 {% extends "t.html" %}
 
 {% block content %}
+{{ super() }}
+
 Hello {{ user }}
 
 {% for i in [1,2,3] %}

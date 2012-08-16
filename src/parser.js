@@ -519,9 +519,9 @@ var Parser = Object.extend({
 //     console.log(util.inspect(t));
 // }
 
-var p = new Parser(lexer.lex('{% extends "hello.html" %} {% block content %}hello {{ user }}{% endblock %}'));
-var n = p.parse();
-nodes.printNodes(n);
+// var p = new Parser(lexer.lex('{% extends "hello.html" %} {% block content %}hello {{ user }}{% endblock %}'));
+// var n = p.parse();
+// nodes.printNodes(n);
 
 module.exports = {
     parse: function(src) {

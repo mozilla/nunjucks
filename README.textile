@@ -1,7 +1,7 @@
 
 h1. Nunjucks
 
-I'm tired of the lack of good templating systems for large js apps. EJS is ugly and is missing a lot, mustache is great but not for large server-side templates, I could go on and on.
+I'm tired of the lack of good templating systems for large js apps. The biggest missing feature between all of them is template inheritance, something necessary for a non-trivial site. Other problems is the ugliness of embedding javascript, too much logic in templates, etc.
 
 I hope that Nunjucks can be better. It is heavily jinja2 inspired because I think it is a great solution for templating. Nunjucks does not claim to be a direct port of jinja2, but most things will work the same in both projects.
 
@@ -9,10 +9,29 @@ h2. Using
 
 Here is an example template that works with the current code:
  
-bc.. Hello {{ username }}, are you feeling ok?
+bc.. {# base.html #}
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>{{ title }}</title>
+  </head>
+  <body>
+    {% block content %}{% endblock %}
+  </body>
+</html>
 
-{{ messages('black') }} {# Call a function #}
-{{ header|title|big }} {# Use a few filters #}
+---
+
+{# index.html, inherits base.html #}
+{% extends "base.html" %}
+
+{% block content %}
+
+{# Variables and filters #}
+Hello {{ name|title }}!
+
+{# Call a function #}
+{{ messages() }}
 
 {# Conditionals #}    
 {% if sick %}
@@ -25,6 +44,18 @@ bc.. Hello {{ username }}, are you feeling ok?
   GOOD!
 {% endif %}
 
+{# For iteration #}
+<p>
+  Let's print some numbers:
+  <ul>
+  {% for i in [1,2,3,4,5] %}
+   <li>{{ i }}</li>
+  {% endfor %}
+  </ul>
+</p>
+
+{% endblock %}
+
 p. To compile templates, you can create a Template directly or load one from an environment object. Right now the environment just loads the template from the disk relative to the current location.
 
 bc.. var e = require('./environment');
@@ -36,15 +67,21 @@ var env = new e.Environment();
 var tmpl = env.get_template('test.html');
 console.log(tmpl.render({ username: "james" }));
 
+h2. Express
+
+To integrate to express, do the following (this will change before the first release):
+
+bc.. var loaders = require('../src/loaders');
+var express = require('express');
+
+var e = new env.Environment(new loaders.FileSystemLoader('templates'));
+app.engine('html', e.express());
+
 h2. Status
 
-This is very early code. The parser is mostly complete and the code generator is being worked on. The biggest missing features are specific blocks like @import@, @block@, @extends@, etc.
+This is very close to a 0.1 beta release. It is mostly feature-complete with all the basic stuff ported from Jinja. There are a few things left:
 
-You can play around with the parser with this:
-
-bc. var parser = require('./parser');
-var nodes = require('./nodes');
-var n = parser.parse("Hello {{ username }}! {% if sick %}Feel better!{% endif %}")
-nodes.printNodes(n);
-
-That will give you a nicely formatted print out of the AST generated from the parser.
+* Implement the "include" tag
+* Allow referencing: {{ foo.bar }} and {{ foo["bar"] }}
+* Better express integration
+* Write more tests, fix bugs
