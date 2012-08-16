@@ -71,7 +71,8 @@ h2. Express
 
 To integrate with express, do the following (this will change before the first release):
 
-bc.. var loaders = require('../src/loaders');
+bc.. var env = require('<src>/environment');
+var loaders = require('<src>/loaders');
 var express = require('express');
 
 var e = new env.Environment(new loaders.FileSystemLoader('templates'));
