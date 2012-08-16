@@ -129,8 +129,8 @@ var Template = Object.extend({
     },
 
     _compile: function() {
-        var src = compiler.compile(this.tmplSrc, this.env);
-        var props = eval(src);
+        var func = new Function(compiler.compile(this.tmplSrc, this.env));
+        var props = func();
         
         this.blocks = this._getBlocks(props);
         this.rootRenderFunc = props.root;

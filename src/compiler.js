@@ -255,8 +255,6 @@ var Compiler = Object.extend({
 
         frame = new Frame();
 
-        this.emitLine('(function () {');
-
         this.emitFuncBegin('root');
         this._compileChildren(node, frame);
         if(this.isChild) {
@@ -286,7 +284,6 @@ var Compiler = Object.extend({
             this.emitLine(name + ': ' + name + ',');
         }, this);
         this.emitLine('root: root\n};');
-        this.emitLine('})()');
     },
 
     compile: function (node, frame) {
