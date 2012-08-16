@@ -115,18 +115,26 @@ var Context = Object.extend({
 var Template = Object.extend({
     init: function (str, env) {
         this.env = env || new Environment();
-        this.tmplObj = null;
+        this.tmplSrc = str;
+        this.compiled = false;
+    },
 
-        var src = compiler.compile(str, this.env);
+    render: function(ctx) {
+        if(!this.compiled) {
+            this._compile();
+        }
+
+        var context = new Context(ctx, this.blocks);
+        return this.rootRenderFunc(this.env, context);
+    },
+
+    _compile: function() {
+        var src = compiler.compile(this.tmplSrc, this.env);
         var props = eval(src);
         
         this.blocks = this._getBlocks(props);
         this.rootRenderFunc = props.root;
-    },
-
-    render: function(ctx) {
-        var context = new Context(ctx, this.blocks);
-        return this.rootRenderFunc(this.env, context);
+        this.compiled = true;
     },
 
     _getBlocks: function(props) {
