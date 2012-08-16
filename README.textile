@@ -69,7 +69,7 @@ console.log(tmpl.render({ username: "james" }));
 
 h2. Express
 
-To integrate to express, do the following (this will change before the first release):
+To integrate with express, do the following (this will change before the first release):
 
 bc.. var loaders = require('../src/loaders');
 var express = require('express');
