@@ -12,15 +12,15 @@ var Frame = Object.extend({
         this.variables = [];
     },
 
-    add_variable: function(name) {
+    addVariable: function(name) {
         this.variables.push(name);
     },
 
-    remove_variable: function(name) {
+    removeVariable: function(name) {
         this.variables = _.without(this.variables, name);
     },
 
-    find_variable: function(name) {
+    findVariable: function(name) {
         return _.indexOf(this.variables, name) !== -1;
     }
 });
@@ -130,7 +130,7 @@ var Compiler = Object.extend({
     compileSymbol: function(node, frame) {
         var name = node.value;
 
-        if(frame.find_variable(name)) {
+        if(frame.findVariable(name)) {
             this.emit('l_' + name);
         }
         else {
@@ -176,7 +176,7 @@ var Compiler = Object.extend({
         var name = node.name;
         this.assertType(name, nodes.Symbol);
 
-        this.emit('env.get_filter("' + name.value + '")');
+        this.emit('env.getFilter("' + name.value + '")');
         this._compileAggregate(node, frame, '(', ')');
     },
 
@@ -203,7 +203,7 @@ var Compiler = Object.extend({
         this._compileExpression(node.arr, frame);
         this.emitLine(';');
 
-        frame.add_variable(node.name.value);
+        frame.addVariable(node.name.value);
 
         this.emitLine('for(var ' + i + '=0; ' + i + ' < ' + arr + '.length; ' +
                       i + '++) {');
@@ -211,7 +211,7 @@ var Compiler = Object.extend({
         this.compile(node.body, frame);
         this.emitLine('}');
 
-        frame.remove_variable(v);
+        frame.removeVariable(v);
     },
 
     compileBlock: function(node, frame) {
@@ -224,7 +224,7 @@ var Compiler = Object.extend({
             throw new Error('cannot extend multiple times');
         }
         
-        this.emit('parentTemplate = env.get_template(');
+        this.emit('parentTemplate = env.getTemplate(');
         this._compileExpression(node.template);
         this.emitLine(');');
 
@@ -271,9 +271,9 @@ var Compiler = Object.extend({
                           '"' + name + '", ' +
                           'b_' + name + ');');
 
-            frame.add_variable('super');
+            frame.addVariable('super');
             this.compile(block.body, frame);
-            frame.remove_variable('super');
+            frame.removeVariable('super');
 
             this.emitFuncEnd();
         }, this);

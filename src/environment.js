@@ -18,15 +18,15 @@ var Environment = Object.extend({
         this.filters = builtin_filters;
     },
 
-    add_filter: function(name, func) {
+    addFilter: function(name, func) {
         this.filters[name] = func;
     },
 
-    get_filter: function(name) {
+    getFilter: function(name) {
         return this.filters[name];
     },
 
-    get_template: function(name) {
+    getTemplate: function(name) {
         var src = null;
 
         for(var i=0; i<this.loaders.length; i++) {
@@ -61,7 +61,7 @@ var Environment = Object.extend({
 
             context = _.extend(context, ctx);
 
-            var res = env.get_template(name).render(ctx);
+            var res = env.getTemplate(name).render(ctx);
             k(null, res);            
         };
     }
@@ -153,7 +153,7 @@ var Template = Object.extend({
 // var env = new Environment();
 // console.log(compiler.compile(fs.readFileSync('test.html', 'utf-8')));
 
-// var tmpl = env.get_template('test.html');
+// var tmpl = env.getTemplate('test.html');
 // console.log("OUTPUT ---");
 // console.log(tmpl.render({ username: "James" }));
 

@@ -5,6 +5,10 @@ I'm tired of the lack of good templating systems for large js apps. The biggest 
 
 I hope that Nunjucks can be better. It is heavily jinja2 inspired because I think it is a great solution for templating. Nunjucks does not claim to be a direct port of jinja2, but most things will work the same in both projects.
 
+h2. Installation
+
+bc. npm install nunjucks
+
 h2. Using
 
 Here is an example template that works with the current code:
@@ -58,25 +62,25 @@ Hello {{ name|title }}!
 
 p. To compile templates, you can create a Template directly or load one from an environment object. Right now the environment just loads the template from the disk relative to the current location.
 
-bc.. var e = require('./environment');
-var tmpl = new e.Template('Hello {{ username }}');
+bc.. var nunjucks = require('nunjucks');
+var tmpl = new nunjucks.Template('Hello {{ username }}');
 console.log(tmpl.render({ username: "james" }));
 
 // From an environment
-var env = new e.Environment();
-var tmpl = env.get_template('test.html');
+var env = new nunjucks.Environment();
+var tmpl = env.getTemplate('test.html');
 console.log(tmpl.render({ username: "james" }));
 
 h2. Express
 
 To integrate with express, do the following (this will change before the first release):
 
-bc.. var env = require('<src>/environment');
-var loaders = require('<src>/loaders');
+bc.. var nunjucks = require('nunjucks');
+var loaders = nunjucks.loaders;
 var express = require('express');
 
-var e = new env.Environment(new loaders.FileSystemLoader('templates'));
-app.engine('html', e.express());
+var env = new nunjucks.Environment(new loaders.FileSystemLoader('templates'));
+env.express(app);
 
 h2. Status
 
