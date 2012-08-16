@@ -13,7 +13,8 @@ h2. Using
 
 Here is an example template that works with the current code:
  
-bc.. {# base.html #}
+bc.. --- base.html
+
 <!DOCTYPE html>
 <html>
   <head>
@@ -24,9 +25,8 @@ bc.. {# base.html #}
   </body>
 </html>
 
----
+--- index.html
 
-{# index.html, inherits base.html #}
 {% extends "base.html" %}
 
 {% block content %}
