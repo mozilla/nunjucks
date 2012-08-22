@@ -26,7 +26,7 @@ var Environment = Object.extend({
         return this.filters[name];
     },
 
-    getTemplate: function(name) {
+    getTemplate: function(name, eagerCompile) {
         var src = null;
 
         for(var i=0; i<this.loaders.length; i++) {
@@ -39,7 +39,7 @@ var Environment = Object.extend({
             throw new Error('template not found: ' + name);
         }
 
-        return new Template(src, this);
+        return new Template(src, this, eagerCompile);
     },
 
     express: function(app) {
@@ -113,10 +113,16 @@ var Context = Object.extend({
 });
 
 var Template = Object.extend({
-    init: function (str, env) {
+    init: function (str, env, eagerCompile) {
         this.env = env || new Environment();
         this.tmplSrc = str;
-        this.compiled = false;
+
+        if(eagerCompile) {
+            this._compile();
+        }
+        else {
+            this.compiled = false;
+        }
     },
 
     render: function(ctx) {

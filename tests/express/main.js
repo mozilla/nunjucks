@@ -1,6 +1,6 @@
 
-var env = require('../src/environment');
-var loaders = require('../src/loaders');
+var env = require('../../src/environment');
+var loaders = require('../../src/loaders');
 var express = require('express');
 
 var app = express();

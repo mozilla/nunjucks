@@ -152,6 +152,11 @@ var Parser = Object.extend({
         this.advanceAfterBlockEnd(tag.value);
 
         node.body = this.parseUntilBlocks('endblock');
+
+        if(!this.peekToken()) {
+            this.fail('expected endblock, got end of file');
+        }
+
         this.advanceAfterBlockEnd();
 
         return node;
@@ -189,7 +194,7 @@ var Parser = Object.extend({
         node.body = this.parseUntilBlocks('elif', 'else', 'endif');
         var tok = this.peekToken();
 
-        switch(tok.value) {
+        switch(tok && tok.value) {
         case "elif":
             node.else_ = this.parseIf();
             break;
@@ -202,6 +207,8 @@ var Parser = Object.extend({
             node.else_ = null;
             this.advanceAfterBlockEnd();
             break;
+        default:
+            this.fail('expected endif, else, or endif, got end of file');
         }
 
         return node;

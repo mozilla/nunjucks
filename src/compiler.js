@@ -224,9 +224,9 @@ var Compiler = Object.extend({
             throw new Error('cannot extend multiple times');
         }
         
-        this.emit('parentTemplate = env.getTemplate(');
+        this.emit('var parentTemplate = env.getTemplate(');
         this._compileExpression(node.template);
-        this.emitLine(');');
+        this.emitLine(', true);');
 
         var k = this.tmpid();
 

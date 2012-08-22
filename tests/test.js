@@ -359,8 +359,13 @@ describe('parser', function() {
     it('should parse blocks', function() {
         var n = parser.parse('want some {% if hungry %}pizza{% else %}' +
                              'water{% endif %}?');
-        var ifn = n.children[1];
-        ifn.typename.should.equal('If');
+        n.children[1].typename.should.equal('If');
+
+        n = parser.parse('{% block foo %}stuff{% endblock %}');
+        n.children[0].typename.should.equal('Block');
+
+        n = parser.parse('{% extends "test.html" %}stuff');
+        n.children[0].typename.should.equal('Extends');
     });
 
     it('should throw errors', function() {
@@ -376,9 +381,13 @@ describe('parser', function() {
             parser.parse('hello {% if sdf zxc');
         }).should.throw(/expected block end/);
 
-        // (function() {
-        //     parser.parse('hello {% if sdf %} data');
-        // }).should.throw(/expected block end/);
+        (function() {
+            parser.parse('hello {% if sdf %} data');
+        }).should.throw(/expected endif, else, or endif/);
+
+        (function() {
+            parser.parse('hello {% block sdf %} data');
+        }).should.throw(/expected endblock/);
 
         (function() {
             parser.parse('hello {% bar %} dsfsdf');
@@ -410,5 +419,28 @@ describe('compiler', function() {
 
         s = render(tmpl, { hungry: false });
         s.should.equal('Give me some water');
+    });
+
+    it('should inherit templates', function() {
+        var s = render('{% extends "base.html" %}');
+        s.should.equal('FooBarBazFizzle');
+
+        s = render('hola {% extends "base.html" %} hizzle mumble');
+        s.should.equal('FooBarBazFizzle');
+
+        s = render('{% extends "base.html" %}' +
+                   '{% block block1 %}BAR{% endblock %}');
+        s.should.equal('FooBARBazFizzle');
+
+        s = render('{% extends "base.html" %}' +
+                   '{% block block1 %}BAR{% endblock %}' + 
+                   '{% block block2 %}BAZ{% endblock %}');
+        s.should.equal('FooBARBAZFizzle');
+    });
+
+    it('should render parent blocks with super()', function() {
+        var s = render('{% extends "base.html" %}' +
+                       '{% block block1 %}{{ super() }}BAR{% endblock %}');
+        s.should.equal('FooBarBARBazFizzle');
     });
 });
