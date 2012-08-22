@@ -295,7 +295,124 @@ var Parser = Object.extend({
         return new nodes.TemplateData(begun.lineno, begun.colno, str);
     },
 
-    parseExpression: function (no_filters) {
+    parsePostfix: function(node) {
+        var tok = this.peekToken();
+
+        while(tok) {
+            if(tok.type == lexer.TOKEN_LEFT_PAREN) {
+                // Function call
+                var list = this.parseAggregate();
+                node =  new nodes.FunCall(tok.lineno,
+                                          tok.colno,
+                                          node,
+                                          list.children);
+            }
+            else if(tok.type == lexer.TOKEN_LEFT_BRACKET) {
+                // Reference
+                var lookup = this.parseAggregate();
+                if(lookup.children.length > 1) {
+                    this.fail('invalid index');
+                }
+
+                node =  new nodes.LookupVal(tok.lineno,
+                                            tok.colno,
+                                            node,
+                                            lookup.children[0]);
+            }
+            else if(tok.type == lexer.TOKEN_OPERATOR && tok.value == '.') {
+                // Reference
+                this.nextToken();
+                var val = this.nextToken();
+
+                if(val.type != lexer.TOKEN_SYMBOL) {
+                    this.fail('expected name as lookup value, got ' + val.value);
+                }
+
+                // Make a literal string because it's not a variable
+                // reference
+                var lookup = new nodes.Literal(val.lineno,
+                                               val.colno,
+                                               val.value);
+
+                node =  new nodes.LookupVal(tok.lineno,
+                                            tok.colno,
+                                            node,
+                                            lookup);
+            }
+            else {
+                break;
+            }
+        
+            tok = this.peekToken();
+        }
+
+        return node;
+    },
+
+    parseExpression: function(no_filters) {
+        var node = this.parseOr();
+        var tok;
+
+        if(!no_filters) {
+            while(1) {
+                // Check for filters
+                tok = this.peekToken();
+
+                if(!tok || tok.type != lexer.TOKEN_PIPE) {
+                    break;
+                }
+
+                node = this.parseFilter(node);
+            }
+        }
+
+        return node;
+    },
+
+    parseOr: function() {
+        var node = this.parseAnd();
+        while(this.skipSymbol('or')) {
+            var node2 = this.parseAnd();
+            node = new nodes.Or(node.lineno,
+                                node.colno,
+                                node,
+                                node2);
+        }
+        return node;
+    },
+
+    parseAnd: function() {
+        var node = this.parseNot();
+        while(this.skipSymbol('and')) {
+            var node2 = this.parseNot();
+            node = new nodes.And(node.lineno,
+                                 node.colno,
+                                 node,
+                                 node2);
+        }
+        return node;
+    },
+
+    parseNot: function() {
+        var tok = this.peekToken();
+        if(this.skipSymbol('not')) {
+            return new nodes.Not(tok.lineno,
+                                 tok.colno,
+                                 this.parseNot());
+        }
+        return this.parsePrimary();
+    },
+
+    // parseCompare: function() {
+    //     var expr = this.parsePrimary();
+    //     var ops = [];
+
+    //     while(1) {
+            
+    //     }
+    // },
+
+    parsePrimary: function () {
         var tok = this.nextToken();
         var val = null;
         var node = null;
@@ -348,17 +465,7 @@ var Parser = Object.extend({
         }
         else if(tok.type == lexer.TOKEN_SYMBOL) {
             node = new nodes.Symbol(tok.lineno, tok.colno, tok.value);
-
-            tok = this.peekToken();
-
-            if(tok && tok.type == lexer.TOKEN_LEFT_PAREN) {
-                // Function call
-                var list = this.parseAggregate();
-                node = new nodes.FunCall(tok.lineno,
-                                         tok.colno,
-                                         node,
-                                         list.children);
-            }
+            node = this.parsePostfix(node);
         }
         else {
             // See if it's an aggregate type, we need to push the
@@ -368,23 +475,10 @@ var Parser = Object.extend({
         }
 
         if(node) {
-            if(!no_filters) {
-                while(1) {
-                    // Check for filters
-                    tok = this.peekToken();
-
-                    if(!tok || tok.type != lexer.TOKEN_PIPE) {
-                        break;
-                    }
-
-                    node = this.parseFilter(node);
-                }
-            }
-
             return node;
         }
         else {
-            throw new Error("parseExpression: invalid token: " + tok.type);
+            throw new Error("parseExpression: invalid token: " + tok.value);
         }
     },
 
@@ -535,7 +629,7 @@ var Parser = Object.extend({
 //     console.log(util.inspect(t));
 // }
 
-// var p = new Parser(lexer.lex('{% extends "hello.html" %} {% block content %}hello {{ user }}{% endblock %}'));
+// var p = new Parser(lexer.lex('foo {{ foo and biz or bar }} sdfdf'));
 // var n = p.parse();
 // nodes.printNodes(n);
 

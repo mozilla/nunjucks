@@ -92,6 +92,13 @@ var Pair = Node.extend("Pair", {
     }
 });
 var Dict = Expr.extend("Dict");
+var LookupVal = Expr.extend("LookupVal", {
+    init: function(lineno, colno, target, val) {
+        this.target = target;
+        this.val = val;
+        this.parent(lineno, colno);
+    }
+});
 
 var If = Node.extend("If", {
     init: function(lineno, colno, cond, body, else_) {
@@ -140,6 +147,25 @@ var Include = TemplateRef.extend("Include");
 
 var Output = Node.extend("Output");
 var TemplateData = Literal.extend("TemplateData");
+
+var UnaryOp = Expr.extend("UnaryOp", {
+    init: function(lineno, colno, target) {
+        this.target = target;
+        this.parent(lineno, colno);
+    }
+});
+
+var BinOp = Expr.extend("BinOp", { 
+    init: function(lineno, colno, left, right) {
+        this.left = left;
+        this.right = right;
+        this.parent(lineno, colno);
+    }
+});
+
+var Or = BinOp.extend("Or");
+var And = BinOp.extend("And");
+var Not = UnaryOp.extend("Not");
 
 function printNodes(node, indent) {
     // TODO: spend more then 30 seconds and clean this up 
@@ -195,6 +221,20 @@ function printNodes(node, indent) {
         printNodes(node.name, indent+2);
         printNodes(node.body, indent+2);
     }
+    else if(node instanceof LookupVal) {
+        print("\n");
+        printNodes(node.target, indent+2);
+        printNodes(node.val, indent+2);
+    }
+    else if(node instanceof UnaryOp) {
+        print("\n");
+        printNodes(node.target, indent+2);
+    }
+    else if(node instanceof BinOp) {
+        print("\n");
+        printNodes(node.left, indent+2);
+        printNodes(node.right, indent+2);
+    }
     else {
         var children = node.children;
         delete node.children;
@@ -228,6 +268,10 @@ module.exports = {
     Block: Block,
     Extends: Extends,
     Include: Include,
+    LookupVal: LookupVal,
+    Or: Or,
+    And: And,
+    Not: Not,
 
     printNodes: printNodes
 };

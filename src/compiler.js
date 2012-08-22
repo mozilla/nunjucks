@@ -91,7 +91,8 @@ var Compiler = Object.extend({
                         nodes.Array,
                         nodes.Dict,
                         nodes.FunCall,
-                        nodes.Filter);
+                        nodes.Filter,
+                        nodes.LookupVal);
         this.compile(node, frame);
     },
 
@@ -167,6 +168,13 @@ var Compiler = Object.extend({
         this._compileExpression(val, frame);
     },
 
+    compileLookupVal: function(node, frame) {
+        this._compileExpression(node.target, frame);
+        this.emit('[');
+        this._compileExpression(node.val, frame);
+        this.emit(']');
+    },
+
     compileFunCall: function(node, frame) {
         this._compileExpression(node.name, frame);
         this._compileAggregate(node, frame, '(', ')');
@@ -225,7 +233,7 @@ var Compiler = Object.extend({
         }
         
         this.emit('var parentTemplate = env.getTemplate(');
-        this._compileExpression(node.template);
+        this._compileExpression(node.template, frame);
         this.emitLine(', true);');
 
         var k = this.tmpid();
@@ -240,7 +248,7 @@ var Compiler = Object.extend({
 
     compileInclude: function(node, frame) {
         this.emit('var includeTemplate = env.getTemplate(');
-        this._compileExpression(node.template);
+        this._compileExpression(node.template, frame);
         this.emitLine(')');
         this.emitLine(this.buffer +
                       ' += includeTemplate.render(context.getVariables());');
@@ -311,7 +319,7 @@ var Compiler = Object.extend({
 
 // var fs = require("fs");
 // var c = new Compiler();
-// var src = fs.readFileSync("test.html", "utf-8");
+// var src = "{{ foo.bar[biz] }}";
 // c.compile(parser.parse(src));
 
 // var tmpl = c.getCode();

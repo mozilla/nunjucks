@@ -11,13 +11,14 @@ bc. npm install nunjucks
 
 h2. Features
 
-* variables @{{ username }}@
+* variables
 * jinja2-style parsing @{{ foo('bar', 1) }}@
-* conditionals @{% if foo %}...{% elif bar %}...{% endif %}@
-* iteration @{% for i in [1,2,3] %}{{ i }}{% endfor %}@
+* conditionals
+* iteration
+* array/dict lookups
 * template inheritance using @extends@ and @block@ tags
 * include other templates with @include@
-* ignore template parsing with @raw@ tag @{% raw %}{{ literal stuff }}{% endraw %}@
+* ignore template parsing with @raw@ tag
 * very fast and active development!
 
 h2. Express
@@ -97,7 +98,7 @@ h2. Status
 
 This is very close to a 0.1 beta release. It is mostly feature-complete with all the basic stuff ported from Jinja. There are a few things left:
 
-* Allow referencing: {{ foo.bar }} and {{ foo["bar"] }}
+* Implement operators (+, -, *, /, etc)
 * Better express integration
 * Make template loading asynchronous (requires different generated code too)
 * Support precompiled templates

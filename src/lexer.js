@@ -2,8 +2,8 @@
 var util = require('util');
 
 var whitespaceChars = " \n\t\r";
-var delimChars = "()[]{}%*-+/#,:|";
-var integerRe = /^[-+]?[0-9]+/;
+var delimChars = "()[]{}%*-+/#,:|.";
+var intChars = "0123456789";
 
 var BLOCK_START = "{%";
 var BLOCK_END = "%}";
@@ -116,11 +116,15 @@ Tokenizer.prototype.nextToken = function() {
             // text and parse it
             tok = this._extractUntil(whitespaceChars + delimChars);
 
-            if(tok.match(/^[-+]?[0-9]+\.[0-9]*$/)) {
-                return token(TOKEN_FLOAT, tok, lineno, colno);
-            }
-            else if(tok.match(/^[-+]?[0-9]+$/)) {
-                return token(TOKEN_INT, tok, lineno, colno);
+            if(tok.match(/^[-+]?[0-9]+$/)) {
+                if(this.current() == '.') {
+                    this.forward();
+                    var dec = this._extract(intChars);
+                    return token(TOKEN_FLOAT, tok + '.' + dec, lineno, colno);
+                }
+                else {
+                    return token(TOKEN_INT, tok, lineno, colno);
+                }
             }
             else if(tok.match(/^(true|false)$/)) {
                 return token(TOKEN_BOOLEAN, tok, lineno, colno);
