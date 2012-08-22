@@ -17,7 +17,7 @@ h2. Features
 * iteration @{% for i in [1,2,3] %}{{ i }}{% endfor %}@
 * template inheritance using @extends@ and @block@ tags
 * include other templates with @include@
-* ignore template parsing with @raw@ {% raw %}{{ literal stuff }}{% endraw %}
+* ignore template parsing with @raw@ tag @{% raw %}{{ literal stuff }}{% endraw %}@
 * very fast and active development!
 
 h2. Express
