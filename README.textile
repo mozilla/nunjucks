@@ -11,13 +11,13 @@ bc. npm install nunjucks
 
 h2. Features
 
-* variables (@{{ username }}@)
-* jinja2-style parsing (@{{ foo('bar', 1) }}@)
-* conditionals (@{% if foo %}...{% elif bar %}...{% endif %}@)
-* iteration (@{% for i in [1,2,3] %}{{ i }}{% endfor %}@)
+* variables @{{ username }}@
+* jinja2-style parsing @{{ foo('bar', 1) }}@
+* conditionals @{% if foo %}...{% elif bar %}...{% endif %}@
+* iteration @{% for i in [1,2,3] %}{{ i }}{% endfor %}@
 * template inheritance using @extends@ and @block@ tags
 * include other templates with @include@
-* ignore template parsing with @raw@ ({% raw %}{{ literal stuff }}{% endraw %})
+* ignore template parsing with @raw@ {% raw %}{{ literal stuff }}{% endraw %}
 * very fast and active development!
 
 h2. Express
