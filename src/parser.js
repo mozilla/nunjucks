@@ -112,7 +112,7 @@ var Parser = Object.extend({
     parseFor: function() {
         var forTok = this.peekToken();
         if(!this.skipSymbol('for')) {
-            this.fail("parseFor: expected for");
+            this.fail("expected for");
         }
 
         var node = new nodes.For(forTok.lineno, forTok.colno);
@@ -139,7 +139,7 @@ var Parser = Object.extend({
     parseBlock: function() {
         var tag = this.peekToken();
         if(!this.skipSymbol('block')) {
-            throw new Error('parseBlock: expected block');
+            this.fail('expected block');
         }
 
         var node = new nodes.Block(tag.lineno, tag.colno);
@@ -162,13 +162,13 @@ var Parser = Object.extend({
         return node;
     },
 
-    parseExtends: function() {
+    parseTemplateRef: function(tagName, nodeType) {
         var tag = this.peekToken();
-        if(!this.skipSymbol('extends')) {
-            throw new Error('parseBlock: expected block');
+        if(!this.skipSymbol(tagName)) {
+            this.fail('expected '+ tagName);
         }
 
-        var node = new nodes.Extends(tag.lineno, tag.colno);
+        var node = new nodeType(tag.lineno, tag.colno);
 
         node.template = this.parseExpression();
         if(!(node.template instanceof nodes.Literal &&
@@ -180,10 +180,18 @@ var Parser = Object.extend({
         return node;
     },
 
+    parseExtends: function() {
+        return this.parseTemplateRef('extends', nodes.Extends);
+    },
+
+    parseInclude: function() {
+        return this.parseTemplateRef('include', nodes.Include);
+    },
+
     parseIf: function() {
         var tag = this.peekToken();
         if(!this.skipSymbol('if') && !this.skipSymbol('elif')) {
-            throw new Error("parseIf: expected if or elif");
+            this.fail("expected if or elif");
         }
 
         var node = new nodes.If(tag.lineno, tag.colno);
@@ -233,6 +241,7 @@ var Parser = Object.extend({
             case 'for': node = this.parseFor(); break;
             case 'block': node = this.parseBlock(); break;
             case 'extends': node = this.parseExtends(); break;
+            case 'include': node = this.parseInclude(); break;
             default: this.fail('unknown block tag: ' + tok.value);
         }
 

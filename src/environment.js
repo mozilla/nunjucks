@@ -79,9 +79,13 @@ var Context = Object.extend({
 
     lookup: function(name) {
         if(!(name in this.ctx)) {
-            throw new Error("'" + name + "' is undefined");
+            return '';
         }
         return this.ctx[name];
+    },
+
+    getVariables: function() {
+        return this.ctx;
     },
 
     addBlock: function(name, block) {

@@ -128,12 +128,15 @@ var Block = Node.extend("Block", {
     }
 });
 
-var Extends = Node.extend("Extends", {
+var TemplateRef = Node.extend("TemplateRef", {
     init: function(lineno, colno, template) {
         this.template = template;
         this.parent(lineno, colno);
     }
 });
+
+var Extends = TemplateRef.extend("Extends");
+var Include = TemplateRef.extend("Include");
 
 var Output = Node.extend("Output");
 var TemplateData = Literal.extend("TemplateData");
@@ -224,6 +227,7 @@ module.exports = {
     Filter: Filter,
     Block: Block,
     Extends: Extends,
+    Include: Include,
 
     printNodes: printNodes
 };

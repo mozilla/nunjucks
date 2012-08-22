@@ -366,6 +366,9 @@ describe('parser', function() {
 
         n = parser.parse('{% extends "test.html" %}stuff');
         n.children[0].typename.should.equal('Extends');
+
+        n = parser.parse('{% include "test.html" %}');
+        n.children[0].typename.should.equal('Include');
     });
 
     it('should throw errors', function() {
@@ -442,5 +445,14 @@ describe('compiler', function() {
         var s = render('{% extends "base.html" %}' +
                        '{% block block1 %}{{ super() }}BAR{% endblock %}');
         s.should.equal('FooBarBARBazFizzle');
+    });
+
+    it('should include templates', function() {
+        var s = render('hello world {% include "include.html" %}');
+        s.should.equal('hello world FooInclude ');
+
+        s = render('hello world {% include "include.html" %}',
+                  { name: 'james' });
+        s.should.equal('hello world FooInclude james');
     });
 });

@@ -9,6 +9,28 @@ h2. Installation
 
 bc. npm install nunjucks
 
+h2. Features
+
+* variables (@{{ username }}@)
+* jinja2-style parsing (@{{ foo('bar', 1) }}@)
+* conditionals (@{% if foo %}...{% elif bar %}...{% endif %}@)
+* iteration (@{% for i in [1,2,3] %}{{ i }}{% endfor %}@)
+* template inheritance using @extends@ and @block@ tags
+* include other templates with @include@
+* ignore template parsing with @raw@ ({% raw %}{{ literal stuff }}{% endraw %})
+* very fast and active development!
+
+h2. Express
+
+To integrate with express, do the following (this will change before the first release):
+
+bc.. var nunjucks = require('nunjucks');
+var loaders = nunjucks.loaders;
+var express = require('express');
+
+var env = new nunjucks.Environment(new loaders.FileSystemLoader('templates'));
+env.express(app);
+
 h2. Using
 
 Here is an example template that works with the current code:
@@ -71,22 +93,10 @@ var env = new nunjucks.Environment();
 var tmpl = env.getTemplate('test.html');
 console.log(tmpl.render({ username: "james" }));
 
-h2. Express
-
-To integrate with express, do the following (this will change before the first release):
-
-bc.. var nunjucks = require('nunjucks');
-var loaders = nunjucks.loaders;
-var express = require('express');
-
-var env = new nunjucks.Environment(new loaders.FileSystemLoader('templates'));
-env.express(app);
-
 h2. Status
 
 This is very close to a 0.1 beta release. It is mostly feature-complete with all the basic stuff ported from Jinja. There are a few things left:
 
-* Implement the "include" tag
 * Allow referencing: {{ foo.bar }} and {{ foo["bar"] }}
 * Better express integration
 * Make template loading asynchronous (requires different generated code too)

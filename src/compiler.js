@@ -238,6 +238,14 @@ var Compiler = Object.extend({
         this.isChild = true;
     },
 
+    compileInclude: function(node, frame) {
+        this.emit('var includeTemplate = env.getTemplate(');
+        this._compileExpression(node.template);
+        this.emitLine(')');
+        this.emitLine(this.buffer +
+                      ' += includeTemplate.render(context.getVariables());');
+    },
+
     compileTemplateData: function(node, frame) {
         this.compileLiteral(node, frame);
     },
