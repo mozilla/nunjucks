@@ -30,7 +30,16 @@ var FileSystemLoader = Object.extend({
             return null;
         }
 
-        return fs.readFileSync(fullpath, 'utf-8');
+        return { src: fs.readFileSync(fullpath, 'utf-8'),
+                 path: fullpath,
+                 upToDate: this.upToDateFunc(fullpath) };
+    },
+
+    upToDateFunc: function(file) {
+        var mtime = fs.statSync(file).mtime.toString();
+        return function() {
+            return fs.statSync(file).mtime.toString() == mtime;
+        };
     }
 });
 

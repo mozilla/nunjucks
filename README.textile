@@ -96,11 +96,17 @@ console.log(tmpl.render({ username: "james" }));
 
 h2. Status
 
-This is very close to a 0.1 beta release. It is mostly feature-complete with all the basic stuff ported from Jinja. There are a few things left:
+All of the features that will be in v0.1 have been ported over. I am currently testing the codebase and letting it solidify before I make the first release. The focus is now documentation, benchmarks, and tests.
 
-* Implement operators (+, -, *, /, etc)
+Features needed for v0.1:
+
 * Better express integration
-* Make template loading asynchronous (requires different generated code too)
-* Support precompiled templates
-* Implement caching
-* Write more tests, fix bugs
+* Builtin filters
+* Thorough-ish documentation, especially what features are missing
+* Benchmarks
+
+Features needed for v0.2:
+
+* Client-side js support (load precompiled templates, convert modules, etc)
+* Macros, a few other missing jinja2 constructs
+* Even more thorough documentation

@@ -16,6 +16,7 @@ var Environment = Object.extend({
         }
 
         this.filters = builtin_filters;
+        this.cache = {};
     },
 
     addFilter: function(name, func) {
@@ -27,19 +28,29 @@ var Environment = Object.extend({
     },
 
     getTemplate: function(name, eagerCompile) {
-        var src = null;
+        var info = null;
+        var tmpl = this.cache[name];
+        var upToDate;
 
-        for(var i=0; i<this.loaders.length; i++) {
-            if((src = this.loaders[i].getSource(name))) {
-                break;
+        if(!tmpl || !tmpl.isUpToDate()) {
+            for(var i=0; i<this.loaders.length; i++) {
+                if((info = this.loaders[i].getSource(name))) {
+                    break;
+                }
             }
+
+            if(!info) {
+                throw new Error('template not found: ' + name);
+            }
+
+            this.cache[name] = new Template(this,
+                                            info.src,
+                                            info.fullpath,
+                                            info.upToDate,
+                                            eagerCompile);
         }
 
-        if(!src) {
-            throw new Error('template not found: ' + name);
-        }
-
-        return new Template(src, this, eagerCompile);
+        return this.cache[name];
     },
 
     express: function(app) {
@@ -117,9 +128,11 @@ var Context = Object.extend({
 });
 
 var Template = Object.extend({
-    init: function (str, env, eagerCompile) {
+    init: function (env, src, path, upToDate, eagerCompile) {
         this.env = env || new Environment();
-        this.tmplSrc = str;
+        this.tmplSrc = src;
+        this.path = path;
+        this.upToDate = upToDate;
 
         if(eagerCompile) {
             this._compile();
@@ -136,6 +149,10 @@ var Template = Object.extend({
 
         var context = new Context(ctx, this.blocks);
         return this.rootRenderFunc(this.env, context);
+    },
+
+    isUpToDate: function() {
+        return this.upToDate();
     },
 
     _compile: function() {
