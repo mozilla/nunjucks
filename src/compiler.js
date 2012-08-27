@@ -4,6 +4,26 @@ var parser = require('./parser');
 var nodes = require('./nodes');
 var Object = require('./object');
 
+// These are all the same for now, but shouldn't be passed straight
+// through
+var compareOps = {
+    '==': '==',
+    '!=': '!=',
+    '<': '<',
+    '>': '>',
+    '<=': '<=',
+    '>=': '>='
+};
+
+// A common pattern is to emit binary operators 
+function binOpEmitter(str) {
+    return function(node, frame) {
+        this.compile(node.left, frame);
+        this.emit(str);
+        this.compile(node.right, frame);
+    };
+}
+
 // Frames keep track of scoping at compile-time so we know how to
 // access variables. Blocks can introduce special variables, for
 // example.
@@ -92,7 +112,8 @@ var Compiler = Object.extend({
                         nodes.Dict,
                         nodes.FunCall,
                         nodes.Filter,
-                        nodes.LookupVal);
+                        nodes.LookupVal,
+                        nodes.Compare);
         this.compile(node, frame);
     },
 
@@ -166,6 +187,54 @@ var Compiler = Object.extend({
         this.compile(key, frame);
         this.emit(': ');
         this._compileExpression(val, frame);
+    },
+
+    compileOr: binOpEmitter(' || '),
+    compileAnd: binOpEmitter(' && '),
+    compileAdd: binOpEmitter(' + '),
+    compileSub: binOpEmitter(' - '),
+    compileMul: binOpEmitter(' * '),
+    compileDiv: binOpEmitter(' / '),
+    compileMod: binOpEmitter(' % '),
+
+    compileNot: function(node, frame) {
+        this.emit('!');
+        this.compile(node.target, frame);
+    },
+
+    compileFloorDiv: function(node, frame) {
+        this.emit('Math.floor(');
+        this.compile(node.left, frame);
+        this.emit(' / ');
+        this.compile(node.right, frame);
+        this.emit(')');
+    },
+
+    compilePow: function(node, frame) {
+        this.emit('Math.pow(');
+        this.compile(node.left, frame);
+        this.emit(', ');
+        this.compile(node.right, frame);
+        this.emit(')');
+    },
+
+    compileNeg: function(node, frame) {
+        this.emit('-');
+        this.compile(node.target, frame);
+    },
+    
+    compilePos: function(node, frame) {
+        this.emit('+');
+        this.compile(node.target, frame);
+    },
+
+    compileCompare: function(node, frame) {
+        this.compile(node.expr, frame);
+        
+        _.each(node.ops, function(n) {
+            this.emit(' ' + compareOps[n.type] + ' ');
+            this.compile(n.expr, frame);
+        }, this);
     },
 
     compileLookupVal: function(node, frame) {
@@ -319,8 +388,11 @@ var Compiler = Object.extend({
 
 // var fs = require("fs");
 // var c = new Compiler();
-// var src = "{{ foo.bar[biz] }}";
-// c.compile(parser.parse(src));
+// var src = "{{ foo < bar != 3 }}";
+
+// var ns = parser.parse(src);
+// nodes.printNodes(ns);
+// c.compile(ns);
 
 // var tmpl = c.getCode();
 

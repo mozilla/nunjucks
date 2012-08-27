@@ -1,8 +1,9 @@
 
 var util = require('util');
+var _ = require('underscore');
 
 var whitespaceChars = " \n\t\r";
-var delimChars = "()[]{}%*-+/#,:|.";
+var delimChars = "()[]{}%*-+/#,:|.<>=!";
 var intChars = "0123456789";
 
 var BLOCK_START = "{%";
@@ -94,7 +95,14 @@ Tokenizer.prototype.nextToken = function() {
         else if(delimChars.indexOf(cur) != -1) {
             // We've hit a delimiter (a special char like a bracket)
             this.forward();
+            var complexOps = ['==', '!=', '<=', '>=', '//', '**'];
+            var curComplex = cur + this.current();
             var type;
+
+            if(_.indexOf(complexOps, curComplex) != -1) {
+                this.forward();
+                cur = curComplex;
+            }
 
             switch(cur) {
             case "(": type = TOKEN_LEFT_PAREN; break;

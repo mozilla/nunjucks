@@ -106,10 +106,11 @@ function toNodes(ast) {
                         toNodes(ast[3]));
     }
     else if(dummy instanceof nodes.FunCall) {
+        var args = ast.slice(2);
         return new type(0,
                         0,
-                        toNodes(ast[0]),
-                        _.map(ast.slice(1), toNodes));
+                        toNodes(ast[1]),
+                        _.map(args, toNodes));
     }
     else {
         return new type(0, 0, _.map(ast.slice(1), toNodes));
@@ -270,6 +271,32 @@ describe('lexer', function() {
                   lexer.TOKEN_OPERATOR,
                   lexer.TOKEN_INT,
                   lexer.TOKEN_VARIABLE_END);
+
+        hasTokens(lexer.lex('{{ 3**4//5 }}'),
+                  lexer.TOKEN_VARIABLE_START,
+                  lexer.TOKEN_INT,
+                  lexer.TOKEN_OPERATOR,
+                  lexer.TOKEN_INT,
+                  lexer.TOKEN_OPERATOR,
+                  lexer.TOKEN_INT,
+                  lexer.TOKEN_VARIABLE_END);
+
+        hasTokens(lexer.lex('{{ 3 != 4 == 5 <= 6 >= 7 < 8 > 9 }}'),
+                  lexer.TOKEN_VARIABLE_START,
+                  lexer.TOKEN_INT,
+                  lexer.TOKEN_OPERATOR,
+                  lexer.TOKEN_INT,
+                  lexer.TOKEN_OPERATOR,
+                  lexer.TOKEN_INT,
+                  lexer.TOKEN_OPERATOR,
+                  lexer.TOKEN_INT,
+                  lexer.TOKEN_OPERATOR,
+                  lexer.TOKEN_INT,
+                  lexer.TOKEN_OPERATOR,
+                  lexer.TOKEN_INT,
+                  lexer.TOKEN_OPERATOR,
+                  lexer.TOKEN_INT,
+                  lexer.TOKEN_VARIABLE_END);
     }),
 
     it('should parse comments', function() {
@@ -371,6 +398,32 @@ describe('parser', function() {
         n.children[0].typename.should.equal('Include');
     });
 
+    it('should parse filters', function() {
+        isAST(parser.parse('{{ foo | bar }}'),
+              [nodes.Root,
+               [nodes.Output, 
+                [nodes.Filter,
+                 [nodes.Symbol, 'bar'],
+                 [nodes.Symbol, 'foo']]]]);
+
+        isAST(parser.parse('{{ foo | bar | baz }}'),
+              [nodes.Root,
+               [nodes.Output,
+                [nodes.Filter,
+                 [nodes.Symbol, 'baz'],
+                 [nodes.Filter,
+                  [nodes.Symbol, 'bar'],
+                  [nodes.Symbol, 'foo']]]]]);
+
+        isAST(parser.parse('{{ foo | bar(3) }}'),
+              [nodes.Root,
+               [nodes.Output, 
+                [nodes.Filter,
+                 [nodes.Symbol, 'bar'],
+                 [nodes.Symbol, 'foo'],
+                 [nodes.Literal, 3]]]]);
+    });
+
     it('should throw errors', function() {
         (function() {
             parser.parse('hello {{ foo');
@@ -422,6 +475,30 @@ describe('compiler', function() {
 
         s = render(tmpl, { hungry: false });
         s.should.equal('Give me some water');
+    });
+
+    it('should compile operators', function() {
+        render('{{ 3 + 4 - 5 * 6 / 10 }}').should.equal('4');
+        render('{{ 4**5 }}').should.equal('1024');
+        render('{{ 9//5 }}').should.equal('1');
+        render('{{ 9%5 }}').should.equal('4');
+        render('{{ -5 }}').should.equal('-5');
+
+        render('{% if 3 < 4 %}yes{% endif %}').should.equal('yes');
+        render('{% if 3 > 4 %}yes{% endif %}').should.equal('');
+        render('{% if 9 >= 10 %}yes{% endif %}').should.equal('');
+        render('{% if 10 >= 10 %}yes{% endif %}').should.equal('yes');
+        render('{% if 9 <= 10 %}yes{% endif %}').should.equal('yes');
+        render('{% if 10 <= 10 %}yes{% endif %}').should.equal('yes');
+        render('{% if 11 <= 10 %}yes{% endif %}').should.equal('');
+
+        render('{% if 10 != 10 %}yes{% endif %}').should.equal('');
+        render('{% if 10 == 10 %}yes{% endif %}').should.equal('yes');
+
+        render('{% if foo(20) > bar %}yes{% endif %}',
+               { foo: function(n) { return n - 1; },
+                 bar: 15 })
+            .should.equal('yes');
     });
 
     it('should inherit templates', function() {

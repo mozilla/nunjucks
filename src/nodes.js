@@ -166,6 +166,30 @@ var BinOp = Expr.extend("BinOp", {
 var Or = BinOp.extend("Or");
 var And = BinOp.extend("And");
 var Not = UnaryOp.extend("Not");
+var Add = BinOp.extend("Add");
+var Sub = BinOp.extend("Sub");
+var Mul = BinOp.extend("Mul");
+var Div = BinOp.extend("Div");
+var FloorDiv = BinOp.extend("FloorDiv");
+var Mod = BinOp.extend("Mod");
+var Pow = BinOp.extend("Pow");
+var Neg = UnaryOp.extend("Neg");
+var Pos = UnaryOp.extend("Pos");
+
+var Compare = Expr.extend("Compare", {
+    init: function(lineno, colno, expr, ops) {
+        this.expr = expr;
+        this.ops = ops;
+        this.parent(lineno, colno);
+    }
+});
+var CompareOperand = Expr.extend("CompareOperand", {
+    init: function(lineno, colno, expr, type) {
+        this.expr = expr;
+        this.type = type;
+        this.parent(lineno, colno);
+    }
+});
 
 function printNodes(node, indent) {
     // TODO: spend more then 30 seconds and clean this up 
@@ -235,6 +259,20 @@ function printNodes(node, indent) {
         printNodes(node.left, indent+2);
         printNodes(node.right, indent+2);
     }
+    else if(node instanceof Compare) {
+        print("\n");
+        printNodes(node.expr, indent+2);
+
+        for(var i=0; i<node.ops.length; i++) {
+            printNodes(node.ops[i], indent+2);
+        }
+    }
+    else if(node instanceof CompareOperand) {
+        console.log("(" + node.type + ")");
+        
+        printNodes(node.expr, indent+2);
+        
+    }
     else {
         var children = node.children;
         delete node.children;
@@ -269,9 +307,21 @@ module.exports = {
     Extends: Extends,
     Include: Include,
     LookupVal: LookupVal,
+    BinOp: BinOp,
     Or: Or,
     And: And,
     Not: Not,
+    Add: Add,
+    Sub: Sub,
+    Mul: Mul,
+    Div: Div,
+    FloorDiv: FloorDiv,
+    Mod: Mod,
+    Pow: Pow,
+    Neg: Neg,
+    Pos: Pos,
+    Compare: Compare,
+    CompareOperand: CompareOperand,
 
     printNodes: printNodes
 };

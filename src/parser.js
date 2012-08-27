@@ -36,7 +36,7 @@ var Parser = Object.extend({
                 tok = this.tokens.nextToken();
             }
         }
-        
+
         return tok;
     },
 
@@ -75,18 +75,31 @@ var Parser = Object.extend({
         return true;
     },
 
-    skipWhitespace: function () {
-        return this.skip(lexer.TOKEN_WHITESPACE);
+    expect: function(type) {
+        var tok = this.nextToken();
+        if(!tok.type == type) {
+            this.fail('expected ' + type + ', got ' + tok.type,
+                      tok.lineno,
+                      tok.colno);
+        }
+        return tok;
     },
 
-    skipSymbol: function(name) {
+    skipValue: function(type, val) {
         var tok = this.nextToken();
-        if(tok.type != lexer.TOKEN_SYMBOL ||
-           tok.value != name) {
+        if(!tok || tok.type != type || tok.value != val) {
             this.pushToken(tok);
             return false;
         }
         return true;
+    },
+
+    skipWhitespace: function () {
+        return this.skip(lexer.TOKEN_WHITESPACE);
+    },
+
+    skipSymbol: function(val) {
+        return this.skipValue(lexer.TOKEN_SYMBOL, val);
     },
 
     advanceAfterBlockEnd: function(name) {
@@ -116,8 +129,8 @@ var Parser = Object.extend({
         }
 
         var node = new nodes.For(forTok.lineno, forTok.colno);
-        
-        node.name = this.parseExpression();
+
+        node.name = this.parsePrimary();
 
         if(!node.name instanceof nodes.Symbol) {
             this.fail('variable name expected');
@@ -144,7 +157,7 @@ var Parser = Object.extend({
 
         var node = new nodes.Block(tag.lineno, tag.colno);
 
-        node.name = this.parseExpression();
+        node.name = this.parsePrimary();
         if(!node.name instanceof nodes.Symbol) {
             this.fail('variable name expected');
         }
@@ -170,7 +183,7 @@ var Parser = Object.extend({
 
         var node = new nodeType(tag.lineno, tag.colno);
 
-        node.template = this.parseExpression();
+        node.template = this.parsePrimary();
         if(!(node.template instanceof nodes.Literal &&
              _.isString(node.template.value))) {
             this.fail('parseExtends: string expected');
@@ -342,30 +355,15 @@ var Parser = Object.extend({
             else {
                 break;
             }
-        
+
             tok = this.peekToken();
         }
 
         return node;
     },
 
-    parseExpression: function(no_filters) {
+    parseExpression: function() {
         var node = this.parseOr();
-        var tok;
-
-        if(!no_filters) {
-            while(1) {
-                // Check for filters
-                tok = this.peekToken();
-
-                if(!tok || tok.type != lexer.TOKEN_PIPE) {
-                    break;
-                }
-
-                node = this.parseFilter(node);
-            }
-        }
-
         return node;
     },
 
@@ -400,33 +398,171 @@ var Parser = Object.extend({
                                  tok.colno,
                                  this.parseNot());
         }
-        return this.parsePrimary();
+        return this.parseCompare();
     },
 
-    // parseCompare: function() {
-    //     var expr = this.parsePrimary();
-    //     var ops = [];
+    parseCompare: function() {
+        var compareOps = ['==', '!=', '<', '>', '<=', '>='];
+        var expr = this.parseAdd();
+        var ops = [];
 
-    //     while(1) {
-            
-    //     }
-    // },
+        while(1) {
+            var tok = this.nextToken();
+
+            if(!tok) {
+                break;
+            }
+            else if(_.indexOf(compareOps, tok.value) != -1) {
+                ops.push(new nodes.CompareOperand(tok.lineno,
+                                                  tok.colno,
+                                                  this.parseAdd(),
+                                                  tok.value));
+            }
+            else if(tok.type == lexer.TOKEN_SYMBOL &&
+                    tok.value == 'in') {
+                ops.push(new nodes.CompareOperand(tok.lineno,
+                                                  tok.colno,
+                                                  this.parseAdd(),
+                                                  'in'));
+            }
+            else if(tok.type == lexer.TOKEN_SYMBOL &&
+                    tok.value == 'not' &&
+                    this.skipSymbol('in')) {
+                ops.push(new nodes.CompareOperand(tok.lineno,
+                                                  tok.colno,
+                                                  this.parseAdd(),
+                                                  'notin'));
+            }
+            else {
+                this.pushToken(tok);
+                break;
+            }
+        }
+
+        if(ops.length) {
+            return new nodes.Compare(ops[0].lineno,
+                                     ops[0].colno,
+                                     expr,
+                                     ops);
+        }
+        else {
+            return expr;
+        }
+    },
+
+    parseAdd: function() {
+        var node = this.parseSub();
+        while(this.skipValue(lexer.TOKEN_OPERATOR, '+')) {
+            var node2 = this.parseSub();
+            node = new nodes.Add(node.lineno,
+                                 node.colno,
+                                 node,
+                                 node2);
+        }
+        return node;
+    },
+
+    parseSub: function() {
+        var node = this.parseMul();
+        while(this.skipValue(lexer.TOKEN_OPERATOR, '-')) {
+            var node2 = this.parseMul();
+            node = new nodes.Sub(node.lineno,
+                                 node.colno,
+                                 node,
+                                 node2);
+        }
+        return node;
+    },
+
+    parseMul: function() {
+        var node = this.parseDiv();
+        while(this.skipValue(lexer.TOKEN_OPERATOR, '*')) {
+            var node2 = this.parseDiv();
+            node = new nodes.Mul(node.lineno,
+                                 node.colno,
+                                 node,
+                                 node2);
+        }
+        return node;
+    },
+
+    parseDiv: function() {
+        var node = this.parseFloorDiv();
+        while(this.skipValue(lexer.TOKEN_OPERATOR, '/')) {
+            var node2 = this.parseFloorDiv();
+            node = new nodes.Div(node.lineno,
+                                 node.colno,
+                                 node,
+                                 node2);
+        }
+        return node;
+    },
+
+    parseFloorDiv: function() {
+        var node = this.parseMod();
+        while(this.skipValue(lexer.TOKEN_OPERATOR, '//')) {
+            var node2 = this.parseMod();
+            node = new nodes.FloorDiv(node.lineno,
+                                      node.colno,
+                                      node,
+                                      node2);
+        }
+        return node;
+    },
+
+    parseMod: function() {
+        var node = this.parsePow();
+        while(this.skipValue(lexer.TOKEN_OPERATOR, '%')) {
+            var node2 = this.parsePow();
+            node = new nodes.Mod(node.lineno,
+                                 node.colno,
+                                 node,
+                                 node2);
+        }
+        return node;
+    },
+
+    parsePow: function() {
+        var node = this.parseUnary();
+        while(this.skipValue(lexer.TOKEN_OPERATOR, '**')) {
+            var node2 = this.parseUnary();
+            node = new nodes.Pow(node.lineno,
+                                 node.colno,
+                                 node,
+                                 node2);
+        }
+        return node;
+    },
+
+    parseUnary: function(noFilters) {
+        var tok = this.peekToken();
+        var node;
+
+        if(this.skipValue(lexer.TOKEN_OPERATOR, '-')) {
+            node = new nodes.Neg(tok.lineno,
+                                 tok.colno,
+                                 this.parseUnary(true));
+        }
+        else if(this.skipValue(lexer.TOKEN_OPERATOR, '+')) {
+            node = new nodes.Pos(tok.lineno,
+                                 tok.colno,
+                                 this.parseUnary(true));
+        }
+        else {
+            node = this.parsePrimary();
+        }
+
+        if(!noFilters) {
+            node = this.parseFilter(node);
+        }
+
+        return node;
+    },
 
     parsePrimary: function () {
         var tok = this.nextToken();
         var val = null;
         var node = null;
-        
-        // HACK: until we get operators working, allow negatives
-        var negate = false;
-        if(tok && 
-           tok.type == lexer.TOKEN_OPERATOR &&
-           tok.value == '-' &&
-           (this.peekToken().type == lexer.TOKEN_INT ||
-            this.peekToken().type == lexer.TOKEN_FLOAT)) {
-            negate = true;
-            tok = this.nextToken();
-        }
 
         if(!tok) {
             this.fail('expected expression, got end of file');
@@ -436,15 +572,9 @@ var Parser = Object.extend({
         }
         else if(tok.type == lexer.TOKEN_INT) {
             val = parseInt(tok.value, 10);
-            if(negate) {
-                val = -val;
-            }
         }
         else if(tok.type == lexer.TOKEN_FLOAT) {
             val = parseFloat(tok.value);
-            if(negate) {
-                val = -val;
-            }
         }
         else if(tok.type == lexer.TOKEN_BOOLEAN) {
             if(tok.value == "true") {
@@ -483,31 +613,30 @@ var Parser = Object.extend({
     },
 
     parseFilter: function(node) {
-        if(this.nextToken().type != lexer.TOKEN_PIPE) {
-            this.fail("parseFilter: expected pipe");
+        while(this.skip(lexer.TOKEN_PIPE)) {
+            var tok = this.expect(lexer.TOKEN_SYMBOL);
+            var name = tok.value;
+
+            while(this.skipValue(lexer.TOKEN_OPERATOR, '.')) {
+                name += '.' + this.expect(lexer.TOKEN_SYMBOL).value;
+            }
+
+            node = new nodes.Filter(tok.lineno,
+                                    tok.colno,
+                                    new nodes.Symbol(tok.lineno,
+                                                     tok.colno,
+                                                     name),
+                                    [node]);
+
+            if(this.peekToken().type == lexer.TOKEN_LEFT_PAREN) {
+                // Get a FunCall node and add the parameters to the
+                // filter
+                var call = this.parsePostfix(node);
+                node.children = node.children.concat(call.children);
+            }
         }
 
-        var filter = this.parseExpression(true);
-
-        if(filter instanceof nodes.Symbol) {
-            filter = new nodes.Filter(filter.lineno,
-                                      filter.colno,
-                                      filter,
-                                      [node]);
-        }
-        else if(filter instanceof nodes.FunCall) {
-            filter = new nodes.Filter(filter.lineno,
-                                      filter.colno,
-                                      filter.name,
-                                      [node].concat(filter.children));
-        }
-        else {
-            this.fail("a filter must be a name or a function call",
-                      filter.lineno,
-                      filter.colno);
-        }
-
-        return filter;
+        return node;
     },
 
     parseAggregate: function() {
@@ -542,7 +671,7 @@ var Parser = Object.extend({
 
             if(node instanceof nodes.Dict) {
                 // TODO: check for errors
-                var key = this.parseExpression();
+                var key = this.parsePrimary();
 
                 // We expect a key/value pair for dicts, separated by a
                 // colon
@@ -629,7 +758,7 @@ var Parser = Object.extend({
 //     console.log(util.inspect(t));
 // }
 
-// var p = new Parser(lexer.lex('foo {{ foo and biz or bar }} sdfdf'));
+// var p = new Parser(lexer.lex('{{ foo | bar | baz }}'));
 // var n = p.parse();
 // nodes.printNodes(n);
 
