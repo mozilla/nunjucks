@@ -1,10 +1,11 @@
 {% extends "base.html" %}
 
+{% block content %}
+{{ super() }}
 Hello {{ username }}
 
+{% for i in arr %}
+{{ i }}
+{% endfor %}
 
-What are you doing
-
-{% block content %}
-hey, don't I know you?
 {% endblock %}

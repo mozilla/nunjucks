@@ -100,13 +100,15 @@ All of the features that will be in v0.1 have been ported over. I am currently t
 
 Features needed for v0.1:
 
-* Better express integration
-* Builtin filters
 * Thorough-ish documentation, especially what features are missing
-* Benchmarks
+* Builtin filters
+* Display pretty errors
+* Better express integration
+* Benchmarks (it's fast, how to prove it?)
 
 Features needed for v0.2:
 
 * Client-side js support (load precompiled templates, convert modules, etc)
 * Macros, a few other missing jinja2 constructs
 * Even more thorough documentation
+* Autoescaping
