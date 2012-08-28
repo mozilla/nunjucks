@@ -210,7 +210,7 @@ about the `Environment` in
 [jinja2](http://jinja.pocoo.org/docs/api/#basics)).
 
 The `Environment` constructor takes an optional list of
-[loaders](#loaders). You can pass a single loader or a an array of
+[loaders](#loaders). You can pass a single loader or an array of
 loaders. Loaders specify how to load templates, whether its from the
 file system, a database, or a different source.
 
@@ -232,7 +232,7 @@ var env = new nunjucks.Environment([new nunjucks.FileSystemLoader('templates'),
 
 #### Methods:
 
-*init(loaders)* - Create a `Template` object with the template
+*init(loaders)* - Create an `Environment` object with the template
  loaders. `loaders` can be an array or a single loader. If none is
  specified, it defaults to a FileSystemLoader with the current working
  directory.
