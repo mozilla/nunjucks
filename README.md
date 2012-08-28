@@ -156,7 +156,7 @@ tweaks. The biggest hurdle will be porting any custom filters or tags
 to javascript.
 
 Read the ["How is nunjucks different from
-jinja2"](how-nunjucks-is-different-from-jinja2) section for more
+jinja2"](#how-nunjucks-is-different-from-jinja2) section for more
 information on how nunjucks differs from jinja2.
 
 ## Status
