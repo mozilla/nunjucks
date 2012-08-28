@@ -26,16 +26,16 @@ jinja2.
 * it's very fast, as fast or faster than jinja2
 * template inheritance allows you to easily share templates across
   your site, without having to touch code
-* jinja2-style parsing of code @{{ foo('bar', 1) }}@
-* operators: @+ - * / < > ==@ and more
-* include other templates with @include@
-* ignore template parsing with @raw@ tag
+* jinja2-style parsing of code `{{ foo('bar', 1) }}`
+* operators: `+ - * / < > ==` and more
+* include other templates with `include`
+* ignore template parsing with `raw` tag
 * and more
 
 View [jinja2's homepage](http://jinja.pocoo.org/) for a full list of
 features. Like that page says, "Jinja is beautiful":
 
-```js
+```
 {% extends "layout.html" %}
 {% block body %}
   <ul>
@@ -48,16 +48,21 @@ features. Like that page says, "Jinja is beautiful":
 
 ## Usage
 
-You can create a template from a string and render it:
+First, require nunjucks:
 
 ```js
 var nunjucks = require('nunjucks');
+```
+
+You can create a template from a string and render it:
+
+```js
 var tmpl = new nunjucks.Template('Hello {{ username }}');
 console.log(tmpl.render({ username: "james" }));
 ```
 
 You can use an environment which allows you to fetch files from the
-file system. See the `Environment` class for more details.
+file system. See the [`Environment`](#environment) class for more details.
 
 ```js
 var env = new nunjucks.Environment();
@@ -150,8 +155,9 @@ there. Depending on what features you use, you may need to make small
 tweaks. The biggest hurdle will be porting any custom filters or tags
 to javascript.
 
-Read the "How is nunjucks different from jinja2" section below for
-more information on how nunjucks differs from jinja2.
+Read the ["How is nunjucks different from
+jinja2"](#how-nunjucks-is-different-from-jinja2) section for more
+information on how nunjucks differs from jinja2.
 
 ## Status
 
@@ -182,11 +188,14 @@ documentation](http://jinja.pocoo.org/docs/templates/) for templates.
 Nunjucks supports most of jinja's features, and those docs are
 very good. Nunjucks will get better docs over time.
 
-Please read "How Nunjucks is Different from Jinja2" to see what
-features are missing. Nunjucks is being quickly developed and will
-implement missing features over time.
+Please read ["How Nunjucks is Different from
+Jinja2"](#how-nunjucks-is-different-from-jinja2) to see what features
+are missing. Nunjucks is being quickly developed and will implement
+missing features over time.
 
 ## API Documentation
+
+*This documentation will be improved soon using a documentation generator*
 
 Nunjucks borrows a lot of the same concepts from [jinja2's
 API](http://jinja.pocoo.org/docs/api/).
@@ -204,11 +213,6 @@ The `Environment` constructor takes an optional list of
 [loaders](#loaders). You can pass a single loader or a an array of
 loaders. Loaders specify how to load templates, whether its from the
 file system, a database, or a different source.
-
-*init(loaders)* - Create a `Template` object with the template
- loaders. `loaders` can be an array or a single loader. If none is
- specified, it defaults to a FileSystemLoader with the current working
- directory.
 
 ```js
 var nunjucks = require('nunjucks');
@@ -228,6 +232,11 @@ var env = new nunjucks.Environment([new nunjucks.FileSystemLoader('templates'),
 
 #### Methods:
 
+*init(loaders)* - Create a `Template` object with the template
+ loaders. `loaders` can be an array or a single loader. If none is
+ specified, it defaults to a FileSystemLoader with the current working
+ directory.
+
 *addFilter(name, func)* - Register a custom filter
 
 *getTemplate(name, eagerCompile)* - Get a template. `eagerCompile`
@@ -241,17 +250,17 @@ A `Template` is an object that handles the compiling of template
 strings and rendering them. The `Environment` method `getTemplate`
 returns a `Template` object. You can also create one yourself.
 
-*init(src, env, path, upToDate, eagerCompile)* - Create a `Template`
- object. `path` is a string, `upToDate` is a function that returns if
- the template is up to date or not. `eagerCompile` tells the template
- to compile itself immediately.
-
-```
+```js
 var nunjucks = require('nunjucks');
 var tmpl = new nunjucks.Template('Hello {{ username }}');
 ```
 
 #### Methods
+
+*init(src, env, path, upToDate, eagerCompile)* - Create a `Template`
+ object. `path` is a string, `upToDate` is a function that returns if
+ the template is up to date or not. `eagerCompile` tells the template
+ to compile itself immediately.
 
 *render(ctx)* - Render a template with the context. `ctx` is a dict.
 
