@@ -12,7 +12,7 @@ enough (EJS) or have too different of a syntax (Jade).
 The only other project like this is
 [jinjs](https://github.com/ravelsoft/node-jinjs), which seems to have
 been abandoned. The code is also not Javascript, but Coco, is
-difficult to work on, has bugs, and is missing features.. Nunjucks
+difficult to work on, has bugs, and is missing features. Nunjucks
 hopes to be a robust, pure javascript, and easily extended port of
 jinja2.
 
