@@ -43,8 +43,8 @@ var Environment = Object.extend({
                 throw new Error('template not found: ' + name);
             }
 
-            this.cache[name] = new Template(this,
-                                            info.src,
+            this.cache[name] = new Template(info.src,
+                                            this,
                                             info.fullpath,
                                             info.upToDate,
                                             eagerCompile);
@@ -128,11 +128,11 @@ var Context = Object.extend({
 });
 
 var Template = Object.extend({
-    init: function (env, src, path, upToDate, eagerCompile) {
+    init: function (src, env, path, upToDate, eagerCompile) {
         this.env = env || new Environment();
         this.tmplSrc = src;
         this.path = path;
-        this.upToDate = upToDate;
+        this.upToDate = upToDate || function() { return false; };
 
         if(eagerCompile) {
             this._compile();
