@@ -46,6 +46,23 @@ features. Like that page says, "Jinja is beautiful":
 {% endblock %}
 ```
 
+You can use filters to add a little bit of logic to your templates:
+
+```
+{% for category, members in items | groupby('category') %}
+  <h1>{{ name }}</h1>
+  <ul>
+  {% for item in members %}
+    <li>{{ item.description }}</li>
+  {% endfor %}
+  </ul>
+{% endfor %}
+```
+
+This groups a list of objects by the "category" attribute so that you
+can list them by category. Nunjucks comes with several [builtin
+filters](#) and the ability to add your own.
+
 ## Usage
 
 First, require nunjucks:
@@ -96,8 +113,6 @@ point but are more obscure and not as important.
 
 Missing features and differences:
 
-* Object iteration: `{% for k, v in obj %}`. Only array
-  iteration is supported right now. (todo)
 * Macros (todo)
 * Whitespace control: `{%-` and `-%}` (todo)
 * The special `self` variable (todo)
@@ -171,6 +186,7 @@ Features needed for v0.1:
 * Thorough-ish documentation, especially what features are missing
 * Builtin filters
 * Display pretty errors
+** Add a global error handler and attempt to inject nice errors
 * Better express integration
 * Benchmarks (it's fast, how to prove it?)
 

@@ -272,7 +272,6 @@ var Compiler = Object.extend({
     },
 
     compileFor: function(node, frame) {
-        var v = 'l_' + node.name.value;
         var i = this.tmpid();
         var arr = this.tmpid();
 
@@ -280,11 +279,31 @@ var Compiler = Object.extend({
         this._compileExpression(node.arr, frame);
         this.emitLine(';');
 
-        frame.addVariable(node.name.value);
+        if(node.name instanceof nodes.Array) {
+            // key/value iteration
+            var key = node.name.children[0];
+            var val = node.name.children[1];
+            var k = 'l_' + key.value;
+            var v = 'l_' + val.value;
 
-        this.emitLine('for(var ' + i + '=0; ' + i + ' < ' + arr + '.length; ' +
-                      i + '++) {');
-        this.emitLine('var ' + v + ' = ' + arr + '[' + i + '];');
+            frame.addVariable(key.value);
+            frame.addVariable(val.value);
+
+
+            this.emitLine('for(var ' + k + ' in ' + arr + ') {');
+            this.emitLine('var ' + v + ' = ' + arr + '[' + k + '];');
+        }
+        else {
+            var v = 'l_' + node.name.value;
+
+            frame.addVariable(node.name.value);
+
+            this.emitLine('for(var ' + i + '=0; ' + i + ' < ' + arr + '.length; ' +
+                          i + '++) {');
+            this.emitLine('var ' + v + ' = ' + arr + '[' + i + '];');
+
+        }
+
         this.compile(node.body, frame);
         this.emitLine('}');
 
@@ -388,7 +407,7 @@ var Compiler = Object.extend({
 
 // var fs = require("fs");
 // var c = new Compiler();
-// var src = "{{ foo < bar != 3 }}";
+// var src = "{% for k, v in tmpl %}{{ k }} ===> {{ v }}{% endfor %}";
 
 // var ns = parser.parse(src);
 // nodes.printNodes(ns);

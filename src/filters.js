@@ -1,4 +1,6 @@
 
+var _ = require('underscore');
+
 function repeat(char_, n) {
     var str = '';
     for(var i=0; i<n; i++) {
@@ -88,7 +90,7 @@ var filters = {
     },
 
     groupby: function(arr, attr) {
-
+        return _.groupBy(arr, attr);
     },
 
     indent: function(str, width, indentfirst) {

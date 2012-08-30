@@ -477,6 +477,20 @@ describe('compiler', function() {
         s.should.equal('Give me some water');
     });
 
+    it('should compile for blocks', function() {
+        var s = render('{% for i in arr %}{{ i }}{% endfor %}',
+                       { arr: [1, 2, 3, 4, 5] });
+        s.should.equal('12345');
+
+        s = render('{% for item in arr | batch(2) %}{{ item[0] }}{% endfor %}',
+                   { arr: ['a', 'b', 'c', 'd'] });
+        s.should.equal('ac');
+
+        s = render('{% for k, v in { one: 1, two: 2 } %}' +
+                   '-{{ k }}:{{ v }}-{% endfor %}');
+        s.should.equal('-one:1--two:2-');
+    });
+
     it('should compile operators', function() {
         render('{{ 3 + 4 - 5 * 6 / 10 }}').should.equal('4');
         render('{{ 4**5 }}').should.equal('1024');

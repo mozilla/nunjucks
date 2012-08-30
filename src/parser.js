@@ -136,6 +136,14 @@ var Parser = Object.extend({
             this.fail('variable name expected');
         }
 
+        if(this.skip(lexer.TOKEN_COMMA)) {
+            // key/value iteration
+            var key = node.name;
+            node.name = new nodes.Array(key.lineno, key.colno);
+            node.name.addChild(key);
+            node.name.addChild(this.parsePrimary());
+        }
+
         if(!this.skipSymbol('in')) {
             this.fail('expected "in" keyword');
         }
@@ -758,7 +766,7 @@ var Parser = Object.extend({
 //     console.log(util.inspect(t));
 // }
 
-// var p = new Parser(lexer.lex('{{ foo | bar | baz }}'));
+// var p = new Parser(lexer.lex('{% for i, k in items %}{% endfor %}'));
 // var n = p.parse();
 // nodes.printNodes(n);
 
