@@ -60,8 +60,8 @@ You can use filters to add a little bit of logic to your templates:
 ```
 
 This groups a list of objects by the "category" attribute so that you
-can list them by category. Nunjucks comes with several [builtin
-filters](#) and the ability to add your own.
+can list them by category. Nunjucks comes with several builtin
+filters (needs documentation) and the ability to add your own.
 
 ## Usage
 
