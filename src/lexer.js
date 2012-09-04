@@ -1,7 +1,4 @@
 
-var util = require('util');
-var _ = require('underscore');
-
 var whitespaceChars = " \n\t\r";
 var delimChars = "()[]{}%*-+/#,:|.<>=!";
 var intChars = "0123456789";
@@ -99,7 +96,7 @@ Tokenizer.prototype.nextToken = function() {
             var curComplex = cur + this.current();
             var type;
 
-            if(_.indexOf(complexOps, curComplex) != -1) {
+            if(complexOps.indexOf(curComplex) != -1) {
                 this.forward();
                 cur = curComplex;
             }

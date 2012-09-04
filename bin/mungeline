@@ -1,0 +1,19 @@
+#!/usr/bin/perl
+
+$modulename = <STDIN>;
+
+while(<>) {
+    if(/^\w*var (\w*) = require\(\W*([\w-]*)\W*\);\w*$/) {
+        my ($obj, $name) = ($1, $2);
+        $name =~ s/-//;
+        print "var $obj = nunjucks.$name;\n";
+    }
+    elsif(/^(.*)require\(\W*([\w-]*)\W*\)(.*)$/) {
+        my ($prefix, $name, $postfix) = ($1, $2, $3);
+        $name =~ s/-//;
+        print "${prefix}nunjucks.${name}${postfix}\n";
+    }
+    else {
+        print
+    }
+}

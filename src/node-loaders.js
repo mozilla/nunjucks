@@ -1,13 +1,13 @@
 
 var fs = require('fs');
 var path = require('path');
-var _ = require('underscore');
+var lib = require('./lib');
 var Object = require('./object');
 
 var FileSystemLoader = Object.extend({
     init: function(searchPaths) {
         if(searchPaths) {
-            this.searchPaths = _.isArray(searchPaths) ? searchPaths : [searchPaths];
+            this.searchPaths = lib.isArray(searchPaths) ? searchPaths : [searchPaths];
         }
         else {
             this.searchPaths = [];
@@ -20,7 +20,7 @@ var FileSystemLoader = Object.extend({
 
         for(var i=0; i<paths.length; i++) {
             var p = path.join(paths[i], name);
-            if(path.existsSync(p)) {
+            if(fs.existsSync(p)) {
                 fullpath = p;
                 break;
             }
@@ -43,6 +43,7 @@ var FileSystemLoader = Object.extend({
     }
 });
 
+
 module.exports = {
-    FileSystemLoader: FileSystemLoader
+    FileSystemLoader: FileSystemLoader,
 };

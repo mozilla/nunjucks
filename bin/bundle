@@ -1,0 +1,22 @@
+#!/bin/sh
+
+ROOT=`dirname "$0"`
+output="index-browser.js"
+
+# Listed in order of dependency
+files="object.js lib.js nodes.js lexer.js parser.js compiler.js 
+       filters.js web-loaders.js environment.js"
+
+echo "var nunjucks = {};" > "$output";
+
+for file in $files; do
+    name=${file%%.*}
+    name=${name//-}
+    echo "(function(nunjucks) {" >> "$output"
+    cat "src/$file" | \
+        "$ROOT"/mungeline | \
+        sed -e "s/module.exports/nunjucks.$name/" \
+        >> "$output"
+    echo "})(nunjucks);" >> "$output"
+done
+

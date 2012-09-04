@@ -1,6 +1,6 @@
 
 var env = require('../src/environment');
-var loaders = require('../src/loaders');
+var loaders = require('../src/node-loaders');
 
 function render(str, ctx) {
     var e = new env.Environment(new loaders.FileSystemLoader('tests'));

@@ -1,19 +1,25 @@
 
-var fs = require('fs');
-var _ = require('underscore');
+var lib = require('./lib');
 var Object = require('./object');
 var compiler = require('./compiler');
 var builtin_filters = require('./filters');
-var builtin_loaders = require('./loaders');
+var builtin_loaders;
+
+if(typeof window === 'undefined') {
+    builtin_loaders = require('./node-loaders');
+}
+else {
+    builtin_loaders = require('./web-loaders');
+}
 
 var Environment = Object.extend({
     init: function(loaders) {
-        if(!loaders) {
-            this.loaders = [new builtin_loaders.FileSystemLoader()];
-        }
-        else {
-            this.loaders = _.isArray(loaders) ? loaders : [loaders];
-        }
+        // if(!loaders) {
+        //     this.loaders = [new builtin_loaders.FileSystemLoader()];
+        // }
+        // else {
+            this.loaders = lib.isArray(loaders) ? loaders : [loaders];
+        //}
 
         this.filters = builtin_filters;
         this.cache = {};
@@ -45,7 +51,7 @@ var Environment = Object.extend({
 
             this.cache[name] = new Template(info.src,
                                             this,
-                                            info.fullpath,
+                                            info.path,
                                             info.upToDate,
                                             eagerCompile);
         }
@@ -59,18 +65,18 @@ var Environment = Object.extend({
         app.render = function(name, ctx, k) {
             var context = {};
 
-            if(_.isFunction(ctx)) {
+            if(lib.isFunction(ctx)) {
                 k = ctx;
                 ctx = {};
             }
 
-            context = _.extend(context, app.locals);
+            context = lib.extend(context, app.locals);
 
             if(ctx._locals) {
-                context = _.extend(context, ctx._locals);
+                context = lib.extend(context, ctx._locals);
             }
 
-            context = _.extend(context, ctx);
+            context = lib.extend(context, ctx);
 
             var res = env.getTemplate(name).render(ctx);
             k(null, res);            
@@ -83,9 +89,9 @@ var Context = Object.extend({
         this.ctx = ctx;
         this.blocks = {};
 
-        _.each(blocks, function(block, name) {
-            this.addBlock(name, block);
-        }, this);
+        for(var name in blocks) {
+            this.addBlock(name, blocks[name]);
+        }
     },
 
     lookup: function(name) {
@@ -113,7 +119,7 @@ var Context = Object.extend({
     },
 
     getSuper: function(env, name, block) {
-        var idx = _.indexOf(this.blocks[name] || [], block);
+        var idx = (this.blocks[name] || []).indexOf(block);
         var blk = this.blocks[name][idx + 1];
         var context = this;
 
@@ -177,6 +183,7 @@ var Template = Object.extend({
     }
 });
 
+// var fs = require('fs');
 // var env = new Environment();
 // console.log(compiler.compile(fs.readFileSync('test.html', 'utf-8')));
 

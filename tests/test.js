@@ -1,7 +1,7 @@
 
 var should = require('should');
-var _ = require('underscore');
 var util = require('util');
+var lib = require('../src/lib');
 var lexer = require('../src/lexer');
 var parser = require('../src/parser');
 var compiler = require('../src/compiler');
@@ -9,7 +9,8 @@ var nodes = require('../src/nodes');
 var render = require('./util').render;
 
 function _hasTokens(ws, tokens, types) {
-    _.each(types, function(type) {
+    for(var i=0; i<types.length; i++) {
+        var type = types[i];
         var tok = tokens.nextToken();
 
         if(!ws) {
@@ -18,22 +19,22 @@ function _hasTokens(ws, tokens, types) {
             }
         }
 
-        if(_.isArray(type)) {
+        if(lib.isArray(type)) {
             tok.type.should.equal(type[0]);
             tok.value.should.equal(type[1]);
         }
         else {
             tok.type.should.equal(type);
         }
-    });
+    }
 }
 
 function hasTokens(tokens /*, types */) {
-    return _hasTokens(false, tokens, _.toArray(arguments).slice(1));
+    return _hasTokens(false, tokens, lib.toArray(arguments).slice(1));
 }
 
 function hasTokensWithWS(tokens /*, types */) {
-    return _hasTokens(true, tokens, _.toArray(arguments).slice(1));
+    return _hasTokens(true, tokens, lib.toArray(arguments).slice(1));
 }
 
 function _isAST(node1, node2) {
@@ -81,7 +82,7 @@ function isAST(node1, ast) {
 }
 
 function toNodes(ast) {
-    if(!(ast && _.isArray(ast))) {
+    if(!(ast && lib.isArray(ast))) {
         return ast;
     }
 
@@ -110,10 +111,10 @@ function toNodes(ast) {
         return new type(0,
                         0,
                         toNodes(ast[1]),
-                        _.map(args, toNodes));
+                        lib.map(args, toNodes));
     }
     else {
-        return new type(0, 0, _.map(ast.slice(1), toNodes));
+        return new type(0, 0, lib.map(ast.slice(1), toNodes));
     }
 }
 

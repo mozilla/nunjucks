@@ -6,7 +6,7 @@
 var lexer = require('./lexer');
 var nodes = require('./nodes');
 var Object = require('./object');
-var _ = require('underscore');
+var lib = require('./lib');
 
 var Parser = Object.extend({
     init: function (tokens) {
@@ -193,7 +193,7 @@ var Parser = Object.extend({
 
         node.template = this.parsePrimary();
         if(!(node.template instanceof nodes.Literal &&
-             _.isString(node.template.value))) {
+             lib.isString(node.template.value))) {
             this.fail('parseExtends: string expected');
         }
 
@@ -252,7 +252,7 @@ var Parser = Object.extend({
         }
 
         if(this.breakOnBlocks &&
-           _.indexOf(this.breakOnBlocks, tok.value) != -1) {
+           this.breakOnBlocks.indexOf(tok.value) != -1) {
             return null;
         }
 
@@ -420,7 +420,7 @@ var Parser = Object.extend({
             if(!tok) {
                 break;
             }
-            else if(_.indexOf(compareOps, tok.value) != -1) {
+            else if(compareOps.indexOf(tok.value) != -1) {
                 ops.push(new nodes.CompareOperand(tok.lineno,
                                                   tok.colno,
                                                   this.parseAdd(),
@@ -706,7 +706,7 @@ var Parser = Object.extend({
 
     parseUntilBlocks: function(/* blockNames */) {
         var prev = this.breakOnBlocks;
-        this.breakOnBlocks = _.toArray(arguments);
+        this.breakOnBlocks = lib.toArray(arguments);
 
         var ret = this.parse();
 

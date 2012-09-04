@@ -1,12 +1,12 @@
 
 var util = require('util');
-var _ = require('underscore');
+var lib = require('./lib');
 var Object = require('./object');
 
 // TODO: Don't use a children array, but rather a single node "body"
 var Node = Object.extend("Node", {
     init: function(lineno, colno, children) {
-        if(children && !_.isArray(children)) {
+        if(children && !lib.isArray(children)) {
             throw new Error("Node.init: third argument must be " +
                             "an array (the children)");
         }
@@ -23,8 +23,10 @@ var Node = Object.extend("Node", {
         for(var k in this) {
             var obj = this[k];
 
-            if(_.isArray(obj)) {
-                _.each(obj, function(n) {
+            if(lib.isArray(obj)) {
+                for(var i=0; i<obj.length; i++) {
+                    var n = obj[i];
+
                     if(n instanceof type) {
                         res.push(n);
                     }
@@ -32,7 +34,7 @@ var Node = Object.extend("Node", {
                     if(n instanceof Node) {
                         res = res.concat(n.findAll(type));
                     }
-                });
+                };
             }
             else if(obj instanceof Node) {
                 res = res.concat(obj.findAll(type));

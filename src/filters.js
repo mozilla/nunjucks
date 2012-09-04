@@ -1,13 +1,5 @@
 
-var _ = require('underscore');
-
-function repeat(char_, n) {
-    var str = '';
-    for(var i=0; i<n; i++) {
-        str += char_;
-    }
-    return str;
-}
+var lib = require('./lib');
 
 var filters = {
     abs: function(n) {
@@ -53,8 +45,8 @@ var filters = {
         }
 
         var spaces = width - str.length;
-        var pre = repeat(" ", spaces/2 - spaces % 2);
-        var post = repeat(" ", spaces/2);
+        var pre = lib.repeat(" ", spaces/2 - spaces % 2);
+        var post = lib.repeat(" ", spaces/2);
         return pre + str + post;
     },
 
@@ -86,11 +78,11 @@ var filters = {
     },
 
     format: function(str /*, vals */) {
-        var args = _.toArray(arguments).slice(1);
+        var args = lib.toArray(arguments).slice(1);
     },
 
     groupby: function(arr, attr) {
-        return _.groupBy(arr, attr);
+        return lib.groupBy(arr, attr);
     },
 
     indent: function(str, width, indentfirst) {

@@ -1,5 +1,5 @@
 
-var _ = require('underscore');
+var lib = require('./lib');
 var parser = require('./parser');
 var nodes = require('./nodes');
 var Object = require('./object');
@@ -37,11 +37,11 @@ var Frame = Object.extend({
     },
 
     removeVariable: function(name) {
-        this.variables = _.without(this.variables, name);
+        this.variables = lib.without(this.variables, name);
     },
 
     findVariable: function(name) {
-        return _.indexOf(this.variables, name) !== -1;
+        return this.variables.indexOf(name) !== -1;
     }
 });
 
@@ -118,14 +118,14 @@ var Compiler = Object.extend({
     },
 
     assertType: function(node /*, types */) {
-        var types = _.toArray(arguments).slice(1);
+        var types = lib.toArray(arguments).slice(1);
         var success = false;
 
-        _.each(types, function(type) {
-            if(node instanceof type) {
+        for(var i=0; i<types.length; i++) {
+            if(node instanceof types[i]) {
                 success = true;
             }
-        });
+        };
 
         if(!success) {
             throw new Error("invalid type: " + node.typename);
@@ -231,10 +231,11 @@ var Compiler = Object.extend({
     compileCompare: function(node, frame) {
         this.compile(node.expr, frame);
         
-        _.each(node.ops, function(n) {
+        for(var i=0; i<node.ops.length; i++) {
+            var n = node.ops[i];
             this.emit(' ' + compareOps[n.type] + ' ');
             this.compile(n.expr, frame);
-        }, this);
+        }
     },
 
     compileLookupVal: function(node, frame) {
@@ -368,8 +369,10 @@ var Compiler = Object.extend({
         this.emitFuncEnd(this.isChild);
 
         var blocks = node.findAll(nodes.Block);
-        _.each(blocks, function(block) {
+        for(var i=0; i<blocks.length; i++) {
+            var block = blocks[i];
             var name = block.name.value;
+
             this.emitFuncBegin('b_' + name);
             this.emitLine('var l_super = context.getSuper(env, ' + 
                           '"' + name + '", ' +
@@ -380,13 +383,14 @@ var Compiler = Object.extend({
             frame.removeVariable('super');
 
             this.emitFuncEnd();
-        }, this);
+        }
 
         this.emitLine('return {');
-        _.each(blocks, function(block) {
+        for(var i=0; i<blocks.length; i++) {
+            var block = blocks[i];
             var name = 'b_' + block.name.value;
             this.emitLine(name + ': ' + name + ',');
-        }, this);
+        }
         this.emitLine('root: root\n};');
     },
 
@@ -407,7 +411,7 @@ var Compiler = Object.extend({
 
 // var fs = require("fs");
 // var c = new Compiler();
-// var src = "{% for k, v in tmpl %}{{ k }} ===> {{ v }}{% endfor %}";
+// var src = "{% extends 'base.html' %} {% block poop %}sdfdf{% endblock %}";
 
 // var ns = parser.parse(src);
 // nodes.printNodes(ns);
