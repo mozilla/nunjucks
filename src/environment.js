@@ -3,23 +3,22 @@ var lib = require('./lib');
 var Object = require('./object');
 var compiler = require('./compiler');
 var builtin_filters = require('./filters');
-var builtin_loaders;
-
-if(typeof window === 'undefined') {
-    builtin_loaders = require('./node-loaders');
-}
-else {
-    builtin_loaders = require('./web-loaders');
-}
+var builtin_loaders = require('./loaders');
 
 var Environment = Object.extend({
     init: function(loaders) {
-        // if(!loaders) {
-        //     this.loaders = [new builtin_loaders.FileSystemLoader()];
-        // }
-        // else {
+        if(!loaders) {
+            // The filesystem loader is only available client-side
+            if(builtin_loaders.FileSystemLoader) {
+                this.loaders = [new builtin_loaders.FileSystemLoader()];
+            }
+            else {
+                this.loaders = [new builtin_loaders.HttpLoader()];
+            }
+        }
+        else {
             this.loaders = lib.isArray(loaders) ? loaders : [loaders];
-        //}
+        }
 
         this.filters = builtin_filters;
         this.cache = {};

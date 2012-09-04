@@ -45,5 +45,5 @@ var FileSystemLoader = Object.extend({
 
 
 module.exports = {
-    FileSystemLoader: FileSystemLoader,
+    FileSystemLoader: FileSystemLoader
 };

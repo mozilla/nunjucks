@@ -1,5 +1,7 @@
-var nunjucks = {};
-(function(nunjucks) {
+(function() {
+var modules = {};
+(function() {
+
 // A simple class system, more documentation to come
 
 function extend(cls, name, props) {
@@ -55,26 +57,27 @@ function extend(cls, name, props) {
     return new_cls;
 }
 
-nunjucks.object = extend(Object, "Object", {});
-})(nunjucks);
-(function(nunjucks) {
+modules['object'] = extend(Object, "Object", {});
+})();
+(function() {
+var ArrayProto = Array.prototype;
 var ObjProto = Object.prototype;
 
-var e = {};
+var exports = modules['lib'] = {};
 
-e.isFunction = function(obj) {
+exports.isFunction = function(obj) {
     return ObjProto.toString.call(obj) == '[object Function]';
 };
 
-e.isArray = Array.isArray || function(obj) {
+exports.isArray = Array.isArray || function(obj) {
     return ObjProto.toString.call(obj) == '[object Array]';
 };
 
-e.isString = function(obj) {
+exports.isString = function(obj) {
     return ObjProto.toString.call(obj) == '[object String]';
 };
 
-e.groupBy = function(obj, val) {
+exports.groupBy = function(obj, val) {
     var result = {};
     var iterator = _.isFunction(val) ? val : function(obj) { return obj[val]; };
     for(var i=0; i<obj.length; i++) {
@@ -85,18 +88,18 @@ e.groupBy = function(obj, val) {
     return result;
 };
 
-e.toArray = function(obj) {
+exports.toArray = function(obj) {
     return Array.prototype.slice.call(obj);
 };
 
-e.without = function(array) {
+exports.without = function(array) {
     var result = [];
     if (!array) {
         return result;
     }
     var index = -1,
     length = array.length,
-    contains = e.toArray(arguments).slice(1);
+    contains = exports.toArray(arguments).slice(1);
 
     while(++index < length) {
         if(contains.indexOf(array[index]) === -1) {
@@ -106,14 +109,14 @@ e.without = function(array) {
     return result;
 };
 
-e.extend = function(obj, obj2) {
+exports.extend = function(obj, obj2) {
     for(var k in obj2) {
         obj[k] = obj2[k];
     }
     return obj;
 };
 
-e.repeat = function(char_, n) {
+exports.repeat = function(char_, n) {
     var str = '';
     for(var i=0; i<n; i++) {
         str += char_;
@@ -121,7 +124,7 @@ e.repeat = function(char_, n) {
     return str;
 };
 
-e.map = function(obj, func) {
+exports.map = function(obj, func) {
     var results = [];
     if(obj == null) {
         return results;
@@ -141,13 +144,12 @@ e.map = function(obj, func) {
 
     return results;
 };
+})();
+(function() {
 
-nunjucks.lib = e;
-})(nunjucks);
-(function(nunjucks) {
-var util = nunjucks.util;
-var lib = nunjucks.lib;
-var Object = nunjucks.object;
+var util = modules["util"];
+var lib = modules["lib"];
+var Object = modules["object"];
 
 // TODO: Don't use a children array, but rather a single node "body"
 var Node = Object.extend("Node", {
@@ -433,7 +435,7 @@ function printNodes(node, indent) {
     }
 }
 
-nunjucks.nodes = {
+modules['nodes'] = {
     Node: Node,
     Root: Root,
     NodeList: NodeList,
@@ -473,8 +475,9 @@ nunjucks.nodes = {
 
     printNodes: printNodes
 };
-})(nunjucks);
-(function(nunjucks) {
+})();
+(function() {
+
 var whitespaceChars = " \n\t\r";
 var delimChars = "()[]{}%*-+/#,:|.<>=!";
 var intChars = "0123456789";
@@ -847,7 +850,7 @@ Tokenizer.prototype.previous = function() {
     return this.str[this.index-1];
 };
 
-nunjucks.lexer = {
+modules['lexer'] = {
     lex: function(src) {
         return new Tokenizer(src);
     },
@@ -876,16 +879,17 @@ nunjucks.lexer = {
     TOKEN_SYMBOL: TOKEN_SYMBOL,
     TOKEN_SPECIAL: TOKEN_SPECIAL
 };
-})(nunjucks);
-(function(nunjucks) {
+})();
+(function() {
+
 // Does not support:
 //
 // Conditional expression: "yes" if True else "no"
 
-var lexer = nunjucks.lexer;
-var nodes = nunjucks.nodes;
-var Object = nunjucks.object;
-var lib = nunjucks.lib;
+var lexer = modules["lexer"];
+var nodes = modules["nodes"];
+var Object = modules["object"];
+var lib = modules["lib"];
 
 var Parser = Object.extend({
     init: function (tokens) {
@@ -1636,7 +1640,7 @@ var Parser = Object.extend({
     }
 });
 
-// var util = nunjucks.util;
+// var util = modules["util"];
 
 // console.log('sdfd\\"sdfd');
 // var l = lexer.lex('1 2 3 {{ "h\\"ello" }} 4');
@@ -1649,18 +1653,19 @@ var Parser = Object.extend({
 // var n = p.parse();
 // nodes.printNodes(n);
 
-nunjucks.parser = {
+modules['parser'] = {
     parse: function(src) {
         var p = new Parser(lexer.lex(src));
         return p.parseAsRoot();
     }
 };
-})(nunjucks);
-(function(nunjucks) {
-var lib = nunjucks.lib;
-var parser = nunjucks.parser;
-var nodes = nunjucks.nodes;
-var Object = nunjucks.object;
+})();
+(function() {
+
+var lib = modules["lib"];
+var parser = modules["parser"];
+var nodes = modules["nodes"];
+var Object = modules["object"];
 
 // These are all the same for now, but shouldn't be passed straight
 // through
@@ -2067,7 +2072,7 @@ var Compiler = Object.extend({
     }
 });
 
-// var fs = nunjucks.fs;
+// var fs = modules["fs"];
 // var c = new Compiler();
 // var src = "{% extends 'base.html' %} {% block poop %}sdfdf{% endblock %}";
 
@@ -2079,7 +2084,7 @@ var Compiler = Object.extend({
 
 // console.log(tmpl);
 
-nunjucks.compiler = {
+modules['compiler'] = {
     compile: function(src, env) {
         var c = new Compiler(env);
         c.compile(parser.parse(src));
@@ -2088,9 +2093,10 @@ nunjucks.compiler = {
 
     Compiler: Compiler
 };
-})(nunjucks);
-(function(nunjucks) {
-var lib = nunjucks.lib;
+})();
+(function() {
+
+var lib = modules["lib"];
 
 var filters = {
     abs: function(n) {
@@ -2273,67 +2279,87 @@ var filters = {
 filters.d = filters.default;
 filters.e = filters.escape;
 
-nunjucks.filters = filters;
-})(nunjucks);
-(function(nunjucks) {
-var Object = nunjucks.object;
+modules['filters'] = filters;
+})();
+(function() {
 
-var HTTPLoader = Object.extend({
+var Object = modules["object"];
+
+var HttpLoader = Object.extend({
     init: function(baseURL) {
-        this.baseURL = baseURL;
+        this.baseURL = baseURL || '';
     },
 
     getSource: function(name) {
-        this.fetch(name, function(r, status) {
-            console.log(r, status);
-        });
+        var src = this.fetch(this.baseURL + '/' + name);
+
+        if(!src) {
+            return null;
+        }
+
+        return { src: src,
+                 path: name,
+                 upToDate: function() { return false; }};
     },
 
-    fetch: function(url, k) {
+    fetch: function(url) {
         // Only in the browser please
         var ajax = new XMLHttpRequest();
+        var src = null;
 
         ajax.onreadystatechange = function() {
-            if(ajax.readyState == 4) {
-                k(ajax.responseText, ajax.status);
+            if(ajax.readyState == 4 && ajax.status == 200) {
+                src = ajax.responseText;
             }
         };
 
-        ajax.open('GET', url, true);
+        // Synchronous because this API shouldn't be used in
+        // production (pre-load compiled templates instead)
+        ajax.open('GET', url, false);
         ajax.send();
+
+        return src;
     }
 });
 
 // var PrecompiledLoader = Object.extend({
-    
+
 // });
 
-nunjucks.webloaders = {
-    HTTPLoader: HTTPLoader
+modules['web-loaders'] = {
+    HttpLoader: HttpLoader
 };
-})(nunjucks);
-(function(nunjucks) {
-var lib = nunjucks.lib;
-var Object = nunjucks.object;
-var compiler = nunjucks.compiler;
-var builtin_filters = nunjucks.filters;
-var builtin_loaders;
-
+})();
+(function() {
 if(typeof window === 'undefined') {
-    builtin_loaders = nunjucks.nodeloaders;
+    modules['loaders'] = modules["node-loaders"];
 }
 else {
-    builtin_loaders = nunjucks.webloaders;
+    modules['loaders'] = modules["web-loaders"];
 }
+})();
+(function() {
+
+var lib = modules["lib"];
+var Object = modules["object"];
+var compiler = modules["compiler"];
+var builtin_filters = modules["filters"];
+var builtin_loaders = modules["loaders"];
 
 var Environment = Object.extend({
     init: function(loaders) {
-        // if(!loaders) {
-        //     this.loaders = [new builtin_loaders.FileSystemLoader()];
-        // }
-        // else {
+        if(!loaders) {
+            // The filesystem loader is only available client-side
+            if(builtin_loaders.FileSystemLoader) {
+                this.loaders = [new builtin_loaders.FileSystemLoader()];
+            }
+            else {
+                this.loaders = [new builtin_loaders.HttpLoader()];
+            }
+        }
+        else {
             this.loaders = lib.isArray(loaders) ? loaders : [loaders];
-        //}
+        }
 
         this.filters = builtin_filters;
         this.cache = {};
@@ -2497,7 +2523,7 @@ var Template = Object.extend({
     }
 });
 
-// var fs = nunjucks.fs;
+// var fs = modules["fs"];
 // var env = new Environment();
 // console.log(compiler.compile(fs.readFileSync('test.html', 'utf-8')));
 
@@ -2505,8 +2531,28 @@ var Template = Object.extend({
 // console.log("OUTPUT ---");
 // console.log(tmpl.render({ username: "James" }));
 
-nunjucks.environment = {
+modules['environment'] = {
     Environment: Environment,
     Template: Template
 };
-})(nunjucks);
+})();
+
+var env = modules["environment"];
+var compiler = modules["compiler"];
+var parser = modules["parser"];
+var lexer = modules["lexer"];
+var loaders = modules["loaders"];
+
+window.nunjucks = {};
+window.nunjucks.Environment = env.Environment;
+window.nunjucks.Template = env.Template;
+
+window.nunjucks.loaders = loaders;
+window.nunjucks.compiler = compiler;
+window.nunjucks.parser = parser;
+window.nunjucks.lexer = lexer;
+
+window.nunjucks.require =
+   function(name) { return modules[name]; };
+
+})();

@@ -1,21 +1,21 @@
 var ArrayProto = Array.prototype;
 var ObjProto = Object.prototype;
 
-var e = {};
+var exports = module.exports = {};
 
-e.isFunction = function(obj) {
+exports.isFunction = function(obj) {
     return ObjProto.toString.call(obj) == '[object Function]';
 };
 
-e.isArray = Array.isArray || function(obj) {
+exports.isArray = Array.isArray || function(obj) {
     return ObjProto.toString.call(obj) == '[object Array]';
 };
 
-e.isString = function(obj) {
+exports.isString = function(obj) {
     return ObjProto.toString.call(obj) == '[object String]';
 };
 
-e.groupBy = function(obj, val) {
+exports.groupBy = function(obj, val) {
     var result = {};
     var iterator = _.isFunction(val) ? val : function(obj) { return obj[val]; };
     for(var i=0; i<obj.length; i++) {
@@ -26,18 +26,18 @@ e.groupBy = function(obj, val) {
     return result;
 };
 
-e.toArray = function(obj) {
+exports.toArray = function(obj) {
     return Array.prototype.slice.call(obj);
 };
 
-e.without = function(array) {
+exports.without = function(array) {
     var result = [];
     if (!array) {
         return result;
     }
     var index = -1,
     length = array.length,
-    contains = e.toArray(arguments).slice(1);
+    contains = exports.toArray(arguments).slice(1);
 
     while(++index < length) {
         if(contains.indexOf(array[index]) === -1) {
@@ -47,14 +47,14 @@ e.without = function(array) {
     return result;
 };
 
-e.extend = function(obj, obj2) {
+exports.extend = function(obj, obj2) {
     for(var k in obj2) {
         obj[k] = obj2[k];
     }
     return obj;
 };
 
-e.repeat = function(char_, n) {
+exports.repeat = function(char_, n) {
     var str = '';
     for(var i=0; i<n; i++) {
         str += char_;
@@ -62,7 +62,7 @@ e.repeat = function(char_, n) {
     return str;
 };
 
-e.map = function(obj, func) {
+exports.map = function(obj, func) {
     var results = [];
     if(obj == null) {
         return results;
@@ -82,5 +82,3 @@ e.map = function(obj, func) {
 
     return results;
 };
-
-module.exports = e;

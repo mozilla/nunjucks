@@ -5,18 +5,32 @@ output="index-browser.js"
 
 # Listed in order of dependency
 files="object.js lib.js nodes.js lexer.js parser.js compiler.js 
-       filters.js web-loaders.js environment.js"
+       filters.js web-loaders.js loaders.js environment.js"
 
-echo "var nunjucks = {};" > "$output";
+rm -f "$output"
+
+echo "(function() {" >> "$output"
+echo "var modules = {};" >> "$output"
 
 for file in $files; do
     name=${file%%.*}
-    name=${name//-}
-    echo "(function(nunjucks) {" >> "$output"
+    echo "(function() {" >> "$output"
     cat "src/$file" | \
-        "$ROOT"/mungeline | \
-        sed -e "s/module.exports/nunjucks.$name/" \
+        perl -ne 's/^(.*)require\(\W*([\w-]*)\W*\)(.*)$/$1modules["$2"]$3/; print' | \
+        sed -e "s/module.exports/modules['$name']/" \
         >> "$output"
-    echo "})(nunjucks);" >> "$output"
+    echo "})();" >> "$output"
 done
+
+cat index.js | \
+    perl -ne 's/require\(\W*\.\/src\/([\w-]*)\W*\)/modules["$1"]/; print' | \
+    sed -e 's/module.exports/window.nunjucks/' \
+    >> "$output"
+
+echo "
+window.nunjucks.require =
+   function(name) { return modules[name]; };
+" >> "$output"
+
+echo "})();" >> "$output"
 
