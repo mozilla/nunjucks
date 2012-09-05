@@ -46,9 +46,8 @@ var Frame = Object.extend({
 });
 
 var Compiler = Object.extend({
-    init: function(env) {
+    init: function() {
         this.codebuf = [];
-        this.env = env;
         this.lastId = 0;
         this.buffer = null;
         this.isChild = false;
@@ -422,8 +421,8 @@ var Compiler = Object.extend({
 // console.log(tmpl);
 
 module.exports = {
-    compile: function(src, env) {
-        var c = new Compiler(env);
+    compile: function(src) {
+        var c = new Compiler();
         c.compile(parser.parse(src));
         return c.getCode();
     },

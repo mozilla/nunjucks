@@ -58,14 +58,14 @@ var Environment = Object.extend({
         return this.cache[name];
     },
 
-    registerPrecompiled: function(templates, templatePaths) {
+    registerPrecompiled: function(templates) {
         for(var name in templates) {
-            this.cache[name] = new Templates({ type: 'code',
-                                               obj: templates[name] },
-                                             this,
-                                             templatePaths[name],
-                                             function() { return true; },
-                                             true);
+            this.cache[name] = new Template({ type: 'code',
+                                              obj: templates[name] },
+                                            this,
+                                            name,
+                                            function() { return true; },
+                                            true);
         }
     },
 
@@ -177,7 +177,7 @@ var Template = Object.extend({
             this._compile();
         }
 
-        var context = new Context(ctx, this.blocks);
+        var context = new Context(ctx || {}, this.blocks);
         return this.rootRenderFunc(this.env, context);
     },
 

@@ -77,6 +77,10 @@ exports.isString = function(obj) {
     return ObjProto.toString.call(obj) == '[object String]';
 };
 
+exports.isObject = function(obj) {
+    return obj === Object(obj);
+}
+
 exports.groupBy = function(obj, val) {
     var result = {};
     var iterator = _.isFunction(val) ? val : function(obj) { return obj[val]; };
@@ -1709,9 +1713,8 @@ var Frame = Object.extend({
 });
 
 var Compiler = Object.extend({
-    init: function(env) {
+    init: function() {
         this.codebuf = [];
-        this.env = env;
         this.lastId = 0;
         this.buffer = null;
         this.isChild = false;
@@ -2085,8 +2088,8 @@ var Compiler = Object.extend({
 // console.log(tmpl);
 
 modules['compiler'] = {
-    compile: function(src, env) {
-        var c = new Compiler(env);
+    compile: function(src) {
+        var c = new Compiler();
         c.compile(parser.parse(src));
         return c.getCode();
     },
@@ -2324,9 +2327,22 @@ var HttpLoader = Object.extend({
     }
 });
 
-// var PrecompiledLoader = Object.extend({
+var PrecompiledLoader = Object.extend({
+    init: function(url) {
+        this.url = url;
+    },
 
-// });
+    registerTemplates: function(templates, templatePaths) {
+        this.templates = templates;
+        this.templatePaths = templatePaths;
+    },
+
+    getSource: function(name) {
+        return { src: this.templates[name],
+                 path: this.templatePaths[name],
+                 upToDate: function() { return true; }};
+    }
+});
 
 modules['web-loaders'] = {
     HttpLoader: HttpLoader
@@ -2399,6 +2415,17 @@ var Environment = Object.extend({
         }
 
         return this.cache[name];
+    },
+
+    registerPrecompiled: function(templates) {
+        for(var name in templates) {
+            this.cache[name] = new Template({ type: 'code',
+                                              obj: templates[name] },
+                                            this,
+                                            name,
+                                            function() { return true; },
+                                            true);
+        }
     },
 
     express: function(app) {
@@ -2478,7 +2505,21 @@ var Context = Object.extend({
 var Template = Object.extend({
     init: function (src, env, path, upToDate, eagerCompile) {
         this.env = env || new Environment();
-        this.tmplSrc = src;
+
+        if(lib.isObject(src)) {
+            switch(src.type) {
+            case 'code': this.tmplProps = src.obj; break;
+            case 'string': this.tmplStr = src.obj; break;
+            }
+        }
+        else if(lib.isString(src)) {
+            this.tmplStr = src;
+        a}
+        else {
+            throw new Error("src must be a string or an object describing " +
+                            "the source");
+        }
+
         this.path = path;
         this.upToDate = upToDate || function() { return false; };
 
@@ -2495,7 +2536,7 @@ var Template = Object.extend({
             this._compile();
         }
 
-        var context = new Context(ctx, this.blocks);
+        var context = new Context(ctx || {}, this.blocks);
         return this.rootRenderFunc(this.env, context);
     },
 
@@ -2504,8 +2545,15 @@ var Template = Object.extend({
     },
 
     _compile: function() {
-        var func = new Function(compiler.compile(this.tmplSrc, this.env));
-        var props = func();
+        var props;
+
+        if(this.tmplProps) {
+            props = this.tmplProps;
+        }
+        else {
+            var func = new Function(compiler.compile(this.tmplStr, this.env));
+            props = func();
+        }
         
         this.blocks = this._getBlocks(props);
         this.rootRenderFunc = props.root;
