@@ -1,6 +1,5 @@
 
 var e = require('../src/environment');
-var _ = require('underscore');
 
 var env = new e.Environment();
 
@@ -20,4 +19,8 @@ for(var i=0; i<100; i++) {
     times.push((t2-t1)/1000);
 }
 
-console.log(_.reduce(times, function(x, y) { return x + y; }) / times.length);
+var total = 0;
+for(var i=0; i<times.length; i++) {
+    total += times[i];
+}
+console.log(total / times.length);

@@ -183,7 +183,7 @@ tests.
 
 Features needed for v0.1:
 
-* Thorough-ish documentation, especially what features are missing
+* Thorough-ish documentation, especially the API and client-side stuff
 * Builtin filters
 * Display pretty errors
 ** Add a global error handler and attempt to inject nice errors
@@ -192,7 +192,6 @@ Features needed for v0.1:
 
 Features needed for v0.2:
 
-* Client-side js support (load precompiled templates, convert modules, etc)
 * Macros, a few other missing jinja2 constructs
 * Even more thorough documentation
 * Autoescaping

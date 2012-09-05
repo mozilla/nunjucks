@@ -11,7 +11,7 @@ function addTemplates(dir) {
     var files = fs.readdirSync(dir);
 
     for(var i=0; i<files.length; i++) {
-        var filepath = path.join(folder, files[i]);
+        var filepath = path.join(dir, files[i]);
         var stat = fs.statSync(filepath);
 
         if(stat && stat.isDirectory()) {
