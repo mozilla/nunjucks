@@ -2,5 +2,5 @@
 test: 
 	mocha -b -R tap tests
 
-browser:
-	@echo Hello
+nunjucks.js:
+	./bin/bundle browser/nunjucks.js

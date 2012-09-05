@@ -58,6 +58,17 @@ var Environment = Object.extend({
         return this.cache[name];
     },
 
+    registerPrecompiled: function(templates, templatePaths) {
+        for(var name in templates) {
+            this.cache[name] = new Templates({ type: 'code',
+                                               obj: templates[name] },
+                                             this,
+                                             templatePaths[name],
+                                             function() { return true; },
+                                             true);
+        }
+    },
+
     express: function(app) {
         var env = this;
 
@@ -135,7 +146,21 @@ var Context = Object.extend({
 var Template = Object.extend({
     init: function (src, env, path, upToDate, eagerCompile) {
         this.env = env || new Environment();
-        this.tmplSrc = src;
+
+        if(lib.isObject(src)) {
+            switch(src.type) {
+            case 'code': this.tmplProps = src.obj; break;
+            case 'string': this.tmplStr = src.obj; break;
+            }
+        }
+        else if(lib.isString(src)) {
+            this.tmplStr = src;
+        }
+        else {
+            throw new Error("src must be a string or an object describing " +
+                            "the source");
+        }
+
         this.path = path;
         this.upToDate = upToDate || function() { return false; };
 
@@ -161,8 +186,15 @@ var Template = Object.extend({
     },
 
     _compile: function() {
-        var func = new Function(compiler.compile(this.tmplSrc, this.env));
-        var props = func();
+        var props;
+
+        if(this.tmplProps) {
+            props = this.tmplProps;
+        }
+        else {
+            var func = new Function(compiler.compile(this.tmplStr, this.env));
+            props = func();
+        }
         
         this.blocks = this._getBlocks(props);
         this.rootRenderFunc = props.root;

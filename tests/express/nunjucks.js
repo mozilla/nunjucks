@@ -2287,6 +2287,8 @@ var Object = modules["object"];
 
 var HttpLoader = Object.extend({
     init: function(baseURL) {
+        console.log("[nunjucks] Warning: only use HttpLoader in " +
+                    "development. Otherwise use PrecompiledLoader.");
         this.baseURL = baseURL || '';
     },
 

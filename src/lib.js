@@ -15,6 +15,10 @@ exports.isString = function(obj) {
     return ObjProto.toString.call(obj) == '[object String]';
 };
 
+exports.isObject = function(obj) {
+    return obj === Object(obj);
+}
+
 exports.groupBy = function(obj, val) {
     var result = {};
     var iterator = _.isFunction(val) ? val : function(obj) { return obj[val]; };

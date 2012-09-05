@@ -3,6 +3,8 @@ var Object = require('./object');
 
 var HttpLoader = Object.extend({
     init: function(baseURL) {
+        console.log("[nunjucks] Warning: only use HttpLoader in " +
+                    "development. Otherwise use PrecompiledLoader.");
         this.baseURL = baseURL || '';
     },
 
@@ -38,9 +40,22 @@ var HttpLoader = Object.extend({
     }
 });
 
-// var PrecompiledLoader = Object.extend({
+var PrecompiledLoader = Object.extend({
+    init: function(url) {
+        this.url = url;
+    },
 
-// });
+    registerTemplates: function(templates, templatePaths) {
+        this.templates = templates;
+        this.templatePaths = templatePaths;
+    },
+
+    getSource: function(name) {
+        return { src: this.templates[name],
+                 path: this.templatePaths[name],
+                 upToDate: function() { return true; }};
+    }
+});
 
 module.exports = {
     HttpLoader: HttpLoader
