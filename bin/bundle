@@ -3,9 +3,14 @@
 ROOT=`dirname "$0"`
 output="$1"
 
-# Listed in order of dependency
-files="object.js lib.js nodes.js lexer.js parser.js compiler.js 
+if [ -z "$SLIM" ]; then
+    # Listed in order of dependency
+    files="object.js lib.js nodes.js lexer.js parser.js compiler.js 
        filters.js web-loaders.js loaders.js environment.js"
+else
+    # Listed in order of dependency
+    files="object.js lib.js filters.js environment.js"
+fi
 
 rm -f "$output"
 
