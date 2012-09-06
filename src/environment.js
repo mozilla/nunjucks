@@ -5,10 +5,6 @@ var compiler = require('./compiler');
 var builtin_filters = require('./filters');
 var builtin_loaders = require('./loaders');
 
-/**
- * A class thing
- * @constructor
- */
 var Environment = Object.extend({
     init: function(loaders) {
         if(!loaders) {
@@ -28,26 +24,14 @@ var Environment = Object.extend({
         this.cache = {};
     },
 
-    /**
-     * A thing.
-     * @param name Something else.
-     */
     addFilter: function(name, func) {
         this.filters[name] = func;
     },
 
-    /**
-     * A thing.
-     * @param name Something else.
-     */
     getFilter: function(name) {
         return this.filters[name];
     },
 
-    /**
-     * A thing.
-     * @param name Something else.
-     */
     getTemplate: function(name, eagerCompile) {
         var info = null;
         var tmpl = this.cache[name];
