@@ -96,9 +96,10 @@ var Environment = Object.extend({
 });
 
 var Context = Object.extend({
-    init: function(ctx, blocks) {
+    init: function(ctx, blocks, frame) {
         this.ctx = ctx;
         this.blocks = {};
+        this.frame = frame;
 
         for(var name in blocks) {
             this.addBlock(name, blocks[name]);
@@ -106,9 +107,6 @@ var Context = Object.extend({
     },
 
     lookup: function(name) {
-        if(!(name in this.ctx)) {
-            return '';
-        }
         return this.ctx[name];
     },
 
@@ -179,7 +177,7 @@ var Template = Object.extend({
         }
 
         var context = new Context(ctx || {}, this.blocks);
-        return this.rootRenderFunc(this.env, context);
+        return this.rootRenderFunc(this.env, context, new Frame());
     },
 
     isUpToDate: function() {
@@ -215,13 +213,13 @@ var Template = Object.extend({
     }
 });
 
-// var fs = require('fs');
-// var env = new Environment();
-// console.log(compiler.compile(fs.readFileSync('test.html', 'utf-8')));
+var fs = require('fs');
+var env = new Environment();
+console.log(compiler.compile(fs.readFileSync('test.html', 'utf-8')));
 
-// var tmpl = env.getTemplate('test.html');
-// console.log("OUTPUT ---");
-// console.log(tmpl.render({ username: "James" }));
+var tmpl = env.getTemplate('test.html');
+console.log("OUTPUT ---");
+console.log(tmpl.render({ username: "James" }));
 
 module.exports = {
     Environment: Environment,

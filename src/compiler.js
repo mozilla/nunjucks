@@ -45,7 +45,6 @@ var Compiler = Object.extend({
         this.buffer = 'output';
         this.emitLine('function ' + name + '(env, context, frame) {');
         this.emitLine('var ' + this.buffer + ' = "";');
-        this.emitLine('frame = frame || new Frame();');
     },
 
     emitFuncEnd: function(noReturn) {
@@ -133,11 +132,13 @@ var Compiler = Object.extend({
         var name = node.value;
         var v;
 
-        if((v = frame.findVariable(name))) {
+        if((v = frame.lookup(name))) {
             this.emit(v);
         }
         else {
-            this.emit('context.lookup("' + name + '")');
+            this.emit('context.lookup("' + name + '") || ' +
+                      'frame.lookup("' + name + '") || ' +
+                      '""');
         }
     },
 
@@ -257,6 +258,8 @@ var Compiler = Object.extend({
         var i = this.tmpid();
         var arr = this.tmpid();
         frame = frame.push();
+
+        this.emitLine('frame = frame.push()');
 
         this.emit('var ' + arr + ' = ');
         this._compileExpression(node.arr, frame);
@@ -391,17 +394,17 @@ var Compiler = Object.extend({
     }
 });
 
-var fs = require("fs");
-var c = new Compiler();
-var src = "{% for i in [1,2,3] %}{{ i }}{% endfor %}";
+// var fs = require("fs");
+// var c = new Compiler();
+// var src = "{% for i in [1,2,3] %}{{ i }}{% endfor %}";
 
-var ns = parser.parse(src);
-nodes.printNodes(ns);
-c.compile(ns);
+// var ns = parser.parse(src);
+// nodes.printNodes(ns);
+// c.compile(ns);
 
-var tmpl = c.getCode();
+// var tmpl = c.getCode();
 
-console.log(tmpl);
+// console.log(tmpl);
 
 module.exports = {
     compile: function(src) {

@@ -14,9 +14,9 @@ var Frame = Object.extend({
         this.variables[name] = id;
     },
 
-    findVariable: function(name) {
+    lookup: function(name) {
         var p = this.parent;
-        return this.variables[name] || (p && p.findVariable(name));
+        return this.variables[name] || (p && p.lookup(name));
     },
 
     push: function() {
