@@ -17,7 +17,7 @@ exports.isString = function(obj) {
 
 exports.isObject = function(obj) {
     return obj === Object(obj);
-}
+};
 
 exports.groupBy = function(obj, val) {
     var result = {};

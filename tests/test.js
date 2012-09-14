@@ -476,6 +476,10 @@ describe('compiler', function() {
 
         s = render(tmpl, { hungry: false });
         s.should.equal('Give me some water');
+
+        s = render('{% if not hungry %}good{% endif %}',
+                   { hungry: false });
+        s.should.equal('good');
     });
 
     it('should compile for blocks', function() {

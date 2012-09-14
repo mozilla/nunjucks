@@ -183,11 +183,11 @@ tests.
 
 Features needed for v0.1:
 
-* Thorough-ish documentation, especially the API and client-side stuff
 * Builtin filters
 * Display pretty errors
 ** Add a global error handler and attempt to inject nice errors
 * Better express integration
+* Thorough-ish documentation, especially the API and client-side stuff
 * Benchmarks (it's fast, how to prove it?)
 
 Features needed for v0.2:

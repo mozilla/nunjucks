@@ -92,7 +92,8 @@ var Compiler = Object.extend({
                         nodes.FunCall,
                         nodes.Filter,
                         nodes.LookupVal,
-                        nodes.Compare);
+                        nodes.Compare,
+                        nodes.Not);
         this.compile(node, frame);
     },
 
