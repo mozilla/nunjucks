@@ -4,6 +4,7 @@ var Object = require('./object');
 var compiler = require('./compiler');
 var builtin_filters = require('./filters');
 var builtin_loaders = require('./loaders');
+var Frame = require('./runtime').Frame;
 
 var Environment = Object.extend({
     init: function(loaders) {

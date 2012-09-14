@@ -3,6 +3,7 @@ var lib = require('./lib');
 var parser = require('./parser');
 var nodes = require('./nodes');
 var Object = require('./object');
+var Frame = require('./runtime').Frame;
 
 // These are all the same for now, but shouldn't be passed straight
 // through
@@ -24,27 +25,6 @@ function binOpEmitter(str) {
     };
 }
 
-// Frames keep track of scoping at compile-time so we know how to
-// access variables. Blocks can introduce special variables, for
-// example.
-var Frame = Object.extend({
-    init: function() {
-        this.variables = [];
-    },
-
-    addVariable: function(name) {
-        this.variables.push(name);
-    },
-
-    removeVariable: function(name) {
-        this.variables = lib.without(this.variables, name);
-    },
-
-    findVariable: function(name) {
-        return this.variables.indexOf(name) !== -1;
-    }
-});
-
 var Compiler = Object.extend({
     init: function() {
         this.codebuf = [];
@@ -62,9 +42,10 @@ var Compiler = Object.extend({
     },
 
     emitFuncBegin: function(name) {
-        this.buffer = this.tmpid();
-        this.emitLine('function ' + name + '(env, context) {');
+        this.buffer = 'output';
+        this.emitLine('function ' + name + '(env, context, frame) {');
         this.emitLine('var ' + this.buffer + ' = "";');
+        this.emitLine('frame = frame || new Frame();');
     },
 
     emitFuncEnd: function(noReturn) {
@@ -150,9 +131,10 @@ var Compiler = Object.extend({
 
     compileSymbol: function(node, frame) {
         var name = node.value;
+        var v;
 
-        if(frame.findVariable(name)) {
-            this.emit('l_' + name);
+        if((v = frame.findVariable(name))) {
+            this.emit(v);
         }
         else {
             this.emit('context.lookup("' + name + '")');
@@ -274,6 +256,7 @@ var Compiler = Object.extend({
     compileFor: function(node, frame) {
         var i = this.tmpid();
         var arr = this.tmpid();
+        frame = frame.push();
 
         this.emit('var ' + arr + ' = ');
         this._compileExpression(node.arr, frame);
@@ -283,36 +266,36 @@ var Compiler = Object.extend({
             // key/value iteration
             var key = node.name.children[0];
             var val = node.name.children[1];
-            var k = 'l_' + key.value;
-            var v = 'l_' + val.value;
+            var k = this.tmpid();
+            var v = this.tmpid();
 
-            frame.addVariable(key.value);
-            frame.addVariable(val.value);
-
+            frame.addVariable(key.value, k);
+            frame.addVariable(val.value, v);
 
             this.emitLine('for(var ' + k + ' in ' + arr + ') {');
             this.emitLine('var ' + v + ' = ' + arr + '[' + k + '];');
+            this.emitLine('frame.addVariable("' + key.value + '", ' + k + ');');
+            this.emitLine('frame.addVariable("' + val.value + '", ' + v + ');');
         }
         else {
-            var v = 'l_' + node.name.value;
+            var v = this.tmpid();
 
-            frame.addVariable(node.name.value);
+            frame.addVariable(node.name.value, v);
 
             this.emitLine('for(var ' + i + '=0; ' + i + ' < ' + arr + '.length; ' +
                           i + '++) {');
             this.emitLine('var ' + v + ' = ' + arr + '[' + i + '];');
-
+            this.emitLine('frame.addVariable("' + node.name.value +
+                          '", ' + v + ');');
         }
 
         this.compile(node.body, frame);
         this.emitLine('}');
-
-        frame.removeVariable(v);
     },
 
     compileBlock: function(node, frame) {
         this.emitLine(this.buffer + ' += context.getBlock("' +
-                      node.name.value + '")(env, context);');
+                      node.name.value + '")(env, context, frame);');
     },
 
     compileExtends: function(node, frame) {
@@ -377,9 +360,9 @@ var Compiler = Object.extend({
                           '"' + name + '", ' +
                           'b_' + name + ');');
 
-            frame.addVariable('super');
-            this.compile(block.body, frame);
-            frame.removeVariable('super');
+            var tmpFrame = frame.push();
+            frame.addVariable('super', 'l_super');
+            this.compile(block.body, tmpFrame);
 
             this.emitFuncEnd();
         }
@@ -408,17 +391,17 @@ var Compiler = Object.extend({
     }
 });
 
-// var fs = require("fs");
-// var c = new Compiler();
-// var src = "{% extends 'base.html' %} {% block poop %}sdfdf{% endblock %}";
+var fs = require("fs");
+var c = new Compiler();
+var src = "{% for i in [1,2,3] %}{{ i }}{% endfor %}";
 
-// var ns = parser.parse(src);
-// nodes.printNodes(ns);
-// c.compile(ns);
+var ns = parser.parse(src);
+nodes.printNodes(ns);
+c.compile(ns);
 
-// var tmpl = c.getCode();
+var tmpl = c.getCode();
 
-// console.log(tmpl);
+console.log(tmpl);
 
 module.exports = {
     compile: function(src) {
