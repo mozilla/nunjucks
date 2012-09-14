@@ -96,10 +96,9 @@ var Environment = Object.extend({
 });
 
 var Context = Object.extend({
-    init: function(ctx, blocks, frame) {
+    init: function(ctx, blocks) {
         this.ctx = ctx;
         this.blocks = {};
-        this.frame = frame;
 
         for(var name in blocks) {
             this.addBlock(name, blocks[name]);
@@ -171,13 +170,15 @@ var Template = Object.extend({
         }
     },
 
-    render: function(ctx) {
+    render: function(ctx, frame) {
         if(!this.compiled) {
             this._compile();
         }
 
         var context = new Context(ctx || {}, this.blocks);
-        return this.rootRenderFunc(this.env, context, new Frame());
+        return this.rootRenderFunc(this.env,
+                                   context,
+                                   frame || new Frame());
     },
 
     isUpToDate: function() {
@@ -213,13 +214,13 @@ var Template = Object.extend({
     }
 });
 
-var fs = require('fs');
-var env = new Environment();
-console.log(compiler.compile(fs.readFileSync('test.html', 'utf-8')));
+// var fs = require('fs');
+// var env = new Environment();
+// console.log(compiler.compile(fs.readFileSync('test.html', 'utf-8')));
 
-var tmpl = env.getTemplate('test.html');
-console.log("OUTPUT ---");
-console.log(tmpl.render({ username: "James" }));
+// var tmpl = env.getTemplate('test.html');
+// console.log("OUTPUT ---");
+// console.log(tmpl.render({ username: "James" }));
 
 module.exports = {
     Environment: Environment,

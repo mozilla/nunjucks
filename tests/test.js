@@ -547,4 +547,24 @@ describe('compiler', function() {
                   { name: 'james' });
         s.should.equal('hello world FooInclude james');
     });
+
+    it('should maintain nested scopes', function() {
+        var s = render('{% for i in [1,2] %}' +
+                       '{% for i in [3,4] %}{{ i }}{% endfor %}' +
+                       '{{ i }}{% endfor %}');
+        s.should.equal('341342');
+    });
+
+    it('should allow blocks in for loops', function() {
+        var s = render('{% extends "base2.html" %}' +
+                       '{% block item %}hello{{ item }}{% endblock %}');
+        s.should.equal('hello1hello2');
+    });
+
+    it('should make includes inherit scope', function() {
+        var s = render('{% for item in [1,2] %}' +
+                       '{% include "item.html" %}' +
+                       '{% endfor %}');
+        s.should.equal('showing 1showing 2');
+    });
 });

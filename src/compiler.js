@@ -323,9 +323,10 @@ var Compiler = Object.extend({
     compileInclude: function(node, frame) {
         this.emit('var includeTemplate = env.getTemplate(');
         this._compileExpression(node.template, frame);
-        this.emitLine(')');
+        this.emitLine(');');
         this.emitLine(this.buffer +
-                      ' += includeTemplate.render(context.getVariables());');
+                      ' += includeTemplate.render(' +
+                      'context.getVariables(), frame);');
     },
 
     compileTemplateData: function(node, frame) {
@@ -349,7 +350,7 @@ var Compiler = Object.extend({
         this._compileChildren(node, frame);
         if(this.isChild) {
             this.emitLine('return ' +
-                          'parentTemplate.rootRenderFunc(env, context);');
+                          'parentTemplate.rootRenderFunc(env, context, frame);');
         }
         this.emitFuncEnd(this.isChild);
 
