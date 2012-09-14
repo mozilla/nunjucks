@@ -21,6 +21,10 @@ var Frame = Object.extend({
 
     push: function() {
         return new Frame(this);
+    },
+
+    pop: function() {
+        return this.parent;
     }
 });
 

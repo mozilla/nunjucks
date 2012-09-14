@@ -221,7 +221,9 @@ var Compiler = Object.extend({
     },
 
     compileLookupVal: function(node, frame) {
+        this.emit('(');
         this._compileExpression(node.target, frame);
+        this.emit(')');
         this.emit('[');
         this._compileExpression(node.val, frame);
         this.emit(']');
@@ -294,6 +296,8 @@ var Compiler = Object.extend({
 
         this.compile(node.body, frame);
         this.emitLine('}');
+
+        this.emitLine('frame = frame.pop();');
     },
 
     compileBlock: function(node, frame) {

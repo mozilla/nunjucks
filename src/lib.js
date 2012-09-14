@@ -21,7 +21,7 @@ exports.isObject = function(obj) {
 
 exports.groupBy = function(obj, val) {
     var result = {};
-    var iterator = _.isFunction(val) ? val : function(obj) { return obj[val]; };
+    var iterator = exports.isFunction(val) ? val : function(obj) { return obj[val]; };
     for(var i=0; i<obj.length; i++) {
         var value = obj[i];
         var key = iterator(value, i);

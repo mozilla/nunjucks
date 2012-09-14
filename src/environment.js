@@ -214,13 +214,13 @@ var Template = Object.extend({
     }
 });
 
-// var fs = require('fs');
-// var env = new Environment();
-// console.log(compiler.compile(fs.readFileSync('test.html', 'utf-8')));
+var fs = require('fs');
+var env = new Environment();
+console.log(compiler.compile(fs.readFileSync('test.html', 'utf-8')));
 
-// var tmpl = env.getTemplate('test.html');
-// console.log("OUTPUT ---");
-// console.log(tmpl.render({ username: "James" }));
+var tmpl = env.getTemplate('test.html');
+console.log("OUTPUT ---");
+console.log(tmpl.render({ username: "James" }));
 
 module.exports = {
     Environment: Environment,
