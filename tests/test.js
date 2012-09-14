@@ -567,4 +567,13 @@ describe('compiler', function() {
                        '{% endfor %}');
         s.should.equal('showing 1showing 2');
     });
+
+    it('should compile a set block', function() {
+        var s = render('{% set username = "foo" %}{{ username }}',
+                       { username: 'james' });
+        s.should.equal('foo');
+
+        var s = render('{% set x, y = "foo" %}{{ x }}{{ y }}');
+        s.should.equal('foofoo');
+    });
 });

@@ -146,6 +146,7 @@ var TemplateRef = Node.extend("TemplateRef", {
 
 var Extends = TemplateRef.extend("Extends");
 var Include = TemplateRef.extend("Include");
+var Set = Node.extend("Set");
 
 var Output = Node.extend("Output");
 var TemplateData = Literal.extend("TemplateData");
@@ -247,6 +248,13 @@ function printNodes(node, indent) {
         printNodes(node.name, indent+2);
         printNodes(node.body, indent+2);
     }
+    else if(node instanceof Set) {
+        print("\n");
+        for(var i=0; i<node.targets.length; i++) {
+            printNodes(node.targets[i], indent+2);
+        }
+        printNodes(node.value, indent+2);
+    }
     else if(node instanceof LookupVal) {
         print("\n");
         printNodes(node.target, indent+2);
@@ -308,6 +316,7 @@ module.exports = {
     Block: Block,
     Extends: Extends,
     Include: Include,
+    Set: Set,
     LookupVal: LookupVal,
     BinOp: BinOp,
     Or: Or,

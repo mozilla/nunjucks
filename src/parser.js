@@ -243,6 +243,34 @@ var Parser = Object.extend({
         return node;
     },
 
+    parseSet: function() {
+        var tag = this.peekToken();
+        if(!this.skipSymbol('set')) {
+            this.fail('expected set');
+        }
+
+        var node = new nodes.Set(tag.lineno, tag.colno);
+        node.targets = [];
+
+        var target;
+        while((target = this.parsePrimary())) {
+            node.targets.push(target);
+
+            if(!this.skip(lexer.TOKEN_COMMA)) {
+                break;
+            }
+        }
+
+        if(!this.skipValue(lexer.TOKEN_OPERATOR, '=')) {
+            this.fail('expected = in set tag');
+        }
+
+        node.value = this.parseExpression();
+        this.advanceAfterBlockEnd(tag.value);
+
+        return node;
+    },
+
     parseStatement: function () {
         var tok = this.peekToken();
         var node;
@@ -263,6 +291,7 @@ var Parser = Object.extend({
             case 'block': node = this.parseBlock(); break;
             case 'extends': node = this.parseExtends(); break;
             case 'include': node = this.parseInclude(); break;
+            case 'set': node = this.parseSet(); break;
             default: this.fail('unknown block tag: ' + tok.value);
         }
 
@@ -757,16 +786,15 @@ var Parser = Object.extend({
     }
 });
 
-// var util = require('util');
+var util = require('util');
 
-// console.log('sdfd\\"sdfd');
-// var l = lexer.lex('1 2 3 {{ "h\\"ello" }} 4');
+// var l = lexer.lex('{% set x = 3 %}');
 // var t;
 // while((t = l.nextToken())) {
 //     console.log(util.inspect(t));
 // }
 
-// var p = new Parser(lexer.lex('{% for i, k in items %}{% endfor %}'));
+// var p = new Parser(lexer.lex('{% set x, y = 3 %}'));
 // var n = p.parse();
 // nodes.printNodes(n);
 

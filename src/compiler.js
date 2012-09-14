@@ -242,6 +242,20 @@ var Compiler = Object.extend({
         this._compileAggregate(node, frame, '(', ')');
     },
 
+    compileSet: function(node, frame) {
+        var val = this.tmpid();
+
+        this.emit('var ' + val + ' = ');
+        this._compileExpression(node.value);
+        this.emitLine(';');
+        
+        for(var i=0; i<node.targets.length; i++) {
+            var t = node.targets[i];
+            this.emitLine('context.setVariable("' + t.value + '", ' +
+                          val + ');');
+        }
+    },
+
     compileIf: function(node, frame) {
         this.emit('if(');
         this._compileExpression(node.cond, frame);
@@ -401,7 +415,7 @@ var Compiler = Object.extend({
 
 // var fs = require("fs");
 // var c = new Compiler();
-// var src = "{% for i in [1,2,3] %}{{ i }}{% endfor %}";
+// var src = "{% set x = 3 %} {{ x }}";
 
 // var ns = parser.parse(src);
 // nodes.printNodes(ns);

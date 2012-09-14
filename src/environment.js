@@ -109,6 +109,10 @@ var Context = Object.extend({
         return this.ctx[name];
     },
 
+    setVariable: function(name, val) {
+        this.ctx[name] = val;
+    },
+    
     getVariables: function() {
         return this.ctx;
     },
@@ -215,10 +219,13 @@ var Template = Object.extend({
 });
 
 // var fs = require('fs');
-// var env = new Environment();
-// console.log(compiler.compile(fs.readFileSync('test.html', 'utf-8')));
+// //var src = fs.readFileSync('test.html', 'utf-8');
+// var src = '{{ username }}';
 
-// var tmpl = env.getTemplate('test.html');
+// var env = new Environment();
+// console.log(compiler.compile(src));
+
+// var tmpl = new Template(src, env);
 // console.log("OUTPUT ---");
 // console.log(tmpl.render({ username: "James" }));
 
