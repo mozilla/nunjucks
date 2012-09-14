@@ -28,4 +28,6 @@ var Frame = Object.extend({
     }
 });
 
-module.exports.Frame = Frame;
+module.exports = { 
+    Frame: Frame
+};

@@ -83,7 +83,7 @@ exports.isObject = function(obj) {
 
 exports.groupBy = function(obj, val) {
     var result = {};
-    var iterator = _.isFunction(val) ? val : function(obj) { return obj[val]; };
+    var iterator = exports.isFunction(val) ? val : function(obj) { return obj[val]; };
     for(var i=0; i<obj.length; i++) {
         var value = obj[i];
         var key = iterator(value, i);
@@ -338,11 +338,47 @@ modules['filters'] = filters;
 })();
 (function() {
 
+var Object = modules["object"];
+
+// Frames keep track of scoping both at compile-time and run-time so
+// we know how to access variables. Block tags can introduce special
+// variables, for example.
+var Frame = Object.extend({
+    init: function(parent) {
+        this.variables = {};
+        this.parent = parent;
+    },
+
+    addVariable: function(name, id) {
+        this.variables[name] = id;
+    },
+
+    lookup: function(name) {
+        var p = this.parent;
+        return this.variables[name] || (p && p.lookup(name));
+    },
+
+    push: function() {
+        return new Frame(this);
+    },
+
+    pop: function() {
+        return this.parent;
+    }
+});
+
+modules['runtime'] = { 
+    Frame: Frame
+};
+})();
+(function() {
+
 var lib = modules["lib"];
 var Object = modules["object"];
 var compiler = modules["compiler"];
 var builtin_filters = modules["filters"];
 var builtin_loaders = modules["loaders"];
+var Frame = modules["runtime"].Frame;
 
 var Environment = Object.extend({
     init: function(loaders) {
@@ -444,9 +480,6 @@ var Context = Object.extend({
     },
 
     lookup: function(name) {
-        if(!(name in this.ctx)) {
-            return '';
-        }
         return this.ctx[name];
     },
 
@@ -511,13 +544,15 @@ var Template = Object.extend({
         }
     },
 
-    render: function(ctx) {
+    render: function(ctx, frame) {
         if(!this.compiled) {
             this._compile();
         }
 
         var context = new Context(ctx || {}, this.blocks);
-        return this.rootRenderFunc(this.env, context);
+        return this.rootRenderFunc(this.env,
+                                   context,
+                                   frame || new Frame());
     },
 
     isUpToDate: function() {
