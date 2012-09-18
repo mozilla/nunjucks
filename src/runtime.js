@@ -10,8 +10,22 @@ var Frame = Object.extend({
         this.parent = parent;
     },
 
-    addVariable: function(name, id) {
-        this.variables[name] = id;
+    set: function(name, val) {
+        // Allow variables with dots by automatically creating the
+        // nested structure
+        var parts = name.split('.');
+        var obj = this.variables;
+
+        for(var i=0; i<parts.length - 1; i++) {
+            var id = parts[i];
+
+            if(!obj[id]) {
+                obj[id] = {};
+            }
+            obj = obj[id];
+        }
+
+        obj[parts[parts.length - 1]] = val;
     },
 
     lookup: function(name) {

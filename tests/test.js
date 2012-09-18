@@ -494,6 +494,27 @@ describe('compiler', function() {
         s = render('{% for k, v in { one: 1, two: 2 } %}' +
                    '-{{ k }}:{{ v }}-{% endfor %}');
         s.should.equal('-one:1--two:2-');
+
+        s = render('{% for i in [7,3,6] %}{{ loop.index }}{% endfor %}');
+        s.should.equal('123');
+
+        s = render('{% for i in [7,3,6] %}{{ loop.index0 }}{% endfor %}');
+        s.should.equal('012');
+
+        s = render('{% for i in [7,3,6] %}{{ loop.revindex }}{% endfor %}');
+        s.should.equal('321');
+
+        s = render('{% for i in [7,3,6] %}{{ loop.revindex0 }}{% endfor %}');
+        s.should.equal('210');
+
+        s = render('{% for i in [7,3,6] %}{% if loop.first %}{{ i }}{% endif %}{% endfor %}');
+        s.should.equal('7');
+
+        s = render('{% for i in [7,3,6] %}{% if loop.last %}{{ i }}{% endif %}{% endfor %}');
+        s.should.equal('6');
+
+        s = render('{% for i in [7,3,6] %}{{ loop.length }}{% endfor %}');
+        s.should.equal('333');
     });
 
     it('should compile operators', function() {

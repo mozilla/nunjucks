@@ -289,24 +289,36 @@ var Compiler = Object.extend({
             var k = this.tmpid();
             var v = this.tmpid();
 
-            frame.addVariable(key.value, k);
-            frame.addVariable(val.value, v);
+            frame.set(key.value, k);
+            frame.set(val.value, v);
 
+            this.emitLine('var ' + i + ' = -1;');
             this.emitLine('for(var ' + k + ' in ' + arr + ') {');
+            this.emitLine(i + '++;');
             this.emitLine('var ' + v + ' = ' + arr + '[' + k + '];');
-            this.emitLine('frame.addVariable("' + key.value + '", ' + k + ');');
-            this.emitLine('frame.addVariable("' + val.value + '", ' + v + ');');
+            this.emitLine('frame.set("' + key.value + '", ' + k + ');');
+            this.emitLine('frame.set("' + val.value + '", ' + v + ');');
+            this.emitLine('frame.set("loop.index", ' + i + ' + 1);');
+            this.emitLine('frame.set("loop.index0", ' + i + ');');
+            this.emitLine('frame.set("loop.first", ' + i + ' === 0);');
         }
         else {
             var v = this.tmpid();
 
-            frame.addVariable(node.name.value, v);
+            frame.set(node.name.value, v);
 
             this.emitLine('for(var ' + i + '=0; ' + i + ' < ' + arr + '.length; ' +
                           i + '++) {');
             this.emitLine('var ' + v + ' = ' + arr + '[' + i + '];');
-            this.emitLine('frame.addVariable("' + node.name.value +
+            this.emitLine('frame.set("' + node.name.value +
                           '", ' + v + ');');
+            this.emitLine('frame.set("loop.index", ' + i + ' + 1);');
+            this.emitLine('frame.set("loop.index0", ' + i + ');');
+            this.emitLine('frame.set("loop.revindex", ' + arr + '.length - ' + i + ');');
+            this.emitLine('frame.set("loop.revindex0", ' + arr + '.length - ' + i + ' - 1);');
+            this.emitLine('frame.set("loop.first", ' + i + ' === 0);');
+            this.emitLine('frame.set("loop.last", ' + i + ' === ' + arr + '.length - 1);');
+            this.emitLine('frame.set("loop.length", ' + arr + '.length);');
         }
 
         this.compile(node.body, frame);
@@ -384,7 +396,7 @@ var Compiler = Object.extend({
                           'b_' + name + ');');
 
             var tmpFrame = frame.push();
-            frame.addVariable('super', 'l_super');
+            frame.set('super', 'l_super');
             this.compile(block.body, tmpFrame);
 
             this.emitFuncEnd();
@@ -416,7 +428,7 @@ var Compiler = Object.extend({
 
 // var fs = require("fs");
 // var c = new Compiler();
-// var src = "{% set x = 3 %} {{ x }}";
+// var src = "{% for i in [3,45,1] %}{{ loop.index }}{% endfor %}";
 
 // var ns = parser.parse(src);
 // nodes.printNodes(ns);

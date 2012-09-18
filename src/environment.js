@@ -220,7 +220,7 @@ var Template = Object.extend({
 
 // var fs = require('fs');
 // //var src = fs.readFileSync('test.html', 'utf-8');
-// var src = '{{ username }}';
+// var src = "{% for k, v in {one:1, two:2} %}{{ loop.first }}{% endfor %}";
 
 // var env = new Environment();
 // console.log(compiler.compile(src));
