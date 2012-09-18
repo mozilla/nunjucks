@@ -77,7 +77,7 @@ exports.map = function(obj, func) {
     }
     
     for(var i=0; i<obj.length; i++) {
-        results[results.length] = func(value, i);
+        results[results.length] = func(obj[i], i);
     }
 
     if(obj.length === +obj.length) {

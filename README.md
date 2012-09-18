@@ -129,6 +129,20 @@ Missing features and differences:
 * Line statements: `# for item in seq`
 * Using `block` inside of `for` loops does not work
 * The API is different, especially for writing custom tags. See `API`.
+* Unpacking doesn't really exist, `for k, v in item` only works on dicts
+* These filters don't exist:
+  * `dictsort`
+  * `filesizeformat`
+  * `forceescape`
+  * `format`
+  * `pprint`
+  * `safe`
+  * `striptags`
+  * `sum
+  * `truncate`
+  * `urlize`
+  * `wordwrap`
+  * `xmlattr`
 
 ## FAQ
 
@@ -313,3 +327,8 @@ Currently you cannot create custom tags. This will be easy to do but I
 want to wait until the parser API stabilizes so that it doesn't change
 after extensions are created.
 
+### Requirements
+
+Should work in all browsers? 
+
+The `dictsort` filter requires IE 9.

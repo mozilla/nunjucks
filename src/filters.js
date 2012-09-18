@@ -54,10 +54,6 @@ var filters = {
         return val ? val : def;
     },
 
-    dictsort: function(dict, caseSens, by) {
-        by = by || 'key';
-    },
-
     escape: function(str) {
         return str.replace(/&/g, '&amp;')
             .replace(/"/g, '&quot;')
@@ -66,19 +62,8 @@ var filters = {
             .replace(/>/g, '&gt;');
     },
 
-    filesizeformat: function(val, binary) {
-    },
-
     first: function(arr) {
         return arr[0];
-    },
-
-    forceescape: function(val) {
-
-    },
-
-    format: function(str /*, vals */) {
-        var args = lib.toArray(arguments).slice(1);
     },
 
     groupby: function(arr, attr) {
@@ -87,13 +72,36 @@ var filters = {
 
     indent: function(str, width, indentfirst) {
         width = width || 4;
+        var res = '';
+        var lines = str.split('\n');
+        var sp = lib.repeat(' ', width);
+
+        for(var i=0; i<lines.length; i++) {
+            if(i == 0 && !indentfirst) {
+                res += lines[i] + '\n';
+            }
+            else {
+                res += sp + lines[i] + '\n';
+            }
+        }
+
+        return res;
     },
 
-    join: function(val, d, attr) {
-        d = d || '';
+    join: function(arr, del, attr) {
+        del = del || '';
+
+        if(attr) {
+            arr = lib.map(arr, function(v) {
+                return v[attr];
+            });
+        }
+
+        return arr.join(del);
     },
 
     last: function(arr) {
+        return arr[arr.length-1];
     },
 
     length: function(arr) {
@@ -101,80 +109,183 @@ var filters = {
     },
 
     list: function(val) {
+        if(lib.isString(val)) {
+            return val.split('');
+        }
+        else if(lib.isObject(val)) {
+            var keys = [];
+
+            if(Object.keys) {
+                keys = Object.keys(val);
+            }
+            else {
+                for(var k in val) {
+                    keys.push(k);
+                }
+            }
+
+            return lib.map(keys, function(k) {
+                return { key: k,
+                         value: val[k] };
+            });
+        }
+        else {
+            throw new Error("list: type not iterable");
+        }
     },
 
     lower: function(str) {
-    },
-
-    pprint: function(val) {
+        return str.toLowerCase();
     },
 
     random: function(arr) {
+        var i = Math.floor(Math.random() * arr.length);
+        if(i == arr.length) {
+            i--;
+        }
+
+        return arr[i];
     },
 
-    replace: function(str, old, new_, count) {
+    replace: function(str, old, new_, maxCount) {
+        var res = str;
+        var last = res;
+        var count = 1;
+        res = res.replace(old, new_);
+
+        while(last != res) {
+            if(count >= maxCount) {
+                break;
+            }
+
+            last = res;
+            res = res.replace(old, new_);
+            count++;
+        }
+
+        return res;
     },
 
-    reverse: function(str) {
+    reverse: function(val) {
+        var arr;
+        if(lib.isString(val)) {
+            arr = filters.list(val);
+        }
+        else {
+            // Copy it
+            arr = lib.map(val, function(v) { return v; });
+        }
+
+        arr.reverse();
+
+        if(lib.isString(val)) {
+            return arr.join('');
+        }
+        return arr;
     },
 
     round: function(val, precision, method) {
-        method = method || 'common';
-    },
+        precision = precision || 0;
+        var factor = Math.pow(10, precision);
+        var rounder;
 
-    safe: function(str) {
+        if(method == 'ceil') {
+            rounder = Math.ceil;
+        }
+        else if(method == 'floor') {
+            rounder = Math.floor;
+        }
+        else {
+            rounder = Math.round;
+        }
+
+        return rounder(val * factor) / factor;
     },
 
     slice: function(arr, slices, fillWith) {
+        var sliceLength = Math.floor(arr.length / slices);
+        var extra = arr.length % slices;
+        var offset = 0;
+        var res = [];
+
+        for(var i=0; i<slices; i++) {
+            var start = offset + i * sliceLength;
+            if(i < extra) {
+                offset++;
+            }
+            var end = offset + (i + 1) * sliceLength;
+
+            var slice = arr.slice(start, end);
+            if(fillWith && i >= extra) {
+                slice.push(fillWith);
+            }
+            res.push(slice);
+        }
+
+        return res;
     },
 
     sort: function(arr, reverse, caseSens, attr) {
+        // Copy it
+        arr = lib.map(arr, function(v) { return v; });
+
+        arr.sort(function(a, b) {
+            var x, y;
+
+            if(attr) {
+                x = a[attr];
+                y = b[attr];
+            }
+            else {
+                x = a;
+                y = b;
+            }
+
+            if(!caseSens && lib.isString(x) && lib.isString(y)) {
+                x = x.toLowerCase();
+                y = y.toLowerCase();
+            }
+               
+            if(x < y) {
+                return reverse ? 1 : -1;
+            }
+            else if(x > y) {
+                return reverse ? -1: 1;
+            }
+            else {
+                return 0;
+            }
+        });
+
+        return arr;
     },
 
     string: function(obj) {
         return obj.toString();
     },
 
-    striptags: function(val) {
-    },
-
-    sum: function(arr, attr, start) {
-    },
-    
     title: function(str) {
         return str.toUpperCase();
     },
 
     trim: function(str) {
-
-    },
-
-    truncate: function(str, length, killWords, end) {
-        length = length || 255;
-        end = end || '...';
+        return str.replace(/^\s*|\s*$/g, '');
     },
 
     upper: function(str) {
         return str.toUpperCase();
     },
 
-    urlize: function(str, trimLimit, noFollow) {
-    },
-
     wordcount: function(str) {
-    },
-
-    wordwrap: function(str, width, breakWords) {
-        width = width || 79;
-    },
-
-    xmlattr: function(dict, autospace) {
+        return str.match(/\w+/g).length;
     },
 
     float: function(val, def) {
+        return parseFloat(val) || def;
     },
-    
+
     int: function(val, def) {
+        return parseInt(val) || def;
     },
 };
 
