@@ -60,7 +60,7 @@ var Parser = Object.extend({
         }
 
         if(lineno && colno) {
-            msg = '[' + lineno + ',' + colno + '] ' + msg;
+            msg = '[Line ' + (lineno + 1) + ', Column ' + (colno + 1) + '] ' + msg;
         }
 
         throw new Error(msg);
@@ -645,7 +645,9 @@ var Parser = Object.extend({
             return node;
         }
         else {
-            throw new Error("parseExpression: invalid token: " + tok.value);
+            this.fail('unexpected token: ' + tok.value,
+                      tok.lineno,
+                      tok.colno);
         }
     },
 
