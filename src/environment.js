@@ -1,24 +1,29 @@
 
 var lib = require('./lib');
 var Object = require('./object');
+var lexer = require('./lexer');
 var compiler = require('./compiler');
 var builtin_filters = require('./filters');
 var builtin_loaders = require('./loaders');
 var Frame = require('./runtime').Frame;
 
 var Environment = Object.extend({
-    init: function(loaders) {
+    init: function(loaders, tags) {
         if(!loaders) {
             // The filesystem loader is only available client-side
             if(builtin_loaders.FileSystemLoader) {
                 this.loaders = [new builtin_loaders.FileSystemLoader()];
             }
             else {
-                this.loaders = [new builtin_loaders.HttpLoader()];
+                this.loaders = [new builtin_loaders.HttpLoader('/views')];
             }
         }
         else {
             this.loaders = lib.isArray(loaders) ? loaders : [loaders];
+        }
+
+        if(tags) {
+            lexer.setTags(tags);
         }
 
         this.filters = builtin_filters;
@@ -89,9 +94,13 @@ var Environment = Object.extend({
 
             context = lib.extend(context, ctx);
 
-            var res = env.getTemplate(name).render(ctx);
+            var res = env.render(name, ctx);
             k(null, res);            
         };
+    },
+
+    render: function(name, ctx) {
+        return this.getTemplate(name).render(ctx);
     }
 });
 
@@ -220,7 +229,7 @@ var Template = Object.extend({
 
 // var fs = require('fs');
 // //var src = fs.readFileSync('test.html', 'utf-8');
-// var src = "{% for k, v in {one:1, two:2} %}{{ loop.first }}{% endfor %}";
+// var src = "{% for i in [1,2,3] %}{% include 'item.html' %}{% endfor %}";
 
 // var env = new Environment();
 // console.log(compiler.compile(src));

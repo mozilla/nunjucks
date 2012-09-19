@@ -4,6 +4,11 @@ var path = require('path');
 var util = require('util');
 var compiler = require('../src/compiler');
 
+if(process.argv.length < 3) {
+    console.log('Usage: ' + path.basename(process.argv[1]) + ' <folder>');
+    process.exit(1);
+}
+
 var folder = process.argv[2];
 var templates = [];
 

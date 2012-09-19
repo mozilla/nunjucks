@@ -15,6 +15,9 @@
     "scripts": {
         "test": "make test"
     },
+    "bin": {
+        "nunjucks-precompile": "./bin/precompile"
+    },
     "main": "index"    
 }
 

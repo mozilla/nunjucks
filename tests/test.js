@@ -467,6 +467,16 @@ describe('compiler', function() {
         s.should.equal('Hello world, James Long, how are you');
     });
 
+    it('should compile references', function() {
+        var s = render('{{ foo.bar }}',
+                       { foo: { bar: 'baz' }});
+        s.should.equal('baz');
+
+        s = render('{{ foo["bar"] }}',
+                   { foo: { bar: 'baz' }});
+        s.should.equal('baz');
+    });
+
     it('should compile if blocks', function() {
         var tmpl = ('Give me some {% if hungry %}pizza' + 
                     '{% else %}water{% endif %}');

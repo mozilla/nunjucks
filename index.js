@@ -9,7 +9,13 @@ module.exports = {};
 module.exports.Environment = env.Environment;
 module.exports.Template = env.Template;
 
-module.exports.loaders = loaders;
+if(loaders.FileSystemLoader) {
+    module.exports.FileSystemLoader = loaders.FileSystemLoader;
+}
+else {
+    module.exports.HttpLoader = loaders.HttpLoader;
+}
+
 module.exports.compiler = compiler;
 module.exports.parser = parser;
 module.exports.lexer = lexer;

@@ -376,6 +376,15 @@ module.exports = {
         return new Tokenizer(src);
     },
 
+    setTags: function(tags) {
+        BLOCK_START = tags.blockStart || BLOCK_START;
+        BLOCK_END = tags.blockEnd || BLOCK_END;
+        VARIABLE_START = tags.variableStart || VARIABLE_START;
+        VARIABLE_END = tags.variableEnd || VARIABLE_END;
+        COMMENT_START = tags.commentStart || COMMENT_START;
+        COMMENT_END = tags.commentEnd || COMMENT_END;
+    },
+
     TOKEN_STRING: TOKEN_STRING,
     TOKEN_WHITESPACE: TOKEN_WHITESPACE,
     TOKEN_DATA: TOKEN_DATA,

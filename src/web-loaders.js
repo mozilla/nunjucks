@@ -2,22 +2,24 @@
 var Object = require('./object');
 
 var HttpLoader = Object.extend({
-    init: function(baseURL) {
+    init: function(baseURL, neverUpdate) {
         console.log("[nunjucks] Warning: only use HttpLoader in " +
                     "development. Otherwise precompile your templates.");
         this.baseURL = baseURL || '';
+        this.neverUpdate = neverUpdate;
     },
 
     getSource: function(name) {
         var src = this.fetch(this.baseURL + '/' + name);
+        var _this = this;
 
         if(!src) {
             return null;
         }
-
+        
         return { src: src,
                  path: name,
-                 upToDate: function() { return false; }};
+                 upToDate: function() { return _this.neverUpdate; }};
     },
 
     fetch: function(url) {
