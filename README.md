@@ -22,4 +22,4 @@ jinja2.
 
 ## Documentation
 
-See http://jlongster.com/ for complete documentation.
+See http://nunjucks.jlongster.com/ for complete documentation.
