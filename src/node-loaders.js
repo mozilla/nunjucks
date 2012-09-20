@@ -4,6 +4,9 @@ var path = require('path');
 var lib = require('./lib');
 var Object = require('./object');
 
+// Node <0.7.1 compatibility
+var existsSync = fs.existsSync ? fs.existsSync : path.existsSync;
+
 var FileSystemLoader = Object.extend({
     init: function(searchPaths) {
         if(searchPaths) {
@@ -20,7 +23,7 @@ var FileSystemLoader = Object.extend({
 
         for(var i=0; i<paths.length; i++) {
             var p = path.join(paths[i], name);
-            if(fs.existsSync(p)) {
+            if(existsSync(p)) {
                 fullpath = p;
                 break;
             }
