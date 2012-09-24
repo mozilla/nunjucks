@@ -1,4 +1,3 @@
-
 var lib = require('./lib');
 var Object = require('./object');
 var lexer = require('./lexer');
@@ -94,7 +93,7 @@ var Environment = Object.extend({
 
             context = lib.extend(context, ctx);
 
-            var res = env.render(name, ctx);
+            var res = env.render(name, context);
             k(null, res);            
         };
     },
