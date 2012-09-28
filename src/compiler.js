@@ -16,7 +16,7 @@ var compareOps = {
     '>=': '>='
 };
 
-// A common pattern is to emit binary operators 
+// A common pattern is to emit binary operators
 function binOpEmitter(str) {
     return function(node, frame) {
         this.compile(node.left, frame);
@@ -43,7 +43,7 @@ var Compiler = Object.extend({
 
     emitFuncBegin: function(name) {
         this.buffer = 'output';
-        this.emitLine('function ' + name + '(env, context, frame) {');
+        this.emitLine('function ' + name + '(env, context, frame, runtime) {');
         this.emitLine('var ' + this.buffer + ' = "";');
     },
 
@@ -205,7 +205,7 @@ var Compiler = Object.extend({
         this.emit('-');
         this.compile(node.target, frame);
     },
-    
+
     compilePos: function(node, frame) {
         this.emit('+');
         this.compile(node.target, frame);
@@ -213,7 +213,7 @@ var Compiler = Object.extend({
 
     compileCompare: function(node, frame) {
         this.compile(node.expr, frame);
-        
+
         for(var i=0; i<node.ops.length; i++) {
             var n = node.ops[i];
             this.emit(' ' + compareOps[n.type] + ' ');
@@ -231,8 +231,46 @@ var Compiler = Object.extend({
     },
 
     compileFunCall: function(node, frame) {
+        var args = [];
+        var kwargs = {};
+        for(var i=0; i<node.children.length; i++) {
+            var arg = node.children[i];
+            if(arg.name) {
+                kwargs[arg.name] = arg.val;
+            } else {
+                args.push(arg.val);
+            }
+        }
+        this.emit('(');
         this._compileExpression(node.name, frame);
-        this._compileAggregate(node, frame, '(', ')');
+        this.emit(').isMacro ? (');
+        this._compileExpression(node.name, frame);
+        this.emit(')([');
+        for(var j=0; j<args.length; j++) {
+            if(j != 0) {
+                this.emit(', ');
+            }
+            this.compile(args[j], frame);
+        }
+        this.emit('], {');
+        for(var name in kwargs) {
+            if(kwargs.hasOwnProperty(name)) {
+                this.compile(name, frame);
+                this.emit(': ');
+                this.compile(kwargs[name], frame);
+            }
+        }
+        this.emit('}) : ');
+        this.emit('(');
+        this._compileExpression(node.name, frame);
+        this.emit(')(');
+        for(var j=0; j<args.length; j++) {
+            if(j != 0) {
+                this.emit(', ');
+            }
+            this.compile(args[j], frame);
+        }
+        this.emit(')');
     },
 
     compileFilter: function(node, frame) {
@@ -249,7 +287,7 @@ var Compiler = Object.extend({
         this.emit('var ' + val + ' = ');
         this._compileExpression(node.value);
         this.emitLine(';');
-        
+
         for(var i=0; i<node.targets.length; i++) {
             var t = node.targets[i];
             this.emitLine('context.setVariable("' + t.value + '", ' +
@@ -276,7 +314,7 @@ var Compiler = Object.extend({
         var arr = this.tmpid();
         frame = frame.push();
 
-        this.emitLine('frame = frame.push()');
+        this.emitLine('frame = frame.push();');
 
         this.emit('var ' + arr + ' = ');
         this._compileExpression(node.arr, frame);
@@ -327,6 +365,56 @@ var Compiler = Object.extend({
         this.emitLine('frame = frame.pop();');
     },
 
+    macroBody: function(node, frame) {
+        frame = frame.push();
+        this.emitLine('frame = frame.push();');
+        var args = [];
+        for(var i=0; i<node.children.length; i++) {
+            var name = node.children[i].name.value
+            args.push('l_' + name);
+            frame.set(name, 'l_' + name);
+        }
+        this.emitLine('function macro(' + args.join(', ') + ') {');
+        var oldBuffer = this.buffer;
+        this.buffer = 'macroOutput';
+        this.emitLine('var ' + this.buffer + '= "";');
+        this.compile(node.body, frame)
+        this.emitLine('return ' + this.buffer + ';');
+        this.emitLine('}');
+        this.buffer = oldBuffer;
+        this.emitLine('frame = frame.pop();');
+        return frame;
+    },
+
+    macroDef: function(node, frame) {
+        var name = node.name.value;
+        this.emit('runtime.wrapMacro(macro, "' + name + '", ' + '[');
+        for(var i=0; i<node.children.length; i++) {
+            var arg = node.children[i];
+            this.emit('["' + arg.name.value + '", ');
+            arg.val ? this.compile(arg.val, frame) : this.emit('null');
+            this.emit(']');
+            if(i != node.children.length - 1) {
+                this.emit(', ');
+            }
+        }
+        this.emitLine('], false, false, false);');
+    },
+
+    compileMacro: function(node, frame) {
+        var macroFrame = this.macroBody(node, frame);
+        var name = node.name.value;
+        this.emit('l_' + name + ' = ');
+        this.macroDef(node, macroFrame);
+        frame.set(name, 'l_' + name);
+        if(!this.isChild) {
+            if(node.name.value.charAt(0) != '_') {
+                this.emitLine('context.addExport("' + name + '");');
+            }
+            this.emitLine('context.setVariable("' + name + '", l_' + name + ');');
+        }
+    },
+
     compileBlock: function(node, frame) {
         this.emitLine(this.buffer + ' += context.getBlock("' +
                       node.name.value + '")(env, context, frame);');
@@ -336,7 +424,7 @@ var Compiler = Object.extend({
         if(this.isChild) {
             throw new Error('cannot extend multiple times');
         }
-        
+
         this.emit('var parentTemplate = env.getTemplate(');
         this._compileExpression(node.template, frame);
         this.emitLine(', true);');
@@ -381,7 +469,7 @@ var Compiler = Object.extend({
         this._compileChildren(node, frame);
         if(this.isChild) {
             this.emitLine('return ' +
-                          'parentTemplate.rootRenderFunc(env, context, frame);');
+                          'parentTemplate.rootRenderFunc(env, context, frame, runtime);');
         }
         this.emitFuncEnd(this.isChild);
 
@@ -391,9 +479,10 @@ var Compiler = Object.extend({
             var name = block.name.value;
 
             this.emitFuncBegin('b_' + name);
-            this.emitLine('var l_super = context.getSuper(env, ' + 
+            this.emitLine('var l_super = context.getSuper(env, ' +
                           '"' + name + '", ' +
-                          'b_' + name + ');');
+                          'b_' + name + ', ' +
+                          'runtime);');
 
             var tmpFrame = frame.push();
             frame.set('super', 'l_super');

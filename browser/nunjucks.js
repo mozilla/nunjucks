@@ -492,19 +492,52 @@ var Frame = Object.extend({
     }
 });
 
-modules['runtime'] = { 
-    Frame: Frame
+// wrapMacro returns a function that stands in for the original macro, and handles
+// the translation of keyword arguments from nunjucks to javascript
+var wrapMacro = function(func, name, definedArgs, catchKwargs, catchVarargs, caller) {
+    var definedArgCount = definedArgs.length;
+
+    var newMacro = function(args, kwargs) {
+        var applyArgs = args.slice(0, definedArgCount);
+        var applyArgCount = applyArgs.length;
+        if(applyArgCount != definedArgCount) {
+            var remainingArgs = definedArgs.slice(applyArgCount);
+            for(var i=0; i<remainingArgs.length; i++) {
+                var arg = remainingArgs[i];
+                var name = arg[0];
+                var defaultVal = arg[1];
+                var value;
+                if(kwargs.hasOwnProperty(name)) {
+                    value = kwargs[name];
+                } else if(defaultVal) {
+                    value = defaultVal;
+                } else {
+                    throw new Error('parameter ' + name + ' was not provided');
+                }
+                applyArgs.push(value);
+            }
+        }
+        return func.apply(null, applyArgs);
+    };
+    newMacro.isMacro = true;
+    return newMacro;
+};
+
+
+modules['runtime'] = {
+    Frame: Frame,
+    wrapMacro: wrapMacro
 };
 })();
 (function() {
-
 var lib = modules["lib"];
 var Object = modules["object"];
 var lexer = modules["lexer"];
 var compiler = modules["compiler"];
 var builtin_filters = modules["filters"];
 var builtin_loaders = modules["loaders"];
-var Frame = modules["runtime"].Frame;
+var runtime = modules["runtime"];
+var Frame = runtime.Frame;
 
 var Environment = Object.extend({
     init: function(loaders, tags) {
@@ -593,8 +626,8 @@ var Environment = Object.extend({
 
             context = lib.extend(context, ctx);
 
-            var res = env.render(name, ctx);
-            k(null, res);            
+            var res = env.render(name, context);
+            k(null, res);
         };
     },
 
@@ -607,6 +640,7 @@ var Context = Object.extend({
     init: function(ctx, blocks) {
         this.ctx = ctx;
         this.blocks = {};
+        this.exported = [];
 
         for(var name in blocks) {
             this.addBlock(name, blocks[name]);
@@ -620,7 +654,7 @@ var Context = Object.extend({
     setVariable: function(name, val) {
         this.ctx[name] = val;
     },
-    
+
     getVariables: function() {
         return this.ctx;
     },
@@ -650,6 +684,10 @@ var Context = Object.extend({
 
             return blk(env, context);
         };
+    },
+
+    addExport: function(name) {
+        this.exported.push(name);
     }
 });
 
@@ -690,7 +728,8 @@ var Template = Object.extend({
         var context = new Context(ctx || {}, this.blocks);
         return this.rootRenderFunc(this.env,
                                    context,
-                                   frame || new Frame());
+                                   frame || new Frame(),
+                                   runtime);
     },
 
     isUpToDate: function() {
@@ -707,7 +746,7 @@ var Template = Object.extend({
             var func = new Function(compiler.compile(this.tmplStr, this.env));
             props = func();
         }
-        
+
         this.blocks = this._getBlocks(props);
         this.rootRenderFunc = props.root;
         this.compiled = true;
