@@ -231,7 +231,9 @@ var Compiler = Object.extend({
     },
 
     compileFunCall: function(node, frame) {
+        this.emit('(');
         this._compileExpression(node.name, frame);
+        this.emit(')');
         this._compileAggregate(node, frame, '(', ')');
     },
 
@@ -428,7 +430,7 @@ var Compiler = Object.extend({
 
 // var fs = require("fs");
 // var c = new Compiler();
-// var src = "{% for i in [3,45,1] %}{{ loop.index }}{% endfor %}";
+// var src = "{{ test('hello') }}";
 
 // var ns = parser.parse(src);
 // nodes.printNodes(ns);
