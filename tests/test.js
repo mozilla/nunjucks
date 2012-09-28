@@ -477,6 +477,12 @@ describe('compiler', function() {
         s.should.equal('baz');
     });
 
+    it('should compile funciton calls', function() {
+        var s = render('{{ foo("msg") }}',
+                       { foo: function(str) { return str + 'hi'; }});
+        s.should.equal('msghi');
+    });
+
     it('should compile if blocks', function() {
         var tmpl = ('Give me some {% if hungry %}pizza' + 
                     '{% else %}water{% endif %}');
