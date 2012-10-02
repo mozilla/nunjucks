@@ -161,12 +161,13 @@ var Parser = Object.extend({
         if(!this.skipSymbol('macro')) {
             this.fail("expected macro");
         }
+
         var nameTok = this.nextToken();
         var name = new nodes.Symbol(nameTok.lineno, nameTok.colno, nameTok.value);
-
         if(!name instanceof nodes.Symbol) {
             this.fail('macro name expected');
         }
+
         var args = this.parseSignature();
         var node = new nodes.Macro(macroTok.lineno,
                                    macroTok.colno,
@@ -829,6 +830,7 @@ var Parser = Object.extend({
         call = call || false;
         var tok = this.nextToken();
         var args = [];
+
         while(1) {
             var type = this.peekToken().type;
             if(type == lexer.TOKEN_RIGHT_PAREN) {

@@ -232,6 +232,7 @@ var Compiler = Object.extend({
 
     emitCallArgs: function(args, frame, startChar, endChar) {
         this.emit(startChar);
+
         for(var j=0; j<args.length; j++) {
             if(j != 0) {
                 this.emit(', ');
@@ -243,6 +244,7 @@ var Compiler = Object.extend({
 
     emitCallKwargs: function(kwargs, frame) {
         this.emit('{');
+
         for(var name in kwargs) {
             if(kwargs.hasOwnProperty(name)) {
                 this.compile(name, frame);
@@ -262,6 +264,7 @@ var Compiler = Object.extend({
     compileFunCall: function(node, frame) {
         var args = [];
         var kwargs = {};
+
         for(var i=0; i<node.children.length; i++) {
             var arg = node.children[i];
             if(arg.name) {
@@ -381,6 +384,7 @@ var Compiler = Object.extend({
         frame = frame.push();
         this.emitLine('frame = frame.push();');
         var args = [];
+
         for(var i=0; i<node.children.length; i++) {
             var name = node.children[i].name.value
             args.push('l_' + name);
@@ -401,11 +405,13 @@ var Compiler = Object.extend({
     macroDef: function(node, frame) {
         var name = node.name.value;
         this.emit('runtime.wrapMacro(macro, "' + name + '", ' + '[');
+
         for(var i=0; i<node.children.length; i++) {
             var arg = node.children[i];
             this.emit('["' + arg.name.value + '", ');
             arg.val ? this.compile(arg.val, frame) : this.emit('null');
             this.emit(']');
+
             if(i != node.children.length - 1) {
                 this.emit(', ');
             }
@@ -419,6 +425,7 @@ var Compiler = Object.extend({
         this.emit('var l_' + name + ' = ');
         this.macroDef(node, macroFrame);
         frame.set(name, 'l_' + name);
+
         if(!this.isChild) {
             if(node.name.value.charAt(0) != '_') {
                 this.emitLine('context.addExport("' + name + '");');
@@ -432,6 +439,7 @@ var Compiler = Object.extend({
         this.compile(node.template, frame);
         this.emitLine(').getModule();');
         frame.set(node.target, 'l_' + node.target);
+
         if(!this.isChild) {
             this.emitLine('context.setVariable("' + node.target + '", l_' + node.target + ');');
         }
@@ -448,6 +456,7 @@ var Compiler = Object.extend({
             if(!alias) {
                 alias = name;
             }
+
             this.emitLine('if(includedTemplate.hasOwnProperty("' + name + '")) {');
             this.emitLine('var l_' + alias + ' = includedTemplate.' + name + ';');
             this.emitLine('} else {');
