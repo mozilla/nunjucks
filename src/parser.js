@@ -443,7 +443,7 @@ var Parser = Object.extend({
                 var node = new nodes.FunCall(tok.lineno,
                                              tok.colno,
                                              node);
-                this.parseCallSignature(node);
+                this.parseSignature(node, true);
             }
             else if(tok.type == lexer.TOKEN_LEFT_BRACKET) {
                 // Reference
@@ -823,7 +823,8 @@ var Parser = Object.extend({
         return node;
     },
 
-    parseSignature: function(node) {
+    parseSignature: function(node, call) {
+        call = call || false;
         var tok = this.nextToken();
         var args = node.children = [];
         while(1) {
@@ -836,39 +837,7 @@ var Parser = Object.extend({
             if(args.length > 0 && !this.skip(lexer.TOKEN_COMMA)) {
                 throw new Error("parseSignature: expected comma after expression");
             }
-            else {
-                // TODO: check for errors
-                var name = this.parseExpression();
-                if(!name instanceof nodes.Symbol) {
-                    this.fail('expected symbol as argument name');
-                }
-                var arg = new nodes.Argument(name.lineno,
-                                             name.colno,
-                                             name);
-                if(this.skipValue(lexer.TOKEN_OPERATOR, '=')) {
-                    arg.val = this.parseExpression();
-                }
-                args.push(arg);
-            }
-        }
-
-        return node;
-    },
-
-    parseCallSignature: function(node) {
-        var tok = this.nextToken();
-        var args = node.children = [];
-        while(1) {
-            var type = this.peekToken().type;
-            if(type == lexer.TOKEN_RIGHT_PAREN) {
-                this.nextToken();
-                break;
-            }
-
-            if(args.length > 0 && !this.skip(lexer.TOKEN_COMMA)) {
-                throw new Error("parseCallSignature: expected comma after expression");
-            }
-            else {
+            else if(call) {
                 // TODO: check for errors
                 var nameOrVal = this.parseExpression();
                 var name, val;
@@ -885,6 +854,20 @@ var Parser = Object.extend({
                                              nameOrVal.colno,
                                              name,
                                              val);
+                args.push(arg);
+            }
+            else {
+                // TODO: check for errors
+                var name = this.parseExpression();
+                if(!name instanceof nodes.Symbol) {
+                    this.fail('expected symbol as argument name');
+                }
+                var arg = new nodes.Argument(name.lineno,
+                                             name.colno,
+                                             name);
+                if(this.skipValue(lexer.TOKEN_OPERATOR, '=')) {
+                    arg.val = this.parseExpression();
+                }
                 args.push(arg);
             }
         }
