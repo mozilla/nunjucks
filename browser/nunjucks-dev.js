@@ -288,6 +288,22 @@ var Macro = Node.extend("Macro", {
     }
 });
 
+var Import = Node.extend("Import", {
+    init: function(lineno, colno, template, target) {
+        this.template = template;
+        this.target = target;
+        this.parent(lineno, colno);
+    }
+});
+
+var FromImport = Node.extend("FromImport", {
+    init: function(lineno, colno, template, names) {
+        this.template = template;
+        this.names = names;
+        this.parent(lineno, colno);
+    }
+});
+
 var FunCall = Node.extend("FunCall", {
     init: function(lineno, colno, name, args) {
         this.name = name;
@@ -481,6 +497,8 @@ modules['nodes'] = {
     For: For,
     Argument: Argument,
     Macro: Macro,
+    Import: Import,
+    FromImport: FromImport,
     FunCall: FunCall,
     Filter: Filter,
     Block: Block,
@@ -1166,9 +1184,9 @@ var Parser = Object.extend({
         if(!this.skipSymbol('macro')) {
             this.fail("expected macro");
         }
-
         var nameTok = this.nextToken();
         var name = new nodes.Symbol(nameTok.lineno, nameTok.colno, nameTok.value);
+
         if(!name instanceof nodes.Symbol) {
             this.fail('macro name expected');
         }
@@ -1180,6 +1198,70 @@ var Parser = Object.extend({
 
         node.body = this.parseUntilBlocks('endmacro');
         this.advanceAfterBlockEnd();
+
+        return node;
+    },
+
+    parseImport: function() {
+        var importTok = this.peekToken();
+        if(!this.skipSymbol('import')) {
+            this.fail("expected import");
+        }
+
+        var template = this.parseExpression();
+
+        if(!this.skipSymbol('as')) {
+            this.fail('expected "as" keyword');
+        }
+        var target = this.parsePrimary().value;
+
+        this.advanceAfterBlockEnd(importTok.value);
+
+        return new nodes.Import(importTok.lineno,
+                                importTok.colno,
+                                template,
+                                target);
+    },
+
+    parseFrom: function() {
+        var fromTok = this.peekToken();
+        if(!this.skipSymbol('from')) {
+            this.fail("expected from");
+        }
+
+        var template = this.parseExpression();
+        var names = [];
+        var node = new nodes.FromImport(fromTok.lineno,
+                                        fromTok.colno,
+                                        template,
+                                        names);
+
+        if(!this.skipSymbol('import')) {
+            this.fail("expected import");
+        }
+
+        while(1) {
+            var type = this.peekToken().type;
+            if(type == lexer.TOKEN_BLOCK_END) {
+                this.nextToken();
+                break;
+            }
+
+            if(names.length > 0 && !this.skip(lexer.TOKEN_COMMA)) {
+                this.fail('expected comma');
+            }
+
+            var name = this.parsePrimary().value;
+            if(name.charAt(0) == '_') {
+                this.fail('names starting with an underscore cannot be imported');
+            }
+
+            var alias = null;
+            if(this.skipSymbol('as')) {
+                var alias = this.parsePrimary().value;
+            }
+            names.push([name, alias]);
+        }
 
         return node;
     },
@@ -1320,6 +1402,8 @@ var Parser = Object.extend({
             case 'include': node = this.parseInclude(); break;
             case 'set': node = this.parseSet(); break;
             case 'macro': node = this.parseMacro(); break;
+            case 'import': node = this.parseImport(); break;
+            case 'from': node = this.parseFrom(); break;
             default: this.fail('unknown block tag: ' + tok.value);
         }
 
@@ -2198,6 +2282,9 @@ var Compiler = Object.extend({
             var t = node.targets[i];
             this.emitLine('context.setVariable("' + t.value + '", ' +
                           val + ');');
+            if(t.value.charAt(0) != '_') {
+                this.emitLine('context.addExport("' + t.value + '");');
+            }
         }
     },
 
@@ -2310,7 +2397,7 @@ var Compiler = Object.extend({
     compileMacro: function(node, frame) {
         var macroFrame = this.macroBody(node, frame);
         var name = node.name.value;
-        this.emit('l_' + name + ' = ');
+        this.emit('var l_' + name + ' = ');
         this.macroDef(node, macroFrame);
         frame.set(name, 'l_' + name);
         if(!this.isChild) {
@@ -2318,6 +2405,41 @@ var Compiler = Object.extend({
                 this.emitLine('context.addExport("' + name + '");');
             }
             this.emitLine('context.setVariable("' + name + '", l_' + name + ');');
+        }
+    },
+
+    compileImport: function(node, frame) {
+        this.emit('var l_' + node.target + ' = env.getTemplate(');
+        this.compile(node.template, frame);
+        this.emitLine(').getModule();');
+        frame.set(node.target, 'l_' + node.target);
+        if(!this.isChild) {
+            this.emitLine('context.setVariable("' + node.target + '", l_' + node.target + ');');
+        }
+    },
+
+    compileFromImport: function(node, frame) {
+        this.emit('var includedTemplate = env.getTemplate(');
+        this.compile(node.template, frame);
+        this.emitLine(').getModule();');
+
+        for(var i=0; i<node.names.length; i++) {
+            var name = node.names[i][0];
+            var alias = node.names[i][1];
+            if(!alias) {
+                alias = name;
+            }
+            this.emitLine('if(includedTemplate.hasOwnProperty("' + name + '")) {');
+            this.emitLine('var l_' + alias + ' = includedTemplate.' + name + ';');
+            this.emitLine('} else {');
+            // TODO: Add runtime errors
+            this.emitLine('// Add runtime error here');
+            this.emitLine('}');
+            frame.set(alias, 'l_' + alias);
+
+            if(!this.isChild) {
+                this.emitLine('context.setVariable("' + alias + '", l_' + alias + ');');
+            }
         }
     },
 
@@ -2423,7 +2545,7 @@ var Compiler = Object.extend({
 
 // var fs = modules["fs"];
 // var c = new Compiler();
-// var src = "{% for i in [3,45,1] %}{{ loop.index }}{% endfor %}";
+// var src = "{{ test('hello') }}";
 
 // var ns = parser.parse(src);
 // nodes.printNodes(ns);
@@ -2957,6 +3079,15 @@ var Context = Object.extend({
 
     addExport: function(name) {
         this.exported.push(name);
+    },
+
+    getExported: function() {
+        var exported = {};
+        for(var i=0; i<this.exported.length; i++) {
+            var name = this.exported[i];
+            exported[name] = this.ctx[name];
+        }
+        return exported;
     }
 });
 
@@ -3003,6 +3134,19 @@ var Template = Object.extend({
 
     isUpToDate: function() {
         return this.upToDate();
+    },
+
+    getModule: function() {
+        if(!this.compiled) {
+            this._compile();
+        }
+        // Run the rootRenderFunc to populate the context with exported vars
+        var ctx = new Context({}, this.blocks);
+        this.rootRenderFunc(this.env,
+                            ctx,
+                            new Frame(),
+                            runtime);
+        return ctx.getExported();
     },
 
     _compile: function() {

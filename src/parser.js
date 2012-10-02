@@ -161,9 +161,9 @@ var Parser = Object.extend({
         if(!this.skipSymbol('macro')) {
             this.fail("expected macro");
         }
-
         var nameTok = this.nextToken();
         var name = new nodes.Symbol(nameTok.lineno, nameTok.colno, nameTok.value);
+
         if(!name instanceof nodes.Symbol) {
             this.fail('macro name expected');
         }
@@ -175,6 +175,70 @@ var Parser = Object.extend({
 
         node.body = this.parseUntilBlocks('endmacro');
         this.advanceAfterBlockEnd();
+
+        return node;
+    },
+
+    parseImport: function() {
+        var importTok = this.peekToken();
+        if(!this.skipSymbol('import')) {
+            this.fail("expected import");
+        }
+
+        var template = this.parseExpression();
+
+        if(!this.skipSymbol('as')) {
+            this.fail('expected "as" keyword');
+        }
+        var target = this.parsePrimary().value;
+
+        this.advanceAfterBlockEnd(importTok.value);
+
+        return new nodes.Import(importTok.lineno,
+                                importTok.colno,
+                                template,
+                                target);
+    },
+
+    parseFrom: function() {
+        var fromTok = this.peekToken();
+        if(!this.skipSymbol('from')) {
+            this.fail("expected from");
+        }
+
+        var template = this.parseExpression();
+        var names = [];
+        var node = new nodes.FromImport(fromTok.lineno,
+                                        fromTok.colno,
+                                        template,
+                                        names);
+
+        if(!this.skipSymbol('import')) {
+            this.fail("expected import");
+        }
+
+        while(1) {
+            var type = this.peekToken().type;
+            if(type == lexer.TOKEN_BLOCK_END) {
+                this.nextToken();
+                break;
+            }
+
+            if(names.length > 0 && !this.skip(lexer.TOKEN_COMMA)) {
+                this.fail('expected comma');
+            }
+
+            var name = this.parsePrimary().value;
+            if(name.charAt(0) == '_') {
+                this.fail('names starting with an underscore cannot be imported');
+            }
+
+            var alias = null;
+            if(this.skipSymbol('as')) {
+                var alias = this.parsePrimary().value;
+            }
+            names.push([name, alias]);
+        }
 
         return node;
     },
@@ -315,6 +379,8 @@ var Parser = Object.extend({
             case 'include': node = this.parseInclude(); break;
             case 'set': node = this.parseSet(); break;
             case 'macro': node = this.parseMacro(); break;
+            case 'import': node = this.parseImport(); break;
+            case 'from': node = this.parseFrom(); break;
             default: this.fail('unknown block tag: ' + tok.value);
         }
 

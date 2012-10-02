@@ -136,6 +136,22 @@ var Macro = Node.extend("Macro", {
     }
 });
 
+var Import = Node.extend("Import", {
+    init: function(lineno, colno, template, target) {
+        this.template = template;
+        this.target = target;
+        this.parent(lineno, colno);
+    }
+});
+
+var FromImport = Node.extend("FromImport", {
+    init: function(lineno, colno, template, names) {
+        this.template = template;
+        this.names = names;
+        this.parent(lineno, colno);
+    }
+});
+
 var FunCall = Node.extend("FunCall", {
     init: function(lineno, colno, name, args) {
         this.name = name;
@@ -329,6 +345,8 @@ module.exports = {
     For: For,
     Argument: Argument,
     Macro: Macro,
+    Import: Import,
+    FromImport: FromImport,
     FunCall: FunCall,
     Filter: Filter,
     Block: Block,

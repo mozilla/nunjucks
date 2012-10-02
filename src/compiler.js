@@ -292,6 +292,9 @@ var Compiler = Object.extend({
             var t = node.targets[i];
             this.emitLine('context.setVariable("' + t.value + '", ' +
                           val + ');');
+            if(t.value.charAt(0) != '_') {
+                this.emitLine('context.addExport("' + t.value + '");');
+            }
         }
     },
 
@@ -404,7 +407,7 @@ var Compiler = Object.extend({
     compileMacro: function(node, frame) {
         var macroFrame = this.macroBody(node, frame);
         var name = node.name.value;
-        this.emit('l_' + name + ' = ');
+        this.emit('var l_' + name + ' = ');
         this.macroDef(node, macroFrame);
         frame.set(name, 'l_' + name);
         if(!this.isChild) {
@@ -412,6 +415,41 @@ var Compiler = Object.extend({
                 this.emitLine('context.addExport("' + name + '");');
             }
             this.emitLine('context.setVariable("' + name + '", l_' + name + ');');
+        }
+    },
+
+    compileImport: function(node, frame) {
+        this.emit('var l_' + node.target + ' = env.getTemplate(');
+        this.compile(node.template, frame);
+        this.emitLine(').getModule();');
+        frame.set(node.target, 'l_' + node.target);
+        if(!this.isChild) {
+            this.emitLine('context.setVariable("' + node.target + '", l_' + node.target + ');');
+        }
+    },
+
+    compileFromImport: function(node, frame) {
+        this.emit('var includedTemplate = env.getTemplate(');
+        this.compile(node.template, frame);
+        this.emitLine(').getModule();');
+
+        for(var i=0; i<node.names.length; i++) {
+            var name = node.names[i][0];
+            var alias = node.names[i][1];
+            if(!alias) {
+                alias = name;
+            }
+            this.emitLine('if(includedTemplate.hasOwnProperty("' + name + '")) {');
+            this.emitLine('var l_' + alias + ' = includedTemplate.' + name + ';');
+            this.emitLine('} else {');
+            // TODO: Add runtime errors
+            this.emitLine('// Add runtime error here');
+            this.emitLine('}');
+            frame.set(alias, 'l_' + alias);
+
+            if(!this.isChild) {
+                this.emitLine('context.setVariable("' + alias + '", l_' + alias + ');');
+            }
         }
     },
 

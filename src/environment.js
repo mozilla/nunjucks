@@ -156,6 +156,15 @@ var Context = Object.extend({
 
     addExport: function(name) {
         this.exported.push(name);
+    },
+
+    getExported: function() {
+        var exported = {};
+        for(var i=0; i<this.exported.length; i++) {
+            var name = this.exported[i];
+            exported[name] = this.ctx[name];
+        }
+        return exported;
     }
 });
 
@@ -202,6 +211,19 @@ var Template = Object.extend({
 
     isUpToDate: function() {
         return this.upToDate();
+    },
+
+    getModule: function() {
+        if(!this.compiled) {
+            this._compile();
+        }
+        // Run the rootRenderFunc to populate the context with exported vars
+        var ctx = new Context({}, this.blocks);
+        this.rootRenderFunc(this.env,
+                            ctx,
+                            new Frame(),
+                            runtime);
+        return ctx.getExported();
     },
 
     _compile: function() {
