@@ -1190,10 +1190,11 @@ var Parser = Object.extend({
         if(!name instanceof nodes.Symbol) {
             this.fail('macro name expected');
         }
+        var args = this.parseSignature();
         var node = new nodes.Macro(macroTok.lineno,
                                    macroTok.colno,
-                                   name);
-        this.parseSignature(node);
+                                   name,
+                                   args);
         this.advanceAfterBlockEnd(macroTok.value);
 
         node.body = this.parseUntilBlocks('endmacro');
@@ -1463,10 +1464,11 @@ var Parser = Object.extend({
         while(tok) {
             if(tok.type == lexer.TOKEN_LEFT_PAREN) {
                 // Function call
+                var args = this.parseSignature(true);
                 var node = new nodes.FunCall(tok.lineno,
                                              tok.colno,
-                                             node);
-                this.parseSignature(node, true);
+                                             node,
+                                             args);
             }
             else if(tok.type == lexer.TOKEN_LEFT_BRACKET) {
                 // Reference
@@ -1846,10 +1848,10 @@ var Parser = Object.extend({
         return node;
     },
 
-    parseSignature: function(node, call) {
+    parseSignature: function(call) {
         call = call || false;
         var tok = this.nextToken();
-        var args = node.children = [];
+        var args = [];
         while(1) {
             var type = this.peekToken().type;
             if(type == lexer.TOKEN_RIGHT_PAREN) {
@@ -1895,7 +1897,7 @@ var Parser = Object.extend({
             }
         }
 
-        return node;
+        return args;
     },
 
     parseUntilBlocks: function(/* blockNames */) {
