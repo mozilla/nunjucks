@@ -230,6 +230,35 @@ var Compiler = Object.extend({
         this.emit(']');
     },
 
+    emitCallArgs: function(args, frame, startChar, endChar) {
+        this.emit(startChar);
+        for(var j=0; j<args.length; j++) {
+            if(j != 0) {
+                this.emit(', ');
+            }
+            this.compile(args[j], frame);
+        }
+        this.emit(endChar);
+    },
+
+    emitCallKwargs: function(kwargs, frame) {
+        this.emit('{');
+        for(var name in kwargs) {
+            if(kwargs.hasOwnProperty(name)) {
+                this.compile(name, frame);
+                this.emit(': ');
+                this.compile(kwargs[name], frame);
+            }
+        }
+        this.emit('}');
+    },
+
+    emitWrappedExpression: function(node, frame) {
+        this.emit('(');
+        this._compileExpression(node.name, frame);
+        this.emit(')');
+    },
+
     compileFunCall: function(node, frame) {
         var args = [];
         var kwargs = {};
@@ -241,36 +270,16 @@ var Compiler = Object.extend({
                 args.push(arg.val);
             }
         }
+        this.emitWrappedExpression(node, frame);
+        this.emit('.isMacro ? ');
+        this.emitWrappedExpression(node, frame);
         this.emit('(');
-        this._compileExpression(node.name, frame);
-        this.emit(').isMacro ? (');
-        this._compileExpression(node.name, frame);
-        this.emit(')([');
-        for(var j=0; j<args.length; j++) {
-            if(j != 0) {
-                this.emit(', ');
-            }
-            this.compile(args[j], frame);
-        }
-        this.emit('], {');
-        for(var name in kwargs) {
-            if(kwargs.hasOwnProperty(name)) {
-                this.compile(name, frame);
-                this.emit(': ');
-                this.compile(kwargs[name], frame);
-            }
-        }
-        this.emit('}) : ');
-        this.emit('(');
-        this._compileExpression(node.name, frame);
-        this.emit(')(');
-        for(var j=0; j<args.length; j++) {
-            if(j != 0) {
-                this.emit(', ');
-            }
-            this.compile(args[j], frame);
-        }
-        this.emit(')');
+        this.emitCallArgs(args, frame, '[', ']');
+        this.emit(', ');
+        this.emitCallKwargs(kwargs, frame);
+        this.emit(') : ');
+        this.emitWrappedExpression(node, frame);
+        this.emitCallArgs(args, frame, '(', ')');
     },
 
     compileFilter: function(node, frame) {
