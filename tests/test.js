@@ -496,6 +496,18 @@ describe('compiler', function() {
         s = render('{% if not hungry %}good{% endif %}',
                    { hungry: false });
         s.should.equal('good');
+
+        s = render('{% if hungry and like_pizza %}good{% endif %}',
+            { hungry: true, like_pizza: true });
+        s.should.equal('good');
+
+        s = render('{% if hungry or like_pizza %}good{% endif %}',
+            { hungry: false, like_pizza: true });
+        s.should.equal('good');
+
+        s = render('{% if (hungry or like_pizza) and anchovies %}good{% endif %}',
+            { hungry: false, like_pizza: true, anchovies: true });
+        s.should.equal('good');
     });
 
     it('should compile for blocks', function() {
