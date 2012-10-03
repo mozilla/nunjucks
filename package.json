@@ -1,13 +1,14 @@
 {
     "name": "nunjucks",
     "description": "A jinja inspired templating engine",
-    "version": "0.1.4",
+    "version": "0.1.4a",
     "author": {
         "name": "James Long",
         "email": "longster@gmail.com"
     },
     "devDependencies": {
-        "should": "1.1.0"
+        "should": "*",
+        "mocha": "*"
     },
     "engines": {
         "node": "*"
