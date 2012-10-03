@@ -585,6 +585,10 @@ describe('compiler', function() {
                    '{% block block1 %}BAR{% endblock %}' + 
                    '{% block block2 %}BAZ{% endblock %}');
         s.should.equal('FooBARBAZFizzle');
+
+        s = render('hola {% extends tmpl %} hizzle mumble',
+                   { tmpl: 'base.html' });
+        s.should.equal('FooBarBazFizzle');
     });
 
     it('should render parent blocks with super()', function() {
@@ -601,9 +605,8 @@ describe('compiler', function() {
                   { name: 'james' });
         s.should.equal('hello world FooInclude james');
 
-
-        s = render('hello world {% include templ %}',
-                  { name: 'thedude', templ: "include.html" });
+        s = render('hello world {% include tmpl %}',
+                  { name: 'thedude', tmpl: "include.html" });
         s.should.equal('hello world FooInclude thedude');
     });
 
