@@ -756,7 +756,10 @@ var Parser = Object.extend({
                                     new nodes.Symbol(tok.lineno,
                                                      tok.colno,
                                                      name),
-                                    [node]);
+                                    [new nodes.Argument(node.lineno,
+                                                        node.colno,
+                                                        undefined,
+                                                        node)]);
 
             if(this.peekToken().type == lexer.TOKEN_LEFT_PAREN) {
                 // Get a FunCall node and add the parameters to the
@@ -842,7 +845,6 @@ var Parser = Object.extend({
                 throw new Error("parseSignature: expected comma after expression");
             }
             else if(call) {
-                // TODO: check for errors
                 var nameOrVal = this.parseExpression();
                 var name, val;
                 if(this.skipValue(lexer.TOKEN_OPERATOR, '=')) {
@@ -861,7 +863,6 @@ var Parser = Object.extend({
                 args.push(arg);
             }
             else {
-                // TODO: check for errors
                 var name = this.parseExpression();
                 if(!name instanceof nodes.Symbol) {
                     this.fail('expected symbol as argument name');

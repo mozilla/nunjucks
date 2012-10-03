@@ -64,6 +64,14 @@ function _isAST(node1, node2) {
             node1.else_.should.equal(null);
         }
     }
+    else if(node2 instanceof nodes.Argument) {
+        if(node2.name) {
+            _isAST(node2.name, node1.name);
+        }
+        if(node2.val) {
+            _isAST(node2.val, node1.val);
+        }
+    }
     else {
         if(node2 instanceof nodes.FunCall) {
             _isAST(node2.name, node1.name);
@@ -112,6 +120,9 @@ function toNodes(ast) {
                         0,
                         toNodes(ast[1]),
                         lib.map(args, toNodes));
+    }
+    else if(dummy instanceof nodes.Argument) {
+        return new type(0, 0, toNodes(ast[1]), toNodes(ast[2]));
     }
     else {
         return new type(0, 0, lib.map(ast.slice(1), toNodes));
@@ -402,27 +413,35 @@ describe('parser', function() {
     it('should parse filters', function() {
         isAST(parser.parse('{{ foo | bar }}'),
               [nodes.Root,
-               [nodes.Output, 
+               [nodes.Output,
                 [nodes.Filter,
                  [nodes.Symbol, 'bar'],
-                 [nodes.Symbol, 'foo']]]]);
+                 [nodes.Argument, null, [nodes.Symbol, 'foo']]]]]);
 
         isAST(parser.parse('{{ foo | bar | baz }}'),
               [nodes.Root,
                [nodes.Output,
                 [nodes.Filter,
                  [nodes.Symbol, 'baz'],
-                 [nodes.Filter,
-                  [nodes.Symbol, 'bar'],
-                  [nodes.Symbol, 'foo']]]]]);
+                 [nodes.Argument,
+                  null,
+                  [nodes.Filter,
+                   [nodes.Symbol, 'bar'],
+                   [nodes.Argument,
+                    null,
+                    [nodes.Symbol, 'foo']]]]]]]);
 
         isAST(parser.parse('{{ foo | bar(3) }}'),
               [nodes.Root,
-               [nodes.Output, 
+               [nodes.Output,
                 [nodes.Filter,
                  [nodes.Symbol, 'bar'],
-                 [nodes.Symbol, 'foo'],
-                 [nodes.Literal, 3]]]]);
+                 [nodes.Argument,
+                  null,
+                  [nodes.Symbol, 'foo']],
+                 [nodes.Argument,
+                  null,
+                  [nodes.Literal, 3]]]]]);
     });
 
     it('should throw errors', function() {
@@ -484,7 +503,7 @@ describe('compiler', function() {
     });
 
     it('should compile if blocks', function() {
-        var tmpl = ('Give me some {% if hungry %}pizza' + 
+        var tmpl = ('Give me some {% if hungry %}pizza' +
                     '{% else %}water{% endif %}');
 
         var s = render(tmpl, { hungry: true });
@@ -569,7 +588,7 @@ describe('compiler', function() {
         s.should.equal('FooBARBazFizzle');
 
         s = render('{% extends "base.html" %}' +
-                   '{% block block1 %}BAR{% endblock %}' + 
+                   '{% block block1 %}BAR{% endblock %}' +
                    '{% block block2 %}BAZ{% endblock %}');
         s.should.equal('FooBARBAZFizzle');
     });
