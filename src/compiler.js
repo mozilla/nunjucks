@@ -230,7 +230,7 @@ var Compiler = Object.extend({
         this.emit(']');
     },
 
-    emitCallArgs: function(args, frame, startChar, endChar) {
+    _emitCallArgs: function(args, frame, startChar, endChar) {
         this.emit(startChar);
 
         for(var j=0; j<args.length; j++) {
@@ -242,7 +242,7 @@ var Compiler = Object.extend({
         this.emit(endChar);
     },
 
-    emitCallKwargs: function(kwargs, frame) {
+    _emitCallKwargs: function(kwargs, frame) {
         this.emit('{');
 
         for(var name in kwargs) {
@@ -255,7 +255,7 @@ var Compiler = Object.extend({
         this.emit('}');
     },
 
-    emitWrappedExpression: function(node, frame) {
+    _emitWrappedExpression: function(node, frame) {
         this.emit('(');
         this._compileExpression(node.name, frame);
         this.emit(')');
@@ -279,16 +279,16 @@ var Compiler = Object.extend({
         var allArgs = this.collectArgs(node);
         var args = allArgs[0];
         var kwargs = allArgs[1];
-        this.emitWrappedExpression(node, frame);
+        this._emitWrappedExpression(node, frame);
         this.emit('.isMacro ? ');
-        this.emitWrappedExpression(node, frame);
+        this._emitWrappedExpression(node, frame);
         this.emit('(');
-        this.emitCallArgs(args, frame, '[', ']');
+        this._emitCallArgs(args, frame, '[', ']');
         this.emit(', ');
-        this.emitCallKwargs(kwargs, frame);
+        this._emitCallKwargs(kwargs, frame);
         this.emit(') : ');
-        this.emitWrappedExpression(node, frame);
-        this.emitCallArgs(args, frame, '(', ')');
+        this._emitWrappedExpression(node, frame);
+        this._emitCallArgs(args, frame, '(', ')');
     },
 
     compileFilter: function(node, frame) {
@@ -297,7 +297,7 @@ var Compiler = Object.extend({
 
         this.emit('env.getFilter("' + name.value + '")');
         var args = this.collectArgs(node)[0];
-        this.emitCallArgs(args, frame, '(', ')');
+        this._emitCallArgs(args, frame, '(', ')');
     },
 
     compileSet: function(node, frame) {
