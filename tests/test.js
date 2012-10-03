@@ -397,6 +397,7 @@ describe('parser', function() {
 
         n = parser.parse('{% include "test.html" %}');
         n.children[0].typename.should.equal('Include');
+
     });
 
     it('should parse filters', function() {
@@ -599,6 +600,11 @@ describe('compiler', function() {
         s = render('hello world {% include "include.html" %}',
                   { name: 'james' });
         s.should.equal('hello world FooInclude james');
+
+
+        s = render('hello world {% include templ %}',
+                  { name: 'thedude', templ: "include.html" });
+        s.should.equal('hello world FooInclude thedude');
     });
 
     it('should maintain nested scopes', function() {
