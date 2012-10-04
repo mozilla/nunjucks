@@ -120,6 +120,29 @@ var For = Node.extend("For", {
     }
 });
 
+var Macro = Node.extend("Macro", {
+    init: function(lineno, colno, name, args, body) {
+        this.name = name;
+        this.body = body;
+        this.parent(lineno, colno, args);
+    }
+});
+
+var Import = Node.extend("Import", {
+    init: function(lineno, colno, template, target) {
+        this.template = template;
+        this.target = target;
+        this.parent(lineno, colno);
+    }
+});
+
+var FromImport = Node.extend("FromImport", {
+    init: function(lineno, colno, template, names) {
+        this.template = template;
+        this.parent(lineno, colno, names);
+    }
+});
+
 var FunCall = Node.extend("FunCall", {
     init: function(lineno, colno, name, args) {
         this.name = name;
@@ -158,7 +181,7 @@ var UnaryOp = Expr.extend("UnaryOp", {
     }
 });
 
-var BinOp = Expr.extend("BinOp", { 
+var BinOp = Expr.extend("BinOp", {
     init: function(lineno, colno, left, right) {
         this.left = left;
         this.right = right;
@@ -195,7 +218,7 @@ var CompareOperand = Expr.extend("CompareOperand", {
 });
 
 function printNodes(node, indent) {
-    // TODO: spend more then 30 seconds and clean this up 
+    // TODO: spend more then 30 seconds and clean this up
     indent = indent || 0;
 
     function print(str, inline) {
@@ -279,9 +302,9 @@ function printNodes(node, indent) {
     }
     else if(node instanceof CompareOperand) {
         console.log("(" + node.type + ")");
-        
+
         printNodes(node.expr, indent+2);
-        
+
     }
     else {
         var children = node.children;
@@ -311,6 +334,9 @@ module.exports = {
     TemplateData: TemplateData,
     If: If,
     For: For,
+    Macro: Macro,
+    Import: Import,
+    FromImport: FromImport,
     FunCall: FunCall,
     Filter: Filter,
     Block: Block,
