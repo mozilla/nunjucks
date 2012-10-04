@@ -401,13 +401,13 @@ var Compiler = Object.extend({
             args.push('l_' + name);
             frame.set(name, 'l_' + name);
         }
-        this.emitLine('function macro(' + args.join(', ') + ') {');
+        this.emitLine('var macro = function(' + args.join(', ') + ') {');
         var oldBuffer = this.buffer;
         this.buffer = 'macroOutput';
         this.emitLine('var ' + this.buffer + '= "";');
         this.compile(node.body, frame)
         this.emitLine('return ' + this.buffer + ';');
-        this.emitLine('}');
+        this.emitLine('};');
         this.buffer = oldBuffer;
         this.emitLine('frame = frame.pop();');
         return frame;
