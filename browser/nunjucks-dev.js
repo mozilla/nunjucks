@@ -272,14 +272,6 @@ var For = Node.extend("For", {
     }
 });
 
-var Argument = Node.extend("Argument", {
-    init: function(lineno, colno, name, val) {
-        this.name = name;
-        this.val = val;
-        this.parent(lineno, colno);
-    }
-});
-
 var Macro = Node.extend("Macro", {
     init: function(lineno, colno, name, args, body) {
         this.name = name;
@@ -494,7 +486,6 @@ modules['nodes'] = {
     TemplateData: TemplateData,
     If: If,
     For: For,
-    Argument: Argument,
     Macro: Macro,
     Import: Import,
     FromImport: FromImport,
@@ -1300,8 +1291,9 @@ var Parser = Object.extend({
 
         node.template = this.parsePrimary();
         if(!(node.template instanceof nodes.Literal &&
-             lib.isString(node.template.value))) {
-            this.fail('parseExtends: string expected');
+             lib.isString(node.template.value)) &&
+           !(node.template instanceof nodes.Symbol)) {
+            this.fail('parseExtends: string or value expected');
         }
 
         this.advanceAfterBlockEnd(tag.value);
@@ -2067,6 +2059,8 @@ var Compiler = Object.extend({
                         nodes.Filter,
                         nodes.LookupVal,
                         nodes.Compare,
+                        nodes.And,
+                        nodes.Or,
                         nodes.Not);
         this.compile(node, frame);
     },
@@ -2373,13 +2367,13 @@ var Compiler = Object.extend({
             args.push('l_' + name);
             frame.set(name, 'l_' + name);
         }
-        this.emitLine('function macro(' + args.join(', ') + ') {');
+        this.emitLine('var macro = function(' + args.join(', ') + ') {');
         var oldBuffer = this.buffer;
         this.buffer = 'macroOutput';
         this.emitLine('var ' + this.buffer + '= "";');
         this.compile(node.body, frame)
         this.emitLine('return ' + this.buffer + ';');
-        this.emitLine('}');
+        this.emitLine('};');
         this.buffer = oldBuffer;
         this.emitLine('frame = frame.pop();');
         return frame;
