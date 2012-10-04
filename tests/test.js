@@ -64,16 +64,16 @@ function _isAST(node1, node2) {
             node1.else_.should.equal(null);
         }
     }
-    else if(node2 instanceof nodes.Argument) {
-        if(node2.name) {
-            _isAST(node2.name, node1.name);
+    else if(node2 instanceof nodes.Pair) {
+        if(node2.getKey()) {
+            _isAST(node2.getKey(), node1.getKey());
         }
-        if(node2.val) {
-            _isAST(node2.val, node1.val);
+        if(node2.getValue()) {
+            _isAST(node2.getValue(), node1.getValue());
         }
     }
     else {
-        if(node2 instanceof nodes.FunCall) {
+        if(node2 instanceof nodes.FunCall || node2 instanceof nodes.Macro) {
             _isAST(node2.name, node1.name);
         }
 
@@ -107,22 +107,22 @@ function toNodes(ast) {
     // TODO: spend more than 30 seconds on this code and clean up
     if(dummy instanceof nodes.Value ||
        dummy instanceof nodes.Pair ||
-       dummy instanceof nodes.If) {
+       dummy instanceof nodes.If ||
+       dummy instanceof nodes.Import) {
         return new type(0,
                         0,
                         toNodes(ast[1]),
                         toNodes(ast[2]),
                         toNodes(ast[3]));
     }
-    else if(dummy instanceof nodes.FunCall) {
+    else if(dummy instanceof nodes.FunCall ||
+            dummy instanceof nodes.Macro ||
+            dummy instanceof nodes.FromImport) {
         var args = ast.slice(2);
         return new type(0,
                         0,
                         toNodes(ast[1]),
                         lib.map(args, toNodes));
-    }
-    else if(dummy instanceof nodes.Argument) {
-        return new type(0, 0, toNodes(ast[1]), toNodes(ast[2]));
     }
     else {
         return new type(0, 0, lib.map(ast.slice(1), toNodes));
@@ -416,18 +416,18 @@ describe('parser', function() {
                [nodes.Output,
                 [nodes.Filter,
                  [nodes.Symbol, 'bar'],
-                 [nodes.Argument, null, [nodes.Symbol, 'foo']]]]]);
+                 [nodes.Pair, null, [nodes.Symbol, 'foo']]]]]);
 
         isAST(parser.parse('{{ foo | bar | baz }}'),
               [nodes.Root,
                [nodes.Output,
                 [nodes.Filter,
                  [nodes.Symbol, 'baz'],
-                 [nodes.Argument,
+                 [nodes.Pair,
                   null,
                   [nodes.Filter,
                    [nodes.Symbol, 'bar'],
-                   [nodes.Argument,
+                   [nodes.Pair,
                     null,
                     [nodes.Symbol, 'foo']]]]]]]);
 
@@ -436,12 +436,47 @@ describe('parser', function() {
                [nodes.Output,
                 [nodes.Filter,
                  [nodes.Symbol, 'bar'],
-                 [nodes.Argument,
+                 [nodes.Pair,
                   null,
                   [nodes.Symbol, 'foo']],
-                 [nodes.Argument,
+                 [nodes.Pair,
                   null,
                   [nodes.Literal, 3]]]]]);
+    });
+
+    it('should parse macro definitions', function() {
+        isAST(parser.parse('{% macro foo(bar, baz="foobar") %}This is a macro{% endmacro %}'),
+              [nodes.Root,
+               [nodes.Macro,
+                [nodes.Symbol, 'foo'],
+                [nodes.Pair, [nodes.Symbol, 'bar'], null],
+                [nodes.Pair, [nodes.Symbol, 'baz'], [nodes.Literal, 'foobar']]]]);
+    });
+
+    it('should parse keyword and non-keyword arguments', function() {
+        isAST(parser.parse('{{ foo("bar", falalalala, baz="foobar") }}'),
+              [nodes.Root,
+               [nodes.Output,
+                [nodes.FunCall,
+                 [nodes.Symbol, 'foo'],
+                 [nodes.Pair, null, [nodes.Literal, 'bar']],
+                 [nodes.Pair, null, [nodes.Symbol, 'falalalala']],
+                 [nodes.Pair, [nodes.Symbol, 'baz'], [nodes.Literal, 'foobar']]]]]);
+    });
+
+    it('should parse imports', function() {
+        isAST(parser.parse('{% import "foo/bar.html" as baz %}'),
+              [nodes.Root,
+               [nodes.Import,
+                [nodes.Literal, "foo/bar.html"]
+                [nodes.Symbol, 'baz']]]);
+
+        isAST(parser.parse('{% from "foo/bar.html" import baz, foobar as foobarbaz %}'),
+              [nodes.Root,
+               [nodes.FromImport,
+                [nodes.Literal, "foo/bar.html"],
+                [nodes.Pair, [nodes.Symbol, 'baz'], null],
+                [nodes.Pair, [nodes.Symbol, 'foobar'], [nodes.Symbol, 'foobarbaz']]]]);
     });
 
     it('should throw errors', function() {
@@ -468,6 +503,34 @@ describe('parser', function() {
         (function() {
             parser.parse('hello {% bar %} dsfsdf');
         }).should.throw(/unknown block tag/);
+
+        (function() {
+            parser.parse('{{ foo(bar baz) }}');
+        }).should.throw(/expected comma after expression/);
+
+        (function() {
+            parser.parse('{{ foo("bar"=baz) }}');
+        }).should.throw(/expected symbol as argument name/);
+
+        (function() {
+            parser.parse('{% macro foo("bar") %}');
+        }).should.throw(/expected symbol as argument name/);
+
+        (function() {
+            parser.parse('{% import "foo" %}');
+        }).should.throw(/expected "as" keyword/);
+
+        (function() {
+            parser.parse('{% from "foo" %}');
+        }).should.throw(/expected import/);
+
+        (function() {
+            parser.parse('{% from "foo" import bar baz %}');
+        }).should.throw(/expected comma/);
+
+        (function() {
+            parser.parse('{% from "foo" import _bar %}');
+        }).should.throw(/names starting with an underscore cannot be imported/);
     });
 });
 
@@ -574,6 +637,20 @@ describe('compiler', function() {
                { foo: function(n) { return n - 1; },
                  bar: 15 })
             .should.equal('yes');
+    });
+
+    it('should compile macros', function() {
+        render('{% macro foo(bar, bazbar, baz="foobar") %}This is a macro{% endmacro %}').should.equal('');
+        render('{% macro foo(bar, bazbar, baz="foobar") %}' +
+               'This is a macro {{ bar }} {{ bazbar }} {{ baz }}' +
+               '{% endmacro %}' +
+               '{{ foo("arg1", bazbar="arg2") }}').should.equal('This is a macro arg1 arg2 foobar');
+    });
+
+    it('should import templates', function() {
+        render('{% import "import.html" as imp %}{{ imp.foo() }} {{ imp.bar }}').should.equal("Here's a macro baz");
+        render('{% from "import.html" import foo as baz, bar %}' +
+               '{{ bar }} {{ baz() }}').should.equal("baz Here's a macro");
     });
 
     it('should inherit templates', function() {
