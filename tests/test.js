@@ -408,6 +408,7 @@ describe('parser', function() {
 
         n = parser.parse('{% include "test.html" %}');
         n.children[0].typename.should.equal('Include');
+
     });
 
     it('should parse filters', function() {
@@ -578,6 +579,18 @@ describe('compiler', function() {
         s = render('{% if not hungry %}good{% endif %}',
                    { hungry: false });
         s.should.equal('good');
+
+        s = render('{% if hungry and like_pizza %}good{% endif %}',
+            { hungry: true, like_pizza: true });
+        s.should.equal('good');
+
+        s = render('{% if hungry or like_pizza %}good{% endif %}',
+            { hungry: false, like_pizza: true });
+        s.should.equal('good');
+
+        s = render('{% if (hungry or like_pizza) and anchovies %}good{% endif %}',
+            { hungry: false, like_pizza: true, anchovies: true });
+        s.should.equal('good');
     });
 
     it('should compile for blocks', function() {
@@ -668,6 +681,10 @@ describe('compiler', function() {
                    '{% block block1 %}BAR{% endblock %}' +
                    '{% block block2 %}BAZ{% endblock %}');
         s.should.equal('FooBARBAZFizzle');
+
+        s = render('hola {% extends tmpl %} hizzle mumble',
+                   { tmpl: 'base.html' });
+        s.should.equal('FooBarBazFizzle');
     });
 
     it('should render parent blocks with super()', function() {
@@ -683,6 +700,10 @@ describe('compiler', function() {
         s = render('hello world {% include "include.html" %}',
                   { name: 'james' });
         s.should.equal('hello world FooInclude james');
+
+        s = render('hello world {% include tmpl %}',
+                  { name: 'thedude', tmpl: "include.html" });
+        s.should.equal('hello world FooInclude thedude');
     });
 
     it('should maintain nested scopes', function() {

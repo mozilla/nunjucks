@@ -278,8 +278,9 @@ var Parser = Object.extend({
 
         node.template = this.parsePrimary();
         if(!(node.template instanceof nodes.Literal &&
-             lib.isString(node.template.value))) {
-            this.fail('parseExtends: string expected');
+             lib.isString(node.template.value)) &&
+           !(node.template instanceof nodes.Symbol)) {
+            this.fail('parseExtends: string or value expected');
         }
 
         this.advanceAfterBlockEnd(tag.value);
