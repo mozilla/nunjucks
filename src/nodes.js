@@ -120,14 +120,6 @@ var For = Node.extend("For", {
     }
 });
 
-var Argument = Node.extend("Argument", {
-    init: function(lineno, colno, name, val) {
-        this.name = name;
-        this.val = val;
-        this.parent(lineno, colno);
-    }
-});
-
 var Macro = Node.extend("Macro", {
     init: function(lineno, colno, name, args, body) {
         this.name = name;
@@ -342,7 +334,6 @@ module.exports = {
     TemplateData: TemplateData,
     If: If,
     For: For,
-    Argument: Argument,
     Macro: Macro,
     Import: Import,
     FromImport: FromImport,
