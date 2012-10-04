@@ -131,7 +131,7 @@ var Parser = Object.extend({
 
         node.name = this.parsePrimary();
 
-        if(!node.name instanceof nodes.Symbol) {
+        if(!(node.name instanceof nodes.Symbol)) {
             this.fail('variable name expected');
         }
 
@@ -164,10 +164,6 @@ var Parser = Object.extend({
 
         var nameTok = this.nextToken();
         var name = new nodes.Symbol(nameTok.lineno, nameTok.colno, nameTok.value);
-        if(!name instanceof nodes.Symbol) {
-            this.fail('macro name expected');
-        }
-
         var args = this.parseSignature();
         var node = new nodes.Macro(macroTok.lineno,
                                    macroTok.colno,
@@ -190,7 +186,7 @@ var Parser = Object.extend({
         var template = this.parseExpression();
 
         if(!this.skipSymbol('as')) {
-            this.fail('expected "as" keyword');
+            throw new Error('expected "as" keyword');
         }
         var target = this.parsePrimary().value;
 
@@ -209,14 +205,12 @@ var Parser = Object.extend({
         }
 
         var template = this.parseExpression();
-        var names = [];
         var node = new nodes.FromImport(fromTok.lineno,
                                         fromTok.colno,
-                                        template,
-                                        names);
+                                        template);
 
         if(!this.skipSymbol('import')) {
-            this.fail("expected import");
+            throw new Error("expected import");
         }
 
         while(1) {
@@ -226,20 +220,23 @@ var Parser = Object.extend({
                 break;
             }
 
-            if(names.length > 0 && !this.skip(lexer.TOKEN_COMMA)) {
-                this.fail('expected comma');
+            if(node.children.length > 0 && !this.skip(lexer.TOKEN_COMMA)) {
+                throw new Error('expected comma');
             }
 
-            var name = this.parsePrimary().value;
-            if(name.charAt(0) == '_') {
-                this.fail('names starting with an underscore cannot be imported');
+            var name = this.parsePrimary();
+            if(name.value.charAt(0) == '_') {
+                throw new Error('names starting with an underscore cannot be imported');
             }
 
             var alias = null;
             if(this.skipSymbol('as')) {
-                var alias = this.parsePrimary().value;
+                var alias = this.parsePrimary();
             }
-            names.push([name, alias]);
+            node.addChild(new nodes.Pair(name.lineno,
+                                         name.colno,
+                                         name,
+                                         alias));
         }
 
         return node;
@@ -254,7 +251,7 @@ var Parser = Object.extend({
         var node = new nodes.Block(tag.lineno, tag.colno);
 
         node.name = this.parsePrimary();
-        if(!node.name instanceof nodes.Symbol) {
+        if(!(node.name instanceof nodes.Symbol)) {
             this.fail('variable name expected');
         }
 
@@ -756,10 +753,10 @@ var Parser = Object.extend({
                                     new nodes.Symbol(tok.lineno,
                                                      tok.colno,
                                                      name),
-                                    [new nodes.Argument(node.lineno,
-                                                        node.colno,
-                                                        undefined,
-                                                        node)]);
+                                    [new nodes.Pair(node.lineno,
+                                                    node.colno,
+                                                    undefined,
+                                                    node)]);
 
             if(this.peekToken().type == lexer.TOKEN_LEFT_PAREN) {
                 // Get a FunCall node and add the parameters to the
@@ -845,7 +842,7 @@ var Parser = Object.extend({
                 throw new Error("parseSignature: expected comma after expression");
             }
             else if(call) {
-                var nameOrVal = this.parseExpression();
+                var nameOrVal = this.parsePrimary();
                 var name, val;
                 if(this.skipValue(lexer.TOKEN_OPERATOR, '=')) {
                     name = nameOrVal;
@@ -853,27 +850,27 @@ var Parser = Object.extend({
                 } else {
                     val = nameOrVal;
                 }
-                if(name && !name instanceof nodes.Symbol) {
-                    this.fail('expected symbol as argument name');
+                if(name && !(name instanceof nodes.Symbol)) {
+                    throw new Error('expected symbol as argument name');
                 }
-                var arg = new nodes.Argument(nameOrVal.lineno,
-                                             nameOrVal.colno,
-                                             name,
-                                             val);
-                args.push(arg);
+                args.push(new nodes.Pair(nameOrVal.lineno,
+                                         nameOrVal.colno,
+                                         name,
+                                         val));
             }
             else {
-                var name = this.parseExpression();
-                if(!name instanceof nodes.Symbol) {
-                    this.fail('expected symbol as argument name');
+                var name = this.parsePrimary();
+                var val;
+                if(!(name instanceof nodes.Symbol)) {
+                    throw new Error('expected symbol as argument name');
                 }
-                var arg = new nodes.Argument(name.lineno,
-                                             name.colno,
-                                             name);
                 if(this.skipValue(lexer.TOKEN_OPERATOR, '=')) {
-                    arg.val = this.parseExpression();
+                    val = this.parseExpression();
                 }
-                args.push(arg);
+                args.push(new nodes.Pair(name.lineno,
+                                         name.colno,
+                                         name,
+                                         val));
             }
         }
 

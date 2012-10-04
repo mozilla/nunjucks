@@ -147,8 +147,7 @@ var Import = Node.extend("Import", {
 var FromImport = Node.extend("FromImport", {
     init: function(lineno, colno, template, names) {
         this.template = template;
-        this.names = names;
-        this.parent(lineno, colno);
+        this.parent(lineno, colno, names);
     }
 });
 

@@ -299,8 +299,7 @@ var Import = Node.extend("Import", {
 var FromImport = Node.extend("FromImport", {
     init: function(lineno, colno, template, names) {
         this.template = template;
-        this.names = names;
-        this.parent(lineno, colno);
+        this.parent(lineno, colno, names);
     }
 });
 
@@ -1154,7 +1153,7 @@ var Parser = Object.extend({
 
         node.name = this.parsePrimary();
 
-        if(!node.name instanceof nodes.Symbol) {
+        if(!(node.name instanceof nodes.Symbol)) {
             this.fail('variable name expected');
         }
 
@@ -1187,10 +1186,6 @@ var Parser = Object.extend({
 
         var nameTok = this.nextToken();
         var name = new nodes.Symbol(nameTok.lineno, nameTok.colno, nameTok.value);
-        if(!name instanceof nodes.Symbol) {
-            this.fail('macro name expected');
-        }
-
         var args = this.parseSignature();
         var node = new nodes.Macro(macroTok.lineno,
                                    macroTok.colno,
@@ -1213,7 +1208,7 @@ var Parser = Object.extend({
         var template = this.parseExpression();
 
         if(!this.skipSymbol('as')) {
-            this.fail('expected "as" keyword');
+            throw new Error('expected "as" keyword');
         }
         var target = this.parsePrimary().value;
 
@@ -1232,14 +1227,12 @@ var Parser = Object.extend({
         }
 
         var template = this.parseExpression();
-        var names = [];
         var node = new nodes.FromImport(fromTok.lineno,
                                         fromTok.colno,
-                                        template,
-                                        names);
+                                        template);
 
         if(!this.skipSymbol('import')) {
-            this.fail("expected import");
+            throw new Error("expected import");
         }
 
         while(1) {
@@ -1249,20 +1242,23 @@ var Parser = Object.extend({
                 break;
             }
 
-            if(names.length > 0 && !this.skip(lexer.TOKEN_COMMA)) {
-                this.fail('expected comma');
+            if(node.children.length > 0 && !this.skip(lexer.TOKEN_COMMA)) {
+                throw new Error('expected comma');
             }
 
-            var name = this.parsePrimary().value;
-            if(name.charAt(0) == '_') {
-                this.fail('names starting with an underscore cannot be imported');
+            var name = this.parsePrimary();
+            if(name.value.charAt(0) == '_') {
+                throw new Error('names starting with an underscore cannot be imported');
             }
 
             var alias = null;
             if(this.skipSymbol('as')) {
-                var alias = this.parsePrimary().value;
+                var alias = this.parsePrimary();
             }
-            names.push([name, alias]);
+            node.addChild(new nodes.Pair(name.lineno,
+                                         name.colno,
+                                         name,
+                                         alias));
         }
 
         return node;
@@ -1277,7 +1273,7 @@ var Parser = Object.extend({
         var node = new nodes.Block(tag.lineno, tag.colno);
 
         node.name = this.parsePrimary();
-        if(!node.name instanceof nodes.Symbol) {
+        if(!(node.name instanceof nodes.Symbol)) {
             this.fail('variable name expected');
         }
 
@@ -1779,10 +1775,10 @@ var Parser = Object.extend({
                                     new nodes.Symbol(tok.lineno,
                                                      tok.colno,
                                                      name),
-                                    [new nodes.Argument(node.lineno,
-                                                        node.colno,
-                                                        undefined,
-                                                        node)]);
+                                    [new nodes.Pair(node.lineno,
+                                                    node.colno,
+                                                    undefined,
+                                                    node)]);
 
             if(this.peekToken().type == lexer.TOKEN_LEFT_PAREN) {
                 // Get a FunCall node and add the parameters to the
@@ -1868,7 +1864,7 @@ var Parser = Object.extend({
                 throw new Error("parseSignature: expected comma after expression");
             }
             else if(call) {
-                var nameOrVal = this.parseExpression();
+                var nameOrVal = this.parsePrimary();
                 var name, val;
                 if(this.skipValue(lexer.TOKEN_OPERATOR, '=')) {
                     name = nameOrVal;
@@ -1876,27 +1872,27 @@ var Parser = Object.extend({
                 } else {
                     val = nameOrVal;
                 }
-                if(name && !name instanceof nodes.Symbol) {
-                    this.fail('expected symbol as argument name');
+                if(name && !(name instanceof nodes.Symbol)) {
+                    throw new Error('expected symbol as argument name');
                 }
-                var arg = new nodes.Argument(nameOrVal.lineno,
-                                             nameOrVal.colno,
-                                             name,
-                                             val);
-                args.push(arg);
+                args.push(new nodes.Pair(nameOrVal.lineno,
+                                         nameOrVal.colno,
+                                         name,
+                                         val));
             }
             else {
-                var name = this.parseExpression();
-                if(!name instanceof nodes.Symbol) {
-                    this.fail('expected symbol as argument name');
+                var name = this.parsePrimary();
+                var val;
+                if(!(name instanceof nodes.Symbol)) {
+                    throw new Error('expected symbol as argument name');
                 }
-                var arg = new nodes.Argument(name.lineno,
-                                             name.colno,
-                                             name);
                 if(this.skipValue(lexer.TOKEN_OPERATOR, '=')) {
-                    arg.val = this.parseExpression();
+                    val = this.parseExpression();
                 }
-                args.push(arg);
+                args.push(new nodes.Pair(name.lineno,
+                                         name.colno,
+                                         name,
+                                         val));
             }
         }
 
@@ -2208,7 +2204,7 @@ var Compiler = Object.extend({
         this.emit(']');
     },
 
-    emitCallArgs: function(args, frame, startChar, endChar) {
+    _emitCallArgs: function(args, frame, startChar, endChar) {
         this.emit(startChar);
 
         for(var j=0; j<args.length; j++) {
@@ -2220,20 +2216,20 @@ var Compiler = Object.extend({
         this.emit(endChar);
     },
 
-    emitCallKwargs: function(kwargs, frame) {
+    _emitCallKwargs: function(kwargs, frame) {
         this.emit('{');
 
-        for(var name in kwargs) {
-            if(kwargs.hasOwnProperty(name)) {
-                this.compile(name, frame);
-                this.emit(': ');
-                this.compile(kwargs[name], frame);
-            }
+        for(var i=0; i<kwargs.length; i++) {
+            var name = kwargs[i][0];
+            var val = kwargs[i][1];
+            this.emit(name.value);
+            this.emit(': ');
+            this.compile(val, frame);
         }
         this.emit('}');
     },
 
-    emitWrappedExpression: function(node, frame) {
+    _emitWrappedExpression: function(node, frame) {
         this.emit('(');
         this._compileExpression(node.name, frame);
         this.emit(')');
@@ -2241,14 +2237,15 @@ var Compiler = Object.extend({
 
     collectArgs: function(node, frame) {
         var args = [];
-        var kwargs = {};
-        debugger;
+        var kwargs = [];
         for(var i=0; i<node.children.length; i++) {
             var arg = node.children[i];
-            if(arg.name) {
-                kwargs[arg.name] = arg.val;
+            var name = arg.getKey();
+            var val = arg.getValue();
+            if(name) {
+                kwargs.push([name, val]);
             } else {
-                args.push(arg.val);
+                args.push(val);
             }
         }
         return [args, kwargs];
@@ -2258,16 +2255,16 @@ var Compiler = Object.extend({
         var allArgs = this.collectArgs(node);
         var args = allArgs[0];
         var kwargs = allArgs[1];
-        this.emitWrappedExpression(node, frame);
+        this._emitWrappedExpression(node, frame);
         this.emit('.isMacro ? ');
-        this.emitWrappedExpression(node, frame);
+        this._emitWrappedExpression(node, frame);
         this.emit('(');
-        this.emitCallArgs(args, frame, '[', ']');
+        this._emitCallArgs(args, frame, '[', ']');
         this.emit(', ');
-        this.emitCallKwargs(kwargs, frame);
+        this._emitCallKwargs(kwargs, frame);
         this.emit(') : ');
-        this.emitWrappedExpression(node, frame);
-        this.emitCallArgs(args, frame, '(', ')');
+        this._emitWrappedExpression(node, frame);
+        this._emitCallArgs(args, frame, '(', ')');
     },
 
     compileFilter: function(node, frame) {
@@ -2276,7 +2273,7 @@ var Compiler = Object.extend({
 
         this.emit('env.getFilter("' + name.value + '")');
         var args = this.collectArgs(node)[0];
-        this.emitCallArgs(args, frame, '(', ')');
+        this._emitCallArgs(args, frame, '(', ')');
     },
 
     compileSet: function(node, frame) {
@@ -2372,7 +2369,7 @@ var Compiler = Object.extend({
         var args = [];
 
         for(var i=0; i<node.children.length; i++) {
-            var name = node.children[i].name.value
+            var name = node.children[i].getKey().value
             args.push('l_' + name);
             frame.set(name, 'l_' + name);
         }
@@ -2394,8 +2391,10 @@ var Compiler = Object.extend({
 
         for(var i=0; i<node.children.length; i++) {
             var arg = node.children[i];
-            this.emit('["' + arg.name.value + '", ');
-            arg.val ? this.compile(arg.val, frame) : this.emit('null');
+            var name = arg.getKey().value;
+            var val = arg.getValue();
+            this.emit('["' + name + '", ');
+            val ? this.compile(val, frame) : this.emit('null');
             this.emit(']');
 
             if(i != node.children.length - 1) {
@@ -2436,10 +2435,12 @@ var Compiler = Object.extend({
         this.compile(node.template, frame);
         this.emitLine(').getModule();');
 
-        for(var i=0; i<node.names.length; i++) {
-            var name = node.names[i][0];
-            var alias = node.names[i][1];
-            if(!alias) {
+        for(var i=0; i<node.children.length; i++) {
+            var name = node.children[i].getKey().value;
+            var alias = node.children[i].getValue();
+            if(alias) {
+                alias = alias.value;
+            } else {
                 alias = name;
             }
 
@@ -2548,7 +2549,6 @@ var Compiler = Object.extend({
             _compile.call(this, node, frame);
         }
         else {
-            debugger;
             throw new Error("Cannot compile node: " + node.typename);
         }
     },

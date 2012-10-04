@@ -245,12 +245,12 @@ var Compiler = Object.extend({
     _emitCallKwargs: function(kwargs, frame) {
         this.emit('{');
 
-        for(var name in kwargs) {
-            if(kwargs.hasOwnProperty(name)) {
-                this.compile(name, frame);
-                this.emit(': ');
-                this.compile(kwargs[name], frame);
-            }
+        for(var i=0; i<kwargs.length; i++) {
+            var name = kwargs[i][0];
+            var val = kwargs[i][1];
+            this.emit(name.value);
+            this.emit(': ');
+            this.compile(val, frame);
         }
         this.emit('}');
     },
@@ -263,13 +263,15 @@ var Compiler = Object.extend({
 
     collectArgs: function(node, frame) {
         var args = [];
-        var kwargs = {};
+        var kwargs = [];
         for(var i=0; i<node.children.length; i++) {
             var arg = node.children[i];
-            if(arg.name) {
-                kwargs[arg.name] = arg.val;
+            var name = arg.getKey();
+            var val = arg.getValue();
+            if(name) {
+                kwargs.push([name, val]);
             } else {
-                args.push(arg.val);
+                args.push(val);
             }
         }
         return [args, kwargs];
@@ -393,7 +395,7 @@ var Compiler = Object.extend({
         var args = [];
 
         for(var i=0; i<node.children.length; i++) {
-            var name = node.children[i].name.value
+            var name = node.children[i].getKey().value
             args.push('l_' + name);
             frame.set(name, 'l_' + name);
         }
@@ -415,8 +417,10 @@ var Compiler = Object.extend({
 
         for(var i=0; i<node.children.length; i++) {
             var arg = node.children[i];
-            this.emit('["' + arg.name.value + '", ');
-            arg.val ? this.compile(arg.val, frame) : this.emit('null');
+            var name = arg.getKey().value;
+            var val = arg.getValue();
+            this.emit('["' + name + '", ');
+            val ? this.compile(val, frame) : this.emit('null');
             this.emit(']');
 
             if(i != node.children.length - 1) {
@@ -457,10 +461,12 @@ var Compiler = Object.extend({
         this.compile(node.template, frame);
         this.emitLine(').getModule();');
 
-        for(var i=0; i<node.names.length; i++) {
-            var name = node.names[i][0];
-            var alias = node.names[i][1];
-            if(!alias) {
+        for(var i=0; i<node.children.length; i++) {
+            var name = node.children[i].getKey().value;
+            var alias = node.children[i].getValue();
+            if(alias) {
+                alias = alias.value;
+            } else {
                 alias = name;
             }
 
