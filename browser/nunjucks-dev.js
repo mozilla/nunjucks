@@ -609,7 +609,7 @@ Tokenizer.prototype.nextToken = function() {
         }
         else if(cur == "\"" || cur == "'") {
             // We've hit a string
-            return token(TOKEN_STRING, this.parseString(), lineno, colno);
+            return token(TOKEN_STRING, this.parseString(cur), lineno, colno);
         }
         else if((tok = this._extract(whitespaceChars))) {
             // We hit some whitespace
@@ -687,8 +687,8 @@ Tokenizer.prototype.nextToken = function() {
         // Parse out the template text, breaking on tag
         // delimiters because we need to look for block/variable start
         // tags (don't use the full delimChars for optimization)
-        var beginChars = (BLOCK_START[0] + 
-                          VARIABLE_START[0] + 
+        var beginChars = (BLOCK_START[0] +
+                          VARIABLE_START[0] +
                           COMMENT_START[0] +
                           COMMENT_END[0]);
         var tok;
@@ -759,14 +759,14 @@ Tokenizer.prototype.nextToken = function() {
     throw new Error("Could not parse text");
 };
 
-Tokenizer.prototype.parseString = function() {
+Tokenizer.prototype.parseString = function(delimiter) {
     this.forward();
-    
+
     var lineno = this.lineno;
     var colno = this.colno;
     var str = "";
-    
-    while(this.current() != "\"" && this.current() != "'") {
+
+    while(this.current() != delimiter) {
         var cur = this.current();
 
         if(cur == "\\") {
@@ -1147,8 +1147,9 @@ var Parser = Object.extend({
 
         node.template = this.parsePrimary();
         if(!(node.template instanceof nodes.Literal &&
-             lib.isString(node.template.value))) {
-            this.fail('parseExtends: string expected');
+             lib.isString(node.template.value)) &&
+           !(node.template instanceof nodes.Symbol)) {
+            this.fail('parseExtends: string or value expected');
         }
 
         this.advanceAfterBlockEnd(tag.value);
@@ -1857,6 +1858,8 @@ var Compiler = Object.extend({
                         nodes.Filter,
                         nodes.LookupVal,
                         nodes.Compare,
+                        nodes.And,
+                        nodes.Or,
                         nodes.Not);
         this.compile(node, frame);
     },
@@ -1995,7 +1998,9 @@ var Compiler = Object.extend({
     },
 
     compileFunCall: function(node, frame) {
+        this.emit('(');
         this._compileExpression(node.name, frame);
+        this.emit(')');
         this._compileAggregate(node, frame, '(', ')');
     },
 
@@ -2192,7 +2197,7 @@ var Compiler = Object.extend({
 
 // var fs = modules["fs"];
 // var c = new Compiler();
-// var src = "{% for i in [3,45,1] %}{{ loop.index }}{% endfor %}";
+// var src = "{{ test('hello') }}";
 
 // var ns = parser.parse(src);
 // nodes.printNodes(ns);
@@ -2568,7 +2573,6 @@ else {
 }
 })();
 (function() {
-
 var lib = modules["lib"];
 var Object = modules["object"];
 var lexer = modules["lexer"];
@@ -2664,7 +2668,7 @@ var Environment = Object.extend({
 
             context = lib.extend(context, ctx);
 
-            var res = env.render(name, ctx);
+            var res = env.render(name, context);
             k(null, res);            
         };
     },
