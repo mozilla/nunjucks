@@ -165,7 +165,7 @@ var Compiler = Object.extend({
             key = new nodes.Literal(key.lineno, key.colno, key.value);
         }
         else if(!(key instanceof nodes.Literal &&
-                  typeof node.value == "string")) {
+                  typeof key.value == "string")) {
             throw new Error("Dict keys must be strings or names");
         }
 
@@ -248,6 +248,9 @@ var Compiler = Object.extend({
         this.emit('{');
 
         for(var i=0; i<kwargs.length; i++) {
+            if(i > 0) {
+                this.emit(', ');
+            }
             var name = kwargs[i][0];
             var val = kwargs[i][1];
             this.emit(name.value);
