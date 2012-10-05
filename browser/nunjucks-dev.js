@@ -37,7 +37,7 @@ function extend(cls, name, props) {
 
     prototype.typename = name;
 
-    var new_cls = function() { 
+    var new_cls = function() {
         if(prototype.init) {
             prototype.init.apply(this, arguments);
         }
@@ -137,7 +137,7 @@ exports.map = function(obj, func) {
     if(ArrayProto.map && obj.map === ArrayProto.map) {
         return obj.map(func);
     }
-    
+
     for(var i=0; i<obj.length; i++) {
         results[results.length] = func(obj[i], i);
     }
@@ -668,7 +668,7 @@ Tokenizer.prototype.nextToken = function() {
         }
         else if(cur == "\"" || cur == "'") {
             // We've hit a string
-            return token(TOKEN_STRING, this.parseString(), lineno, colno);
+            return token(TOKEN_STRING, this.parseString(cur), lineno, colno);
         }
         else if((tok = this._extract(whitespaceChars))) {
             // We hit some whitespace
@@ -746,8 +746,8 @@ Tokenizer.prototype.nextToken = function() {
         // Parse out the template text, breaking on tag
         // delimiters because we need to look for block/variable start
         // tags (don't use the full delimChars for optimization)
-        var beginChars = (BLOCK_START[0] + 
-                          VARIABLE_START[0] + 
+        var beginChars = (BLOCK_START[0] +
+                          VARIABLE_START[0] +
                           COMMENT_START[0] +
                           COMMENT_END[0]);
         var tok;
@@ -818,14 +818,14 @@ Tokenizer.prototype.nextToken = function() {
     throw new Error("Could not parse text");
 };
 
-Tokenizer.prototype.parseString = function() {
+Tokenizer.prototype.parseString = function(delimiter) {
     this.forward();
-    
+
     var lineno = this.lineno;
     var colno = this.colno;
     var str = "";
-    
-    while(this.current() != "\"" && this.current() != "'") {
+
+    while(this.current() != delimiter) {
         var cur = this.current();
 
         if(cur == "\\") {
@@ -2825,7 +2825,7 @@ var filters = {
                 x = x.toLowerCase();
                 y = y.toLowerCase();
             }
-               
+
             if(x < y) {
                 return reverse ? 1 : -1;
             }
@@ -2894,7 +2894,7 @@ var HttpLoader = Object.extend({
         if(!src) {
             return null;
         }
-        
+
         return { src: src,
                  path: name,
                  upToDate: function() { return _this.neverUpdate; }};

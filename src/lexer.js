@@ -68,7 +68,7 @@ Tokenizer.prototype.nextToken = function() {
         }
         else if(cur == "\"" || cur == "'") {
             // We've hit a string
-            return token(TOKEN_STRING, this.parseString(), lineno, colno);
+            return token(TOKEN_STRING, this.parseString(cur), lineno, colno);
         }
         else if((tok = this._extract(whitespaceChars))) {
             // We hit some whitespace
@@ -146,8 +146,8 @@ Tokenizer.prototype.nextToken = function() {
         // Parse out the template text, breaking on tag
         // delimiters because we need to look for block/variable start
         // tags (don't use the full delimChars for optimization)
-        var beginChars = (BLOCK_START[0] + 
-                          VARIABLE_START[0] + 
+        var beginChars = (BLOCK_START[0] +
+                          VARIABLE_START[0] +
                           COMMENT_START[0] +
                           COMMENT_END[0]);
         var tok;
@@ -218,14 +218,14 @@ Tokenizer.prototype.nextToken = function() {
     throw new Error("Could not parse text");
 };
 
-Tokenizer.prototype.parseString = function() {
+Tokenizer.prototype.parseString = function(delimiter) {
     this.forward();
-    
+
     var lineno = this.lineno;
     var colno = this.colno;
     var str = "";
-    
-    while(this.current() != "\"" && this.current() != "'") {
+
+    while(this.current() != delimiter) {
         var cur = this.current();
 
         if(cur == "\\") {
