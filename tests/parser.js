@@ -182,7 +182,7 @@ describe('parser', function() {
                 [nodes.Filter,
                  [nodes.Symbol, 'bar'],
                  [nodes.NodeList,
-                  [nodes.Pair, null, [nodes.Symbol, 'foo']]]]]]);
+                  [nodes.Symbol, 'foo']]]]]);
 
         isAST(parser.parse('{{ foo | bar | baz }}'),
               [nodes.Root,
@@ -190,14 +190,10 @@ describe('parser', function() {
                 [nodes.Filter,
                  [nodes.Symbol, 'baz'],
                  [nodes.NodeList,
-                  [nodes.Pair,
-                   null,
-                   [nodes.Filter,
-                    [nodes.Symbol, 'bar'],
-                    [nodes.NodeList,
-                     [nodes.Pair,
-                      null,
-                      [nodes.Symbol, 'foo']]]]]]]]]);
+                  [nodes.Filter,
+                   [nodes.Symbol, 'bar'],
+                   [nodes.NodeList,
+                    [nodes.Symbol, 'foo']]]]]]]);
 
         isAST(parser.parse('{{ foo | bar(3) }}'),
               [nodes.Root,
@@ -205,12 +201,8 @@ describe('parser', function() {
                 [nodes.Filter,
                  [nodes.Symbol, 'bar'],
                  [nodes.NodeList,
-                  [nodes.Pair,
-                   null,
-                   [nodes.Symbol, 'foo']],
-                  [nodes.Pair,
-                   null,
-                   [nodes.Literal, 3]]]]]]);
+                  [nodes.Symbol, 'foo'],
+                  [nodes.Literal, 3]]]]]);
     });
 
     it('should parse macro definitions', function() {
@@ -222,8 +214,8 @@ describe('parser', function() {
                [nodes.Macro,
                 [nodes.Symbol, 'foo'],
                 [nodes.NodeList,
-                 [nodes.Pair, [nodes.Symbol, 'bar'], null],
-                 [nodes.Pair, [nodes.Symbol, 'baz'], [nodes.Literal, 'foobar']]],
+                 [nodes.Symbol, 'bar'],
+                 [nodes.KeywordArg, [nodes.Symbol, 'baz'], [nodes.Literal, 'foobar']]],
                 [nodes.NodeList,
                  [nodes.Output,
                   [nodes.TemplateData, 'This is a macro']]]]]);
@@ -236,9 +228,9 @@ describe('parser', function() {
                 [nodes.FunCall,
                  [nodes.Symbol, 'foo'],
                  [nodes.NodeList,
-                  [nodes.Pair, null, [nodes.Literal, 'bar']],
-                  [nodes.Pair, null, [nodes.Symbol, 'falalalala']],
-                  [nodes.Pair,
+                  [nodes.Literal, 'bar'],
+                  [nodes.Symbol, 'falalalala'],
+                  [nodes.KeywordArg,
                    [nodes.Symbol, 'baz'],
                    [nodes.Literal, 'foobar']]]]]]);
     });
@@ -256,8 +248,7 @@ describe('parser', function() {
                [nodes.FromImport,
                 [nodes.Literal, "foo/bar.html"],
                 [nodes.NodeList,
-                 [nodes.Pair,
-                  [nodes.Symbol, 'baz'], null],
+                 [nodes.Symbol, 'baz'],
                  [nodes.Pair,
                   [nodes.Symbol, 'foobar'],
                   [nodes.Symbol, 'foobarbaz']]]]]);
@@ -291,14 +282,6 @@ describe('parser', function() {
         (function() {
             parser.parse('{{ foo(bar baz) }}');
         }).should.throw(/expected comma after expression/);
-
-        (function() {
-            parser.parse('{{ foo("bar"=baz) }}');
-        }).should.throw(/expected symbol as argument name/);
-
-        (function() {
-            parser.parse('{% macro foo("bar") %}');
-        }).should.throw(/expected symbol as argument name/);
 
         (function() {
             parser.parse('{% import "foo" %}');

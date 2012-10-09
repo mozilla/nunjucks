@@ -100,10 +100,17 @@ var Parser = Object.extend({
 
     advanceAfterBlockEnd: function(name) {
         if(!name) {
-            if(this.peekToken().type != lexer.TOKEN_SYMBOL) {
+            var tok = this.peekToken();
+
+            if(!tok) {
+                this.fail('unexpected end of file');
+            }
+
+            if(tok.type != lexer.TOKEN_SYMBOL) {
                 this.fail("advanceAfterBlockEnd: expected symbol token or " +
                           "explicit name to be passed");
             }
+
             name = this.nextToken().value;
         }
 
@@ -159,8 +166,7 @@ var Parser = Object.extend({
             this.fail("expected macro");
         }
 
-        var nameTok = this.nextToken();
-        var name = new nodes.Symbol(nameTok.lineno, nameTok.colno, nameTok.value);
+        var name = this.parsePrimary(true);
         var args = this.parseSignature();
         var node = new nodes.Macro(macroTok.lineno,
                                    macroTok.colno,
@@ -180,19 +186,20 @@ var Parser = Object.extend({
             this.fail("expected import");
         }
 
-        var template = this.parseExpression();
+        var template = this.parsePrimary();
 
         if(!this.skipSymbol('as')) {
             throw new Error('expected "as" keyword');
         }
-        var target = this.parsePrimary();
 
+        var target = this.parsePrimary();
+        var node = new nodes.Import(importTok.lineno,
+                                    importTok.colno,
+                                    template,
+                                    target);
         this.advanceAfterBlockEnd(importTok.value);
 
-        return new nodes.Import(importTok.lineno,
-                                importTok.colno,
-                                template,
-                                target);
+        return node;
     },
 
     parseFrom: function() {
@@ -201,7 +208,7 @@ var Parser = Object.extend({
             this.fail("expected from");
         }
 
-        var template = this.parseExpression();
+        var template = this.parsePrimary();
         var node = new nodes.FromImport(fromTok.lineno,
                                         fromTok.colno,
                                         template,
@@ -216,6 +223,10 @@ var Parser = Object.extend({
         while(1) {
             var type = this.peekToken().type;
             if(type == lexer.TOKEN_BLOCK_END) {
+                if(!names.children.length) {
+                    this.fail('Expected at least one import name');
+                }
+
                 this.nextToken();
                 break;
             }
@@ -226,17 +237,22 @@ var Parser = Object.extend({
 
             var name = this.parsePrimary();
             if(name.value.charAt(0) == '_') {
-                throw new Error('names starting with an underscore cannot be imported');
+                this.fail('names starting with an underscore cannot be ' +
+                          'imported',
+                          name.lineno,
+                          name.colno);
             }
 
-            var alias = null;
             if(this.skipSymbol('as')) {
-                alias = this.parsePrimary();
+                var alias = this.parsePrimary();
+                names.addChild(new nodes.Pair(name.lineno,
+                                              name.colno,
+                                              name,
+                                              alias));
             }
-            names.addChild(new nodes.Pair(name.lineno,
-                                          name.colno,
-                                          name,
-                                          alias));
+            else {
+                names.addChild(name);
+            }
         }
 
         return node;
@@ -439,11 +455,10 @@ var Parser = Object.extend({
         while(tok) {
             if(tok.type == lexer.TOKEN_LEFT_PAREN) {
                 // Function call
-                var args = this.parseSignature(true);
                 node = new nodes.FunCall(tok.lineno,
                                          tok.colno,
                                          node,
-                                         args);
+                                         this.parseSignature());
             }
             else if(tok.type == lexer.TOKEN_LEFT_BRACKET) {
                 // Reference
@@ -684,7 +699,7 @@ var Parser = Object.extend({
         return node;
     },
 
-    parsePrimary: function () {
+    parsePrimary: function (noPostfix) {
         var tok = this.nextToken();
         var val = null;
         var node = null;
@@ -720,7 +735,10 @@ var Parser = Object.extend({
         }
         else if(tok.type == lexer.TOKEN_SYMBOL) {
             node = new nodes.Symbol(tok.lineno, tok.colno, tok.value);
-            node = this.parsePostfix(node);
+
+            if(!noPostfix) {
+                node = this.parsePostfix(node);
+            }
         }
         else {
             // See if it's an aggregate type, we need to push the
@@ -757,10 +775,7 @@ var Parser = Object.extend({
                 new nodes.NodeList(
                     tok.lineno,
                     tok.colno,
-                    [new nodes.Pair(node.lineno,
-                                    node.colno,
-                                    null,
-                                    node)])
+                    [node])
             );
 
             if(this.peekToken().type == lexer.TOKEN_LEFT_PAREN) {
@@ -831,8 +846,7 @@ var Parser = Object.extend({
         return node;
     },
 
-    parseSignature: function(call) {
-        call = call || false;
+   parseSignature: function() {
         var tok = this.nextToken();
         var args = [];
 
@@ -846,39 +860,17 @@ var Parser = Object.extend({
             if(args.length > 0 && !this.skip(lexer.TOKEN_COMMA)) {
                 throw new Error("parseSignature: expected comma after expression");
             }
-            else if(call) {
-                var nameOrVal = this.parsePrimary();
-                var name = null;
-                var val;
-
-                if(this.skipValue(lexer.TOKEN_OPERATOR, '=')) {
-                    name = nameOrVal;
-                    val = this.parseExpression();
-                } else {
-                    val = nameOrVal;
-                }
-                if(name && !(name instanceof nodes.Symbol)) {
-                    throw new Error('expected symbol as argument name');
-                }
-                args.push(new nodes.Pair(nameOrVal.lineno,
-                                         nameOrVal.colno,
-                                         name,
-                                         val));
-            }
             else {
-                var name = this.parsePrimary();
-                var val = null;
+                var arg = this.parsePrimary();
 
-                if(!(name instanceof nodes.Symbol)) {
-                    throw new Error('expected symbol as argument name');
-                }
                 if(this.skipValue(lexer.TOKEN_OPERATOR, '=')) {
-                    val = this.parseExpression();
+                    arg = new nodes.KeywordArg(arg.lineno,
+                                               arg.colno,
+                                               arg,
+                                               this.parseExpression());
                 }
-                args.push(new nodes.Pair(name.lineno,
-                                         name.colno,
-                                         name,
-                                         val));
+
+                args.push(arg);
             }
         }
 
@@ -946,7 +938,7 @@ var util = require('util');
 //     console.log(util.inspect(t));
 // }
 
-// var p = new Parser(lexer.lex('{{ 0 }}'));
+// var p = new Parser(lexer.lex('{% macro foo() %}'));
 // var n = p.parse();
 // nodes.printNodes(n);
 
