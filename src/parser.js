@@ -1,6 +1,3 @@
-// Does not support:
-//
-// Conditional expression: "yes" if True else "no"
 
 var lexer = require('./lexer');
 var nodes = require('./nodes');
@@ -169,8 +166,8 @@ var Parser = Object.extend({
                                    macroTok.colno,
                                    name,
                                    args);
-        this.advanceAfterBlockEnd(macroTok.value);
 
+        this.advanceAfterBlockEnd(macroTok.value);
         node.body = this.parseUntilBlocks('endmacro');
         this.advanceAfterBlockEnd();
 
@@ -188,7 +185,7 @@ var Parser = Object.extend({
         if(!this.skipSymbol('as')) {
             throw new Error('expected "as" keyword');
         }
-        var target = this.parsePrimary().value;
+        var target = this.parsePrimary();
 
         this.advanceAfterBlockEnd(importTok.value);
 
@@ -207,11 +204,14 @@ var Parser = Object.extend({
         var template = this.parseExpression();
         var node = new nodes.FromImport(fromTok.lineno,
                                         fromTok.colno,
-                                        template);
+                                        template,
+                                        new nodes.NodeList());
 
         if(!this.skipSymbol('import')) {
             throw new Error("expected import");
         }
+
+        var names = node.names;
 
         while(1) {
             var type = this.peekToken().type;
@@ -220,7 +220,7 @@ var Parser = Object.extend({
                 break;
             }
 
-            if(node.children.length > 0 && !this.skip(lexer.TOKEN_COMMA)) {
+            if(names.children.length > 0 && !this.skip(lexer.TOKEN_COMMA)) {
                 throw new Error('expected comma');
             }
 
@@ -231,12 +231,12 @@ var Parser = Object.extend({
 
             var alias = null;
             if(this.skipSymbol('as')) {
-                var alias = this.parsePrimary();
+                alias = this.parsePrimary();
             }
-            node.addChild(new nodes.Pair(name.lineno,
-                                         name.colno,
-                                         name,
-                                         alias));
+            names.addChild(new nodes.Pair(name.lineno,
+                                          name.colno,
+                                          name,
+                                          alias));
         }
 
         return node;
@@ -335,8 +335,7 @@ var Parser = Object.extend({
             this.fail('expected set');
         }
 
-        var node = new nodes.Set(tag.lineno, tag.colno);
-        node.targets = [];
+        var node = new nodes.Set(tag.lineno, tag.colno, []);
 
         var target;
         while((target = this.parsePrimary())) {
@@ -441,10 +440,10 @@ var Parser = Object.extend({
             if(tok.type == lexer.TOKEN_LEFT_PAREN) {
                 // Function call
                 var args = this.parseSignature(true);
-                var node = new nodes.FunCall(tok.lineno,
-                                             tok.colno,
-                                             node,
-                                             args);
+                node = new nodes.FunCall(tok.lineno,
+                                         tok.colno,
+                                         node,
+                                         args);
             }
             else if(tok.type == lexer.TOKEN_LEFT_BRACKET) {
                 // Reference
@@ -749,21 +748,26 @@ var Parser = Object.extend({
                 name += '.' + this.expect(lexer.TOKEN_SYMBOL).value;
             }
 
-            node = new nodes.Filter(tok.lineno,
-                                    tok.colno,
-                                    new nodes.Symbol(tok.lineno,
-                                                     tok.colno,
-                                                     name),
-                                    [new nodes.Pair(node.lineno,
-                                                    node.colno,
-                                                    undefined,
-                                                    node)]);
+            node = new nodes.Filter(
+                tok.lineno,
+                tok.colno,
+                new nodes.Symbol(tok.lineno,
+                                 tok.colno,
+                                 name),
+                new nodes.NodeList(
+                    tok.lineno,
+                    tok.colno,
+                    [new nodes.Pair(node.lineno,
+                                    node.colno,
+                                    null,
+                                    node)])
+            );
 
             if(this.peekToken().type == lexer.TOKEN_LEFT_PAREN) {
                 // Get a FunCall node and add the parameters to the
                 // filter
                 var call = this.parsePostfix(node);
-                node.children = node.children.concat(call.children);
+                node.args.children = node.args.children.concat(call.args.children);
             }
         }
 
@@ -794,7 +798,7 @@ var Parser = Object.extend({
                 break;
             }
 
-            if(node.numChildren() > 0) {
+            if(node.children.length > 0) {
                 if(!this.skip(lexer.TOKEN_COMMA)) {
                     throw new Error("parseAggregate: expected comma after expression");
                 }
@@ -844,7 +848,9 @@ var Parser = Object.extend({
             }
             else if(call) {
                 var nameOrVal = this.parsePrimary();
-                var name, val;
+                var name = null;
+                var val;
+
                 if(this.skipValue(lexer.TOKEN_OPERATOR, '=')) {
                     name = nameOrVal;
                     val = this.parseExpression();
@@ -861,7 +867,8 @@ var Parser = Object.extend({
             }
             else {
                 var name = this.parsePrimary();
-                var val;
+                var val = null;
+
                 if(!(name instanceof nodes.Symbol)) {
                     throw new Error('expected symbol as argument name');
                 }
@@ -875,7 +882,7 @@ var Parser = Object.extend({
             }
         }
 
-        return args;
+        return new nodes.NodeList(tok.lineno, tok.colno, args);
     },
 
     parseUntilBlocks: function(/* blockNames */) {
@@ -939,7 +946,7 @@ var util = require('util');
 //     console.log(util.inspect(t));
 // }
 
-// var p = new Parser(lexer.lex('{% set x, y = 3 %}'));
+// var p = new Parser(lexer.lex('{{ 0 }}'));
 // var n = p.parse();
 // nodes.printNodes(n);
 

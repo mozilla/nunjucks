@@ -62,10 +62,9 @@ var Compiler = Object.extend({
     },
 
     _compileChildren: function(node, frame) {
-        var _this = this;
-        node.iterChildren(function(n) {
-            _this.compile(n, frame);
-        });
+        lib.each(node.children, function(n) {
+            this.compile(n, frame);
+        }, this);
     },
 
     _compileAggregate: function(node, frame, startChar, endChar) {
@@ -158,8 +157,8 @@ var Compiler = Object.extend({
     },
 
     compilePair: function(node, frame) {
-        var key = node.getKey();
-        var val = node.getValue();
+        var key = node.key;
+        var val = node.value;
 
         if(key instanceof nodes.Symbol) {
             key = new nodes.Literal(key.lineno, key.colno, key.value);
@@ -269,16 +268,15 @@ var Compiler = Object.extend({
     collectArgs: function(node, frame) {
         var args = [];
         var kwargs = [];
-        for(var i=0; i<node.children.length; i++) {
-            var arg = node.children[i];
-            var name = arg.getKey();
-            var val = arg.getValue();
+        lib.each(node.args.children, function(arg) {
+            var name = arg.key;
+            var val = arg.value;
             if(name) {
                 kwargs.push([name, val]);
             } else {
                 args.push(val);
             }
-        }
+        });
         return [args, kwargs];
     },
 
@@ -399,11 +397,12 @@ var Compiler = Object.extend({
         this.emitLine('frame = frame.push();');
         var args = [];
 
-        for(var i=0; i<node.children.length; i++) {
-            var name = node.children[i].getKey().value
+        lib.each(node.args.children, function(arg) {
+            var name = arg.key.name;
             args.push('l_' + name);
             frame.set(name, 'l_' + name);
-        }
+        });
+
         this.emitLine('var macro = function(' + args.join(', ') + ') {');
         var oldBuffer = this.buffer;
         this.buffer = 'macroOutput';
@@ -422,8 +421,8 @@ var Compiler = Object.extend({
 
         for(var i=0; i<node.children.length; i++) {
             var arg = node.children[i];
-            var name = arg.getKey().value;
-            var val = arg.getValue();
+            var name = arg.key.value;
+            var val = arg.value;
             this.emit('["' + name + '", ');
             val ? this.compile(val, frame) : this.emit('null');
             this.emit(']');
@@ -467,8 +466,8 @@ var Compiler = Object.extend({
         this.emitLine(').getModule();');
 
         for(var i=0; i<node.children.length; i++) {
-            var name = node.children[i].getKey().value;
-            var alias = node.children[i].getValue();
+            var name = node.children[i].key.value;
+            var alias = node.children[i].value;
             if(alias) {
                 alias = alias.value;
             } else {
@@ -591,7 +590,7 @@ var Compiler = Object.extend({
 
 // var fs = require("fs");
 // var c = new Compiler();
-// var src = "{{ test('hello') }}";
+// var src = '{{ item[0] }}';
 
 // var ns = parser.parse(src);
 // nodes.printNodes(ns);
