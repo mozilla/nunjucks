@@ -398,7 +398,7 @@ var Compiler = Object.extend({
         var args = [];
 
         lib.each(node.args.children, function(arg) {
-            var name = arg.key.name;
+            var name = arg.key.value;
             args.push('l_' + name);
             frame.set(name, 'l_' + name);
         });
@@ -407,7 +407,7 @@ var Compiler = Object.extend({
         var oldBuffer = this.buffer;
         this.buffer = 'macroOutput';
         this.emitLine('var ' + this.buffer + '= "";');
-        this.compile(node.body, frame)
+        this.compile(node.body, frame);
         this.emitLine('return ' + this.buffer + ';');
         this.emitLine('};');
         this.buffer = oldBuffer;
@@ -419,18 +419,18 @@ var Compiler = Object.extend({
         var name = node.name.value;
         this.emit('runtime.wrapMacro(macro, "' + name + '", ' + '[');
 
-        for(var i=0; i<node.children.length; i++) {
-            var arg = node.children[i];
+        lib.each(node.args.children, function(arg, i) {
             var name = arg.key.value;
             var val = arg.value;
             this.emit('["' + name + '", ');
             val ? this.compile(val, frame) : this.emit('null');
             this.emit(']');
 
-            if(i != node.children.length - 1) {
+            if(i != node.args.children.length - 1) {
                 this.emit(', ');
             }
-        }
+        }, this);
+
         this.emitLine('], false, false, false);');
     },
 
@@ -450,13 +450,15 @@ var Compiler = Object.extend({
     },
 
     compileImport: function(node, frame) {
-        this.emit('var l_' + node.target + ' = env.getTemplate(');
+        var target = node.target.value;
+
+        this.emit('var l_' + target + ' = env.getTemplate(');
         this.compile(node.template, frame);
         this.emitLine(').getModule();');
-        frame.set(node.target, 'l_' + node.target);
+        frame.set(target, 'l_' + target);
 
         if(!this.isChild) {
-            this.emitLine('context.setVariable("' + node.target + '", l_' + node.target + ');');
+            this.emitLine('context.setVariable("' + target + '", l_' + target + ');');
         }
     },
 
@@ -465,9 +467,9 @@ var Compiler = Object.extend({
         this.compile(node.template, frame);
         this.emitLine(').getModule();');
 
-        for(var i=0; i<node.children.length; i++) {
-            var name = node.children[i].key.value;
-            var alias = node.children[i].value;
+        lib.each(node.names.children, function(nameNode) {
+            var name = nameNode.key.value;
+            var alias = nameNode.value;
             if(alias) {
                 alias = alias.value;
             } else {
@@ -485,7 +487,7 @@ var Compiler = Object.extend({
             if(!this.isChild) {
                 this.emitLine('context.setVariable("' + alias + '", l_' + alias + ');');
             }
-        }
+        }, this);
     },
 
     compileBlock: function(node, frame) {
@@ -590,7 +592,7 @@ var Compiler = Object.extend({
 
 // var fs = require("fs");
 // var c = new Compiler();
-// var src = '{{ item[0] }}';
+// var src = 'foo {% block block1 %}bar{% endblock %}';
 
 // var ns = parser.parse(src);
 // nodes.printNodes(ns);

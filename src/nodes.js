@@ -25,17 +25,27 @@ var Node = Object.extend("Node", {
     findAll: function(type) {
         var res = [];
 
-        lib.each(this.fields, function(field) {
-            var obj = this[field];
-
+        function check(obj) {
             if(obj instanceof type) {
                 res.push(obj);
             }
 
             if(obj instanceof Node) {
                 res = res.concat(obj.findAll(type));
-            }
-        }, this);
+            }   
+        }
+
+        if(this instanceof NodeList) {
+            lib.each(this.children, function(node) {
+                check(node);
+            }, this);
+        }
+        else {
+            lib.each(this.fields, function(field) {
+                var obj = this[field];
+                check(obj);
+            }, this);
+        }
 
         return res;
     },
