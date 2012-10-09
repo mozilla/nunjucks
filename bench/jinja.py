@@ -11,13 +11,14 @@ from jinja2 import Template, Environment, FileSystemLoader
 
 env = Environment(loader=FileSystemLoader('.'))
 times = []
+arr = [5]*1000
 
 for i in range(100):
     env = Environment(loader=FileSystemLoader('.'))
     t1 = time.time()
     tmpl = env.get_template('index.html')
     tmpl.render({'username': 'james',
-                 'arr': [5]*1000})
+                 'arr': arr})
     t2 = time.time()
 
     times.append(t2-t1)
