@@ -335,12 +335,12 @@ var Compiler = Object.extend({
         this.emitLine('frame = frame.pop();');
     },
 
-    compileMacro: function(node, frame) {
+    _emitMacroBegin: function(node, frame) {
         var args = [];
         var kwargs = null;
         var funcId = 'macro_' + this.tmpid();
-        frame = frame.push();
 
+        // Type check the definition of the args
         lib.each(node.args.children, function(arg, i) {
             if(i === node.args.children.length - 1 &&
                arg instanceof nodes.Dict) {
@@ -354,12 +354,15 @@ var Compiler = Object.extend({
 
         var names = lib.map(args, function(a) { return 'l_' + a.value; });
         names.push('kwargs');
-        
+
+        // We statically know what args to accept, and keyword
+        // arguments come as a dict as the last argument, if any
         this.emitLine('function ' + funcId + '(' + names.join(', ') + ') {');
         this.emitLine('frame = frame.push();');
         this.emitLine('kwargs = kwargs || {};');
 
-        // Don't need to use random names because the function
+        // Expose the arguments to the template. Don't need to use
+        // random names because the function
         // will create a new run-time scope for us
         lib.each(args, function(arg) {
             this.emitLine('frame.set("' + arg.value + '", ' +
@@ -367,6 +370,7 @@ var Compiler = Object.extend({
             frame.set(arg.value, 'l_' + arg.value);
         }, this);
 
+        // Set the keyword arguments
         if(kwargs) {
             lib.each(kwargs.children, function(pair) {
                 var name = pair.key.value;
@@ -378,15 +382,28 @@ var Compiler = Object.extend({
             }, this);
         }
 
+        return funcId;
+    },
+
+    _emitMacroEnd: function() {
+        this.emitLine('frame = frame.pop();');
+        this.emitLine('return ' + this.buffer + ';');
+        this.emitLine('};');
+    },
+
+    compileMacro: function(node, frame) {
+        frame = frame.push();
+        var funcId = this._emitMacroBegin(node, frame);
+
+        // Start a new output buffer, and set the old one back after
+        // we're done
         var prevBuffer = this.buffer;
         this.buffer = 'output';
         this.emitLine('var ' + this.buffer + '= "";');
 
         this.compile(node.body, frame);
 
-        this.emitLine('frame = frame.pop();');
-        this.emitLine('return ' + this.buffer + ';');
-        this.emitLine('};');
+        this._emitMacroEnd();
         this.buffer = prevBuffer;
 
         // Expose the macro to the templates
@@ -397,17 +414,19 @@ var Compiler = Object.extend({
             if(node.name.value.charAt(0) != '_') {
                 this.emitLine('context.addExport("' + name + '");');
             }
+
             this.emitLine('context.setVariable("' + name + '", ' + funcId + ');');
         }
     },
 
     compileImport: function(node, frame) {
+        var id = this.tmpid();
         var target = node.target.value;
 
-        this.emit('var l_' + target + ' = env.getTemplate(');
-        this.compile(node.template, frame);
+        this.emit('var ' + id + ' = env.getTemplate(');
+        this._compileExpression(node.template, frame);
         this.emitLine(').getModule();');
-        frame.set(target, 'l_' + target);
+        frame.set(target, id);
 
         if(!this.isChild) {
             this.emitLine('context.setVariable("' + target + '", l_' + target + ');');
