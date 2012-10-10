@@ -431,7 +431,10 @@ var Compiler = Object.extend({
         this.emitLine(').getExported();');
         frame.set(target, id);
 
-        if(!this.isChild) {
+        if(frame.parent) {
+            this.emitLine('frame.set("' + target + '", ' + id + ');');
+        }
+        else {
             this.emitLine('context.setVariable("' + target + '", ' + id + ');');
         }
     },
@@ -444,6 +447,7 @@ var Compiler = Object.extend({
         lib.each(node.names.children, function(nameNode) {
             var name;
             var alias;
+            var id = this.tmpid();
 
             if(nameNode instanceof nodes.Pair) {
                 name = nameNode.key.value;
@@ -455,14 +459,18 @@ var Compiler = Object.extend({
             }
 
             this.emitLine('if(imported.hasOwnProperty("' + name + '")) {');
-            this.emitLine('var l_' + alias + ' = imported.' + name + ';');
+            this.emitLine('var ' + id + ' = imported.' + name + ';');
             this.emitLine('} else {');
             this.emitLine('throw new Error("cannot import \'' + name + '\'")');
             this.emitLine('}');
-            frame.set(alias, 'l_' + alias);
 
-            if(!this.isChild) {
-                this.emitLine('context.setVariable("' + alias + '", l_' + alias + ');');
+            frame.set(alias, id);
+
+            if(frame.parent) {
+                this.emitLine('frame.set("' + alias + '", ' + id + ');');
+            }
+            else {
+                this.emitLine('context.setVariable("' + alias + '", ' + id + ');');
             }
         }, this);
     },

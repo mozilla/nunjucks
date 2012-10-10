@@ -137,6 +137,17 @@ describe('compiler', function() {
         s = render('{% from "import.html" import foo as baz, bar %}' +
                        '{{ bar }} {{ baz() }}');
         s.should.equal("baz Here's a macro");
+
+        s = render('{% for i in [1,2] %}' +
+                   'start: {{ num }}' +
+                   '{% from "import.html" import bar as num %}' +
+                   'end: {{ num }}' +
+                   '{% endfor %}' +
+                   'final: {{ num }}');
+        // TODO: Should the for loop create a new frame for each
+        // iteration? As it is, `num` is set on all iterations after
+        // the first one sets it
+        s.should.equal('start: end: bazstart: bazend: bazfinal: ');
     });
 
     it('should inherit templates', function() {
@@ -206,6 +217,10 @@ describe('compiler', function() {
 
         s = render('{% set x, y = "foo" %}{{ x }}{{ y }}');
         s.should.equal('foofoo');
+
+        s = render('{% for i in [1] %}{% set foo=1 %}{% endfor %}{{ foo }}',
+                   { foo: 2 });
+        s.should.equal('2');
 
         s = render('{% include "set.html" %}{{ foo }}',
                    { foo: 'bar' });
