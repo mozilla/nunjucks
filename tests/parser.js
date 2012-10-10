@@ -215,7 +215,9 @@ describe('parser', function() {
                 [nodes.Symbol, 'foo'],
                 [nodes.NodeList,
                  [nodes.Symbol, 'bar'],
-                 [nodes.KeywordArg, [nodes.Symbol, 'baz'], [nodes.Literal, 'foobar']]],
+                 [nodes.Dict,
+                  [nodes.Pair, 
+                   [nodes.Symbol, 'baz'], [nodes.Literal, 'foobar']]]],
                 [nodes.NodeList,
                  [nodes.Output,
                   [nodes.TemplateData, 'This is a macro']]]]]);
@@ -230,9 +232,10 @@ describe('parser', function() {
                  [nodes.NodeList,
                   [nodes.Literal, 'bar'],
                   [nodes.Symbol, 'falalalala'],
-                  [nodes.KeywordArg,
-                   [nodes.Symbol, 'baz'],
-                   [nodes.Literal, 'foobar']]]]]]);
+                  [nodes.Dict,
+                   [nodes.Pair,
+                    [nodes.Symbol, 'baz'],
+                    [nodes.Literal, 'foobar']]]]]]]);
     });
 
     it('should parse imports', function() {

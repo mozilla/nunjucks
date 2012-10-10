@@ -255,16 +255,16 @@ var Template = Object.extend({
     }
 });
 
-// var fs = require('fs');
-// //var src = fs.readFileSync('test.html', 'utf-8');
-// var src = "{% for i in [1,2,3] %}{% include 'item.html' %}{% endfor %}";
+var fs = require('fs');
+//var src = fs.readFileSync('test.html', 'utf-8');
+var src = '{% macro foo(a, b, c, h="hello") %}{{ h }}{% endmacro %} {{ foo(1, h="foo") }}';
 
-// var env = new Environment();
-// console.log(compiler.compile(src));
+var env = new Environment();
+console.log(compiler.compile(src));
 
-// var tmpl = new Template(src, env);
-// console.log("OUTPUT ---");
-// console.log(tmpl.render({ username: "James" }));
+var tmpl = new Template(src, env);
+console.log("OUTPUT ---");
+console.log(tmpl.render({ username: "James" }));
 
 module.exports = {
     Environment: Environment,

@@ -386,17 +386,17 @@ var Parser = Object.extend({
         }
 
         switch(tok.value) {
-            case 'raw': node = this.parseRaw(); break;
-            case 'if': node = this.parseIf(); break;
-            case 'for': node = this.parseFor(); break;
-            case 'block': node = this.parseBlock(); break;
-            case 'extends': node = this.parseExtends(); break;
-            case 'include': node = this.parseInclude(); break;
-            case 'set': node = this.parseSet(); break;
-            case 'macro': node = this.parseMacro(); break;
-            case 'import': node = this.parseImport(); break;
-            case 'from': node = this.parseFrom(); break;
-            default: this.fail('unknown block tag: ' + tok.value);
+        case 'raw': node = this.parseRaw(); break;
+        case 'if': node = this.parseIf(); break;
+        case 'for': node = this.parseFor(); break;
+        case 'block': node = this.parseBlock(); break;
+        case 'extends': node = this.parseExtends(); break;
+        case 'include': node = this.parseInclude(); break;
+        case 'set': node = this.parseSet(); break;
+        case 'macro': node = this.parseMacro(); break;
+        case 'import': node = this.parseImport(); break;
+        case 'from': node = this.parseFrom(); break;
+        default: this.fail('unknown block tag: ' + tok.value);
         }
 
         return node;
@@ -846,9 +846,11 @@ var Parser = Object.extend({
         return node;
     },
 
-   parseSignature: function() {
+    parseSignature: function() {
         var tok = this.nextToken();
-        var args = [];
+        var args = new nodes.NodeList(tok.lineno, tok.colno);
+        var kwargs = new nodes.Dict(tok.lineno, tok.colno);
+        var checkComma = false;
 
         while(1) {
             var type = this.peekToken().type;
@@ -857,24 +859,33 @@ var Parser = Object.extend({
                 break;
             }
 
-            if(args.length > 0 && !this.skip(lexer.TOKEN_COMMA)) {
+            if(checkComma && !this.skip(lexer.TOKEN_COMMA)) {
                 throw new Error("parseSignature: expected comma after expression");
             }
             else {
                 var arg = this.parsePrimary();
 
                 if(this.skipValue(lexer.TOKEN_OPERATOR, '=')) {
-                    arg = new nodes.KeywordArg(arg.lineno,
-                                               arg.colno,
-                                               arg,
-                                               this.parseExpression());
+                    kwargs.addChild(
+                        new nodes.Pair(arg.lineno,
+                                       arg.colno,
+                                       arg,
+                                       this.parseExpression())
+                    );
                 }
-
-                args.push(arg);
+                else {
+                    args.addChild(arg);
+                }
             }
+
+            checkComma = true;
         }
 
-        return new nodes.NodeList(tok.lineno, tok.colno, args);
+        if(kwargs.children.length) {
+            args.addChild(kwargs);
+        }
+
+        return args;
     },
 
     parseUntilBlocks: function(/* blockNames */) {
@@ -938,7 +949,7 @@ var util = require('util');
 //     console.log(util.inspect(t));
 // }
 
-// var p = new Parser(lexer.lex('{% macro foo() %}'));
+// var p = new Parser(lexer.lex('{{ foo(1, 2, 3, foo=3) }}'));
 // var n = p.parse();
 // nodes.printNodes(n);
 

@@ -95,7 +95,6 @@ var FromImport = Node.extend("FromImport", {
     }
 });
 var FunCall = Node.extend("FunCall", { fields: ['name', 'args'] });
-var KeywordArg = Node.extend("KeywordArg", { fields: ['key', 'value'] });
 var Filter = FunCall.extend("Filter");
 var Block = Node.extend("Block", { fields: ['name', 'body'] });
 var TemplateRef = Node.extend("TemplateRef", { fields: ['template'] });
@@ -215,7 +214,6 @@ module.exports = {
     Import: Import,
     FromImport: FromImport,
     FunCall: FunCall,
-    KeywordArg: KeywordArg,
     Filter: Filter,
     Block: Block,
     Extends: Extends,

@@ -26,7 +26,7 @@ describe('compiler', function() {
         s.should.equal('baz');
     });
 
-    it('should compile funciton calls', function() {
+    it('should compile function calls', function() {
         var s = render('{{ foo("msg") }}',
                        { foo: function(str) { return str + 'hi'; }});
         s.should.equal('msghi');
@@ -119,17 +119,24 @@ describe('compiler', function() {
     });
 
     it('should compile macros', function() {
-        render('{% macro foo(bar, bazbar, baz="foobar") %}This is a macro{% endmacro %}').should.equal('');
-        render('{% macro foo(bar, bazbar, baz="foobar") %}' +
-               'This is a macro {{ bar }} {{ bazbar }} {{ baz }}' +
-               '{% endmacro %}' +
-               '{{ foo("arg1", bazbar="arg2") }}').should.equal('This is a macro arg1 arg2 foobar');
+        var s = render('{% macro foo() %}This is a macro{% endmacro %}');
+        s.should.equal('');
+
+        s = render('{% macro foo(bar, bazbar, baz="foobar") %}' +
+                   'This is a macro {{ bar }} {{ bazbar }} {{ baz }}' +
+                   '{% endmacro %}' +
+                   '{{ foo("arg1", "arg2") }}');
+        s.should.equal('This is a macro arg1 arg2 foobar');
     });
 
     it('should import templates', function() {
-        render('{% import "import.html" as imp %}{{ imp.foo() }} {{ imp.bar }}').should.equal("Here's a macro baz");
-        render('{% from "import.html" import foo as baz, bar %}' +
-               '{{ bar }} {{ baz() }}').should.equal("baz Here's a macro");
+        var s = render('{% import "import.html" as imp %}' +
+                       '{{ imp.foo() }} {{ imp.bar }}');
+        s.should.equal("Here's a macro baz");
+
+        s = render('{% from "import.html" import foo as baz, bar %}' +
+                       '{{ bar }} {{ baz() }}');
+        s.should.equal("baz Here's a macro");
     });
 
     it('should inherit templates', function() {

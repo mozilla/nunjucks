@@ -73,6 +73,9 @@ var wrapMacro = function(func, name, definedArgs, catchKwargs, catchVarargs, cal
     return newMacro;
 };
 
+function processArgs(args) {
+    
+}
 
 module.exports = {
     Frame: Frame,
