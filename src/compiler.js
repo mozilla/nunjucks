@@ -257,11 +257,14 @@ var Compiler = Object.extend({
             var name = node.targets[i].value;
             frame.set(name, id);
 
-            this.emitLine('context.setVariable("' + name + '", ' +
-                          id + ');');
+            this.emitLine('frame.set("' + name + '", ' + id + ');');
+
+            this.emitLine('if(!frame.parent) {');
+            this.emitLine('context.setVariable("' + name + '", ' + id + ');');
             if(name.charAt(0) != '_') {
                 this.emitLine('context.addExport("' + name + '");');
             }
+            this.emitLine('}');
         }
     },
 
@@ -425,18 +428,18 @@ var Compiler = Object.extend({
 
         this.emit('var ' + id + ' = env.getTemplate(');
         this._compileExpression(node.template, frame);
-        this.emitLine(').getModule();');
+        this.emitLine(').getExported();');
         frame.set(target, id);
 
         if(!this.isChild) {
-            this.emitLine('context.setVariable("' + target + '", l_' + target + ');');
+            this.emitLine('context.setVariable("' + target + '", ' + id + ');');
         }
     },
 
     compileFromImport: function(node, frame) {
-        this.emit('var includedTemplate = env.getTemplate(');
+        this.emit('var imported = env.getTemplate(');
         this.compile(node.template, frame);
-        this.emitLine(').getModule();');
+        this.emitLine(').getExported();');
 
         lib.each(node.names.children, function(nameNode) {
             var name;
@@ -451,11 +454,10 @@ var Compiler = Object.extend({
                 alias = name;
             }
 
-            this.emitLine('if(includedTemplate.hasOwnProperty("' + name + '")) {');
-            this.emitLine('var l_' + alias + ' = includedTemplate.' + name + ';');
+            this.emitLine('if(imported.hasOwnProperty("' + name + '")) {');
+            this.emitLine('var l_' + alias + ' = imported.' + name + ';');
             this.emitLine('} else {');
-            // TODO: Add runtime errors
-            this.emitLine('// Add runtime error here');
+            this.emitLine('throw new Error("cannot import \'' + name + '\'")');
             this.emitLine('}');
             frame.set(alias, 'l_' + alias);
 
@@ -495,7 +497,7 @@ var Compiler = Object.extend({
         this.emitLine(');');
         this.emitLine(this.buffer +
                       ' += includeTemplate.render(' +
-                      'context.getVariables(), frame);');
+                      'context.getVariables(), frame.push());');
     },
 
     compileTemplateData: function(node, frame) {

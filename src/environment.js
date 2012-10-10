@@ -213,17 +213,18 @@ var Template = Object.extend({
         return this.upToDate();
     },
 
-    getModule: function() {
+    getExported: function() {
         if(!this.compiled) {
             this._compile();
         }
+
         // Run the rootRenderFunc to populate the context with exported vars
-        var ctx = new Context({}, this.blocks);
+        var context = new Context({}, this.blocks);
         this.rootRenderFunc(this.env,
-                            ctx,
+                            context,
                             new Frame(),
                             runtime);
-        return ctx.getExported();
+        return context.getExported();
     },
 
     _compile: function() {
@@ -255,16 +256,16 @@ var Template = Object.extend({
     }
 });
 
-var fs = require('fs');
-//var src = fs.readFileSync('test.html', 'utf-8');
-var src = '{% macro foo(a, b, c, h="hello") %}{{ h }}{% endmacro %} {{ foo(1, h="foo") }}';
+// var fs = require('fs');
+// //var src = fs.readFileSync('test.html', 'utf-8');
+// var src = '{% macro foo(a, b, c, h="hello") %}{{ h }}{% endmacro %} {{ foo(1, h="foo") }}';
 
-var env = new Environment();
-console.log(compiler.compile(src));
+// var env = new Environment();
+// console.log(compiler.compile(src));
 
-var tmpl = new Template(src, env);
-console.log("OUTPUT ---");
-console.log(tmpl.render({ username: "James" }));
+// var tmpl = new Template(src, env);
+// console.log("OUTPUT ---");
+// console.log(tmpl.render({ username: "James" }));
 
 module.exports = {
     Environment: Environment,

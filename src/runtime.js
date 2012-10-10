@@ -42,42 +42,6 @@ var Frame = Object.extend({
     }
 });
 
-// wrapMacro returns a function that stands in for the original macro, and handles
-// the translation of keyword arguments from nunjucks to javascript
-var wrapMacro = function(func, name, definedArgs, catchKwargs, catchVarargs, caller) {
-    var definedArgCount = definedArgs.length;
-
-    var newMacro = function(args, kwargs) {
-        var applyArgs = args.slice(0, definedArgCount);
-        var applyArgCount = applyArgs.length;
-        if(applyArgCount != definedArgCount) {
-            var remainingArgs = definedArgs.slice(applyArgCount);
-            for(var i=0; i<remainingArgs.length; i++) {
-                var arg = remainingArgs[i];
-                var name = arg[0];
-                var defaultVal = arg[1];
-                var value;
-                if(kwargs.hasOwnProperty(name)) {
-                    value = kwargs[name];
-                } else if(defaultVal) {
-                    value = defaultVal;
-                } else {
-                    throw new Error('parameter ' + name + ' was not provided');
-                }
-                applyArgs.push(value);
-            }
-        }
-        return func.apply(null, applyArgs);
-    };
-    newMacro.isMacro = true;
-    return newMacro;
-};
-
-function processArgs(args) {
-    
-}
-
 module.exports = {
-    Frame: Frame,
-    wrapMacro: wrapMacro
+    Frame: Frame
 };

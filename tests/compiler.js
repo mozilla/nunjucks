@@ -204,7 +204,17 @@ describe('compiler', function() {
                        { username: 'james' });
         s.should.equal('foo');
 
-        var s = render('{% set x, y = "foo" %}{{ x }}{{ y }}');
+        s = render('{% set x, y = "foo" %}{{ x }}{{ y }}');
         s.should.equal('foofoo');
+
+        s = render('{% include "set.html" %}{{ foo }}',
+                   { foo: 'bar' });
+        s.should.equal('bar');
+    });
+
+    it('should throw errors', function() {
+        (function() {
+            render('{% from "import.html" import boozle %}');
+        }).should.throw(/cannot import 'boozle'/);
     });
 });
