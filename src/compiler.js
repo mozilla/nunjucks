@@ -250,8 +250,8 @@ var Compiler = Object.extend({
             if(i > 0) {
                 this.emit(', ');
             }
-            var name = kwargs[i][0];
-            var val = kwargs[i][1];
+            var name = kwargs[i].key;
+            var val = kwargs[i].value;
             this.emit(name.value);
             this.emit(': ');
             this.compile(val, frame);
@@ -265,35 +265,37 @@ var Compiler = Object.extend({
         this.emit(')');
     },
 
-    collectArgs: function(node, frame) {
+    splitArgs: function(node) {
         var args = [];
         var kwargs = [];
+
         lib.each(node.args.children, function(arg) {
-            var name = arg.key;
-            var val = arg.value;
-            if(name) {
-                kwargs.push([name, val]);
+            if(arg instanceof nodes.KeywordArg) {
+                kwargs.push(arg);
             } else {
-                args.push(val);
+                args.push(arg);
             }
         });
-        return [args, kwargs];
+
+        return { positional: args,
+                 keyword: kwargs };
     },
 
     compileFunCall: function(node, frame) {
-        var allArgs = this.collectArgs(node);
-        var args = allArgs[0];
-        var kwargs = allArgs[1];
+        var args = this.splitArgs(node);
+
         this._emitWrappedExpression(node, frame);
         this.emit('.isMacro ? ');
+
         this._emitWrappedExpression(node, frame);
         this.emit('(');
-        this._emitCallArgs(args, frame, '[', ']');
+        this._emitCallArgs(args.positional, frame, '[', ']');
         this.emit(', ');
-        this._emitCallKwargs(kwargs, frame);
+        this._emitCallKwargs(args.keyword, frame);
         this.emit(') : ');
+
         this._emitWrappedExpression(node, frame);
-        this._emitCallArgs(args, frame, '(', ')');
+        this._emitCallArgs(args.positional, frame, '(', ')');
     },
 
     compileFilter: function(node, frame) {
@@ -301,8 +303,8 @@ var Compiler = Object.extend({
         this.assertType(name, nodes.Symbol);
 
         this.emit('env.getFilter("' + name.value + '")');
-        var args = this.collectArgs(node)[0];
-        this._emitCallArgs(args, frame, '(', ')');
+        var args = this.splitArgs(node);
+        this._emitCallArgs(args.positional, frame, '(', ')');
     },
 
     compileSet: function(node, frame) {
@@ -398,7 +400,15 @@ var Compiler = Object.extend({
         var args = [];
 
         lib.each(node.args.children, function(arg) {
-            var name = arg.key.value;
+            var name;
+
+            if(arg instanceof nodes.KeywordArg) {
+                name = arg.key.value;
+            }
+            else {
+                name = arg.value;
+            }
+
             args.push('l_' + name);
             frame.set(name, 'l_' + name);
         });
@@ -420,11 +430,14 @@ var Compiler = Object.extend({
         this.emit('runtime.wrapMacro(macro, "' + name + '", ' + '[');
 
         lib.each(node.args.children, function(arg, i) {
-            var name = arg.key.value;
-            var val = arg.value;
-            this.emit('["' + name + '", ');
-            val ? this.compile(val, frame) : this.emit('null');
-            this.emit(']');
+            if(arg instanceof nodes.KeywordArg) {
+                this.emit('["' + arg.key.value + '", ');
+                this.compile(arg.value, frame);
+                this.emit(']');
+            }
+            else {
+                this.emit('["' + arg.value + '", null]');
+            }
 
             if(i != node.args.children.length - 1) {
                 this.emit(', ');
@@ -468,11 +481,15 @@ var Compiler = Object.extend({
         this.emitLine(').getModule();');
 
         lib.each(node.names.children, function(nameNode) {
-            var name = nameNode.key.value;
-            var alias = nameNode.value;
-            if(alias) {
-                alias = alias.value;
-            } else {
+            var name;
+            var alias;
+
+            if(nameNode instanceof nodes.Pair) {
+                name = nameNode.key.value;
+                alias = nameNode.value.value;
+            }
+            else {
+                name = nameNode.value;
                 alias = name;
             }
 
