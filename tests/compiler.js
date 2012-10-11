@@ -119,8 +119,54 @@ describe('compiler', function() {
     });
 
     it('should compile macros', function() {
-        var s = render('{% macro foo() %}This is a macro{% endmacro %}');
-        s.should.equal('');
+        var s = render('{% macro foo() %}This is a macro{% endmacro %}' +
+                       '{{ foo() }}');
+        s.should.equal('This is a macro');
+
+        s = render('{% macro foo(x, y) %}{{ y }}{% endmacro %}' +
+                   '{{ foo(1) }}');
+        s.should.equal('undefined');
+
+        s = render('{% macro foo(x, y) %}{{ y }}{% endmacro %}' +
+                   '{{ foo(1, 2) }}');
+        s.should.equal('2');
+
+        s = render('{% macro foo(x, y, z=5) %}{{ y }}{% endmacro %}' +
+                   '{{ foo(1, 2) }}');
+        s.should.equal('2');
+
+        s = render('{% macro foo(x, y, z=5) %}{{ z }}{% endmacro %}' +
+                   '{{ foo(1, 2) }}');
+        s.should.equal('5');
+
+        s = render('{% macro foo(x, y, z=5) %}{{ y }}{% endmacro %}' +
+                   '{{ foo(1, y=2) }}');
+        s.should.equal('2');
+
+        s = render('{% macro foo(x, y, z=5) %}{{ x }}{{ y }}{{ z }}' +
+                   '{% endmacro %}' +
+                   '{{ foo(x=1, y=2) }}');
+        s.should.equal('125');
+
+        s = render('{% macro foo(x, y, z=5) %}{{ x }}{{ y }}{{ z }}' +
+                   '{% endmacro %}' +
+                   '{{ foo(x=1, y=2, z=3) }}');
+        s.should.equal('123');
+
+        s = render('{% macro foo(x, y=2, z=5) %}{{ x }}{{ y }}{{ z }}' +
+                   '{% endmacro %}' +
+                   '{{ foo(1, z=3) }}');
+        s.should.equal('123');
+
+        s = render('{% macro foo(x, y=2, z=5) %}{{ x }}{{ y }}{{ z }}' +
+                   '{% endmacro %}' +
+                   '{{ foo(1) }}');
+        s.should.equal('125');
+
+        s = render('{% macro foo(x, y=2, z=5) %}{{ x }}{{ y }}{{ z }}' +
+                   '{% endmacro %}' +
+                   '{{ foo(1, 10, 20) }}');
+        s.should.equal('11020');
 
         s = render('{% macro foo(bar, bazbar, baz="foobar") %}' +
                    'This is a macro {{ bar }} {{ bazbar }} {{ baz }}' +

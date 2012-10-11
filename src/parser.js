@@ -849,7 +849,8 @@ var Parser = Object.extend({
     parseSignature: function() {
         var tok = this.nextToken();
         var args = new nodes.NodeList(tok.lineno, tok.colno);
-        var kwargs = new nodes.Dict(tok.lineno, tok.colno);
+        var kwargs = new nodes.KeywordArgs(tok.lineno, tok.colno);
+        var kwnames = [];
         var checkComma = false;
 
         while(1) {

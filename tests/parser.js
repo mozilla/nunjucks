@@ -215,7 +215,7 @@ describe('parser', function() {
                 [nodes.Symbol, 'foo'],
                 [nodes.NodeList,
                  [nodes.Symbol, 'bar'],
-                 [nodes.Dict,
+                 [nodes.KeywordArgs,
                   [nodes.Pair, 
                    [nodes.Symbol, 'baz'], [nodes.Literal, 'foobar']]]],
                 [nodes.NodeList,
@@ -232,7 +232,7 @@ describe('parser', function() {
                  [nodes.NodeList,
                   [nodes.Literal, 'bar'],
                   [nodes.Symbol, 'falalalala'],
-                  [nodes.Dict,
+                  [nodes.KeywordArgs,
                    [nodes.Pair,
                     [nodes.Symbol, 'baz'],
                     [nodes.Literal, 'foobar']]]]]]]);

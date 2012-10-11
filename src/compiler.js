@@ -25,6 +25,13 @@ function binOpEmitter(str) {
     };
 }
 
+// Generate an array of strings
+function quotedArray(arr) {
+    return '[' + 
+        lib.map(arr, function(x) { return '"' + x + '"'; }) +
+        ']';
+}
+
 var Compiler = Object.extend({
     init: function() {
         this.codebuf = [];
@@ -39,6 +46,12 @@ var Compiler = Object.extend({
 
     emitLine: function(code) {
         this.emit(code + "\n");
+    },
+
+    emitLines: function() {
+        lib.each(lib.toArray(arguments), function(line) {
+            this.emitLine(line);
+        }, this);
     },
 
     emitFuncBegin: function(name) {
@@ -246,6 +259,18 @@ var Compiler = Object.extend({
         this._compileAggregate(node.args, frame, '(', ')');
     },
 
+    compileKeywordArgs: function(node, frame) {
+        var names = [];
+
+        lib.each(node.children, function(pair) {
+            names.push(pair.key.value);
+        });
+
+        this.emit('runtime.makeKeywordArgs(');
+        this.compileDict(node, frame);
+        this.emit(')');
+    },
+
     compileSet: function(node, frame) {
         var id = this.tmpid();
 
@@ -355,14 +380,26 @@ var Compiler = Object.extend({
             }
         }, this);
 
-        var names = lib.map(args, function(a) { return 'l_' + a.value; });
-        names.push('kwargs');
+        var realNames = lib.map(args, function(n) { return 'l_' + n.value; });
+        realNames.push('kwargs');
 
-        // We statically know what args to accept, and keyword
-        // arguments come as a dict as the last argument, if any
-        this.emitLine('function ' + funcId + '(' + names.join(', ') + ') {');
-        this.emitLine('frame = frame.push();');
-        this.emitLine('kwargs = kwargs || {};');
+        // Quoted argument names
+        var argNames = lib.map(args, function(n) { return '"' + n.value + '"'; });
+        var kwargNames = lib.map((kwargs && kwargs.children) || [],
+                                 function(n) { return '"' + n.key.value + '"'; });
+
+        // We pass a function to makeMacro which destructures the
+        // arguments so support setting positional args with keywords
+        // args and passing keyword args as positional args
+        // (essentially default values). See runtime.js.
+        this.emitLines(
+            'var ' + funcId + ' = runtime.makeMacro(',
+            '[' + argNames.join(', ') + '], ',
+            '[' + kwargNames.join(', ') + '], ',
+            'function (' + realNames.join(', ') + ') {',
+            'frame = frame.push();',
+            'kwargs = kwargs || {};'
+        );
 
         // Expose the arguments to the template. Don't need to use
         // random names because the function
@@ -372,8 +409,8 @@ var Compiler = Object.extend({
                           'l_' + arg.value + ');');
             frame.set(arg.value, 'l_' + arg.value);
         }, this);
-
-        // Set the keyword arguments
+        
+        // Expose the keyword arguments
         if(kwargs) {
             lib.each(kwargs.children, function(pair) {
                 var name = pair.key.value;
@@ -391,7 +428,7 @@ var Compiler = Object.extend({
     _emitMacroEnd: function() {
         this.emitLine('frame = frame.pop();');
         this.emitLine('return ' + this.buffer + ';');
-        this.emitLine('};');
+        this.emitLine('});');
     },
 
     compileMacro: function(node, frame) {
@@ -411,13 +448,16 @@ var Compiler = Object.extend({
 
         // Expose the macro to the templates
         var name = node.name.value;
+        frame = frame.pop();
         frame.set(name, funcId);
 
-        if(!this.isChild) {
+        if(frame.parent) {
+            this.emitLine('frame.set("' + name + '", ' + funcId + ');');
+        }
+        else {
             if(node.name.value.charAt(0) != '_') {
                 this.emitLine('context.addExport("' + name + '");');
             }
-
             this.emitLine('context.setVariable("' + name + '", ' + funcId + ');');
         }
     },
@@ -577,7 +617,7 @@ var Compiler = Object.extend({
 
 // var fs = require("fs");
 // var c = new Compiler();
-// var src = '{{ "one\ntwo\nthree" | indent(2) }}';
+// var src = '{% macro foo(x, y, z=3) %}h{% endmacro %}';
 
 // var ns = parser.parse(src);
 // nodes.printNodes(ns);

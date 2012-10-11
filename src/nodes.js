@@ -96,6 +96,7 @@ var FromImport = Node.extend("FromImport", {
 });
 var FunCall = Node.extend("FunCall", { fields: ['name', 'args'] });
 var Filter = FunCall.extend("Filter");
+var KeywordArgs = Dict.extend("KeywordArgs");
 var Block = Node.extend("Block", { fields: ['name', 'body'] });
 var TemplateRef = Node.extend("TemplateRef", { fields: ['template'] });
 var Extends = TemplateRef.extend("Extends");
@@ -215,6 +216,7 @@ module.exports = {
     FromImport: FromImport,
     FunCall: FunCall,
     Filter: Filter,
+    KeywordArgs: KeywordArgs,
     Block: Block,
     Extends: Extends,
     Include: Include,
