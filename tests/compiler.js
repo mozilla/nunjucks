@@ -168,11 +168,22 @@ describe('compiler', function() {
                    '{{ foo(1, 10, 20) }}');
         s.should.equal('11020');
 
-        s = render('{% macro foo(bar, bazbar, baz="foobar") %}' +
-                   'This is a macro {{ bar }} {{ bazbar }} {{ baz }}' +
+        s = render('{% extends "base.html" %}' +
+                   '{% macro foo(x, y=2, z=5) %}{{ x }}{{ y }}{{ z }}' +
                    '{% endmacro %}' +
-                   '{{ foo("arg1", "arg2") }}');
-        s.should.equal('This is a macro arg1 arg2 foobar');
+                   '{% block block1 %}' +
+                   '{{ foo(1) }}' +
+                   '{% endblock %}');
+        s.should.equal('Foo125BazFizzle');
+
+        s = render('{% block bar %}' +
+                   '{% macro foo(x, y=2, z=5) %}{{ x }}{{ y }}{{ z }}' +
+                   '{% endmacro %}' +
+                   '{% endblock %}' +
+                   '{% block baz %}' +
+                   '{{ foo(1) }}' +
+                   '{% endblock %}');
+        s.should.equal('125');
     });
 
     it('should import templates', function() {

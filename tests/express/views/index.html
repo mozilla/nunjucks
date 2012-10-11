@@ -1,7 +1,15 @@
 {% extends "base.html" %}
 
+{% macro foo(x, y, z=10) %}
+{{ x }} is better than {{ y }}!
+
+AND {{ z }}
+{% endmacro %}
+
 {% block content %}
 Hello, {{ username }}! This is just some content
+
+{{ foo(1, 2, 3) }}
 {% endblock %}
 
 

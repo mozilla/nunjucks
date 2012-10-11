@@ -128,6 +128,21 @@ exports.repeat = function(char_, n) {
     return str;
 };
 
+exports.each = function(obj, func, context) {
+    if(obj == null) {
+        return;
+    }
+    
+    if(ArrayProto.each && obj.each == ArrayProto.each) {
+        obj.forEach(func, context);
+    }
+    else if(obj.length === +obj.length) {
+        for(var i=0, l=obj.length; i<l; i++) {
+            func.call(context, obj[i], i, obj);
+        }
+    }
+};
+
 exports.map = function(obj, func) {
     var results = [];
     if(obj == null) {
@@ -492,19 +507,89 @@ var Frame = Object.extend({
     }
 });
 
-modules['runtime'] = { 
-    Frame: Frame
+function makeMacro(argNames, kwargNames, func) {
+    return function() {
+        var argCount = numArgs(arguments);
+        var args;
+        var kwargs = getKeywordArgs(arguments);
+
+        if(argCount > argNames.length) {
+            args = Array.prototype.slice.call(arguments, 0, argNames.length);
+
+            // Positional arguments that should be passed in as
+            // keyword arguments (essentially default values)
+            var vals = Array.prototype.slice.call(arguments, args.length, argCount);
+            for(var i=0; i<vals.length; i++) {
+                if(i < kwargNames.length) {
+                    kwargs[kwargNames[i]] = vals[i];
+                }
+            }
+
+            args.push(kwargs);
+        }
+        else if(argCount < argNames.length) {
+            args = Array.prototype.slice.call(arguments, 0, argCount);
+
+            for(var i=argCount; i<argNames.length; i++) {
+                var arg = argNames[i];
+
+                // Keyword arguments that should be passed as
+                // positional arguments, i.e. the caller explicitly
+                // used the name of a positional arg
+                args.push(kwargs[arg]);
+                delete kwargs[arg];
+            }
+
+            args.push(kwargs);
+        }
+        else {
+            args = arguments;
+        }
+
+        return func.apply(this, args);
+    };
+}
+
+function makeKeywordArgs(obj) {
+    obj.__keywords = true;
+    return obj;
+}
+
+function getKeywordArgs(args) {
+    if(args.length && args[args.length - 1].__keywords) {
+        return args[args.length - 1];
+    }
+    return {};
+}
+
+function numArgs(args) {
+    if(args.length === 0) {
+        return 0;
+    }
+    else if(args[args.length - 1].__keywords) {
+        return args.length - 1;
+    }
+    else {
+        return args.length;
+    }
+}
+
+modules['runtime'] = {
+    Frame: Frame,
+    makeMacro: makeMacro,
+    makeKeywordArgs: makeKeywordArgs,
+    numArgs: numArgs
 };
 })();
 (function() {
-
 var lib = modules["lib"];
 var Object = modules["object"];
 var lexer = modules["lexer"];
 var compiler = modules["compiler"];
 var builtin_filters = modules["filters"];
 var builtin_loaders = modules["loaders"];
-var Frame = modules["runtime"].Frame;
+var runtime = modules["runtime"];
+var Frame = runtime.Frame;
 
 var Environment = Object.extend({
     init: function(loaders, tags) {
@@ -593,8 +678,8 @@ var Environment = Object.extend({
 
             context = lib.extend(context, ctx);
 
-            var res = env.render(name, ctx);
-            k(null, res);            
+            var res = env.render(name, context);
+            k(null, res);
         };
     },
 
@@ -607,6 +692,7 @@ var Context = Object.extend({
     init: function(ctx, blocks) {
         this.ctx = ctx;
         this.blocks = {};
+        this.exported = [];
 
         for(var name in blocks) {
             this.addBlock(name, blocks[name]);
@@ -620,7 +706,7 @@ var Context = Object.extend({
     setVariable: function(name, val) {
         this.ctx[name] = val;
     },
-    
+
     getVariables: function() {
         return this.ctx;
     },
@@ -650,6 +736,19 @@ var Context = Object.extend({
 
             return blk(env, context);
         };
+    },
+
+    addExport: function(name) {
+        this.exported.push(name);
+    },
+
+    getExported: function() {
+        var exported = {};
+        for(var i=0; i<this.exported.length; i++) {
+            var name = this.exported[i];
+            exported[name] = this.ctx[name];
+        }
+        return exported;
     }
 });
 
@@ -690,11 +789,26 @@ var Template = Object.extend({
         var context = new Context(ctx || {}, this.blocks);
         return this.rootRenderFunc(this.env,
                                    context,
-                                   frame || new Frame());
+                                   frame || new Frame(),
+                                   runtime);
     },
 
     isUpToDate: function() {
         return this.upToDate();
+    },
+
+    getExported: function() {
+        if(!this.compiled) {
+            this._compile();
+        }
+
+        // Run the rootRenderFunc to populate the context with exported vars
+        var context = new Context({}, this.blocks);
+        this.rootRenderFunc(this.env,
+                            context,
+                            new Frame(),
+                            runtime);
+        return context.getExported();
     },
 
     _compile: function() {
@@ -707,7 +821,7 @@ var Template = Object.extend({
             var func = new Function(compiler.compile(this.tmplStr, this.env));
             props = func();
         }
-        
+
         this.blocks = this._getBlocks(props);
         this.rootRenderFunc = props.root;
         this.compiled = true;
@@ -727,8 +841,9 @@ var Template = Object.extend({
 });
 
 // var fs = modules["fs"];
-// //var src = fs.readFileSync('test.html', 'utf-8');
-// var src = "{% for i in [1,2,3] %}{% include 'item.html' %}{% endfor %}";
+// var src = fs.readFileSync('test.html', 'utf-8');
+// //var src = '{% macro foo(x, y, z=3) %}h{% endmacro %}';
+// //var src = '{% macro foo() %}{{ h }}{% endmacro %} {{ foo() }}';
 
 // var env = new Environment();
 // console.log(compiler.compile(src));

@@ -517,7 +517,7 @@ var Compiler = Object.extend({
 
     compileBlock: function(node, frame) {
         this.emitLine(this.buffer + ' += context.getBlock("' +
-                      node.name.value + '")(env, context, frame);');
+                      node.name.value + '")(env, context, frame, runtime);');
     },
 
     compileExtends: function(node, frame) {
@@ -584,8 +584,8 @@ var Compiler = Object.extend({
                           'b_' + name + ', ' +
                           'runtime);');
 
-            var tmpFrame = frame.push();
-            frame.set('super', 'l_super');
+            var tmpFrame = new Frame();
+            tmpFrame.set('super', 'l_super');
             this.compile(block.body, tmpFrame);
 
             this.emitFuncEnd();
