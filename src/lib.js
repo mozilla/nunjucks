@@ -66,6 +66,21 @@ exports.repeat = function(char_, n) {
     return str;
 };
 
+exports.each = function(obj, func, context) {
+    if(obj == null) {
+        return;
+    }
+    
+    if(ArrayProto.each && obj.each == ArrayProto.each) {
+        obj.forEach(func, context);
+    }
+    else if(obj.length === +obj.length) {
+        for(var i=0, l=obj.length; i<l; i++) {
+            func.call(context, obj[i], i, obj);
+        }
+    }
+};
+
 exports.map = function(obj, func) {
     var results = [];
     if(obj == null) {

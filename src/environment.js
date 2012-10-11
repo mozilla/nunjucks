@@ -4,7 +4,8 @@ var lexer = require('./lexer');
 var compiler = require('./compiler');
 var builtin_filters = require('./filters');
 var builtin_loaders = require('./loaders');
-var Frame = require('./runtime').Frame;
+var runtime = require('./runtime');
+var Frame = runtime.Frame;
 
 var Environment = Object.extend({
     init: function(loaders, tags) {
@@ -94,7 +95,7 @@ var Environment = Object.extend({
             context = lib.extend(context, ctx);
 
             var res = env.render(name, context);
-            k(null, res);            
+            k(null, res);
         };
     },
 
@@ -107,6 +108,7 @@ var Context = Object.extend({
     init: function(ctx, blocks) {
         this.ctx = ctx;
         this.blocks = {};
+        this.exported = [];
 
         for(var name in blocks) {
             this.addBlock(name, blocks[name]);
@@ -120,7 +122,7 @@ var Context = Object.extend({
     setVariable: function(name, val) {
         this.ctx[name] = val;
     },
-    
+
     getVariables: function() {
         return this.ctx;
     },
@@ -150,6 +152,19 @@ var Context = Object.extend({
 
             return blk(env, context);
         };
+    },
+
+    addExport: function(name) {
+        this.exported.push(name);
+    },
+
+    getExported: function() {
+        var exported = {};
+        for(var i=0; i<this.exported.length; i++) {
+            var name = this.exported[i];
+            exported[name] = this.ctx[name];
+        }
+        return exported;
     }
 });
 
@@ -190,11 +205,26 @@ var Template = Object.extend({
         var context = new Context(ctx || {}, this.blocks);
         return this.rootRenderFunc(this.env,
                                    context,
-                                   frame || new Frame());
+                                   frame || new Frame(),
+                                   runtime);
     },
 
     isUpToDate: function() {
         return this.upToDate();
+    },
+
+    getExported: function() {
+        if(!this.compiled) {
+            this._compile();
+        }
+
+        // Run the rootRenderFunc to populate the context with exported vars
+        var context = new Context({}, this.blocks);
+        this.rootRenderFunc(this.env,
+                            context,
+                            new Frame(),
+                            runtime);
+        return context.getExported();
     },
 
     _compile: function() {
@@ -207,7 +237,7 @@ var Template = Object.extend({
             var func = new Function(compiler.compile(this.tmplStr, this.env));
             props = func();
         }
-        
+
         this.blocks = this._getBlocks(props);
         this.rootRenderFunc = props.root;
         this.compiled = true;
@@ -228,7 +258,8 @@ var Template = Object.extend({
 
 // var fs = require('fs');
 // //var src = fs.readFileSync('test.html', 'utf-8');
-// var src = "{% for i in [1,2,3] %}{% include 'item.html' %}{% endfor %}";
+// //var src = '{% macro foo(x, y, z=3) %}h{% endmacro %}';
+// var src = '{% macro foo() %}{{ h }}{% endmacro %} {{ foo() }}';
 
 // var env = new Environment();
 // console.log(compiler.compile(src));

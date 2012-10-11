@@ -16,13 +16,20 @@ var compareOps = {
     '>=': '>='
 };
 
-// A common pattern is to emit binary operators 
+// A common pattern is to emit binary operators
 function binOpEmitter(str) {
     return function(node, frame) {
         this.compile(node.left, frame);
         this.emit(str);
         this.compile(node.right, frame);
     };
+}
+
+// Generate an array of strings
+function quotedArray(arr) {
+    return '[' + 
+        lib.map(arr, function(x) { return '"' + x + '"'; }) +
+        ']';
 }
 
 var Compiler = Object.extend({
@@ -41,9 +48,15 @@ var Compiler = Object.extend({
         this.emit(code + "\n");
     },
 
+    emitLines: function() {
+        lib.each(lib.toArray(arguments), function(line) {
+            this.emitLine(line);
+        }, this);
+    },
+
     emitFuncBegin: function(name) {
         this.buffer = 'output';
-        this.emitLine('function ' + name + '(env, context, frame) {');
+        this.emitLine('function ' + name + '(env, context, frame, runtime) {');
         this.emitLine('var ' + this.buffer + ' = "";');
     },
 
@@ -62,10 +75,9 @@ var Compiler = Object.extend({
     },
 
     _compileChildren: function(node, frame) {
-        var _this = this;
-        node.iterChildren(function(n) {
-            _this.compile(n, frame);
-        });
+        lib.each(node.children, function(n) {
+            this.compile(n, frame);
+        }, this);
     },
 
     _compileAggregate: function(node, frame, startChar, endChar) {
@@ -158,14 +170,14 @@ var Compiler = Object.extend({
     },
 
     compilePair: function(node, frame) {
-        var key = node.getKey();
-        var val = node.getValue();
+        var key = node.key;
+        var val = node.value;
 
         if(key instanceof nodes.Symbol) {
             key = new nodes.Literal(key.lineno, key.colno, key.value);
         }
         else if(!(key instanceof nodes.Literal &&
-                  typeof node.value == "string")) {
+                  typeof key.value == "string")) {
             throw new Error("Dict keys must be strings or names");
         }
 
@@ -207,7 +219,7 @@ var Compiler = Object.extend({
         this.emit('-');
         this.compile(node.target, frame);
     },
-    
+
     compilePos: function(node, frame) {
         this.emit('+');
         this.compile(node.target, frame);
@@ -215,7 +227,7 @@ var Compiler = Object.extend({
 
     compileCompare: function(node, frame) {
         this.compile(node.expr, frame);
-        
+
         for(var i=0; i<node.ops.length; i++) {
             var n = node.ops[i];
             this.emit(' ' + compareOps[n.type] + ' ');
@@ -236,7 +248,7 @@ var Compiler = Object.extend({
         this.emit('(');
         this._compileExpression(node.name, frame);
         this.emit(')');
-        this._compileAggregate(node, frame, '(', ')');
+        this._compileAggregate(node.args, frame, '(', ')');
     },
 
     compileFilter: function(node, frame) {
@@ -244,20 +256,40 @@ var Compiler = Object.extend({
         this.assertType(name, nodes.Symbol);
 
         this.emit('env.getFilter("' + name.value + '")');
-        this._compileAggregate(node, frame, '(', ')');
+        this._compileAggregate(node.args, frame, '(', ')');
+    },
+
+    compileKeywordArgs: function(node, frame) {
+        var names = [];
+
+        lib.each(node.children, function(pair) {
+            names.push(pair.key.value);
+        });
+
+        this.emit('runtime.makeKeywordArgs(');
+        this.compileDict(node, frame);
+        this.emit(')');
     },
 
     compileSet: function(node, frame) {
-        var val = this.tmpid();
+        var id = this.tmpid();
 
-        this.emit('var ' + val + ' = ');
+        this.emit('var ' + id + ' = ');
         this._compileExpression(node.value);
         this.emitLine(';');
-        
+
         for(var i=0; i<node.targets.length; i++) {
-            var t = node.targets[i];
-            this.emitLine('context.setVariable("' + t.value + '", ' +
-                          val + ');');
+            var name = node.targets[i].value;
+            frame.set(name, id);
+
+            this.emitLine('frame.set("' + name + '", ' + id + ');');
+
+            this.emitLine('if(!frame.parent) {');
+            this.emitLine('context.setVariable("' + name + '", ' + id + ');');
+            if(name.charAt(0) != '_') {
+                this.emitLine('context.addExport("' + name + '");');
+            }
+            this.emitLine('}');
         }
     },
 
@@ -280,7 +312,7 @@ var Compiler = Object.extend({
         var arr = this.tmpid();
         frame = frame.push();
 
-        this.emitLine('frame = frame.push()');
+        this.emitLine('frame = frame.push();');
 
         this.emit('var ' + arr + ' = ');
         this._compileExpression(node.arr, frame);
@@ -331,6 +363,158 @@ var Compiler = Object.extend({
         this.emitLine('frame = frame.pop();');
     },
 
+    _emitMacroBegin: function(node, frame) {
+        var args = [];
+        var kwargs = null;
+        var funcId = 'macro_' + this.tmpid();
+
+        // Type check the definition of the args
+        lib.each(node.args.children, function(arg, i) {
+            if(i === node.args.children.length - 1 &&
+               arg instanceof nodes.Dict) {
+                kwargs = arg;
+            }
+            else {
+                this.assertType(arg, nodes.Symbol);
+                args.push(arg);
+            }
+        }, this);
+
+        var realNames = lib.map(args, function(n) { return 'l_' + n.value; });
+        realNames.push('kwargs');
+
+        // Quoted argument names
+        var argNames = lib.map(args, function(n) { return '"' + n.value + '"'; });
+        var kwargNames = lib.map((kwargs && kwargs.children) || [],
+                                 function(n) { return '"' + n.key.value + '"'; });
+
+        // We pass a function to makeMacro which destructures the
+        // arguments so support setting positional args with keywords
+        // args and passing keyword args as positional args
+        // (essentially default values). See runtime.js.
+        this.emitLines(
+            'var ' + funcId + ' = runtime.makeMacro(',
+            '[' + argNames.join(', ') + '], ',
+            '[' + kwargNames.join(', ') + '], ',
+            'function (' + realNames.join(', ') + ') {',
+            'frame = frame.push();',
+            'kwargs = kwargs || {};'
+        );
+
+        // Expose the arguments to the template. Don't need to use
+        // random names because the function
+        // will create a new run-time scope for us
+        lib.each(args, function(arg) {
+            this.emitLine('frame.set("' + arg.value + '", ' +
+                          'l_' + arg.value + ');');
+            frame.set(arg.value, 'l_' + arg.value);
+        }, this);
+        
+        // Expose the keyword arguments
+        if(kwargs) {
+            lib.each(kwargs.children, function(pair) {
+                var name = pair.key.value;
+                this.emit('frame.set("' + name + '", ' +
+                          'kwargs.hasOwnProperty("' + name + '") ? ' +
+                          'kwargs["' + name + '"] : ');
+                this._compileExpression(pair.value);
+                this.emitLine(');');
+            }, this);
+        }
+
+        return funcId;
+    },
+
+    _emitMacroEnd: function() {
+        this.emitLine('frame = frame.pop();');
+        this.emitLine('return ' + this.buffer + ';');
+        this.emitLine('});');
+    },
+
+    compileMacro: function(node, frame) {
+        frame = frame.push();
+        var funcId = this._emitMacroBegin(node, frame);
+
+        // Start a new output buffer, and set the old one back after
+        // we're done
+        var prevBuffer = this.buffer;
+        this.buffer = 'output';
+        this.emitLine('var ' + this.buffer + '= "";');
+
+        this.compile(node.body, frame);
+
+        this._emitMacroEnd();
+        this.buffer = prevBuffer;
+
+        // Expose the macro to the templates
+        var name = node.name.value;
+        frame = frame.pop();
+        frame.set(name, funcId);
+
+        if(frame.parent) {
+            this.emitLine('frame.set("' + name + '", ' + funcId + ');');
+        }
+        else {
+            if(node.name.value.charAt(0) != '_') {
+                this.emitLine('context.addExport("' + name + '");');
+            }
+            this.emitLine('context.setVariable("' + name + '", ' + funcId + ');');
+        }
+    },
+
+    compileImport: function(node, frame) {
+        var id = this.tmpid();
+        var target = node.target.value;
+
+        this.emit('var ' + id + ' = env.getTemplate(');
+        this._compileExpression(node.template, frame);
+        this.emitLine(').getExported();');
+        frame.set(target, id);
+
+        if(frame.parent) {
+            this.emitLine('frame.set("' + target + '", ' + id + ');');
+        }
+        else {
+            this.emitLine('context.setVariable("' + target + '", ' + id + ');');
+        }
+    },
+
+    compileFromImport: function(node, frame) {
+        this.emit('var imported = env.getTemplate(');
+        this.compile(node.template, frame);
+        this.emitLine(').getExported();');
+
+        lib.each(node.names.children, function(nameNode) {
+            var name;
+            var alias;
+            var id = this.tmpid();
+
+            if(nameNode instanceof nodes.Pair) {
+                name = nameNode.key.value;
+                alias = nameNode.value.value;
+            }
+            else {
+                name = nameNode.value;
+                alias = name;
+            }
+
+            this.emitLine('if(imported.hasOwnProperty("' + name + '")) {');
+            this.emitLine('var ' + id + ' = imported.' + name + ';');
+            this.emitLine('} else {');
+            this.emitLine('throw new Error("cannot import \'' + name + '\'")');
+            this.emitLine('}');
+
+            frame.set(alias, id);
+
+            if(frame.parent) {
+                this.emitLine('frame.set("' + alias + '", ' + id + ');');
+            }
+            else {
+                this.emitLine('context.setVariable("' + alias + '", ' + id + ');');
+            }
+        }, this);
+    },
+
     compileBlock: function(node, frame) {
         this.emitLine(this.buffer + ' += context.getBlock("' +
                       node.name.value + '")(env, context, frame);');
@@ -340,7 +524,7 @@ var Compiler = Object.extend({
         if(this.isChild) {
             throw new Error('cannot extend multiple times');
         }
-        
+
         this.emit('var parentTemplate = env.getTemplate(');
         this._compileExpression(node.template, frame);
         this.emitLine(', true);');
@@ -361,7 +545,7 @@ var Compiler = Object.extend({
         this.emitLine(');');
         this.emitLine(this.buffer +
                       ' += includeTemplate.render(' +
-                      'context.getVariables(), frame);');
+                      'context.getVariables(), frame.push());');
     },
 
     compileTemplateData: function(node, frame) {
@@ -385,7 +569,7 @@ var Compiler = Object.extend({
         this._compileChildren(node, frame);
         if(this.isChild) {
             this.emitLine('return ' +
-                          'parentTemplate.rootRenderFunc(env, context, frame);');
+                          'parentTemplate.rootRenderFunc(env, context, frame, runtime);');
         }
         this.emitFuncEnd(this.isChild);
 
@@ -395,9 +579,10 @@ var Compiler = Object.extend({
             var name = block.name.value;
 
             this.emitFuncBegin('b_' + name);
-            this.emitLine('var l_super = context.getSuper(env, ' + 
+            this.emitLine('var l_super = context.getSuper(env, ' +
                           '"' + name + '", ' +
-                          'b_' + name + ');');
+                          'b_' + name + ', ' +
+                          'runtime);');
 
             var tmpFrame = frame.push();
             frame.set('super', 'l_super');
@@ -432,7 +617,7 @@ var Compiler = Object.extend({
 
 // var fs = require("fs");
 // var c = new Compiler();
-// var src = "{{ test('hello') }}";
+// var src = '{% macro foo(x, y, z=3) %}h{% endmacro %}';
 
 // var ns = parser.parse(src);
 // nodes.printNodes(ns);

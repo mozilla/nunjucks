@@ -37,7 +37,7 @@ function extend(cls, name, props) {
 
     prototype.typename = name;
 
-    var new_cls = function() { 
+    var new_cls = function() {
         if(prototype.init) {
             prototype.init.apply(this, arguments);
         }
@@ -137,7 +137,7 @@ exports.map = function(obj, func) {
     if(ArrayProto.map && obj.map === ArrayProto.map) {
         return obj.map(func);
     }
-    
+
     for(var i=0; i<obj.length; i++) {
         results[results.length] = func(obj[i], i);
     }
@@ -272,6 +272,29 @@ var For = Node.extend("For", {
     }
 });
 
+var Macro = Node.extend("Macro", {
+    init: function(lineno, colno, name, args, body) {
+        this.name = name;
+        this.body = body;
+        this.parent(lineno, colno, args);
+    }
+});
+
+var Import = Node.extend("Import", {
+    init: function(lineno, colno, template, target) {
+        this.template = template;
+        this.target = target;
+        this.parent(lineno, colno);
+    }
+});
+
+var FromImport = Node.extend("FromImport", {
+    init: function(lineno, colno, template, names) {
+        this.template = template;
+        this.parent(lineno, colno, names);
+    }
+});
+
 var FunCall = Node.extend("FunCall", {
     init: function(lineno, colno, name, args) {
         this.name = name;
@@ -310,7 +333,7 @@ var UnaryOp = Expr.extend("UnaryOp", {
     }
 });
 
-var BinOp = Expr.extend("BinOp", { 
+var BinOp = Expr.extend("BinOp", {
     init: function(lineno, colno, left, right) {
         this.left = left;
         this.right = right;
@@ -347,7 +370,7 @@ var CompareOperand = Expr.extend("CompareOperand", {
 });
 
 function printNodes(node, indent) {
-    // TODO: spend more then 30 seconds and clean this up 
+    // TODO: spend more then 30 seconds and clean this up
     indent = indent || 0;
 
     function print(str, inline) {
@@ -431,9 +454,9 @@ function printNodes(node, indent) {
     }
     else if(node instanceof CompareOperand) {
         console.log("(" + node.type + ")");
-        
+
         printNodes(node.expr, indent+2);
-        
+
     }
     else {
         var children = node.children;
@@ -463,6 +486,9 @@ modules['nodes'] = {
     TemplateData: TemplateData,
     If: If,
     For: For,
+    Macro: Macro,
+    Import: Import,
+    FromImport: FromImport,
     FunCall: FunCall,
     Filter: Filter,
     Block: Block,
@@ -534,8 +560,41 @@ var Frame = Object.extend({
     }
 });
 
-modules['runtime'] = { 
-    Frame: Frame
+// wrapMacro returns a function that stands in for the original macro, and handles
+// the translation of keyword arguments from nunjucks to javascript
+var wrapMacro = function(func, name, definedArgs, catchKwargs, catchVarargs, caller) {
+    var definedArgCount = definedArgs.length;
+
+    var newMacro = function(args, kwargs) {
+        var applyArgs = args.slice(0, definedArgCount);
+        var applyArgCount = applyArgs.length;
+        if(applyArgCount != definedArgCount) {
+            var remainingArgs = definedArgs.slice(applyArgCount);
+            for(var i=0; i<remainingArgs.length; i++) {
+                var arg = remainingArgs[i];
+                var name = arg[0];
+                var defaultVal = arg[1];
+                var value;
+                if(kwargs.hasOwnProperty(name)) {
+                    value = kwargs[name];
+                } else if(defaultVal) {
+                    value = defaultVal;
+                } else {
+                    throw new Error('parameter ' + name + ' was not provided');
+                }
+                applyArgs.push(value);
+            }
+        }
+        return func.apply(null, applyArgs);
+    };
+    newMacro.isMacro = true;
+    return newMacro;
+};
+
+
+modules['runtime'] = {
+    Frame: Frame,
+    wrapMacro: wrapMacro
 };
 })();
 (function() {
@@ -609,7 +668,7 @@ Tokenizer.prototype.nextToken = function() {
         }
         else if(cur == "\"" || cur == "'") {
             // We've hit a string
-            return token(TOKEN_STRING, this.parseString(), lineno, colno);
+            return token(TOKEN_STRING, this.parseString(cur), lineno, colno);
         }
         else if((tok = this._extract(whitespaceChars))) {
             // We hit some whitespace
@@ -687,8 +746,8 @@ Tokenizer.prototype.nextToken = function() {
         // Parse out the template text, breaking on tag
         // delimiters because we need to look for block/variable start
         // tags (don't use the full delimChars for optimization)
-        var beginChars = (BLOCK_START[0] + 
-                          VARIABLE_START[0] + 
+        var beginChars = (BLOCK_START[0] +
+                          VARIABLE_START[0] +
                           COMMENT_START[0] +
                           COMMENT_END[0]);
         var tok;
@@ -759,14 +818,14 @@ Tokenizer.prototype.nextToken = function() {
     throw new Error("Could not parse text");
 };
 
-Tokenizer.prototype.parseString = function() {
+Tokenizer.prototype.parseString = function(delimiter) {
     this.forward();
-    
+
     var lineno = this.lineno;
     var colno = this.colno;
     var str = "";
-    
-    while(this.current() != "\"" && this.current() != "'") {
+
+    while(this.current() != delimiter) {
         var cur = this.current();
 
         if(cur == "\\") {
@@ -952,7 +1011,6 @@ modules['lexer'] = {
 };
 })();
 (function() {
-
 // Does not support:
 //
 // Conditional expression: "yes" if True else "no"
@@ -1086,7 +1144,7 @@ var Parser = Object.extend({
 
         node.name = this.parsePrimary();
 
-        if(!node.name instanceof nodes.Symbol) {
+        if(!(node.name instanceof nodes.Symbol)) {
             this.fail('variable name expected');
         }
 
@@ -1111,6 +1169,92 @@ var Parser = Object.extend({
         return node;
     },
 
+    parseMacro: function() {
+        var macroTok = this.peekToken();
+        if(!this.skipSymbol('macro')) {
+            this.fail("expected macro");
+        }
+
+        var nameTok = this.nextToken();
+        var name = new nodes.Symbol(nameTok.lineno, nameTok.colno, nameTok.value);
+        var args = this.parseSignature();
+        var node = new nodes.Macro(macroTok.lineno,
+                                   macroTok.colno,
+                                   name,
+                                   args);
+        this.advanceAfterBlockEnd(macroTok.value);
+
+        node.body = this.parseUntilBlocks('endmacro');
+        this.advanceAfterBlockEnd();
+
+        return node;
+    },
+
+    parseImport: function() {
+        var importTok = this.peekToken();
+        if(!this.skipSymbol('import')) {
+            this.fail("expected import");
+        }
+
+        var template = this.parseExpression();
+
+        if(!this.skipSymbol('as')) {
+            throw new Error('expected "as" keyword');
+        }
+        var target = this.parsePrimary().value;
+
+        this.advanceAfterBlockEnd(importTok.value);
+
+        return new nodes.Import(importTok.lineno,
+                                importTok.colno,
+                                template,
+                                target);
+    },
+
+    parseFrom: function() {
+        var fromTok = this.peekToken();
+        if(!this.skipSymbol('from')) {
+            this.fail("expected from");
+        }
+
+        var template = this.parseExpression();
+        var node = new nodes.FromImport(fromTok.lineno,
+                                        fromTok.colno,
+                                        template);
+
+        if(!this.skipSymbol('import')) {
+            throw new Error("expected import");
+        }
+
+        while(1) {
+            var type = this.peekToken().type;
+            if(type == lexer.TOKEN_BLOCK_END) {
+                this.nextToken();
+                break;
+            }
+
+            if(node.children.length > 0 && !this.skip(lexer.TOKEN_COMMA)) {
+                throw new Error('expected comma');
+            }
+
+            var name = this.parsePrimary();
+            if(name.value.charAt(0) == '_') {
+                throw new Error('names starting with an underscore cannot be imported');
+            }
+
+            var alias = null;
+            if(this.skipSymbol('as')) {
+                var alias = this.parsePrimary();
+            }
+            node.addChild(new nodes.Pair(name.lineno,
+                                         name.colno,
+                                         name,
+                                         alias));
+        }
+
+        return node;
+    },
+
     parseBlock: function() {
         var tag = this.peekToken();
         if(!this.skipSymbol('block')) {
@@ -1120,7 +1264,7 @@ var Parser = Object.extend({
         var node = new nodes.Block(tag.lineno, tag.colno);
 
         node.name = this.parsePrimary();
-        if(!node.name instanceof nodes.Symbol) {
+        if(!(node.name instanceof nodes.Symbol)) {
             this.fail('variable name expected');
         }
 
@@ -1147,8 +1291,9 @@ var Parser = Object.extend({
 
         node.template = this.parsePrimary();
         if(!(node.template instanceof nodes.Literal &&
-             lib.isString(node.template.value))) {
-            this.fail('parseExtends: string expected');
+             lib.isString(node.template.value)) &&
+           !(node.template instanceof nodes.Symbol)) {
+            this.fail('parseExtends: string or value expected');
         }
 
         this.advanceAfterBlockEnd(tag.value);
@@ -1246,6 +1391,9 @@ var Parser = Object.extend({
             case 'extends': node = this.parseExtends(); break;
             case 'include': node = this.parseInclude(); break;
             case 'set': node = this.parseSet(); break;
+            case 'macro': node = this.parseMacro(); break;
+            case 'import': node = this.parseImport(); break;
+            case 'from': node = this.parseFrom(); break;
             default: this.fail('unknown block tag: ' + tok.value);
         }
 
@@ -1305,11 +1453,11 @@ var Parser = Object.extend({
         while(tok) {
             if(tok.type == lexer.TOKEN_LEFT_PAREN) {
                 // Function call
-                var list = this.parseAggregate();
-                node =  new nodes.FunCall(tok.lineno,
-                                          tok.colno,
-                                          node,
-                                          list.children);
+                var args = this.parseSignature(true);
+                var node = new nodes.FunCall(tok.lineno,
+                                             tok.colno,
+                                             node,
+                                             args);
             }
             else if(tok.type == lexer.TOKEN_LEFT_BRACKET) {
                 // Reference
@@ -1619,7 +1767,10 @@ var Parser = Object.extend({
                                     new nodes.Symbol(tok.lineno,
                                                      tok.colno,
                                                      name),
-                                    [node]);
+                                    [new nodes.Pair(node.lineno,
+                                                    node.colno,
+                                                    undefined,
+                                                    node)]);
 
             if(this.peekToken().type == lexer.TOKEN_LEFT_PAREN) {
                 // Get a FunCall node and add the parameters to the
@@ -1687,6 +1838,57 @@ var Parser = Object.extend({
         }
 
         return node;
+    },
+
+    parseSignature: function(call) {
+        call = call || false;
+        var tok = this.nextToken();
+        var args = [];
+
+        while(1) {
+            var type = this.peekToken().type;
+            if(type == lexer.TOKEN_RIGHT_PAREN) {
+                this.nextToken();
+                break;
+            }
+
+            if(args.length > 0 && !this.skip(lexer.TOKEN_COMMA)) {
+                throw new Error("parseSignature: expected comma after expression");
+            }
+            else if(call) {
+                var nameOrVal = this.parsePrimary();
+                var name, val;
+                if(this.skipValue(lexer.TOKEN_OPERATOR, '=')) {
+                    name = nameOrVal;
+                    val = this.parseExpression();
+                } else {
+                    val = nameOrVal;
+                }
+                if(name && !(name instanceof nodes.Symbol)) {
+                    throw new Error('expected symbol as argument name');
+                }
+                args.push(new nodes.Pair(nameOrVal.lineno,
+                                         nameOrVal.colno,
+                                         name,
+                                         val));
+            }
+            else {
+                var name = this.parsePrimary();
+                var val;
+                if(!(name instanceof nodes.Symbol)) {
+                    throw new Error('expected symbol as argument name');
+                }
+                if(this.skipValue(lexer.TOKEN_OPERATOR, '=')) {
+                    val = this.parseExpression();
+                }
+                args.push(new nodes.Pair(name.lineno,
+                                         name.colno,
+                                         name,
+                                         val));
+            }
+        }
+
+        return args;
     },
 
     parseUntilBlocks: function(/* blockNames */) {
@@ -1780,7 +1982,7 @@ var compareOps = {
     '>=': '>='
 };
 
-// A common pattern is to emit binary operators 
+// A common pattern is to emit binary operators
 function binOpEmitter(str) {
     return function(node, frame) {
         this.compile(node.left, frame);
@@ -1807,7 +2009,7 @@ var Compiler = Object.extend({
 
     emitFuncBegin: function(name) {
         this.buffer = 'output';
-        this.emitLine('function ' + name + '(env, context, frame) {');
+        this.emitLine('function ' + name + '(env, context, frame, runtime) {');
         this.emitLine('var ' + this.buffer + ' = "";');
     },
 
@@ -1857,6 +2059,8 @@ var Compiler = Object.extend({
                         nodes.Filter,
                         nodes.LookupVal,
                         nodes.Compare,
+                        nodes.And,
+                        nodes.Or,
                         nodes.Not);
         this.compile(node, frame);
     },
@@ -1927,7 +2131,7 @@ var Compiler = Object.extend({
             key = new nodes.Literal(key.lineno, key.colno, key.value);
         }
         else if(!(key instanceof nodes.Literal &&
-                  typeof node.value == "string")) {
+                  typeof key.value == "string")) {
             throw new Error("Dict keys must be strings or names");
         }
 
@@ -1969,7 +2173,7 @@ var Compiler = Object.extend({
         this.emit('-');
         this.compile(node.target, frame);
     },
-    
+
     compilePos: function(node, frame) {
         this.emit('+');
         this.compile(node.target, frame);
@@ -1977,7 +2181,7 @@ var Compiler = Object.extend({
 
     compileCompare: function(node, frame) {
         this.compile(node.expr, frame);
-        
+
         for(var i=0; i<node.ops.length; i++) {
             var n = node.ops[i];
             this.emit(' ' + compareOps[n.type] + ' ');
@@ -1994,9 +2198,70 @@ var Compiler = Object.extend({
         this.emit(']');
     },
 
-    compileFunCall: function(node, frame) {
+    _emitCallArgs: function(args, frame, startChar, endChar) {
+        this.emit(startChar);
+
+        for(var j=0; j<args.length; j++) {
+            if(j != 0) {
+                this.emit(', ');
+            }
+            this.compile(args[j], frame);
+        }
+        this.emit(endChar);
+    },
+
+    _emitCallKwargs: function(kwargs, frame) {
+        this.emit('{');
+
+        for(var i=0; i<kwargs.length; i++) {
+            if(i > 0) {
+                this.emit(', ');
+            }
+            var name = kwargs[i][0];
+            var val = kwargs[i][1];
+            this.emit(name.value);
+            this.emit(': ');
+            this.compile(val, frame);
+        }
+        this.emit('}');
+    },
+
+    _emitWrappedExpression: function(node, frame) {
+        this.emit('(');
         this._compileExpression(node.name, frame);
-        this._compileAggregate(node, frame, '(', ')');
+        this.emit(')');
+    },
+
+    collectArgs: function(node, frame) {
+        var args = [];
+        var kwargs = [];
+        for(var i=0; i<node.children.length; i++) {
+            var arg = node.children[i];
+            var name = arg.getKey();
+            var val = arg.getValue();
+            if(name) {
+                kwargs.push([name, val]);
+            } else {
+                args.push(val);
+            }
+        }
+        return [args, kwargs];
+    },
+
+    compileFunCall: function(node, frame) {
+        var allArgs = this.collectArgs(node);
+        var args = allArgs[0];
+        var kwargs = allArgs[1];
+        this._emitWrappedExpression(node, frame);
+        this.emit('.isMacro ? ');
+        this._emitWrappedExpression(node, frame);
+        this.emit('(');
+        this._emitCallArgs(args, frame, '[', ']');
+        this.emit(', ');
+        this._emitCallKwargs(kwargs, frame);
+        this.emit(') : ');
+        this._emitWrappedExpression(node, frame);
+        this._emitCallArgs(args, frame, '(', ')');
     },
 
     compileFilter: function(node, frame) {
@@ -2004,7 +2269,8 @@ var Compiler = Object.extend({
         this.assertType(name, nodes.Symbol);
 
         this.emit('env.getFilter("' + name.value + '")');
-        this._compileAggregate(node, frame, '(', ')');
+        var args = this.collectArgs(node)[0];
+        this._emitCallArgs(args, frame, '(', ')');
     },
 
     compileSet: function(node, frame) {
@@ -2013,11 +2279,14 @@ var Compiler = Object.extend({
         this.emit('var ' + val + ' = ');
         this._compileExpression(node.value);
         this.emitLine(';');
-        
+
         for(var i=0; i<node.targets.length; i++) {
             var t = node.targets[i];
             this.emitLine('context.setVariable("' + t.value + '", ' +
                           val + ');');
+            if(t.value.charAt(0) != '_') {
+                this.emitLine('context.addExport("' + t.value + '");');
+            }
         }
     },
 
@@ -2040,7 +2309,7 @@ var Compiler = Object.extend({
         var arr = this.tmpid();
         frame = frame.push();
 
-        this.emitLine('frame = frame.push()');
+        this.emitLine('frame = frame.push();');
 
         this.emit('var ' + arr + ' = ');
         this._compileExpression(node.arr, frame);
@@ -2091,6 +2360,101 @@ var Compiler = Object.extend({
         this.emitLine('frame = frame.pop();');
     },
 
+    macroBody: function(node, frame) {
+        frame = frame.push();
+        this.emitLine('frame = frame.push();');
+        var args = [];
+
+        for(var i=0; i<node.children.length; i++) {
+            var name = node.children[i].getKey().value
+            args.push('l_' + name);
+            frame.set(name, 'l_' + name);
+        }
+        this.emitLine('var macro = function(' + args.join(', ') + ') {');
+        var oldBuffer = this.buffer;
+        this.buffer = 'macroOutput';
+        this.emitLine('var ' + this.buffer + '= "";');
+        this.compile(node.body, frame)
+        this.emitLine('return ' + this.buffer + ';');
+        this.emitLine('};');
+        this.buffer = oldBuffer;
+        this.emitLine('frame = frame.pop();');
+        return frame;
+    },
+
+    macroDef: function(node, frame) {
+        var name = node.name.value;
+        this.emit('runtime.wrapMacro(macro, "' + name + '", ' + '[');
+
+        for(var i=0; i<node.children.length; i++) {
+            var arg = node.children[i];
+            var name = arg.getKey().value;
+            var val = arg.getValue();
+            this.emit('["' + name + '", ');
+            val ? this.compile(val, frame) : this.emit('null');
+            this.emit(']');
+
+            if(i != node.children.length - 1) {
+                this.emit(', ');
+            }
+        }
+        this.emitLine('], false, false, false);');
+    },
+
+    compileMacro: function(node, frame) {
+        var macroFrame = this.macroBody(node, frame);
+        var name = node.name.value;
+        this.emit('var l_' + name + ' = ');
+        this.macroDef(node, macroFrame);
+        frame.set(name, 'l_' + name);
+
+        if(!this.isChild) {
+            if(node.name.value.charAt(0) != '_') {
+                this.emitLine('context.addExport("' + name + '");');
+            }
+            this.emitLine('context.setVariable("' + name + '", l_' + name + ');');
+        }
+    },
+
+    compileImport: function(node, frame) {
+        this.emit('var l_' + node.target + ' = env.getTemplate(');
+        this.compile(node.template, frame);
+        this.emitLine(').getModule();');
+        frame.set(node.target, 'l_' + node.target);
+
+        if(!this.isChild) {
+            this.emitLine('context.setVariable("' + node.target + '", l_' + node.target + ');');
+        }
+    },
+
+    compileFromImport: function(node, frame) {
+        this.emit('var includedTemplate = env.getTemplate(');
+        this.compile(node.template, frame);
+        this.emitLine(').getModule();');
+
+        for(var i=0; i<node.children.length; i++) {
+            var name = node.children[i].getKey().value;
+            var alias = node.children[i].getValue();
+            if(alias) {
+                alias = alias.value;
+            } else {
+                alias = name;
+            }
+
+            this.emitLine('if(includedTemplate.hasOwnProperty("' + name + '")) {');
+            this.emitLine('var l_' + alias + ' = includedTemplate.' + name + ';');
+            this.emitLine('} else {');
+            // TODO: Add runtime errors
+            this.emitLine('// Add runtime error here');
+            this.emitLine('}');
+            frame.set(alias, 'l_' + alias);
+
+            if(!this.isChild) {
+                this.emitLine('context.setVariable("' + alias + '", l_' + alias + ');');
+            }
+        }
+    },
+
     compileBlock: function(node, frame) {
         this.emitLine(this.buffer + ' += context.getBlock("' +
                       node.name.value + '")(env, context, frame);');
@@ -2100,7 +2464,7 @@ var Compiler = Object.extend({
         if(this.isChild) {
             throw new Error('cannot extend multiple times');
         }
-        
+
         this.emit('var parentTemplate = env.getTemplate(');
         this._compileExpression(node.template, frame);
         this.emitLine(', true);');
@@ -2145,7 +2509,7 @@ var Compiler = Object.extend({
         this._compileChildren(node, frame);
         if(this.isChild) {
             this.emitLine('return ' +
-                          'parentTemplate.rootRenderFunc(env, context, frame);');
+                          'parentTemplate.rootRenderFunc(env, context, frame, runtime);');
         }
         this.emitFuncEnd(this.isChild);
 
@@ -2155,9 +2519,10 @@ var Compiler = Object.extend({
             var name = block.name.value;
 
             this.emitFuncBegin('b_' + name);
-            this.emitLine('var l_super = context.getSuper(env, ' + 
+            this.emitLine('var l_super = context.getSuper(env, ' +
                           '"' + name + '", ' +
-                          'b_' + name + ');');
+                          'b_' + name + ', ' +
+                          'runtime);');
 
             var tmpFrame = frame.push();
             frame.set('super', 'l_super');
@@ -2192,7 +2557,7 @@ var Compiler = Object.extend({
 
 // var fs = modules["fs"];
 // var c = new Compiler();
-// var src = "{% for i in [3,45,1] %}{{ loop.index }}{% endfor %}";
+// var src = "{{ test('hello') }}";
 
 // var ns = parser.parse(src);
 // nodes.printNodes(ns);
@@ -2460,7 +2825,7 @@ var filters = {
                 x = x.toLowerCase();
                 y = y.toLowerCase();
             }
-               
+
             if(x < y) {
                 return reverse ? 1 : -1;
             }
@@ -2529,7 +2894,7 @@ var HttpLoader = Object.extend({
         if(!src) {
             return null;
         }
-        
+
         return { src: src,
                  path: name,
                  upToDate: function() { return _this.neverUpdate; }};
@@ -2568,14 +2933,14 @@ else {
 }
 })();
 (function() {
-
 var lib = modules["lib"];
 var Object = modules["object"];
 var lexer = modules["lexer"];
 var compiler = modules["compiler"];
 var builtin_filters = modules["filters"];
 var builtin_loaders = modules["loaders"];
-var Frame = modules["runtime"].Frame;
+var runtime = modules["runtime"];
+var Frame = runtime.Frame;
 
 var Environment = Object.extend({
     init: function(loaders, tags) {
@@ -2664,8 +3029,8 @@ var Environment = Object.extend({
 
             context = lib.extend(context, ctx);
 
-            var res = env.render(name, ctx);
-            k(null, res);            
+            var res = env.render(name, context);
+            k(null, res);
         };
     },
 
@@ -2678,6 +3043,7 @@ var Context = Object.extend({
     init: function(ctx, blocks) {
         this.ctx = ctx;
         this.blocks = {};
+        this.exported = [];
 
         for(var name in blocks) {
             this.addBlock(name, blocks[name]);
@@ -2691,7 +3057,7 @@ var Context = Object.extend({
     setVariable: function(name, val) {
         this.ctx[name] = val;
     },
-    
+
     getVariables: function() {
         return this.ctx;
     },
@@ -2721,6 +3087,19 @@ var Context = Object.extend({
 
             return blk(env, context);
         };
+    },
+
+    addExport: function(name) {
+        this.exported.push(name);
+    },
+
+    getExported: function() {
+        var exported = {};
+        for(var i=0; i<this.exported.length; i++) {
+            var name = this.exported[i];
+            exported[name] = this.ctx[name];
+        }
+        return exported;
     }
 });
 
@@ -2761,11 +3140,25 @@ var Template = Object.extend({
         var context = new Context(ctx || {}, this.blocks);
         return this.rootRenderFunc(this.env,
                                    context,
-                                   frame || new Frame());
+                                   frame || new Frame(),
+                                   runtime);
     },
 
     isUpToDate: function() {
         return this.upToDate();
+    },
+
+    getModule: function() {
+        if(!this.compiled) {
+            this._compile();
+        }
+        // Run the rootRenderFunc to populate the context with exported vars
+        var ctx = new Context({}, this.blocks);
+        this.rootRenderFunc(this.env,
+                            ctx,
+                            new Frame(),
+                            runtime);
+        return ctx.getExported();
     },
 
     _compile: function() {
@@ -2778,7 +3171,7 @@ var Template = Object.extend({
             var func = new Function(compiler.compile(this.tmplStr, this.env));
             props = func();
         }
-        
+
         this.blocks = this._getBlocks(props);
         this.rootRenderFunc = props.root;
         this.compiled = true;
