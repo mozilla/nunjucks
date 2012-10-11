@@ -20,6 +20,14 @@ jinja2.
 
 `npm install nunjucks`
 
+The current version is v0.1.5 ([changelog](http://nunjucks.tumblr.com/post/33376448796/v0-1-5-macros-keyword-arguments-bugfixes)).
+
 ## Documentation
 
 See http://nunjucks.jlongster.com/ for complete documentation.
+
+## Contributors
+
+* James Long (owner)
+* Brent Hagany
+* Thomas Hunkapiller
