@@ -128,6 +128,21 @@ exports.repeat = function(char_, n) {
     return str;
 };
 
+exports.each = function(obj, func, context) {
+    if(obj == null) {
+        return;
+    }
+    
+    if(ArrayProto.each && obj.each == ArrayProto.each) {
+        obj.forEach(func, context);
+    }
+    else if(obj.length === +obj.length) {
+        for(var i=0, l=obj.length; i<l; i++) {
+            func.call(context, obj[i], i, obj);
+        }
+    }
+};
+
 exports.map = function(obj, func) {
     var results = [];
     if(obj == null) {
@@ -492,41 +507,78 @@ var Frame = Object.extend({
     }
 });
 
-// wrapMacro returns a function that stands in for the original macro, and handles
-// the translation of keyword arguments from nunjucks to javascript
-var wrapMacro = function(func, name, definedArgs, catchKwargs, catchVarargs, caller) {
-    var definedArgCount = definedArgs.length;
+function makeMacro(argNames, kwargNames, func) {
+    return function() {
+        var argCount = numArgs(arguments);
+        var args;
+        var kwargs = getKeywordArgs(arguments);
 
-    var newMacro = function(args, kwargs) {
-        var applyArgs = args.slice(0, definedArgCount);
-        var applyArgCount = applyArgs.length;
-        if(applyArgCount != definedArgCount) {
-            var remainingArgs = definedArgs.slice(applyArgCount);
-            for(var i=0; i<remainingArgs.length; i++) {
-                var arg = remainingArgs[i];
-                var name = arg[0];
-                var defaultVal = arg[1];
-                var value;
-                if(kwargs.hasOwnProperty(name)) {
-                    value = kwargs[name];
-                } else if(defaultVal) {
-                    value = defaultVal;
-                } else {
-                    throw new Error('parameter ' + name + ' was not provided');
+        if(argCount > argNames.length) {
+            args = Array.prototype.slice.call(arguments, 0, argNames.length);
+
+            // Positional arguments that should be passed in as
+            // keyword arguments (essentially default values)
+            var vals = Array.prototype.slice.call(arguments, args.length, argCount);
+            for(var i=0; i<vals.length; i++) {
+                if(i < kwargNames.length) {
+                    kwargs[kwargNames[i]] = vals[i];
                 }
-                applyArgs.push(value);
             }
-        }
-        return func.apply(null, applyArgs);
-    };
-    newMacro.isMacro = true;
-    return newMacro;
-};
 
+            args.push(kwargs);
+        }
+        else if(argCount < argNames.length) {
+            args = Array.prototype.slice.call(arguments, 0, argCount);
+
+            for(var i=argCount; i<argNames.length; i++) {
+                var arg = argNames[i];
+
+                // Keyword arguments that should be passed as
+                // positional arguments, i.e. the caller explicitly
+                // used the name of a positional arg
+                args.push(kwargs[arg]);
+                delete kwargs[arg];
+            }
+
+            args.push(kwargs);
+        }
+        else {
+            args = arguments;
+        }
+
+        return func.apply(this, args);
+    };
+}
+
+function makeKeywordArgs(obj) {
+    obj.__keywords = true;
+    return obj;
+}
+
+function getKeywordArgs(args) {
+    if(args.length && args[args.length - 1].__keywords) {
+        return args[args.length - 1];
+    }
+    return {};
+}
+
+function numArgs(args) {
+    if(args.length === 0) {
+        return 0;
+    }
+    else if(args[args.length - 1].__keywords) {
+        return args.length - 1;
+    }
+    else {
+        return args.length;
+    }
+}
 
 modules['runtime'] = {
     Frame: Frame,
-    wrapMacro: wrapMacro
+    makeMacro: makeMacro,
+    makeKeywordArgs: makeKeywordArgs,
+    numArgs: numArgs
 };
 })();
 (function() {
@@ -745,17 +797,18 @@ var Template = Object.extend({
         return this.upToDate();
     },
 
-    getModule: function() {
+    getExported: function() {
         if(!this.compiled) {
             this._compile();
         }
+
         // Run the rootRenderFunc to populate the context with exported vars
-        var ctx = new Context({}, this.blocks);
+        var context = new Context({}, this.blocks);
         this.rootRenderFunc(this.env,
-                            ctx,
+                            context,
                             new Frame(),
                             runtime);
-        return ctx.getExported();
+        return context.getExported();
     },
 
     _compile: function() {
@@ -789,7 +842,8 @@ var Template = Object.extend({
 
 // var fs = modules["fs"];
 // //var src = fs.readFileSync('test.html', 'utf-8');
-// var src = "{% for i in [1,2,3] %}{% include 'item.html' %}{% endfor %}";
+// //var src = '{% macro foo(x, y, z=3) %}h{% endmacro %}';
+// var src = '{% macro foo() %}{{ h }}{% endmacro %} {{ foo() }}';
 
 // var env = new Environment();
 // console.log(compiler.compile(src));

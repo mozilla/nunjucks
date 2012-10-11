@@ -37,7 +37,7 @@ function extend(cls, name, props) {
 
     prototype.typename = name;
 
-    var new_cls = function() {
+    var new_cls = function() { 
         if(prototype.init) {
             prototype.init.apply(this, arguments);
         }
@@ -128,6 +128,21 @@ exports.repeat = function(char_, n) {
     return str;
 };
 
+exports.each = function(obj, func, context) {
+    if(obj == null) {
+        return;
+    }
+    
+    if(ArrayProto.each && obj.each == ArrayProto.each) {
+        obj.forEach(func, context);
+    }
+    else if(obj.length === +obj.length) {
+        for(var i=0, l=obj.length; i<l; i++) {
+            func.call(context, obj[i], i, obj);
+        }
+    }
+};
+
 exports.map = function(obj, func) {
     var results = [];
     if(obj == null) {
@@ -137,7 +152,7 @@ exports.map = function(obj, func) {
     if(ArrayProto.map && obj.map === ArrayProto.map) {
         return obj.map(func);
     }
-
+    
     for(var i=0; i<obj.length; i++) {
         results[results.length] = func(obj[i], i);
     }
@@ -155,192 +170,109 @@ var util = modules["util"];
 var lib = modules["lib"];
 var Object = modules["object"];
 
-// TODO: Don't use a children array, but rather a single node "body"
 var Node = Object.extend("Node", {
-    init: function(lineno, colno, children) {
-        if(children && !lib.isArray(children)) {
-            throw new Error("Node.init: third argument must be " +
-                            "an array (the children)");
-        }
-
-        this.children = children || [];
+    init: function(lineno, colno) {
+        var args = lib.toArray(arguments).slice(2);
         this.lineno = lineno;
         this.colno = colno;
+
+        lib.each(this.fields, function(field, i) {
+            var val = args[i];
+
+            // Fields should never be undefined, but null. It makes
+            // testing easier to normalize values.
+            if(val === undefined) {
+                val = null;
+            }
+
+            this[field] = val;
+        }, this);
     },
 
     findAll: function(type) {
         var res = [];
 
-        // TODO: clean this up
-        for(var k in this) {
-            var obj = this[k];
-
-            if(lib.isArray(obj)) {
-                for(var i=0; i<obj.length; i++) {
-                    var n = obj[i];
-
-                    if(n instanceof type) {
-                        res.push(n);
-                    }
-
-                    if(n instanceof Node) {
-                        res = res.concat(n.findAll(type));
-                    }
-                };
+        function check(obj) {
+            if(obj instanceof type) {
+                res.push(obj);
             }
-            else if(obj instanceof Node) {
+
+            if(obj instanceof Node) {
                 res = res.concat(obj.findAll(type));
-            }
+            }   
+        }
+
+        if(this instanceof NodeList) {
+            lib.each(this.children, function(node) {
+                check(node);
+            }, this);
+        }
+        else {
+            lib.each(this.fields, function(field) {
+                var obj = this[field];
+                check(obj);
+            }, this);
         }
 
         return res;
     },
 
-    addChild: function(node) {
-        this.children.push(node);
-    },
-
-    getChild: function(i) {
-        return this.children[i];
-    },
-
-    numChildren: function() {
-        return this.children.length;
-    },
-
-    iterChildren: function(func) {
-        for(var i=0; i<this.children.length; i++) {
-            func(this.children[i]);
-        }
+    iterFields: function(func) {
+        lib.each(this.fields, function(field) {
+            func(this[field], field);
+        }, this);
     }
 });
 
 // Abstract nodes
-var Expr = Node.extend("Expr");
-var Value = Expr.extend("Value", {
-    init: function (lineno, colno, value) {
-        this.value = value;
-        this.parent(lineno, colno);
-    }
-});
+var Value = Node.extend("Value", { fields: ['value'] });
 
 // Concrete nodes
-var Root = Node.extend("Root");
-var NodeList = Node.extend("NodeList");
+var NodeList = Node.extend("NodeList", {
+    fields: ['children'],
+
+    init: function(lineno, colno, nodes) {
+        this.parent(lineno, colno, nodes || []);
+    },
+
+    addChild: function(node) {
+        this.children.push(node);
+    }
+});
+
+var Root = NodeList.extend("Root");
 var Literal = Value.extend("Literal");
 var Symbol = Value.extend("Symbol");
-
-var Group = Expr.extend("Group");
-var Array = Expr.extend("Array");
-var Pair = Node.extend("Pair", {
-    init: function(lineno, colno, key, val) {
-        this.parent(lineno, colno, [key, val]);
-    },
-
-    getKey: function() {
-        return this.children[0];
-    },
-
-    getValue: function() {
-        return this.children[1];
-    }
-});
-var Dict = Expr.extend("Dict");
-var LookupVal = Expr.extend("LookupVal", {
-    init: function(lineno, colno, target, val) {
-        this.target = target;
-        this.val = val;
-        this.parent(lineno, colno);
-    }
-});
-
-var If = Node.extend("If", {
-    init: function(lineno, colno, cond, body, else_) {
-        this.cond = cond;
-        this.body = body;
-        this.else_ = else_;
-        this.parent(lineno, colno);
-    }
-});
-
-var For = Node.extend("For", {
-    init: function(lineno, colno, arr, name, body) {
-        this.arr = arr;
-        this.name = name;
-        this.body = body;
-        this.parent(lineno, colno);
-    }
-});
-
-var Macro = Node.extend("Macro", {
-    init: function(lineno, colno, name, args, body) {
-        this.name = name;
-        this.body = body;
-        this.parent(lineno, colno, args);
-    }
-});
-
-var Import = Node.extend("Import", {
-    init: function(lineno, colno, template, target) {
-        this.template = template;
-        this.target = target;
-        this.parent(lineno, colno);
-    }
-});
-
+var Group = NodeList.extend("Group");
+var Array = NodeList.extend("Array");
+var Pair = Node.extend("Pair", { fields: ['key', 'value'] });
+var Dict = NodeList.extend("Dict");
+var LookupVal = Node.extend("LookupVal", { fields: ['target', 'val'] });
+var If = Node.extend("If", { fields: ['cond', 'body', 'else_'] });
+var For = Node.extend("For", { fields: ['arr', 'name', 'body'] });
+var Macro = Node.extend("Macro", { fields: ['name', 'args', 'body'] });
+var Import = Node.extend("Import", { fields: ['template', 'target'] });
 var FromImport = Node.extend("FromImport", {
+    fields: ['template', 'names'],
+
     init: function(lineno, colno, template, names) {
-        this.template = template;
-        this.parent(lineno, colno, names);
+        this.parent(lineno, colno,
+                    template,
+                    names || new NodeList());
     }
 });
-
-var FunCall = Node.extend("FunCall", {
-    init: function(lineno, colno, name, args) {
-        this.name = name;
-        this.parent(lineno, colno, args);
-    }
-});
-
+var FunCall = Node.extend("FunCall", { fields: ['name', 'args'] });
 var Filter = FunCall.extend("Filter");
-
-var Block = Node.extend("Block", {
-    init: function(lineno, colno, name, body) {
-        this.name = name;
-        this.body = body;
-        this.parent(lineno, colno);
-    }
-});
-
-var TemplateRef = Node.extend("TemplateRef", {
-    init: function(lineno, colno, template) {
-        this.template = template;
-        this.parent(lineno, colno);
-    }
-});
-
+var KeywordArgs = Dict.extend("KeywordArgs");
+var Block = Node.extend("Block", { fields: ['name', 'body'] });
+var TemplateRef = Node.extend("TemplateRef", { fields: ['template'] });
 var Extends = TemplateRef.extend("Extends");
 var Include = TemplateRef.extend("Include");
-var Set = Node.extend("Set");
-
-var Output = Node.extend("Output");
+var Set = Node.extend("Set", { fields: ['targets', 'value'] });
+var Output = NodeList.extend("Output");
 var TemplateData = Literal.extend("TemplateData");
-
-var UnaryOp = Expr.extend("UnaryOp", {
-    init: function(lineno, colno, target) {
-        this.target = target;
-        this.parent(lineno, colno);
-    }
-});
-
-var BinOp = Expr.extend("BinOp", {
-    init: function(lineno, colno, left, right) {
-        this.left = left;
-        this.right = right;
-        this.parent(lineno, colno);
-    }
-});
-
+var UnaryOp = Node.extend("UnaryOp", { fields: ['target'] });
+var BinOp = Node.extend("BinOp", { fields: ['left', 'right'] });
 var Or = BinOp.extend("Or");
 var And = BinOp.extend("And");
 var Not = UnaryOp.extend("Not");
@@ -353,28 +285,19 @@ var Mod = BinOp.extend("Mod");
 var Pow = BinOp.extend("Pow");
 var Neg = UnaryOp.extend("Neg");
 var Pos = UnaryOp.extend("Pos");
-
-var Compare = Expr.extend("Compare", {
-    init: function(lineno, colno, expr, ops) {
-        this.expr = expr;
-        this.ops = ops;
-        this.parent(lineno, colno);
-    }
-});
-var CompareOperand = Expr.extend("CompareOperand", {
-    init: function(lineno, colno, expr, type) {
-        this.expr = expr;
-        this.type = type;
-        this.parent(lineno, colno);
-    }
+var Compare = Node.extend("Compare", { fields: ['expr', 'ops'] });
+var CompareOperand = Node.extend("CompareOperand", {
+    fields: ['expr', 'type']
 });
 
+// Print the AST in a nicely formatted tree format for debuggin
 function printNodes(node, indent) {
-    // TODO: spend more then 30 seconds and clean this up
     indent = indent || 0;
 
-    function print(str, inline) {
+    // This is hacky, but this is just a debugging function anyway
+    function print(str, indent, inline) {
         var lines = str.split("\n");
+
         for(var i=0; i<lines.length; i++) {
             if(lines[i]) {
                 if((inline && i > 0) || !inline) {
@@ -393,88 +316,57 @@ function printNodes(node, indent) {
         }
     }
 
-    print(node.typename + ": ");
+    print(node.typename + ": ", indent);
 
-    if(node instanceof FunCall) {
-        print("\n");
-        printNodes(node.name, indent+2);
-
-        node.iterChildren(function(node) {
-            printNodes(node, indent+2);
+    if(node instanceof NodeList) {
+        print('\n');
+        lib.each(node.children, function(n) {
+            printNodes(n, indent + 2);
         });
-    }
-    else if(node instanceof For) {
-        print("\n");
-        printNodes(node.name, indent+2);
-        printNodes(node.arr, indent+2);
-        printNodes(node.body, indent+2);
-    }
-    else if(node instanceof If) {
-        print("\n");
-        printNodes(node.cond, indent+2);
-        printNodes(node.body, indent+2);
-
-        if(node.else_) {
-            printNodes(node.else_, indent+2);
-        }
-    }
-    else if(node instanceof Block) {
-        print("\n");
-        printNodes(node.name, indent+2);
-        printNodes(node.body, indent+2);
-    }
-    else if(node instanceof Set) {
-        print("\n");
-        for(var i=0; i<node.targets.length; i++) {
-            printNodes(node.targets[i], indent+2);
-        }
-        printNodes(node.value, indent+2);
-    }
-    else if(node instanceof LookupVal) {
-        print("\n");
-        printNodes(node.target, indent+2);
-        printNodes(node.val, indent+2);
-    }
-    else if(node instanceof UnaryOp) {
-        print("\n");
-        printNodes(node.target, indent+2);
-    }
-    else if(node instanceof BinOp) {
-        print("\n");
-        printNodes(node.left, indent+2);
-        printNodes(node.right, indent+2);
-    }
-    else if(node instanceof Compare) {
-        print("\n");
-        printNodes(node.expr, indent+2);
-
-        for(var i=0; i<node.ops.length; i++) {
-            printNodes(node.ops[i], indent+2);
-        }
-    }
-    else if(node instanceof CompareOperand) {
-        console.log("(" + node.type + ")");
-
-        printNodes(node.expr, indent+2);
-
     }
     else {
-        var children = node.children;
-        delete node.children;
-        print(util.inspect(node, true, null) + "\n", true);
-        node.children = children;
+        var nodes = null;
+        var props = null;
 
-        node.iterChildren(function(node) {
-            printNodes(node, indent+2);
+        node.iterFields(function(val, field) {
+            if(val instanceof Node) {
+                nodes = nodes || {};
+                nodes[field] = val;
+            }
+            else {
+                props = props || {};
+                props[field] = val;
+            }
         });
+
+        if(props) {
+            print(util.inspect(props, true, null) + '\n', null, true);
+        }
+        else {
+            print('\n');
+        }
+
+        if(nodes) {
+            for(var k in nodes) {
+                printNodes(nodes[k], indent + 2);
+            }
+        }
+        
     }
 }
+
+// var t = new NodeList(0, 0,
+//                      [new Value(0, 0, 3),
+//                       new Value(0, 0, 10),
+//                       new Pair(0, 0,
+//                                new Value(0, 0, 'key'),
+//                                new Value(0, 0, 'value'))]);
+// printNodes(t);
 
 modules['nodes'] = {
     Node: Node,
     Root: Root,
     NodeList: NodeList,
-    Expr: Expr,
     Value: Value,
     Literal: Literal,
     Symbol: Symbol,
@@ -491,6 +383,7 @@ modules['nodes'] = {
     FromImport: FromImport,
     FunCall: FunCall,
     Filter: Filter,
+    KeywordArgs: KeywordArgs,
     Block: Block,
     Extends: Extends,
     Include: Include,
@@ -560,41 +453,78 @@ var Frame = Object.extend({
     }
 });
 
-// wrapMacro returns a function that stands in for the original macro, and handles
-// the translation of keyword arguments from nunjucks to javascript
-var wrapMacro = function(func, name, definedArgs, catchKwargs, catchVarargs, caller) {
-    var definedArgCount = definedArgs.length;
+function makeMacro(argNames, kwargNames, func) {
+    return function() {
+        var argCount = numArgs(arguments);
+        var args;
+        var kwargs = getKeywordArgs(arguments);
 
-    var newMacro = function(args, kwargs) {
-        var applyArgs = args.slice(0, definedArgCount);
-        var applyArgCount = applyArgs.length;
-        if(applyArgCount != definedArgCount) {
-            var remainingArgs = definedArgs.slice(applyArgCount);
-            for(var i=0; i<remainingArgs.length; i++) {
-                var arg = remainingArgs[i];
-                var name = arg[0];
-                var defaultVal = arg[1];
-                var value;
-                if(kwargs.hasOwnProperty(name)) {
-                    value = kwargs[name];
-                } else if(defaultVal) {
-                    value = defaultVal;
-                } else {
-                    throw new Error('parameter ' + name + ' was not provided');
+        if(argCount > argNames.length) {
+            args = Array.prototype.slice.call(arguments, 0, argNames.length);
+
+            // Positional arguments that should be passed in as
+            // keyword arguments (essentially default values)
+            var vals = Array.prototype.slice.call(arguments, args.length, argCount);
+            for(var i=0; i<vals.length; i++) {
+                if(i < kwargNames.length) {
+                    kwargs[kwargNames[i]] = vals[i];
                 }
-                applyArgs.push(value);
             }
-        }
-        return func.apply(null, applyArgs);
-    };
-    newMacro.isMacro = true;
-    return newMacro;
-};
 
+            args.push(kwargs);
+        }
+        else if(argCount < argNames.length) {
+            args = Array.prototype.slice.call(arguments, 0, argCount);
+
+            for(var i=argCount; i<argNames.length; i++) {
+                var arg = argNames[i];
+
+                // Keyword arguments that should be passed as
+                // positional arguments, i.e. the caller explicitly
+                // used the name of a positional arg
+                args.push(kwargs[arg]);
+                delete kwargs[arg];
+            }
+
+            args.push(kwargs);
+        }
+        else {
+            args = arguments;
+        }
+
+        return func.apply(this, args);
+    };
+}
+
+function makeKeywordArgs(obj) {
+    obj.__keywords = true;
+    return obj;
+}
+
+function getKeywordArgs(args) {
+    if(args.length && args[args.length - 1].__keywords) {
+        return args[args.length - 1];
+    }
+    return {};
+}
+
+function numArgs(args) {
+    if(args.length === 0) {
+        return 0;
+    }
+    else if(args[args.length - 1].__keywords) {
+        return args.length - 1;
+    }
+    else {
+        return args.length;
+    }
+}
 
 modules['runtime'] = {
     Frame: Frame,
-    wrapMacro: wrapMacro
+    makeMacro: makeMacro,
+    makeKeywordArgs: makeKeywordArgs,
+    numArgs: numArgs
 };
 })();
 (function() {
@@ -1011,9 +941,6 @@ modules['lexer'] = {
 };
 })();
 (function() {
-// Does not support:
-//
-// Conditional expression: "yes" if True else "no"
 
 var lexer = modules["lexer"];
 var nodes = modules["nodes"];
@@ -1116,10 +1043,17 @@ var Parser = Object.extend({
 
     advanceAfterBlockEnd: function(name) {
         if(!name) {
-            if(this.peekToken().type != lexer.TOKEN_SYMBOL) {
+            var tok = this.peekToken();
+
+            if(!tok) {
+                this.fail('unexpected end of file');
+            }
+
+            if(tok.type != lexer.TOKEN_SYMBOL) {
                 this.fail("advanceAfterBlockEnd: expected symbol token or " +
                           "explicit name to be passed");
             }
+
             name = this.nextToken().value;
         }
 
@@ -1175,15 +1109,14 @@ var Parser = Object.extend({
             this.fail("expected macro");
         }
 
-        var nameTok = this.nextToken();
-        var name = new nodes.Symbol(nameTok.lineno, nameTok.colno, nameTok.value);
+        var name = this.parsePrimary(true);
         var args = this.parseSignature();
         var node = new nodes.Macro(macroTok.lineno,
                                    macroTok.colno,
                                    name,
                                    args);
-        this.advanceAfterBlockEnd(macroTok.value);
 
+        this.advanceAfterBlockEnd(macroTok.value);
         node.body = this.parseUntilBlocks('endmacro');
         this.advanceAfterBlockEnd();
 
@@ -1196,19 +1129,20 @@ var Parser = Object.extend({
             this.fail("expected import");
         }
 
-        var template = this.parseExpression();
+        var template = this.parsePrimary();
 
         if(!this.skipSymbol('as')) {
             throw new Error('expected "as" keyword');
         }
-        var target = this.parsePrimary().value;
 
+        var target = this.parsePrimary();
+        var node = new nodes.Import(importTok.lineno,
+                                    importTok.colno,
+                                    template,
+                                    target);
         this.advanceAfterBlockEnd(importTok.value);
 
-        return new nodes.Import(importTok.lineno,
-                                importTok.colno,
-                                template,
-                                target);
+        return node;
     },
 
     parseFrom: function() {
@@ -1217,39 +1151,51 @@ var Parser = Object.extend({
             this.fail("expected from");
         }
 
-        var template = this.parseExpression();
+        var template = this.parsePrimary();
         var node = new nodes.FromImport(fromTok.lineno,
                                         fromTok.colno,
-                                        template);
+                                        template,
+                                        new nodes.NodeList());
 
         if(!this.skipSymbol('import')) {
             throw new Error("expected import");
         }
 
+        var names = node.names;
+
         while(1) {
             var type = this.peekToken().type;
             if(type == lexer.TOKEN_BLOCK_END) {
+                if(!names.children.length) {
+                    this.fail('Expected at least one import name');
+                }
+
                 this.nextToken();
                 break;
             }
 
-            if(node.children.length > 0 && !this.skip(lexer.TOKEN_COMMA)) {
+            if(names.children.length > 0 && !this.skip(lexer.TOKEN_COMMA)) {
                 throw new Error('expected comma');
             }
 
             var name = this.parsePrimary();
             if(name.value.charAt(0) == '_') {
-                throw new Error('names starting with an underscore cannot be imported');
+                this.fail('names starting with an underscore cannot be ' +
+                          'imported',
+                          name.lineno,
+                          name.colno);
             }
 
-            var alias = null;
             if(this.skipSymbol('as')) {
                 var alias = this.parsePrimary();
+                names.addChild(new nodes.Pair(name.lineno,
+                                              name.colno,
+                                              name,
+                                              alias));
             }
-            node.addChild(new nodes.Pair(name.lineno,
-                                         name.colno,
-                                         name,
-                                         alias));
+            else {
+                names.addChild(name);
+            }
         }
 
         return node;
@@ -1348,8 +1294,7 @@ var Parser = Object.extend({
             this.fail('expected set');
         }
 
-        var node = new nodes.Set(tag.lineno, tag.colno);
-        node.targets = [];
+        var node = new nodes.Set(tag.lineno, tag.colno, []);
 
         var target;
         while((target = this.parsePrimary())) {
@@ -1384,17 +1329,17 @@ var Parser = Object.extend({
         }
 
         switch(tok.value) {
-            case 'raw': node = this.parseRaw(); break;
-            case 'if': node = this.parseIf(); break;
-            case 'for': node = this.parseFor(); break;
-            case 'block': node = this.parseBlock(); break;
-            case 'extends': node = this.parseExtends(); break;
-            case 'include': node = this.parseInclude(); break;
-            case 'set': node = this.parseSet(); break;
-            case 'macro': node = this.parseMacro(); break;
-            case 'import': node = this.parseImport(); break;
-            case 'from': node = this.parseFrom(); break;
-            default: this.fail('unknown block tag: ' + tok.value);
+        case 'raw': node = this.parseRaw(); break;
+        case 'if': node = this.parseIf(); break;
+        case 'for': node = this.parseFor(); break;
+        case 'block': node = this.parseBlock(); break;
+        case 'extends': node = this.parseExtends(); break;
+        case 'include': node = this.parseInclude(); break;
+        case 'set': node = this.parseSet(); break;
+        case 'macro': node = this.parseMacro(); break;
+        case 'import': node = this.parseImport(); break;
+        case 'from': node = this.parseFrom(); break;
+        default: this.fail('unknown block tag: ' + tok.value);
         }
 
         return node;
@@ -1453,11 +1398,10 @@ var Parser = Object.extend({
         while(tok) {
             if(tok.type == lexer.TOKEN_LEFT_PAREN) {
                 // Function call
-                var args = this.parseSignature(true);
-                var node = new nodes.FunCall(tok.lineno,
-                                             tok.colno,
-                                             node,
-                                             args);
+                node = new nodes.FunCall(tok.lineno,
+                                         tok.colno,
+                                         node,
+                                         this.parseSignature());
             }
             else if(tok.type == lexer.TOKEN_LEFT_BRACKET) {
                 // Reference
@@ -1698,7 +1642,7 @@ var Parser = Object.extend({
         return node;
     },
 
-    parsePrimary: function () {
+    parsePrimary: function (noPostfix) {
         var tok = this.nextToken();
         var val = null;
         var node = null;
@@ -1734,7 +1678,10 @@ var Parser = Object.extend({
         }
         else if(tok.type == lexer.TOKEN_SYMBOL) {
             node = new nodes.Symbol(tok.lineno, tok.colno, tok.value);
-            node = this.parsePostfix(node);
+
+            if(!noPostfix) {
+                node = this.parsePostfix(node);
+            }
         }
         else {
             // See if it's an aggregate type, we need to push the
@@ -1762,21 +1709,23 @@ var Parser = Object.extend({
                 name += '.' + this.expect(lexer.TOKEN_SYMBOL).value;
             }
 
-            node = new nodes.Filter(tok.lineno,
-                                    tok.colno,
-                                    new nodes.Symbol(tok.lineno,
-                                                     tok.colno,
-                                                     name),
-                                    [new nodes.Pair(node.lineno,
-                                                    node.colno,
-                                                    undefined,
-                                                    node)]);
+            node = new nodes.Filter(
+                tok.lineno,
+                tok.colno,
+                new nodes.Symbol(tok.lineno,
+                                 tok.colno,
+                                 name),
+                new nodes.NodeList(
+                    tok.lineno,
+                    tok.colno,
+                    [node])
+            );
 
             if(this.peekToken().type == lexer.TOKEN_LEFT_PAREN) {
                 // Get a FunCall node and add the parameters to the
                 // filter
                 var call = this.parsePostfix(node);
-                node.children = node.children.concat(call.children);
+                node.args.children = node.args.children.concat(call.args.children);
             }
         }
 
@@ -1807,7 +1756,7 @@ var Parser = Object.extend({
                 break;
             }
 
-            if(node.numChildren() > 0) {
+            if(node.children.length > 0) {
                 if(!this.skip(lexer.TOKEN_COMMA)) {
                     throw new Error("parseAggregate: expected comma after expression");
                 }
@@ -1840,10 +1789,12 @@ var Parser = Object.extend({
         return node;
     },
 
-    parseSignature: function(call) {
-        call = call || false;
+    parseSignature: function() {
         var tok = this.nextToken();
-        var args = [];
+        var args = new nodes.NodeList(tok.lineno, tok.colno);
+        var kwargs = new nodes.KeywordArgs(tok.lineno, tok.colno);
+        var kwnames = [];
+        var checkComma = false;
 
         while(1) {
             var type = this.peekToken().type;
@@ -1852,40 +1803,30 @@ var Parser = Object.extend({
                 break;
             }
 
-            if(args.length > 0 && !this.skip(lexer.TOKEN_COMMA)) {
+            if(checkComma && !this.skip(lexer.TOKEN_COMMA)) {
                 throw new Error("parseSignature: expected comma after expression");
             }
-            else if(call) {
-                var nameOrVal = this.parsePrimary();
-                var name, val;
-                if(this.skipValue(lexer.TOKEN_OPERATOR, '=')) {
-                    name = nameOrVal;
-                    val = this.parseExpression();
-                } else {
-                    val = nameOrVal;
-                }
-                if(name && !(name instanceof nodes.Symbol)) {
-                    throw new Error('expected symbol as argument name');
-                }
-                args.push(new nodes.Pair(nameOrVal.lineno,
-                                         nameOrVal.colno,
-                                         name,
-                                         val));
-            }
             else {
-                var name = this.parsePrimary();
-                var val;
-                if(!(name instanceof nodes.Symbol)) {
-                    throw new Error('expected symbol as argument name');
-                }
+                var arg = this.parsePrimary();
+
                 if(this.skipValue(lexer.TOKEN_OPERATOR, '=')) {
-                    val = this.parseExpression();
+                    kwargs.addChild(
+                        new nodes.Pair(arg.lineno,
+                                       arg.colno,
+                                       arg,
+                                       this.parseExpression())
+                    );
                 }
-                args.push(new nodes.Pair(name.lineno,
-                                         name.colno,
-                                         name,
-                                         val));
+                else {
+                    args.addChild(arg);
+                }
             }
+
+            checkComma = true;
+        }
+
+        if(kwargs.children.length) {
+            args.addChild(kwargs);
         }
 
         return args;
@@ -1952,7 +1893,7 @@ var util = modules["util"];
 //     console.log(util.inspect(t));
 // }
 
-// var p = new Parser(lexer.lex('{% set x, y = 3 %}'));
+// var p = new Parser(lexer.lex('{{ foo(1, 2, 3, foo=3) }}'));
 // var n = p.parse();
 // nodes.printNodes(n);
 
@@ -1991,6 +1932,13 @@ function binOpEmitter(str) {
     };
 }
 
+// Generate an array of strings
+function quotedArray(arr) {
+    return '[' + 
+        lib.map(arr, function(x) { return '"' + x + '"'; }) +
+        ']';
+}
+
 var Compiler = Object.extend({
     init: function() {
         this.codebuf = [];
@@ -2005,6 +1953,12 @@ var Compiler = Object.extend({
 
     emitLine: function(code) {
         this.emit(code + "\n");
+    },
+
+    emitLines: function() {
+        lib.each(lib.toArray(arguments), function(line) {
+            this.emitLine(line);
+        }, this);
     },
 
     emitFuncBegin: function(name) {
@@ -2028,10 +1982,9 @@ var Compiler = Object.extend({
     },
 
     _compileChildren: function(node, frame) {
-        var _this = this;
-        node.iterChildren(function(n) {
-            _this.compile(n, frame);
-        });
+        lib.each(node.children, function(n) {
+            this.compile(n, frame);
+        }, this);
     },
 
     _compileAggregate: function(node, frame, startChar, endChar) {
@@ -2124,8 +2077,8 @@ var Compiler = Object.extend({
     },
 
     compilePair: function(node, frame) {
-        var key = node.getKey();
-        var val = node.getValue();
+        var key = node.key;
+        var val = node.value;
 
         if(key instanceof nodes.Symbol) {
             key = new nodes.Literal(key.lineno, key.colno, key.value);
@@ -2198,70 +2151,11 @@ var Compiler = Object.extend({
         this.emit(']');
     },
 
-    _emitCallArgs: function(args, frame, startChar, endChar) {
-        this.emit(startChar);
-
-        for(var j=0; j<args.length; j++) {
-            if(j != 0) {
-                this.emit(', ');
-            }
-            this.compile(args[j], frame);
-        }
-        this.emit(endChar);
-    },
-
-    _emitCallKwargs: function(kwargs, frame) {
-        this.emit('{');
-
-        for(var i=0; i<kwargs.length; i++) {
-            if(i > 0) {
-                this.emit(', ');
-            }
-            var name = kwargs[i][0];
-            var val = kwargs[i][1];
-            this.emit(name.value);
-            this.emit(': ');
-            this.compile(val, frame);
-        }
-        this.emit('}');
-    },
-
-    _emitWrappedExpression: function(node, frame) {
+    compileFunCall: function(node, frame) {
         this.emit('(');
         this._compileExpression(node.name, frame);
         this.emit(')');
-    },
-
-    collectArgs: function(node, frame) {
-        var args = [];
-        var kwargs = [];
-        for(var i=0; i<node.children.length; i++) {
-            var arg = node.children[i];
-            var name = arg.getKey();
-            var val = arg.getValue();
-            if(name) {
-                kwargs.push([name, val]);
-            } else {
-                args.push(val);
-            }
-        }
-        return [args, kwargs];
-    },
-
-    compileFunCall: function(node, frame) {
-        var allArgs = this.collectArgs(node);
-        var args = allArgs[0];
-        var kwargs = allArgs[1];
-        this._emitWrappedExpression(node, frame);
-        this.emit('.isMacro ? ');
-        this._emitWrappedExpression(node, frame);
-        this.emit('(');
-        this._emitCallArgs(args, frame, '[', ']');
-        this.emit(', ');
-        this._emitCallKwargs(kwargs, frame);
-        this.emit(') : ');
-        this._emitWrappedExpression(node, frame);
-        this._emitCallArgs(args, frame, '(', ')');
+        this._compileAggregate(node.args, frame, '(', ')');
     },
 
     compileFilter: function(node, frame) {
@@ -2269,24 +2163,40 @@ var Compiler = Object.extend({
         this.assertType(name, nodes.Symbol);
 
         this.emit('env.getFilter("' + name.value + '")');
-        var args = this.collectArgs(node)[0];
-        this._emitCallArgs(args, frame, '(', ')');
+        this._compileAggregate(node.args, frame, '(', ')');
+    },
+
+    compileKeywordArgs: function(node, frame) {
+        var names = [];
+
+        lib.each(node.children, function(pair) {
+            names.push(pair.key.value);
+        });
+
+        this.emit('runtime.makeKeywordArgs(');
+        this.compileDict(node, frame);
+        this.emit(')');
     },
 
     compileSet: function(node, frame) {
-        var val = this.tmpid();
+        var id = this.tmpid();
 
-        this.emit('var ' + val + ' = ');
+        this.emit('var ' + id + ' = ');
         this._compileExpression(node.value);
         this.emitLine(';');
 
         for(var i=0; i<node.targets.length; i++) {
-            var t = node.targets[i];
-            this.emitLine('context.setVariable("' + t.value + '", ' +
-                          val + ');');
-            if(t.value.charAt(0) != '_') {
-                this.emitLine('context.addExport("' + t.value + '");');
+            var name = node.targets[i].value;
+            frame.set(name, id);
+
+            this.emitLine('frame.set("' + name + '", ' + id + ');');
+
+            this.emitLine('if(!frame.parent) {');
+            this.emitLine('context.setVariable("' + name + '", ' + id + ');');
+            if(name.charAt(0) != '_') {
+                this.emitLine('context.addExport("' + name + '");');
             }
+            this.emitLine('}');
         }
     },
 
@@ -2360,99 +2270,156 @@ var Compiler = Object.extend({
         this.emitLine('frame = frame.pop();');
     },
 
-    macroBody: function(node, frame) {
-        frame = frame.push();
-        this.emitLine('frame = frame.push();');
+    _emitMacroBegin: function(node, frame) {
         var args = [];
+        var kwargs = null;
+        var funcId = 'macro_' + this.tmpid();
 
-        for(var i=0; i<node.children.length; i++) {
-            var name = node.children[i].getKey().value
-            args.push('l_' + name);
-            frame.set(name, 'l_' + name);
+        // Type check the definition of the args
+        lib.each(node.args.children, function(arg, i) {
+            if(i === node.args.children.length - 1 &&
+               arg instanceof nodes.Dict) {
+                kwargs = arg;
+            }
+            else {
+                this.assertType(arg, nodes.Symbol);
+                args.push(arg);
+            }
+        }, this);
+
+        var realNames = lib.map(args, function(n) { return 'l_' + n.value; });
+        realNames.push('kwargs');
+
+        // Quoted argument names
+        var argNames = lib.map(args, function(n) { return '"' + n.value + '"'; });
+        var kwargNames = lib.map((kwargs && kwargs.children) || [],
+                                 function(n) { return '"' + n.key.value + '"'; });
+
+        // We pass a function to makeMacro which destructures the
+        // arguments so support setting positional args with keywords
+        // args and passing keyword args as positional args
+        // (essentially default values). See runtime.js.
+        this.emitLines(
+            'var ' + funcId + ' = runtime.makeMacro(',
+            '[' + argNames.join(', ') + '], ',
+            '[' + kwargNames.join(', ') + '], ',
+            'function (' + realNames.join(', ') + ') {',
+            'frame = frame.push();',
+            'kwargs = kwargs || {};'
+        );
+
+        // Expose the arguments to the template. Don't need to use
+        // random names because the function
+        // will create a new run-time scope for us
+        lib.each(args, function(arg) {
+            this.emitLine('frame.set("' + arg.value + '", ' +
+                          'l_' + arg.value + ');');
+            frame.set(arg.value, 'l_' + arg.value);
+        }, this);
+        
+        // Expose the keyword arguments
+        if(kwargs) {
+            lib.each(kwargs.children, function(pair) {
+                var name = pair.key.value;
+                this.emit('frame.set("' + name + '", ' +
+                          'kwargs.hasOwnProperty("' + name + '") ? ' +
+                          'kwargs["' + name + '"] : ');
+                this._compileExpression(pair.value);
+                this.emitLine(');');
+            }, this);
         }
-        this.emitLine('var macro = function(' + args.join(', ') + ') {');
-        var oldBuffer = this.buffer;
-        this.buffer = 'macroOutput';
-        this.emitLine('var ' + this.buffer + '= "";');
-        this.compile(node.body, frame)
-        this.emitLine('return ' + this.buffer + ';');
-        this.emitLine('};');
-        this.buffer = oldBuffer;
-        this.emitLine('frame = frame.pop();');
-        return frame;
+
+        return funcId;
     },
 
-    macroDef: function(node, frame) {
-        var name = node.name.value;
-        this.emit('runtime.wrapMacro(macro, "' + name + '", ' + '[');
-
-        for(var i=0; i<node.children.length; i++) {
-            var arg = node.children[i];
-            var name = arg.getKey().value;
-            var val = arg.getValue();
-            this.emit('["' + name + '", ');
-            val ? this.compile(val, frame) : this.emit('null');
-            this.emit(']');
-
-            if(i != node.children.length - 1) {
-                this.emit(', ');
-            }
-        }
-        this.emitLine('], false, false, false);');
+    _emitMacroEnd: function() {
+        this.emitLine('frame = frame.pop();');
+        this.emitLine('return ' + this.buffer + ';');
+        this.emitLine('});');
     },
 
     compileMacro: function(node, frame) {
-        var macroFrame = this.macroBody(node, frame);
-        var name = node.name.value;
-        this.emit('var l_' + name + ' = ');
-        this.macroDef(node, macroFrame);
-        frame.set(name, 'l_' + name);
+        frame = frame.push();
+        var funcId = this._emitMacroBegin(node, frame);
 
-        if(!this.isChild) {
+        // Start a new output buffer, and set the old one back after
+        // we're done
+        var prevBuffer = this.buffer;
+        this.buffer = 'output';
+        this.emitLine('var ' + this.buffer + '= "";');
+
+        this.compile(node.body, frame);
+
+        this._emitMacroEnd();
+        this.buffer = prevBuffer;
+
+        // Expose the macro to the templates
+        var name = node.name.value;
+        frame = frame.pop();
+        frame.set(name, funcId);
+
+        if(frame.parent) {
+            this.emitLine('frame.set("' + name + '", ' + funcId + ');');
+        }
+        else {
             if(node.name.value.charAt(0) != '_') {
                 this.emitLine('context.addExport("' + name + '");');
             }
-            this.emitLine('context.setVariable("' + name + '", l_' + name + ');');
+            this.emitLine('context.setVariable("' + name + '", ' + funcId + ');');
         }
     },
 
     compileImport: function(node, frame) {
-        this.emit('var l_' + node.target + ' = env.getTemplate(');
-        this.compile(node.template, frame);
-        this.emitLine(').getModule();');
-        frame.set(node.target, 'l_' + node.target);
+        var id = this.tmpid();
+        var target = node.target.value;
 
-        if(!this.isChild) {
-            this.emitLine('context.setVariable("' + node.target + '", l_' + node.target + ');');
+        this.emit('var ' + id + ' = env.getTemplate(');
+        this._compileExpression(node.template, frame);
+        this.emitLine(').getExported();');
+        frame.set(target, id);
+
+        if(frame.parent) {
+            this.emitLine('frame.set("' + target + '", ' + id + ');');
+        }
+        else {
+            this.emitLine('context.setVariable("' + target + '", ' + id + ');');
         }
     },
 
     compileFromImport: function(node, frame) {
-        this.emit('var includedTemplate = env.getTemplate(');
+        this.emit('var imported = env.getTemplate(');
         this.compile(node.template, frame);
-        this.emitLine(').getModule();');
+        this.emitLine(').getExported();');
 
-        for(var i=0; i<node.children.length; i++) {
-            var name = node.children[i].getKey().value;
-            var alias = node.children[i].getValue();
-            if(alias) {
-                alias = alias.value;
-            } else {
+        lib.each(node.names.children, function(nameNode) {
+            var name;
+            var alias;
+            var id = this.tmpid();
+
+            if(nameNode instanceof nodes.Pair) {
+                name = nameNode.key.value;
+                alias = nameNode.value.value;
+            }
+            else {
+                name = nameNode.value;
                 alias = name;
             }
 
-            this.emitLine('if(includedTemplate.hasOwnProperty("' + name + '")) {');
-            this.emitLine('var l_' + alias + ' = includedTemplate.' + name + ';');
+            this.emitLine('if(imported.hasOwnProperty("' + name + '")) {');
+            this.emitLine('var ' + id + ' = imported.' + name + ';');
             this.emitLine('} else {');
-            // TODO: Add runtime errors
-            this.emitLine('// Add runtime error here');
+            this.emitLine('throw new Error("cannot import \'' + name + '\'")');
             this.emitLine('}');
-            frame.set(alias, 'l_' + alias);
 
-            if(!this.isChild) {
-                this.emitLine('context.setVariable("' + alias + '", l_' + alias + ');');
+            frame.set(alias, id);
+
+            if(frame.parent) {
+                this.emitLine('frame.set("' + alias + '", ' + id + ');');
             }
-        }
+            else {
+                this.emitLine('context.setVariable("' + alias + '", ' + id + ');');
+            }
+        }, this);
     },
 
     compileBlock: function(node, frame) {
@@ -2485,7 +2452,7 @@ var Compiler = Object.extend({
         this.emitLine(');');
         this.emitLine(this.buffer +
                       ' += includeTemplate.render(' +
-                      'context.getVariables(), frame);');
+                      'context.getVariables(), frame.push());');
     },
 
     compileTemplateData: function(node, frame) {
@@ -2557,7 +2524,7 @@ var Compiler = Object.extend({
 
 // var fs = modules["fs"];
 // var c = new Compiler();
-// var src = "{{ test('hello') }}";
+// var src = '{% macro foo(x, y, z=3) %}h{% endmacro %}';
 
 // var ns = parser.parse(src);
 // nodes.printNodes(ns);
@@ -2825,7 +2792,7 @@ var filters = {
                 x = x.toLowerCase();
                 y = y.toLowerCase();
             }
-
+               
             if(x < y) {
                 return reverse ? 1 : -1;
             }
@@ -2894,7 +2861,7 @@ var HttpLoader = Object.extend({
         if(!src) {
             return null;
         }
-
+        
         return { src: src,
                  path: name,
                  upToDate: function() { return _this.neverUpdate; }};
@@ -3148,17 +3115,18 @@ var Template = Object.extend({
         return this.upToDate();
     },
 
-    getModule: function() {
+    getExported: function() {
         if(!this.compiled) {
             this._compile();
         }
+
         // Run the rootRenderFunc to populate the context with exported vars
-        var ctx = new Context({}, this.blocks);
+        var context = new Context({}, this.blocks);
         this.rootRenderFunc(this.env,
-                            ctx,
+                            context,
                             new Frame(),
                             runtime);
-        return ctx.getExported();
+        return context.getExported();
     },
 
     _compile: function() {
@@ -3192,7 +3160,8 @@ var Template = Object.extend({
 
 // var fs = modules["fs"];
 // //var src = fs.readFileSync('test.html', 'utf-8');
-// var src = "{% for i in [1,2,3] %}{% include 'item.html' %}{% endfor %}";
+// //var src = '{% macro foo(x, y, z=3) %}h{% endmacro %}';
+// var src = '{% macro foo() %}{{ h }}{% endmacro %} {{ foo() }}';
 
 // var env = new Environment();
 // console.log(compiler.compile(src));
