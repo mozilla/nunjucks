@@ -78,25 +78,53 @@ var Environment = Object.extend({
     express: function(app) {
         var env = this;
 
-        app.render = function(name, ctx, k) {
-            var context = {};
+        if(app.render) {
+            // Express >2.5.11
+            app.render = function(name, ctx, k) {
+                var context = {};
 
-            if(lib.isFunction(ctx)) {
-                k = ctx;
-                ctx = {};
-            }
+                if(lib.isFunction(ctx)) {
+                    k = ctx;
+                    ctx = {};
+                }
 
-            context = lib.extend(context, app.locals);
+                context = lib.extend(context, app.locals);
 
-            if(ctx._locals) {
-                context = lib.extend(context, ctx._locals);
-            }
+                if(ctx._locals) {
+                    context = lib.extend(context, ctx._locals);
+                }
 
-            context = lib.extend(context, ctx);
+                context = lib.extend(context, ctx);
 
-            var res = env.render(name, context);
-            k(null, res);
-        };
+                var res = env.render(name, context);
+                k(null, res);
+            };
+        }
+        else {
+            // Express <2.5.11
+            var http = require('http');
+            var res = http.ServerResponse.prototype;
+
+            res._render = function(name, ctx, k) {
+                var context = {};
+
+                context = lib.extend(context, this.app._locals);
+
+                if(ctx.locals) {
+                    context = lib.extend(context, ctx.locals);
+                }
+
+                context = lib.extend(context, ctx);
+                var str = env.render(name, context);
+
+                if(k) {
+                    k(null, str);
+                }
+                else {
+                    this.send(str);
+                }
+            };
+        }
     },
 
     render: function(name, ctx) {

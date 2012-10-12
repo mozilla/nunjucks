@@ -3,7 +3,7 @@ var env = require('../../src/environment');
 var loaders = require('../../src/node-loaders');
 var express = require('express');
 
-var app = express();
+var app = express.createServer();
 
 var e = new env.Environment(new loaders.FileSystemLoader('views'));
 e.express(app);
