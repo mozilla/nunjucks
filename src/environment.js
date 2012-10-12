@@ -108,13 +108,18 @@ var Environment = Object.extend({
             res._render = function(name, ctx, k) {
                 var context = {};
 
-                context = lib.extend(context, this.app._locals);
-
-                if(ctx.locals) {
-                    context = lib.extend(context, ctx.locals);
+                if(this._locals) {
+                    context = lib.extend(context, this._locals);
                 }
 
-                context = lib.extend(context, ctx);
+                if(ctx) {
+                    context = lib.extend(context, ctx);
+
+                    if(ctx.locals) {
+                        context = lib.extend(context, ctx.locals);
+                    }
+                }
+
                 var str = env.render(name, context);
 
                 if(k) {
