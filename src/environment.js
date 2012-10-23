@@ -88,7 +88,7 @@ var Environment = Object.extend({
                     ctx = {};
                 }
 
-                context = lib.extend(context, app.locals);
+                context = lib.extend(context, this.locals);
 
                 if(ctx._locals) {
                     context = lib.extend(context, ctx._locals);

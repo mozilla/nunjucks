@@ -57,6 +57,11 @@ describe('compiler', function() {
         s = render('{% if (hungry or like_pizza) and anchovies %}good{% endif %}',
             { hungry: false, like_pizza: true, anchovies: true });
         s.should.equal('good');
+
+        s = render('{% if food == "pizza" %}pizza{% endif %}' +
+                   '{% if food =="beer" %}beer{% endif %}', 
+                  { food: 'beer' });
+        s.should.equal('beer');
     });
 
     it('should compile for blocks', function() {

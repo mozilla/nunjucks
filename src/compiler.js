@@ -151,9 +151,9 @@ var Compiler = Object.extend({
             this.emit(v);
         }
         else {
-            this.emit('context.lookup("' + name + '") || ' +
+            this.emit('(context.lookup("' + name + '") || ' +
                       'frame.lookup("' + name + '") || ' +
-                      '""');
+                      '"")');
         }
     },
 
