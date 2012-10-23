@@ -1,6 +1,6 @@
 
 test: 
-	mocha -b -R tap tests
+	./node_modules/mocha/bin/mocha -b -R tap tests
 
 browserfiles:
 	./bin/bundle browser/nunjucks-dev.js
