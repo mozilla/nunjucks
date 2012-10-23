@@ -16,6 +16,10 @@ describe('compiler', function() {
         s.should.equal('Hello world, James Long, how are you');
     });
 
+    it('should escape newlines', function() {
+        render('foo\\nbar').should.equal('foo\\nbar');
+    });
+
     it('should compile references', function() {
         var s = render('{{ foo.bar }}',
                        { foo: { bar: 'baz' }});

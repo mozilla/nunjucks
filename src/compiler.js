@@ -132,7 +132,8 @@ var Compiler = Object.extend({
 
     compileLiteral: function(node, frame) {
         if(typeof node.value == "string") {
-            var val = node.value.replace(/"/g, '\\"');
+            var val = node.value.replace(/\\/g, '\\\\');
+            val = val.replace(/"/g, '\\"');
             val = val.replace(/\n/g, "\\n");
             val = val.replace(/\r/g, "\\r");
             val = val.replace(/\t/g, "\\t");
@@ -617,7 +618,7 @@ var Compiler = Object.extend({
 
 // var fs = require("fs");
 // var c = new Compiler();
-// var src = '{% macro foo(x, y, z=3) %}h{% endmacro %}';
+// var src = 'foo\n \t \\\ efsdfsdkljflkj';
 
 // var ns = parser.parse(src);
 // nodes.printNodes(ns);
