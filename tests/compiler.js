@@ -35,7 +35,6 @@ describe('compiler', function() {
         s.should.equal('');
 
         var s = render('{{ foo.bar }}');
-        console.log(s);
         s.should.equal('');
 
         var s = render('{{ foo.bar.baz }}');
