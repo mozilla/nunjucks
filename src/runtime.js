@@ -109,9 +109,20 @@ function numArgs(args) {
     }
 }
 
+function silenceUndefined(val) {
+    return (val !== undefined) ? val : "";
+}
+
+function contextOrFrameLookup(context, frame, name) {
+    var val = context.lookup(name);
+    return val !== undefined ? val : frame.lookup(name);
+}
+
 module.exports = {
     Frame: Frame,
     makeMacro: makeMacro,
     makeKeywordArgs: makeKeywordArgs,
-    numArgs: numArgs
+    numArgs: numArgs,
+    silenceUndefined: silenceUndefined,
+    contextOrFrameLookup: contextOrFrameLookup
 };

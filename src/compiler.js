@@ -152,9 +152,9 @@ var Compiler = Object.extend({
             this.emit(v);
         }
         else {
-            this.emit('(context.lookup("' + name + '") || ' +
-                      'frame.lookup("' + name + '") || ' +
-                      '"")');
+            this.emit('runtime.silenceUndefined(' +
+                        'runtime.contextOrFrameLookup(' +
+                            'context, frame, "' + name + '"))');
         }
     },
 
@@ -237,12 +237,12 @@ var Compiler = Object.extend({
     },
 
     compileLookupVal: function(node, frame) {
-        this.emit('(');
+        this.emit('runtime.silenceUndefined(((');
         this._compileExpression(node.target, frame);
-        this.emit(')');
+        this.emit(')||{})');
         this.emit('[');
         this._compileExpression(node.val, frame);
-        this.emit(']');
+        this.emit('])');
     },
 
     compileFunCall: function(node, frame) {
@@ -618,7 +618,7 @@ var Compiler = Object.extend({
 
 // var fs = require("fs");
 // var c = new Compiler();
-// var src = 'foo\n \t \\\ efsdfsdkljflkj';
+// var src = '{{ foo }}';
 
 // var ns = parser.parse(src);
 // nodes.printNodes(ns);
