@@ -30,6 +30,31 @@ describe('compiler', function() {
         s.should.equal('baz');
     });
 
+    it('should fail silently on undefined values', function() {
+        var s = render('{{ foo }}');
+        s.should.equal('');
+
+        var s = render('{{ foo.bar }}');
+        s.should.equal('');
+
+        var s = render('{{ foo.bar.baz }}');
+        s.should.equal('');
+
+        var s = render('{{ foo.bar.baz["biz"].mumble }}');
+        s.should.equal('');
+    });
+
+    it('should not treat falsy values the same as undefined', function() {
+        var s = render('{{ foo }}', {foo: 0});
+        s.should.equal('0');
+
+        var s = render('{{ foo }}', {foo: false});
+        s.should.equal('false');
+
+        var s = render('{{ foo }}', {foo: null});
+        s.should.equal('null');
+    });
+
     it('should compile function calls', function() {
         var s = render('{{ foo("msg") }}',
                        { foo: function(str) { return str + 'hi'; }});
