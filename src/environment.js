@@ -35,6 +35,9 @@ var Environment = Object.extend({
     },
 
     getFilter: function(name) {
+        if(!this.filters[name]) {
+            throw new Error('filter not found: ' + name);
+        }
         return this.filters[name];
     },
 
