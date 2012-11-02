@@ -109,13 +109,15 @@ function numArgs(args) {
     }
 }
 
-function silenceUndefined(val) {
-    return (val !== undefined) ? val : "";
+function suppressValue(val) {
+    return (val !== undefined && val !== null) ? val : "";
 }
 
 function contextOrFrameLookup(context, frame, name) {
     var val = context.lookup(name);
-    return val !== undefined ? val : frame.lookup(name);
+    return (val !== undefined && val !== null) ?
+        val :
+        frame.lookup(name);
 }
 
 module.exports = {
@@ -123,6 +125,6 @@ module.exports = {
     makeMacro: makeMacro,
     makeKeywordArgs: makeKeywordArgs,
     numArgs: numArgs,
-    silenceUndefined: silenceUndefined,
+    suppressValue: suppressValue,
     contextOrFrameLookup: contextOrFrameLookup
 };

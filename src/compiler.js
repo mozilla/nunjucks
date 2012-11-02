@@ -152,7 +152,7 @@ var Compiler = Object.extend({
             this.emit(v);
         }
         else {
-            this.emit('runtime.silenceUndefined(' +
+            this.emit('runtime.suppressValue(' +
                         'runtime.contextOrFrameLookup(' +
                             'context, frame, "' + name + '"))');
         }
@@ -237,7 +237,7 @@ var Compiler = Object.extend({
     },
 
     compileLookupVal: function(node, frame) {
-        this.emit('runtime.silenceUndefined(((');
+        this.emit('runtime.suppressValue(((');
         this._compileExpression(node.target, frame);
         this.emit(')||{})');
         this.emit('[');

@@ -50,9 +50,6 @@ describe('compiler', function() {
 
         var s = render('{{ foo }}', {foo: false});
         s.should.equal('false');
-
-        var s = render('{{ foo }}', {foo: null});
-        s.should.equal('null');
     });
 
     it('should compile function calls', function() {
