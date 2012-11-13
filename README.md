@@ -20,7 +20,7 @@ jinja2.
 
 `npm install nunjucks`
 
-The current version is v0.1.5 ([changelog](http://nunjucks.tumblr.com/post/33376448796/v0-1-5-macros-keyword-arguments-bugfixes)).
+The current version is v0.1.6 ([changelog](http://nunjucks.tumblr.com/post/35641526923/v0-1-6-undefined-handling-bugfixes)).
 
 ## Documentation
 
