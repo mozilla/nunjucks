@@ -315,6 +315,12 @@ describe('compiler', function() {
         s.should.equal('bar');
     });
 
+    it('should compile set with frame references', function() {
+        var s = render('{% set username = user.name %}{{ username }}',
+                       { user: { name: 'james' } });
+        s.should.equal('james');
+    });
+
     it('should throw errors', function() {
         (function() {
             render('{% from "import.html" import boozle %}');

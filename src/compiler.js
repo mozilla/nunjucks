@@ -276,7 +276,7 @@ var Compiler = Object.extend({
         var id = this.tmpid();
 
         this.emit('var ' + id + ' = ');
-        this._compileExpression(node.value);
+        this._compileExpression(node.value, frame);
         this.emitLine(';');
 
         for(var i=0; i<node.targets.length; i++) {
