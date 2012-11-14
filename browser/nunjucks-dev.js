@@ -2,6 +2,42 @@
 var modules = {};
 (function() {
 
+//Prototype out a indexOf for IE, only if it doesn't exist
+if (!Array.prototype.indexOf)
+{
+  Array.prototype.indexOf = function(elt /*, from*/)
+  {
+    var len = this.length >>> 0;
+
+    var from = Number(arguments[1]) || 0;
+    from = (from < 0)
+         ? Math.ceil(from)
+         : Math.floor(from);
+    if (from < 0)
+      from += len;
+
+    for (; from < len; from++)
+    {
+      if (from in this &&
+          this[from] === elt)
+        return from;
+    }
+    return -1;
+  };
+}
+//IE check for Object.create
+//https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Object/create (polyfill)                      
+if (!Object.create) {
+    Object.create = function (o) {
+        if (arguments.length > 1) {
+            throw new Error('Object.create implementation only accepts the first parameter.');
+        }
+        function F() {}
+        F.prototype = o;
+        return new F();
+    };
+}
+
 // A simple class system, more documentation to come
 
 function extend(cls, name, props) {
@@ -676,10 +712,10 @@ Tokenizer.prototype.nextToken = function() {
         // Parse out the template text, breaking on tag
         // delimiters because we need to look for block/variable start
         // tags (don't use the full delimChars for optimization)
-        var beginChars = (BLOCK_START[0] +
-                          VARIABLE_START[0] +
-                          COMMENT_START[0] +
-                          COMMENT_END[0]);
+		var beginChars = (BLOCK_START.charAt(0) + 
+						VARIABLE_START.charAt(0) + 
+						COMMENT_START.charAt(0) + 
+						COMMENT_END.charAt(0));        
         var tok;
 
         if(this.is_finished()) {
@@ -892,13 +928,13 @@ Tokenizer.prototype.back = function() {
 
 Tokenizer.prototype.current = function() {
     if(!this.is_finished()) {
-        return this.str[this.index];
+        return this.str.charAt(this.index);
     }
     return "";
 };
 
 Tokenizer.prototype.previous = function() {
-    return this.str[this.index-1];
+    return this.str.charAt(this.index-1);
 };
 
 modules['lexer'] = {
@@ -2597,7 +2633,7 @@ var filters = {
         return pre + str + post;
     },
 
-    default: function(val, def) {
+    'default': function(val, def) {
         return val ? val : def;
     },
 
@@ -2833,11 +2869,11 @@ var filters = {
 
     int: function(val, def) {
         return parseInt(val) || def;
-    },
+    }
 };
 
 // Aliases
-filters.d = filters.default;
+filters.d = filters['default'];
 filters.e = filters.escape;
 
 modules['filters'] = filters;
