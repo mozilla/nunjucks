@@ -49,17 +49,15 @@ var Parser = Object.extend({
     },
 
     fail: function (msg, lineno, colno) {
-        if((!lineno || !colno) && this.peekToken()) {
+        if((lineno === undefined || colno === undefined) && this.peekToken()) {
             var tok = this.peekToken();
             lineno = tok.lineno;
             colno = tok.colno;
         }
+        if (lineno !== undefined) lineno += 1;
+        if (colno !== undefined) colno += 1;
 
-        if(lineno && colno) {
-            msg = '[Line ' + (lineno + 1) + ', Column ' + (colno + 1) + '] ' + msg;
-        }
-
-        throw new Error(msg);
+        throw new lib.TemplateError(msg, lineno, colno);
     },
 
     skip: function(type) {
@@ -296,7 +294,11 @@ var Parser = Object.extend({
         if(!(node.template instanceof nodes.Literal &&
              lib.isString(node.template.value)) &&
            !(node.template instanceof nodes.Symbol)) {
-            this.fail('parseExtends: string or value expected');
+            this.fail(
+                'parseExtends: string or value expected',
+                node.template.lineno,
+                node.template.colno
+            );
         }
 
         this.advanceAfterBlockEnd(tag.value);

@@ -8,7 +8,13 @@ var runtime = require('./runtime');
 var Frame = runtime.Frame;
 
 var Environment = Object.extend({
-    init: function(loaders, tags) {
+    init: function(loaders, tags, development) {
+        // The development flag determines the trace that'll be shown on errors.
+        // If set to true, returns the full trace from the error point,
+        // otherwise will return trace starting from Template.render
+        // (the full trace from within nunjucks may confuse developers using
+        //  the library)
+        this.development = development;
         if(!loaders) {
             // The filesystem loader is only available client-side
             if(builtin_loaders.FileSystemLoader) {
@@ -234,15 +240,32 @@ var Template = Object.extend({
     },
 
     render: function(ctx, frame) {
-        if(!this.compiled) {
-            this._compile();
-        }
+        try {
+            if(!this.compiled) {
+                this._compile();
+            }
 
-        var context = new Context(ctx || {}, this.blocks);
-        return this.rootRenderFunc(this.env,
-                                   context,
-                                   frame || new Frame(),
-                                   runtime);
+            var context = new Context(ctx || {}, this.blocks);
+
+            return this.rootRenderFunc(this.env,
+                context,
+                frame || new Frame(),
+                runtime);
+        } catch (e) {
+            if (e.Update) {
+                e.Update("(" + (this.path || "unknown path") + ")");
+            } else {
+                e.name = "Template Render Error - " + e.name;
+                e.message = "(" + (this.path || "unknown path") + ")\n  " + (e.message || "");
+            }
+            if (!this.env.development) {
+                var old = e;
+                e = new Error(old.message);
+                e.name = old.name;
+            }
+
+            throw e;
+        }
     },
 
     isUpToDate: function() {

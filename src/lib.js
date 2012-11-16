@@ -3,6 +3,27 @@ var ObjProto = Object.prototype;
 
 var exports = module.exports = {};
 
+exports.TemplateError = function(message, lineno, colno) {
+
+    Error.captureStackTrace(this);
+
+    this.name = "Template render error";
+    this.message = message;
+    this.lineno = lineno;
+    this.colno = colno;
+
+    this.Update = function(path) {
+        var message = (path || " ");
+
+        if (this.lineno && this.colno)
+            message += ' [Line ' + this.lineno + ', Column ' + this.colno + ']\n  ';
+
+        this.message = message + (this.message || '');
+    };
+};
+exports.TemplateError.prototype = Error.prototype;
+
+
 exports.isFunction = function(obj) {
     return ObjProto.toString.call(obj) == '[object Function]';
 };
