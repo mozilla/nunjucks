@@ -4,22 +4,34 @@ var ObjProto = Object.prototype;
 var exports = module.exports = {};
 
 exports.TemplateError = function(message, lineno, colno) {
+    var self = this;
 
-    Error.captureStackTrace(this);
+    if (message instanceof Error) { // for casting regular js errors
+        self = message;
+        message = message.name + ": " + message.message;
 
-    this.name = "Template render error";
-    this.message = message;
-    this.lineno = lineno;
-    this.colno = colno;
+    } else {
+        Error.captureStackTrace(self);
+    }
 
-    this.Update = function(path) {
-        var message = (path || " ");
+    self.name = "Template render error";
+    self.message = message;
+    self.lineno = lineno;
+    self.colno = colno;
 
-        if (this.lineno && this.colno)
-            message += ' [Line ' + this.lineno + ', Column ' + this.colno + ']\n  ';
+    self.Update = function(path) {
+        var message = "(" + (path || "unknown path") + ")";
+
+        if (this.lineno && this.colno) {
+            message += ' [Line ' + this.lineno + ', Column ' + this.colno + ']';
+        }
+        message += '\n  ';
+
 
         this.message = message + (this.message || '');
+        return this;
     };
+    return self;
 };
 exports.TemplateError.prototype = Error.prototype;
 

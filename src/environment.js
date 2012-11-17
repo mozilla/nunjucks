@@ -251,13 +251,15 @@ var Template = Object.extend({
                 context,
                 frame || new Frame(),
                 runtime);
+
         } catch (e) {
-            if (e.Update) {
-                e.Update("(" + (this.path || "unknown path") + ")");
-            } else {
-                e.name = "Template Render Error - " + e.name;
-                e.message = "(" + (this.path || "unknown path") + ")\n  " + (e.message || "");
+            if (!e.Update) { // not one of ours, cast it
+                e = lib.TemplateError(e);
             }
+
+            e.Update(this.path);
+
+            // Unless they marked the dev flag, show them a trace from here
             if (!this.env.development) {
                 var old = e;
                 e = new Error(old.message);
