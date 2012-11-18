@@ -35,6 +35,28 @@ var Environment = Object.extend({
         this.filters = builtin_filters;
         this.cache = {};
     },
+    tryTemplate: function(path, func) {
+
+        try {
+            return func();
+
+        } catch (e) {
+            if (!e.Update) { // not one of ours, cast it
+                e = lib.TemplateError(e);
+            }
+            console.log('thrown error ', path);
+            e.Update(path);
+
+            // Unless they marked the dev flag, show them a trace from here
+            if (!this.development) {
+                var old = e;
+                e = new Error(old.message);
+                e.name = old.name;
+            }
+
+            throw e;
+        }
+    },
 
     addFilter: function(name, func) {
         this.filters[name] = func;
@@ -232,7 +254,9 @@ var Template = Object.extend({
         this.upToDate = upToDate || function() { return false; };
 
         if(eagerCompile) {
-            this._compile();
+            var self = this;
+            this.env.tryTemplate(this.path, function() { self._compile(); });
+            self = null;
         }
         else {
             this.compiled = false;
@@ -240,34 +264,21 @@ var Template = Object.extend({
     },
 
     render: function(ctx, frame) {
-        try {
-            if(!this.compiled) {
-                this._compile();
+        var self = this;
+
+        var render = function() {
+            if(!self.compiled) {
+                self._compile();
             }
 
-            var context = new Context(ctx || {}, this.blocks);
+            var context = new Context(ctx || {}, self.blocks);
 
-            return this.rootRenderFunc(this.env,
+            return self.rootRenderFunc(self.env,
                 context,
                 frame || new Frame(),
                 runtime);
-
-        } catch (e) {
-            if (!e.Update) { // not one of ours, cast it
-                e = lib.TemplateError(e);
-            }
-
-            e.Update(this.path);
-
-            // Unless they marked the dev flag, show them a trace from here
-            if (!this.env.development) {
-                var old = e;
-                e = new Error(old.message);
-                e.name = old.name;
-            }
-
-            throw e;
-        }
+        };
+        return this.env.tryTemplate(this.path, render);
     },
 
     isUpToDate: function() {

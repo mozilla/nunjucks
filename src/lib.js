@@ -18,17 +18,24 @@ exports.TemplateError = function(message, lineno, colno) {
     self.message = message;
     self.lineno = lineno;
     self.colno = colno;
+    self.firstUpdate = true;
 
     self.Update = function(path) {
         var message = "(" + (path || "unknown path") + ")";
 
-        if (this.lineno && this.colno) {
+        // only show lineno + colno next to path of template
+        // where error occurred
+        if (this.firstUpdate && this.lineno && this.colno) {
             message += ' [Line ' + this.lineno + ', Column ' + this.colno + ']';
         }
-        message += '\n  ';
 
+        message += '\n ';
+        if (this.firstUpdate) {
+            message += ' '
+        }
 
         this.message = message + (this.message || '');
+        this.firstUpdate = false;
         return this;
     };
     return self;
