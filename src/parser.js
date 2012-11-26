@@ -500,8 +500,8 @@ var Parser = Object.extend({
 
                 if(val.type != lexer.TOKEN_SYMBOL) {
                     this.fail('expected name as lookup value, got ' + val.value,
-                              val.colno,
-                              val.value);
+                              val.lineno,
+                              val.colno);
                 }
 
                 // Make a literal string because it's not a variable

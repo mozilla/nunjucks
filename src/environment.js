@@ -44,7 +44,6 @@ var Environment = Object.extend({
             if (!e.Update) { // not one of ours, cast it
                 e = lib.TemplateError(e);
             }
-            console.log('thrown error ', path);
             e.Update(path);
 
             // Unless they marked the dev flag, show them a trace from here
