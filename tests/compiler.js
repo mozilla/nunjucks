@@ -310,6 +310,9 @@ describe('compiler', function() {
         s = render('{% set x, y = "foo" %}{{ x }}{{ y }}');
         s.should.equal('foofoo');
 
+        s = render('{% set x = 1 + 2 %}{{ x }}');
+        s.should.equal('3');
+
         s = render('{% for i in [1] %}{% set foo=1 %}{% endfor %}{{ foo }}',
                    { foo: 2 });
         s.should.equal('2');

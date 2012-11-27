@@ -101,19 +101,33 @@ var Compiler = Object.extend({
     },
 
     _compileExpression: function(node, frame) {
-        this.assertType(node,
-                        nodes.Literal,
-                        nodes.Symbol,
-                        nodes.Group,
-                        nodes.Array,
-                        nodes.Dict,
-                        nodes.FunCall,
-                        nodes.Filter,
-                        nodes.LookupVal,
-                        nodes.Compare,
-                        nodes.And,
-                        nodes.Or,
-                        nodes.Not);
+        // TODO: I'm not really sure if this type check is worth it or
+        // not.
+        this.assertType(
+            node,
+            nodes.Literal,
+            nodes.Symbol,
+            nodes.Group,
+            nodes.Array,
+            nodes.Dict,
+            nodes.FunCall,
+            nodes.Filter,
+            nodes.LookupVal,
+            nodes.Compare,
+            nodes.And,
+            nodes.Or,
+            nodes.Not,
+            nodes.Add,
+            nodes.Sub,
+            nodes.Mul,
+            nodes.Div,
+            nodes.FloorDiv,
+            nodes.Mod,
+            nodes.Pow,
+            nodes.Neg,
+            nodes.Pos,
+            nodes.Compare
+        );
         this.compile(node, frame);
     },
 
