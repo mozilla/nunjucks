@@ -42,6 +42,10 @@ var Environment = Object.extend({
     },
 
     getTemplate: function(name, eagerCompile) {
+        if (name && name.raw) {
+            // this fixes autoescape for templates referenced in symbols
+            name = name.raw;
+        }
         var info = null;
         var tmpl = this.cache[name];
         var upToDate;

@@ -61,6 +61,12 @@ var filters = {
             .replace(/</g, '&lt;')
             .replace(/>/g, '&gt;');
     },
+    safe: function(str) {
+        if (str && str.setSafe) {
+            str.setSafe();
+        }
+        return str;
+    },
 
     first: function(arr) {
         return arr[0];

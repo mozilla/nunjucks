@@ -109,8 +109,29 @@ function numArgs(args) {
     }
 }
 
+var FakeString = Object.extend({
+    init: function(val) {
+        this.raw = val;
+    },
+    toString: function() {
+        return this.raw.replace(/&/g, '&amp;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+    },
+    setSafe: function() {
+        this.toString = this.rawToString;
+    },
+    rawToString: function() {
+        return this.raw;
+    }
+});
+
 function suppressValue(val) {
-    return (val !== undefined && val !== null) ? val : "";
+    val = (val !== undefined && val !== null) ? val : "";
+    if (typeof val === "string") val = new FakeString(val);
+    return val;
 }
 
 function contextOrFrameLookup(context, frame, name) {

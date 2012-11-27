@@ -326,4 +326,12 @@ describe('compiler', function() {
             render('{% from "import.html" import boozle %}');
         }).should.throw(/cannot import 'boozle'/);
     });
+
+    it('should autoescape unless safe filter is used', function() {
+        var s = render('{{ foo }}', { foo: '"\'<>&'});
+        s.should.equal('&quot;&#39;&lt;&gt;&amp;');
+
+        var s = render('{{ foo|safe }}', { foo: '"\'<>&'});
+        s.should.equal('"\'<>&');
+    });
 });
