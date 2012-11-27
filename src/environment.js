@@ -8,13 +8,14 @@ var runtime = require('./runtime');
 var Frame = runtime.Frame;
 
 var Environment = Object.extend({
-    init: function(loaders, tags, development) {
-        // The development flag determines the trace that'll be shown on errors.
+    init: function(loaders, tags, dev) {
+        // The dev flag determines the trace that'll be shown on errors.
         // If set to true, returns the full trace from the error point,
         // otherwise will return trace starting from Template.render
         // (the full trace from within nunjucks may confuse developers using
         //  the library)
-        this.development = development;
+        this.dev = dev;
+
         if(!loaders) {
             // The filesystem loader is only available client-side
             if(builtin_loaders.FileSystemLoader) {
@@ -35,19 +36,19 @@ var Environment = Object.extend({
         this.filters = builtin_filters;
         this.cache = {};
     },
-    tryTemplate: function(path, func) {
 
+    tryTemplate: function(path, func) {
         try {
             return func();
-
         } catch (e) {
-            if (!e.Update) { // not one of ours, cast it
+            if (!e.Update) {
+                // not one of ours, cast it
                 e = lib.TemplateError(e);
             }
             e.Update(path);
 
             // Unless they marked the dev flag, show them a trace from here
-            if (!this.development) {
+            if (!this.dev) {
                 var old = e;
                 e = new Error(old.message);
                 e.name = old.name;

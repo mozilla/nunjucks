@@ -9,7 +9,6 @@ exports.TemplateError = function(message, lineno, colno) {
     if (message instanceof Error) { // for casting regular js errors
         self = message;
         message = message.name + ": " + message.message;
-
     } else {
         Error.captureStackTrace(self);
     }
@@ -31,7 +30,7 @@ exports.TemplateError = function(message, lineno, colno) {
 
         message += '\n ';
         if (this.firstUpdate) {
-            message += ' '
+            message += ' ';
         }
 
         this.message = message + (this.message || '');
