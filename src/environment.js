@@ -109,6 +109,7 @@ var Environment = Object.extend({
             var res = http.ServerResponse.prototype;
 
             res._render = function(name, ctx, k) {
+                var app = this.app;
                 var context = {};
 
                 if(this._locals) {
@@ -123,6 +124,7 @@ var Environment = Object.extend({
                     }
                 }
 
+                context = lib.extend(context, app._locals);
                 var str = env.render(name, context);
 
                 if(k) {
