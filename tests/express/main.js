@@ -11,7 +11,7 @@ e.express(app);
 app.use(express.static(__dirname));
 
 app.use(function(req, res, next) {
-    res.local('user', 'hello');
+    res.locals.user = 'hello';
     next();
 });
 
