@@ -117,12 +117,6 @@ var FakeString = Object.extend({
     toString: function() {
         return lib.escape(this.raw);
     },
-    setSafe: function() {
-        this.toString = this.rawToString;
-    },
-    rawToString: function() {
-        return this.raw;
-    },
     replace: function() {
         return this.raw.replace.apply(this.raw, arguments);
     }

@@ -57,7 +57,7 @@ var filters = {
     escape: lib.escape,
 
     safe: function(str) {
-        if (str && str.setSafe) {
+        if (str && str.raw) {
             str = str.raw;
         }
         return str;
