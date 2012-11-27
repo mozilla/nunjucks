@@ -276,6 +276,10 @@ describe('compiler', function() {
         s = render('hello world {% include tmpl %}',
                   { name: 'thedude', tmpl: "include.html" });
         s.should.equal('hello world FooInclude thedude');
+
+        s = render('hello world {% include data.tmpl %}',
+            { name: 'thedude', data: {tmpl: "include.html"} });
+        s.should.equal('hello world FooInclude thedude');
     });
 
     it('should maintain nested scopes', function() {
