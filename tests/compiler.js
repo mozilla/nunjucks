@@ -333,4 +333,26 @@ describe('compiler', function() {
             render('{% from "import.html" import boozle %}');
         }).should.throw(/cannot import 'boozle'/);
     });
+
+    it('should not autoescape by default', function() {
+        var s = render('{{ foo }}', { foo: '"\'<>&'});
+        s.should.equal('"\'<>&');
+    });
+
+    it('should autoescape if global autoescape is on unless safe filter is used', function() {
+        var env = require('../src/environment');
+        var loaders = require('../src/node-loaders');
+
+        var safe_render = function (str, ctx) {
+            var e = new env.Environment(new loaders.FileSystemLoader('tests/templates'), null, { dev: true, autoescape: true});
+            ctx = ctx || {};
+            var t = new env.Template(str, e);
+            return t.render(ctx);
+        };
+        var s = safe_render('{{ foo }}', { foo: '"\'<>&'});
+        s.should.equal('&quot;&#39;&lt;&gt;&amp;');
+
+        var s = safe_render('{{ foo|safe }}', { foo: '"\'<>&'});
+        s.should.equal('"\'<>&');
+    });
 });

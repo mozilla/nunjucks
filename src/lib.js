@@ -1,6 +1,17 @@
 var ArrayProto = Array.prototype;
 var ObjProto = Object.prototype;
 
+var escapeMap = {
+    '&': '&amp;',
+    '"': '&quot;',
+    "'": '&#39;',
+    "<": '&lt;',
+    ">": '&gt;'
+};
+var lookupEscape = function(ch) {
+    return escapeMap[ch];
+};
+
 var exports = module.exports = {};
 
 exports.TemplateError = function(message, lineno, colno) {
@@ -41,6 +52,10 @@ exports.TemplateError = function(message, lineno, colno) {
 };
 exports.TemplateError.prototype = Error.prototype;
 
+
+exports.escape = function(val) {
+    return val.replace(/[&"'<>]/g, lookupEscape);
+};
 
 exports.isFunction = function(obj) {
     return ObjProto.toString.call(obj) == '[object Function]';
