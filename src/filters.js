@@ -57,10 +57,7 @@ var filters = {
     escape: lib.escape,
 
     safe: function(str) {
-        if (str && str.raw) {
-            str = str.raw;
-        }
-        return str;
+        return (str && str.raw) ? str.raw : str;
     },
 
     first: function(arr) {
