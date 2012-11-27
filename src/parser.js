@@ -291,14 +291,7 @@ var Parser = Object.extend({
         }
 
         var node = new nodeType(tag.lineno, tag.colno);
-
         node.template = this.parsePrimary();
-        if(!(node.template instanceof nodes.Literal &&
-             lib.isString(node.template.value)) &&
-           !(node.template instanceof nodes.Symbol) &&
-           !(node.template instanceof nodes.LookupVal)) {
-            this.fail('parseExtends: string or value expected');
-        }
 
         this.advanceAfterBlockEnd(tag.value);
         return node;

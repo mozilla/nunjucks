@@ -46,6 +46,10 @@ var Environment = Object.extend({
         var tmpl = this.cache[name];
         var upToDate;
 
+        if(typeof name !== 'string') {
+            throw new Error('template names must be a string: ' + name);
+        }
+
         if(!tmpl || !tmpl.isUpToDate()) {
             for(var i=0; i<this.loaders.length; i++) {
                 if((info = this.loaders[i].getSource(name))) {
