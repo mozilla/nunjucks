@@ -176,7 +176,7 @@ var Compiler = Object.extend({
         else {
             this.emit('runtime.suppressValue(' +
                         'runtime.contextOrFrameLookup(' +
-                            'context, frame, "' + name + '"))');
+                            'context, frame, "' + name + '"), env.autoesc)');
         }
     },
 
@@ -266,7 +266,7 @@ var Compiler = Object.extend({
         this.emit(')||{})');
         this.emit('[');
         this._compileExpression(node.val, frame);
-        this.emit('])');
+        this.emit('], env.autoesc)');
     },
 
     compileFunCall: function(node, frame) {

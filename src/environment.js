@@ -8,13 +8,21 @@ var runtime = require('./runtime');
 var Frame = runtime.Frame;
 
 var Environment = Object.extend({
-    init: function(loaders, tags, dev) {
+    init: function(loaders, tags, opts) {
         // The dev flag determines the trace that'll be shown on errors.
         // If set to true, returns the full trace from the error point,
         // otherwise will return trace starting from Template.render
         // (the full trace from within nunjucks may confuse developers using
         //  the library)
-        this.dev = dev;
+        // defaults to false
+        opts = opts || {};
+        this.dev = !!opts.dev;
+
+        // The autoescape flag sets global autoescaping. If true,
+        // every string variable will be escaped by default.
+        // If false, strings can be manually escaped using the `escape` filter.
+        // defaults to false
+        this.autoesc = !!opts.autoescape;
 
         if(!loaders) {
             // The filesystem loader is only available client-side

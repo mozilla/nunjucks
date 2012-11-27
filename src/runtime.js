@@ -1,5 +1,6 @@
 
 var Object = require('./object');
+var lib = require('./lib');
 
 // Frames keep track of scoping both at compile-time and run-time so
 // we know how to access variables. Block tags can introduce special
@@ -114,23 +115,22 @@ var FakeString = Object.extend({
         this.raw = val;
     },
     toString: function() {
-        return this.raw.replace(/&/g, '&amp;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#39;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;');
+        return lib.escape(this.raw);
     },
     setSafe: function() {
         this.toString = this.rawToString;
     },
     rawToString: function() {
         return this.raw;
+    },
+    replace: function() {
+        return this.raw.replace.apply(this.raw, arguments);
     }
 });
 
-function suppressValue(val) {
+function suppressValue(val, autoescape) {
     val = (val !== undefined && val !== null) ? val : "";
-    if (typeof val === "string") val = new FakeString(val);
+    if (autoescape && typeof val === "string") val = new FakeString(val);
     return val;
 }
 

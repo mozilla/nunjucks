@@ -54,16 +54,11 @@ var filters = {
         return val ? val : def;
     },
 
-    escape: function(str) {
-        return str.replace(/&/g, '&amp;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#39;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;');
-    },
+    escape: lib.escape,
+
     safe: function(str) {
         if (str && str.setSafe) {
-            str.setSafe();
+            str = str.raw;
         }
         return str;
     },
