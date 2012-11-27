@@ -130,7 +130,7 @@ var filters = {
             });
         }
         else {
-            throw new Error("list: type not iterable");
+            throw new lib.TemplateError("list filter: type not iterable");
         }
     },
 
@@ -286,7 +286,7 @@ var filters = {
 
     int: function(val, def) {
         return parseInt(val) || def;
-    },
+    }
 };
 
 // Aliases
