@@ -8,7 +8,14 @@ var runtime = require('./runtime');
 var Frame = runtime.Frame;
 
 var Environment = Object.extend({
-    init: function(loaders, tags) {
+    init: function(loaders, tags, dev) {
+        // The dev flag determines the trace that'll be shown on errors.
+        // If set to true, returns the full trace from the error point,
+        // otherwise will return trace starting from Template.render
+        // (the full trace from within nunjucks may confuse developers using
+        //  the library)
+        this.dev = dev;
+
         if(!loaders) {
             // The filesystem loader is only available client-side
             if(builtin_loaders.FileSystemLoader) {
@@ -30,6 +37,27 @@ var Environment = Object.extend({
         this.cache = {};
     },
 
+    tryTemplate: function(path, func) {
+        try {
+            return func();
+        } catch (e) {
+            if (!e.Update) {
+                // not one of ours, cast it
+                e = lib.TemplateError(e);
+            }
+            e.Update(path);
+
+            // Unless they marked the dev flag, show them a trace from here
+            if (!this.dev) {
+                var old = e;
+                e = new Error(old.message);
+                e.name = old.name;
+            }
+
+            throw e;
+        }
+    },
+
     addFilter: function(name, func) {
         this.filters[name] = func;
     },
@@ -49,6 +77,10 @@ var Environment = Object.extend({
         var info = null;
         var tmpl = this.cache[name];
         var upToDate;
+
+        if(typeof name !== 'string') {
+            throw new Error('template names must be a string: ' + name);
+        }
 
         if(!tmpl || !tmpl.isUpToDate()) {
             for(var i=0; i<this.loaders.length; i++) {
@@ -113,6 +145,7 @@ var Environment = Object.extend({
             var res = http.ServerResponse.prototype;
 
             res._render = function(name, ctx, k) {
+                var app = this.app;
                 var context = {};
 
                 if(this._locals) {
@@ -127,6 +160,7 @@ var Environment = Object.extend({
                     }
                 }
 
+                context = lib.extend(context, app._locals);
                 var str = env.render(name, context);
 
                 if(k) {
@@ -230,7 +264,9 @@ var Template = Object.extend({
         this.upToDate = upToDate || function() { return false; };
 
         if(eagerCompile) {
-            this._compile();
+            var self = this;
+            this.env.tryTemplate(this.path, function() { self._compile(); });
+            self = null;
         }
         else {
             this.compiled = false;
@@ -238,15 +274,21 @@ var Template = Object.extend({
     },
 
     render: function(ctx, frame) {
-        if(!this.compiled) {
-            this._compile();
-        }
+        var self = this;
 
-        var context = new Context(ctx || {}, this.blocks);
-        return this.rootRenderFunc(this.env,
-                                   context,
-                                   frame || new Frame(),
-                                   runtime);
+        var render = function() {
+            if(!self.compiled) {
+                self._compile();
+            }
+
+            var context = new Context(ctx || {}, self.blocks);
+
+            return self.rootRenderFunc(self.env,
+                context,
+                frame || new Frame(),
+                runtime);
+        };
+        return this.env.tryTemplate(this.path, render);
     },
 
     isUpToDate: function() {

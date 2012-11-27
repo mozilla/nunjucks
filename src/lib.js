@@ -3,6 +3,45 @@ var ObjProto = Object.prototype;
 
 var exports = module.exports = {};
 
+exports.TemplateError = function(message, lineno, colno) {
+    var self = this;
+
+    if (message instanceof Error) { // for casting regular js errors
+        self = message;
+        message = message.name + ": " + message.message;
+    } else {
+        Error.captureStackTrace(self);
+    }
+
+    self.name = "Template render error";
+    self.message = message;
+    self.lineno = lineno;
+    self.colno = colno;
+    self.firstUpdate = true;
+
+    self.Update = function(path) {
+        var message = "(" + (path || "unknown path") + ")";
+
+        // only show lineno + colno next to path of template
+        // where error occurred
+        if (this.firstUpdate && this.lineno && this.colno) {
+            message += ' [Line ' + this.lineno + ', Column ' + this.colno + ']';
+        }
+
+        message += '\n ';
+        if (this.firstUpdate) {
+            message += ' ';
+        }
+
+        this.message = message + (this.message || '');
+        this.firstUpdate = false;
+        return this;
+    };
+    return self;
+};
+exports.TemplateError.prototype = Error.prototype;
+
+
 exports.isFunction = function(obj) {
     return ObjProto.toString.call(obj) == '[object Function]';
 };

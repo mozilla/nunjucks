@@ -39,6 +39,12 @@ var Compiler = Object.extend({
         this.buffer = null;
         this.isChild = false;
     },
+    fail: function (msg, lineno, colno) {
+        if (lineno !== undefined) lineno += 1;
+        if (colno !== undefined) colno += 1;
+
+        throw new lib.TemplateError(msg, lineno, colno);
+    },
 
     emit: function(code) {
         this.codebuf.push(code);
@@ -95,19 +101,33 @@ var Compiler = Object.extend({
     },
 
     _compileExpression: function(node, frame) {
-        this.assertType(node,
-                        nodes.Literal,
-                        nodes.Symbol,
-                        nodes.Group,
-                        nodes.Array,
-                        nodes.Dict,
-                        nodes.FunCall,
-                        nodes.Filter,
-                        nodes.LookupVal,
-                        nodes.Compare,
-                        nodes.And,
-                        nodes.Or,
-                        nodes.Not);
+        // TODO: I'm not really sure if this type check is worth it or
+        // not.
+        this.assertType(
+            node,
+            nodes.Literal,
+            nodes.Symbol,
+            nodes.Group,
+            nodes.Array,
+            nodes.Dict,
+            nodes.FunCall,
+            nodes.Filter,
+            nodes.LookupVal,
+            nodes.Compare,
+            nodes.And,
+            nodes.Or,
+            nodes.Not,
+            nodes.Add,
+            nodes.Sub,
+            nodes.Mul,
+            nodes.Div,
+            nodes.FloorDiv,
+            nodes.Mod,
+            nodes.Pow,
+            nodes.Neg,
+            nodes.Pos,
+            nodes.Compare
+        );
         this.compile(node, frame);
     },
 
@@ -119,10 +139,12 @@ var Compiler = Object.extend({
             if(node instanceof types[i]) {
                 success = true;
             }
-        };
+        }
 
         if(!success) {
-            throw new Error("invalid type: " + node.typename);
+            this.fail("assertType: invalid type: " + node.typename,
+                      node.lineno,
+                      node.colno);
         }
     },
 
@@ -179,7 +201,9 @@ var Compiler = Object.extend({
         }
         else if(!(key instanceof nodes.Literal &&
                   typeof key.value == "string")) {
-            throw new Error("Dict keys must be strings or names");
+            this.fail("compilePair: Dict keys must be strings or names",
+                      key.lineno,
+                      key.colno);
         }
 
         this.compile(key, frame);
@@ -523,7 +547,9 @@ var Compiler = Object.extend({
 
     compileExtends: function(node, frame) {
         if(this.isChild) {
-            throw new Error('cannot extend multiple times');
+            this.fail('compileExtends: cannot extend multiple times',
+                      node.template.lineno,
+                      node.template.colno);
         }
 
         this.emit('var parentTemplate = env.getTemplate(');
@@ -561,7 +587,7 @@ var Compiler = Object.extend({
 
     compileRoot: function(node, frame) {
         if(frame) {
-            throw new Error("root node can't have frame");
+            this.fail("compileRoot: root node can't have frame");
         }
 
         frame = new Frame();
@@ -607,7 +633,9 @@ var Compiler = Object.extend({
             _compile.call(this, node, frame);
         }
         else {
-            throw new Error("Cannot compile node: " + node.typename);
+            this.fail("compile: Cannot compile node: " + node.typename,
+                      node.lineno,
+                      node.colno);
         }
     },
 

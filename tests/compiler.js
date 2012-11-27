@@ -276,6 +276,10 @@ describe('compiler', function() {
         s = render('hello world {% include tmpl %}',
                   { name: 'thedude', tmpl: "include.html" });
         s.should.equal('hello world FooInclude thedude');
+
+        s = render('hello world {% include data.tmpl %}',
+            { name: 'thedude', data: {tmpl: "include.html"} });
+        s.should.equal('hello world FooInclude thedude');
     });
 
     it('should maintain nested scopes', function() {
@@ -305,6 +309,9 @@ describe('compiler', function() {
 
         s = render('{% set x, y = "foo" %}{{ x }}{{ y }}');
         s.should.equal('foofoo');
+
+        s = render('{% set x = 1 + 2 %}{{ x }}');
+        s.should.equal('3');
 
         s = render('{% for i in [1] %}{% set foo=1 %}{% endfor %}{{ foo }}',
                    { foo: 2 });
