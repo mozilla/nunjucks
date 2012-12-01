@@ -58,6 +58,12 @@ describe('compiler', function() {
         s.should.equal('msghi');
     });
 
+    it('should compile function calls with correct scope', function() {
+        var s = render('{{ foo.bar() }}',
+            { foo: { bar: function() { return this.baz }, baz: 'hello' }});
+        s.should.equal('hello');
+    });
+
     it('should compile if blocks', function() {
         var tmpl = ('Give me some {% if hungry %}pizza' +
                     '{% else %}water{% endif %}');
