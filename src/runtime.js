@@ -113,6 +113,16 @@ function suppressValue(val) {
     return (val !== undefined && val !== null) ? val : "";
 }
 
+function suppressLookupValue(obj, val) {
+    obj = obj || {};
+    val = obj[val];
+
+    return (typeof val === 'function') ?
+        function() {
+            return suppressValue(val.apply(obj, arguments))} :
+        suppressValue(val);
+}
+
 function contextOrFrameLookup(context, frame, name) {
     var val = context.lookup(name);
     return (val !== undefined && val !== null) ?
@@ -126,5 +136,6 @@ module.exports = {
     makeKeywordArgs: makeKeywordArgs,
     numArgs: numArgs,
     suppressValue: suppressValue,
+    suppressLookupValue: suppressLookupValue,
     contextOrFrameLookup: contextOrFrameLookup
 };
