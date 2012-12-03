@@ -117,10 +117,14 @@ function suppressLookupValue(obj, val) {
     obj = obj || {};
     val = obj[val];
 
-    return (typeof val === 'function') ?
-        function() {
-            return suppressValue(val.apply(obj, arguments))} :
-        suppressValue(val);
+    if(typeof val === 'function') {
+        return function() {
+            return suppressValue(val.apply(obj, arguments));
+        };
+    }
+    else {
+        return suppressValue(val);
+    }
 }
 
 function contextOrFrameLookup(context, frame, name) {
