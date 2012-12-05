@@ -119,6 +119,9 @@ var FakeString = Object.extend({
     },
     replace: function() {
         return this.raw.replace.apply(this.raw, arguments);
+    },
+    toUpperCase: function() {
+        return this.raw.toUpperCase();
     }
 });
 

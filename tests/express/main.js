@@ -5,7 +5,10 @@ var express = require('express');
 
 var app = express.createServer();
 
-var e = new env.Environment(new loaders.FileSystemLoader('views'));
+var e = new env.Environment(new loaders.FileSystemLoader('views'),
+                            null,
+                           { dev: true,
+                             autoescape: true });
 e.express(app);
 
 app.use(express.static(__dirname));
@@ -16,7 +19,7 @@ app.use(function(req, res, next) {
 });
 
 app.get('/', function(req, res) {
-    res.render('index.html', { username: 'James Long' });
+    res.render('index.html', { username: 'James Long <strong>copyright</strong>' });
 });
 
 app.get('/about', function(req, res) {
