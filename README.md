@@ -20,7 +20,7 @@ jinja2.
 
 `npm install nunjucks`
 
-The current version is v0.1.6 ([changelog](http://nunjucks.tumblr.com/post/35641526923/v0-1-6-undefined-handling-bugfixes)).
+The current version is v0.1.7 ([changelog](http://nunjucks.tumblr.com/post/37795552313/v0-1-7-helpful-errors-many-bug-fixes)).
 
 ## Documentation
 
