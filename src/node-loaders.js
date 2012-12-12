@@ -1,4 +1,3 @@
-
 var fs = require('fs');
 var path = require('path');
 var lib = require('./lib');
@@ -23,7 +22,7 @@ var FileSystemLoader = Object.extend({
 
         for(var i=0; i<paths.length; i++) {
             var p = path.join(paths[i], name);
-            if(existsSync(p)) {
+            if(p.indexOf(paths[i]) === 0 && existsSync(p)) {
                 fullpath = p;
                 break;
             }
