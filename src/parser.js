@@ -457,7 +457,14 @@ var Parser = Object.extend({
             }
         }
 
-        return new nodes.TemplateData(begun.lineno, begun.colno, str);
+
+        var output = new nodes.Output(
+            begun.lineno,
+            begun.colno,
+            [new nodes.TemplateData(begun.lineno, begun.colno, str)]
+        );
+
+        return output;
     },
 
     parsePostfix: function(node) {
@@ -963,7 +970,7 @@ var util = require('util');
 //     console.log(util.inspect(t));
 // }
 
-// var p = new Parser(lexer.lex('{{ foo(1, 2, 3, foo=3) }}'));
+// var p = new Parser(lexer.lex('{% raw %}hello{% endraw %}'));
 // var n = p.parse();
 // nodes.printNodes(n);
 

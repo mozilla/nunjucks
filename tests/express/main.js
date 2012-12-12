@@ -5,7 +5,7 @@ var express = require('express');
 
 var app = express.createServer();
 
-var e = new env.Environment(new loaders.FileSystemLoader('views'));
+var e = new env.Environment(new loaders.FileSystemLoader('views'), null, true);
 e.express(app);
 
 app.use(express.static(__dirname));

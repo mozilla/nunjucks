@@ -645,7 +645,7 @@ var Compiler = Object.extend({
 
 // var fs = require("fs");
 // var c = new Compiler();
-// var src = '{{ foo }}';
+// var src = '{% raw %}hello{% endraw %}';
 
 // var ns = parser.parse(src);
 // nodes.printNodes(ns);

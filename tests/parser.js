@@ -223,6 +223,13 @@ describe('parser', function() {
                   [nodes.TemplateData, 'This is a macro']]]]]);
     });
 
+    it('should parse raw', function() {
+        isAST(parser.parse('{% raw %}hello {{ {% %} }}{% endraw %}'),
+              [nodes.Root,
+               [nodes.Output,
+                [nodes.TemplateData, 'hello {{ {% %} }}']]]);
+    });
+
     it('should parse keyword and non-keyword arguments', function() {
         isAST(parser.parse('{{ foo("bar", falalalala, baz="foobar") }}'),
               [nodes.Root,
