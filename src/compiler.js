@@ -27,7 +27,7 @@ function binOpEmitter(str) {
 
 // Generate an array of strings
 function quotedArray(arr) {
-    return '[' + 
+    return '[' +
         lib.map(arr, function(x) { return '"' + x + '"'; }) +
         ']';
 }
@@ -433,7 +433,7 @@ var Compiler = Object.extend({
                           'l_' + arg.value + ');');
             frame.set(arg.value, 'l_' + arg.value);
         }, this);
-        
+
         // Expose the keyword arguments
         if(kwargs) {
             lib.each(kwargs.children, function(pair) {
@@ -441,7 +441,7 @@ var Compiler = Object.extend({
                 this.emit('frame.set("' + name + '", ' +
                           'kwargs.hasOwnProperty("' + name + '") ? ' +
                           'kwargs["' + name + '"] : ');
-                this._compileExpression(pair.value);
+                this._compileExpression(pair.value, frame);
                 this.emitLine(');');
             }, this);
         }

@@ -30,7 +30,10 @@ var Frame = Object.extend({
 
     lookup: function(name) {
         var p = this.parent;
-        return this.variables[name] || (p && p.lookup(name));
+        var val = this.variables[name];
+        return (val !== undefined && val !== null) ?
+            val :
+            (p && p.lookup(name));
     },
 
     push: function() {
