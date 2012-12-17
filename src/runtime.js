@@ -31,9 +31,10 @@ var Frame = Object.extend({
     lookup: function(name) {
         var p = this.parent;
         var val = this.variables[name];
-        return (val !== undefined && val !== null) ?
-            val :
-            (p && p.lookup(name));
+        if(val !== undefined && val !== null) {
+            return val;
+        }
+        return p && p.lookup(name);
     },
 
     push: function() {
