@@ -63,7 +63,61 @@ modules['object'] = extend(Object, "Object", {});
 var ArrayProto = Array.prototype;
 var ObjProto = Object.prototype;
 
+var escapeMap = {
+    '&': '&amp;',
+    '"': '&quot;',
+    "'": '&#39;',
+    "<": '&lt;',
+    ">": '&gt;'
+};
+var lookupEscape = function(ch) {
+    return escapeMap[ch];
+};
+
 var exports = modules['lib'] = {};
+
+exports.TemplateError = function(message, lineno, colno) {
+    var self = this;
+
+    if (message instanceof Error) { // for casting regular js errors
+        self = message;
+        message = message.name + ": " + message.message;
+    } else {
+        Error.captureStackTrace(self);
+    }
+
+    self.name = "Template render error";
+    self.message = message;
+    self.lineno = lineno;
+    self.colno = colno;
+    self.firstUpdate = true;
+
+    self.Update = function(path) {
+        var message = "(" + (path || "unknown path") + ")";
+
+        // only show lineno + colno next to path of template
+        // where error occurred
+        if (this.firstUpdate && this.lineno && this.colno) {
+            message += ' [Line ' + this.lineno + ', Column ' + this.colno + ']';
+        }
+
+        message += '\n ';
+        if (this.firstUpdate) {
+            message += ' ';
+        }
+
+        this.message = message + (this.message || '');
+        this.firstUpdate = false;
+        return this;
+    };
+    return self;
+};
+exports.TemplateError.prototype = Error.prototype;
+
+
+exports.escape = function(val) {
+    return val.replace(/[&"'<>]/g, lookupEscape);
+};
 
 exports.isFunction = function(obj) {
     return ObjProto.toString.call(obj) == '[object Function]';
@@ -221,12 +275,10 @@ var filters = {
         return val ? val : def;
     },
 
-    escape: function(str) {
-        return str.replace(/&/g, '&amp;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#39;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;');
+    escape: lib.escape,
+
+    safe: function(str) {
+        return (str && str.raw) ? str.raw : str;
     },
 
     first: function(arr) {
@@ -297,7 +349,7 @@ var filters = {
             });
         }
         else {
-            throw new Error("list: type not iterable");
+            throw new lib.TemplateError("list filter: type not iterable");
         }
     },
 
@@ -453,7 +505,7 @@ var filters = {
 
     int: function(val, def) {
         return parseInt(val) || def;
-    },
+    }
 };
 
 // Aliases
@@ -465,6 +517,7 @@ modules['filters'] = filters;
 (function() {
 
 var Object = modules["object"];
+var lib = modules["lib"];
 
 // Frames keep track of scoping both at compile-time and run-time so
 // we know how to access variables. Block tags can introduce special
@@ -574,11 +627,41 @@ function numArgs(args) {
     }
 }
 
+var FakeString = Object.extend({
+    init: function(val) {
+        this.raw = val;
+    },
+    toString: function() {
+        return lib.escape(this.raw);
+    },
+    replace: function() {
+        return this.raw.replace.apply(this.raw, arguments);
+    },
+    toUpperCase: function() {
+        return this.raw.toUpperCase();
+    }
+});
+
+function suppressValue(val, autoescape) {
+    val = (val !== undefined && val !== null) ? val : "";
+    if (autoescape && typeof val === "string") val = new FakeString(val);
+    return val;
+}
+
+function contextOrFrameLookup(context, frame, name) {
+    var val = context.lookup(name);
+    return (val !== undefined && val !== null) ?
+        val :
+        frame.lookup(name);
+}
+
 modules['runtime'] = {
     Frame: Frame,
     makeMacro: makeMacro,
     makeKeywordArgs: makeKeywordArgs,
-    numArgs: numArgs
+    numArgs: numArgs,
+    suppressValue: suppressValue,
+    contextOrFrameLookup: contextOrFrameLookup
 };
 })();
 (function() {
@@ -592,7 +675,22 @@ var runtime = modules["runtime"];
 var Frame = runtime.Frame;
 
 var Environment = Object.extend({
-    init: function(loaders, tags) {
+    init: function(loaders, tags, opts) {
+        // The dev flag determines the trace that'll be shown on errors.
+        // If set to true, returns the full trace from the error point,
+        // otherwise will return trace starting from Template.render
+        // (the full trace from within nunjucks may confuse developers using
+        //  the library)
+        // defaults to false
+        opts = opts || {};
+        this.dev = !!opts.dev;
+
+        // The autoescape flag sets global autoescaping. If true,
+        // every string variable will be escaped by default.
+        // If false, strings can be manually escaped using the `escape` filter.
+        // defaults to false
+        this.autoesc = !!opts.autoescape;
+
         if(!loaders) {
             // The filesystem loader is only available client-side
             if(builtin_loaders.FileSystemLoader) {
@@ -614,18 +712,50 @@ var Environment = Object.extend({
         this.cache = {};
     },
 
+    tryTemplate: function(path, func) {
+        try {
+            return func();
+        } catch (e) {
+            if (!e.Update) {
+                // not one of ours, cast it
+                e = lib.TemplateError(e);
+            }
+            e.Update(path);
+
+            // Unless they marked the dev flag, show them a trace from here
+            if (!this.dev) {
+                var old = e;
+                e = new Error(old.message);
+                e.name = old.name;
+            }
+
+            throw e;
+        }
+    },
+
     addFilter: function(name, func) {
         this.filters[name] = func;
     },
 
     getFilter: function(name) {
+        if(!this.filters[name]) {
+            throw new Error('filter not found: ' + name);
+        }
         return this.filters[name];
     },
 
     getTemplate: function(name, eagerCompile) {
+        if (name && name.raw) {
+            // this fixes autoescape for templates referenced in symbols
+            name = name.raw;
+        }
         var info = null;
         var tmpl = this.cache[name];
         var upToDate;
+
+        if(typeof name !== 'string') {
+            throw new Error('template names must be a string: ' + name);
+        }
 
         if(!tmpl || !tmpl.isUpToDate()) {
             for(var i=0; i<this.loaders.length; i++) {
@@ -662,25 +792,60 @@ var Environment = Object.extend({
     express: function(app) {
         var env = this;
 
-        app.render = function(name, ctx, k) {
-            var context = {};
+        if(app.render) {
+            // Express >2.5.11
+            app.render = function(name, ctx, k) {
+                var context = {};
 
-            if(lib.isFunction(ctx)) {
-                k = ctx;
-                ctx = {};
-            }
+                if(lib.isFunction(ctx)) {
+                    k = ctx;
+                    ctx = {};
+                }
 
-            context = lib.extend(context, app.locals);
+                context = lib.extend(context, this.locals);
 
-            if(ctx._locals) {
-                context = lib.extend(context, ctx._locals);
-            }
+                if(ctx._locals) {
+                    context = lib.extend(context, ctx._locals);
+                }
 
-            context = lib.extend(context, ctx);
+                context = lib.extend(context, ctx);
 
-            var res = env.render(name, context);
-            k(null, res);
-        };
+                var res = env.render(name, context);
+                k(null, res);
+            };
+        }
+        else {
+            // Express <2.5.11
+            var http = modules["http"];
+            var res = http.ServerResponse.prototype;
+
+            res._render = function(name, ctx, k) {
+                var app = this.app;
+                var context = {};
+
+                if(this._locals) {
+                    context = lib.extend(context, this._locals);
+                }
+
+                if(ctx) {
+                    context = lib.extend(context, ctx);
+
+                    if(ctx.locals) {
+                        context = lib.extend(context, ctx.locals);
+                    }
+                }
+
+                context = lib.extend(context, app._locals);
+                var str = env.render(name, context);
+
+                if(k) {
+                    k(null, str);
+                }
+                else {
+                    this.send(str);
+                }
+            };
+        }
     },
 
     render: function(name, ctx) {
@@ -774,7 +939,9 @@ var Template = Object.extend({
         this.upToDate = upToDate || function() { return false; };
 
         if(eagerCompile) {
-            this._compile();
+            var self = this;
+            this.env.tryTemplate(this.path, function() { self._compile(); });
+            self = null;
         }
         else {
             this.compiled = false;
@@ -782,15 +949,21 @@ var Template = Object.extend({
     },
 
     render: function(ctx, frame) {
-        if(!this.compiled) {
-            this._compile();
-        }
+        var self = this;
 
-        var context = new Context(ctx || {}, this.blocks);
-        return this.rootRenderFunc(this.env,
-                                   context,
-                                   frame || new Frame(),
-                                   runtime);
+        var render = function() {
+            if(!self.compiled) {
+                self._compile();
+            }
+
+            var context = new Context(ctx || {}, self.blocks);
+
+            return self.rootRenderFunc(self.env,
+                context,
+                frame || new Frame(),
+                runtime);
+        };
+        return this.env.tryTemplate(this.path, render);
     },
 
     isUpToDate: function() {
@@ -868,11 +1041,14 @@ window.nunjucks = {};
 window.nunjucks.Environment = env.Environment;
 window.nunjucks.Template = env.Template;
 
-if(loaders.FileSystemLoader) {
-    window.nunjucks.FileSystemLoader = loaders.FileSystemLoader;
-}
-else {
-    window.nunjucks.HttpLoader = loaders.HttpLoader;
+// loaders is not available when using precompiled templates
+if(loaders) {
+    if(loaders.FileSystemLoader) {
+        window.nunjucks.FileSystemLoader = loaders.FileSystemLoader;
+    }
+    else {
+        window.nunjucks.HttpLoader = loaders.HttpLoader;
+    }
 }
 
 window.nunjucks.compiler = compiler;

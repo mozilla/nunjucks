@@ -9,11 +9,14 @@ module.exports = {};
 module.exports.Environment = env.Environment;
 module.exports.Template = env.Template;
 
-if(loaders.FileSystemLoader) {
-    module.exports.FileSystemLoader = loaders.FileSystemLoader;
-}
-else {
-    module.exports.HttpLoader = loaders.HttpLoader;
+// loaders is not available when using precompiled templates
+if(loaders) {
+    if(loaders.FileSystemLoader) {
+        module.exports.FileSystemLoader = loaders.FileSystemLoader;
+    }
+    else {
+        module.exports.HttpLoader = loaders.HttpLoader;
+    }
 }
 
 module.exports.compiler = compiler;

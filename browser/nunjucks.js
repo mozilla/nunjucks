@@ -535,9 +535,10 @@ var Frame = Object.extend({
     lookup: function(name) {
         var p = this.parent;
         var val = this.variables[name];
-        return (val !== undefined && val !== null) ?
-            val :
-            (p && p.lookup(name));
+        if(val !== undefined && val !== null) {
+            return val;
+        }
+        return p && p.lookup(name);
     },
 
     push: function() {
@@ -1016,11 +1017,14 @@ window.nunjucks = {};
 window.nunjucks.Environment = env.Environment;
 window.nunjucks.Template = env.Template;
 
-if(loaders.FileSystemLoader) {
-    window.nunjucks.FileSystemLoader = loaders.FileSystemLoader;
-}
-else {
-    window.nunjucks.HttpLoader = loaders.HttpLoader;
+// loaders is not available when using precompiled templates
+if(loaders) {
+    if(loaders.FileSystemLoader) {
+        window.nunjucks.FileSystemLoader = loaders.FileSystemLoader;
+    }
+    else {
+        window.nunjucks.HttpLoader = loaders.HttpLoader;
+    }
 }
 
 window.nunjucks.compiler = compiler;
