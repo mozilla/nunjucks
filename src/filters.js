@@ -50,7 +50,7 @@ var filters = {
         return pre + str + post;
     },
 
-    default: function(val, def) {
+    'default': function(val, def) {
         return val ? val : def;
     },
 
@@ -280,17 +280,17 @@ var filters = {
         return str.match(/\w+/g).length;
     },
 
-    float: function(val, def) {
+    'float': function(val, def) {
         return parseFloat(val) || def;
     },
 
-    int: function(val, def) {
+    'int': function(val, def) {
         return parseInt(val) || def;
     }
 };
 
 // Aliases
-filters.d = filters.default;
+filters.d = filters['default'];
 filters.e = filters.escape;
 
 module.exports = filters;
