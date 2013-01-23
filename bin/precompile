@@ -2,6 +2,7 @@
 var fs = require('fs');
 var path = require('path');
 var util = require('util');
+var lib = require('../src/lib');
 var compiler = require('../src/compiler');
 
 if(process.argv.length < 3) {
@@ -34,7 +35,14 @@ util.puts('(function() {');
 util.puts('var templates = {};');
 
 for(var i=0; i<templates.length; i++) {
-    var src = compiler.compile(fs.readFileSync(templates[i], 'utf-8'));
+    var src = lib.withPrettyErrors(
+        templates[i],
+        false,
+        function() {
+            return compiler.compile(fs.readFileSync(templates[i],
+                                                    'utf-8'));
+        }
+    );
     var name = templates[i].replace(path.join(folder, '/'), '');
     
     util.puts('templates["' + name + '"] = (function() {');

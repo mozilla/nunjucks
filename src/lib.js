@@ -3,6 +3,27 @@ var ObjProto = Object.prototype;
 
 var exports = module.exports = {};
 
+exports.withPrettyErrors = function(path, withInternals, func) {
+    try {
+        return func();
+    } catch (e) {
+        if (!e.Update) {
+            // not one of ours, cast it
+            e = exports.TemplateError(e);
+        }
+        e.Update(path);
+
+        // Unless they marked the dev flag, show them a trace from here
+        if (!this.dev) {
+            var old = e;
+            e = new Error(old.message);
+            e.name = old.name;
+        }
+
+        throw e;
+    }
+}
+
 exports.TemplateError = function(message, lineno, colno) {
     var self = this;
 
@@ -40,7 +61,6 @@ exports.TemplateError = function(message, lineno, colno) {
     return self;
 };
 exports.TemplateError.prototype = Error.prototype;
-
 
 exports.isFunction = function(obj) {
     return ObjProto.toString.call(obj) == '[object Function]';

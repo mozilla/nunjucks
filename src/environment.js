@@ -37,27 +37,6 @@ var Environment = Object.extend({
         this.cache = {};
     },
 
-    tryTemplate: function(path, func) {
-        try {
-            return func();
-        } catch (e) {
-            if (!e.Update) {
-                // not one of ours, cast it
-                e = lib.TemplateError(e);
-            }
-            e.Update(path);
-
-            // Unless they marked the dev flag, show them a trace from here
-            if (!this.dev) {
-                var old = e;
-                e = new Error(old.message);
-                e.name = old.name;
-            }
-
-            throw e;
-        }
-    },
-
     addFilter: function(name, func) {
         this.filters[name] = func;
     },
@@ -260,9 +239,10 @@ var Template = Object.extend({
         this.upToDate = upToDate || function() { return false; };
 
         if(eagerCompile) {
-            var self = this;
-            this.env.tryTemplate(this.path, function() { self._compile(); });
-            self = null;
+            var _this = this;
+            lib.withPrettyErrors(this.path,
+                                 this.env.dev,
+                                 function() { _this._compile(); });
         }
         else {
             this.compiled = false;
@@ -284,7 +264,8 @@ var Template = Object.extend({
                 frame || new Frame(),
                 runtime);
         };
-        return this.env.tryTemplate(this.path, render);
+
+        return lib.withPrettyErrors(this.path, this.env.dev, render);
     },
 
     isUpToDate: function() {
