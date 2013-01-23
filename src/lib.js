@@ -14,7 +14,7 @@ exports.withPrettyErrors = function(path, withInternals, func) {
         e.Update(path);
 
         // Unless they marked the dev flag, show them a trace from here
-        if (!this.dev) {
+        if (!withInternals) {
             var old = e;
             e = new Error(old.message);
             e.name = old.name;
