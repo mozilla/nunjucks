@@ -55,8 +55,20 @@ describe('filter', function() {
         var s = render('{{ "3.5" | float }}');
         s.should.equal('3.5');
 
-        var s = render('{{ "3.5" | int }}');
+        s = render('{{ "3.5" | int }}');
         s.should.equal('3');
+
+        s = render('{{ "0" | int }}');
+        s.should.equal('0');
+
+        s = render('{{ "0" | float }}');
+        s.should.equal('0');
+
+        s = render('{{ "bob" | int("cat") }}');
+        s.should.equal('cat');
+
+        s = render('{{ "bob" | float("cat") }}');
+        s.should.equal('cat');
     });
 
     it('groupby', function() {

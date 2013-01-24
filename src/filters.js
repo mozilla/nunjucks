@@ -281,11 +281,13 @@ var filters = {
     },
 
     'float': function(val, def) {
-        return parseFloat(val) || def;
+        var res = parseFloat(val);
+        return isNaN(res) ? def : res;
     },
 
     'int': function(val, def) {
-        return parseInt(val) || def;
+        var res = parseInt(val, 10);
+        return isNaN(res) ? def : res;
     }
 };
 
