@@ -1,4 +1,4 @@
-
+var lib = require('./lib');
 var Object = require('./object');
 
 // Frames keep track of scoping both at compile-time and run-time so
@@ -138,6 +138,15 @@ function contextOrFrameLookup(context, frame, name) {
         frame.lookup(name);
 }
 
+function handleError(error, lineno, colno) {
+    if(error.lineno) {
+        throw error;
+    }
+    else {
+        throw new lib.TemplateError(error, lineno, colno);
+    }
+}
+
 module.exports = {
     Frame: Frame,
     makeMacro: makeMacro,
@@ -145,5 +154,6 @@ module.exports = {
     numArgs: numArgs,
     suppressValue: suppressValue,
     suppressLookupValue: suppressLookupValue,
-    contextOrFrameLookup: contextOrFrameLookup
+    contextOrFrameLookup: contextOrFrameLookup,
+    handleError: handleError
 };

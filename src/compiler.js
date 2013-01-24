@@ -63,7 +63,10 @@ var Compiler = Object.extend({
     emitFuncBegin: function(name) {
         this.buffer = 'output';
         this.emitLine('function ' + name + '(env, context, frame, runtime) {');
+        this.emitLine('var lineno = null;');
+        this.emitLine('var colno = null;');
         this.emitLine('var ' + this.buffer + ' = "";');
+        this.emitLine('try {');
     },
 
     emitFuncEnd: function(noReturn) {
@@ -71,6 +74,9 @@ var Compiler = Object.extend({
             this.emitLine('return ' + this.buffer + ';');
         }
 
+        this.emitLine('} catch (e) {');
+        this.emitLine('  runtime.handleError(e, lineno, colno);');
+        this.emitLine('}');
         this.emitLine('}');
         this.buffer = null;
     },
@@ -174,9 +180,8 @@ var Compiler = Object.extend({
             this.emit(v);
         }
         else {
-            this.emit('runtime.suppressValue(' +
-                        'runtime.contextOrFrameLookup(' +
-                            'context, frame, "' + name + '"))');
+            this.emit('runtime.contextOrFrameLookup(' +
+                      'context, frame, "' + name + '")');
         }
     },
 
@@ -269,10 +274,20 @@ var Compiler = Object.extend({
     },
 
     compileFunCall: function(node, frame) {
+        // Keep track of line/col info at runtime by settings
+        // variables within an expression. An expression in javascript
+        // like (x, y, z) returns the last value, and x and y can be
+        // anything
+        this.emit('(lineno = ' + node.lineno +
+                  ', colno = ' + node.colno + ', ');
+
         this.emit('(');
         this._compileExpression(node.name, frame);
         this.emit(')');
+
         this._compileAggregate(node.args, frame, '(', ')');
+
+        this.emit(')');
     },
 
     compileFilter: function(node, frame) {
@@ -579,9 +594,9 @@ var Compiler = Object.extend({
     },
 
     compileOutput: function(node, frame) {
-        this.emit(this.buffer + ' += ');
+        this.emit(this.buffer + ' += runtime.suppressValue(');
         this._compileChildren(node, frame);
-        this.emit(';\n');
+        this.emit(');\n');
     },
 
     compileRoot: function(node, frame) {
@@ -608,12 +623,12 @@ var Compiler = Object.extend({
             this.emitLine('var l_super = context.getSuper(env, ' +
                           '"' + name + '", ' +
                           'b_' + name + ', ' +
+                          'frame, ' +
                           'runtime);');
 
             var tmpFrame = new Frame();
             tmpFrame.set('super', 'l_super');
             this.compile(block.body, tmpFrame);
-
             this.emitFuncEnd();
         }
 
@@ -639,13 +654,15 @@ var Compiler = Object.extend({
     },
 
     getCode: function() {
-        return this.codebuf.join("");
+        return this.codebuf.join('');
     }
 });
 
 // var fs = require("fs");
 // var c = new Compiler();
-// var src = '{% raw %}hello{% endraw %}';
+// //var src = '{{ foo({a:1}) }}';
+// var src = '{% extends "base.html" %}' +
+//     '{% block block1 %}{{ super() }}BAR{% endblock %}';
 
 // var ns = parser.parse(src);
 // nodes.printNodes(ns);

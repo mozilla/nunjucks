@@ -189,7 +189,7 @@ var Context = Object.extend({
         return this.blocks[name][0];
     },
 
-    getSuper: function(env, name, block) {
+    getSuper: function(env, name, block, frame, runtime) {
         var idx = (this.blocks[name] || []).indexOf(block);
         var blk = this.blocks[name][idx + 1];
         var context = this;
@@ -199,7 +199,7 @@ var Context = Object.extend({
                 throw new Error('no super block available for "' + name + '"');
             }
 
-            return blk(env, context);
+            return blk(env, context, frame, runtime);
         };
     },
 

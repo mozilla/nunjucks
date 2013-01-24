@@ -9,7 +9,7 @@ exports.withPrettyErrors = function(path, withInternals, func) {
     } catch (e) {
         if (!e.Update) {
             // not one of ours, cast it
-            e = exports.TemplateError(e);
+            e = new exports.TemplateError(e);
         }
         e.Update(path);
 
@@ -25,28 +25,33 @@ exports.withPrettyErrors = function(path, withInternals, func) {
 }
 
 exports.TemplateError = function(message, lineno, colno) {
-    var self = this;
+    var err = this;
 
     if (message instanceof Error) { // for casting regular js errors
-        self = message;
+        err = message;
         message = message.name + ": " + message.message;
     } else {
-        Error.captureStackTrace(self);
+        Error.captureStackTrace(err);
     }
 
-    self.name = "Template render error";
-    self.message = message;
-    self.lineno = lineno;
-    self.colno = colno;
-    self.firstUpdate = true;
+    err.name = "Template render error";
+    err.message = message;
+    err.lineno = lineno;
+    err.colno = colno;
+    err.firstUpdate = true;
 
-    self.Update = function(path) {
+    err.Update = function(path) {
         var message = "(" + (path || "unknown path") + ")";
 
         // only show lineno + colno next to path of template
         // where error occurred
-        if (this.firstUpdate && this.lineno && this.colno) {
-            message += ' [Line ' + this.lineno + ', Column ' + this.colno + ']';
+        if (this.firstUpdate) {
+            if(this.lineno && this.colno) {
+                message += ' [Line ' + this.lineno + ', Column ' + this.colno + ']';
+            }
+            else if(this.lineno) {
+                message += ' [Line ' + this.lineno + ']';
+            }
         }
 
         message += '\n ';
@@ -58,8 +63,10 @@ exports.TemplateError = function(message, lineno, colno) {
         this.firstUpdate = false;
         return this;
     };
-    return self;
+
+    return err;
 };
+
 exports.TemplateError.prototype = Error.prototype;
 
 exports.isFunction = function(obj) {
