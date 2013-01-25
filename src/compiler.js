@@ -359,6 +359,38 @@ var Compiler = Object.extend({
 
         if(node.name instanceof nodes.Array) {
             // key/value iteration
+            this.emitLine('var ' + i + ';');
+
+            // did they pass an array of tuples or a dict? 
+            this.emitLine('if (runtime.isArray(' + arr + ')) {');
+
+            // array of tuples
+            this.emitLine('for (' + i + '=0; ' + i + ' < ' + arr + '.length; ' 
+                            + i + '++) {');
+
+            // create one frame var for each element in the unpacking expr
+            for (var u=0; u < node.name.children.length; u++) {
+                var tid = this.tmpid();
+                this.emitLine('var ' + tid + ' = ' + arr + '[' + i + '][' + u + ']');
+                this.emitLine('frame.set("' + node.name.children[u].value 
+                    + '", ' + arr + '[' + i + '][' + u + ']' + ');');
+                frame.set(node.name.children[u].value, tid);
+            }
+
+            this.emitLine('frame.set("loop.index", ' + i + ' + 1);');
+            this.emitLine('frame.set("loop.index0", ' + i + ');');
+            this.emitLine('frame.set("loop.first", ' + i + ' === 0);');
+
+            this.compile(node.body, frame);
+
+            this.emitLine('}');
+
+            this.emitLine('} else {');
+
+            // dict
+
+            this.emitLine(i + ' = -1;');
+
             var key = node.name.children[0];
             var val = node.name.children[1];
             var k = this.tmpid();
@@ -367,7 +399,6 @@ var Compiler = Object.extend({
             frame.set(key.value, k);
             frame.set(val.value, v);
 
-            this.emitLine('var ' + i + ' = -1;');
             this.emitLine('for(var ' + k + ' in ' + arr + ') {');
             this.emitLine(i + '++;');
             this.emitLine('var ' + v + ' = ' + arr + '[' + k + '];');
@@ -376,6 +407,10 @@ var Compiler = Object.extend({
             this.emitLine('frame.set("loop.index", ' + i + ' + 1);');
             this.emitLine('frame.set("loop.index0", ' + i + ');');
             this.emitLine('frame.set("loop.first", ' + i + ' === 0);');
+            this.compile(node.body, frame);
+
+            this.emitLine('}');
+            this.emitLine('}');
         }
         else {
             var v = this.tmpid();
@@ -394,10 +429,12 @@ var Compiler = Object.extend({
             this.emitLine('frame.set("loop.first", ' + i + ' === 0);');
             this.emitLine('frame.set("loop.last", ' + i + ' === ' + arr + '.length - 1);');
             this.emitLine('frame.set("loop.length", ' + arr + '.length);');
+
+            this.compile(node.body, frame);
+
+            this.emitLine('}');
         }
 
-        this.compile(node.body, frame);
-        this.emitLine('}');
 
         this.emitLine('frame = frame.pop();');
     },

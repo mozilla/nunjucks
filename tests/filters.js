@@ -46,6 +46,53 @@ describe('filter', function() {
         s.should.equal('&lt;html&gt;');
     });
 
+    it("dictsort", function() {
+        // no real foolproof way to test that a js obj has been sorted,
+        // as its enumeration ordering is undefined and might fluke
+        // being sorted originally .. lets just init with some jumbled
+        // keys 
+
+        // no params - should be case insensitive, by key
+        var s = render('{% for item in items | dictsort %}' +
+                           '{{ item[0] }}{% endfor %}', { 
+            items: { 
+                "e": 1,  
+                "d": 2,
+                "c": 3,
+                "a": 4,
+                "f": 5,
+                "b": 6
+            }
+        });
+        s.should.equal("abcdef");
+
+        // case sensitive = true
+        var s = render('{% for item in items | dictsort(true) %}' +
+                           '{{ item[0] }},{% endfor %}', { 
+            items: { 
+                "ABC": 6,
+                "ABc": 5,
+                "Abc": 1,
+                "abc": 2
+            }
+        });
+
+        s.should.equal("ABC,ABc,Abc,abc,");
+
+        // use values for sort 
+        var s = render('{% for item in items | dictsort(false, "value") %}' +
+                           '{{ item[0] }}{% endfor %}', { 
+            items: { 
+                "a": 6,
+                "b": 5,
+                "c": 1,
+                "d": 2
+            }
+        });
+
+        s.should.equal("cdba");
+    });
+
     it('first', function() {
         var s = render('{{ [1,2,3] | first }}');
         s.should.equal('1');

@@ -155,5 +155,6 @@ module.exports = {
     suppressValue: suppressValue,
     suppressLookupValue: suppressLookupValue,
     contextOrFrameLookup: contextOrFrameLookup,
-    handleError: handleError
+    handleError: handleError,
+    isArray: lib.isArray
 };

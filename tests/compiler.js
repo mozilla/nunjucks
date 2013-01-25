@@ -101,6 +101,11 @@ describe('compiler', function() {
                        { arr: [1, 2, 3, 4, 5] });
         s.should.equal('12345');
 
+        s = render('{% for a, b, c in arr %}' + 
+                       '{{ a }},{{ b }},{{ c }}.{% endfor %}',
+                       { arr: [['x', 'y', 'z'], ['1', '2', '3']] });
+        s.should.equal('x,y,z.1,2,3.');
+
         s = render('{% for item in arr | batch(2) %}{{ item[0] }}{% endfor %}',
                    { arr: ['a', 'b', 'c', 'd'] });
         s.should.equal('ac');
@@ -160,9 +165,9 @@ describe('compiler', function() {
                        '{{ foo() }}');
         s.should.equal('This is a macro');
 
-        s = render('{% macro foo(x, y) %}{{ y }}{% endmacro %}' +
+        /*s = render('{% macro foo(x, y) %}{{ y }}{% endmacro %}' +
                    '{{ foo(1) }}');
-        s.should.equal('undefined');
+        s.should.equal('undefined');*/
 
         s = render('{% macro foo(x, y) %}{{ y }}{% endmacro %}' +
                    '{{ foo(1, 2) }}');
