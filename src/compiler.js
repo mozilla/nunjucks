@@ -358,10 +358,17 @@ var Compiler = Object.extend({
         this.emitLine(';');
 
         if(node.name instanceof nodes.Array) {
-            // key/value iteration
+            // key/value iteration. the user could have passed a dict 
+            // amd two elements to be unpacked - "for k,v in { a: b }"
+            // or they could have passed an array of arrays - 
+            // for a,b,c in [[a,b,c],[c,d,e]] where the number of 
+            // elements to be unpacked is variable.
+            //
+            // we cant known in advance which has been passed so we 
+            // have to emit code that handles both cases
             this.emitLine('var ' + i + ';');
 
-            // did they pass an array of tuples or a dict? 
+            // did they pass an array of tuples or a dict?
             this.emitLine('if (runtime.isArray(' + arr + ')) {');
 
             // array of tuples
@@ -383,12 +390,11 @@ var Compiler = Object.extend({
 
             this.compile(node.body, frame);
 
-            this.emitLine('}');
+            this.emitLine('}'); // end for
 
             this.emitLine('} else {');
 
-            // dict
-
+            // caller passed a dict
             this.emitLine(i + ' = -1;');
 
             var key = node.name.children[0];
@@ -409,8 +415,9 @@ var Compiler = Object.extend({
             this.emitLine('frame.set("loop.first", ' + i + ' === 0);');
             this.compile(node.body, frame);
 
-            this.emitLine('}');
-            this.emitLine('}');
+            this.emitLine('}'); // end for 
+
+            this.emitLine('}'); // end if
         }
         else {
             var v = this.tmpid();
