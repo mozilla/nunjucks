@@ -137,12 +137,17 @@ var Parser = Object.extend({
             this.fail('parseFor: variable name expected for loop');
         }
 
-        if(this.skip(lexer.TOKEN_COMMA)) {
+        var type = this.peekToken().type;
+        if (type == lexer.TOKEN_COMMA) {
             // key/value iteration
             var key = node.name;
             node.name = new nodes.Array(key.lineno, key.colno);
             node.name.addChild(key);
-            node.name.addChild(this.parsePrimary());
+
+            while (this.skip(lexer.TOKEN_COMMA)) {
+                var prim = this.parsePrimary();
+                node.name.addChild(prim);
+            }
         }
 
         if(!this.skipSymbol('in')) {
