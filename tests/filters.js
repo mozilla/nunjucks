@@ -47,9 +47,9 @@ describe('filter', function() {
     });
 
     it("dictsort", function() {
-        // no real foolproof way to test that a js obj has been sorted,
-        // as its enumeration ordering is undefined and might fluke
-        // being sorted originally .. lets just init with some jumbled
+        // no real foolproof way to test that a js obj has been transformed 
+        // from unsorted -> sorted, as its enumeration ordering is undefined 
+        // and might fluke being sorted originally .. lets just init with some jumbled
         // keys 
 
         // no params - should be case insensitive, by key
