@@ -138,13 +138,13 @@ var Parser = Object.extend({
         }
 
         var type = this.peekToken().type;
-        if (type == lexer.TOKEN_COMMA) {
+        if(type == lexer.TOKEN_COMMA) {
             // key/value iteration
             var key = node.name;
             node.name = new nodes.Array(key.lineno, key.colno);
             node.name.addChild(key);
 
-            while (this.skip(lexer.TOKEN_COMMA)) {
+            while(this.skip(lexer.TOKEN_COMMA)) {
                 var prim = this.parsePrimary();
                 node.name.addChild(prim);
             }

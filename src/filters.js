@@ -68,14 +68,14 @@ var filters = {
         var si;
         if (by === undefined || by === "key") {
             si = 0;
-        } else if (by == "value") {
+        } else if (by === "value") {
             si = 1;
         } else {
             throw new lib.TemplateError(
                 "dictsort filter: You can only sort by either key or value");
         }
 
-        var sortfunc = function(t1, t2) { 
+        array.sort(function(t1, t2) { 
             var a = t1[si];
             var b = t2[si];
 
@@ -89,9 +89,7 @@ var filters = {
             }
 
             return a > b ? 1 : (a == b ? 0 : -1);
-        };
-
-        array.sort(sortfunc);
+        });
 
         return array;
     },
