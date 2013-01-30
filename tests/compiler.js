@@ -167,7 +167,7 @@ describe('compiler', function() {
 
         s = render('{% macro foo(x, y) %}{{ y }}{% endmacro %}' +
                    '{{ foo(1) }}');
-        s.should.equal('undefined');
+        s.should.equal('');
 
         s = render('{% macro foo(x, y) %}{{ y }}{% endmacro %}' +
                    '{{ foo(1, 2) }}');
