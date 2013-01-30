@@ -101,6 +101,11 @@ describe('compiler', function() {
                        { arr: [1, 2, 3, 4, 5] });
         s.should.equal('12345');
 
+        s = render('{% for a, b, c in arr %}' + 
+                       '{{ a }},{{ b }},{{ c }}.{% endfor %}',
+                       { arr: [['x', 'y', 'z'], ['1', '2', '3']] });
+        s.should.equal('x,y,z.1,2,3.');
+
         s = render('{% for item in arr | batch(2) %}{{ item[0] }}{% endfor %}',
                    { arr: ['a', 'b', 'c', 'd'] });
         s.should.equal('ac');
