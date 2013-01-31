@@ -74,7 +74,8 @@ Tokenizer.prototype.nextToken = function() {
             // We hit some whitespace
             return token(TOKEN_WHITESPACE, tok, lineno, colno);
         }
-        else if((tok = this._extractString(BLOCK_END))) {
+        else if((tok = this._extractString(BLOCK_END)) ||
+                (tok = this._extractString('-' + BLOCK_END))) {
             // Special check for the block end tag
             //
             // It is a requirement that start and end tags are composed of
@@ -155,7 +156,8 @@ Tokenizer.prototype.nextToken = function() {
         if(this.is_finished()) {
             return null;
         }
-        else if((tok = this._extractString(BLOCK_START))) {
+        else if((tok = this._extractString(BLOCK_START + '-')) ||
+                (tok = this._extractString(BLOCK_START))) {
             this.in_code = true;
             return token(TOKEN_BLOCK_START, tok, lineno, colno);
         }

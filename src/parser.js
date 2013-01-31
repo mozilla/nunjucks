@@ -9,6 +9,7 @@ var Parser = Object.extend({
         this.tokens = tokens;
         this.peeked = null;
         this.breakOnBlocks = null;
+        this.dropLeadingWhitespace = false;
     },
 
     nextToken: function (withWhitespace) {
@@ -112,7 +113,14 @@ var Parser = Object.extend({
             name = this.nextToken().value;
         }
 
-        if(!this.skip(lexer.TOKEN_BLOCK_END)) {
+        var tok = this.nextToken();
+
+        if(tok.type == lexer.TOKEN_BLOCK_END) {
+            if(tok.value.charAt(0) === '-') {
+                this.dropLeadingWhitespace = true;
+            }
+        }
+        else {
             this.fail("expected block end in " + name + " statement");
         }
     },
@@ -232,12 +240,19 @@ var Parser = Object.extend({
         var names = node.names;
 
         while(1) {
-            var type = this.peekToken().type;
-            if(type == lexer.TOKEN_BLOCK_END) {
+            var nextTok = this.peekToken();
+            if(nextTok.type == lexer.TOKEN_BLOCK_END) {
                 if(!names.children.length) {
                     this.fail('parseFrom: Expected at least one import name',
                               fromTok.lineno,
                               fromTok.colno);
+                }
+
+                // Since we are manually advancing past the block end,
+                // need to keep track of whitespace control (normally
+                // this is done in `advanceAfterBlockEnd`
+                if(nextTok.value.charAt(0) == '-') {
+                    this.dropLeadingWhitespace = true;
                 }
 
                 this.nextToken();
@@ -930,11 +945,32 @@ var Parser = Object.extend({
 
         while((tok = this.nextToken())) {
             if(tok.type == lexer.TOKEN_DATA) {
+                var data = tok.value;
+                var nextToken = this.peekToken();
+                var nextVal = nextToken && nextToken.value;
+
+                // If the last token has "-" we need to trim the
+                // leading whitespace of the data. This is marked with
+                // the `dropLeadingWhitespace` variable.
+                if(this.dropLeadingWhitespace) {
+                    // TODO: this could be optimized (don't use regex)
+                    data = data.replace(/^\s*/, '');
+                    this.dropLeadingWhitespace = false;
+                }
+
+                // Same for the succeding block start token
+                if(nextToken &&
+                   nextToken.type == lexer.TOKEN_BLOCK_START &&
+                   nextVal.charAt(nextVal.length - 1) == '-') {
+                    // TODO: this could be optimized (don't use regex)
+                    data = data.replace(/\s*$/, '');
+                }
+
                 buf.push(new nodes.Output(tok.lineno,
                                           tok.colno,
                                           [new nodes.TemplateData(tok.lineno,
                                                                   tok.colno,
-                                                                  tok.value)]));
+                                                                  data)]));
             }
             else if(tok.type == lexer.TOKEN_BLOCK_START) {
                 var n = this.parseStatement();
@@ -967,17 +1003,17 @@ var Parser = Object.extend({
     }
 });
 
-var util = require('util');
+// var util = require('util');
 
-// var l = lexer.lex('{% set x = 3 %}');
+// var l = lexer.lex('{%- if x -%}\n hello {% endif %}');
 // var t;
 // while((t = l.nextToken())) {
 //     console.log(util.inspect(t));
 // }
 
-// var p = new Parser(lexer.lex('{% raw %}hello{% endraw %}'));
-// var n = p.parse();
-// nodes.printNodes(n);
+var p = new Parser(lexer.lex('{% from x import y -%}\n  hi \n'));
+var n = p.parse();
+nodes.printNodes(n);
 
 module.exports = {
     parse: function(src) {

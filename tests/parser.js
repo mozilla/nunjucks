@@ -264,6 +264,73 @@ describe('parser', function() {
                   [nodes.Symbol, 'foobarbaz']]]]]);
     });
 
+    it('should parse whitespace control', function() {
+        // Every start/end tag with "-" should trim the whitespace
+        // before or after it
+
+        isAST(parser.parse('{% if x %}\n  hi \n{% endif %}'),
+              [nodes.Root,
+               [nodes.If,
+                [nodes.Symbol, 'x'],
+                [nodes.NodeList,
+                 [nodes.Output,
+                  [nodes.TemplateData, '\n  hi \n']]]]]);
+
+        isAST(parser.parse('{% if x -%}\n  hi \n{% endif %}'),
+              [nodes.Root,
+               [nodes.If,
+                [nodes.Symbol, 'x'],
+                [nodes.NodeList,
+                 [nodes.Output,
+                  [nodes.TemplateData, 'hi \n']]]]]);
+
+        isAST(parser.parse('{% if x %}\n  hi \n{%- endif %}'),
+              [nodes.Root,
+               [nodes.If,
+                [nodes.Symbol, 'x'],
+                [nodes.NodeList,
+                 [nodes.Output,
+                  [nodes.TemplateData, '\n  hi']]]]]);
+
+        isAST(parser.parse('{% if x -%}\n  hi \n{%- endif %}'),
+              [nodes.Root,
+               [nodes.If,
+                [nodes.Symbol, 'x'],
+                [nodes.NodeList,
+                 [nodes.Output,
+                  [nodes.TemplateData, 'hi']]]]]);
+
+        isAST(parser.parse('poop  \n{%- if x -%}\n  hi \n{%- endif %}'),
+              [nodes.Root,
+               [nodes.Output,
+                [nodes.TemplateData, 'poop']],
+               [nodes.If,
+                [nodes.Symbol, 'x'],
+                [nodes.NodeList,
+                 [nodes.Output,
+                  [nodes.TemplateData, 'hi']]]]]);
+
+        // The from statement required a special case so make sure to
+        // test it
+        isAST(parser.parse('{% from x import y %}\n  hi \n'),
+              [nodes.Root,
+               [nodes.FromImport,
+                [nodes.Symbol, 'x'],
+                [nodes.NodeList,
+                 [nodes.Symbol, 'y']]],
+               [nodes.Output,
+                [nodes.TemplateData, '\n  hi \n']]]);
+
+        isAST(parser.parse('{% from x import y -%}\n  hi \n'),
+              [nodes.Root,
+               [nodes.FromImport,
+                [nodes.Symbol, 'x'],
+                [nodes.NodeList,
+                 [nodes.Symbol, 'y']]],
+               [nodes.Output,
+                [nodes.TemplateData, 'hi \n']]]);
+    });
+
     it('should throw errors', function() {
         (function() {
             parser.parse('hello {{ foo');
