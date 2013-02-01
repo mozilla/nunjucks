@@ -543,7 +543,25 @@ var Parser = Object.extend({
     },
 
     parseExpression: function() {
+        var node = this.parseInlineIf();
+        return node;
+    },
+
+    parseInlineIf: function() {
         var node = this.parseOr();
+        if(this.skipSymbol('if')) {
+            var cond_node = this.parseOr();
+            var body_node = node;
+            node = new nodes.InlineIf(node.lineno, node.colno);
+            node.body = body_node;
+            node.cond = cond_node;
+            if(this.skipSymbol('else')) {
+                node.else_ = this.parseOr();
+            } else {
+                node.else_ = null;
+            }
+        }
+
         return node;
     },
 

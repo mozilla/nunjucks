@@ -91,7 +91,38 @@ describe('compiler', function() {
         s.should.equal('good');
 
         s = render('{% if food == "pizza" %}pizza{% endif %}' +
-                   '{% if food =="beer" %}beer{% endif %}', 
+                   '{% if food =="beer" %}beer{% endif %}',
+                  { food: 'beer' });
+        s.should.equal('beer');
+    });
+
+    it('should compile inline conditionals', function() {
+        var tmpl = 'Give me some {{ "pizza" if hungry else "water" }}';
+
+        var s = render(tmpl, { hungry: true });
+        s.should.equal('Give me some pizza');
+
+        s = render(tmpl, { hungry: false });
+        s.should.equal('Give me some water');
+
+        s = render('{{ "good" if not hungry }}',
+                   { hungry: false });
+        s.should.equal('good');
+
+        s = render('{{ "good" if hungry and like_pizza }}',
+            { hungry: true, like_pizza: true });
+        s.should.equal('good');
+
+        s = render('{{ "good" if hungry or like_pizza }}',
+            { hungry: false, like_pizza: true });
+        s.should.equal('good');
+
+        s = render('{{ "good" if (hungry or like_pizza) and anchovies }}',
+            { hungry: false, like_pizza: true, anchovies: true });
+        s.should.equal('good');
+
+        s = render('{{ "pizza" if food == "pizza" }}' +
+                   '{{ "beer" if food == "beer" }}',
                   { food: 'beer' });
         s.should.equal('beer');
     });
@@ -101,7 +132,7 @@ describe('compiler', function() {
                        { arr: [1, 2, 3, 4, 5] });
         s.should.equal('12345');
 
-        s = render('{% for a, b, c in arr %}' + 
+        s = render('{% for a, b, c in arr %}' +
                        '{{ a }},{{ b }},{{ c }}.{% endfor %}',
                        { arr: [['x', 'y', 'z'], ['1', '2', '3']] });
         s.should.equal('x,y,z.1,2,3.');
