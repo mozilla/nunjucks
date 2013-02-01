@@ -6,11 +6,19 @@ var lib = require('../src/lib');
 var compiler = require('../src/compiler');
 
 if(process.argv.length < 3) {
-    console.log('Usage: ' + path.basename(process.argv[1]) + ' <folder>');
+    console.log('Usage: ' + path.basename(process.argv[1]) + ' <folder> [-f]');
     process.exit(1);
 }
 
 var folder = process.argv[2];
+var force = false;
+if(process.argv.length > 3) {
+    process.argv.splice(3).forEach(function(e) {
+        if (e === '-f') {
+            force = true;
+        }
+    });
+}
 var templates = [];
 
 function addTemplates(dir) {
@@ -35,19 +43,33 @@ util.puts('(function() {');
 util.puts('var templates = {};');
 
 for(var i=0; i<templates.length; i++) {
-    var src = lib.withPrettyErrors(
-        templates[i],
-        false,
-        function() {
-            return compiler.compile(fs.readFileSync(templates[i],
-                                                    'utf-8'));
+    var doCompile = function() {
+        var src = lib.withPrettyErrors(
+            templates[i],
+            false,
+            function() {
+                return compiler.compile(fs.readFileSync(templates[i],
+                                                        'utf-8'));
+            }
+        );
+        var name = templates[i].replace(path.join(folder, '/'), '');
+
+        util.puts('templates["' + name + '"] = (function() {');
+        util.puts(src);
+        util.puts('})();');
+    }
+
+    // Don't stop generating the output if we're forcing compilation.
+    if(force) {
+        try {
+            doCompile();
+        } catch(e) {
+            console.error(e);
         }
-    );
-    var name = templates[i].replace(path.join(folder, '/'), '');
-    
-    util.puts('templates["' + name + '"] = (function() {');
-    util.puts(src);
-    util.puts('})();');
+    }
+    else {
+        doCompile();
+    }
 }
 
 util.puts('nunjucks.env = new nunjucks.Environment([]);');
