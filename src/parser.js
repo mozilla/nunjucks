@@ -1011,9 +1011,9 @@ var Parser = Object.extend({
 //     console.log(util.inspect(t));
 // }
 
-var p = new Parser(lexer.lex('{% from x import y -%}\n  hi \n'));
-var n = p.parse();
-nodes.printNodes(n);
+// var p = new Parser(lexer.lex('{% from x import y -%}\n  hi \n'));
+// var n = p.parse();
+// nodes.printNodes(n);
 
 module.exports = {
     parse: function(src) {
