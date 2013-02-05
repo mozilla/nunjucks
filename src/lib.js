@@ -136,7 +136,7 @@ exports.each = function(obj, func, context) {
     if(obj == null) {
         return;
     }
-    
+
     if(ArrayProto.each && obj.each == ArrayProto.each) {
         obj.forEach(func, context);
     }
@@ -156,7 +156,7 @@ exports.map = function(obj, func) {
     if(ArrayProto.map && obj.map === ArrayProto.map) {
         return obj.map(func);
     }
-    
+
     for(var i=0; i<obj.length; i++) {
         results[results.length] = func(obj[i], i);
     }

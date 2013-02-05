@@ -37,7 +37,7 @@ function extend(cls, name, props) {
 
     prototype.typename = name;
 
-    var new_cls = function() { 
+    var new_cls = function() {
         if(prototype.init) {
             prototype.init.apply(this, arguments);
         }
@@ -171,7 +171,7 @@ exports.each = function(obj, func, context) {
     if(obj == null) {
         return;
     }
-    
+
     if(ArrayProto.each && obj.each == ArrayProto.each) {
         obj.forEach(func, context);
     }
@@ -191,7 +191,7 @@ exports.map = function(obj, func) {
     if(ArrayProto.map && obj.map === ArrayProto.map) {
         return obj.map(func);
     }
-    
+
     for(var i=0; i<obj.length; i++) {
         results[results.length] = func(obj[i], i);
     }
@@ -451,7 +451,7 @@ var filters = {
                 x = x.toLowerCase();
                 y = y.toLowerCase();
             }
-               
+
             if(x < y) {
                 return reverse ? 1 : -1;
             }
