@@ -28,6 +28,4 @@ See http://nunjucks.jlongster.com/ for complete documentation.
 
 ## Contributors
 
-* James Long (owner)
-* Brent Hagany
-* Thomas Hunkapiller
+https://github.com/jlongster/nunjucks/graphs/contributors
