@@ -8,7 +8,8 @@
     },
     "devDependencies": {
         "should": "*",
-        "mocha": "*"
+        "mocha": "*",
+        "uglify-js": "*"
     },
     "engines": {
         "node": "*"

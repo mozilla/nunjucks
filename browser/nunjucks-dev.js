@@ -65,29 +65,55 @@ var ObjProto = Object.prototype;
 
 var exports = modules['lib'] = {};
 
+exports.withPrettyErrors = function(path, withInternals, func) {
+    try {
+        return func();
+    } catch (e) {
+        if (!e.Update) {
+            // not one of ours, cast it
+            e = new exports.TemplateError(e);
+        }
+        e.Update(path);
+
+        // Unless they marked the dev flag, show them a trace from here
+        if (!withInternals) {
+            var old = e;
+            e = new Error(old.message);
+            e.name = old.name;
+        }
+
+        throw e;
+    }
+}
+
 exports.TemplateError = function(message, lineno, colno) {
-    var self = this;
+    var err = this;
 
     if (message instanceof Error) { // for casting regular js errors
-        self = message;
+        err = message;
         message = message.name + ": " + message.message;
     } else {
-        Error.captureStackTrace(self);
+        Error.captureStackTrace(err);
     }
 
-    self.name = "Template render error";
-    self.message = message;
-    self.lineno = lineno;
-    self.colno = colno;
-    self.firstUpdate = true;
+    err.name = "Template render error";
+    err.message = message;
+    err.lineno = lineno;
+    err.colno = colno;
+    err.firstUpdate = true;
 
-    self.Update = function(path) {
+    err.Update = function(path) {
         var message = "(" + (path || "unknown path") + ")";
 
         // only show lineno + colno next to path of template
         // where error occurred
-        if (this.firstUpdate && this.lineno && this.colno) {
-            message += ' [Line ' + this.lineno + ', Column ' + this.colno + ']';
+        if (this.firstUpdate) {
+            if(this.lineno && this.colno) {
+                message += ' [Line ' + this.lineno + ', Column ' + this.colno + ']';
+            }
+            else if(this.lineno) {
+                message += ' [Line ' + this.lineno + ']';
+            }
         }
 
         message += '\n ';
@@ -99,10 +125,11 @@ exports.TemplateError = function(message, lineno, colno) {
         this.firstUpdate = false;
         return this;
     };
-    return self;
-};
-exports.TemplateError.prototype = Error.prototype;
 
+    return err;
+};
+
+exports.TemplateError.prototype = Error.prototype;
 
 exports.isFunction = function(obj) {
     return ObjProto.toString.call(obj) == '[object Function]';
@@ -445,10 +472,9 @@ modules['nodes'] = {
     CompareOperand: CompareOperand,
 
     printNodes: printNodes
-};
-})();
+};})();
 (function() {
-
+var lib = modules["lib"];
 var Object = modules["object"];
 
 // Frames keep track of scoping both at compile-time and run-time so
@@ -588,6 +614,15 @@ function contextOrFrameLookup(context, frame, name) {
         frame.lookup(name);
 }
 
+function handleError(error, lineno, colno) {
+    if(error.lineno) {
+        throw error;
+    }
+    else {
+        throw new lib.TemplateError(error, lineno, colno);
+    }
+}
+
 modules['runtime'] = {
     Frame: Frame,
     makeMacro: makeMacro,
@@ -595,7 +630,9 @@ modules['runtime'] = {
     numArgs: numArgs,
     suppressValue: suppressValue,
     suppressLookupValue: suppressLookupValue,
-    contextOrFrameLookup: contextOrFrameLookup
+    contextOrFrameLookup: contextOrFrameLookup,
+    handleError: handleError,
+    isArray: lib.isArray
 };
 })();
 (function() {
@@ -675,7 +712,8 @@ Tokenizer.prototype.nextToken = function() {
             // We hit some whitespace
             return token(TOKEN_WHITESPACE, tok, lineno, colno);
         }
-        else if((tok = this._extractString(BLOCK_END))) {
+        else if((tok = this._extractString(BLOCK_END)) ||
+                (tok = this._extractString('-' + BLOCK_END))) {
             // Special check for the block end tag
             //
             // It is a requirement that start and end tags are composed of
@@ -756,7 +794,8 @@ Tokenizer.prototype.nextToken = function() {
         if(this.is_finished()) {
             return null;
         }
-        else if((tok = this._extractString(BLOCK_START))) {
+        else if((tok = this._extractString(BLOCK_START + '-')) ||
+                (tok = this._extractString(BLOCK_START))) {
             this.in_code = true;
             return token(TOKEN_BLOCK_START, tok, lineno, colno);
         }
@@ -1023,6 +1062,7 @@ var Parser = Object.extend({
         this.tokens = tokens;
         this.peeked = null;
         this.breakOnBlocks = null;
+        this.dropLeadingWhitespace = false;
     },
 
     nextToken: function (withWhitespace) {
@@ -1126,7 +1166,14 @@ var Parser = Object.extend({
             name = this.nextToken().value;
         }
 
-        if(!this.skip(lexer.TOKEN_BLOCK_END)) {
+        var tok = this.nextToken();
+
+        if(tok.type == lexer.TOKEN_BLOCK_END) {
+            if(tok.value.charAt(0) === '-') {
+                this.dropLeadingWhitespace = true;
+            }
+        }
+        else {
             this.fail("expected block end in " + name + " statement");
         }
     },
@@ -1151,12 +1198,17 @@ var Parser = Object.extend({
             this.fail('parseFor: variable name expected for loop');
         }
 
-        if(this.skip(lexer.TOKEN_COMMA)) {
+        var type = this.peekToken().type;
+        if(type == lexer.TOKEN_COMMA) {
             // key/value iteration
             var key = node.name;
             node.name = new nodes.Array(key.lineno, key.colno);
             node.name.addChild(key);
-            node.name.addChild(this.parsePrimary());
+
+            while(this.skip(lexer.TOKEN_COMMA)) {
+                var prim = this.parsePrimary();
+                node.name.addChild(prim);
+            }
         }
 
         if(!this.skipSymbol('in')) {
@@ -1241,12 +1293,19 @@ var Parser = Object.extend({
         var names = node.names;
 
         while(1) {
-            var type = this.peekToken().type;
-            if(type == lexer.TOKEN_BLOCK_END) {
+            var nextTok = this.peekToken();
+            if(nextTok.type == lexer.TOKEN_BLOCK_END) {
                 if(!names.children.length) {
                     this.fail('parseFrom: Expected at least one import name',
                               fromTok.lineno,
                               fromTok.colno);
+                }
+
+                // Since we are manually advancing past the block end,
+                // need to keep track of whitespace control (normally
+                // this is done in `advanceAfterBlockEnd`
+                if(nextTok.value.charAt(0) == '-') {
+                    this.dropLeadingWhitespace = true;
                 }
 
                 this.nextToken();
@@ -1939,11 +1998,32 @@ var Parser = Object.extend({
 
         while((tok = this.nextToken())) {
             if(tok.type == lexer.TOKEN_DATA) {
+                var data = tok.value;
+                var nextToken = this.peekToken();
+                var nextVal = nextToken && nextToken.value;
+
+                // If the last token has "-" we need to trim the
+                // leading whitespace of the data. This is marked with
+                // the `dropLeadingWhitespace` variable.
+                if(this.dropLeadingWhitespace) {
+                    // TODO: this could be optimized (don't use regex)
+                    data = data.replace(/^\s*/, '');
+                    this.dropLeadingWhitespace = false;
+                }
+
+                // Same for the succeding block start token
+                if(nextToken &&
+                   nextToken.type == lexer.TOKEN_BLOCK_START &&
+                   nextVal.charAt(nextVal.length - 1) == '-') {
+                    // TODO: this could be optimized (don't use regex)
+                    data = data.replace(/\s*$/, '');
+                }
+
                 buf.push(new nodes.Output(tok.lineno,
                                           tok.colno,
                                           [new nodes.TemplateData(tok.lineno,
                                                                   tok.colno,
-                                                                  tok.value)]));
+                                                                  data)]));
             }
             else if(tok.type == lexer.TOKEN_BLOCK_START) {
                 var n = this.parseStatement();
@@ -1976,15 +2056,15 @@ var Parser = Object.extend({
     }
 });
 
-var util = modules["util"];
+// var util = modules["util"];
 
-// var l = lexer.lex('{% set x = 3 %}');
+// var l = lexer.lex('{%- if x -%}\n hello {% endif %}');
 // var t;
 // while((t = l.nextToken())) {
 //     console.log(util.inspect(t));
 // }
 
-// var p = new Parser(lexer.lex('{% raw %}hello{% endraw %}'));
+// var p = new Parser(lexer.lex('{% from x import y -%}\n  hi \n'));
 // var n = p.parse();
 // nodes.printNodes(n);
 
@@ -2061,7 +2141,10 @@ var Compiler = Object.extend({
     emitFuncBegin: function(name) {
         this.buffer = 'output';
         this.emitLine('function ' + name + '(env, context, frame, runtime) {');
+        this.emitLine('var lineno = null;');
+        this.emitLine('var colno = null;');
         this.emitLine('var ' + this.buffer + ' = "";');
+        this.emitLine('try {');
     },
 
     emitFuncEnd: function(noReturn) {
@@ -2069,6 +2152,9 @@ var Compiler = Object.extend({
             this.emitLine('return ' + this.buffer + ';');
         }
 
+        this.emitLine('} catch (e) {');
+        this.emitLine('  runtime.handleError(e, lineno, colno);');
+        this.emitLine('}');
         this.emitLine('}');
         this.buffer = null;
     },
@@ -2172,9 +2258,8 @@ var Compiler = Object.extend({
             this.emit(v);
         }
         else {
-            this.emit('runtime.suppressValue(' +
-                        'runtime.contextOrFrameLookup(' +
-                            'context, frame, "' + name + '"))');
+            this.emit('runtime.contextOrFrameLookup(' +
+                      'context, frame, "' + name + '")');
         }
     },
 
@@ -2267,10 +2352,20 @@ var Compiler = Object.extend({
     },
 
     compileFunCall: function(node, frame) {
+        // Keep track of line/col info at runtime by settings
+        // variables within an expression. An expression in javascript
+        // like (x, y, z) returns the last value, and x and y can be
+        // anything
+        this.emit('(lineno = ' + node.lineno +
+                  ', colno = ' + node.colno + ', ');
+
         this.emit('(');
         this._compileExpression(node.name, frame);
         this.emit(')');
+
         this._compileAggregate(node.args, frame, '(', ')');
+
+        this.emit(')');
     },
 
     compileFilter: function(node, frame) {
@@ -2341,7 +2436,45 @@ var Compiler = Object.extend({
         this.emitLine(';');
 
         if(node.name instanceof nodes.Array) {
-            // key/value iteration
+            // key/value iteration. the user could have passed a dict 
+            // amd two elements to be unpacked - "for k,v in { a: b }"
+            // or they could have passed an array of arrays - 
+            // for a,b,c in [[a,b,c],[c,d,e]] where the number of 
+            // elements to be unpacked is variable.
+            //
+            // we cant known in advance which has been passed so we 
+            // have to emit code that handles both cases
+            this.emitLine('var ' + i + ';');
+
+            // did they pass an array of tuples or a dict?
+            this.emitLine('if (runtime.isArray(' + arr + ')) {');
+
+            // array of tuples
+            this.emitLine('for (' + i + '=0; ' + i + ' < ' + arr + '.length; ' 
+                            + i + '++) {');
+
+            // create one frame var for each element in the unpacking expr
+            for (var u=0; u < node.name.children.length; u++) {
+                var tid = this.tmpid();
+                this.emitLine('var ' + tid + ' = ' + arr + '[' + i + '][' + u + ']');
+                this.emitLine('frame.set("' + node.name.children[u].value 
+                    + '", ' + arr + '[' + i + '][' + u + ']' + ');');
+                frame.set(node.name.children[u].value, tid);
+            }
+
+            this.emitLine('frame.set("loop.index", ' + i + ' + 1);');
+            this.emitLine('frame.set("loop.index0", ' + i + ');');
+            this.emitLine('frame.set("loop.first", ' + i + ' === 0);');
+
+            this.compile(node.body, frame);
+
+            this.emitLine('}'); // end for
+
+            this.emitLine('} else {');
+
+            // caller passed a dict
+            this.emitLine(i + ' = -1;');
+
             var key = node.name.children[0];
             var val = node.name.children[1];
             var k = this.tmpid();
@@ -2350,7 +2483,6 @@ var Compiler = Object.extend({
             frame.set(key.value, k);
             frame.set(val.value, v);
 
-            this.emitLine('var ' + i + ' = -1;');
             this.emitLine('for(var ' + k + ' in ' + arr + ') {');
             this.emitLine(i + '++;');
             this.emitLine('var ' + v + ' = ' + arr + '[' + k + '];');
@@ -2359,6 +2491,11 @@ var Compiler = Object.extend({
             this.emitLine('frame.set("loop.index", ' + i + ' + 1);');
             this.emitLine('frame.set("loop.index0", ' + i + ');');
             this.emitLine('frame.set("loop.first", ' + i + ' === 0);');
+            this.compile(node.body, frame);
+
+            this.emitLine('}'); // end for 
+
+            this.emitLine('}'); // end if
         }
         else {
             var v = this.tmpid();
@@ -2377,10 +2514,12 @@ var Compiler = Object.extend({
             this.emitLine('frame.set("loop.first", ' + i + ' === 0);');
             this.emitLine('frame.set("loop.last", ' + i + ' === ' + arr + '.length - 1);');
             this.emitLine('frame.set("loop.length", ' + arr + '.length);');
+
+            this.compile(node.body, frame);
+
+            this.emitLine('}');
         }
 
-        this.compile(node.body, frame);
-        this.emitLine('}');
 
         this.emitLine('frame = frame.pop();');
     },
@@ -2577,9 +2716,9 @@ var Compiler = Object.extend({
     },
 
     compileOutput: function(node, frame) {
-        this.emit(this.buffer + ' += ');
+        this.emit(this.buffer + ' += runtime.suppressValue(');
         this._compileChildren(node, frame);
-        this.emit(';\n');
+        this.emit(');\n');
     },
 
     compileRoot: function(node, frame) {
@@ -2606,12 +2745,12 @@ var Compiler = Object.extend({
             this.emitLine('var l_super = context.getSuper(env, ' +
                           '"' + name + '", ' +
                           'b_' + name + ', ' +
+                          'frame, ' +
                           'runtime);');
 
             var tmpFrame = new Frame();
             tmpFrame.set('super', 'l_super');
             this.compile(block.body, tmpFrame);
-
             this.emitFuncEnd();
         }
 
@@ -2637,13 +2776,15 @@ var Compiler = Object.extend({
     },
 
     getCode: function() {
-        return this.codebuf.join("");
+        return this.codebuf.join('');
     }
 });
 
 // var fs = modules["fs"];
 // var c = new Compiler();
-// var src = '{% raw %}hello{% endraw %}';
+// //var src = '{{ foo({a:1}) }}';
+// var src = '{% extends "base.html" %}' +
+//     '{% block block1 %}{{ super() }}BAR{% endblock %}';
 
 // var ns = parser.parse(src);
 // nodes.printNodes(ns);
@@ -2716,8 +2857,48 @@ var filters = {
         return pre + str + post;
     },
 
-    default: function(val, def) {
+    'default': function(val, def) {
         return val ? val : def;
+    },
+
+    dictsort: function(val, case_sensitive, by) {
+        if (!lib.isObject(val)) {
+            throw new lib.TemplateError("dictsort filter: val must be an object");
+        }
+
+        var array = [];
+        for (var k in val) {
+            // deliberately include properties from the object's prototype
+            array.push([k,val[k]]);
+        }
+
+        var si;
+        if (by === undefined || by === "key") {
+            si = 0;
+        } else if (by === "value") {
+            si = 1;
+        } else {
+            throw new lib.TemplateError(
+                "dictsort filter: You can only sort by either key or value");
+        }
+
+        array.sort(function(t1, t2) { 
+            var a = t1[si];
+            var b = t2[si];
+
+            if (!case_sensitive) {
+                if (lib.isString(a)) {
+                    a = a.toUpperCase();
+                }
+                if (lib.isString(b)) {
+                    b = b.toUpperCase();
+                }
+            }
+
+            return a > b ? 1 : (a == b ? 0 : -1);
+        });
+
+        return array;
     },
 
     escape: function(str) {
@@ -2946,17 +3127,19 @@ var filters = {
         return str.match(/\w+/g).length;
     },
 
-    float: function(val, def) {
-        return parseFloat(val) || def;
+    'float': function(val, def) {
+        var res = parseFloat(val);
+        return isNaN(res) ? def : res;
     },
 
-    int: function(val, def) {
-        return parseInt(val) || def;
+    'int': function(val, def) {
+        var res = parseInt(val, 10);
+        return isNaN(res) ? def : res;
     }
 };
 
 // Aliases
-filters.d = filters.default;
+filters.d = filters['default'];
 filters.e = filters.escape;
 
 modules['filters'] = filters;
@@ -3008,8 +3191,7 @@ var HttpLoader = Object.extend({
 
 modules['web-loaders'] = {
     HttpLoader: HttpLoader
-};
-})();
+};})();
 (function() {
 if(typeof window === 'undefined') {
     modules['loaders'] = modules["node-loaders"];
@@ -3056,27 +3238,6 @@ var Environment = Object.extend({
 
         this.filters = builtin_filters;
         this.cache = {};
-    },
-
-    tryTemplate: function(path, func) {
-        try {
-            return func();
-        } catch (e) {
-            if (!e.Update) {
-                // not one of ours, cast it
-                e = lib.TemplateError(e);
-            }
-            e.Update(path);
-
-            // Unless they marked the dev flag, show them a trace from here
-            if (!this.dev) {
-                var old = e;
-                e = new Error(old.message);
-                e.name = old.name;
-            }
-
-            throw e;
-        }
     },
 
     addFilter: function(name, func) {
@@ -3231,7 +3392,7 @@ var Context = Object.extend({
         return this.blocks[name][0];
     },
 
-    getSuper: function(env, name, block) {
+    getSuper: function(env, name, block, frame, runtime) {
         var idx = (this.blocks[name] || []).indexOf(block);
         var blk = this.blocks[name][idx + 1];
         var context = this;
@@ -3241,7 +3402,7 @@ var Context = Object.extend({
                 throw new Error('no super block available for "' + name + '"');
             }
 
-            return blk(env, context);
+            return blk(env, context, frame, runtime);
         };
     },
 
@@ -3281,9 +3442,10 @@ var Template = Object.extend({
         this.upToDate = upToDate || function() { return false; };
 
         if(eagerCompile) {
-            var self = this;
-            this.env.tryTemplate(this.path, function() { self._compile(); });
-            self = null;
+            var _this = this;
+            lib.withPrettyErrors(this.path,
+                                 this.env.dev,
+                                 function() { _this._compile(); });
         }
         else {
             this.compiled = false;
@@ -3305,7 +3467,8 @@ var Template = Object.extend({
                 frame || new Frame(),
                 runtime);
         };
-        return this.env.tryTemplate(this.path, render);
+
+        return lib.withPrettyErrors(this.path, this.env.dev, render);
     },
 
     isUpToDate: function() {
@@ -3396,7 +3559,6 @@ if(loaders) {
 window.nunjucks.compiler = compiler;
 window.nunjucks.parser = parser;
 window.nunjucks.lexer = lexer;
-
 window.nunjucks.require =
    function(name) { return modules[name]; };
 
