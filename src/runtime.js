@@ -131,6 +131,13 @@ function suppressLookupValue(obj, val) {
     }
 }
 
+function callWrap(obj, name, args) {
+    if (obj) {
+        return obj.apply(this, args);
+    }
+    throw new Error('Could not find value "' + name + '" to call.');
+}
+
 function contextOrFrameLookup(context, frame, name) {
     var val = context.lookup(name);
     return (val !== undefined && val !== null) ?
@@ -155,6 +162,7 @@ module.exports = {
     suppressValue: suppressValue,
     suppressLookupValue: suppressLookupValue,
     contextOrFrameLookup: contextOrFrameLookup,
+    callWrap: callWrap,
     handleError: handleError,
     isArray: lib.isArray
 };

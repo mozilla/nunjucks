@@ -273,6 +273,22 @@ var Compiler = Object.extend({
         this.emit(')');
     },
 
+    _getNodeName: function(node) {
+        switch (node.typename) {
+            case 'Symbol':
+                return node.value;
+            case 'FunCall':
+                return 'the return value of (' + this._getNodeName(node.name) + ')';
+            case 'LookupVal':
+                return this._getNodeName(node.target) + '["' +
+                       this._getNodeName(node.val) + '"]';
+            case 'Literal':
+                return node.value.toString().substr(0, 10);
+            default:
+                return '--expression--';
+        }
+    },
+
     compileFunCall: function(node, frame) {
         // Keep track of line/col info at runtime by settings
         // variables within an expression. An expression in javascript
@@ -281,11 +297,15 @@ var Compiler = Object.extend({
         this.emit('(lineno = ' + node.lineno +
                   ', colno = ' + node.colno + ', ');
 
-        this.emit('(');
+        this.emit('runtime.callWrap(');
+        // Compile it as normal.
         this._compileExpression(node.name, frame);
-        this.emit(')');
 
-        this._compileAggregate(node.args, frame, '(', ')');
+        // Output the name of what we're calling so we can get friendly errors
+        // if the lookup fails.
+        this.emit(', "' + this._getNodeName(node.name).replace(/"/g, '\\"') + '", ');
+
+        this._compileAggregate(node.args, frame, '[', '])');
 
         this.emit(')');
     },
