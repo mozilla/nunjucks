@@ -276,6 +276,23 @@ describe('filter', function() {
         s.should.equal('foo');
     });
 
+    it('truncate', function() {
+        var s = render('{{ "foo bar" | truncate(3) }}');
+        s.should.equal('foo...');
+
+        var s = render('{{ "foo bar baz" | truncate(6) }}');
+        s.should.equal('foo...');
+
+        var s = render('{{ "foo bar baz" | truncate(7) }}');
+        s.should.equal('foo bar...');
+
+        var s = render('{{ "foo bar baz" | truncate(5, true) }}');
+        s.should.equal('foo b...');
+
+        var s = render('{{ "foo bar baz" | truncate(6, true, "?") }}');
+        s.should.equal('foo ba?');
+    });
+
     it('upper', function() {
         var s = render('{{ "foo" | upper }}');
         s.should.equal('FOO');
