@@ -312,6 +312,22 @@ var filters = {
         return str.replace(/^\s*|\s*$/g, '');
     },
 
+    truncate: function(input, length, killwords, end) {
+        length = length || 255;
+
+        if (input.length <= length)
+            return input;
+
+        if (killwords) {
+            input = input.substring(0, length);
+        } else {
+            input = input.substring(0, input.lastIndexOf(' ', length));
+        }
+
+        input += (end !== undefined && end !== null) ? end : '...';
+        return input;
+    },
+
     upper: function(str) {
         return str.toUpperCase();
     },
