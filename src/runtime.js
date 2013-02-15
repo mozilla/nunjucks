@@ -132,10 +132,14 @@ function suppressLookupValue(obj, val) {
 }
 
 function callWrap(obj, name, args) {
-    if (obj) {
-        return obj.apply(this, args);
+    if(!obj) {
+        throw new Error('Unable to call `' + name + '`, which is undefined or falsey');
     }
-    throw new Error('Could not find value "' + name + '" to call.');
+    else if(typeof obj !== 'function') {
+        throw new Error('Unable to call `' + name + '`, which is not a function');
+    }
+
+    return obj.apply(this, args);
 }
 
 function contextOrFrameLookup(context, frame, name) {
