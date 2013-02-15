@@ -392,13 +392,13 @@ var Compiler = Object.extend({
         this.emitLine(';');
 
         if(node.name instanceof nodes.Array) {
-            // key/value iteration. the user could have passed a dict 
+            // key/value iteration. the user could have passed a dict
             // amd two elements to be unpacked - "for k,v in { a: b }"
-            // or they could have passed an array of arrays - 
-            // for a,b,c in [[a,b,c],[c,d,e]] where the number of 
+            // or they could have passed an array of arrays -
+            // for a,b,c in [[a,b,c],[c,d,e]] where the number of
             // elements to be unpacked is variable.
             //
-            // we cant known in advance which has been passed so we 
+            // we cant known in advance which has been passed so we
             // have to emit code that handles both cases
             this.emitLine('var ' + i + ';');
 
@@ -406,14 +406,14 @@ var Compiler = Object.extend({
             this.emitLine('if (runtime.isArray(' + arr + ')) {');
 
             // array of tuples
-            this.emitLine('for (' + i + '=0; ' + i + ' < ' + arr + '.length; ' 
+            this.emitLine('for (' + i + '=0; ' + i + ' < ' + arr + '.length; '
                             + i + '++) {');
 
             // create one frame var for each element in the unpacking expr
             for (var u=0; u < node.name.children.length; u++) {
                 var tid = this.tmpid();
                 this.emitLine('var ' + tid + ' = ' + arr + '[' + i + '][' + u + ']');
-                this.emitLine('frame.set("' + node.name.children[u].value 
+                this.emitLine('frame.set("' + node.name.children[u].value
                     + '", ' + arr + '[' + i + '][' + u + ']' + ');');
                 frame.set(node.name.children[u].value, tid);
             }
@@ -449,7 +449,7 @@ var Compiler = Object.extend({
             this.emitLine('frame.set("loop.first", ' + i + ' === 0);');
             this.compile(node.body, frame);
 
-            this.emitLine('}'); // end for 
+            this.emitLine('}'); // end for
 
             this.emitLine('}'); // end if
         }
@@ -672,6 +672,17 @@ var Compiler = Object.extend({
     },
 
     compileOutput: function(node, frame) {
+        if (node.children.length == 1 &&
+            node.children[0].typename == 'TemplateData') {
+            var val = node.children[0].value;
+            if (val !== undefined && val !== null) {
+                this.emit(this.buffer + ' += ');
+                this.compileLiteral(node.children[0], frame);
+                this.emit(';\n');
+                return;
+            }
+        }
+
         this.emit(this.buffer + ' += runtime.suppressValue(');
         this._compileChildren(node, frame);
         this.emit(');\n');
