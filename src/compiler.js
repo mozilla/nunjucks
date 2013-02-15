@@ -120,6 +120,7 @@ var Compiler = Object.extend({
             nodes.Filter,
             nodes.LookupVal,
             nodes.Compare,
+            nodes.InlineIf,
             nodes.And,
             nodes.Or,
             nodes.Not,
@@ -214,6 +215,19 @@ var Compiler = Object.extend({
         this.compile(key, frame);
         this.emit(': ');
         this._compileExpression(val, frame);
+    },
+
+    compileInlineIf: function(node, frame) {
+        this.emit('(');
+        this.compile(node.cond, frame);
+        this.emit('?');
+        this.compile(node.body, frame);
+        this.emit(':');
+        if(node.else_ !== null)
+            this.compile(node.else_, frame);
+        else
+            this.emit('""');
+        this.emit(')');
     },
 
     compileOr: binOpEmitter(' || '),
