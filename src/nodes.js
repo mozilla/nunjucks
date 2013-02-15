@@ -32,7 +32,7 @@ var Node = Object.extend("Node", {
 
             if(obj instanceof Node) {
                 res = res.concat(obj.findAll(type));
-            }   
+            }
         }
 
         if(this instanceof NodeList) {
@@ -82,6 +82,7 @@ var Pair = Node.extend("Pair", { fields: ['key', 'value'] });
 var Dict = NodeList.extend("Dict");
 var LookupVal = Node.extend("LookupVal", { fields: ['target', 'val'] });
 var If = Node.extend("If", { fields: ['cond', 'body', 'else_'] });
+var InlineIf = Node.extend("InlineIf", { fields: ['cond', 'body', 'else_'] });
 var For = Node.extend("For", { fields: ['arr', 'name', 'body'] });
 var Macro = Node.extend("Macro", { fields: ['name', 'args', 'body'] });
 var Import = Node.extend("Import", { fields: ['template', 'target'] });
@@ -184,7 +185,7 @@ function printNodes(node, indent) {
                 printNodes(nodes[k], indent + 2);
             }
         }
-        
+
     }
 }
 
@@ -210,6 +211,7 @@ module.exports = {
     Output: Output,
     TemplateData: TemplateData,
     If: If,
+    InlineIf: InlineIf,
     For: For,
     Macro: Macro,
     Import: Import,
