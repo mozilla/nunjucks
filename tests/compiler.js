@@ -1,144 +1,144 @@
 var should = require('should');
-var render = require('./util').render;
+var render = require('./util').render,
+    asyncParallel = require('../src/lib').asyncParallel;
+
+// shorthand to generate test render callbacks
+function testCb (str, cb) {
+    return function (s) {
+        s.should.equal(str);
+        cb();
+    }
+}
 
 describe('compiler', function() {
-    it('should compile templates 1', function (done) {
-        render('Hello world', function (s) {
-            s.should.equal('Hello world');
-            done()
-        });
-    });
-    it('should compile templates 2', function (done) {
-        render('Hello world, {{ name }}', { name:'James' }, function (s) {
-            s.should.equal('Hello world, James');
-            done()
-        });
-    });
-    it('should compile templates 3', function (done) {
-        render('Hello world, {{name}}{{suffix}}, how are you',
-            { name:'James',
-                suffix:' Long'},
-            function (s) {
-                s.should.equal('Hello world, James Long, how are you');
-                done()
-            });
-    });
-    it('should compile templates 4', function (done) {
-        render('Hello world, {{name}}{{suffix}}, how are you',
-            { name:'James',
-                suffix:' Long'},
-            function (s) {
-                s.should.equal('Hello world, James Long, how are you');
-                done()
-            });
+    it('should compile templates', function (done) {
+        // for each area of tests, if there is more than one test,
+        // fire up asyncParallel.
+        //
+        // first arg is an array of functions to call, and the second arg
+        // is the function to call when all of them are finished.
+        //
+        // example below
+        asyncParallel(
+            [
+                function(next) {
+                    render('Hello world',
+                        testCb('Hello world', next));
+
+                }, function(next) {
+                    render('Hello world, {{ name }}',
+                           { name:'James' },
+                           testCb('Hello world, James', next));
+
+                }, function(next) {
+                    render('Hello world, {{name}}{{suffix}}, how are you',
+                           { name:'James',
+                             suffix:' Long'},
+                           testCb('Hello world, James Long, how are you', next));
+
+                }
+            ], function() { done(); }); // call done to finish this async test
     });
 
     it('should escape newlines', function(done) {
-        render('foo\\nbar', function(s) {
-            s.should.equal('foo\\nbar');
-            done()
-        })
+        render('foo\\nbar',
+            testCb('foo\\nbar', done));
     });
 
     it('should compile references', function(done) {
-        render('{{ foo.bar }}',
-               { foo: { bar: 'baz' }},
-               function(s) {
-                   s.should.equal('baz');
-                   done()
-        });
+        render('{{ foo.bar }}', { foo: { bar: 'baz' }},
+            testCb('baz', done));
     });
 
-    it('should fail silently on undefined values 1', function(done) {
-        render('{{ foo }}', function(s) {
-            s.should.equal('');
-            done();
-        });
+    it('should fail silently on undefined values', function(done) {
+        asyncParallel(
+            [
+                function(next) {
+                    render('{{ foo }}',
+                        testCb('', next));
+
+                }, function (next) {
+                    render('{{ foo.bar }}',
+                        testCb('', next));
+
+                }, function (next) {
+                    render('{{ foo.bar.baz }}',
+                        testCb('', next));
+
+                }, function (next) {
+                    render('{{ foo.bar.baz["biz"].mumble }}',
+                        testCb('', next));
+                }
+            ], function() { done() });
     });
 
-    it('should fail silently on undefined values 2', function (done) {
-        render('{{ foo.bar }}', function(s) {
-            s.should.equal('');
-            done()
-        });
-    });
+    it('should not treat falsy values the same as undefined', function(done) {
+        asyncParallel(
+            [
+                function (next) {
+                    render('{{ foo }}', {foo:0},
+                        testCb('0', next));
 
-    it('should fail silently on undefined values 3', function (done) {
-        render('{{ foo.bar.baz }}', function (s) {
-            s.should.equal('');
-            done()
-        });
-    });
-
-    it('should fail silently on undefined values 4', function (done) {
-        render('{{ foo.bar.baz["biz"].mumble }}', function (s) {
-            s.should.equal('');
-            done()
-        });
-    });
-
-    it('should not treat falsy values the same as undefined 1', function(done) {
-        render('{{ foo }}', {foo: 0}, function (s) {
-            s.should.equal('0');
-            done()
-        });
-    });
-
-    it('should not treat falsy values the same as undefined 2', function (done) {
-        render('{{ foo }}', {foo: false}, function (s) {
-            s.should.equal('false');
-            done()
-        });
+                }, function (next) {
+                    render('{{ foo }}', {foo:false},
+                        testCb('false', next));
+                }
+            ], function () { done() });
     });
 
     it('should compile function calls', function(done) {
         render('{{ foo("msg") }}',
                { foo: function(str) { return str + 'hi'; }},
-               function (s) {
-                   s.should.equal('msghi');
-                   done()
-               });
+               testCb('msghi', done));
     });
 
     it('should compile function calls with correct scope', function(done) {
         render('{{ foo.bar() }}',
                { foo: { bar: function() { return this.baz }, baz: 'hello' }},
-               function (s) {
-                   s.should.equal('hello');
-                   done()
-               });
+               testCb('hello', done));
     });
 
-    it('should compile if blocks', function() {
+    it('should compile if blocks', function(done) {
         var tmpl = ('Give me some {% if hungry %}pizza' +
                     '{% else %}water{% endif %}');
 
-        var s = render(tmpl, { hungry: true });
-        s.should.equal('Give me some pizza');
+        asyncParallel(
+            [
+                function (next) {
+                    render(tmpl, { hungry:true },
+                        testCb('Give me some pizza', next));
 
-        s = render(tmpl, { hungry: false });
-        s.should.equal('Give me some water');
+                }, function (next) {
+                    render(tmpl, { hungry:false },
+                        testCb('Give me some water', next));
 
-        s = render('{% if not hungry %}good{% endif %}',
-                   { hungry: false });
-        s.should.equal('good');
+                }, function (next) {
+                    render('{% if not hungry %}good{% endif %}',
+                           { hungry:false },
+                           testCb('good', next));
 
-        s = render('{% if hungry and like_pizza %}good{% endif %}',
-            { hungry: true, like_pizza: true });
-        s.should.equal('good');
+                }, function (next) {
+                    render('{% if hungry and like_pizza %}good{% endif %}',
+                           { hungry: true, like_pizza: true },
+                           testCb('good', next));
 
-        s = render('{% if hungry or like_pizza %}good{% endif %}',
-            { hungry: false, like_pizza: true });
-        s.should.equal('good');
+                }, function (next) {
+                    render('{% if hungry or like_pizza %}good{% endif %}',
+                           { hungry:false, like_pizza: true },
+                           testCb('good', next));
 
-        s = render('{% if (hungry or like_pizza) and anchovies %}good{% endif %}',
-            { hungry: false, like_pizza: true, anchovies: true });
-        s.should.equal('good');
+                }, function (next) {
+                    render('{% if (hungry or like_pizza) and anchovies %}good{% endif %}',
+                           { hungry:false, like_pizza:true, anchovies:true },
+                           testCb('good', next));
 
-        s = render('{% if food == "pizza" %}pizza{% endif %}' +
-                   '{% if food =="beer" %}beer{% endif %}',
-                  { food: 'beer' });
-        s.should.equal('beer');
+                }, function (next) {
+                    render('{% if food == "pizza" %}pizza{% endif %}' +
+                           '{% if food =="beer" %}beer{% endif %}',
+                           { food:'beer' },
+                           testCb('beer', next));
+                }
+            ], function () { done() });
     });
 
     it('should compile inline conditionals', function() {
@@ -371,31 +371,22 @@ describe('compiler', function() {
 
     it('should maintain nested scopes', function(done) {
         render('{% for i in [1,2] %}' +
-               '{% for i in [3,4] %}{{ i }}{% endfor %}' +
+                   '{% for i in [3,4] %}{{ i }}{% endfor %}' +
                '{{ i }}{% endfor %}',
-               function (s) {
-                   s.should.equal('341342');
-                   done();
-               });
+               testCb('341342', done));
     });
 
     it('should allow blocks in for loops', function(done) {
         render('{% extends "base2.html" %}' +
                '{% block item %}hello{{ item }}{% endblock %}',
-               function (s) {
-                   s.should.equal('hello1hello2');
-                   done();
-               });
+               testCb('hello1hello2', done));
     });
 
     it('should make includes inherit scope', function(done) {
         render('{% for item in [1,2] %}' +
                '{% include "item.html" %}' +
                '{% endfor %}',
-               function (s) {
-                   s.should.equal('showing 1showing 2');
-                   done();
-               });
+               testCb('showing 1showing 2', done));
     });
 
     it('should compile a set block', function() {
@@ -421,10 +412,7 @@ describe('compiler', function() {
     it('should compile set with frame references', function(done) {
         render('{% set username = user.name %}{{ username }}',
                { user: { name: 'james' } },
-               function(s) {
-                   s.should.equal('james');
-                   done();
-               });
+               testCb('james', done));
     });
 
     it('should throw errors', function() {
