@@ -48,34 +48,57 @@ var Environment = Object.extend({
         return this.filters[name];
     },
 
-    getTemplate: function(name, eagerCompile) {
+    getTemplate: function(name, eagerCompile, callback) {
+        var self = this;
         var info = null;
         var tmpl = this.cache[name];
-        var upToDate;
 
         if(typeof name !== 'string') {
             throw new Error('template names must be a string: ' + name);
         }
 
-        if(!tmpl || !tmpl.isUpToDate()) {
-            for(var i=0; i<this.loaders.length; i++) {
-                if((info = this.loaders[i].getSource(name))) {
-                    break;
+        var finalize = function() {
+            callback(self.cache[name]);
+        };
+
+        var _getTemplate = function() {
+            var index = 0;
+            var getSource = function (cb) {
+                self.loaders[i].getSource(name, function (info) {
+                    if (info) {
+                        cb(info)
+                    } else {
+                        (++index < self.loaders.length) ? getSource(cb) : cb(null);
+                    }
+                });
+            };
+
+            getSource(function (info) {
+                if (!info) {
+                    throw new Error('template not found: ' + name);
                 }
-            }
 
-            if(!info) {
-                throw new Error('template not found: ' + name);
-            }
+                self.cache[name] = new Template(info.src,
+                    self,
+                    info.path,
+                    info.upToDate,
+                    eagerCompile);
 
-            this.cache[name] = new Template(info.src,
-                                            this,
-                                            info.path,
-                                            info.upToDate,
-                                            eagerCompile);
+                callback(self.cache[name]);
+            });
+        };
+
+        if(!tmpl) {
+            _getTemplate();
+        } else {
+            tmpl.upToDate(function (isUpToDate) {
+                if (isUpToDate) {
+                    finalize();
+                } else {
+                    _getTemplate();
+                }
+            })
         }
-
-        return this.cache[name];
     },
 
     registerPrecompiled: function(templates) {
@@ -148,8 +171,10 @@ var Environment = Object.extend({
         }
     },
 
-    render: function(name, ctx) {
-        return this.getTemplate(name).render(ctx);
+    render: function(name, ctx, callback) {
+        this.getTemplate(name, function(tmpl) {
+            callback(tmpl.render(ctx));
+        })
     }
 });
 
@@ -266,10 +291,6 @@ var Template = Object.extend({
         };
 
         return lib.withPrettyErrors(this.path, this.env.dev, render);
-    },
-
-    isUpToDate: function() {
-        return this.upToDate();
     },
 
     getExported: function() {
