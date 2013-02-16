@@ -2,35 +2,35 @@ var should = require('should');
 var render = require('./util').render;
 
 describe('compiler', function() {
-    it('should compile templates', function(done) {
-        render('Hello world', function(s) {
+    it('should compile templates 1', function (done) {
+        render('Hello world', function (s) {
             s.should.equal('Hello world');
             done()
         });
     });
-    it('should compile templates', function (done) {
+    it('should compile templates 2', function (done) {
         render('Hello world, {{ name }}', { name:'James' }, function (s) {
             s.should.equal('Hello world, James');
             done()
         });
     });
-    it('should compile templates', function (done) {
+    it('should compile templates 3', function (done) {
         render('Hello world, {{name}}{{suffix}}, how are you',
-               { name:'James',
-                 suffix:' Long'},
-               function (s) {
-                   s.should.equal('Hello world, James Long, how are you');
-                   done()
-               });
+            { name:'James',
+                suffix:' Long'},
+            function (s) {
+                s.should.equal('Hello world, James Long, how are you');
+                done()
+            });
     });
-    it('should compile templates', function (done) {
+    it('should compile templates 4', function (done) {
         render('Hello world, {{name}}{{suffix}}, how are you',
-                { name:'James',
-                  suffix:' Long'},
-                function (s) {
-                    s.should.equal('Hello world, James Long, how are you');
-                    done()
-                });
+            { name:'James',
+                suffix:' Long'},
+            function (s) {
+                s.should.equal('Hello world, James Long, how are you');
+                done()
+            });
     });
 
     it('should escape newlines', function(done) {
@@ -49,38 +49,64 @@ describe('compiler', function() {
         });
     });
 
-    it('should fail silently on undefined values', function() {
-        var s = render('{{ foo }}');
-        s.should.equal('');
-
-        var s = render('{{ foo.bar }}');
-        s.should.equal('');
-
-        var s = render('{{ foo.bar.baz }}');
-        s.should.equal('');
-
-        var s = render('{{ foo.bar.baz["biz"].mumble }}');
-        s.should.equal('');
+    it('should fail silently on undefined values 1', function(done) {
+        render('{{ foo }}', function(s) {
+            s.should.equal('');
+            done();
+        });
     });
 
-    it('should not treat falsy values the same as undefined', function() {
-        var s = render('{{ foo }}', {foo: 0});
-        s.should.equal('0');
-
-        var s = render('{{ foo }}', {foo: false});
-        s.should.equal('false');
+    it('should fail silently on undefined values 2', function (done) {
+        render('{{ foo.bar }}', function(s) {
+            s.should.equal('');
+            done()
+        });
     });
 
-    it('should compile function calls', function() {
-        var s = render('{{ foo("msg") }}',
-                       { foo: function(str) { return str + 'hi'; }});
-        s.should.equal('msghi');
+    it('should fail silently on undefined values 3', function (done) {
+        render('{{ foo.bar.baz }}', function (s) {
+            s.should.equal('');
+            done()
+        });
     });
 
-    it('should compile function calls with correct scope', function() {
-        var s = render('{{ foo.bar() }}',
-            { foo: { bar: function() { return this.baz }, baz: 'hello' }});
-        s.should.equal('hello');
+    it('should fail silently on undefined values 4', function (done) {
+        render('{{ foo.bar.baz["biz"].mumble }}', function (s) {
+            s.should.equal('');
+            done()
+        });
+    });
+
+    it('should not treat falsy values the same as undefined 1', function(done) {
+        render('{{ foo }}', {foo: 0}, function (s) {
+            s.should.equal('0');
+            done()
+        });
+    });
+
+    it('should not treat falsy values the same as undefined 2', function (done) {
+        render('{{ foo }}', {foo: false}, function (s) {
+            s.should.equal('false');
+            done()
+        });
+    });
+
+    it('should compile function calls', function(done) {
+        render('{{ foo("msg") }}',
+               { foo: function(str) { return str + 'hi'; }},
+               function (s) {
+                   s.should.equal('msghi');
+                   done()
+               });
+    });
+
+    it('should compile function calls with correct scope', function(done) {
+        render('{{ foo.bar() }}',
+               { foo: { bar: function() { return this.baz }, baz: 'hello' }},
+               function (s) {
+                   s.should.equal('hello');
+                   done()
+               });
     });
 
     it('should compile if blocks', function() {
@@ -343,24 +369,33 @@ describe('compiler', function() {
         s.should.equal('hello world FooInclude thedude');
     });
 
-    it('should maintain nested scopes', function() {
-        var s = render('{% for i in [1,2] %}' +
-                       '{% for i in [3,4] %}{{ i }}{% endfor %}' +
-                       '{{ i }}{% endfor %}');
-        s.should.equal('341342');
+    it('should maintain nested scopes', function(done) {
+        render('{% for i in [1,2] %}' +
+               '{% for i in [3,4] %}{{ i }}{% endfor %}' +
+               '{{ i }}{% endfor %}',
+               function (s) {
+                   s.should.equal('341342');
+                   done();
+               });
     });
 
-    it('should allow blocks in for loops', function() {
-        var s = render('{% extends "base2.html" %}' +
-                       '{% block item %}hello{{ item }}{% endblock %}');
-        s.should.equal('hello1hello2');
+    it('should allow blocks in for loops', function(done) {
+        render('{% extends "base2.html" %}' +
+               '{% block item %}hello{{ item }}{% endblock %}',
+               function (s) {
+                   s.should.equal('hello1hello2');
+                   done();
+               });
     });
 
-    it('should make includes inherit scope', function() {
-        var s = render('{% for item in [1,2] %}' +
-                       '{% include "item.html" %}' +
-                       '{% endfor %}');
-        s.should.equal('showing 1showing 2');
+    it('should make includes inherit scope', function(done) {
+        render('{% for item in [1,2] %}' +
+               '{% include "item.html" %}' +
+               '{% endfor %}',
+               function (s) {
+                   s.should.equal('showing 1showing 2');
+                   done();
+               });
     });
 
     it('should compile a set block', function() {
@@ -383,10 +418,13 @@ describe('compiler', function() {
         s.should.equal('bar');
     });
 
-    it('should compile set with frame references', function() {
-        var s = render('{% set username = user.name %}{{ username }}',
-                       { user: { name: 'james' } });
-        s.should.equal('james');
+    it('should compile set with frame references', function(done) {
+        render('{% set username = user.name %}{{ username }}',
+               { user: { name: 'james' } },
+               function(s) {
+                   s.should.equal('james');
+                   done();
+               });
     });
 
     it('should throw errors', function() {

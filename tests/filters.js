@@ -3,26 +3,39 @@ var render = require('./util').render;
 var lib = require('../src/lib');
 
 describe('filter', function() {
-    it('abs', function() {
-        render('{{ -3|abs }}').should.equal('3');
-        render('{{ -3.456|abs }}').should.equal('3.456');
+    it('abs', function(done) {
+        render('{{ -3|abs }}', function(s) {
+            s.should.equal('3');
+            done();
+        })
+    });
+    it('abs', function (done) {
+        render('{{ -3.456|abs }}',function (s) {
+            s.should.equal('3.456');
+            done();
+        })
     });
 
-    it('batch', function() {
+    it('batch', function(done) {
         render('{% for a in [1,2,3,4,5,6]|batch(2) %}' +
                '-{% for b in a %}' +
                '{{ b }}' +
                '{% endfor %}-' +
-               '{% endfor %}')
-            .should.equal('-12--34--56-');
+               '{% endfor %}',
+               function (s) {
+                   s.should.equal('-12--34--56-');
+                   done();
+               });
     });
 
-    it('capitalize', function() {
-        var s = render('{{ "foo" | capitalize }}');
-        s.should.equal('Foo');
+    it('capitalize', function(done) {
+        render('{{ "foo" | capitalize }}', function (s) {
+            s.should.equal('Foo');
+            done();
+        });
     });
 
-    it('center', function() {
+    it('center', function(done) {
         var s = render('{{ "fooo" | center }}');
         s.should.equal(lib.repeat(' ', 38) + 'fooo' + 
                        lib.repeat(' ', 38));
@@ -33,20 +46,28 @@ describe('filter', function() {
 
     });
 
-    it('default', function() {
-        var s = render('{{ false | default("foo") }}');
-        s.should.equal('foo');
-
-        s = render('{{ "bar" | default("foo") }}');
-        s.should.equal('bar');
+    it('default', function(done) {
+        render('{{ false | default("foo") }}', function (s) {
+            s.should.equal('foo');
+            done();
+        });
     });
 
-    it('escape', function() {
-        var s = render('{{ "<html>" | escape }}');
-        s.should.equal('&lt;html&gt;');
+    it('default', function (done) {
+        render('{{ "bar" | default("foo") }}', function (s) {
+            s.should.equal('bar');
+            done();
+        });
     });
 
-    it("dictsort", function() {
+    it('escape', function(done) {
+        render('{{ "<html>" | escape }}', function (s) {
+            s.should.equal('&lt;html&gt;');
+            done();
+        });
+    });
+
+    it("dictsort", function(done) {
         // no real foolproof way to test that a js obj has been transformed 
         // from unsorted -> sorted, as its enumeration ordering is undefined 
         // and might fluke being sorted originally .. lets just init with some jumbled
@@ -93,29 +114,53 @@ describe('filter', function() {
         s.should.equal("cdba");
     });
 
-    it('first', function() {
-        var s = render('{{ [1,2,3] | first }}');
-        s.should.equal('1');
+    it('first', function(done) {
+        render('{{ [1,2,3] | first }}', function (s) {
+            s.should.equal('1');
+            done();
+        });
     });
 
-    it('float/int', function() {
-        var s = render('{{ "3.5" | float }}');
-        s.should.equal('3.5');
+    it('float/int', function (done) {
+        render('{{ "3.5" | float }}', function (s) {
+            s.should.equal('3.5');
+            done();
+        });
+    });
 
-        s = render('{{ "3.5" | int }}');
-        s.should.equal('3');
+    it('float/int', function (done) {
+        render('{{ "3.5" | int }}', function (s) {
+            s.should.equal('3');
+            done();
+        });
+    });
 
-        s = render('{{ "0" | int }}');
-        s.should.equal('0');
+    it('float/int', function (done) {
+        render('{{ "0" | int }}', function (s) {
+            s.should.equal('0');
+            done();
+        });
+    });
 
-        s = render('{{ "0" | float }}');
-        s.should.equal('0');
+    it('float/int', function (done) {
+        render('{{ "0" | float }}', function (s) {
+            s.should.equal('0');
+            done();
+        });
+    });
 
-        s = render('{{ "bob" | int("cat") }}');
-        s.should.equal('cat');
+    it('float/int', function (done) {
+        render('{{ "bob" | int("cat") }}', function (s) {
+            s.should.equal('cat');
+            done();
+        });
+    });
 
-        s = render('{{ "bob" | float("cat") }}');
-        s.should.equal('cat');
+    it('float/int', function (done) {
+        render('{{ "bob" | float("cat") }}', function (s) {
+            s.should.equal('cat');
+            done();
+        });
     });
 
     it('groupby', function() {
@@ -137,15 +182,23 @@ describe('filter', function() {
         s.should.equal(':green:jamesjessie:blue:johnjim');
     });
 
-    it('indent', function() {
-        var s = render('{{ "one\ntwo\nthree" | indent }}');
-        s.should.equal('one\n    two\n    three\n');
-
-        s = render('{{ "one\ntwo\nthree" | indent(2) }}');
-        s.should.equal('one\n  two\n  three\n');
-
-        s = render('{{ "one\ntwo\nthree" | indent(2, true) }}');
-        s.should.equal('  one\n  two\n  three\n');
+    it('indent', function(done) {
+        render('{{ "one\ntwo\nthree" | indent }}', function(s) {
+            s.should.equal('one\n    two\n    three\n');
+            done();
+        });
+    });
+    it('indent', function (done) {
+        render('{{ "one\ntwo\nthree" | indent(2) }}', function (s) {
+            s.should.equal('one\n  two\n  three\n');
+            done();
+        });
+    });
+    it('indent', function (done) {
+        render('{{ "one\ntwo\nthree" | indent(2, true) }}', function (s) {
+            s.should.equal('  one\n  two\n  three\n');
+            done();
+        });
     });
 
     it('join', function() {
@@ -164,14 +217,18 @@ describe('filter', function() {
         s.should.equal('foo,bar,bear');
     });
 
-    it('last', function() {
-        var s = render('{{ [1,2,3] | last }}');
-        s.should.equal('3');
+    it('last', function(done) {
+        render('{{ [1,2,3] | last }}', function (s) {
+            s.should.equal('3');
+            done();
+        });
     });
 
-    it('length', function() {
-        var s = render('{{ [1,2,3] | length }}');
-        s.should.equal('3');        
+    it('length', function(done) {
+        render('{{ [1,2,3] | length }}', function (s) {
+            s.should.equal('3');
+            done();
+        });
     });
 
     it('list', function() {
@@ -179,9 +236,11 @@ describe('filter', function() {
         s.should.equal('f,o,o,b,a,r,');
     });
 
-    it('lower', function() {
-        var s = render('{{ "fOObAr" | lower }}');
-        s.should.equal('foobar');
+    it('lower', function(done) {
+        render('{{ "fOObAr" | lower }}', function (s) {
+            s.should.equal('foobar');
+            done();
+        });
     });
 
     it('random', function() {
@@ -293,13 +352,17 @@ describe('filter', function() {
         s.should.equal('foo ba?');
     });
 
-    it('upper', function() {
-        var s = render('{{ "foo" | upper }}');
-        s.should.equal('FOO');
+    it('upper', function(done) {
+        render('{{ "foo" | upper }}', function(s) {
+            s.should.equal('FOO');
+            done();
+        });
     });
 
-    it('wordcount', function() {
-        var s = render('{{ "foo bar baz" | wordcount }}');
-        s.should.equal('3');
+    it('wordcount', function(done) {
+        render('{{ "foo bar baz" | wordcount }}', function (s) {
+            s.should.equal('3');
+            done();
+        });
     });
 });
