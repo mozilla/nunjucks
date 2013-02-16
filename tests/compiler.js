@@ -2,32 +2,51 @@ var should = require('should');
 var render = require('./util').render;
 
 describe('compiler', function() {
-    it('should compile templates', function() {
-        var s = render('Hello world');
-        s.should.equal('Hello world');
-
-        s = render('Hello world, {{ name }}',
-                   { name: 'James' });
-        s.should.equal('Hello world, James');
-
-        s = render('Hello world, {{name}}{{suffix}}, how are you',
-                   { name: 'James',
-                     suffix: ' Long'});
-        s.should.equal('Hello world, James Long, how are you');
+    it('should compile templates', function(done) {
+        render('Hello world', function(s) {
+            s.should.equal('Hello world');
+            done()
+        });
+    });
+    it('should compile templates', function (done) {
+        render('Hello world, {{ name }}', { name:'James' }, function (s) {
+            s.should.equal('Hello world, James');
+            done()
+        });
+    });
+    it('should compile templates', function (done) {
+        render('Hello world, {{name}}{{suffix}}, how are you',
+               { name:'James',
+                 suffix:' Long'},
+               function (s) {
+                   s.should.equal('Hello world, James Long, how are you');
+                   done()
+               });
+    });
+    it('should compile templates', function (done) {
+        render('Hello world, {{name}}{{suffix}}, how are you',
+                { name:'James',
+                  suffix:' Long'},
+                function (s) {
+                    s.should.equal('Hello world, James Long, how are you');
+                    done()
+                });
     });
 
-    it('should escape newlines', function() {
-        render('foo\\nbar').should.equal('foo\\nbar');
+    it('should escape newlines', function(done) {
+        render('foo\\nbar', function(s) {
+            s.should.equal('foo\\nbar');
+            done()
+        })
     });
 
-    it('should compile references', function() {
-        var s = render('{{ foo.bar }}',
-                       { foo: { bar: 'baz' }});
-        s.should.equal('baz');
-
-        s = render('{{ foo["bar"] }}',
-                   { foo: { bar: 'baz' }});
-        s.should.equal('baz');
+    it('should compile references', function(done) {
+        render('{{ foo.bar }}',
+               { foo: { bar: 'baz' }},
+               function(s) {
+                   s.should.equal('baz');
+                   done()
+        });
     });
 
     it('should fail silently on undefined values', function() {

@@ -64,7 +64,7 @@ var Environment = Object.extend({
         var _getTemplate = function() {
             var index = 0;
             var getSource = function (cb) {
-                self.loaders[i].getSource(name, function (info) {
+                self.loaders[index].getSource(name, function (info) {
                     if (info) {
                         cb(info)
                     } else {
@@ -277,8 +277,16 @@ var Template = Object.extend({
         }
     },
 
-    render: function(ctx, frame) {
+    render: function(ctx, frame, callback) {
         var self = this;
+        if (typeof ctx === 'function') {
+            callback = ctx;
+            ctx = {};
+        }
+        else if (typeof frame === 'function') {
+            callback = frame;
+            frame = null;
+        }
 
         var render = function() {
             if(!self.compiled) {
@@ -287,10 +295,11 @@ var Template = Object.extend({
 
             var context = new Context(ctx || {}, self.blocks);
 
-            return self.rootRenderFunc(self.env,
+            self.rootRenderFunc(self.env,
                 context,
                 frame || new Frame(),
-                runtime);
+                runtime,
+                function(s) {callback(s)});
         };
 
         return lib.withPrettyErrors(this.path, this.env.dev, render);
