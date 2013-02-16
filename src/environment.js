@@ -133,13 +133,15 @@ var Environment = Object.extend({
 
                 context = lib.extend(context, ctx);
 
-                var res = env.render(name, context);
-                k(null, res);
+                env.render(name, context, function(res) {
+                    k(null, res);
+                });
             };
         }
         else {
             // Express <2.5.11
             var http = require('http');
+            var self = this;
             var res = http.ServerResponse.prototype;
 
             res._render = function(name, ctx, k) {
@@ -159,14 +161,15 @@ var Environment = Object.extend({
                 }
 
                 context = lib.extend(context, app._locals);
-                var str = env.render(name, context);
 
-                if(k) {
-                    k(null, str);
-                }
-                else {
-                    this.send(str);
-                }
+                env.render(name, context, function (str) {
+                    if (k) {
+                        k(null, str);
+                    }
+                    else {
+                        self.send(str);
+                    }
+                });
             };
         }
     },
