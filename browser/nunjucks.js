@@ -198,7 +198,7 @@ exports.each = function(obj, func, context) {
     if(obj == null) {
         return;
     }
-    
+
     if(ArrayProto.each && obj.each == ArrayProto.each) {
         obj.forEach(func, context);
     }
@@ -218,7 +218,7 @@ exports.map = function(obj, func) {
     if(ArrayProto.map && obj.map === ArrayProto.map) {
         return obj.map(func);
     }
-    
+
     for(var i=0; i<obj.length; i++) {
         results[results.length] = func(obj[i], i);
     }
@@ -545,6 +545,22 @@ var filters = {
         return str.replace(/^\s*|\s*$/g, '');
     },
 
+    truncate: function(input, length, killwords, end) {
+        length = length || 255;
+
+        if (input.length <= length)
+            return input;
+
+        if (killwords) {
+            input = input.substring(0, length);
+        } else {
+            input = input.substring(0, input.lastIndexOf(' ', length));
+        }
+
+        input += (end !== undefined && end !== null) ? end : '...';
+        return input;
+    },
+
     upper: function(str) {
         return str.toUpperCase();
     },
@@ -704,6 +720,17 @@ function suppressLookupValue(obj, val) {
     }
 }
 
+function callWrap(obj, name, args) {
+    if(!obj) {
+        throw new Error('Unable to call `' + name + '`, which is undefined or falsey');
+    }
+    else if(typeof obj !== 'function') {
+        throw new Error('Unable to call `' + name + '`, which is not a function');
+    }
+
+    return obj.apply(this, args);
+}
+
 function contextOrFrameLookup(context, frame, name) {
     var val = context.lookup(name);
     return (val !== undefined && val !== null) ?
@@ -728,6 +755,7 @@ modules['runtime'] = {
     suppressValue: suppressValue,
     suppressLookupValue: suppressLookupValue,
     contextOrFrameLookup: contextOrFrameLookup,
+    callWrap: callWrap,
     handleError: handleError,
     isArray: lib.isArray
 };
@@ -1091,6 +1119,7 @@ if(loaders) {
 window.nunjucks.compiler = compiler;
 window.nunjucks.parser = parser;
 window.nunjucks.lexer = lexer;
+
 window.nunjucks.require =
    function(name) { return modules[name]; };
 

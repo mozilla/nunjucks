@@ -33,6 +33,8 @@ var HttpLoader = Object.extend({
             }
         };
 
+        url += (url.indexOf('?') === -1 ? '?' : '&') + 's=' + Date.now();
+
         // Synchronous because this API shouldn't be used in
         // production (pre-load compiled templates instead)
         ajax.open('GET', url, false);

@@ -63,42 +63,57 @@ modules['object'] = extend(Object, "Object", {});
 var ArrayProto = Array.prototype;
 var ObjProto = Object.prototype;
 
-var escapeMap = {
-    '&': '&amp;',
-    '"': '&quot;',
-    "'": '&#39;',
-    "<": '&lt;',
-    ">": '&gt;'
-};
-var lookupEscape = function(ch) {
-    return escapeMap[ch];
-};
-
 var exports = modules['lib'] = {};
 
+exports.withPrettyErrors = function(path, withInternals, func) {
+    try {
+        return func();
+    } catch (e) {
+        if (!e.Update) {
+            // not one of ours, cast it
+            e = new exports.TemplateError(e);
+        }
+        e.Update(path);
+
+        // Unless they marked the dev flag, show them a trace from here
+        if (!withInternals) {
+            var old = e;
+            e = new Error(old.message);
+            e.name = old.name;
+        }
+
+        throw e;
+    }
+}
+
 exports.TemplateError = function(message, lineno, colno) {
-    var self = this;
+    var err = this;
 
     if (message instanceof Error) { // for casting regular js errors
-        self = message;
+        err = message;
         message = message.name + ": " + message.message;
     } else {
-        Error.captureStackTrace(self);
+        Error.captureStackTrace(err);
     }
 
-    self.name = "Template render error";
-    self.message = message;
-    self.lineno = lineno;
-    self.colno = colno;
-    self.firstUpdate = true;
+    err.name = "Template render error";
+    err.message = message;
+    err.lineno = lineno;
+    err.colno = colno;
+    err.firstUpdate = true;
 
-    self.Update = function(path) {
+    err.Update = function(path) {
         var message = "(" + (path || "unknown path") + ")";
 
         // only show lineno + colno next to path of template
         // where error occurred
-        if (this.firstUpdate && this.lineno && this.colno) {
-            message += ' [Line ' + this.lineno + ', Column ' + this.colno + ']';
+        if (this.firstUpdate) {
+            if(this.lineno && this.colno) {
+                message += ' [Line ' + this.lineno + ', Column ' + this.colno + ']';
+            }
+            else if(this.lineno) {
+                message += ' [Line ' + this.lineno + ']';
+            }
         }
 
         message += '\n ';
@@ -110,14 +125,11 @@ exports.TemplateError = function(message, lineno, colno) {
         this.firstUpdate = false;
         return this;
     };
-    return self;
+
+    return err;
 };
+
 exports.TemplateError.prototype = Error.prototype;
-
-
-exports.escape = function(val) {
-    return val.replace(/[&"'<>]/g, lookupEscape);
-};
 
 exports.isFunction = function(obj) {
     return ObjProto.toString.call(obj) == '[object Function]';
@@ -186,7 +198,7 @@ exports.each = function(obj, func, context) {
     if(obj == null) {
         return;
     }
-    
+
     if(ArrayProto.each && obj.each == ArrayProto.each) {
         obj.forEach(func, context);
     }
@@ -206,7 +218,7 @@ exports.map = function(obj, func) {
     if(ArrayProto.map && obj.map === ArrayProto.map) {
         return obj.map(func);
     }
-    
+
     for(var i=0; i<obj.length; i++) {
         results[results.length] = func(obj[i], i);
     }
@@ -271,14 +283,56 @@ var filters = {
         return pre + str + post;
     },
 
-    default: function(val, def) {
+    'default': function(val, def) {
         return val ? val : def;
     },
 
-    escape: lib.escape,
+    dictsort: function(val, case_sensitive, by) {
+        if (!lib.isObject(val)) {
+            throw new lib.TemplateError("dictsort filter: val must be an object");
+        }
 
-    safe: function(str) {
-        return (str && str.raw) ? str.raw : str;
+        var array = [];
+        for (var k in val) {
+            // deliberately include properties from the object's prototype
+            array.push([k,val[k]]);
+        }
+
+        var si;
+        if (by === undefined || by === "key") {
+            si = 0;
+        } else if (by === "value") {
+            si = 1;
+        } else {
+            throw new lib.TemplateError(
+                "dictsort filter: You can only sort by either key or value");
+        }
+
+        array.sort(function(t1, t2) { 
+            var a = t1[si];
+            var b = t2[si];
+
+            if (!case_sensitive) {
+                if (lib.isString(a)) {
+                    a = a.toUpperCase();
+                }
+                if (lib.isString(b)) {
+                    b = b.toUpperCase();
+                }
+            }
+
+            return a > b ? 1 : (a == b ? 0 : -1);
+        });
+
+        return array;
+    },
+
+    escape: function(str) {
+        return str.replace(/&/g, '&amp;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
     },
 
     first: function(arr) {
@@ -491,6 +545,22 @@ var filters = {
         return str.replace(/^\s*|\s*$/g, '');
     },
 
+    truncate: function(input, length, killwords, end) {
+        length = length || 255;
+
+        if (input.length <= length)
+            return input;
+
+        if (killwords) {
+            input = input.substring(0, length);
+        } else {
+            input = input.substring(0, input.lastIndexOf(' ', length));
+        }
+
+        input += (end !== undefined && end !== null) ? end : '...';
+        return input;
+    },
+
     upper: function(str) {
         return str.toUpperCase();
     },
@@ -499,25 +569,26 @@ var filters = {
         return str.match(/\w+/g).length;
     },
 
-    float: function(val, def) {
-        return parseFloat(val) || def;
+    'float': function(val, def) {
+        var res = parseFloat(val);
+        return isNaN(res) ? def : res;
     },
 
-    int: function(val, def) {
-        return parseInt(val) || def;
+    'int': function(val, def) {
+        var res = parseInt(val, 10);
+        return isNaN(res) ? def : res;
     }
 };
 
 // Aliases
-filters.d = filters.default;
+filters.d = filters['default'];
 filters.e = filters.escape;
 
 modules['filters'] = filters;
 })();
 (function() {
-
-var Object = modules["object"];
 var lib = modules["lib"];
+var Object = modules["object"];
 
 // Frames keep track of scoping both at compile-time and run-time so
 // we know how to access variables. Block tags can introduce special
@@ -548,7 +619,11 @@ var Frame = Object.extend({
 
     lookup: function(name) {
         var p = this.parent;
-        return this.variables[name] || (p && p.lookup(name));
+        var val = this.variables[name];
+        if(val !== undefined && val !== null) {
+            return val;
+        }
+        return p && p.lookup(name);
     },
 
     push: function() {
@@ -627,25 +702,33 @@ function numArgs(args) {
     }
 }
 
-var FakeString = Object.extend({
-    init: function(val) {
-        this.raw = val;
-    },
-    toString: function() {
-        return lib.escape(this.raw);
-    },
-    replace: function() {
-        return this.raw.replace.apply(this.raw, arguments);
-    },
-    toUpperCase: function() {
-        return this.raw.toUpperCase();
-    }
-});
+function suppressValue(val) {
+    return (val !== undefined && val !== null) ? val : "";
+}
 
-function suppressValue(val, autoescape) {
-    val = (val !== undefined && val !== null) ? val : "";
-    if (autoescape && typeof val === "string") val = new FakeString(val);
-    return val;
+function suppressLookupValue(obj, val) {
+    obj = obj || {};
+    val = obj[val];
+
+    if(typeof val === 'function') {
+        return function() {
+            return suppressValue(val.apply(obj, arguments));
+        };
+    }
+    else {
+        return suppressValue(val);
+    }
+}
+
+function callWrap(obj, name, args) {
+    if(!obj) {
+        throw new Error('Unable to call `' + name + '`, which is undefined or falsey');
+    }
+    else if(typeof obj !== 'function') {
+        throw new Error('Unable to call `' + name + '`, which is not a function');
+    }
+
+    return obj.apply(this, args);
 }
 
 function contextOrFrameLookup(context, frame, name) {
@@ -655,13 +738,26 @@ function contextOrFrameLookup(context, frame, name) {
         frame.lookup(name);
 }
 
+function handleError(error, lineno, colno) {
+    if(error.lineno) {
+        throw error;
+    }
+    else {
+        throw new lib.TemplateError(error, lineno, colno);
+    }
+}
+
 modules['runtime'] = {
     Frame: Frame,
     makeMacro: makeMacro,
     makeKeywordArgs: makeKeywordArgs,
     numArgs: numArgs,
     suppressValue: suppressValue,
-    contextOrFrameLookup: contextOrFrameLookup
+    suppressLookupValue: suppressLookupValue,
+    contextOrFrameLookup: contextOrFrameLookup,
+    callWrap: callWrap,
+    handleError: handleError,
+    isArray: lib.isArray
 };
 })();
 (function() {
@@ -675,21 +771,13 @@ var runtime = modules["runtime"];
 var Frame = runtime.Frame;
 
 var Environment = Object.extend({
-    init: function(loaders, tags, opts) {
+    init: function(loaders, tags, dev) {
         // The dev flag determines the trace that'll be shown on errors.
         // If set to true, returns the full trace from the error point,
         // otherwise will return trace starting from Template.render
         // (the full trace from within nunjucks may confuse developers using
         //  the library)
-        // defaults to false
-        opts = opts || {};
-        this.dev = !!opts.dev;
-
-        // The autoescape flag sets global autoescaping. If true,
-        // every string variable will be escaped by default.
-        // If false, strings can be manually escaped using the `escape` filter.
-        // defaults to false
-        this.autoesc = !!opts.autoescape;
+        this.dev = dev;
 
         if(!loaders) {
             // The filesystem loader is only available client-side
@@ -712,27 +800,6 @@ var Environment = Object.extend({
         this.cache = {};
     },
 
-    tryTemplate: function(path, func) {
-        try {
-            return func();
-        } catch (e) {
-            if (!e.Update) {
-                // not one of ours, cast it
-                e = lib.TemplateError(e);
-            }
-            e.Update(path);
-
-            // Unless they marked the dev flag, show them a trace from here
-            if (!this.dev) {
-                var old = e;
-                e = new Error(old.message);
-                e.name = old.name;
-            }
-
-            throw e;
-        }
-    },
-
     addFilter: function(name, func) {
         this.filters[name] = func;
     },
@@ -745,10 +812,6 @@ var Environment = Object.extend({
     },
 
     getTemplate: function(name, eagerCompile) {
-        if (name && name.raw) {
-            // this fixes autoescape for templates referenced in symbols
-            name = name.raw;
-        }
         var info = null;
         var tmpl = this.cache[name];
         var upToDate;
@@ -889,7 +952,7 @@ var Context = Object.extend({
         return this.blocks[name][0];
     },
 
-    getSuper: function(env, name, block) {
+    getSuper: function(env, name, block, frame, runtime) {
         var idx = (this.blocks[name] || []).indexOf(block);
         var blk = this.blocks[name][idx + 1];
         var context = this;
@@ -899,7 +962,7 @@ var Context = Object.extend({
                 throw new Error('no super block available for "' + name + '"');
             }
 
-            return blk(env, context);
+            return blk(env, context, frame, runtime);
         };
     },
 
@@ -939,9 +1002,10 @@ var Template = Object.extend({
         this.upToDate = upToDate || function() { return false; };
 
         if(eagerCompile) {
-            var self = this;
-            this.env.tryTemplate(this.path, function() { self._compile(); });
-            self = null;
+            var _this = this;
+            lib.withPrettyErrors(this.path,
+                                 this.env.dev,
+                                 function() { _this._compile(); });
         }
         else {
             this.compiled = false;
@@ -963,7 +1027,8 @@ var Template = Object.extend({
                 frame || new Frame(),
                 runtime);
         };
-        return this.env.tryTemplate(this.path, render);
+
+        return lib.withPrettyErrors(this.path, this.env.dev, render);
     },
 
     isUpToDate: function() {
