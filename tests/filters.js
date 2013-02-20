@@ -271,6 +271,12 @@ describe('filter', function() {
         s.should.equal('1,2,3,4,');
     });
 
+    it('title', function() {
+           var s = render('{{ "foo bar baz" | title }}');
+           s.should.equal('Foo Bar Baz');
+    });
+
+
     it('trim', function() {
         var s = render('{{ "  foo " | trim }}');
         s.should.equal('foo');
