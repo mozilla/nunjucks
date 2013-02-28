@@ -328,11 +328,16 @@ var filters = {
     },
 
     escape: function(str) {
-        return str.replace(/&/g, '&amp;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#39;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;');
+        if(typeof str === 'string') {
+            return str.replace(/&/g, '&amp;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+        }
+        else {
+            return str;
+        }
     },
 
     first: function(arr) {
@@ -538,7 +543,11 @@ var filters = {
     },
 
     title: function(str) {
-        return str.toUpperCase();
+        var words = str.split(' ');
+        for(var i = 0; i < words.length; i++) {
+            words[i] = filters.capitalize(words[i]);
+        }
+        return words.join(' ');
     },
 
     trim: function(str) {
@@ -1095,6 +1104,7 @@ modules['environment'] = {
     Template: Template
 };
 })();
+var nunjucks;
 
 var env = modules["environment"];
 var compiler = modules["compiler"];
@@ -1102,25 +1112,31 @@ var parser = modules["parser"];
 var lexer = modules["lexer"];
 var loaders = modules["loaders"];
 
-window.nunjucks = {};
-window.nunjucks.Environment = env.Environment;
-window.nunjucks.Template = env.Template;
+nunjucks = {};
+nunjucks.Environment = env.Environment;
+nunjucks.Template = env.Template;
 
 // loaders is not available when using precompiled templates
 if(loaders) {
     if(loaders.FileSystemLoader) {
-        window.nunjucks.FileSystemLoader = loaders.FileSystemLoader;
+        nunjucks.FileSystemLoader = loaders.FileSystemLoader;
     }
     else {
-        window.nunjucks.HttpLoader = loaders.HttpLoader;
+        nunjucks.HttpLoader = loaders.HttpLoader;
     }
 }
 
-window.nunjucks.compiler = compiler;
-window.nunjucks.parser = parser;
-window.nunjucks.lexer = lexer;
+nunjucks.compiler = compiler;
+nunjucks.parser = parser;
+nunjucks.lexer = lexer;
 
-window.nunjucks.require =
-   function(name) { return modules[name]; };
+nunjucks.require = function(name) { return modules[name]; };
+
+if(typeof define === 'function' && define.amd) {
+    define(function() { return nunjucks; });
+}
+else {
+    window.nunjucks = nunjucks;
+}
 
 })();

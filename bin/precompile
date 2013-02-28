@@ -83,6 +83,20 @@ for(var i=0; i<templates.length; i++) {
     }
 }
 
-util.puts('nunjucks.env = new nunjucks.Environment([]);');
-util.puts('nunjucks.env.registerPrecompiled(templates);');
-util.puts('})()');
+util.puts(
+    'if(typeof define === "function" && define.amd) {\n' +
+    '    define(["nunjucks"], function(nunjucks) {\n' +
+    '        nunjucks.env = new nunjucks.Environment([]);\n' +
+    '        nunjucks.env.registerPrecompiled(templates);\n' +
+    '        return nunjucks;\n' +
+    '    });\n' +
+    '}\n' +
+    'else if(typeof nunjucks === "object") {\n' +
+    '    nunjucks.env = new nunjucks.Environment([]);\n' +
+    '    nunjucks.env.registerPrecompiled(templates);\n' +
+    '}\n' +
+    'else {\n' +
+    '    console.error("ERROR: You must load nunjucks before the precompiled templates");\n' +
+    '}\n' +
+    '})();'
+);

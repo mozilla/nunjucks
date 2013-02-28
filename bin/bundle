@@ -27,14 +27,22 @@ for file in $files; do
     echo "})();" >> "$output"
 done
 
+echo "var nunjucks;" >> $output
+
 cat index.js | \
     perl -ne 's/require\(\W*\.\/src\/([\w-]*)\W*\)/modules["$1"]/; print' | \
-    sed -e 's/module.exports/window.nunjucks/' \
+    sed -e 's/module.exports/nunjucks/' \
     >> "$output"
 
 echo "
-window.nunjucks.require =
-   function(name) { return modules[name]; };
+nunjucks.require = function(name) { return modules[name]; };
+
+if(typeof define === 'function' && define.amd) {
+    define(function() { return nunjucks; });
+}
+else {
+    window.nunjucks = nunjucks;
+}
 " >> "$output"
 
 echo "})();" >> "$output"

@@ -11,9 +11,7 @@ for(var t_1 in parentTemplate.blocks) {
 context.addBlock(t_1, parentTemplate.blocks[t_1]);
 }
 output += "\n\n";
-output += context.getBlock("content")(env, context, frame, runtime);
 output += "\n\n";
-output += context.getBlock("footer")(env, context, frame, runtime);
 output += "\n";
 return parentTemplate.rootRenderFunc(env, context, frame, runtime);
 } catch (e) {
@@ -59,9 +57,9 @@ var lineno = null;
 var colno = null;
 var output = "";
 try {
-output += "<!DOCTYPE html>\n<html>\n  <head>\n    <title>A quick app</title>\n\n    <style>\n      body {\n        background-color: #ccccff;\n      }\n\n      .footer {\n        margin-top: 5em;\n        font-size: .75em;\n      }\n    </style>\n\n    <script src=\"/nunjucks-dev.js\"></script>\n    <!-- <script src=\"/templates.js\"></script> -->\n  </head>\n  <body>\n    ";
+output += "<!DOCTYPE html>\n<html>\n  <head>\n    <title>A quick app</title>\n\n    <style>\n      body {\n        background-color: #ccccff;\n      }\n\n      .footer {\n        margin-top: 5em;\n        font-size: .75em;\n      }\n    </style>\n\n    <!-- <script src=\"/nunjucks-min.js\"></script> -->\n    <!-- <script src=\"/templates.js\"></script> -->\n  </head>\n  <body>\n    ";
 output += context.getBlock("content")(env, context, frame, runtime);
-output += "\n\n    <div class=\"footer\">\n      ";
+output += "\n\n\n    <script data-main=\"/app.js\" src=\"/require.js\"></script>\n\n    <div class=\"footer\">\n      ";
 output += context.getBlock("footer")(env, context, frame, runtime);
 output += "\n    </div>\n  </body>\n</html>\n";
 return output;
@@ -133,7 +131,6 @@ return output;
 context.addExport("foo");
 context.setVariable("foo", macro_t_2);
 output += "\n\n";
-output += context.getBlock("content")(env, context, frame, runtime);
 output += "\n";
 return parentTemplate.rootRenderFunc(env, context, frame, runtime);
 } catch (e) {
@@ -211,7 +208,6 @@ for(var t_1 in parentTemplate.blocks) {
 context.addBlock(t_1, parentTemplate.blocks[t_1]);
 }
 output += "\n\n";
-output += context.getBlock("description")(env, context, frame, runtime);
 output += "\n";
 return parentTemplate.rootRenderFunc(env, context, frame, runtime);
 } catch (e) {
@@ -240,6 +236,18 @@ root: root
 };
 
 })();
-nunjucks.env = new nunjucks.Environment([]);
-nunjucks.env.registerPrecompiled(templates);
-})()
+if(typeof define === "function" && define.amd) {
+    define(["nunjucks"], function(nunjucks) {
+        nunjucks.env = new nunjucks.Environment([]);
+        nunjucks.env.registerPrecompiled(templates);
+        return nunjucks;
+    });
+}
+else if(typeof nunjucks === "object") {
+    nunjucks.env = new nunjucks.Environment([]);
+    nunjucks.env.registerPrecompiled(templates);
+}
+else {
+    console.error("ERROR: You must load nunjucks before the precompiled templates");
+}
+})();
