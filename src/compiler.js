@@ -33,11 +33,13 @@ function quotedArray(arr) {
 }
 
 var Compiler = Object.extend({
-    init: function() {
+    init: function(extensions) {
         this.codebuf = [];
         this.lastId = 0;
         this.buffer = null;
         this.isChild = false;
+
+        this.extensions = extensions || [];
     },
     fail: function (msg, lineno, colno) {
         if (lineno !== undefined) lineno += 1;
@@ -153,6 +155,17 @@ var Compiler = Object.extend({
                       node.lineno,
                       node.colno);
         }
+    },
+
+    compileCustomTag: function(node, frame) {
+        for (var i = 0; i < this.extensions.length; i++) {
+            var ext = this.extensions[i];
+            if ((ext.tags || []).indexOf(node.name) > -1) {
+                ext.compile(this, node, frame);
+                return;
+            }
+        }
+        throw new Error('Could not find appropriate extension for tag.');
     },
 
     compileNodeList: function(node, frame) {
@@ -764,9 +777,18 @@ var Compiler = Object.extend({
 // console.log(tmpl);
 
 module.exports = {
-    compile: function(src) {
-        var c = new Compiler();
-        c.compile(parser.parse(src));
+    compile: function(src, extensions, name) {
+        var c = new Compiler(extensions);
+
+        // Run the extension preprocessors against the source.
+        if (extensions && extensions.length) {
+            for (var i = 0; i < extensions.length; i++) {
+                if ('preprocess' in extensions[i]) {
+                    src = extensions[i].preprocess(src, name);
+                }
+            }
+        }
+        c.compile(parser.parse(src, extensions));
         return c.getCode();
     },
 

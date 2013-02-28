@@ -35,6 +35,13 @@ var Environment = Object.extend({
 
         this.filters = builtin_filters;
         this.cache = {};
+        this.extensions = {};
+        this.extensionsList = [];
+    },
+
+    addExtension: function(name, extension) {
+        this.extensions[name] = extension;
+        this.extensionsList.push(extension);
     },
 
     addFilter: function(name, func) {
@@ -293,7 +300,8 @@ var Template = Object.extend({
             props = this.tmplProps;
         }
         else {
-            var func = new Function(compiler.compile(this.tmplStr, this.env));
+            var source = compiler.compile(this.tmplStr, this.env.extensionsList, this.path);
+            var func = new Function(source);
             props = func();
         }
 
