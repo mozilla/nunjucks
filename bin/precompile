@@ -4,21 +4,32 @@ var path = require('path');
 var util = require('util');
 var lib = require('../src/lib');
 var compiler = require('../src/compiler');
+var args = process.argv;
 
-if(process.argv.length < 3) {
-    console.log('Usage: ' + path.basename(process.argv[1]) + ' <folder> [-f]');
+var force = false;
+
+// Remove the "node precompile" arguments
+args.shift();
+args.shift();
+
+// Process any flags
+while(1) {
+    if(args[0] == '-f') {
+        force = true;
+        args.shift();
+    }
+    else {
+        break;
+    }
+}
+
+if(args.length === 0) {
+    console.log('Usage: ' + path.basename(process.argv[1]) + ' [-f] <folder>\n' +
+                '  -f   Force compilation to continue on error');
     process.exit(1);
 }
 
-var folder = process.argv[2];
-var force = false;
-if(process.argv.length > 3) {
-    process.argv.splice(3).forEach(function(e) {
-        if (e === '-f') {
-            force = true;
-        }
-    });
-}
+var folder = args[0];
 var templates = [];
 
 function addTemplates(dir) {
@@ -57,7 +68,7 @@ for(var i=0; i<templates.length; i++) {
         util.puts('templates["' + name + '"] = (function() {');
         util.puts(src);
         util.puts('})();');
-    }
+    };
 
     // Don't stop generating the output if we're forcing compilation.
     if(force) {
