@@ -310,7 +310,11 @@ var filters = {
     },
 
     title: function(str) {
-        return str.toUpperCase();
+        var words = str.split(' ');
+        for(var i = 0; i < words.length; i++) {
+            words[i] = filters.capitalize(words[i]);
+        }
+        return words.join(' ');
     },
 
     trim: function(str) {
