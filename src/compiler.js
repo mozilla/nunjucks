@@ -633,8 +633,10 @@ var Compiler = Object.extend({
     },
 
     compileBlock: function(node, frame) {
-        this.emitLine(this.buffer + ' += context.getBlock("' +
-                      node.name.value + '")(env, context, frame, runtime);');
+        if(!this.isChild) {
+            this.emitLine(this.buffer + ' += context.getBlock("' +
+                          node.name.value + '")(env, context, frame, runtime);');
+        }
     },
 
     compileExtends: function(node, frame) {
@@ -749,9 +751,9 @@ var Compiler = Object.extend({
 
 // var fs = require("fs");
 // var c = new Compiler();
-// //var src = '{{ foo({a:1}) }}';
+// //var src = '{{ foo({a:1}) }} {% block content %}foo{% endblock %}';
 // var src = '{% extends "base.html" %}' +
-//     '{% block block1 %}{{ super() }}BAR{% endblock %}';
+//     '{% block block1 %}{{ super() }}{% endblock %}';
 
 // var ns = parser.parse(src);
 // nodes.printNodes(ns);

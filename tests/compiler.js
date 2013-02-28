@@ -305,6 +305,11 @@ describe('compiler', function() {
         var s = render('{% extends "base.html" %}' +
                        '{% block block1 %}{{ super() }}BAR{% endblock %}');
         s.should.equal('FooBarBARBazFizzle');
+
+        // two levels of `super` should work 
+        s = render('{% extends "base-inherit.html" %}' +
+                   '{% block block1 %}*{{ super() }}*{% endblock %}');
+        s.should.equal('Foo**Bar**BazFizzle');
     });
 
     it('should include templates', function() {
