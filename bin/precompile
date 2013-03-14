@@ -4,11 +4,12 @@ var path = require('path');
 var util = require('util');
 var lib = require('../src/lib');
 var compiler = require('../src/compiler');
-var args = process.argv;
+var args = process.argv.slice();
 
 var force = false;
 
 // Remove the "node precompile" arguments
+
 args.shift();
 args.shift();
 
@@ -23,13 +24,50 @@ while(1) {
     }
 }
 
+var input_path = args[0];
+
 if(args.length === 0) {
-    console.log('Usage: ' + path.basename(process.argv[1]) + ' [-f] <folder>\n' +
-                '  -f   Force compilation to continue on error');
+    console.log('Precompile nunjucks templates to javascript.\n\n' +
+                'Usage: ' + path.basename(process.argv[1]) + 
+                ' [-f] <path to file or directory>\n\n' +
+                ' -f   Force compilation to continue on error\n\n' +
+                ' if <path> is a file, outputs compiled javascript for\n' +
+                ' that file only to stdout\n\n' +
+                ' if <path> is a directory, recursively outputs template\n' +
+                ' javascript and code for loading the templates at runtime\n' +
+                ' for all files and subdirectories in that directory');
     process.exit(1);
 }
 
-var folder = args[0];
+try {
+    var path_stats = fs.statSync(input_path);
+} catch (e) {
+    console.log('Unable to stat ' + input_path + ": " + e);
+    process.exit(2);
+}
+
+if (path_stats.isFile()) {
+    // compile a single file; exit on first error found
+    try {
+        var src = lib.withPrettyErrors(
+            input_path,
+            false,
+            function() {
+                return compiler.compile(fs.readFileSync(input_path,
+                                                        'utf-8'));
+            }
+        );
+    } catch (e) {
+        console.error(e.toString());
+        process.exit(4);
+    }
+    util.puts(src);
+    process.exit(0);
+} else if (!path_stats.isDirectory()) {
+    console.log(input_path + ' is not a file or directory');
+    process.exit(3);
+}
+
 var templates = [];
 
 function addTemplates(dir) {
@@ -48,7 +86,7 @@ function addTemplates(dir) {
     }
 }
 
-addTemplates(folder);
+addTemplates(input_path);
 
 util.puts('(function() {');
 util.puts('var templates = {};');
@@ -63,7 +101,7 @@ for(var i=0; i<templates.length; i++) {
                                                         'utf-8'));
             }
         );
-        var name = templates[i].replace(path.join(folder, '/'), '');
+        var name = templates[i].replace(path.join(path, '/'), '');
 
         util.puts('templates["' + name + '"] = (function() {');
         util.puts(src);
