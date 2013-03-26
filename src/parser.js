@@ -1040,7 +1040,7 @@ var Parser = Object.extend({
 //     console.log(util.inspect(t));
 // }
 
-// var p = new Parser(lexer.lex('{% from x import y -%}\n  hi \n'));
+// var p = new Parser(lexer.lex('{% test %}sdfd{% endtest %}'));
 // var n = p.parse();
 // nodes.printNodes(n);
 

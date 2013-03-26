@@ -132,6 +132,16 @@ var CustomTag = Node.extend("CustomTag", {
     }
 });
 
+var CallExtension = Node.extend("CallExtension", {
+    fields: ['extName', 'prop', 'args'],
+
+    init: function(ext, prop, args) {
+        this.extName = ext._name;
+        this.prop = prop;
+        this.args = args || [];
+    }
+});
+
 // Print the AST in a nicely formatted tree format for debuggin
 function printNodes(node, indent) {
     indent = indent || 0;
@@ -248,7 +258,8 @@ module.exports = {
     Compare: Compare,
     CompareOperand: CompareOperand,
 
-    CustomTag: CustomTag,
+    //CustomTag: CustomTag,
+    CallExtension: CallExtension,
 
     printNodes: printNodes
 };

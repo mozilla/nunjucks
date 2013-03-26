@@ -40,8 +40,13 @@ var Environment = Object.extend({
     },
 
     addExtension: function(name, extension) {
+        extension._name = name;
         this.extensions[name] = extension;
         this.extensionsList.push(extension);
+    },
+
+    getExtension: function(name) {
+        return this.extensions[name];
     },
 
     addFilter: function(name, func) {
@@ -325,11 +330,10 @@ var Template = Object.extend({
 
 // var fs = require('fs');
 // var src = fs.readFileSync('test.html', 'utf-8');
-// //var src = '{% macro foo(x, y, z=3) %}h{% endmacro %}';
-// //var src = '{% macro foo() %}{{ h }}{% endmacro %} {{ foo() }}';
-
+// var src = '{% test %}foo{% endtest %}';
 // var env = new Environment();
-// console.log(compiler.compile(src));
+// env.addExtension('testExtension', new testExtension());
+// console.log(compiler.compile(src, [new testExtension()]));
 
 // var tmpl = new Template(src, env);
 // console.log("OUTPUT ---");

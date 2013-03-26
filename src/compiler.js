@@ -37,15 +37,27 @@ var Compiler = Object.extend({
         this.codebuf = [];
         this.lastId = 0;
         this.buffer = null;
+        this.bufferStack = [];
         this.isChild = false;
 
         this.extensions = extensions || [];
     },
+
     fail: function (msg, lineno, colno) {
         if (lineno !== undefined) lineno += 1;
         if (colno !== undefined) colno += 1;
 
         throw new lib.TemplateError(msg, lineno, colno);
+    },
+
+    pushBufferId: function(id) {
+        this.bufferStack.push(this.buffer);
+        this.buffer = id;
+        this.emit('var ' + this.buffer + ' = "";');
+    },
+
+    popBufferId: function() {
+        this.buffer = this.bufferStack.pop();
     },
 
     emit: function(code) {
@@ -86,6 +98,12 @@ var Compiler = Object.extend({
     tmpid: function() {
         this.lastId++;
         return 't_' + this.lastId;
+    },
+
+    _bufferAppend: function(func) {
+        this.emit(this.buffer + ' += runtime.suppressValue(');
+        func();
+        this.emit(');\n');
     },
 
     _compileChildren: function(node, frame) {
@@ -157,15 +175,32 @@ var Compiler = Object.extend({
         }
     },
 
-    compileCustomTag: function(node, frame) {
-        for (var i = 0; i < this.extensions.length; i++) {
-            var ext = this.extensions[i];
-            if ((ext.tags || []).indexOf(node.name) > -1) {
-                ext.compile(this, node, frame);
-                return;
+    compileCallExtension: function(node, frame) {
+        var name = node.extName;
+        var args = node.args;
+        var transformedArgs = [];
+
+        for(var i=0; i<args.length; i++) {
+            if(args[i] instanceof nodes.Node) {
+                var id = this.tmpid();
+                this.pushBufferId(id);
+
+                this.compile(args[i], frame);
+                transformedArgs.push(id);
+
+                this.popBufferId();
+            }
+            else {
+                transformedArgs.push('' + args[i]);
             }
         }
-        throw new Error('Could not find appropriate extension for tag.');
+
+        var _this = this;
+        this._bufferAppend(function() {
+            _this.emit('env.getExtension("' + node.extName + '")["' + node.prop + '"](');
+            _this.emit(transformedArgs.join(','));
+            _this.emit(')');
+        });
     },
 
     compileNodeList: function(node, frame) {
@@ -698,9 +733,10 @@ var Compiler = Object.extend({
             }
         }
 
-        this.emit(this.buffer + ' += runtime.suppressValue(');
-        this._compileChildren(node, frame);
-        this.emit(');\n');
+        var _this = this;
+        this._bufferAppend(function() {
+            _this._compileChildren(node, frame);
+        });
     },
 
     compileRoot: function(node, frame) {
@@ -763,12 +799,35 @@ var Compiler = Object.extend({
 });
 
 // var fs = require("fs");
+//var src = '{{ foo({a:1}) }} {% block content %}foo{% endblock %}';
 // var c = new Compiler();
-// //var src = '{{ foo({a:1}) }} {% block content %}foo{% endblock %}';
-// var src = '{% extends "base.html" %}' +
-//     '{% block block1 %}{{ super() }}{% endblock %}';
+// var src = '{% test %}hello{% endtest %}';
 
-// var ns = parser.parse(src);
+// function testExtension() {
+//     this.tags = ['test'];
+//     this._name = 'testExtension';
+
+//     this.parse = function(parser, nodes) {
+//         var begun = parser.peekToken();
+//         parser.advanceAfterBlockEnd();
+
+//         //var tag = new nodes.CustomTag(begun.lineno, begun.colno, "test");
+
+//         var content = parser.parseUntilBlocks("endtest");
+//         var tag = new nodes.CallExtension(this, 'run', [content]);
+
+//         parser.advanceAfterBlockEnd();
+
+//         return tag;
+//     };
+
+//     this.run = function(content) {
+//         return 'poop';
+//     };
+// }
+// var extensions = [new testExtension()];
+
+// var ns = parser.parse(src, extensions);
 // nodes.printNodes(ns);
 // c.compile(ns);
 
@@ -788,6 +847,7 @@ module.exports = {
                 }
             }
         }
+
         c.compile(parser.parse(src, extensions));
         return c.getCode();
     },
