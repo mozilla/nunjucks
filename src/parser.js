@@ -204,7 +204,7 @@ var Parser = Object.extend({
         var template = this.parsePrimary();
 
         if(!this.skipSymbol('as')) {
-            throw new Error('parseImport: expected "as" keyword',
+            this.fail('parseImport: expected "as" keyword',
                             importTok.lineno,
                             importTok.colno);
         }
@@ -232,7 +232,7 @@ var Parser = Object.extend({
                                         new nodes.NodeList());
 
         if(!this.skipSymbol('import')) {
-            throw new Error("parseFrom: expected import",
+            this.fail("parseFrom: expected import",
                             fromTok.lineno,
                             fromTok.colno);
         }
@@ -260,7 +260,7 @@ var Parser = Object.extend({
             }
 
             if(names.children.length > 0 && !this.skip(lexer.TOKEN_COMMA)) {
-                throw new Error('parseFrom: expected comma',
+                this.fail('parseFrom: expected comma',
                                 fromTok.lineno,
                                 fromTok.colno);
             }
@@ -873,7 +873,9 @@ var Parser = Object.extend({
 
             if(node.children.length > 0) {
                 if(!this.skip(lexer.TOKEN_COMMA)) {
-                    throw new Error("parseAggregate: expected comma after expression");
+                    this.fail("parseAggregate: expected comma after expression",
+                              tok.lineno,
+                              tok.colno);
                 }
             }
 
@@ -884,7 +886,9 @@ var Parser = Object.extend({
                 // We expect a key/value pair for dicts, separated by a
                 // colon
                 if(!this.skip(lexer.TOKEN_COLON)) {
-                    throw new Error("parseAggregate: expected colon after dict key");
+                    this.fail("parseAggregate: expected colon after dict key",
+                        tok.lineno,
+                        tok.colno);
                 }
 
                 // TODO: check for errors
@@ -919,7 +923,9 @@ var Parser = Object.extend({
             }
 
             if(checkComma && !this.skip(lexer.TOKEN_COMMA)) {
-                throw new Error("parseSignature: expected comma after expression");
+                this.fail("parseSignature: expected comma after expression",
+                    tok.lineno,
+                    tok.colno);
             }
             else {
                 var arg = this.parsePrimary();
@@ -1004,8 +1010,8 @@ var Parser = Object.extend({
             }
             else if(tok.type != lexer.TOKEN_COMMENT) {
                 // Ignore comments, otherwise this should be an error
-                throw new Error("Unexpected token at top-level: " +
-                                tok.type);
+                this.fail("Unexpected token at top-level: " +
+                                tok.type, tok.lineno, tok.colno);
             }
         }
 
