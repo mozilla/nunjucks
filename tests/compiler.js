@@ -1,4 +1,7 @@
 var should = require('should');
+
+var compiler = require('../src/compiler');
+var env = require('../src/environment');
 var render = require('./util').render;
 
 describe('compiler', function() {
@@ -379,5 +382,112 @@ describe('compiler', function() {
         (function() {
             render('{% from "import.html" import boozle %}');
         }).should.throw(/cannot import 'boozle'/);
+    });
+
+    function easy_compile(template, ctx, extensions) {
+        var e = new env.Environment([], null, true);
+        for (var ext_name in extensions) {
+            e.addExtension(ext_name, extensions[ext_name]);
+        }
+        var t = new env.Template(template, e);
+        return t.render(ctx);
+    }
+
+    it('should allow custom tag compilation', function() {
+        function testExtension() {
+            this.tags = ['test'];
+
+            this.parse = function(parser, nodes) {
+                var begun = parser.peekToken();
+
+                parser.advanceAfterBlockEnd();
+                var tag = new nodes.CustomTag(begun.lineno, begun.colno, "test");
+                tag.body = parser.parseUntilBlocks("endtest");
+                parser.advanceAfterBlockEnd();
+
+                return new nodes.Output(begun.lineno, begun.colno, [tag]);
+            };
+
+            this.compile = function(compiler, tag, frame) {
+                compiler.emit('env.extensions["testExtension"]._run(');
+                compiler.emit('function() {');
+                var buffer = compiler.buffer;
+                compiler.emitLine('var ' + buffer + ' = "";');
+                compiler.compile(tag.body);
+                compiler.emitLine('return ' + buffer + ';');
+                compiler.emit('}')
+                compiler.emit(')');
+            };
+
+            this._run = function(func) {
+                return func().split("").reverse().join("");  // Reverse the string.
+            };
+        }
+
+        var extensions = {'testExtension': new testExtension()};
+
+        var output = easy_compile('{% test %}123456789{% endtest %}', {}, extensions);
+        output.should.equal('987654321');
+
+    });
+
+    it('should allow complicated custom tag compilation', function() {
+        function testExtension() {
+            this.tags = ['test'];
+
+            this.parse = function(parser, nodes, lexer) {
+                var begun = parser.peekToken();
+
+                parser.advanceAfterBlockEnd();
+                var tag = new nodes.CustomTag(begun.lineno, begun.colno, 'test');
+                tag.body = parser.parseUntilBlocks('intermediate', 'endtest');
+                if (parser.skipSymbol('intermediate')) {
+                    parser.skip(lexer.TOKEN_BLOCK_END);
+                    tag.intermediate = parser.parseUntilBlocks('endtest');
+                } else {
+                    tag.intermediate = null;
+                }
+                parser.advanceAfterBlockEnd();
+
+                return new nodes.Output(begun.lineno, begun.colno, [tag]);
+            };
+
+            this.compile = function(compiler, tag, frame) {
+                compiler.emit('env.extensions["testExtension"]._run(');
+                compiler.emit('function() {');
+                var buffer = compiler.buffer;
+                compiler.emitLine('var ' + buffer + ' = "";');
+                compiler.compile(tag.body);
+                compiler.emitLine('return ' + buffer + ';');
+                compiler.emit('}')
+                if (tag.intermediate) {
+                    compiler.emit(', function() {');
+                    compiler.emitLine('var ' + buffer + ' = "";');
+                    compiler.compile(tag.intermediate);
+                    compiler.emitLine('return ' + buffer + ';');
+                    compiler.emit('}');
+                }
+                compiler.emit(')');
+            };
+
+            this._run = function(func, func2) {
+                var output = func().split("").join(",");
+                if (func2) {
+                    output += func2().split("").reverse().join("");  // Reverse the string.
+                }
+                return output;
+            };
+        }
+
+        var extensions = {'testExtension': new testExtension()};
+
+        var output = easy_compile('{% test %}abcdefg{% endtest %}', {}, extensions);
+        output.should.equal('a,b,c,d,e,f,g');
+
+        output = easy_compile(
+            '{% test %}abcdefg{% intermediate %}second half{% endtest %}',
+            {}, extensions);
+        output.should.equal('a,b,c,d,e,f,gflah dnoces');
+
     });
 });

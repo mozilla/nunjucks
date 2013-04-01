@@ -18,7 +18,7 @@ function _isAST(node1, node2) {
 
         should.exist(node1.children);
         var sig1 = (node1.typename + lit + node1.children.length);
-        
+
         sig1.should.equal(sig2);
 
         for(var i=0, l=node2.children.length; i<l; i++) {
@@ -32,7 +32,7 @@ function _isAST(node1, node2) {
             }
             else if(node1[field] !== null || value !== null) {
                 if(node1[field] === null) {
-                    throw new Error(value + ' expected for "' + field + 
+                    throw new Error(value + ' expected for "' + field +
                                     '", null found');
                 }
 
@@ -216,7 +216,7 @@ describe('parser', function() {
                 [nodes.NodeList,
                  [nodes.Symbol, 'bar'],
                  [nodes.KeywordArgs,
-                  [nodes.Pair, 
+                  [nodes.Pair,
                    [nodes.Symbol, 'baz'], [nodes.Literal, 'foobar']]]],
                 [nodes.NodeList,
                  [nodes.Output,
@@ -375,5 +375,87 @@ describe('parser', function() {
         (function() {
             parser.parse('{% from "foo" import _bar %}');
         }).should.throw(/names starting with an underscore cannot be imported/);
+    });
+
+    it('should parse custom tags', function() {
+
+        function testtagExtension() {
+            this.tags = ['testtag'];
+
+            this.parse = function(parser, nodes) {
+                var begun = parser.peekToken();
+                parser.advanceAfterBlockEnd();
+                return new nodes.CustomTag(begun.lineno, begun.colno, 'testtag');
+            };
+        }
+        function testblocktagExtension() {
+            this.tags = ['testblocktag'];
+
+            this.parse = function(parser, nodes) {
+                var begun = parser.peekToken();
+                parser.advanceAfterBlockEnd();
+                var tag = new nodes.CustomTag(begun.lineno, begun.colno, 'testblocktag');
+                tag.body = parser.parseUntilBlocks('endtestblocktag');
+                parser.advanceAfterBlockEnd();
+                return tag;
+            };
+        }
+
+        function testargsExtension() {
+            this.tags = ['testargs'];
+
+            this.parse = function(parser, nodes, tokens) {
+                var begun = parser.peekToken();
+                var tag = new nodes.CustomTag(begun.lineno, begun.colno, 'testargs');
+
+                parser.nextToken();  // Skip the name
+                if (parser.peekToken().type === tokens.TOKEN_LEFT_PAREN) {
+                    tag.signature = parser.parseSignature();
+                } else {
+                    tag.signature = null;
+                }
+                parser.skip(tokens.TOKEN_WHITESPACE);
+                parser.skip(tokens.TOKEN_BLOCK_END);
+                return tag;
+            };
+        }
+        var extensions = [new testtagExtension(),
+                          new testblocktagExtension(),
+                          new testargsExtension()];
+
+        isAST(parser.parse('{% testtag %}', extensions),
+              [nodes.Root,
+               [nodes.CustomTag, null]]);
+
+        isAST(parser.parse('{% testblocktag %}{% endtestblocktag %}',
+                           extensions),
+              [nodes.Root,
+               [nodes.CustomTag,
+                [nodes.NodeList]]]);
+
+        isAST(parser.parse('{% testblocktag %}{{ 123 }}{% endtestblocktag %}',
+                           extensions),
+              [nodes.Root,
+               [nodes.CustomTag,
+                [nodes.NodeList,
+                 [nodes.Output,
+                  [nodes.Literal, 123]]]]]);
+
+        (function() {
+            var parsed = parser.parse('{% testargs(123, "abc", foo="bar") %}', extensions);
+
+            var signature = parsed.children[0].signature.children;
+            signature[0].value.should.equal(123);
+            signature[1].value.should.equal("abc");
+            var kwargs = signature[2].children;
+            kwargs[0].key.value.should.equal("foo");
+            kwargs[0].value.value.should.equal("bar");
+        })();
+
+        (function() {
+            var parsed = parser.parse('{% testargs %}', extensions);
+            should.not.exist(parsed.children[0].signature);
+        })();
+
     });
 });

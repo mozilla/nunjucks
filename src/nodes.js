@@ -124,6 +124,14 @@ var CompareOperand = Node.extend("CompareOperand", {
     fields: ['expr', 'type']
 });
 
+var CustomTag = Node.extend("CustomTag", {
+    init: function(lineno, colno, name) {
+        this.lineno = lineno;
+        this.colno = colno;
+        this.name = name;
+    }
+});
+
 // Print the AST in a nicely formatted tree format for debuggin
 function printNodes(node, indent) {
     indent = indent || 0;
@@ -239,6 +247,8 @@ module.exports = {
     Pos: Pos,
     Compare: Compare,
     CompareOperand: CompareOperand,
+
+    CustomTag: CustomTag,
 
     printNodes: printNodes
 };

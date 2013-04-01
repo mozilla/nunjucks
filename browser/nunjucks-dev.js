@@ -37,7 +37,7 @@ function extend(cls, name, props) {
 
     prototype.typename = name;
 
-    var new_cls = function() { 
+    var new_cls = function() {
         if(prototype.init) {
             prototype.init.apply(this, arguments);
         }
@@ -357,6 +357,14 @@ var CompareOperand = Node.extend("CompareOperand", {
     fields: ['expr', 'type']
 });
 
+var CustomTag = Node.extend("CustomTag", {
+    init: function(lineno, colno, name) {
+        this.lineno = lineno;
+        this.colno = colno;
+        this.name = name;
+    }
+});
+
 // Print the AST in a nicely formatted tree format for debuggin
 function printNodes(node, indent) {
     indent = indent || 0;
@@ -472,6 +480,8 @@ modules['nodes'] = {
     Pos: Pos,
     Compare: Compare,
     CompareOperand: CompareOperand,
+
+    CustomTag: CustomTag,
 
     printNodes: printNodes
 };
@@ -706,7 +716,7 @@ function Tokenizer(str) {
     this.in_code = false;
 }
 
-Tokenizer.prototype.nextToken = function() {
+var nextToken = Tokenizer.prototype.nextToken = function() {
     var lineno = this.lineno;
     var colno = this.colno;
 
@@ -872,6 +882,12 @@ Tokenizer.prototype.nextToken = function() {
 
     throw new Error("Could not parse text");
 };
+/*
+Tokenizer.prototype.nextToken = function() {
+    var out = nextToken.apply(this, arguments);
+    console.log(out);
+    return out;
+};*/
 
 Tokenizer.prototype.parseString = function(delimiter) {
     this.forward();
@@ -1078,6 +1094,8 @@ var Parser = Object.extend({
         this.peeked = null;
         this.breakOnBlocks = null;
         this.dropLeadingWhitespace = false;
+
+        this.extensions = [];
     },
 
     nextToken: function (withWhitespace) {
@@ -1485,17 +1503,26 @@ var Parser = Object.extend({
         }
 
         switch(tok.value) {
-        case 'raw': node = this.parseRaw(); break;
-        case 'if': node = this.parseIf(); break;
-        case 'for': node = this.parseFor(); break;
-        case 'block': node = this.parseBlock(); break;
-        case 'extends': node = this.parseExtends(); break;
-        case 'include': node = this.parseInclude(); break;
-        case 'set': node = this.parseSet(); break;
-        case 'macro': node = this.parseMacro(); break;
-        case 'import': node = this.parseImport(); break;
-        case 'from': node = this.parseFrom(); break;
-        default: this.fail('unknown block tag: ' + tok.value, tok.lineno, tok.colno);
+        case 'raw': return this.parseRaw();
+        case 'if': return this.parseIf();
+        case 'for': return this.parseFor();
+        case 'block': return this.parseBlock();
+        case 'extends': return this.parseExtends();
+        case 'include': return this.parseInclude();
+        case 'set': return this.parseSet();
+        case 'macro': return this.parseMacro();
+        case 'import': return this.parseImport();
+        case 'from': return this.parseFrom();
+        default:
+            if (this.extensions.length) {
+                for (var i = 0; i < this.extensions.length; i++) {
+                    var ext = this.extensions[i];
+                    if ((ext.tags || []).indexOf(tok.value) > -1) {
+                        return ext.parse(this, nodes, lexer);
+                    }
+                }
+            }
+            this.fail('unknown block tag: ' + tok.value, tok.lineno, tok.colno);
         }
 
         return node;
@@ -2102,8 +2129,11 @@ var Parser = Object.extend({
 // nodes.printNodes(n);
 
 modules['parser'] = {
-    parse: function(src) {
-        var p = new Parser(lexer.lex(src));
+    parse: function(src, extensions) {
+        var p = new Parser(lexer.lex(src, extensions));
+        if (extensions !== undefined) {
+            p.extensions = extensions;
+        }
         return p.parseAsRoot();
     }
 };
@@ -2144,11 +2174,13 @@ function quotedArray(arr) {
 }
 
 var Compiler = Object.extend({
-    init: function() {
+    init: function(extensions) {
         this.codebuf = [];
         this.lastId = 0;
         this.buffer = null;
         this.isChild = false;
+
+        this.extensions = extensions || [];
     },
     fail: function (msg, lineno, colno) {
         if (lineno !== undefined) lineno += 1;
@@ -2264,6 +2296,17 @@ var Compiler = Object.extend({
                       node.lineno,
                       node.colno);
         }
+    },
+
+    compileCustomTag: function(node, frame) {
+        for (var i = 0; i < this.extensions.length; i++) {
+            var ext = this.extensions[i];
+            if ((ext.tags || []).indexOf(node.name) > -1) {
+                ext.compile(this, node, frame);
+                return;
+            }
+        }
+        throw new Error('Could not find appropriate extension for tag.');
     },
 
     compileNodeList: function(node, frame) {
@@ -2875,9 +2918,18 @@ var Compiler = Object.extend({
 // console.log(tmpl);
 
 modules['compiler'] = {
-    compile: function(src) {
-        var c = new Compiler();
-        c.compile(parser.parse(src));
+    compile: function(src, extensions, name) {
+        var c = new Compiler(extensions);
+
+        // Run the extension preprocessors against the source.
+        if (extensions && extensions.length) {
+            for (var i = 0; i < extensions.length; i++) {
+                if ('preprocess' in extensions[i]) {
+                    src = extensions[i].preprocess(src, name);
+                }
+            }
+        }
+        c.compile(parser.parse(src, extensions));
         return c.getCode();
     },
 
@@ -2962,7 +3014,7 @@ var filters = {
                 "dictsort filter: You can only sort by either key or value");
         }
 
-        array.sort(function(t1, t2) { 
+        array.sort(function(t1, t2) {
             var a = t1[si];
             var b = t2[si];
 
@@ -3177,7 +3229,7 @@ var filters = {
                 x = x.toLowerCase();
                 y = y.toLowerCase();
             }
-               
+
             if(x < y) {
                 return reverse ? 1 : -1;
             }
@@ -3268,7 +3320,7 @@ var HttpLoader = Object.extend({
         if(!src) {
             return null;
         }
-        
+
         return { src: src,
                  path: name,
                  upToDate: function() { return _this.neverUpdate; }};
@@ -3346,6 +3398,13 @@ var Environment = Object.extend({
 
         this.filters = builtin_filters;
         this.cache = {};
+        this.extensions = {};
+        this.extensionsList = [];
+    },
+
+    addExtension: function(name, extension) {
+        this.extensions[name] = extension;
+        this.extensionsList.push(extension);
     },
 
     addFilter: function(name, func) {
@@ -3604,7 +3663,9 @@ var Template = Object.extend({
             props = this.tmplProps;
         }
         else {
-            var func = new Function(compiler.compile(this.tmplStr, this.env));
+            var compiled = compiler.compile(this.tmplStr, this.env.extensionsList, this.path);
+            //console.log(compiled);
+            var func = new Function(compiled);
             props = func();
         }
 
