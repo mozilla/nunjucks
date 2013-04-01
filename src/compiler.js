@@ -391,6 +391,18 @@ var Compiler = Object.extend({
         this._compileExpression(node.arr, frame);
         this.emitLine(';');
 
+        var loopUses = {};
+        node.iterFields(function(field) {
+            var lookups = field.findAll(nodes.LookupVal);
+            for (var i = 0, lookup; lookup = lookups[i++];) {
+                if (lookup.target instanceof nodes.Symbol &&
+                        lookup.target.value == 'loop' &&
+                        lookup.val instanceof nodes.Literal) {
+                    loopUses[lookup.val.value] = true;
+                }
+            }
+        });
+
         if(node.name instanceof nodes.Array) {
             // key/value iteration. the user could have passed a dict
             // amd two elements to be unpacked - "for k,v in { a: b }"
@@ -418,9 +430,15 @@ var Compiler = Object.extend({
                 frame.set(node.name.children[u].value, tid);
             }
 
-            this.emitLine('frame.set("loop.index", ' + i + ' + 1);');
-            this.emitLine('frame.set("loop.index0", ' + i + ');');
-            this.emitLine('frame.set("loop.first", ' + i + ' === 0);');
+            if ('index' in loopUses) {
+                this.emitLine('frame.set("loop.index", ' + i + ' + 1);');
+            }
+            if ('index0' in loopUses) {
+                this.emitLine('frame.set("loop.index0", ' + i + ');');
+            }
+            if ('first' in loopUses) {
+                this.emitLine('frame.set("loop.first", ' + i + ' === 0);');
+            }
 
             this.compile(node.body, frame);
 
@@ -444,9 +462,15 @@ var Compiler = Object.extend({
             this.emitLine('var ' + v + ' = ' + arr + '[' + k + '];');
             this.emitLine('frame.set("' + key.value + '", ' + k + ');');
             this.emitLine('frame.set("' + val.value + '", ' + v + ');');
-            this.emitLine('frame.set("loop.index", ' + i + ' + 1);');
-            this.emitLine('frame.set("loop.index0", ' + i + ');');
-            this.emitLine('frame.set("loop.first", ' + i + ' === 0);');
+            if ('index' in loopUses) {
+                this.emitLine('frame.set("loop.index", ' + i + ' + 1);');
+            }
+            if ('index0' in loopUses) {
+                this.emitLine('frame.set("loop.index0", ' + i + ');');
+            }
+            if ('first' in loopUses) {
+                this.emitLine('frame.set("loop.first", ' + i + ' === 0);');
+            }
             this.compile(node.body, frame);
 
             this.emitLine('}'); // end for
@@ -463,13 +487,27 @@ var Compiler = Object.extend({
             this.emitLine('var ' + v + ' = ' + arr + '[' + i + '];');
             this.emitLine('frame.set("' + node.name.value +
                           '", ' + v + ');');
-            this.emitLine('frame.set("loop.index", ' + i + ' + 1);');
-            this.emitLine('frame.set("loop.index0", ' + i + ');');
-            this.emitLine('frame.set("loop.revindex", ' + arr + '.length - ' + i + ');');
-            this.emitLine('frame.set("loop.revindex0", ' + arr + '.length - ' + i + ' - 1);');
-            this.emitLine('frame.set("loop.first", ' + i + ' === 0);');
-            this.emitLine('frame.set("loop.last", ' + i + ' === ' + arr + '.length - 1);');
-            this.emitLine('frame.set("loop.length", ' + arr + '.length);');
+            if ('index' in loopUses) {
+                this.emitLine('frame.set("loop.index", ' + i + ' + 1);');
+            }
+            if ('index0' in loopUses) {
+                this.emitLine('frame.set("loop.index0", ' + i + ');');
+            }
+            if ('revindex' in loopUses) {
+                this.emitLine('frame.set("loop.revindex", ' + arr + '.length - ' + i + ');');
+            }
+            if ('revindex0' in loopUses) {
+                this.emitLine('frame.set("loop.revindex0", ' + arr + '.length - ' + i + ' - 1);');
+            }
+            if ('first' in loopUses) {
+                this.emitLine('frame.set("loop.first", ' + i + ' === 0);');
+            }
+            if ('last' in loopUses) {
+                this.emitLine('frame.set("loop.last", ' + i + ' === ' + arr + '.length - 1);');
+            }
+            if ('length' in loopUses) {
+                this.emitLine('frame.set("loop.length", ' + arr + '.length);');
+            }
 
             this.compile(node.body, frame);
 
