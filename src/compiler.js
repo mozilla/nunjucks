@@ -394,13 +394,14 @@ var Compiler = Object.extend({
         var loopUses = {};
         node.iterFields(function(field) {
             var lookups = field.findAll(nodes.LookupVal);
-            for (var i = 0, lookup; lookup = lookups[i++];) {
+
+            lib.each(lookups, function(lookup) {
                 if (lookup.target instanceof nodes.Symbol &&
-                        lookup.target.value == 'loop' &&
-                        lookup.val instanceof nodes.Literal) {
+                    lookup.target.value == 'loop' &&
+                    lookup.val instanceof nodes.Literal) {
                     loopUses[lookup.val.value] = true;
                 }
-            }
+            });
         });
 
         if(node.name instanceof nodes.Array) {
@@ -510,7 +511,6 @@ var Compiler = Object.extend({
             }
 
             this.compile(node.body, frame);
-
             this.emitLine('}');
         }
 
