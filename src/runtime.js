@@ -118,6 +118,10 @@ function numArgs(args) {
 // autoescaped. This happens magically because autoescaping only 
 // occurs on primitive string objects.
 function SafeString(val) {
+    if(typeof val != 'string') {
+        return val;
+    }
+
     this.toString = function() {
         return val;
     };

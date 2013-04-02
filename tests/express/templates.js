@@ -57,7 +57,7 @@ var lineno = null;
 var colno = null;
 var output = "";
 try {
-output += "<!DOCTYPE html>\n<html>\n  <head>\n    <title>A quick app</title>\n\n    <style>\n      body {\n        background-color: #ccccff;\n      }\n\n      .footer {\n        margin-top: 5em;\n        font-size: .75em;\n      }\n    </style>\n\n    <script src=\"/nunjucks-min.js\"></script>\n    <script src=\"/templates.js\"></script>\n  </head>\n  <body>\n    ";
+output += "<!DOCTYPE html>\n<html>\n  <head>\n    <title>A quick app</title>\n\n    <style>\n      body {\n        background-color: #ccccff;\n      }\n\n      .footer {\n        margin-top: 5em;\n        font-size: .75em;\n      }\n    </style>\n\n    <script src=\"/nunjucks-dev.js\"></script>\n    <script src=\"/templates.js\"></script>\n  </head>\n  <body>\n    ";
 output += context.getBlock("content")(env, context, frame, runtime);
 output += "\n\n    <div class=\"footer\">\n      ";
 output += context.getBlock("footer")(env, context, frame, runtime);
@@ -238,13 +238,13 @@ root: root
 })();
 if(typeof define === "function" && define.amd) {
     define(["nunjucks"], function(nunjucks) {
-        nunjucks.env = new nunjucks.Environment([], { autoscape: true });
+        nunjucks.env = new nunjucks.Environment([], { autoescape: true });
         nunjucks.env.registerPrecompiled(templates);
         return nunjucks;
     });
 }
 else if(typeof nunjucks === "object") {
-    nunjucks.env = new nunjucks.Environment([], { autoscape: true });
+    nunjucks.env = new nunjucks.Environment([], { autoescape: true });
     nunjucks.env.registerPrecompiled(templates);
 }
 else {

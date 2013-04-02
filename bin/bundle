@@ -9,7 +9,7 @@ if [ -z "$SLIM" ]; then
        filters.js web-loaders.js loaders.js environment.js"
 else
     # Listed in order of dependency
-    files="object.js lib.js filters.js runtime.js environment.js"
+    files="object.js lib.js runtime.js filters.js environment.js"
 fi
 
 rm -f "$output"

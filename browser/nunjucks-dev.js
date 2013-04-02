@@ -635,6 +635,10 @@ function numArgs(args) {
 // autoescaped. This happens magically because autoescaping only 
 // occurs on primitive string objects.
 function SafeString(val) {
+    if(typeof val != 'string') {
+        return val;
+    }
+
     this.toString = function() {
         return val;
     };
@@ -3920,19 +3924,19 @@ var Template = Object.extend({
 
 // var fs = modules["fs"];
 // var src = fs.readFileSync('test.html', 'utf-8');
-var src = '{{ foo|safe|bar }}';
-var env = new Environment(null, { autoescape: true, dev: true });
+// var src = '{{ foo|safe|bar }}';
+// var env = new Environment(null, { autoescape: true, dev: true });
 
-env.addFilter('bar', function(x) {
-    return runtime.copySafeness(x, x.substring(3, 1) + x.substring(0, 2));
-});
+// env.addFilter('bar', function(x) {
+//     return runtime.copySafeness(x, x.substring(3, 1) + x.substring(0, 2));
+// });
 
-//env.addExtension('testExtension', new testExtension());
-console.log(compiler.compile(src));
+// //env.addExtension('testExtension', new testExtension());
+// console.log(compiler.compile(src));
 
-var tmpl = new Template(src, env);
-console.log("OUTPUT ---");
-console.log(tmpl.render({ foo: '<>&' }));
+// var tmpl = new Template(src, env);
+// console.log("OUTPUT ---");
+// console.log(tmpl.render({ foo: '<>&' }));
 
 modules['environment'] = {
     Environment: Environment,
