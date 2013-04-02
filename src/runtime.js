@@ -1,6 +1,6 @@
+
 var lib = require('./lib');
 var Object = require('./object');
-var lib = require('./lib');
 
 // Frames keep track of scoping both at compile-time and run-time so
 // we know how to access variables. Block tags can introduce special
@@ -114,26 +114,53 @@ function numArgs(args) {
     }
 }
 
-var FakeString = Object.extend({
-    init: function(val) {
-        this.raw = val;
-    },
-    toString: function() {
-        return lib.escape(this.raw);
-    },
-    replace: function() {
-        return this.raw.replace.apply(this.raw, arguments);
-    },
-    toUpperCase: function() {
-        return this.raw.toUpperCase();
+// A SafeString object indicates that the string should not be 
+// autoescaped. This happens magically because autoescaping only 
+// occurs on primitive string objects.
+function SafeString(val) {
+    this.toString = function() {
+        return val;
+    };
+
+    this.length = val.length;
+
+    var methods = [
+        'charAt', 'charCodeAt', 'concat', 'contains',
+        'endsWith', 'fromCharCode', 'indexOf', 'lastIndexOf',
+        'length', 'localeCompare', 'match', 'quote', 'replace',
+        'search', 'slice', 'split', 'startsWith', 'substr',
+        'substring', 'toLocaleLowerCase', 'toLocaleUpperCase',
+        'toLowerCase', 'toUpperCase', 'trim', 'trimLeft', 'trimRight'
+    ];
+
+    for(var i=0; i<methods.length; i++) {
+        this[methods[i]] = proxyStr(val[methods[i]]);
     }
-});
+}
+
+function copySafeness(dest, target) {
+    if(dest instanceof SafeString) {
+        return new SafeString(target);
+    }
+    return '' + target;
+}
+
+function proxyStr(func) {
+    return function() {
+        var ret = func.apply(this, arguments);
+
+        if(typeof ret == 'string') {
+            return new SafeString(ret);
+        }
+        return ret;
+    };
+}
 
 function suppressValue(val, autoescape) {
     val = (val !== undefined && val !== null) ? val : "";
 
     if(autoescape && typeof val === "string") {
-        val = new FakeString(val);
+        val = lib.escape(val);
     }
 
     return val;
@@ -188,5 +215,7 @@ module.exports = {
     contextOrFrameLookup: contextOrFrameLookup,
     callWrap: callWrap,
     handleError: handleError,
-    isArray: lib.isArray
+    isArray: lib.isArray,
+    SafeString: SafeString,
+    copySafeness: copySafeness
 };

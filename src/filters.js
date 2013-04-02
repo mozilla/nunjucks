@@ -1,5 +1,6 @@
 
 var lib = require('./lib');
+var runtime = require('./runtime');
 
 var filters = {
     abs: function(n) {
@@ -95,14 +96,15 @@ var filters = {
     },
     
     escape: function(str) {
-        if(typeof str == 'string') {
+        if(typeof str == 'string' || 
+           str instanceof runtime.SafeString) {
             return lib.escape(str);
         }
         return str;
     },
 
     safe: function(str) {
-        return (str && str.raw) ? str.raw : str;
+        return new runtime.SafeString(str);
     },
 
     first: function(arr) {

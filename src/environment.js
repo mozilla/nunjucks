@@ -342,14 +342,19 @@ var Template = Object.extend({
 
 // var fs = require('fs');
 // var src = fs.readFileSync('test.html', 'utf-8');
-// var src = '{{ foo|safe }}';
-// var env = new Environment(null, { autoescape: true, dev: true });
-// //env.addExtension('testExtension', new testExtension());
-// console.log(compiler.compile(src));
+var src = '{{ foo|safe|bar }}';
+var env = new Environment(null, { autoescape: true, dev: true });
 
-// var tmpl = new Template(src, env);
-// console.log("OUTPUT ---");
-// console.log(tmpl.render({ foo: '<>&' }));
+env.addFilter('bar', function(x) {
+    return runtime.copySafeness(x.substring(3, 1) + x.substring(0, 2));
+});
+
+//env.addExtension('testExtension', new testExtension());
+console.log(compiler.compile(src));
+
+var tmpl = new Template(src, env);
+console.log("OUTPUT ---");
+console.log(tmpl.render({ foo: '<>&' }));
 
 module.exports = {
     Environment: Environment,

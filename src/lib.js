@@ -8,6 +8,7 @@ var escapeMap = {
     "<": '&lt;',
     ">": '&gt;'
 };
+
 var lookupEscape = function(ch) {
     return escapeMap[ch];
 };
