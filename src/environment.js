@@ -8,7 +8,7 @@ var runtime = require('./runtime');
 var Frame = runtime.Frame;
 
 var Environment = Object.extend({
-    init: function(loaders, tags, opts) {
+    init: function(loaders, opts) {
         // The dev flag determines the trace that'll be shown on errors.
         // If set to true, returns the full trace from the error point,
         // otherwise will return trace starting from Template.render
@@ -37,8 +37,8 @@ var Environment = Object.extend({
             this.loaders = lib.isArray(loaders) ? loaders : [loaders];
         }
 
-        if(tags) {
-            lexer.setTags(tags);
+        if(opts.tags) {
+            lexer.setTags(opts.tags);
         }
 
         this.filters = builtin_filters;
@@ -342,34 +342,10 @@ var Template = Object.extend({
 
 // var fs = require('fs');
 // var src = fs.readFileSync('test.html', 'utf-8');
-// var src = '{% test %} foo {{ username }} bar{% endtest %}';
+// var src = '{{ foo["bar"] }}';
 // var env = new Environment(null, null, true);
-
-// function testExtension() {
-//     this.tags = ['test'];
-//     this._name = 'testExtension';
-
-//     this.parse = function(parser, nodes) {
-//         var name = parser.nextToken();
-//         var args = parser.parseSignature(true);
-//         parser.advanceAfterBlockEnd(name.value);
-
-//         var content = parser.parseUntilBlocks("endtest");
-//         var tag = new nodes.CallExtension(this, 'run', args, [content]);
-//         parser.advanceAfterBlockEnd();
-
-//         return tag;
-//     };
-
-//     this.run = function(context, content) {
-//         // Reverse the string
-//         return content().split("").reverse().join("");
-//     };
-// }
-
-
-// env.addExtension('testExtension', new testExtension());
-// console.log(compiler.compile(src, [new testExtension()]));
+//env.addExtension('testExtension', new testExtension());
+// console.log(compiler.compile(src));
 
 // var tmpl = new Template(src, env);
 // console.log("OUTPUT ---");

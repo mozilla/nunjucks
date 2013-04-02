@@ -135,18 +135,16 @@ function suppressValue(val, autoescape) {
     return val;
 }
 
-function suppressLookupValue(obj, val) {
+function memberLookup(obj, val) {
     obj = obj || {};
-    val = obj[val];
 
-    if(typeof val === 'function') {
+    if(typeof obj[val] === 'function') {
         return function() {
-            return suppressValue(val.apply(obj, arguments));
+            return obj[val].apply(obj, arguments);
         };
     }
-    else {
-        return suppressValue(val);
-    }
+
+    return obj[val];
 }
 
 function callWrap(obj, name, args) {
@@ -182,7 +180,7 @@ module.exports = {
     makeKeywordArgs: makeKeywordArgs,
     numArgs: numArgs,
     suppressValue: suppressValue,
-    suppressLookupValue: suppressLookupValue,
+    memberLookup: memberLookup,
     contextOrFrameLookup: contextOrFrameLookup,
     callWrap: callWrap,
     handleError: handleError,

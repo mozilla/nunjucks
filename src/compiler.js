@@ -358,7 +358,7 @@ var Compiler = Object.extend({
     },
 
     compileLookupVal: function(node, frame) {
-        this.emit('runtime.suppressLookupValue((');
+        this.emit('runtime.memberLookup((');
         this._compileExpression(node.target, frame);
         this.emit('),');
         this._compileExpression(node.val, frame);
