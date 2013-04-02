@@ -10,6 +10,8 @@ var Parser = Object.extend({
         this.peeked = null;
         this.breakOnBlocks = null;
         this.dropLeadingWhitespace = false;
+
+        this.extensions = [];
     },
 
     nextToken: function (withWhitespace) {
@@ -417,17 +419,26 @@ var Parser = Object.extend({
         }
 
         switch(tok.value) {
-        case 'raw': node = this.parseRaw(); break;
-        case 'if': node = this.parseIf(); break;
-        case 'for': node = this.parseFor(); break;
-        case 'block': node = this.parseBlock(); break;
-        case 'extends': node = this.parseExtends(); break;
-        case 'include': node = this.parseInclude(); break;
-        case 'set': node = this.parseSet(); break;
-        case 'macro': node = this.parseMacro(); break;
-        case 'import': node = this.parseImport(); break;
-        case 'from': node = this.parseFrom(); break;
-        default: this.fail('unknown block tag: ' + tok.value, tok.lineno, tok.colno);
+        case 'raw': return this.parseRaw();
+        case 'if': return this.parseIf();
+        case 'for': return this.parseFor();
+        case 'block': return this.parseBlock();
+        case 'extends': return this.parseExtends();
+        case 'include': return this.parseInclude();
+        case 'set': return this.parseSet();
+        case 'macro': return this.parseMacro();
+        case 'import': return this.parseImport();
+        case 'from': return this.parseFrom();
+        default:
+            if (this.extensions.length) {
+                for (var i = 0; i < this.extensions.length; i++) {
+                    var ext = this.extensions[i];
+                    if ((ext.tags || []).indexOf(tok.value) > -1) {
+                        return ext.parse(this, nodes, lexer);
+                    }
+                }
+            }
+            this.fail('unknown block tag: ' + tok.value, tok.lineno, tok.colno);
         }
 
         return node;
@@ -908,7 +919,16 @@ var Parser = Object.extend({
         return node;
     },
 
-    parseSignature: function() {
+    parseSignature: function(tolerant) {
+        if(this.peekToken().type != lexer.TOKEN_LEFT_PAREN) {
+            if(tolerant) {
+                return null;
+            }
+            else {
+                this.fail('expected arguments', tok.lineno, tok.colno);
+            }
+        }
+
         var tok = this.nextToken();
         var args = new nodes.NodeList(tok.lineno, tok.colno);
         var kwargs = new nodes.KeywordArgs(tok.lineno, tok.colno);
@@ -916,16 +936,16 @@ var Parser = Object.extend({
         var checkComma = false;
 
         while(1) {
-            var type = this.peekToken().type;
-            if(type == lexer.TOKEN_RIGHT_PAREN) {
+            tok = this.peekToken();
+            if(tok.type == lexer.TOKEN_RIGHT_PAREN) {
                 this.nextToken();
                 break;
             }
 
             if(checkComma && !this.skip(lexer.TOKEN_COMMA)) {
                 this.fail("parseSignature: expected comma after expression",
-                    tok.lineno,
-                    tok.colno);
+                          tok.lineno,
+                          tok.colno);
             }
             else {
                 var arg = this.parsePrimary();
@@ -1035,13 +1055,16 @@ var Parser = Object.extend({
 //     console.log(util.inspect(t));
 // }
 
-// var p = new Parser(lexer.lex('{% from x import y -%}\n  hi \n'));
+// var p = new Parser(lexer.lex('{% test %}sdfd{% endtest %}'));
 // var n = p.parse();
 // nodes.printNodes(n);
 
 module.exports = {
-    parse: function(src) {
+    parse: function(src, extensions) {
         var p = new Parser(lexer.lex(src));
+        if (extensions !== undefined) {
+            p.extensions = extensions;
+        }
         return p.parseAsRoot();
     }
 };

@@ -33,17 +33,31 @@ function quotedArray(arr) {
 }
 
 var Compiler = Object.extend({
-    init: function() {
+    init: function(extensions) {
         this.codebuf = [];
         this.lastId = 0;
         this.buffer = null;
+        this.bufferStack = [];
         this.isChild = false;
+
+        this.extensions = extensions || [];
     },
+
     fail: function (msg, lineno, colno) {
         if (lineno !== undefined) lineno += 1;
         if (colno !== undefined) colno += 1;
 
         throw new lib.TemplateError(msg, lineno, colno);
+    },
+
+    pushBufferId: function(id) {
+        this.bufferStack.push(this.buffer);
+        this.buffer = id;
+        this.emit('var ' + this.buffer + ' = "";');
+    },
+
+    popBufferId: function() {
+        this.buffer = this.bufferStack.pop();
     },
 
     emit: function(code) {
@@ -84,6 +98,12 @@ var Compiler = Object.extend({
     tmpid: function() {
         this.lastId++;
         return 't_' + this.lastId;
+    },
+
+    _bufferAppend: function(func) {
+        this.emit(this.buffer + ' += runtime.suppressValue(');
+        func.call(this);
+        this.emit(');\n');
     },
 
     _compileChildren: function(node, frame) {
@@ -153,6 +173,64 @@ var Compiler = Object.extend({
                       node.lineno,
                       node.colno);
         }
+    },
+
+    compileCallExtension: function(node, frame) {
+        var name = node.extName;
+        var args = node.args;
+        var contentArgs = node.contentArgs;
+        var transformedArgs = [];
+
+        this._bufferAppend(function() {
+            this.emit('env.getExtension("' + node.extName + '")["' + node.prop + '"](');
+            this.emit('context');
+
+            if(args || contentArgs) {
+                this.emit(',');
+            }
+
+            if(args) {
+                if(!(args instanceof nodes.NodeList)) {
+                    this.fail('compileCallExtension: arguments must be a NodeList, ' +
+                              'use `parser.parseSignature`');
+                }
+
+                lib.each(args.children, function(arg, i) {
+                    // Tag arguments are passed normally to the call. Note
+                    // that keyword arguments are turned into a single js
+                    // object as the last argument, if they exist.
+                    this._compileExpression(arg, frame);
+
+                    if(i != args.children.length || contentArgs) {
+                        this.emit(',');
+                    }
+                }, this);
+            }
+
+            if(contentArgs) {
+                lib.each(contentArgs, function(arg, i) {
+                    if(i > 0) {
+                        this.emit(',');
+                    }
+
+                    if(arg) {
+                        var id = this.tmpid();
+
+                        this.emit('function() {');
+                        this.pushBufferId(id);
+                        this.compile(arg, frame);
+                        this.popBufferId();
+                        this.emitLine('return ' + id + ';\n' +
+                                      '}');
+                    }
+                    else {
+                        this.emit('null');
+                    }
+                }, this);
+            }
+
+            this.emit(')');
+        });
     },
 
     compileNodeList: function(node, frame) {
@@ -723,9 +801,10 @@ var Compiler = Object.extend({
             }
         }
 
-        this.emit(this.buffer + ' += runtime.suppressValue(');
-        this._compileChildren(node, frame);
-        this.emit(');\n');
+        var _this = this;
+        this._bufferAppend(function() {
+            _this._compileChildren(node, frame);
+        });
     },
 
     compileRoot: function(node, frame) {
@@ -788,12 +867,35 @@ var Compiler = Object.extend({
 });
 
 // var fs = require("fs");
+//var src = '{{ foo({a:1}) }} {% block content %}foo{% endblock %}';
 // var c = new Compiler();
-// //var src = '{{ foo({a:1}) }} {% block content %}foo{% endblock %}';
-// var src = '{% extends "base.html" %}' +
-//     '{% block block1 %}{{ super() }}{% endblock %}';
+// var src = '{% test %}hello{% endtest %}';
 
-// var ns = parser.parse(src);
+// function testExtension() {
+//     this.tags = ['test'];
+//     this._name = 'testExtension';
+
+//     this.parse = function(parser, nodes) {
+//         var begun = parser.peekToken();
+//         parser.advanceAfterBlockEnd();
+
+//         //var tag = new nodes.CustomTag(begun.lineno, begun.colno, "test");
+
+//         var content = parser.parseUntilBlocks("endtest");
+//         var tag = new nodes.CallExtension(this, 'run', [content]);
+
+//         parser.advanceAfterBlockEnd();
+
+//         return tag;
+//     };
+
+//     this.run = function(content) {
+//         return 'poop';
+//     };
+// }
+// var extensions = [new testExtension()];
+
+// var ns = parser.parse(src, extensions);
 // nodes.printNodes(ns);
 // c.compile(ns);
 
@@ -802,9 +904,19 @@ var Compiler = Object.extend({
 // console.log(tmpl);
 
 module.exports = {
-    compile: function(src) {
-        var c = new Compiler();
-        c.compile(parser.parse(src));
+    compile: function(src, extensions, name) {
+        var c = new Compiler(extensions);
+
+        // Run the extension preprocessors against the source.
+        if (extensions && extensions.length) {
+            for (var i = 0; i < extensions.length; i++) {
+                if ('preprocess' in extensions[i]) {
+                    src = extensions[i].preprocess(src, name);
+                }
+            }
+        }
+
+        c.compile(parser.parse(src, extensions));
         return c.getCode();
     },
 

@@ -35,6 +35,18 @@ var Environment = Object.extend({
 
         this.filters = builtin_filters;
         this.cache = {};
+        this.extensions = {};
+        this.extensionsList = [];
+    },
+
+    addExtension: function(name, extension) {
+        extension._name = name;
+        this.extensions[name] = extension;
+        this.extensionsList.push(extension);
+    },
+
+    getExtension: function(name) {
+        return this.extensions[name];
     },
 
     addFilter: function(name, func) {
@@ -293,7 +305,8 @@ var Template = Object.extend({
             props = this.tmplProps;
         }
         else {
-            var func = new Function(compiler.compile(this.tmplStr, this.env));
+            var source = compiler.compile(this.tmplStr, this.env.extensionsList, this.path);
+            var func = new Function(source);
             props = func();
         }
 
@@ -317,11 +330,34 @@ var Template = Object.extend({
 
 // var fs = require('fs');
 // var src = fs.readFileSync('test.html', 'utf-8');
-// //var src = '{% macro foo(x, y, z=3) %}h{% endmacro %}';
-// //var src = '{% macro foo() %}{{ h }}{% endmacro %} {{ foo() }}';
+// var src = '{% test %} foo {{ username }} bar{% endtest %}';
+// var env = new Environment(null, null, true);
 
-// var env = new Environment();
-// console.log(compiler.compile(src));
+// function testExtension() {
+//     this.tags = ['test'];
+//     this._name = 'testExtension';
+
+//     this.parse = function(parser, nodes) {
+//         var name = parser.nextToken();
+//         var args = parser.parseSignature(true);
+//         parser.advanceAfterBlockEnd(name.value);
+
+//         var content = parser.parseUntilBlocks("endtest");
+//         var tag = new nodes.CallExtension(this, 'run', args, [content]);
+//         parser.advanceAfterBlockEnd();
+
+//         return tag;
+//     };
+
+//     this.run = function(context, content) {
+//         // Reverse the string
+//         return content().split("").reverse().join("");
+//     };
+// }
+
+
+// env.addExtension('testExtension', new testExtension());
+// console.log(compiler.compile(src, [new testExtension()]));
 
 // var tmpl = new Template(src, env);
 // console.log("OUTPUT ---");

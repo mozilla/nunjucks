@@ -5,7 +5,7 @@ var parser = require('../src/parser');
 
 function _isAST(node1, node2) {
     // Compare ASTs
-    // TODO: Clean this up
+    // TODO: Clean this up (seriously, really)
 
     node1.typename.should.equal(node2.typename);
 
@@ -18,7 +18,7 @@ function _isAST(node1, node2) {
 
         should.exist(node1.children);
         var sig1 = (node1.typename + lit + node1.children.length);
-        
+
         sig1.should.equal(sig2);
 
         for(var i=0, l=node2.children.length; i<l; i++) {
@@ -27,27 +27,42 @@ function _isAST(node1, node2) {
     }
     else {
         node2.iterFields(function(value, field) {
+            var ofield = node1[field];
+
             if(value instanceof nodes.Node) {
-                _isAST(node1[field], value);
+                _isAST(ofield, value);
             }
-            else if(node1[field] !== null || value !== null) {
-                if(node1[field] === null) {
-                    throw new Error(value + ' expected for "' + field + 
+            else if(lib.isArray(ofield) && lib.isArray(value)) {
+                ('num-children: ' + ofield.length).should.equal('num-children: ' + value.length);
+
+                lib.each(ofield, function(v, i) {
+                    if(ofield[i] instanceof nodes.Node) {
+                        _isAST(ofield[i], value[i]);
+                    }
+                    else if(ofield[i] !== null && value[i] !== null) {
+                        ofield[i].should.equal(value[i]);
+                    }
+                });
+            }
+            else if((ofield !== null || value !== null) &&
+                    (ofield !== undefined || value !== undefined)) {
+                if(ofield === null) {
+                    throw new Error(value + ' expected for "' + field +
                                     '", null found');
                 }
 
                 if(value === null) {
-                    throw new Error(node1[field] + ' expected to be null for "' +
+                    throw new Error(ofield + ' expected to be null for "' +
                                     field + '"');
                 }
 
                 // We want good errors and tracebacks, so test on
                 // whichever object exists
-                if(!node1[field]) {
-                    value.should.equal(node1[field]);
+                if(!ofield) {
+                    value.should.equal(ofield);
                 }
                 else {
-                    node1[field].should.equal(value);
+                    ofield.should.equal(value);
                 }
             }
         });
@@ -73,6 +88,10 @@ function toNodes(ast) {
 
     if(dummy instanceof nodes.NodeList) {
         return new type(0, 0, lib.map(ast.slice(1), toNodes));
+    }
+    else if(dummy instanceof nodes.CallExtension) {
+        return new type(ast[1], ast[2], ast[3] ? toNodes(ast[3]) : ast[3],
+                        lib.isArray(ast[4]) ? lib.map(ast[4], toNodes) : ast[4]);
     }
     else {
         return new type(0, 0,
@@ -216,7 +235,7 @@ describe('parser', function() {
                 [nodes.NodeList,
                  [nodes.Symbol, 'bar'],
                  [nodes.KeywordArgs,
-                  [nodes.Pair, 
+                  [nodes.Pair,
                    [nodes.Symbol, 'baz'], [nodes.Literal, 'foobar']]]],
                 [nodes.NodeList,
                  [nodes.Output,
@@ -375,5 +394,97 @@ describe('parser', function() {
         (function() {
             parser.parse('{% from "foo" import _bar %}');
         }).should.throw(/names starting with an underscore cannot be imported/);
+    });
+
+    it('should parse custom tags', function() {
+
+        function testtagExtension() {
+            this.tags = ['testtag'];
+
+            /* normally this is automatically done by Environment */
+            this._name = 'testtagExtension';
+
+            this.parse = function(parser, nodes) {
+                var begun = parser.peekToken();
+                parser.advanceAfterBlockEnd();
+                return new nodes.CallExtension(this, 'foo');
+            };
+        }
+
+        function testblocktagExtension() {
+            this.tags = ['testblocktag'];
+            this._name = 'testblocktagExtension';
+
+            this.parse = function(parser, nodes) {
+                var begun = parser.peekToken();
+                parser.advanceAfterBlockEnd();
+
+                var content = parser.parseUntilBlocks('endtestblocktag');
+                var tag = new nodes.CallExtension(this, 'bar', null, [1, content]);
+                parser.advanceAfterBlockEnd();
+
+                return tag;
+            };
+        }
+
+        function testargsExtension() {
+            this.tags = ['testargs'];
+            this._name = 'testargsExtension';
+
+            this.parse = function(parser, nodes, tokens) {
+                var begun = parser.peekToken();
+                var args = null;
+
+                // Skip the name
+                parser.nextToken(); 
+
+                args = parser.parseSignature(true);
+                parser.advanceAfterBlockEnd(begun.value);
+
+                return new nodes.CallExtension(this, 'biz', args);
+            };
+        }
+
+        var extensions = [new testtagExtension(),
+                          new testblocktagExtension(),
+                          new testargsExtension()];
+            
+        isAST(parser.parse('{% testtag %}', extensions),
+              [nodes.Root,
+               [nodes.CallExtension, extensions[0], 'foo', undefined, undefined]]);
+
+        isAST(parser.parse('{% testblocktag %}sdfd{% endtestblocktag %}',
+                           extensions),
+              [nodes.Root,
+               [nodes.CallExtension, extensions[1], 'bar', null,
+                [1, [nodes.NodeList,
+                     [nodes.Output,
+                      [nodes.TemplateData, "sdfd"]]]]]]);
+
+        isAST(parser.parse('{% testblocktag %}{{ 123 }}{% endtestblocktag %}',
+                           extensions),
+              [nodes.Root,
+               [nodes.CallExtension, extensions[1], 'bar', null,
+                [1, [nodes.NodeList,
+                     [nodes.Output,
+                      [nodes.Literal, 123]]]]]]);
+
+        isAST(parser.parse('{% testargs(123, "abc", foo="bar") %}', extensions),
+              [nodes.Root,
+               [nodes.CallExtension, extensions[2], 'biz',
+
+                // The only arg is the list of run-time arguments
+                // coming from the template
+                [nodes.NodeList,
+                 [nodes.Literal, 123],
+                 [nodes.Literal, "abc"],
+                 [nodes.KeywordArgs, 
+                  [nodes.Pair,
+                   [nodes.Symbol, "foo"],
+                   [nodes.Literal, "bar"]]]]]]);
+
+        isAST(parser.parse('{% testargs %}', extensions),
+              [nodes.Root,
+               [nodes.CallExtension, extensions[2], 'biz', null]]);
     });
 });
