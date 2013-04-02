@@ -9,7 +9,6 @@ var args = process.argv.slice();
 var force = false;
 
 // Remove the "node precompile" arguments
-
 args.shift();
 args.shift();
 
@@ -24,7 +23,7 @@ while(1) {
     }
 }
 
-var input_path = args[0];
+var inputPath = args[0];
 
 if(args.length === 0) {
     console.log('Precompile nunjucks templates to javascript.\n\n' +
@@ -40,20 +39,23 @@ if(args.length === 0) {
 }
 
 try {
-    var path_stats = fs.statSync(input_path);
+    var pathStats = fs.statSync(inputPath);
 } catch (e) {
-    console.log('Unable to stat ' + input_path + ": " + e);
+    console.log('Unable to stat ' + inputPath + ": " + e);
     process.exit(2);
 }
 
-if (path_stats.isFile()) {
-    // compile a single file; exit on first error found
+if(pathStats.isFile()) {
+    // Compile a single file and exit on first error found.
+    // Note that you don't get an Environment object automatically
+    // with this, so you will have to build your own scaffolding if you 
+    // compile templates individually.
     try {
         var src = lib.withPrettyErrors(
-            input_path,
+            inputPath,
             false,
             function() {
-                return compiler.compile(fs.readFileSync(input_path,
+                return compiler.compile(fs.readFileSync(inputPath,
                                                         'utf-8'));
             }
         );
@@ -61,10 +63,12 @@ if (path_stats.isFile()) {
         console.error(e.toString());
         process.exit(4);
     }
+
     util.puts(src);
     process.exit(0);
-} else if (!path_stats.isDirectory()) {
-    console.log(input_path + ' is not a file or directory');
+}
+else if(!pathStats.isDirectory()) {
+    console.log(inputPath + ' is not a file or directory');
     process.exit(3);
 }
 
@@ -86,7 +90,7 @@ function addTemplates(dir) {
     }
 }
 
-addTemplates(input_path);
+addTemplates(inputPath);
 
 util.puts('(function() {');
 util.puts('var templates = {};');
@@ -101,7 +105,8 @@ for(var i=0; i<templates.length; i++) {
                                                         'utf-8'));
             }
         );
-        var name = templates[i].replace(path.join(path, '/'), '');
+        
+        var name = templates[i].replace(path.join(inputPath, '/'), '');
 
         util.puts('templates["' + name + '"] = (function() {');
         util.puts(src);

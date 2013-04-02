@@ -1,6 +1,6 @@
 (function() {
 var templates = {};
-templates["viewsabout.html"] = (function() {
+templates["about.html"] = (function() {
 function root(env, context, frame, runtime) {
 var lineno = null;
 var colno = null;
@@ -51,7 +51,7 @@ root: root
 };
 
 })();
-templates["viewsbase.html"] = (function() {
+templates["base.html"] = (function() {
 function root(env, context, frame, runtime) {
 var lineno = null;
 var colno = null;
@@ -97,7 +97,7 @@ root: root
 };
 
 })();
-templates["viewsindex.html"] = (function() {
+templates["index.html"] = (function() {
 function root(env, context, frame, runtime) {
 var lineno = null;
 var colno = null;
@@ -161,7 +161,7 @@ root: root
 };
 
 })();
-templates["viewsitem-base.html"] = (function() {
+templates["item-base.html"] = (function() {
 function root(env, context, frame, runtime) {
 var lineno = null;
 var colno = null;
@@ -197,7 +197,7 @@ root: root
 };
 
 })();
-templates["viewsitem.html"] = (function() {
+templates["item.html"] = (function() {
 function root(env, context, frame, runtime) {
 var lineno = null;
 var colno = null;
