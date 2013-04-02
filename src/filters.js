@@ -1,6 +1,6 @@
 
 var lib = require('./lib');
-var runtime = require('./runtime');
+var r = require('./runtime');
 
 var filters = {
     abs: function(n) {
@@ -34,8 +34,8 @@ var filters = {
     },
 
     capitalize: function(str) {
-        str = str.toLowerCase();
-        return str[0].toUpperCase() + str.slice(1);
+        var ret = str.toLowerCase();
+        return r.copySafeness(str, ret[0].toUpperCase() + ret.slice(1));
     },
 
     center: function(str, width) {
@@ -48,7 +48,7 @@ var filters = {
         var spaces = width - str.length;
         var pre = lib.repeat(" ", spaces/2 - spaces % 2);
         var post = lib.repeat(" ", spaces/2);
-        return pre + str + post;
+        return r.copySafeness(str, pre + str + post);
     },
 
     'default': function(val, def) {
@@ -97,14 +97,14 @@ var filters = {
     
     escape: function(str) {
         if(typeof str == 'string' || 
-           str instanceof runtime.SafeString) {
+           str instanceof r.SafeString) {
             return lib.escape(str);
         }
         return str;
     },
 
     safe: function(str) {
-        return new runtime.SafeString(str);
+        return new r.SafeString(str);
     },
 
     first: function(arr) {
@@ -130,7 +130,7 @@ var filters = {
             }
         }
 
-        return res;
+        return r.copySafeness(str, res);
     },
 
     join: function(arr, del, attr) {
@@ -208,7 +208,7 @@ var filters = {
             count++;
         }
 
-        return res;
+        return r.copySafeness(str, res);
     },
 
     reverse: function(val) {
@@ -224,7 +224,7 @@ var filters = {
         arr.reverse();
 
         if(lib.isString(val)) {
-            return arr.join('');
+            return r.copySafeness(val, arr.join(''));
         }
         return arr;
     },
@@ -306,7 +306,7 @@ var filters = {
     },
 
     string: function(obj) {
-        return obj.toString();
+        return r.copySafeness(obj, obj);
     },
 
     title: function(str) {
@@ -314,14 +314,15 @@ var filters = {
         for(var i = 0; i < words.length; i++) {
             words[i] = filters.capitalize(words[i]);
         }
-        return words.join(' ');
+        return r.copySafeness(str, words.join(' '));
     },
 
     trim: function(str) {
-        return str.replace(/^\s*|\s*$/g, '');
+        return r.copySafeness(str, str.replace(/^\s*|\s*$/g, ''));
     },
 
     truncate: function(input, length, killwords, end) {
+        var orig = input;
         length = length || 255;
 
         if (input.length <= length)
@@ -334,7 +335,7 @@ var filters = {
         }
 
         input += (end !== undefined && end !== null) ? end : '...';
-        return input;
+        return r.copySafeness(orig, input);
     },
 
     upper: function(str) {

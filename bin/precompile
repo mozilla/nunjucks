@@ -6,6 +6,7 @@ var lib = require('../src/lib');
 var compiler = require('../src/compiler');
 var args = process.argv.slice();
 
+var envOpts = 'null';
 var force = false;
 
 // Remove the "node precompile" arguments
@@ -16,6 +17,11 @@ args.shift();
 while(1) {
     if(args[0] == '-f') {
         force = true;
+        args.shift();
+    }
+    else if(args[0] == '-p') {
+        envOpts = args[1];
+        args.shift();
         args.shift();
     }
     else {
@@ -129,13 +135,13 @@ for(var i=0; i<templates.length; i++) {
 util.puts(
     'if(typeof define === "function" && define.amd) {\n' +
     '    define(["nunjucks"], function(nunjucks) {\n' +
-    '        nunjucks.env = new nunjucks.Environment([]);\n' +
+    '        nunjucks.env = new nunjucks.Environment([], ' + envOpts + ');\n' +
     '        nunjucks.env.registerPrecompiled(templates);\n' +
     '        return nunjucks;\n' +
     '    });\n' +
     '}\n' +
     'else if(typeof nunjucks === "object") {\n' +
-    '    nunjucks.env = new nunjucks.Environment([]);\n' +
+    '    nunjucks.env = new nunjucks.Environment([], ' + envOpts + ');\n' +
     '    nunjucks.env.registerPrecompiled(templates);\n' +
     '}\n' +
     'else {\n' +

@@ -409,9 +409,8 @@ describe('compiler', function() {
             };
         }
 
-        var extensions = {'testExtension': new testExtension()};
-
-        var output = render('{% test %}123456789{% endtest %}', null, extensions);
+        var opts = { extensions: { 'testExtension': new testExtension() }};
+        var output = render('{% test %}123456789{% endtest %}', null, opts);
         output.should.equal('987654321');
 
     });
@@ -449,15 +448,15 @@ describe('compiler', function() {
             };
         }
 
-        var extensions = {'testExtension': new testExtension()};
+        var opts = { extensions: { 'testExtension': new testExtension() }};
 
-        var output = render('{% test %}abcdefg{% endtest %}', null, extensions);
+        var output = render('{% test %}abcdefg{% endtest %}', null, opts);
         output.should.equal('a,b,c,d,e,f,g');
 
         output = render(
             '{% test %}abcdefg{% intermediate %}second half{% endtest %}',
             null, 
-            extensions
+            opts
         );
         output.should.equal('a,b,c,d,e,f,gflah dnoces');
     });
@@ -503,15 +502,15 @@ describe('compiler', function() {
             };
         }
 
-        var extensions = {'testExtension': new testExtension()};
+        var opts = { extensions: {'testExtension': new testExtension() }};
 
-        var output = render('{% test %}foobar{% endtest %}', null, extensions);
+        var output = render('{% test %}foobar{% endtest %}', null, opts);
         output.should.equal('raboof');
 
-        output = render('{% test("biz") %}foobar{% endtest %}', null, extensions);
+        output = render('{% test("biz") %}foobar{% endtest %}', null, opts);
         output.should.equal('bizraboof');
 
-        output = render('{% test("biz", cutoff=5) %}foobar{% endtest %}', null, extensions);
+        output = render('{% test("biz", cutoff=5) %}foobar{% endtest %}', null, opts);
         output.should.equal('bizra');
     });
 
@@ -520,25 +519,19 @@ describe('compiler', function() {
         s.should.equal('"\'<>&');
     });
 
-    it('should autoescape if global autoescape is on unless safe filter is used', function() {
-        var env = require('../src/environment');
-        var loaders = require('../src/node-loaders');
-
-        var safe_render = function (str, ctx) {
-            var e = new env.Environment(new loaders.FileSystemLoader('tests/templates'), {
-                dev: true,
-                autoescape: true
-            });
-
-            ctx = ctx || {};
-            var t = new env.Template(str, e);
-            return t.render(ctx);
-        };
-
-        var s = safe_render('{{ foo }}', { foo: '"\'<>&'});
+    it('should autoescape if autoescape is on', function() {
+        var s = render('{{ foo }}', { foo: '"\'<>&'}, { autoescape: true });
         s.should.equal('&quot;&#39;&lt;&gt;&amp;');
 
-        // var s = safe_render('{{ foo|safe }}', { foo: '"\'<>&'});
-        // s.should.equal('"\'<>&');
+        var s = render('{{ foo|reverse }}', { foo: '"\'<>&'}, { autoescape: true });
+        s.should.equal('&amp;&gt;&lt;&#39;&quot;');
+
+        var s = render('{{ foo|reverse|safe }}', { foo: '"\'<>&'}, { autoescape: true });
+        s.should.equal('&><\'"');
+    });
+
+    it('should not autoescape safe strings', function() {
+        var s = render('{{ foo|safe }}', { foo: '"\'<>&'}, { autoescape: true });
+        s.should.equal('"\'<>&');
     });
 });

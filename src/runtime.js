@@ -121,13 +121,39 @@ function SafeString(val) {
     this.toString = function() {
         return val;
     };
+
+    this.length = val.length;
+
+    var methods = [
+        'charAt', 'charCodeAt', 'concat', 'contains',
+        'endsWith', 'fromCharCode', 'indexOf', 'lastIndexOf',
+        'length', 'localeCompare', 'match', 'quote', 'replace',
+        'search', 'slice', 'split', 'startsWith', 'substr',
+        'substring', 'toLocaleLowerCase', 'toLocaleUpperCase',
+        'toLowerCase', 'toUpperCase', 'trim', 'trimLeft', 'trimRight'
+    ];
+
+    for(var i=0; i<methods.length; i++) {
+        this[methods[i]] = proxyStr(val[methods[i]]);
+    }
 }
 
 function copySafeness(dest, target) {
     if(dest instanceof SafeString) {
         return new SafeString(target);
     }
-    return '' + target;
+    return target.toString();
+}
+
+function proxyStr(func) {
+    return function() {
+        var ret = func.apply(this, arguments);
+
+        if(typeof ret == 'string') {
+            return new SafeString(ret);
+        }
+        return ret;
+    };
 }
 
 function suppressValue(val, autoescape) {

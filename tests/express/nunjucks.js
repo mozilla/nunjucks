@@ -63,6 +63,18 @@ modules['object'] = extend(Object, "Object", {});
 var ArrayProto = Array.prototype;
 var ObjProto = Object.prototype;
 
+var escapeMap = {
+    '&': '&amp;',
+    '"': '&quot;',
+    "'": '&#39;',
+    "<": '&lt;',
+    ">": '&gt;'
+};
+
+var lookupEscape = function(ch) {
+    return escapeMap[ch];
+};
+
 var exports = modules['lib'] = {};
 
 exports.withPrettyErrors = function(path, withInternals, func) {
@@ -130,6 +142,10 @@ exports.TemplateError = function(message, lineno, colno) {
 };
 
 exports.TemplateError.prototype = Error.prototype;
+
+exports.escape = function(val) {
+    return val.replace(/[&"'<>]/g, lookupEscape);
+};
 
 exports.isFunction = function(obj) {
     return ObjProto.toString.call(obj) == '[object Function]';
@@ -233,6 +249,7 @@ exports.map = function(obj, func) {
 (function() {
 
 var lib = modules["lib"];
+var r = modules["runtime"];
 
 var filters = {
     abs: function(n) {
@@ -266,8 +283,8 @@ var filters = {
     },
 
     capitalize: function(str) {
-        str = str.toLowerCase();
-        return str[0].toUpperCase() + str.slice(1);
+        var ret = str.toLowerCase();
+        return r.copySafeness(str, ret[0].toUpperCase() + ret.slice(1));
     },
 
     center: function(str, width) {
@@ -280,7 +297,7 @@ var filters = {
         var spaces = width - str.length;
         var pre = lib.repeat(" ", spaces/2 - spaces % 2);
         var post = lib.repeat(" ", spaces/2);
-        return pre + str + post;
+        return r.copySafeness(str, pre + str + post);
     },
 
     'default': function(val, def) {
@@ -326,18 +343,17 @@ var filters = {
 
         return array;
     },
-
+    
     escape: function(str) {
-        if(typeof str === 'string') {
-            return str.replace(/&/g, '&amp;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#39;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;');
+        if(typeof str == 'string' || 
+           str instanceof r.SafeString) {
+            return lib.escape(str);
         }
-        else {
-            return str;
-        }
+        return str;
+    },
+
+    safe: function(str) {
+        return new r.SafeString(str);
     },
 
     first: function(arr) {
@@ -363,7 +379,7 @@ var filters = {
             }
         }
 
-        return res;
+        return r.copySafeness(str, res);
     },
 
     join: function(arr, del, attr) {
@@ -441,7 +457,7 @@ var filters = {
             count++;
         }
 
-        return res;
+        return r.copySafeness(str, res);
     },
 
     reverse: function(val) {
@@ -457,7 +473,7 @@ var filters = {
         arr.reverse();
 
         if(lib.isString(val)) {
-            return arr.join('');
+            return r.copySafeness(val, arr.join(''));
         }
         return arr;
     },
@@ -539,7 +555,7 @@ var filters = {
     },
 
     string: function(obj) {
-        return obj.toString();
+        return r.copySafeness(obj, obj);
     },
 
     title: function(str) {
@@ -547,14 +563,15 @@ var filters = {
         for(var i = 0; i < words.length; i++) {
             words[i] = filters.capitalize(words[i]);
         }
-        return words.join(' ');
+        return r.copySafeness(str, words.join(' '));
     },
 
     trim: function(str) {
-        return str.replace(/^\s*|\s*$/g, '');
+        return r.copySafeness(str, str.replace(/^\s*|\s*$/g, ''));
     },
 
     truncate: function(input, length, killwords, end) {
+        var orig = input;
         length = length || 255;
 
         if (input.length <= length)
@@ -567,7 +584,7 @@ var filters = {
         }
 
         input += (end !== undefined && end !== null) ? end : '...';
-        return input;
+        return r.copySafeness(orig, input);
     },
 
     upper: function(str) {
@@ -596,6 +613,7 @@ filters.e = filters.escape;
 modules['filters'] = filters;
 })();
 (function() {
+
 var lib = modules["lib"];
 var Object = modules["object"];
 
@@ -711,22 +729,68 @@ function numArgs(args) {
     }
 }
 
-function suppressValue(val) {
-    return (val !== undefined && val !== null) ? val : "";
+// A SafeString object indicates that the string should not be 
+// autoescaped. This happens magically because autoescaping only 
+// occurs on primitive string objects.
+function SafeString(val) {
+    this.toString = function() {
+        return val;
+    };
+
+    this.length = val.length;
+
+    var methods = [
+        'charAt', 'charCodeAt', 'concat', 'contains',
+        'endsWith', 'fromCharCode', 'indexOf', 'lastIndexOf',
+        'length', 'localeCompare', 'match', 'quote', 'replace',
+        'search', 'slice', 'split', 'startsWith', 'substr',
+        'substring', 'toLocaleLowerCase', 'toLocaleUpperCase',
+        'toLowerCase', 'toUpperCase', 'trim', 'trimLeft', 'trimRight'
+    ];
+
+    for(var i=0; i<methods.length; i++) {
+        this[methods[i]] = proxyStr(val[methods[i]]);
+    }
 }
 
-function suppressLookupValue(obj, val) {
-    obj = obj || {};
-    val = obj[val];
+function copySafeness(dest, target) {
+    if(dest instanceof SafeString) {
+        return new SafeString(target);
+    }
+    return target.toString();
+}
 
-    if(typeof val === 'function') {
+function proxyStr(func) {
+    return function() {
+        var ret = func.apply(this, arguments);
+
+        if(typeof ret == 'string') {
+            return new SafeString(ret);
+        }
+        return ret;
+    };
+}
+
+function suppressValue(val, autoescape) {
+    val = (val !== undefined && val !== null) ? val : "";
+
+    if(autoescape && typeof val === "string") {
+        val = lib.escape(val);
+    }
+
+    return val;
+}
+
+function memberLookup(obj, val) {
+    obj = obj || {};
+
+    if(typeof obj[val] === 'function') {
         return function() {
-            return suppressValue(val.apply(obj, arguments));
+            return obj[val].apply(obj, arguments);
         };
     }
-    else {
-        return suppressValue(val);
-    }
+
+    return obj[val];
 }
 
 function callWrap(obj, name, args) {
@@ -762,11 +826,13 @@ modules['runtime'] = {
     makeKeywordArgs: makeKeywordArgs,
     numArgs: numArgs,
     suppressValue: suppressValue,
-    suppressLookupValue: suppressLookupValue,
+    memberLookup: memberLookup,
     contextOrFrameLookup: contextOrFrameLookup,
     callWrap: callWrap,
     handleError: handleError,
-    isArray: lib.isArray
+    isArray: lib.isArray,
+    SafeString: SafeString,
+    copySafeness: copySafeness
 };
 })();
 (function() {
@@ -780,13 +846,21 @@ var runtime = modules["runtime"];
 var Frame = runtime.Frame;
 
 var Environment = Object.extend({
-    init: function(loaders, tags, dev) {
+    init: function(loaders, opts) {
         // The dev flag determines the trace that'll be shown on errors.
         // If set to true, returns the full trace from the error point,
         // otherwise will return trace starting from Template.render
         // (the full trace from within nunjucks may confuse developers using
         //  the library)
-        this.dev = dev;
+        // defaults to false
+        opts = opts || {};
+        this.dev = !!opts.dev;
+
+        // The autoescape flag sets global autoescaping. If true,
+        // every string variable will be escaped by default.
+        // If false, strings can be manually escaped using the `escape` filter.
+        // defaults to false
+        this.autoesc = !!opts.autoescape;
 
         if(!loaders) {
             // The filesystem loader is only available client-side
@@ -801,12 +875,24 @@ var Environment = Object.extend({
             this.loaders = lib.isArray(loaders) ? loaders : [loaders];
         }
 
-        if(tags) {
-            lexer.setTags(tags);
+        if(opts.tags) {
+            lexer.setTags(opts.tags);
         }
 
         this.filters = builtin_filters;
         this.cache = {};
+        this.extensions = {};
+        this.extensionsList = [];
+    },
+
+    addExtension: function(name, extension) {
+        extension._name = name;
+        this.extensions[name] = extension;
+        this.extensionsList.push(extension);
+    },
+
+    getExtension: function(name) {
+        return this.extensions[name];
     },
 
     addFilter: function(name, func) {
@@ -821,6 +907,10 @@ var Environment = Object.extend({
     },
 
     getTemplate: function(name, eagerCompile) {
+        if (name && name.raw) {
+            // this fixes autoescape for templates referenced in symbols
+            name = name.raw;
+        }
         var info = null;
         var tmpl = this.cache[name];
         var upToDate;
@@ -1065,7 +1155,8 @@ var Template = Object.extend({
             props = this.tmplProps;
         }
         else {
-            var func = new Function(compiler.compile(this.tmplStr, this.env));
+            var source = compiler.compile(this.tmplStr, this.env.extensionsList, this.path);
+            var func = new Function(source);
             props = func();
         }
 
@@ -1089,15 +1180,19 @@ var Template = Object.extend({
 
 // var fs = modules["fs"];
 // var src = fs.readFileSync('test.html', 'utf-8');
-// //var src = '{% macro foo(x, y, z=3) %}h{% endmacro %}';
-// //var src = '{% macro foo() %}{{ h }}{% endmacro %} {{ foo() }}';
+var src = '{{ foo|safe|bar }}';
+var env = new Environment(null, { autoescape: true, dev: true });
 
-// var env = new Environment();
-// console.log(compiler.compile(src));
+env.addFilter('bar', function(x) {
+    return runtime.copySafeness(x, x.substring(3, 1) + x.substring(0, 2));
+});
 
-// var tmpl = new Template(src, env);
-// console.log("OUTPUT ---");
-// console.log(tmpl.render({ username: "James" }));
+//env.addExtension('testExtension', new testExtension());
+console.log(compiler.compile(src));
+
+var tmpl = new Template(src, env);
+console.log("OUTPUT ---");
+console.log(tmpl.render({ foo: '<>&' }));
 
 modules['environment'] = {
     Environment: Environment,
