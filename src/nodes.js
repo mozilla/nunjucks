@@ -133,12 +133,13 @@ var CustomTag = Node.extend("CustomTag", {
 });
 
 var CallExtension = Node.extend("CallExtension", {
-    fields: ['extName', 'prop', 'args'],
+    fields: ['extName', 'prop', 'args', 'contentArgs'],
 
-    init: function(ext, prop, args) {
+    init: function(ext, prop, args, contentArgs) {
         this.extName = ext._name;
         this.prop = prop;
-        this.args = args || [];
+        this.args = args;
+        this.contentArgs = contentArgs;
     }
 });
 

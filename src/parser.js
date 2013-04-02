@@ -915,7 +915,16 @@ var Parser = Object.extend({
         return node;
     },
 
-    parseSignature: function() {
+    parseSignature: function(tolerant) {
+        if(this.peekToken().type != lexer.TOKEN_LEFT_PAREN) {
+            if(tolerant) {
+                return null;
+            }
+            else {
+                this.fail('expected arguments', tok.lineno, tok.colno);
+            }
+        }
+
         var tok = this.nextToken();
         var args = new nodes.NodeList(tok.lineno, tok.colno);
         var kwargs = new nodes.KeywordArgs(tok.lineno, tok.colno);
@@ -923,14 +932,16 @@ var Parser = Object.extend({
         var checkComma = false;
 
         while(1) {
-            var type = this.peekToken().type;
-            if(type == lexer.TOKEN_RIGHT_PAREN) {
+            tok = this.peekToken();
+            if(tok.type == lexer.TOKEN_RIGHT_PAREN) {
                 this.nextToken();
                 break;
             }
 
             if(checkComma && !this.skip(lexer.TOKEN_COMMA)) {
-                throw new Error("parseSignature: expected comma after expression");
+                this.fail("parseSignature: expected comma after expression",
+                          tok.lineno,
+                          tok.colno);
             }
             else {
                 var arg = this.parsePrimary();

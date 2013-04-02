@@ -44,7 +44,8 @@ function _isAST(node1, node2) {
                     }
                 });
             }
-            else if(ofield !== null || value !== null) {
+            else if((ofield !== null || value !== null) &&
+                    (ofield !== undefined || value !== undefined)) {
                 if(ofield === null) {
                     throw new Error(value + ' expected for "' + field +
                                     '", null found');
@@ -89,8 +90,8 @@ function toNodes(ast) {
         return new type(0, 0, lib.map(ast.slice(1), toNodes));
     }
     else if(dummy instanceof nodes.CallExtension) {
-        return new type(ast[1], ast[2],
-                        lib.isArray(ast[3]) ? lib.map(ast[3], toNodes) : ast[3]);
+        return new type(ast[1], ast[2], ast[3] ? toNodes(ast[3]) : ast[3],
+                        lib.isArray(ast[4]) ? lib.map(ast[4], toNodes) : ast[4]);
     }
     else {
         return new type(0, 0,
@@ -419,7 +420,7 @@ describe('parser', function() {
                 parser.advanceAfterBlockEnd();
 
                 var content = parser.parseUntilBlocks('endtestblocktag');
-                var tag = new nodes.CallExtension(this, 'bar', [1, content]);
+                var tag = new nodes.CallExtension(this, 'bar', null, [1, content]);
                 parser.advanceAfterBlockEnd();
 
                 return tag;
@@ -432,19 +433,15 @@ describe('parser', function() {
 
             this.parse = function(parser, nodes, tokens) {
                 var begun = parser.peekToken();
-                var sig = null;
+                var args = null;
 
                 // Skip the name
                 parser.nextToken(); 
 
-                if (parser.peekToken().type === tokens.TOKEN_LEFT_PAREN) {
-                    sig = parser.parseSignature();
-                }
-
-                parser.skipWhitespace();
+                args = parser.parseSignature(true);
                 parser.advanceAfterBlockEnd(begun.value);
 
-                return new nodes.CallExtension(this, 'biz', [sig]);
+                return new nodes.CallExtension(this, 'biz', args);
             };
         }
 
@@ -454,12 +451,12 @@ describe('parser', function() {
             
         isAST(parser.parse('{% testtag %}', extensions),
               [nodes.Root,
-               [nodes.CallExtension, extensions[0], 'foo']]);
+               [nodes.CallExtension, extensions[0], 'foo', undefined, undefined]]);
 
         isAST(parser.parse('{% testblocktag %}sdfd{% endtestblocktag %}',
                            extensions),
               [nodes.Root,
-               [nodes.CallExtension, extensions[1], 'bar',
+               [nodes.CallExtension, extensions[1], 'bar', null,
                 [1, [nodes.NodeList,
                      [nodes.Output,
                       [nodes.TemplateData, "sdfd"]]]]]]);
@@ -467,7 +464,7 @@ describe('parser', function() {
         isAST(parser.parse('{% testblocktag %}{{ 123 }}{% endtestblocktag %}',
                            extensions),
               [nodes.Root,
-               [nodes.CallExtension, extensions[1], 'bar',
+               [nodes.CallExtension, extensions[1], 'bar', null,
                 [1, [nodes.NodeList,
                      [nodes.Output,
                       [nodes.Literal, 123]]]]]]);
@@ -478,16 +475,16 @@ describe('parser', function() {
 
                 // The only arg is the list of run-time arguments
                 // coming from the template
-                [[nodes.NodeList,
-                  [nodes.Literal, 123],
-                  [nodes.Literal, "abc"],
-                  [nodes.KeywordArgs, 
-                   [nodes.Pair,
-                    [nodes.Symbol, "foo"],
-                    [nodes.Literal, "bar"]]]]]]]);
+                [nodes.NodeList,
+                 [nodes.Literal, 123],
+                 [nodes.Literal, "abc"],
+                 [nodes.KeywordArgs, 
+                  [nodes.Pair,
+                   [nodes.Symbol, "foo"],
+                   [nodes.Literal, "bar"]]]]]]);
 
         isAST(parser.parse('{% testargs %}', extensions),
               [nodes.Root,
-               [nodes.CallExtension, extensions[2], 'biz', [null]]]);
+               [nodes.CallExtension, extensions[2], 'biz', null]]);
     });
 });

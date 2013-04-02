@@ -392,15 +392,15 @@ describe('compiler', function() {
                 parser.advanceAfterBlockEnd();
 
                 var content = parser.parseUntilBlocks("endtest");
-                var tag = new nodes.CallExtension(this, 'run', [content]);
+                var tag = new nodes.CallExtension(this, 'run', null, [content]);
                 parser.advanceAfterBlockEnd();
 
                 return tag;
             };
 
-            this.run = function(content) {
+            this.run = function(context, content) {
                 // Reverse the string
-                return content.split("").reverse().join("");
+                return content().split("").reverse().join("");
             };
         }
 
@@ -424,21 +424,21 @@ describe('compiler', function() {
 
                 body = parser.parseUntilBlocks('intermediate', 'endtest');
 
-                if (parser.skipSymbol('intermediate')) {
+                if(parser.skipSymbol('intermediate')) {
                     parser.skip(lexer.TOKEN_BLOCK_END);
                     intermediate = parser.parseUntilBlocks('endtest');
                 }
 
                 parser.advanceAfterBlockEnd();
 
-                return new nodes.CallExtension(this, 'run', [body, intermediate]);
+                return new nodes.CallExtension(this, 'run', null, [body, intermediate]);
             };
 
-            this.run = function(body, intermediate) {
-                var output = body.split("").join(",");
+            this.run = function(context, body, intermediate) {
+                var output = body().split("").join(",");
                 if(intermediate) {
                     // Reverse the string.
-                    output += intermediate.split("").reverse().join("");
+                    output += intermediate().split("").reverse().join("");
                 }
                 return output;
             };
@@ -455,5 +455,58 @@ describe('compiler', function() {
             extensions
         );
         output.should.equal('a,b,c,d,e,f,gflah dnoces');
+    });
+
+    it('should allow custom tag with args compilation', function() {
+        function testExtension() {
+            this.tags = ['test'];
+
+            /* normally this is automatically done by Environment */
+            this._name = 'testExtension';
+
+            this.parse = function(parser, nodes, lexer) {
+                var body, args = null;
+                var tok = parser.nextToken();
+
+                // passing true makes it tolerate when no args exist
+                args = parser.parseSignature(true);
+                parser.advanceAfterBlockEnd(tok.value);
+
+                body = parser.parseUntilBlocks('endtest');
+                parser.advanceAfterBlockEnd();
+
+                return new nodes.CallExtension(this, 'run', args, [body]);
+            };
+
+            this.run = function(context, prefix, kwargs, body) {
+                if(typeof prefix == 'function') {
+                    body = prefix;
+                    prefix = '';
+                    kwargs = {};
+                }
+                else if(typeof kwargs == 'function') {
+                    body = kwargs;
+                    kwargs = {};
+                }
+
+                var output = prefix + body().split('').reverse().join('');
+                if(kwargs.cutoff) {
+                    output = output.slice(0, kwargs.cutoff);
+                }
+
+                return output;
+            };
+        }
+
+        var extensions = {'testExtension': new testExtension()};
+
+        var output = render('{% test %}foobar{% endtest %}', null, extensions);
+        output.should.equal('raboof');
+
+        output = render('{% test("biz") %}foobar{% endtest %}', null, extensions);
+        output.should.equal('bizraboof');
+
+        output = render('{% test("biz", cutoff=5) %}foobar{% endtest %}', null, extensions);
+        output.should.equal('bizra');
     });
 });

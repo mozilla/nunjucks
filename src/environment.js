@@ -330,8 +330,32 @@ var Template = Object.extend({
 
 // var fs = require('fs');
 // var src = fs.readFileSync('test.html', 'utf-8');
-// var src = '{% test %}foo{% endtest %}';
-// var env = new Environment();
+// var src = '{% test %} foo {{ username }} bar{% endtest %}';
+// var env = new Environment(null, null, true);
+
+// function testExtension() {
+//     this.tags = ['test'];
+//     this._name = 'testExtension';
+
+//     this.parse = function(parser, nodes) {
+//         var name = parser.nextToken();
+//         var args = parser.parseSignature(true);
+//         parser.advanceAfterBlockEnd(name.value);
+
+//         var content = parser.parseUntilBlocks("endtest");
+//         var tag = new nodes.CallExtension(this, 'run', args, [content]);
+//         parser.advanceAfterBlockEnd();
+
+//         return tag;
+//     };
+
+//     this.run = function(context, content) {
+//         // Reverse the string
+//         return content().split("").reverse().join("");
+//     };
+// }
+
+
 // env.addExtension('testExtension', new testExtension());
 // console.log(compiler.compile(src, [new testExtension()]));
 
