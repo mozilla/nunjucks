@@ -16,7 +16,7 @@ app.use(function(req, res, next) {
 });
 
 app.get('/', function(req, res) {
-    res.render('index.html', { username: 'James Long' });
+    res.render('index.html', { username: 'James Long <strong>copyright</strong>' });
 });
 
 app.get('/about', function(req, res) {

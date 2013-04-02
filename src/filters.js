@@ -93,18 +93,16 @@ var filters = {
 
         return array;
     },
-
+    
     escape: function(str) {
-        if(typeof str === 'string') {
-            return str.replace(/&/g, '&amp;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#39;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;');
+        if(typeof str == 'string') {
+            return lib.escape(str);
         }
-        else {
-            return str;
-        }
+        return str;
+    },
+
+    safe: function(str) {
+        return (str && str.raw) ? str.raw : str;
     },
 
     first: function(arr) {

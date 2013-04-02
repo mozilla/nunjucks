@@ -260,7 +260,7 @@ var Compiler = Object.extend({
         }
         else {
             this.emit('runtime.contextOrFrameLookup(' +
-                      'context, frame, "' + name + '")');
+                      'context, frame, "' + name + '", env.autoesc)');
         }
     },
 
@@ -362,7 +362,7 @@ var Compiler = Object.extend({
         this._compileExpression(node.target, frame);
         this.emit('),');
         this._compileExpression(node.val, frame);
-        this.emit(')');
+        this.emit(', env.autoesc)');
     },
 
     _getNodeName: function(node) {
