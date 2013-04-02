@@ -131,7 +131,11 @@ var FakeString = Object.extend({
 
 function suppressValue(val, autoescape) {
     val = (val !== undefined && val !== null) ? val : "";
-    if (autoescape && typeof val === "string") val = new FakeString(val);
+
+    if(autoescape && typeof val === "string") {
+        val = new FakeString(val);
+    }
+
     return val;
 }
 

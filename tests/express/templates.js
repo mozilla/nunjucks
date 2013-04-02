@@ -1,6 +1,6 @@
 (function() {
 var templates = {};
-templates["about.html"] = (function() {
+templates["viewsabout.html"] = (function() {
 function root(env, context, frame, runtime) {
 var lineno = null;
 var colno = null;
@@ -37,7 +37,7 @@ var output = "";
 try {
 var l_super = context.getSuper(env, "footer", b_footer, frame, runtime);
 output += "\n";
-output += runtime.suppressValue((lineno = 7, colno = 6, runtime.callWrap(l_super, "super", [])));
+output += runtime.suppressValue((lineno = 7, colno = 6, runtime.callWrap(l_super, "super", [])), env.autoesc);
 output += "\nYou really should read this!\n";
 return output;
 } catch (e) {
@@ -51,15 +51,15 @@ root: root
 };
 
 })();
-templates["base.html"] = (function() {
+templates["viewsbase.html"] = (function() {
 function root(env, context, frame, runtime) {
 var lineno = null;
 var colno = null;
 var output = "";
 try {
-output += "<!DOCTYPE html>\n<html>\n  <head>\n    <title>A quick app</title>\n\n    <style>\n      body {\n        background-color: #ccccff;\n      }\n\n      .footer {\n        margin-top: 5em;\n        font-size: .75em;\n      }\n    </style>\n\n    <!-- <script src=\"/nunjucks-min.js\"></script> -->\n    <!-- <script src=\"/templates.js\"></script> -->\n  </head>\n  <body>\n    ";
+output += "<!DOCTYPE html>\n<html>\n  <head>\n    <title>A quick app</title>\n\n    <style>\n      body {\n        background-color: #ccccff;\n      }\n\n      .footer {\n        margin-top: 5em;\n        font-size: .75em;\n      }\n    </style>\n\n    <script src=\"/nunjucks-min.js\"></script>\n    <script src=\"/templates.js\"></script>\n  </head>\n  <body>\n    ";
 output += context.getBlock("content")(env, context, frame, runtime);
-output += "\n\n\n    <script data-main=\"/app.js\" src=\"/require.js\"></script>\n\n    <div class=\"footer\">\n      ";
+output += "\n\n    <div class=\"footer\">\n      ";
 output += context.getBlock("footer")(env, context, frame, runtime);
 output += "\n    </div>\n  </body>\n</html>\n";
 return output;
@@ -97,7 +97,7 @@ root: root
 };
 
 })();
-templates["index.html"] = (function() {
+templates["viewsindex.html"] = (function() {
 function root(env, context, frame, runtime) {
 var lineno = null;
 var colno = null;
@@ -119,11 +119,11 @@ frame.set("y", l_y);
 frame.set("z", kwargs.hasOwnProperty("z") ? kwargs["z"] : 10);
 var output= "";
 output += "\n";
-output += runtime.suppressValue(l_x);
+output += runtime.suppressValue(l_x, env.autoesc);
 output += " is better than ";
-output += runtime.suppressValue(l_y);
+output += runtime.suppressValue(l_y, env.autoesc);
 output += "!\n\nAND ";
-output += runtime.suppressValue(runtime.contextOrFrameLookup(context, frame, "z"));
+output += runtime.suppressValue(runtime.contextOrFrameLookup(context, frame, "z"), env.autoesc);
 output += "\n";
 frame = frame.pop();
 return output;
@@ -144,11 +144,11 @@ var output = "";
 try {
 var l_super = context.getSuper(env, "content", b_content, frame, runtime);
 output += "\nHello, ";
-output += runtime.suppressValue(runtime.contextOrFrameLookup(context, frame, "username"));
+output += runtime.suppressValue(runtime.contextOrFrameLookup(context, frame, "username"), env.autoesc);
 output += "! This is just some content\n\n";
-output += runtime.suppressValue((lineno = 11, colno = 4, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "foo"), "foo", [1,2,3])));
+output += runtime.suppressValue((lineno = 11, colno = 4, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "foo"), "foo", [1,2,3])), env.autoesc);
 output += "\n\n";
-output += runtime.suppressValue(runtime.contextOrFrameLookup(context, frame, "user"));
+output += runtime.suppressValue(runtime.contextOrFrameLookup(context, frame, "user"), env.autoesc);
 output += "\n";
 return output;
 } catch (e) {
@@ -161,14 +161,14 @@ root: root
 };
 
 })();
-templates["item-base.html"] = (function() {
+templates["viewsitem-base.html"] = (function() {
 function root(env, context, frame, runtime) {
 var lineno = null;
 var colno = null;
 var output = "";
 try {
 output += "\nEditing item: ";
-output += runtime.suppressValue(runtime.contextOrFrameLookup(context, frame, "name"));
+output += runtime.suppressValue(runtime.contextOrFrameLookup(context, frame, "name"), env.autoesc);
 output += "\n\n";
 output += context.getBlock("description")(env, context, frame, runtime);
 output += "\n";
@@ -184,7 +184,7 @@ var output = "";
 try {
 var l_super = context.getSuper(env, "description", b_description, frame, runtime);
 output += "\nA basic description is: ";
-output += runtime.suppressValue(runtime.contextOrFrameLookup(context, frame, "desc"));
+output += runtime.suppressValue(runtime.contextOrFrameLookup(context, frame, "desc"), env.autoesc);
 output += "\n";
 return output;
 } catch (e) {
@@ -197,7 +197,7 @@ root: root
 };
 
 })();
-templates["item.html"] = (function() {
+templates["viewsitem.html"] = (function() {
 function root(env, context, frame, runtime) {
 var lineno = null;
 var colno = null;
@@ -221,9 +221,9 @@ var output = "";
 try {
 var l_super = context.getSuper(env, "description", b_description, frame, runtime);
 output += "\nI told you, it's name is ";
-output += runtime.suppressValue(runtime.contextOrFrameLookup(context, frame, "name"));
+output += runtime.suppressValue(runtime.contextOrFrameLookup(context, frame, "name"), env.autoesc);
 output += ".\n\nIt also has the description: ";
-output += runtime.suppressValue(runtime.contextOrFrameLookup(context, frame, "desc"));
+output += runtime.suppressValue(runtime.contextOrFrameLookup(context, frame, "desc"), env.autoesc);
 output += ".\n";
 return output;
 } catch (e) {

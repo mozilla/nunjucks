@@ -3,9 +3,7 @@ var env = require('../src/environment');
 var loaders = require('../src/node-loaders');
 
 function render(str, ctx, extensions) {
-    var e = new env.Environment(new loaders.FileSystemLoader('tests/templates'), {
-        autoescape: true
-    });
+    var e = new env.Environment(new loaders.FileSystemLoader('tests/templates'));
 
     for(var name in extensions) {
         e.addExtension(name, extensions[name]);

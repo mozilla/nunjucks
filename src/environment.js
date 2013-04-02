@@ -342,14 +342,14 @@ var Template = Object.extend({
 
 // var fs = require('fs');
 // var src = fs.readFileSync('test.html', 'utf-8');
-// var src = '{{ foo["bar"] }}';
-// var env = new Environment(null, null, true);
-//env.addExtension('testExtension', new testExtension());
+// var src = '{{ foo|safe }}';
+// var env = new Environment(null, { autoescape: true, dev: true });
+// //env.addExtension('testExtension', new testExtension());
 // console.log(compiler.compile(src));
 
 // var tmpl = new Template(src, env);
 // console.log("OUTPUT ---");
-// console.log(tmpl.render({ username: "James" }));
+// console.log(tmpl.render({ foo: '<>&' }));
 
 module.exports = {
     Environment: Environment,

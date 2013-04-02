@@ -103,7 +103,7 @@ var Compiler = Object.extend({
     _bufferAppend: function(func) {
         this.emit(this.buffer + ' += runtime.suppressValue(');
         func.call(this);
-        this.emit(');\n');
+        this.emit(', env.autoesc);\n');
     },
 
     _compileChildren: function(node, frame) {
@@ -260,7 +260,7 @@ var Compiler = Object.extend({
         }
         else {
             this.emit('runtime.contextOrFrameLookup(' +
-                      'context, frame, "' + name + '", env.autoesc)');
+                      'context, frame, "' + name + '")');
         }
     },
 
