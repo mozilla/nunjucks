@@ -238,13 +238,13 @@ root: root
 })();
 if(typeof define === "function" && define.amd) {
     define(["nunjucks"], function(nunjucks) {
-        nunjucks.env = new nunjucks.Environment([]);
+        nunjucks.env = new nunjucks.Environment([], { autoscape: true });
         nunjucks.env.registerPrecompiled(templates);
         return nunjucks;
     });
 }
 else if(typeof nunjucks === "object") {
-    nunjucks.env = new nunjucks.Environment([]);
+    nunjucks.env = new nunjucks.Environment([], { autoscape: true });
     nunjucks.env.registerPrecompiled(templates);
 }
 else {
