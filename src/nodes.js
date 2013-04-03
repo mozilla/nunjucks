@@ -103,7 +103,9 @@ var TemplateRef = Node.extend("TemplateRef", { fields: ['template'] });
 var Extends = TemplateRef.extend("Extends");
 var Include = TemplateRef.extend("Include");
 var Set = Node.extend("Set", { fields: ['targets', 'value'] });
-var Output = NodeList.extend("Output");
+var Output = NodeList.extend("Output", {
+    fields: ['children', 'autoescape']
+});
 var TemplateData = Literal.extend("TemplateData");
 var UnaryOp = Node.extend("UnaryOp", { fields: ['target'] });
 var BinOp = Node.extend("BinOp", { fields: ['left', 'right'] });

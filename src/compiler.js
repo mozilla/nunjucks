@@ -100,10 +100,15 @@ var Compiler = Object.extend({
         return 't_' + this.lastId;
     },
 
-    _bufferAppend: function(func) {
+    _bufferAppend: function(func, autoescape) {
+        var escStr = 'env.autoesc';
+        if(autoescape === true || autoescape === false) {
+            escStr = autoescape.toString();
+        }
+
         this.emit(this.buffer + ' += runtime.suppressValue(');
         func.call(this);
-        this.emit(', env.autoesc);\n');
+        this.emit(', ' + escStr + ');\n');
     },
 
     _compileChildren: function(node, frame) {
@@ -804,7 +809,7 @@ var Compiler = Object.extend({
         var _this = this;
         this._bufferAppend(function() {
             _this._compileChildren(node, frame);
-        });
+        }, node.autoescape);
     },
 
     compileRoot: function(node, frame) {
@@ -869,38 +874,14 @@ var Compiler = Object.extend({
 // var fs = require("fs");
 //var src = '{{ foo({a:1}) }} {% block content %}foo{% endblock %}';
 // var c = new Compiler();
-// var src = '{% test %}hello{% endtest %}';
+// var src = '{% macro foo(x) %}Here is {{ x|safe }}{% endmacro %}{{ foo("<>") }}';
+// //var extensions = [new testExtension()];
 
-// function testExtension() {
-//     this.tags = ['test'];
-//     this._name = 'testExtension';
-
-//     this.parse = function(parser, nodes) {
-//         var begun = parser.peekToken();
-//         parser.advanceAfterBlockEnd();
-
-//         //var tag = new nodes.CustomTag(begun.lineno, begun.colno, "test");
-
-//         var content = parser.parseUntilBlocks("endtest");
-//         var tag = new nodes.CallExtension(this, 'run', [content]);
-
-//         parser.advanceAfterBlockEnd();
-
-//         return tag;
-//     };
-
-//     this.run = function(content) {
-//         return 'poop';
-//     };
-// }
-// var extensions = [new testExtension()];
-
-// var ns = parser.parse(src, extensions);
+// var ns = parser.parse(src);
 // nodes.printNodes(ns);
 // c.compile(ns);
 
 // var tmpl = c.getCode();
-
 // console.log(tmpl);
 
 module.exports = {

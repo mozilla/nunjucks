@@ -192,6 +192,10 @@ var Parser = Object.extend({
         node.body = this.parseUntilBlocks('endmacro');
         this.advanceAfterBlockEnd();
 
+        node.body.findAll(nodes.Output).forEach(function(node) {
+            node.autoescape = false;
+        });
+
         return node;
     },
 
@@ -1055,7 +1059,7 @@ var Parser = Object.extend({
 //     console.log(util.inspect(t));
 // }
 
-// var p = new Parser(lexer.lex('{% test %}sdfd{% endtest %}'));
+// var p = new Parser(lexer.lex('{% macro foo(x) %}{{ x }}{% endmacro %}{{ foo(5) }}'));
 // var n = p.parse();
 // nodes.printNodes(n);
 

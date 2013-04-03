@@ -534,4 +534,14 @@ describe('compiler', function() {
         var s = render('{{ foo|safe }}', { foo: '"\'<>&'}, { autoescape: true });
         s.should.equal('"\'<>&');
     });
+
+    it('should not autoescape macros', function() {
+        var s = render(
+            '{% macro foo(x, y) %}{{ x|safe }} and {{ y }}{% endmacro %}' +
+            '{{ foo("<>&", "<>") }}',
+            null,
+            { autoescape: true }
+        );
+        s.should.equal('&lt;&gt;&amp; and &lt;&gt;');
+    });
 });
