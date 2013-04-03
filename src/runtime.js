@@ -1,4 +1,3 @@
-
 var lib = require('./lib');
 var Object = require('./object');
 
@@ -170,7 +169,7 @@ function suppressValue(val, autoescape) {
     return val;
 }
 
-function memberLookup(obj, val) {
+function memberLookup(obj, val, autoescape) {
     obj = obj || {};
 
     if(typeof obj[val] === 'function') {
@@ -179,7 +178,7 @@ function memberLookup(obj, val) {
         };
     }
 
-    return obj[val];
+    return suppressValue(obj[val], autoescape);
 }
 
 function callWrap(obj, name, args) {
