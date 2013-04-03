@@ -383,6 +383,18 @@ describe('compiler', function() {
         s.should.equal('james');
     });
 
+    it('should compile set assignments of the same variable', function() {
+        var s = render('{% set x = "hello" %}' +
+                       '{% if false %}{% set x = "world" %}{% endif %}' +
+                       '{{ x }}');
+        s.should.equal('hello');
+
+        s = render('{% set x = "blue" %}' +
+                   '{% if true %}{% set x = "green" %}{% endif %}' +
+                   '{{ x }}');
+        s.should.equal('green');
+    });
+
     it('should throw errors', function() {
         (function() {
             render('{% from "import.html" import boozle %}');
