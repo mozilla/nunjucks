@@ -31,4 +31,8 @@ describe('runtime', function() {
             render('{{ foo["bar"]["zip"]("multiple", "args") }}');
         }).should.throw(/foo\["bar"\]\["zip"\]/);
     });
+
+    it('should allow for undefined macro arguments in the last position', function() {
+      render('{% macro foo(bar, baz) %}{{ bar }} {{ baz }}{% endmacro %} {{ foo("hello", none) }}');
+    });
 });
