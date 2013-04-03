@@ -100,15 +100,10 @@ var Compiler = Object.extend({
         return 't_' + this.lastId;
     },
 
-    _bufferAppend: function(func, autoescape) {
-        var escStr = 'env.autoesc';
-        if(autoescape === true || autoescape === false) {
-            escStr = autoescape.toString();
-        }
-
+    _bufferAppend: function(func) {
         this.emit(this.buffer + ' += runtime.suppressValue(');
         func.call(this);
-        this.emit(', ' + escStr + ');\n');
+        this.emit(', env.autoesc);\n');
     },
 
     _compileChildren: function(node, frame) {
@@ -665,7 +660,7 @@ var Compiler = Object.extend({
 
     _emitMacroEnd: function() {
         this.emitLine('frame = frame.pop();');
-        this.emitLine('return ' + this.buffer + ';');
+        this.emitLine('return new runtime.SafeString(' + this.buffer + ');');
         this.emitLine('});');
     },
 
@@ -809,7 +804,7 @@ var Compiler = Object.extend({
         var _this = this;
         this._bufferAppend(function() {
             _this._compileChildren(node, frame);
-        }, node.autoescape);
+        });
     },
 
     compileRoot: function(node, frame) {

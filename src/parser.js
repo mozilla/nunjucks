@@ -191,10 +191,6 @@ var Parser = Object.extend({
         node.body = this.parseUntilBlocks('endmacro');
         this.advanceAfterBlockEnd();
 
-        node.body.findAll(nodes.Output).forEach(function(node) {
-            node.autoescape = false;
-        });
-
         return node;
     },
 

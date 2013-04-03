@@ -537,11 +537,19 @@ describe('compiler', function() {
 
     it('should not autoescape macros', function() {
         var s = render(
-            '{% macro foo(x, y) %}{{ x|safe }} and {{ y }}{% endmacro %}' +
+            '{% macro foo(x, y) %}{{ x }} and {{ y }}{% endmacro %}' +
             '{{ foo("<>&", "<>") }}',
             null,
             { autoescape: true }
         );
         s.should.equal('&lt;&gt;&amp; and &lt;&gt;');
+
+        var s = render(
+            '{% macro foo(x, y) %}{{ x|safe }} and {{ y }}{% endmacro %}' +
+            '{{ foo("<>&", "<>") }}',
+            null,
+            { autoescape: true }
+        );
+        s.should.equal('<>& and &lt;&gt;');
     });
 });
