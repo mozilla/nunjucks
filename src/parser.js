@@ -1,4 +1,3 @@
-
 var lexer = require('./lexer');
 var nodes = require('./nodes');
 var Object = require('./object');
@@ -924,7 +923,8 @@ var Parser = Object.extend({
     },
 
     parseSignature: function(tolerant) {
-        if(this.peekToken().type != lexer.TOKEN_LEFT_PAREN) {
+        var tok = this.peekToken();
+        if(tok.type != lexer.TOKEN_LEFT_PAREN) {
             if(tolerant) {
                 return null;
             }
@@ -933,7 +933,7 @@ var Parser = Object.extend({
             }
         }
 
-        var tok = this.nextToken();
+        tok = this.nextToken();
         var args = new nodes.NodeList(tok.lineno, tok.colno);
         var kwargs = new nodes.KeywordArgs(tok.lineno, tok.colno);
         var kwnames = [];
