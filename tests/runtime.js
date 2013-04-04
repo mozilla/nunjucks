@@ -24,9 +24,7 @@ describe('runtime', function() {
         (function() {
             render('{{ foo.bar("multiple", "args") }}');
         }).should.throw(/foo\["bar"\]/);
-    });
 
-    it('should report the failed function calls to filters', function() {
         (function() {
             render('{{ foo["bar"]["zip"]("multiple", "args") }}');
         }).should.throw(/foo\["bar"\]\["zip"\]/);
