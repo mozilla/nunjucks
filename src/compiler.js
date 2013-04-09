@@ -423,52 +423,45 @@ var Compiler = Object.extend({
     },
 
     compileSet: function(node, frame) {
-        var undeclared_ids = [];
         var ids = [];
 
-        // Retrieve existing temp var mapping from frame
-        for(var i=0; i<node.targets.length; i++) {
-            var name = node.targets[i].value;
-            var id = frame.lookup_local(name);
+        // Lookup the variable names for each identifier and create
+        // new ones if necessary
+        lib.each(node.targets, function(target) {
+            var name = target.value;
+            var id = frame.get(name);
+
             if (id === null) {
-                // Variable doesn't exist in the frame
                 id = this.tmpid();
                 frame.set(name, id);
-                undeclared_ids.push(id);
+
+                // Note: This relies on js allowing scope across
+                // blocks, in case this is created inside an `if`
+                this.emitLine('var ' + id + ';');
             }
+
             ids.push(id);
-        }
+        }, this);
 
-        if (undeclared_ids.length > 0) {
-            // Note: This relies on JS variable hoisting in the case that we're
-            // assigning for the first time inside an {% if %} block or
-            // something similar.
-            this.emitLine('var ' + undeclared_ids.join(',') + ';');
-        }
-
-        // Assign multiple targets in one go
         this.emit(ids.join(' = ') + ' = ');
         this._compileExpression(node.value, frame);
         this.emitLine(';');
 
-        // Update the frame variable with the new value
-        for(var i=0; i<node.targets.length; i++) {
-            var name = node.targets[i].value;
+        lib.each(node.targets, function(target, i) {
             var id = ids[i];
-            this.emitLine('frame.set("' + name + '", ' + id + ');');
-        }
+            var name = target.value;
 
-        // Top level assignment exports
-        this.emitLine('if(!frame.parent) {');
-        for(var i=0; i<node.targets.length; i++) {
-            var name = node.targets[i].value;
-            var id = ids[i];
+            this.emitLine('frame.set("' + name + '", ' + id + ');');
+
+            // We are running this for every var, but it's very
+            // uncommon to assign to multiple vars anyway
+            this.emitLine('if(!frame.parent) {');
             this.emitLine('context.setVariable("' + name + '", ' + id + ');');
             if(name.charAt(0) != '_') {
                 this.emitLine('context.addExport("' + name + '");');
             }
-        }
-        this.emitLine('}');
+            this.emitLine('}');
+        }, this);
     },
 
     compileIf: function(node, frame) {

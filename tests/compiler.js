@@ -37,13 +37,13 @@ describe('compiler', function() {
         var s = render('{{ foo }}');
         s.should.equal('');
 
-        var s = render('{{ foo.bar }}');
+        s = render('{{ foo.bar }}');
         s.should.equal('');
 
-        var s = render('{{ foo.bar.baz }}');
+        s = render('{{ foo.bar.baz }}');
         s.should.equal('');
 
-        var s = render('{{ foo.bar.baz["biz"].mumble }}');
+        s = render('{{ foo.bar.baz["biz"].mumble }}');
         s.should.equal('');
     });
 
@@ -51,7 +51,7 @@ describe('compiler', function() {
         var s = render('{{ foo }}', {foo: 0});
         s.should.equal('0');
 
-        var s = render('{{ foo }}', {foo: false});
+        s = render('{{ foo }}', {foo: false});
         s.should.equal('false');
     });
 
