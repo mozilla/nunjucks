@@ -38,6 +38,16 @@ var Frame = Object.extend({
         return p && p.lookup(name);
     },
 
+    // Only used for internal local variable tracking during compilation
+    // when processing {% set %} assignments.
+    lookup_local: function(name) {
+        var val = this.variables[name];
+        if(val !== undefined && val !== null) {
+            return val;
+        }
+        return null;
+    },
+
     push: function() {
         return new Frame(this);
     },
