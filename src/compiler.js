@@ -423,25 +423,52 @@ var Compiler = Object.extend({
     },
 
     compileSet: function(node, frame) {
-        var id = this.tmpid();
+        var undeclared_ids = [];
+        var ids = [];
 
-        this.emit('var ' + id + ' = ');
+        // Retrieve existing temp var mapping from frame
+        for(var i=0; i<node.targets.length; i++) {
+            var name = node.targets[i].value;
+            var id = frame.lookup_local(name);
+            if (id === null) {
+                // Variable doesn't exist in the frame
+                id = this.tmpid();
+                frame.set(name, id);
+                undeclared_ids.push(id);
+            }
+            ids.push(id);
+        }
+
+        if (undeclared_ids.length > 0) {
+            // Note: This relies on JS variable hoisting in the case that we're
+            // assigning for the first time inside an {% if %} block or
+            // something similar.
+            this.emitLine('var ' + undeclared_ids.join(',') + ';');
+        }
+
+        // Assign multiple targets in one go
+        this.emit(ids.join(' = ') + ' = ');
         this._compileExpression(node.value, frame);
         this.emitLine(';');
 
+        // Update the frame variable with the new value
         for(var i=0; i<node.targets.length; i++) {
             var name = node.targets[i].value;
-            frame.set(name, id);
-
+            var id = ids[i];
             this.emitLine('frame.set("' + name + '", ' + id + ');');
+        }
 
-            this.emitLine('if(!frame.parent) {');
+        // Top level assignment exports
+        this.emitLine('if(!frame.parent) {');
+        for(var i=0; i<node.targets.length; i++) {
+            var name = node.targets[i].value;
+            var id = ids[i];
             this.emitLine('context.setVariable("' + name + '", ' + id + ');');
             if(name.charAt(0) != '_') {
                 this.emitLine('context.addExport("' + name + '");');
             }
-            this.emitLine('}');
         }
+        this.emitLine('}');
     },
 
     compileIf: function(node, frame) {
