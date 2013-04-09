@@ -179,7 +179,7 @@ function memberLookup(obj, val) {
         };
     }
 
-    return suppressValue(obj[val]);
+    return obj[val];
 }
 
 function callWrap(obj, name, args) {

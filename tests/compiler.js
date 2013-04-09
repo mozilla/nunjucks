@@ -173,6 +173,12 @@ describe('compiler', function() {
 
         s = render('{% for i in [7,3,6] %}{{ loop.length }}{% endfor %}');
         s.should.equal('333');
+
+        s = render('{% for i in foo %}{{ i }}{% endfor %}');
+        s.should.equal('');
+
+        s = render('{% for i in foo.bar %}{{ i }}{% endfor %}', { foo: {} });
+        s.should.equal('');
     });
 
     it('should compile operators', function() {

@@ -482,6 +482,8 @@ var Compiler = Object.extend({
             });
         });
 
+        this.emit('if(' + arr + ' !== undefined) {');
+
         if(node.name instanceof nodes.Array) {
             // key/value iteration. the user could have passed a dict
             // amd two elements to be unpacked - "for k,v in { a: b }"
@@ -592,7 +594,7 @@ var Compiler = Object.extend({
             this.emitLine('}');
         }
 
-
+        this.emit('}');
         this.emitLine('frame = frame.pop();');
     },
 
