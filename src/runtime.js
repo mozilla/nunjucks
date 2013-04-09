@@ -96,26 +96,33 @@ function makeKeywordArgs(obj) {
 }
 
 function getKeywordArgs(args) {
-    if(args.length && args[args.length - 1].__keywords) {
-        return args[args.length - 1];
+    var len = args.length;
+    if(len) {
+        var lastArg = args[len - 1];
+        if(lastArg && lastArg.hasOwnProperty('__keywords')) {
+            return lastArg;
+        }
     }
     return {};
 }
 
 function numArgs(args) {
-    if(args.length === 0) {
+    var len = args.length;
+    if(len === 0) {
         return 0;
     }
-    else if(args[args.length - 1].__keywords) {
-        return args.length - 1;
+
+    var lastArg = args[len - 1];
+    if(lastArg && lastArg.hasOwnProperty('__keywords')) {
+        return len - 1;
     }
     else {
-        return args.length;
+        return len;
     }
 }
 
-// A SafeString object indicates that the string should not be 
-// autoescaped. This happens magically because autoescaping only 
+// A SafeString object indicates that the string should not be
+// autoescaped. This happens magically because autoescaping only
 // occurs on primitive string objects.
 function SafeString(val) {
     if(typeof val != 'string') {
