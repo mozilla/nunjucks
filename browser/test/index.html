@@ -1,0 +1,27 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Nunjucks Browser Tests</title>
+  <link rel="stylesheet" href="../../node_modules/mocha/mocha.css" />
+</head>
+<body>
+  <div id="mocha"></div>
+  <script src="../../node_modules/expect.js/expect.js"></script>
+  <script src="../../node_modules/mocha/mocha.js"></script>
+  <script src="../nunjucks-dev.js"></script>
+  <script>mocha.setup('bdd')</script>
+  <script>
+    describe('raw string templates', function() {
+      it('should substitute variables', function(done) {
+        var tmpl = new nunjucks.Template('Hello {{ username }}');
+        var rendered = tmpl.render({username: 'James'});
+        expect(rendered).to.be("Hello James");
+        done();
+      });
+    });
+    mocha.checkLeaks();
+    mocha.globals(['nunjucks']);
+    mocha.run();
+  </script>
+</body>
+</html>
