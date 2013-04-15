@@ -11,6 +11,31 @@
   <script src="../nunjucks-dev.js"></script>
   <script>mocha.setup('bdd')</script>
   <script>
+    describe('lexer', function() {
+      it('should work', function(done) {
+        var tokenizer = nunjucks.lexer.lex('Hello {{ username }}');
+        expect(tokenizer.nextToken()).to.eql({
+          type: "data",
+          value: "Hello ",
+          lineno: 0,
+          colno: 0
+        });
+        expect(tokenizer.nextToken()).to.eql({
+          type: "variable-start",
+          value: "{{",
+          lineno: 0,
+          colno: 6
+        });
+        expect(tokenizer.nextToken()).to.eql({
+          type: "whitespace",
+          value: " ",
+          lineno: 0,
+          colno: 6
+        });
+        done();
+      });
+    });
+
     describe('raw string templates', function() {
       it('should substitute variables', function(done) {
         var tmpl = new nunjucks.Template('Hello {{ username }}');
@@ -19,6 +44,7 @@
         done();
       });
     });
+
     mocha.checkLeaks();
     mocha.globals(['nunjucks']);
     mocha.run();
