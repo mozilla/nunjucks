@@ -3,8 +3,9 @@ var Object = require('./object');
 
 var HttpLoader = Object.extend({
     init: function(baseURL, neverUpdate) {
-        console.log("[nunjucks] Warning: only use HttpLoader in " +
-                    "development. Otherwise precompile your templates.");
+        if (typeof(console) !== "undefined" && console.log)
+          console.log("[nunjucks] Warning: only use HttpLoader in " +
+                      "development. Otherwise precompile your templates.");
         this.baseURL = baseURL || '';
         this.neverUpdate = neverUpdate;
     },
