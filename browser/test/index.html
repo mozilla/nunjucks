@@ -45,6 +45,25 @@
       });
     });
 
+    describe('HttpLoader', function() {
+      it('should work', function(done) {
+        var loader = new nunjucks.HttpLoader('.');
+        expect(loader.fetch('sample-template.txt'))
+          .to.be("Hello {{ username }}");
+        done();
+      });
+
+      it('should work with nunjucks environment', function(done) {
+        var loader = new nunjucks.HttpLoader('.');
+        var env = new nunjucks.Environment(loader);
+        var rendered = env.render('sample-template.txt', {
+          username: 'James'
+        });
+        expect(rendered).to.be("Hello James");
+        done();
+      });
+    });
+
     mocha.checkLeaks();
     mocha.globals(['nunjucks']);
     mocha.run();

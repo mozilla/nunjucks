@@ -34,7 +34,8 @@ var HttpLoader = Object.extend({
             }
         };
 
-        url += (url.indexOf('?') === -1 ? '?' : '&') + 's=' + Date.now();
+        url += (url.indexOf('?') === -1 ? '?' : '&') + 's=' + 
+               (new Date().getTime());
 
         // Synchronous because this API shouldn't be used in
         // production (pre-load compiled templates instead)
