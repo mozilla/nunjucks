@@ -2,71 +2,55 @@
 <head>
   <meta charset="utf-8">
   <title>Nunjucks Browser Tests</title>
-  <link rel="stylesheet" href="../../node_modules/mocha/mocha.css" />
+  <link rel="stylesheet" href="qunit.css" />
 </head>
 <body>
-  <div id="mocha"></div>
-  <script src="../../node_modules/expect.js/expect.js"></script>
-  <script src="../../node_modules/mocha/mocha.js"></script>
+  <div id="qunit"></div>
+  <div id="qunit-fixture"></div>
+  <script src="qunit.js"></script>
   <script src="../nunjucks-dev.js"></script>
-  <script>mocha.setup('bdd')</script>
   <script>
-    describe('lexer', function() {
-      it('should work', function(done) {
-        var tokenizer = nunjucks.lexer.lex('Hello {{ username }}');
-        expect(tokenizer.nextToken()).to.eql({
-          type: "data",
-          value: "Hello ",
-          lineno: 0,
-          colno: 0
-        });
-        expect(tokenizer.nextToken()).to.eql({
-          type: "variable-start",
-          value: "{{",
-          lineno: 0,
-          colno: 6
-        });
-        expect(tokenizer.nextToken()).to.eql({
-          type: "whitespace",
-          value: " ",
-          lineno: 0,
-          colno: 6
-        });
-        done();
+    test("lexer should work", function() {
+      var tokenizer = nunjucks.lexer.lex('Hello {{ username }}');
+      deepEqual(tokenizer.nextToken(), {
+        type: "data",
+        value: "Hello ",
+        lineno: 0,
+        colno: 0
+      });
+      deepEqual(tokenizer.nextToken(), {
+        type: "variable-start",
+        value: "{{",
+        lineno: 0,
+        colno: 6
+      });
+      deepEqual(tokenizer.nextToken(), {
+        type: "whitespace",
+        value: " ",
+        lineno: 0,
+        colno: 6
       });
     });
 
-    describe('raw string templates', function() {
-      it('should substitute variables', function(done) {
-        var tmpl = new nunjucks.Template('Hello {{ username }}');
-        var rendered = tmpl.render({username: 'James'});
-        expect(rendered).to.be("Hello James");
-        done();
-      });
+    test("raw string templates should work", function() {
+      var tmpl = new nunjucks.Template('Hello {{ username }}');
+      var rendered = tmpl.render({username: 'James'});
+      equal(rendered, "Hello James");
     });
 
-    describe('HttpLoader', function() {
-      it('should work', function(done) {
-        var loader = new nunjucks.HttpLoader('.');
-        expect(loader.fetch('sample-template.txt'))
-          .to.be("Hello {{ username }}");
-        done();
-      });
-
-      it('should work with nunjucks environment', function(done) {
-        var loader = new nunjucks.HttpLoader('.');
-        var env = new nunjucks.Environment(loader);
-        var rendered = env.render('sample-template.txt', {
-          username: 'James'
-        });
-        expect(rendered).to.be("Hello James");
-        done();
-      });
+    test("HttpLoader should work", function() {
+      var loader = new nunjucks.HttpLoader('.');
+      equal(loader.fetch('sample-template.txt'), "Hello {{ username }}");
     });
 
-    mocha.checkLeaks();
-    mocha.globals(['nunjucks']);
-    mocha.run();
+    test("HttpLoader should work w/ nunjucks environment", function() {
+      var loader = new nunjucks.HttpLoader('.');
+      var env = new nunjucks.Environment(loader);
+      var rendered = env.render('sample-template.txt', {
+        username: 'James'
+      });
+      equal(rendered, "Hello James");
+    });
   </script>
 </body>
 </html>
