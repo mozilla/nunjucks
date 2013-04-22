@@ -294,6 +294,23 @@ describe('compiler', function() {
         s.should.equal('start: end: bazstart: bazend: bazfinal: ');
     });
 
+    it('should render nested blocks defined in inheriting template', function() {
+        var s = render('{% extends "base.html" %}' +
+            '{% block block1 %}{% block nested %}BAR{% endblock %}{% endblock %}');
+        s.should.equal('FooBARBazFizzle');
+    });
+
+    it('should inherit templates but not needlessly compile child templates', function() {
+        var count = 0;
+        render('{% extends "base.html" %}' +
+            '{% block block1 %}{{ foo() }}{% endblock %}', {
+            foo: function(){
+                count++;
+            }
+        });
+        count.should.equal(1);
+    });
+
     it('should inherit templates', function() {
         var s = render('{% extends "base.html" %}');
         s.should.equal('FooBarBazFizzle');
