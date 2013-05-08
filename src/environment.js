@@ -5,6 +5,7 @@ var compiler = require('./compiler');
 var builtin_filters = require('./filters');
 var builtin_loaders = require('./loaders');
 var runtime = require('./runtime');
+var globals = require('./globals');
 var Frame = runtime.Frame;
 
 var Environment = Object.extend({
@@ -189,7 +190,14 @@ var Context = Object.extend({
     },
 
     lookup: function(name) {
-        return this.ctx[name];
+        // This is one of the most called functions, so optimize for
+        // the typical case where the name isn't in the globals
+        if(name in globals && !(name in this.ctx)) {
+            return globals[name];
+        }
+        else {
+            return this.ctx[name];
+        }
     },
 
     setVariable: function(name, val) {

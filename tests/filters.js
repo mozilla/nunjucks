@@ -1,4 +1,3 @@
-
 var render = require('./util').render;
 var lib = require('../src/lib');
 
