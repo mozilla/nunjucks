@@ -844,6 +844,7 @@ var Compiler = Object.extend({
         }
         this.emitFuncEnd(this.isChild);
 
+        this.isChild = false;
         var blocks = node.findAll(nodes.Block);
         for(var i=0; i<blocks.length; i++) {
             var block = blocks[i];
