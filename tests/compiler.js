@@ -319,6 +319,22 @@
             s = render('hola {% extends tmpl %} hizzle mumble',
                        { tmpl: 'base.html' });
             expect(s).to.be('FooBarBazFizzle');
+
+            var count = 0;
+            render('{% extends "base.html" %}' + 
+                   '{% block notReal %}{{ foo() }}{% endblock %}',
+                   {
+                       foo: function() {
+                           count++;
+                       }
+                   });
+            expect(count).to.be(0);
+        });
+
+        it('should render nested blocks in child template', function() {
+            var s = render('{% extends "base.html" %}' +
+                           '{% block block1 %}{% block nested %}BAR{% endblock %}{% endblock %}');
+            expect(s).to.be('FooBARBazFizzle');
         });
 
         it('should render parent blocks with super()', function() {

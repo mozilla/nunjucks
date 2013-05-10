@@ -843,6 +843,9 @@ var Compiler = Object.extend({
         }
         this.emitFuncEnd(this.isChild);
 
+        // When compiling the blocks, they should all act as top-level code
+        this.isChild = false;
+
         var blocks = node.findAll(nodes.Block);
         for(var i=0; i<blocks.length; i++) {
             var block = blocks[i];
@@ -890,8 +893,8 @@ var Compiler = Object.extend({
 // var fs = require("fs");
 //var src = '{{ foo({a:1}) }} {% block content %}foo{% endblock %}';
 // var c = new Compiler();
-// var src = '{% macro foo(x) %}Here is {{ x|safe }}{% endmacro %}{{ foo("<>") }}';
-// //var extensions = [new testExtension()];
+// var src = '{% extends "b.html" %}{% block block1 %}{% block nested %}BAR{% endblock %}{% endblock %}';
+//var extensions = [new testExtension()];
 
 // var ns = parser.parse(src);
 // nodes.printNodes(ns);
