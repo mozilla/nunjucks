@@ -6,10 +6,10 @@ output="$1"
 if [ -z "$SLIM" ]; then
     # Listed in order of dependency
     files="object.js lib.js nodes.js runtime.js lexer.js parser.js compiler.js 
-       filters.js web-loaders.js loaders.js environment.js"
+       filters.js globals.js web-loaders.js loaders.js environment.js"
 else
     # Listed in order of dependency
-    files="object.js lib.js runtime.js filters.js environment.js"
+    files="object.js lib.js runtime.js filters.js globals.js environment.js"
 fi
 
 rm -f "$output"

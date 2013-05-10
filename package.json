@@ -7,7 +7,7 @@
         "email": "longster@gmail.com"
     },
     "devDependencies": {
-        "should": "*",
+        "expect.js": "*",
         "mocha": "*",
         "uglify-js": "*"
     },
