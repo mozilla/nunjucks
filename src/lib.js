@@ -116,19 +116,18 @@ exports.toArray = function(obj) {
     return Array.prototype.slice.call(obj);
 };
 
-// https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/indexOf
-var arrayPrototypeIndexOf = function (searchElement /*, fromIndex */ ) {
-    if (this == null) {
+exports.indexOf = function(array, searchElement /*, fromIndex */) {
+    if (array == null) {
         throw new TypeError();
     }
-    var t = Object(this);
+    var t = Object(array);
     var len = t.length >>> 0;
     if (len === 0) {
         return -1;
     }
     var n = 0;
-    if (arguments.length > 1) {
-        n = Number(arguments[1]);
+    if (arguments.length > 2) {
+        n = Number(arguments[2]);
         if (n != n) { // shortcut for verifying if it's NaN
             n = 0;
         } else if (n != 0 && n != Infinity && n != -Infinity) {
@@ -145,10 +144,6 @@ var arrayPrototypeIndexOf = function (searchElement /*, fromIndex */ ) {
         }
     }
     return -1;
-};
-
-exports.inArray = function(array, searchElement, fromIndex) {
-    return arrayPrototypeIndexOf.call(array, searchElement, fromIndex);
 };
 
 exports.without = function(array) {

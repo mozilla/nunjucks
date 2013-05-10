@@ -620,7 +620,7 @@ var Parser = Object.extend({
             if(!tok) {
                 break;
             }
-            else if(lib.inArray(compareOps, tok.value) != -1) {
+            else if(lib.indexOf(compareOps, tok.value) != -1) {
                 ops.push(new nodes.CompareOperand(tok.lineno,
                                                   tok.colno,
                                                   this.parseAdd(),
