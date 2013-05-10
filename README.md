@@ -26,6 +26,10 @@ The current version is v0.1.8 ([changelog](http://nunjucks.tumblr.com/post/42445
 
 See http://nunjucks.jlongster.com/ for complete documentation.
 
+## Mailing List
+
+Join our mailing list and get help with and issues you have: https://groups.google.com/forum/?fromgroups#!forum/nunjucks
+
 ## Contributors
 
 https://github.com/jlongster/nunjucks/graphs/contributors
