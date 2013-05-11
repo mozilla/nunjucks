@@ -22,6 +22,8 @@ jinja2.
 
 The current version is v0.1.8 ([changelog](http://nunjucks.tumblr.com/post/42445457638/v0-1-8-whitespace-controls-unpacking-better-errors)).
 
+The next version is coming very soon (around 5/15/2013) and will include some major new features, such as autoescaping and custom block tags.
+
 ## Documentation
 
 See http://nunjucks.jlongster.com/ for complete documentation.
