@@ -105,7 +105,9 @@ exports.TemplateError = function(message, lineno, colno) {
         err = message;
         message = message.name + ": " + message.message;
     } else {
-        Error.captureStackTrace(err);
+        if(Error.captureStackTrace) {
+            Error.captureStackTrace(err);
+        }
     }
 
     err.name = "Template render error";
@@ -544,6 +546,14 @@ var Frame = Object.extend({
         }
 
         obj[parts[parts.length - 1]] = val;
+    },
+
+    get: function(name) {
+        var val = this.variables[name];
+        if(val !== undefined && val !== null) {
+            return val;
+        }
+        return null;
     },
 
     lookup: function(name) {
@@ -1164,7 +1174,6 @@ modules['lexer'] = {
 };
 })();
 (function() {
-
 var lexer = modules["lexer"];
 var nodes = modules["nodes"];
 var Object = modules["object"];
@@ -2086,7 +2095,8 @@ var Parser = Object.extend({
     },
 
     parseSignature: function(tolerant) {
-        if(this.peekToken().type != lexer.TOKEN_LEFT_PAREN) {
+        var tok = this.peekToken();
+        if(tok.type != lexer.TOKEN_LEFT_PAREN) {
             if(tolerant) {
                 return null;
             }
@@ -2095,7 +2105,7 @@ var Parser = Object.extend({
             }
         }
 
-        var tok = this.nextToken();
+        tok = this.nextToken();
         var args = new nodes.NodeList(tok.lineno, tok.colno);
         var kwargs = new nodes.KeywordArgs(tok.lineno, tok.colno);
         var kwnames = [];
@@ -2221,7 +2231,7 @@ var Parser = Object.extend({
 //     console.log(util.inspect(t));
 // }
 
-// var p = new Parser(lexer.lex('{% test %}sdfd{% endtest %}'));
+// var p = new Parser(lexer.lex('{% macro foo(x) %}{{ x }}{% endmacro %}{{ foo(5) }}'));
 // var n = p.parse();
 // nodes.printNodes(n);
 
@@ -2661,25 +2671,45 @@ var Compiler = Object.extend({
     },
 
     compileSet: function(node, frame) {
-        var id = this.tmpid();
+        var ids = [];
 
-        this.emit('var ' + id + ' = ');
+        // Lookup the variable names for each identifier and create
+        // new ones if necessary
+        lib.each(node.targets, function(target) {
+            var name = target.value;
+            var id = frame.get(name);
+
+            if (id === null) {
+                id = this.tmpid();
+                frame.set(name, id);
+
+                // Note: This relies on js allowing scope across
+                // blocks, in case this is created inside an `if`
+                this.emitLine('var ' + id + ';');
+            }
+
+            ids.push(id);
+        }, this);
+
+        this.emit(ids.join(' = ') + ' = ');
         this._compileExpression(node.value, frame);
         this.emitLine(';');
 
-        for(var i=0; i<node.targets.length; i++) {
-            var name = node.targets[i].value;
-            frame.set(name, id);
+        lib.each(node.targets, function(target, i) {
+            var id = ids[i];
+            var name = target.value;
 
             this.emitLine('frame.set("' + name + '", ' + id + ');');
 
+            // We are running this for every var, but it's very
+            // uncommon to assign to multiple vars anyway
             this.emitLine('if(!frame.parent) {');
             this.emitLine('context.setVariable("' + name + '", ' + id + ');');
             if(name.charAt(0) != '_') {
                 this.emitLine('context.addExport("' + name + '");');
             }
             this.emitLine('}');
-        }
+        }, this);
     },
 
     compileIf: function(node, frame) {
@@ -2719,6 +2749,8 @@ var Compiler = Object.extend({
                 }
             });
         });
+
+        this.emit('if(' + arr + ' !== undefined) {');
 
         if(node.name instanceof nodes.Array) {
             // key/value iteration. the user could have passed a dict
@@ -2830,7 +2862,7 @@ var Compiler = Object.extend({
             this.emitLine('}');
         }
 
-
+        this.emit('}');
         this.emitLine('frame = frame.pop();');
     },
 
@@ -2898,7 +2930,7 @@ var Compiler = Object.extend({
 
     _emitMacroEnd: function() {
         this.emitLine('frame = frame.pop();');
-        this.emitLine('return ' + this.buffer + ';');
+        this.emitLine('return new runtime.SafeString(' + this.buffer + ');');
         this.emitLine('});');
     },
 
@@ -3107,38 +3139,14 @@ var Compiler = Object.extend({
 // var fs = modules["fs"];
 //var src = '{{ foo({a:1}) }} {% block content %}foo{% endblock %}';
 // var c = new Compiler();
-// var src = '{% test %}hello{% endtest %}';
+// var src = '{% macro foo(x) %}Here is {{ x|safe }}{% endmacro %}{{ foo("<>") }}';
+// //var extensions = [new testExtension()];
 
-// function testExtension() {
-//     this.tags = ['test'];
-//     this._name = 'testExtension';
-
-//     this.parse = function(parser, nodes) {
-//         var begun = parser.peekToken();
-//         parser.advanceAfterBlockEnd();
-
-//         //var tag = new nodes.CustomTag(begun.lineno, begun.colno, "test");
-
-//         var content = parser.parseUntilBlocks("endtest");
-//         var tag = new nodes.CallExtension(this, 'run', [content]);
-
-//         parser.advanceAfterBlockEnd();
-
-//         return tag;
-//     };
-
-//     this.run = function(content) {
-//         return 'poop';
-//     };
-// }
-// var extensions = [new testExtension()];
-
-// var ns = parser.parse(src, extensions);
+// var ns = parser.parse(src);
 // nodes.printNodes(ns);
 // c.compile(ns);
 
 // var tmpl = c.getCode();
-
 // console.log(tmpl);
 
 modules['compiler'] = {
@@ -3529,6 +3537,74 @@ modules['filters'] = filters;
 })();
 (function() {
 
+function cycler(items) {
+    var index = -1;
+    var current = null;
+
+    return {
+        reset: function() {
+            index = -1;
+            current = null;
+        },
+
+        next: function() {
+            index++;
+            if(index >= items.length) {
+                index = 0;
+            }
+
+            current = items[index];
+            return current;
+        }
+    };
+
+}
+
+function joiner(sep) {
+    sep = sep || ',';
+    var first = true;
+
+    return function() {
+        var val = first ? '' : sep;
+        first = false;
+        return val;
+    };
+}
+
+var globals = {
+    range: function(start, stop, step) {
+        if(!stop) {
+            stop = start;
+            start = 0;
+            step = 1;
+        }
+        else if(!step) {
+            step = 1;
+        }
+
+        var arr = [];
+        for(var i=start; i<stop; i+=step) {
+            arr.push(i);
+        }
+        return arr;
+    },
+
+    // lipsum: function(n, html, min, max) {
+    // },
+
+    cycler: function() {
+        return cycler(Array.prototype.slice.call(arguments));
+    },
+
+    joiner: function(sep) {
+        return joiner(sep);
+    }
+}
+
+modules['globals'] = globals;
+})();
+(function() {
+
 var Object = modules["object"];
 
 var HttpLoader = Object.extend({
@@ -3594,6 +3670,7 @@ var compiler = modules["compiler"];
 var builtin_filters = modules["filters"];
 var builtin_loaders = modules["loaders"];
 var runtime = modules["runtime"];
+var globals = modules["globals"];
 var Frame = runtime.Frame;
 
 var Environment = Object.extend({
@@ -3778,7 +3855,14 @@ var Context = Object.extend({
     },
 
     lookup: function(name) {
-        return this.ctx[name];
+        // This is one of the most called functions, so optimize for
+        // the typical case where the name isn't in the globals
+        if(name in globals && !(name in this.ctx)) {
+            return globals[name];
+        }
+        else {
+            return this.ctx[name];
+        }
     },
 
     setVariable: function(name, val) {
@@ -3931,7 +4015,7 @@ var Template = Object.extend({
 
 // var fs = modules["fs"];
 // var src = fs.readFileSync('test.html', 'utf-8');
-// var src = '{{ foo|safe|bar }}';
+// var src = '{% macro foo(x) %}{{ x }}{% endmacro %}{{ foo("<>") }}';
 // var env = new Environment(null, { autoescape: true, dev: true });
 
 // env.addFilter('bar', function(x) {
@@ -3943,7 +4027,7 @@ var Template = Object.extend({
 
 // var tmpl = new Template(src, env);
 // console.log("OUTPUT ---");
-// console.log(tmpl.render({ foo: '<>&' }));
+// console.log(tmpl.render({ bar: '<>&' }));
 
 modules['environment'] = {
     Environment: Environment,

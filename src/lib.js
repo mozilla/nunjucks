@@ -43,7 +43,9 @@ exports.TemplateError = function(message, lineno, colno) {
         err = message;
         message = message.name + ": " + message.message;
     } else {
-        Error.captureStackTrace(err);
+        if(Error.captureStackTrace) {
+            Error.captureStackTrace(err);
+        }
     }
 
     err.name = "Template render error";
