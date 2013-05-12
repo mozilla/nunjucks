@@ -1,3 +1,4 @@
+var lib = require('./lib');
 
 var whitespaceChars = " \n\t\r";
 var delimChars = "()[]{}%*-+/#,:|.<>=!";
@@ -97,7 +98,7 @@ Tokenizer.prototype.nextToken = function() {
             var curComplex = cur + this.current();
             var type;
 
-            if(complexOps.indexOf(curComplex) != -1) {
+            if(lib.indexOf(complexOps, curComplex) != -1) {
                 this.forward();
                 cur = curComplex;
             }

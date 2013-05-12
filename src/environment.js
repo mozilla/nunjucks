@@ -222,7 +222,7 @@ var Context = Object.extend({
     },
 
     getSuper: function(env, name, block, frame, runtime) {
-        var idx = (this.blocks[name] || []).indexOf(block);
+        var idx = lib.indexOf(this.blocks[name] || [], block);
         var blk = this.blocks[name][idx + 1];
         var context = this;
 
