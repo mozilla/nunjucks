@@ -1,16 +1,28 @@
-
 var util = require('util');
 var lib = require('./lib');
 var Object = require('./object');
 
+function traverseAndCheck(obj, type, results) {
+    if(obj instanceof type) {
+        results.push(obj);
+    }
+
+    if(obj instanceof Node) {
+        obj.findAll(type, results);
+    }
+}
+
 var Node = Object.extend("Node", {
     init: function(lineno, colno) {
-        var args = lib.toArray(arguments).slice(2);
         this.lineno = lineno;
         this.colno = colno;
 
-        lib.each(this.fields, function(field, i) {
-            var val = args[i];
+        var fields = this.fields;
+        for(var i=0, l=fields.length; i<l; i++) {
+            var field = fields[i];
+
+            // The first two args are line/col numbers, so offset by 2
+            var val = arguments[i + 2];
 
             // Fields should never be undefined, but null. It makes
             // testing easier to normalize values.
@@ -19,35 +31,28 @@ var Node = Object.extend("Node", {
             }
 
             this[field] = val;
-        }, this);
+        }
     },
 
-    findAll: function(type) {
-        var res = [];
-
-        function check(obj) {
-            if(obj instanceof type) {
-                res.push(obj);
-            }
-
-            if(obj instanceof Node) {
-                res = res.concat(obj.findAll(type));
-            }
-        }
+    findAll: function(type, results) {
+        results = results || [];
 
         if(this instanceof NodeList) {
-            lib.each(this.children, function(node) {
-                check(node);
-            }, this);
+            var children = this.children;
+
+            for(var i=0, l=children.length; i<l; i++) {
+                traverseAndCheck(children[i], type, results);
+            }
         }
         else {
-            lib.each(this.fields, function(field) {
-                var obj = this[field];
-                check(obj);
-            }, this);
+            var fields = this.fields;
+
+            for(var i=0, l=fields.length; i<l; i++) {
+                traverseAndCheck(this[fields[i]], type, results);
+            }
         }
 
-        return res;
+        return results;
     },
 
     iterFields: function(func) {

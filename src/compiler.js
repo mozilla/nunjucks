@@ -106,9 +106,10 @@ var Compiler = Object.extend({
     },
 
     _compileChildren: function(node, frame) {
-        lib.each(node.children, function(n) {
-            this.compile(n, frame);
-        }, this);
+        var children = node.children;
+        for(var i=0, l=children.length; i<l; i++) {
+            this.compile(children[i], frame);
+        }
     },
 
     _compileAggregate: function(node, frame, startChar, endChar) {
