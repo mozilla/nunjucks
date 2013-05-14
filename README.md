@@ -28,6 +28,8 @@ The next version is coming very soon (around 5/15/2013) and will include some ma
 
 See http://nunjucks.jlongster.com/ for complete documentation.
 
+Run all the tests at http://jlongster.github.io/nunjucks/tests/browser/.
+
 ## Mailing List
 
 Join our mailing list and get help with and issues you have: https://groups.google.com/forum/?fromgroups#!forum/nunjucks
