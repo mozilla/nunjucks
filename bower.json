@@ -4,11 +4,17 @@
   "main": "browser/nunjucks-min.js",
   "ignore": [
     "Makefile",
-    "package.json"
+    "package.json",
+    "tests",
+    "src",
+    "docs",
+    "bin",
+    "index.js"
   ],
   "keywords": [
     "jinja",
     "template",
+    "templates",
     "templating",
     "browser"
   ]
