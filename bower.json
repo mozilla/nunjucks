@@ -1,0 +1,15 @@
+{
+  "name": "nunjucks",
+  "version": "0.1.8",
+  "main": "browser/nunjucks-min.js",
+  "ignore": [
+    "Makefile",
+    "package.json"
+  ],
+  "keywords": [
+    "jinja",
+    "template",
+    "templating",
+    "browser"
+  ]
+}
