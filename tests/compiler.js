@@ -110,6 +110,14 @@
             expect(s).to.be('beer');
         });
 
+        it('should compile the ternary operator', function() {
+            var s = render('{{ "foo" if bar else "baz" }}');
+            expect(s).to.be('baz');
+
+            var s = render('{{ "foo" if bar else "baz" }}', { bar: true });
+            expect(s).to.be('foo');
+        });
+
         it('should compile inline conditionals', function() {
             var tmpl = 'Give me some {{ "pizza" if hungry else "water" }}';
 
