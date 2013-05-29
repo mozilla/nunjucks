@@ -105,7 +105,9 @@ exports.TemplateError = function(message, lineno, colno) {
         err = message;
         message = message.name + ": " + message.message;
     } else {
-        Error.captureStackTrace(err);
+        if(Error.captureStackTrace) {
+            Error.captureStackTrace(err);
+        }
     }
 
     err.name = "Template render error";
@@ -278,6 +280,14 @@ var Frame = Object.extend({
         obj[parts[parts.length - 1]] = val;
     },
 
+    get: function(name) {
+        var val = this.variables[name];
+        if(val !== undefined && val !== null) {
+            return val;
+        }
+        return null;
+    },
+
     lookup: function(name) {
         var p = this.parent;
         var val = this.variables[name];
@@ -345,26 +355,33 @@ function makeKeywordArgs(obj) {
 }
 
 function getKeywordArgs(args) {
-    if(args.length && args[args.length - 1].__keywords) {
-        return args[args.length - 1];
+    var len = args.length;
+    if(len) {
+        var lastArg = args[len - 1];
+        if(lastArg && lastArg.hasOwnProperty('__keywords')) {
+            return lastArg;
+        }
     }
     return {};
 }
 
 function numArgs(args) {
-    if(args.length === 0) {
+    var len = args.length;
+    if(len === 0) {
         return 0;
     }
-    else if(args[args.length - 1].__keywords) {
-        return args.length - 1;
+
+    var lastArg = args[len - 1];
+    if(lastArg && lastArg.hasOwnProperty('__keywords')) {
+        return len - 1;
     }
     else {
-        return args.length;
+        return len;
     }
 }
 
-// A SafeString object indicates that the string should not be 
-// autoescaped. This happens magically because autoescaping only 
+// A SafeString object indicates that the string should not be
+// autoescaped. This happens magically because autoescaping only
 // occurs on primitive string objects.
 function SafeString(val) {
     if(typeof val != 'string') {
@@ -840,6 +857,74 @@ filters.e = filters.escape;
 modules['filters'] = filters;
 })();
 (function() {
+
+function cycler(items) {
+    var index = -1;
+    var current = null;
+
+    return {
+        reset: function() {
+            index = -1;
+            current = null;
+        },
+
+        next: function() {
+            index++;
+            if(index >= items.length) {
+                index = 0;
+            }
+
+            current = items[index];
+            return current;
+        }
+    };
+
+}
+
+function joiner(sep) {
+    sep = sep || ',';
+    var first = true;
+
+    return function() {
+        var val = first ? '' : sep;
+        first = false;
+        return val;
+    };
+}
+
+var globals = {
+    range: function(start, stop, step) {
+        if(!stop) {
+            stop = start;
+            start = 0;
+            step = 1;
+        }
+        else if(!step) {
+            step = 1;
+        }
+
+        var arr = [];
+        for(var i=start; i<stop; i+=step) {
+            arr.push(i);
+        }
+        return arr;
+    },
+
+    // lipsum: function(n, html, min, max) {
+    // },
+
+    cycler: function() {
+        return cycler(Array.prototype.slice.call(arguments));
+    },
+
+    joiner: function(sep) {
+        return joiner(sep);
+    }
+}
+
+modules['globals'] = globals;
+})();
+(function() {
 var lib = modules["lib"];
 var Object = modules["object"];
 var lexer = modules["lexer"];
@@ -847,6 +932,7 @@ var compiler = modules["compiler"];
 var builtin_filters = modules["filters"];
 var builtin_loaders = modules["loaders"];
 var runtime = modules["runtime"];
+var globals = modules["globals"];
 var Frame = runtime.Frame;
 
 var Environment = Object.extend({
@@ -1031,7 +1117,14 @@ var Context = Object.extend({
     },
 
     lookup: function(name) {
-        return this.ctx[name];
+        // This is one of the most called functions, so optimize for
+        // the typical case where the name isn't in the globals
+        if(name in globals && !(name in this.ctx)) {
+            return globals[name];
+        }
+        else {
+            return this.ctx[name];
+        }
     },
 
     setVariable: function(name, val) {
@@ -1184,7 +1277,7 @@ var Template = Object.extend({
 
 // var fs = modules["fs"];
 // var src = fs.readFileSync('test.html', 'utf-8');
-// var src = '{{ foo|safe|bar }}';
+// var src = '{% macro foo(x) %}{{ x }}{% endmacro %}{{ foo("<>") }}';
 // var env = new Environment(null, { autoescape: true, dev: true });
 
 // env.addFilter('bar', function(x) {
@@ -1196,7 +1289,7 @@ var Template = Object.extend({
 
 // var tmpl = new Template(src, env);
 // console.log("OUTPUT ---");
-// console.log(tmpl.render({ foo: '<>&' }));
+// console.log(tmpl.render({ bar: '<>&' }));
 
 modules['environment'] = {
     Environment: Environment,
