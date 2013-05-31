@@ -1,7 +1,7 @@
 {
     "name": "nunjucks",
     "description": "A jinja inspired templating engine",
-    "version": "0.1.8",
+    "version": "0.1.9",
     "author": {
         "name": "James Long",
         "email": "longster@gmail.com"

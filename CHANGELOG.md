@@ -6,6 +6,7 @@ Changelog for versions previous to v0.1.9 are located at http://nunjucks.tumblr.
 * autoescaping ([docs](http://nunjucks.jlongster.com/api#Autoescaping))
 * support for custom tags ([docs](http://nunjucks.jlongster.com/api#Custom-Tags-%2526-Extensions))
 * the API for the `Environment` object changed slightly ([docs](http://nunjucks.jlongster.com/api#new-Environment%28%255Bloaders%255D%252C-%255Boptions%255D%29))
+* tests now use expect.js instead of should.js, can be run [in the browser](http://jlongster.github.io/nunjucks/tests/browser/)!
 * ternary conditional operator added (foo if bar else baz)
 * various optimizations, comilation is now 1.4x faster
 * fix too aggressive caching of templates from HTTP loader
@@ -19,5 +20,4 @@ Changelog for versions previous to v0.1.9 are located at http://nunjucks.tumblr.
 * fixed passing a false-y value as the last argument to a macro
 * `range`, `cycler`, and `joiner` globals have been added
 * fix nested blocks
-* tests now use expect.js instead of should.js, can be run [in the browser](http://jlongster.github.io/nunjucks/tests/browser/)!
 * add bower.json so the client-side lib can be installed through bower
