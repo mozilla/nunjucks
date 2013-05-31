@@ -2099,9 +2099,9 @@ var Parser = Object.extend({
         return node;
     },
 
-    parseSignature: function(tolerant) {
+    parseSignature: function(tolerant, noParens) {
         var tok = this.peekToken();
-        if(tok.type != lexer.TOKEN_LEFT_PAREN) {
+        if(!noParens && tok.type != lexer.TOKEN_LEFT_PAREN) {
             if(tolerant) {
                 return null;
             }
@@ -2110,7 +2110,10 @@ var Parser = Object.extend({
             }
         }
 
-        tok = this.nextToken();
+        if(tok.type == lexer.TOKEN_LEFT_PAREN) {
+            tok = this.nextToken();
+        }
+
         var args = new nodes.NodeList(tok.lineno, tok.colno);
         var kwargs = new nodes.KeywordArgs(tok.lineno, tok.colno);
         var kwnames = [];
@@ -2118,8 +2121,11 @@ var Parser = Object.extend({
 
         while(1) {
             tok = this.peekToken();
-            if(tok.type == lexer.TOKEN_RIGHT_PAREN) {
+            if(!noParens && tok.type == lexer.TOKEN_RIGHT_PAREN) {
                 this.nextToken();
+                break;
+            }
+            else if(noParens && tok.type == lexer.TOKEN_BLOCK_END) {
                 break;
             }
 
@@ -2434,56 +2440,56 @@ var Compiler = Object.extend({
         var contentArgs = node.contentArgs;
         var transformedArgs = [];
 
-        this._bufferAppend(function() {
-            this.emit('env.getExtension("' + node.extName + '")["' + node.prop + '"](');
-            this.emit('context');
+        this.emit(this.buffer + ' += runtime.suppressValue(');
+        this.emit('env.getExtension("' + node.extName + '")["' + node.prop + '"](');
+        this.emit('context');
 
-            if(args || contentArgs) {
-                this.emit(',');
+        if(args || contentArgs) {
+            this.emit(',');
+        }
+
+        if(args) {
+            if(!(args instanceof nodes.NodeList)) {
+                this.fail('compileCallExtension: arguments must be a NodeList, ' +
+                          'use `parser.parseSignature`');
             }
 
-            if(args) {
-                if(!(args instanceof nodes.NodeList)) {
-                    this.fail('compileCallExtension: arguments must be a NodeList, ' +
-                              'use `parser.parseSignature`');
+            lib.each(args.children, function(arg, i) {
+                // Tag arguments are passed normally to the call. Note
+                // that keyword arguments are turned into a single js
+                // object as the last argument, if they exist.
+                this._compileExpression(arg, frame);
+
+                if(i != args.children.length || contentArgs) {
+                    this.emit(',');
+                }
+            }, this);
+        }
+
+        if(contentArgs) {
+            lib.each(contentArgs, function(arg, i) {
+                if(i > 0) {
+                    this.emit(',');
                 }
 
-                lib.each(args.children, function(arg, i) {
-                    // Tag arguments are passed normally to the call. Note
-                    // that keyword arguments are turned into a single js
-                    // object as the last argument, if they exist.
-                    this._compileExpression(arg, frame);
+                if(arg) {
+                    var id = this.tmpid();
 
-                    if(i != args.children.length || contentArgs) {
-                        this.emit(',');
-                    }
-                }, this);
-            }
+                    this.emit('function() {');
+                    this.pushBufferId(id);
+                    this.compile(arg, frame);
+                    this.popBufferId();
+                    this.emitLine('return ' + id + ';\n' +
+                                  '}');
+                }
+                else {
+                    this.emit('null');
+                }
+            }, this);
+        }
 
-            if(contentArgs) {
-                lib.each(contentArgs, function(arg, i) {
-                    if(i > 0) {
-                        this.emit(',');
-                    }
-
-                    if(arg) {
-                        var id = this.tmpid();
-
-                        this.emit('function() {');
-                        this.pushBufferId(id);
-                        this.compile(arg, frame);
-                        this.popBufferId();
-                        this.emitLine('return ' + id + ';\n' +
-                                      '}');
-                    }
-                    else {
-                        this.emit('null');
-                    }
-                }, this);
-            }
-
-            this.emit(')');
-        });
+        this.emit(')');
+        this.emit(', env.autoesc);\n');
     },
 
     compileNodeList: function(node, frame) {
@@ -3065,21 +3071,23 @@ var Compiler = Object.extend({
     },
 
     compileOutput: function(node, frame) {
-        if (node.children.length == 1 &&
-            node.children[0].typename == 'TemplateData') {
-            var val = node.children[0].value;
-            if (val !== undefined && val !== null) {
-                this.emit(this.buffer + ' += ');
-                this.compileLiteral(node.children[0], frame);
-                this.emit(';\n');
-                return;
+        var children = node.children;
+        for(var i=0, l=children.length; i<l; i++) {
+            // TemplateData is a special case because it is never
+            // autoescaped, so simply output it for optimization
+            if(children[i] instanceof nodes.TemplateData) {
+                if(children[i].value) {
+                    this.emit(this.buffer + ' += ');
+                    this.compileLiteral(children[i], frame);
+                    this.emitLine(';');
+                }
+            }
+            else {
+                this.emit(this.buffer + ' += runtime.suppressValue(');
+                this.compile(children[i], frame);
+                this.emit(', env.autoesc);\n');
             }
         }
-
-        var _this = this;
-        this._bufferAppend(function() {
-            _this._compileChildren(node, frame);
-        });
     },
 
     compileRoot: function(node, frame) {
@@ -3511,7 +3519,12 @@ var filters = {
         if (killwords) {
             input = input.substring(0, length);
         } else {
-            input = input.substring(0, input.lastIndexOf(' ', length));
+            var idx = input.lastIndexOf(' ', length);
+            if(idx === -1) {
+                idx = length;
+            }
+
+            input = input.substring(0, idx);
         }
 
         input += (end !== undefined && end !== null) ? end : '...';
@@ -4048,6 +4061,7 @@ var env = modules["environment"];
 var compiler = modules["compiler"];
 var parser = modules["parser"];
 var lexer = modules["lexer"];
+var runtime = modules["runtime"];
 var loaders = modules["loaders"];
 
 nunjucks = {};
@@ -4067,6 +4081,7 @@ if(loaders) {
 nunjucks.compiler = compiler;
 nunjucks.parser = parser;
 nunjucks.lexer = lexer;
+nunjucks.runtime = runtime;
 
 nunjucks.require = function(name) { return modules[name]; };
 

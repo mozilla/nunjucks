@@ -3,8 +3,9 @@ Changelog for versions previous to v0.1.9 are located at http://nunjucks.tumblr.
 
 # v0.1.9 (May 29, 2013)
 
-* support for custom tags
-* autoescaping
+* autoescaping ([docs](http://nunjucks.jlongster.com/api#Autoescaping))
+* support for custom tags ([docs](http://nunjucks.jlongster.com/api#Custom-Tags-%2526-Extensions))
+* the API for the `Environment` object changed slightly ([docs](http://nunjucks.jlongster.com/api#new-Environment%28%255Bloaders%255D%252C-%255Boptions%255D%29))
 * ternary conditional operator added (foo if bar else baz)
 * various optimizations, comilation is now 1.4x faster
 * fix too aggressive caching of templates from HTTP loader

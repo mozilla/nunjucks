@@ -918,9 +918,9 @@ var Parser = Object.extend({
         return node;
     },
 
-    parseSignature: function(tolerant) {
+    parseSignature: function(tolerant, noParens) {
         var tok = this.peekToken();
-        if(tok.type != lexer.TOKEN_LEFT_PAREN) {
+        if(!noParens && tok.type != lexer.TOKEN_LEFT_PAREN) {
             if(tolerant) {
                 return null;
             }
@@ -929,7 +929,10 @@ var Parser = Object.extend({
             }
         }
 
-        tok = this.nextToken();
+        if(tok.type == lexer.TOKEN_LEFT_PAREN) {
+            tok = this.nextToken();
+        }
+
         var args = new nodes.NodeList(tok.lineno, tok.colno);
         var kwargs = new nodes.KeywordArgs(tok.lineno, tok.colno);
         var kwnames = [];
@@ -937,8 +940,11 @@ var Parser = Object.extend({
 
         while(1) {
             tok = this.peekToken();
-            if(tok.type == lexer.TOKEN_RIGHT_PAREN) {
+            if(!noParens && tok.type == lexer.TOKEN_RIGHT_PAREN) {
                 this.nextToken();
+                break;
+            }
+            else if(noParens && tok.type == lexer.TOKEN_BLOCK_END) {
                 break;
             }
 

@@ -824,7 +824,12 @@ var filters = {
         if (killwords) {
             input = input.substring(0, length);
         } else {
-            input = input.substring(0, input.lastIndexOf(' ', length));
+            var idx = input.lastIndexOf(' ', length);
+            if(idx === -1) {
+                idx = length;
+            }
+
+            input = input.substring(0, idx);
         }
 
         input += (end !== undefined && end !== null) ? end : '...';
@@ -1302,6 +1307,7 @@ var env = modules["environment"];
 var compiler = modules["compiler"];
 var parser = modules["parser"];
 var lexer = modules["lexer"];
+var runtime = modules["runtime"];
 var loaders = modules["loaders"];
 
 nunjucks = {};
@@ -1321,6 +1327,7 @@ if(loaders) {
 nunjucks.compiler = compiler;
 nunjucks.parser = parser;
 nunjucks.lexer = lexer;
+nunjucks.runtime = runtime;
 
 nunjucks.require = function(name) { return modules[name]; };
 

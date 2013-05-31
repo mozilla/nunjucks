@@ -1,15 +1,17 @@
-
 var env = require('../../src/environment');
+var runtime = require('../../src/runtime');
 var loaders = require('../../src/node-loaders');
 var express = require('express');
 
 var app = express.createServer();
 
 var e = new env.Environment(new loaders.FileSystemLoader('views'), { 
-    dev: true, 
+    //dev: true, 
     autoescape: true 
 });
 e.express(app);
+
+// app
 
 app.use(express.static(__dirname));
 
