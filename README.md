@@ -20,9 +20,7 @@ jinja2.
 
 `npm install nunjucks`
 
-The current version is v0.1.8 ([changelog](http://nunjucks.tumblr.com/post/42445457638/v0-1-8-whitespace-controls-unpacking-better-errors)).
-
-The next version is coming very soon (around 5/15/2013) and will include some major new features, such as autoescaping and custom block tags.
+The current version is v0.1.9 ([changelog](https://github.com/jlongster/nunjucks/blob/master/CHANGELOG.md))
 
 ## Documentation
 

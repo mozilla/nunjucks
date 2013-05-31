@@ -1,7 +1,7 @@
 
 Changelog for versions previous to v0.1.9 are located at http://nunjucks.tumblr.com/.
 
-# v0.1.9 (May 29, 2013)
+# v0.1.9 (May 31, 2013)
 
 * autoescaping ([docs](http://nunjucks.jlongster.com/api#Autoescaping))
 * support for custom tags ([docs](http://nunjucks.jlongster.com/api#Custom-Tags-%2526-Extensions))
