@@ -116,7 +116,7 @@ var Parser = Object.extend({
 
         var tok = this.nextToken();
 
-        if(tok.type == lexer.TOKEN_BLOCK_END) {
+        if(tok && tok.type == lexer.TOKEN_BLOCK_END) {
             if(tok.value.charAt(0) === '-') {
                 this.dropLeadingWhitespace = true;
             }

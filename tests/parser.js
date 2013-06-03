@@ -374,6 +374,10 @@
             }).to.throwException(/expected block end/);
 
             expect(function() {
+                parser.parse('{% include "foo %}');
+            }).to.throwException(/expected block end/);
+
+            expect(function() {
                 parser.parse('hello {% if sdf %} data');
             }).to.throwException(/expected endif, else, or endif/);
 
