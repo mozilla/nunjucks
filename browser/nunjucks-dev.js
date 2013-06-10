@@ -993,7 +993,7 @@ Tokenizer.prototype.parseString = function(delimiter) {
     var colno = this.colno;
     var str = "";
 
-    while(this.current() != delimiter) {
+    while(!this.is_finished() && this.current() != delimiter) {
         var cur = this.current();
 
         if(cur == "\\") {
@@ -1297,7 +1297,7 @@ var Parser = Object.extend({
 
         var tok = this.nextToken();
 
-        if(tok.type == lexer.TOKEN_BLOCK_END) {
+        if(tok && tok.type == lexer.TOKEN_BLOCK_END) {
             if(tok.value.charAt(0) === '-') {
                 this.dropLeadingWhitespace = true;
             }
