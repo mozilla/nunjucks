@@ -1,3 +1,4 @@
+var lib = require('./lib');
 
 var whitespaceChars = " \n\t\r";
 var delimChars = "()[]{}%*-+/#,:|.<>=!";
@@ -97,7 +98,7 @@ Tokenizer.prototype.nextToken = function() {
             var curComplex = cur + this.current();
             var type;
 
-            if(complexOps.indexOf(curComplex) != -1) {
+            if(lib.indexOf(complexOps, curComplex) != -1) {
                 this.forward();
                 cur = curComplex;
             }
@@ -147,10 +148,10 @@ Tokenizer.prototype.nextToken = function() {
         // Parse out the template text, breaking on tag
         // delimiters because we need to look for block/variable start
         // tags (don't use the full delimChars for optimization)
-        var beginChars = (BLOCK_START[0] +
-                          VARIABLE_START[0] +
-                          COMMENT_START[0] +
-                          COMMENT_END[0]);
+        var beginChars = (BLOCK_START.charAt(0) +
+                          VARIABLE_START.charAt(0) +
+                          COMMENT_START.charAt(0) +
+                          COMMENT_END.charAt(0));
         var tok;
 
         if(this.is_finished()) {
@@ -364,13 +365,13 @@ Tokenizer.prototype.back = function() {
 
 Tokenizer.prototype.current = function() {
     if(!this.is_finished()) {
-        return this.str[this.index];
+        return this.str.charAt(this.index);
     }
     return "";
 };
 
 Tokenizer.prototype.previous = function() {
-    return this.str[this.index-1];
+    return this.str.charAt(this.index-1);
 };
 
 module.exports = {
