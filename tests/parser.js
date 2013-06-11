@@ -95,7 +95,10 @@
         }
 
         var type = ast[0];
-        var dummy = Object.create(type.prototype);
+        var F = function() {};
+        F.prototype = type.prototype;
+
+        var dummy = new F();
 
         if(dummy instanceof nodes.NodeList) {
             return new type(0, 0, lib.map(ast.slice(1), toNodes));
