@@ -855,11 +855,12 @@ var Compiler = Object.extend({
             var name = block.name.value;
 
             this.emitFuncBegin('b_' + name);
-            this.emitLine('var l_super = context.getSuper(env, ' +
+            this.emitLine('var l_super = runtime.markAsSafe(' +
+                          'context.getSuper(env, ' +
                           '"' + name + '", ' +
                           'b_' + name + ', ' +
                           'frame, ' +
-                          'runtime);');
+                          'runtime));');
 
             var tmpFrame = new Frame();
             tmpFrame.set('super', 'l_super');
