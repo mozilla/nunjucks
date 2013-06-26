@@ -153,7 +153,7 @@ function SafeString(val) {
     ];
 
     for(var i=0; i<methods.length; i++) {
-        this[methods[i]] = markAsSafe(val[methods[i]]);
+        this[methods[i]] = markSafe(val[methods[i]]);
     }
 }
 
@@ -164,23 +164,25 @@ function copySafeness(dest, target) {
     return target.toString();
 }
 
-function markAsSafe(val) {
-    if (typeof val === 'string') {
+function markSafe(val) {
+    var type = typeof val;
+
+    if(type === 'string') {
         return new SafeString(val);
     }
-
-    if (typeof val !== 'function') {
+    else if(type !== 'function') {
         return val;
     }
+    else {
+        return function() {
+            var ret = val.apply(this, arguments);
 
-    return function() {
-        var ret = val.apply(this, arguments);
+            if(typeof ret === 'string') {
+                return new SafeString(ret);
+            }
 
-        if (typeof ret === 'string') {
-            return new SafeString(ret);
-        }
-
-        return ret;
+            return ret;
+        };
     }
 }
 
@@ -246,5 +248,5 @@ module.exports = {
     isArray: lib.isArray,
     SafeString: SafeString,
     copySafeness: copySafeness,
-    markAsSafe: markAsSafe
+    markSafe: markSafe
 };

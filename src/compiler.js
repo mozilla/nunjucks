@@ -855,7 +855,7 @@ var Compiler = Object.extend({
             var name = block.name.value;
 
             this.emitFuncBegin('b_' + name);
-            this.emitLine('var l_super = runtime.markAsSafe(' +
+            this.emitLine('var l_super = runtime.markSafe(' +
                           'context.getSuper(env, ' +
                           '"' + name + '", ' +
                           'b_' + name + ', ' +

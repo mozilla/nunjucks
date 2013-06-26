@@ -104,7 +104,7 @@ var filters = {
     },
 
     safe: function(str) {
-        return r.markAsSafe(str);
+        return r.markSafe(str);
     },
 
     first: function(arr) {
