@@ -231,7 +231,7 @@ var Context = Object.extend({
                 throw new Error('no super block available for "' + name + '"');
             }
 
-            return new runtime.SafeString(blk(env, context, frame, runtime));
+            return blk(env, context, frame, runtime);
         };
     },
 
