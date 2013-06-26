@@ -600,5 +600,15 @@
             );
             expect(s).to.be('<>& and &lt;&gt;');
         });
+
+        it('should not autoescape super()', function() {
+            var s = render(
+              '{% extends "base3.html" %}' +
+              '{% block block1 %}{{ super() }}{% endblock %}',
+              null,
+              { autoescape: true }
+            );
+            expect(s).to.be('<b>Foo</b>');
+        });
     });
 })();
