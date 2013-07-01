@@ -201,7 +201,7 @@ var Compiler = Object.extend({
                 // object as the last argument, if they exist.
                 this._compileExpression(arg, frame);
 
-                if(i != args.children.length || contentArgs) {
+                if(i != args.children.length - 1 || contentArgs) {
                     this.emit(',');
                 }
             }, this);
