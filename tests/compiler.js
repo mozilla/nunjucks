@@ -463,6 +463,30 @@
 
         });
 
+        it('should allow custom tag compilation without content', function() {
+            function testExtension() {
+                this.tags = ['test'];
+
+                this.parse = function(parser, nodes) {
+                    var tok = parser.nextToken();
+                    var args = parser.parseSignature(null, true);
+                    parser.advanceAfterBlockEnd(tok.value);
+
+                    return new nodes.CallExtension(this, 'run', args, null);
+                };
+
+                this.run = function(context, arg1) {
+                    // Reverse the string
+                    return arg1.split("").reverse().join("");
+                };
+            }
+
+            var opts = { extensions: { 'testExtension': new testExtension() }};
+            var output = render('{% test "123456" %}', null, opts);
+            expect(output).to.be('654321');
+
+        });
+
         it('should allow complicated custom tag compilation', function() {
             function testExtension() {
                 this.tags = ['test'];
