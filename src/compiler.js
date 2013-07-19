@@ -502,7 +502,7 @@ var Compiler = Object.extend({
             });
         });
 
-        this.emit('if(' + arr + ' !== undefined) {');
+        this.emit('if(' + arr + ') {');
 
         if(node.name instanceof nodes.Array) {
             // key/value iteration. the user could have passed a dict
