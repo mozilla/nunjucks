@@ -35,7 +35,7 @@ var filters = {
 
     capitalize: function(str) {
         var ret = str.toLowerCase();
-        return r.copySafeness(str, ret[0].toUpperCase() + ret.slice(1));
+        return r.copySafeness(str, ret.charAt(0).toUpperCase() + ret.slice(1));
     },
 
     center: function(str, width) {
