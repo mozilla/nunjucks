@@ -413,7 +413,7 @@ var Parser = Object.extend({
         }
 
         if(this.breakOnBlocks &&
-           lib.indexOf(this.breakOnBlocks, tok.value) != -1) {
+           this.breakOnBlocks.indexOf(tok.value) !== -1) {
             return null;
         }
 
@@ -432,7 +432,7 @@ var Parser = Object.extend({
             if (this.extensions.length) {
                 for (var i = 0; i < this.extensions.length; i++) {
                     var ext = this.extensions[i];
-                    if (lib.indexOf(ext.tags || [], tok.value) > -1) {
+                    if ((ext.tags || []).indexOf(tok.value) !== -1) {
                         return ext.parse(this, nodes, lexer);
                     }
                 }
@@ -620,7 +620,7 @@ var Parser = Object.extend({
             if(!tok) {
                 break;
             }
-            else if(lib.indexOf(compareOps, tok.value) != -1) {
+            else if(compareOps.indexOf(tok.value) !== -1) {
                 ops.push(new nodes.CompareOperand(tok.lineno,
                                                   tok.colno,
                                                   this.parseAdd(),

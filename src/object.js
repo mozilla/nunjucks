@@ -2,10 +2,11 @@
 // A simple class system, more documentation to come
 
 function extend(cls, name, props) {
+    // This does that same thing as Object.create, but with support for IE8
     var F = function() {};
     F.prototype = cls.prototype;
-
     var prototype = new F();
+
     var fnTest = /xyz/.test(function(){ xyz; }) ? /\bparent\b/ : /.*/;
     props = props || {};
 

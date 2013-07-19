@@ -98,7 +98,7 @@ Tokenizer.prototype.nextToken = function() {
             var curComplex = cur + this.current();
             var type;
 
-            if(lib.indexOf(complexOps, curComplex) != -1) {
+            if(complexOps.indexOf(curComplex) !== -1) {
                 this.forward();
                 cur = curComplex;
             }

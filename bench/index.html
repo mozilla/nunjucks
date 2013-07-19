@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  </head>
+  <body>
+    <button id="start">Start</button>
+    <button id="stop">Stop</button>
+
+    <script type="text/javascript" src="../browser/nunjucks-dev.js"></script>
+    <script>
+    var tmpl = '<h1>{{ header }}</h1>' +
+'<h1>{{ header }}</h1>' +
+'{% if items.length %}' +
+'<ul>' +
+'{% for item in items %}' +
+'    {% if item.current %}' +
+'    <li><strong>{{ item.name }}</strong></li>' +
+'    {% else %}' +
+'    <li><a href="{{ item.url }}">{{ item.name }}</a></li>' +
+'    {% endif %}' +
+'{% endfor %}' +
+'</ul>' +
+'{% else %}' +
+'<p>The list is empty.</p>' +
+'{% endif %}';
+
+      var env = new nunjucks.Environment();
+      var running = false;
+      var timer = null;
+      var t;
+
+      function start() {
+          for(var i=0; i<20000; i++) {
+            t = new nunjucks.Template(tmpl, env, null, null, true);
+          }
+      }
+
+      function stop() {
+          if(timer) {
+              timer && clearTimeout(timer);
+          }
+      }
+
+      document.getElementById('start').addEventListener('click', function() {
+          running = true;
+          start();
+      });
+      document.getElementById('stop').addEventListener('click', stop);
+    </script>
+  </body>
+</html>
