@@ -193,6 +193,9 @@
 
             s = render('{% for i in foo.bar %}{{ i }}{% endfor %}', { foo: {} });
             expect(s).to.be('');
+
+            s = render('{% for i in foo %}{{ i }}{% endfor %}', { foo: null });
+            expect(s).to.be('');
         });
 
         it('should compile operators', function() {
