@@ -12,39 +12,45 @@ var HttpLoader = Object.extend({
         this.neverUpdate = neverUpdate;
     },
 
-    getSource: function(name) {
-        var src = this.fetch(this.baseURL + '/' + name);
+    getSource: function(name, callback) {
         var _this = this;
 
-        if(!src) {
-            return null;
-        }
-        
-        return { src: src,
-                 path: name,
-                 upToDate: function() { return _this.neverUpdate; }};
+        this.fetch(this.baseURL + '/' + name, function(src) {
+            if (!src) {
+                return callback(null);
+            }
+
+            return { src:src,
+                     path:name,
+                     upToDate:function (cb) {
+                         cb(_this.neverUpdate);
+                     }};
+        });
     },
 
-    fetch: function(url) {
+    fetch: function(url, callback) {
         // Only in the browser please
-        var ajax = new XMLHttpRequest();
-        var src = null;
+        var ajax,
+            loading = true;
+
+        if (window.XMLHttpRequest) { // Mozilla, Safari, ...
+            ajax = new XMLHttpRequest();
+        } else if (window.ActiveXObject) { // IE 8 and older
+            ajax = new ActiveXObject("Microsoft.XMLHTTP");
+        }
 
         ajax.onreadystatechange = function() {
-            if(ajax.readyState == 4 && ajax.status == 200) {
-                src = ajax.responseText;
+            if(ajax.readyState == 4 && ajax.status == 200 && loading) {
+                loading = false;
+                callback(ajax.responseText);
             }
         };
 
         url += (url.indexOf('?') === -1 ? '?' : '&') + 's=' + 
                (new Date().getTime());
 
-        // Synchronous because this API shouldn't be used in
-        // production (pre-load compiled templates instead)
-        ajax.open('GET', url, false);
+        ajax.open('GET', url, true);
         ajax.send();
-
-        return src;
     }
 });
 

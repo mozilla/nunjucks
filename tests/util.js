@@ -14,10 +14,9 @@
         templatesPath = '../templates';
     }
 
-    function render(str, ctx, opts) {
+    function render(str, ctx, opts, cb) {
         opts = opts || { dev: true };
         var e = new Environment(new loader(templatesPath), opts);
-
         if(opts.filters) {
             for(var name in opts.filters) {
                 e.addFilter(name, opts.filters[name]);
@@ -32,7 +31,7 @@
 
         ctx = ctx || {};
         var t = new Template(str, e);
-        return t.render(ctx);
+        return t.render(ctx, cb);
     }
 
     if(typeof module != 'undefined') {

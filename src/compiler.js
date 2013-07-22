@@ -75,7 +75,7 @@ var Compiler = Object.extend({
 
     emitFuncBegin: function(name) {
         this.buffer = 'output';
-        this.emitLine('function ' + name + '(env, context, frame, runtime) {');
+        this.emitLine('function ' + name + '(env, context, frame, runtime, cb) {');
         this.emitLine('var lineno = null;');
         this.emitLine('var colno = null;');
         this.emitLine('var ' + this.buffer + ' = "";');
@@ -84,7 +84,9 @@ var Compiler = Object.extend({
 
     emitFuncEnd: function(noReturn) {
         if(!noReturn) {
-            this.emitLine('return ' + this.buffer + ';');
+            this.emitLine('cb(' + this.buffer +');');
+        } else {
+            this.emitLine('cb();');
         }
 
         this.emitLine('} catch (e) {');
@@ -784,11 +786,13 @@ var Compiler = Object.extend({
                       node.template.colno);
         }
 
-        this.emit('var parentTemplate = env.getTemplate(');
-        this._compileExpression(node.template, frame);
-        this.emitLine(', true);');
-
         var k = this.tmpid();
+
+        this.emit('env.getTemplate(');
+        this._compileExpression(node.template, frame);
+        this.emitLine(', true, continue_'+ k +');');
+
+        this.emitLine('function continue_' + k + '(parentTemplate){');
 
         this.emitLine('for(var ' + k + ' in parentTemplate.blocks) {');
         this.emitLine('context.addBlock(' + k +
@@ -843,6 +847,7 @@ var Compiler = Object.extend({
         if(this.isChild) {
             this.emitLine('return ' +
                           'parentTemplate.rootRenderFunc(env, context, frame, runtime);');
+            this.emitLine('}'); // close continue_<id>
         }
         this.emitFuncEnd(this.isChild);
 

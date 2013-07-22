@@ -34,7 +34,7 @@ exports.withPrettyErrors = function(path, withInternals, func) {
 
         throw e;
     }
-}
+};
 
 exports.TemplateError = function(message, lineno, colno) {
     var err = this;
@@ -184,6 +184,27 @@ exports.map = function(obj, func) {
     }
 
     return results;
+};
+
+exports.asyncParallel = function(funcs, done) {
+    var count = funcs.length,
+        result = new Array(count),
+        current = 0;
+
+    var makeNext = function(i) {
+        return function(res) {
+            result[i] = res;
+            current += 1;
+
+            if (current === count) {
+                done(result);
+            }
+        };
+    };
+
+    for (var i = 0; i < count; i++) {
+        funcs[i](makeNext(i));
+    }
 };
 
 if(!Array.prototype.indexOf) {

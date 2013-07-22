@@ -69,38 +69,62 @@ var Environment = Object.extend({
         return this.filters[name];
     },
 
-    getTemplate: function(name, eagerCompile) {
+    getTemplate: function(name, eagerCompile, callback) {
         if (name && name.raw) {
             // this fixes autoescape for templates referenced in symbols
             name = name.raw;
         }
+
+        var self = this;
         var info = null;
         var tmpl = this.cache[name];
-        var upToDate;
 
         if(typeof name !== 'string') {
             throw new Error('template names must be a string: ' + name);
         }
 
-        if(!tmpl || !tmpl.isUpToDate()) {
-            for(var i=0; i<this.loaders.length; i++) {
-                if((info = this.loaders[i].getSource(name))) {
-                    break;
+        var finalize = function() {
+            callback(self.cache[name]);
+        };
+
+        var _getTemplate = function() {
+            var index = 0;
+            var getSource = function (cb) {
+                self.loaders[index].getSource(name, function (info) {
+                    if (info) {
+                        cb(info)
+                    } else {
+                        (++index < self.loaders.length) ? getSource(cb) : cb(null);
+                    }
+                });
+            };
+
+            getSource(function (info) {
+                if (!info) {
+                    throw new Error('template not found: ' + name);
                 }
-            }
 
-            if(!info) {
-                throw new Error('template not found: ' + name);
-            }
+                self.cache[name] = new Template(info.src,
+                    self,
+                    info.path,
+                    info.upToDate,
+                    eagerCompile);
 
-            this.cache[name] = new Template(info.src,
-                                            this,
-                                            info.path,
-                                            info.upToDate,
-                                            eagerCompile);
+                callback(self.cache[name]);
+            });
+        };
+
+        if(!tmpl) {
+            _getTemplate();
+        } else {
+            tmpl.upToDate(function (isUpToDate) {
+                if (isUpToDate) {
+                    finalize();
+                } else {
+                    _getTemplate();
+                }
+            });
         }
-
-        return this.cache[name];
     },
 
     registerPrecompiled: function(templates) {
@@ -135,13 +159,15 @@ var Environment = Object.extend({
 
                 context = lib.extend(context, ctx);
 
-                var res = env.render(name, context);
-                k(null, res);
+                env.render(name, context, function(res) {
+                    k(null, res);
+                });
             };
         }
         else {
             // Express <2.5.11
             var http = require('http');
+            var self = this;
             var res = http.ServerResponse.prototype;
 
             res._render = function(name, ctx, k) {
@@ -161,20 +187,23 @@ var Environment = Object.extend({
                 }
 
                 context = lib.extend(context, app._locals);
-                var str = env.render(name, context);
 
-                if(k) {
-                    k(null, str);
-                }
-                else {
-                    this.send(str);
-                }
+                env.render(name, context, function (str) {
+                    if (k) {
+                        k(null, str);
+                    }
+                    else {
+                        self.send(str);
+                    }
+                });
             };
         }
     },
 
-    render: function(name, ctx) {
-        return this.getTemplate(name).render(ctx);
+    render: function(name, ctx, callback) {
+        this.getTemplate(name, function(tmpl) {
+            callback(tmpl.render(ctx));
+        })
     }
 });
 
@@ -281,8 +310,16 @@ var Template = Object.extend({
         }
     },
 
-    render: function(ctx, frame) {
+    render: function(ctx, frame, callback) {
         var self = this;
+        if (typeof ctx === 'function') {
+            callback = ctx;
+            ctx = {};
+        }
+        else if (typeof frame === 'function') {
+            callback = frame;
+            frame = null;
+        }
 
         var render = function() {
             if(!self.compiled) {
@@ -291,17 +328,14 @@ var Template = Object.extend({
 
             var context = new Context(ctx || {}, self.blocks);
 
-            return self.rootRenderFunc(self.env,
+            self.rootRenderFunc(self.env,
                 context,
                 frame || new Frame(),
-                runtime);
+                runtime,
+                function(s) {callback(s)});
         };
 
         return lib.withPrettyErrors(this.path, this.env.dev, render);
-    },
-
-    isUpToDate: function() {
-        return this.upToDate();
     },
 
     getExported: function() {

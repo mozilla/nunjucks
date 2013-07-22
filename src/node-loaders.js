@@ -4,7 +4,7 @@ var lib = require('./lib');
 var Object = require('./object');
 
 // Node <0.7.1 compatibility
-var existsSync = fs.existsSync ? fs.existsSync : path.existsSync;
+var exists = fs.exists || path.exists;
 
 var FileSystemLoader = Object.extend({
     init: function(searchPaths) {
@@ -19,31 +19,69 @@ var FileSystemLoader = Object.extend({
 
     },
 
-    getSource: function(name) {
-        var fullpath = null;
+    getSource: function(name, callback) {
+        var self = this;
         var paths = this.searchPaths.concat(['', __dirname]);
-        for(var i=0; i<paths.length; i++) {
-            var p = path.join(paths[i], name);
-            if(p.indexOf(paths[i]) === 0 && existsSync(p)) {
-                fullpath = p;
-                break;
+        var index = 0;
+
+        var runExists = function(cb) {
+            var p = path.join(paths[index], name);
+            if (p.indexOf(paths[i]) === 0) {
+                // template is in path
+                exists(p, function(answer) {
+                    if (answer) {
+                        // template found
+                        cb(p);
+                    } else {
+                        // template not found, move on
+                        (++index < paths.length) ? runExists(cb) : cb(null);
+                    }
+                });
+            } else {
+                // template not in path, skip exists, move on
+                (++index < paths.length) ? runExists(cb) : cb(null);
             }
-        }
+        };
 
-        if(!fullpath) {
-            return null;
-        }
+        runExists(function(fullpath) {
+            if (!fullpath) {
+                return callback(null);
+            }
 
-        return { src: fs.readFileSync(fullpath, 'utf-8'),
-                 path: fullpath,
-                 upToDate: this.upToDateFunc(fullpath) };
+            lib.asyncParallel([
+                function(done) {
+                    self.upToDateFunc(fullpath, function (upToDate) {
+                        done(upToDate);
+                    });
+                },
+                function (done) {
+                    fs.readFile(fullpath, 'utf-8', function (err, src) {
+                        // todo: catch potential errors here
+                        done(src);
+                    });
+                }
+            ], function(result) {
+                callback({
+                    src: result[1],
+                    path: fullpath,
+                    upToDate: result[0]
+                })
+            });
+        });
     },
 
-    upToDateFunc: function(file) {
-        var mtime = fs.statSync(file).mtime.toString();
-        return function() {
-            return fs.statSync(file).mtime.toString() == mtime;
-        };
+    upToDateFunc: function(file, callback) {
+        fs.stat(file, function (err, stats) {
+            // todo: catch potential errors here
+            var mtime = stats.mtime.toString();
+
+            callback(function (cb) {
+                fs.stat(function (err, stats) {
+                    // todo: catch potential errors here
+                    cb(mtime === stats.mtime.toString());
+                });
+            });
+        });
     }
 });
 
