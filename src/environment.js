@@ -332,7 +332,9 @@ var Template = Object.extend({
                 context,
                 frame || new Frame(),
                 runtime,
-                function(s) {callback(s)});
+                function(s) {
+                    callback(s);
+                });
         };
 
         return lib.withPrettyErrors(this.path, this.env.dev, render);
@@ -384,8 +386,8 @@ var Template = Object.extend({
 
 // var fs = require('fs');
 // var src = fs.readFileSync('test.html', 'utf-8');
-// var src = '{% macro foo(x) %}{{ x }}{% endmacro %}{{ foo("<>") }}';
-// var env = new Environment(null, { autoescape: true, dev: true });
+var src = '{% extends "../tests/templates/base.html" %}{% block block1 %}BAR{% endblock %}';
+var env = new Environment(null, { autoescape: true, dev: true });
 
 // env.addFilter('bar', function(x) {
 //     return runtime.copySafeness(x, x.substring(3, 1) + x.substring(0, 2));
@@ -394,9 +396,13 @@ var Template = Object.extend({
 // //env.addExtension('testExtension', new testExtension());
 // console.log(compiler.compile(src));
 
-// var tmpl = new Template(src, env);
-// console.log("OUTPUT ---");
-// console.log(tmpl.render({ bar: '<>&' }));
+
+var x = 5000;
+var tmpl = new Template(src, env);
+console.log("OUTPUT ---");
+console.log(tmpl.render({ bar: '<>&' }, function(res) {
+    console.log(res);
+}));
 
 module.exports = {
     Environment: Environment,

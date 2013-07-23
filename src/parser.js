@@ -954,7 +954,7 @@ var Parser = Object.extend({
                           tok.colno);
             }
             else {
-                var arg = this.parsePrimary();
+                var arg = this.parseExpression();
 
                 if(this.skipValue(lexer.TOKEN_OPERATOR, '=')) {
                     kwargs.addChild(
@@ -1061,9 +1061,9 @@ var Parser = Object.extend({
 //     console.log(util.inspect(t));
 // }
 
-// var p = new Parser(lexer.lex('{% macro foo(x) %}{{ x }}{% endmacro %}{{ foo(5) }}'));
-// var n = p.parse();
-// nodes.printNodes(n);
+var p = new Parser(lexer.lex('{{ baz(foo | bar(5)) }}'));
+var n = p.parse();
+nodes.printNodes(n);
 
 module.exports = {
     parse: function(src, extensions) {

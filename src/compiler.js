@@ -774,8 +774,13 @@ var Compiler = Object.extend({
 
     compileBlock: function(node, frame) {
         if(!this.isChild) {
-            this.emitLine(this.buffer + ' += context.getBlock("' +
-                          node.name.value + '")(env, context, frame, runtime);');
+            this.suspend(function(resume) {
+                this.buffer += 'context.getBlock("' + node.name.value + '")' +
+                    '(env, context, frame, runtime, ' + resume + ')';
+            });
+
+            // this.emitLine(this.buffer + ' += context.getBlock("' +
+            //               node.name.value + '")(env, context, frame, runtime, function() {});');
         }
     },
 
@@ -846,7 +851,7 @@ var Compiler = Object.extend({
         this._compileChildren(node, frame);
         if(this.isChild) {
             this.emitLine('return ' +
-                          'parentTemplate.rootRenderFunc(env, context, frame, runtime);');
+                          'parentTemplate.rootRenderFunc(env, context, frame, runtime, cb);');
             this.emitLine('}'); // close continue_<id>
         }
         this.emitFuncEnd(this.isChild);
@@ -901,16 +906,16 @@ var Compiler = Object.extend({
 
 // var fs = require("fs");
 //var src = '{{ foo({a:1}) }} {% block content %}foo{% endblock %}';
-// var c = new Compiler();
-// var src = '{% extends "b.html" %}{% block block1 %}{% block nested %}BAR{% endblock %}{% endblock %}';
+var c = new Compiler();
+var src = '{% extends "../tests/templates/base.html" %}{% block block1 %}BAR{% endblock %}';
 //var extensions = [new testExtension()];
 
-// var ns = parser.parse(src);
-// nodes.printNodes(ns);
-// c.compile(ns);
+var ns = parser.parse(src);
+//nodes.printNodes(ns);
+c.compile(ns);
 
-// var tmpl = c.getCode();
-// console.log(tmpl);
+var tmpl = c.getCode();
+console.log(tmpl);
 
 module.exports = {
     compile: function(src, extensions, name) {

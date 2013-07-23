@@ -26,7 +26,7 @@ var FileSystemLoader = Object.extend({
 
         var runExists = function(cb) {
             var p = path.join(paths[index], name);
-            if (p.indexOf(paths[i]) === 0) {
+            if (p.indexOf(paths[index]) === 0) {
                 // template is in path
                 exists(p, function(answer) {
                     if (answer) {
