@@ -954,7 +954,7 @@ var Parser = Object.extend({
                           tok.colno);
             }
             else {
-                var arg = this.parsePrimary();
+                var arg = this.parseExpression();
 
                 if(this.skipValue(lexer.TOKEN_OPERATOR, '=')) {
                     kwargs.addChild(
