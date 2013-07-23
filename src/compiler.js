@@ -1,5 +1,6 @@
 var lib = require('./lib');
 var parser = require('./parser');
+var transformer = require('./transformer');
 var nodes = require('./nodes');
 var Object = require('./object');
 var Frame = require('./runtime').Frame;
@@ -915,27 +916,20 @@ var Compiler = Object.extend({
 // var src = '{{ foo | poop(1, 2, 3) }}';
 //var extensions = [new testExtension()];
 
-var ns = parser.parse(src);
-//nodes.printNodes(ns);
-c.compile(ns);
+// var ast = parser.parse(src);
+// nodes.printNodes(ast);
+// c.compile(ast);
 
-var tmpl = c.getCode();
-console.log(tmpl);
+// var tmpl = c.getCode();
+// console.log(tmpl);
 
 module.exports = {
     compile: function(src, extensions, name) {
         var c = new Compiler(extensions);
 
-        // Run the extension preprocessors against the source.
-        if (extensions && extensions.length) {
-            for (var i = 0; i < extensions.length; i++) {
-                if ('preprocess' in extensions[i]) {
-                    src = extensions[i].preprocess(src, name);
-                }
-            }
-        }
-
-        c.compile(parser.parse(src, extensions));
+        c.compile(transformer.transform(parser.parse(src, extensions),
+                                        extensions,
+                                        name));
         return c.getCode();
     },
 

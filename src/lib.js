@@ -238,3 +238,9 @@ if(!Array.prototype.indexOf) {
         return -1;
     };
 }
+
+if(!Array.prototype.map) {
+    Array.prototype.map = function() {
+        throw new Error("map is unimplemented for this js engine");
+    };
+}

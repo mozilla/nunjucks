@@ -1061,9 +1061,9 @@ var Parser = Object.extend({
 //     console.log(util.inspect(t));
 // }
 
-var p = new Parser(lexer.lex('{{ baz(foo | bar(5)) }}'));
-var n = p.parse();
-nodes.printNodes(n);
+// var p = new Parser(lexer.lex('sdfsdf {{ baz(foo | bar(5)) }}'));
+// var n = p.parseAsRoot();
+// nodes.printNodes(n);
 
 module.exports = {
     parse: function(src, extensions) {
