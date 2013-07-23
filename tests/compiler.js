@@ -1,13 +1,17 @@
 (function() {
-    var expect, render;
+    var expect, render, Environment, Template;
 
     if(typeof require != 'undefined') {
         expect = require('expect.js');
         render = require('./util').render;
+        Environment = require('../src/environment').Environment;
+        Template = require('../src/environment').Template;
     }
     else {
         expect = window.expect;
         render = window.render;
+        Environment = nunjucks.Environment;
+        Template = nunjucks.Template;
     }
 
     describe('compiler', function() {
@@ -636,6 +640,14 @@
               { autoescape: true }
             );
             expect(s).to.be('<b>Foo</b>');
+        });
+
+        it('should pass context as this to filters', function() {
+            var e = new Environment();
+            e.addFilter('hallo', function(foo) { return foo + this.lookup('bar'); });
+
+            var t = new Template('{{ foo | hallo }}', e);
+            expect(t.render({ foo: 1, bar: 2 })).to.be('3');
         });
     });
 })();
