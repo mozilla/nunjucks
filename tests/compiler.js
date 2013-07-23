@@ -1,14 +1,17 @@
-<<<<<<< HEAD
 (function() {
-    var expect, render;
+    var expect, render, Environment, Template;
 
     if(typeof require != 'undefined') {
         expect = require('expect.js');
         render = require('./util').render;
+        Environment = require('../src/environment').Environment;
+        Template = require('../src/environment').Template;
     }
     else {
         expect = window.expect;
         render = window.render;
+        Environment = nunjucks.Environment;
+        Template = nunjucks.Template;
     }
 
     describe('compiler', function() {
@@ -114,150 +117,6 @@
         it('should compile the ternary operator', function() {
             var s = render('{{ "foo" if bar else "baz" }}');
             expect(s).to.be('baz');
-=======
-var should = require('should');
-var render = require('./util').render,
-    asyncParallel = require('../src/lib').asyncParallel;
-
-// shorthand to generate test render callbacks
-function testCb (str, cb) {
-    return function (s) {
-        s.should.equal(str);
-        cb();
-    }
-}
-
-describe('compiler', function() {
-    it('should compile templates', function (done) {
-        // for each area of tests, if there is more than one test,
-        // fire up asyncParallel.
-        //
-        // first arg is an array of functions to call, and the second arg
-        // is the function to call when all of them are finished.
-        //
-        // example below
-        asyncParallel(
-            [
-                function(next) {
-                    render('Hello world',
-                        testCb('Hello world', next));
-
-                }, function(next) {
-                    render('Hello world, {{ name }}',
-                           { name:'James' },
-                           testCb('Hello world, James', next));
-
-                }, function(next) {
-                    render('Hello world, {{name}}{{suffix}}, how are you',
-                           { name:'James',
-                             suffix:' Long'},
-                           testCb('Hello world, James Long, how are you', next));
-
-                }
-            ], function() { done(); }); // call done to finish this async test
-    });
-
-    it('should escape newlines', function(done) {
-        render('foo\\nbar',
-            testCb('foo\\nbar', done));
-    });
-
-    it('should compile references', function(done) {
-        render('{{ foo.bar }}', { foo: { bar: 'baz' }},
-            testCb('baz', done));
-    });
-
-    it('should fail silently on undefined values', function(done) {
-        asyncParallel(
-            [
-                function(next) {
-                    render('{{ foo }}',
-                        testCb('', next));
-
-                }, function (next) {
-                    render('{{ foo.bar }}',
-                        testCb('', next));
-
-                }, function (next) {
-                    render('{{ foo.bar.baz }}',
-                        testCb('', next));
-
-                }, function (next) {
-                    render('{{ foo.bar.baz["biz"].mumble }}',
-                        testCb('', next));
-                }
-            ], function() { done() });
-    });
-
-    it('should not treat falsy values the same as undefined', function(done) {
-        asyncParallel(
-            [
-                function (next) {
-                    render('{{ foo }}', {foo:0},
-                        testCb('0', next));
-
-                }, function (next) {
-                    render('{{ foo }}', {foo:false},
-                        testCb('false', next));
-                }
-            ], function () { done() });
-    });
-
-    it('should compile function calls', function(done) {
-        render('{{ foo("msg") }}',
-               { foo: function(str) { return str + 'hi'; }},
-               testCb('msghi', done));
-    });
-
-    it('should compile function calls with correct scope', function(done) {
-        render('{{ foo.bar() }}',
-               { foo: { bar: function() { return this.baz }, baz: 'hello' }},
-               testCb('hello', done));
-    });
-
-    it('should compile if blocks', function(done) {
-        var tmpl = ('Give me some {% if hungry %}pizza' +
-                    '{% else %}water{% endif %}');
-
-        asyncParallel(
-            [
-                function (next) {
-                    render(tmpl, { hungry:true },
-                        testCb('Give me some pizza', next));
-
-                }, function (next) {
-                    render(tmpl, { hungry:false },
-                        testCb('Give me some water', next));
-
-                }, function (next) {
-                    render('{% if not hungry %}good{% endif %}',
-                           { hungry:false },
-                           testCb('good', next));
-
-                }, function (next) {
-                    render('{% if hungry and like_pizza %}good{% endif %}',
-                           { hungry: true, like_pizza: true },
-                           testCb('good', next));
-
-                }, function (next) {
-                    render('{% if hungry or like_pizza %}good{% endif %}',
-                           { hungry:false, like_pizza: true },
-                           testCb('good', next));
-
-                }, function (next) {
-                    render('{% if (hungry or like_pizza) and anchovies %}good{% endif %}',
-                           { hungry:false, like_pizza:true, anchovies:true },
-                           testCb('good', next));
-
-                }, function (next) {
-                    render('{% if food == "pizza" %}pizza{% endif %}' +
-                           '{% if food =="beer" %}beer{% endif %}',
-                           { food:'beer' },
-                           testCb('beer', next));
-                }
-            ], function () { done() });
-    });
->>>>>>> devoidfury/async_templates
 
             var s = render('{{ "foo" if bar else "baz" }}', { bar: true });
             expect(s).to.be('foo');
@@ -442,7 +301,6 @@ describe('compiler', function() {
 
             s = render('{% from "import.html" import foo as baz, bar %}' +
                        '{{ bar }} {{ baz() }}');
-<<<<<<< HEAD
             expect(s).to.be("baz Here's a macro");
 
             s = render('{% for i in [1,2] %}' +
@@ -783,115 +641,13 @@ describe('compiler', function() {
             );
             expect(s).to.be('<b>Foo</b>');
         });
-=======
-        s.should.equal("baz Here's a macro");
 
-        s = render('{% for i in [1,2] %}' +
-                   'start: {{ num }}' +
-                   '{% from "import.html" import bar as num %}' +
-                   'end: {{ num }}' +
-                   '{% endfor %}' +
-                   'final: {{ num }}');
-        // TODO: Should the for loop create a new frame for each
-        // iteration? As it is, `num` is set on all iterations after
-        // the first one sets it
-        s.should.equal('start: end: bazstart: bazend: bazfinal: ');
-    });
+        it('should pass context as this to filters', function() {
+            var e = new Environment();
+            e.addFilter('hallo', function(foo) { return foo + this.lookup('bar'); });
 
-    it('should inherit templates', function() {
-        var s = render('{% extends "base.html" %}');
-        s.should.equal('FooBarBazFizzle');
-
-        s = render('hola {% extends "base.html" %} hizzle mumble');
-        s.should.equal('FooBarBazFizzle');
-
-        s = render('{% extends "base.html" %}' +
-                   '{% block block1 %}BAR{% endblock %}');
-        s.should.equal('FooBARBazFizzle');
-
-        s = render('{% extends "base.html" %}' +
-                   '{% block block1 %}BAR{% endblock %}' +
-                   '{% block block2 %}BAZ{% endblock %}');
-        s.should.equal('FooBARBAZFizzle');
-
-        s = render('hola {% extends tmpl %} hizzle mumble',
-                   { tmpl: 'base.html' });
-        s.should.equal('FooBarBazFizzle');
-    });
-
-    it('should render parent blocks with super()', function() {
-        var s = render('{% extends "base.html" %}' +
-                       '{% block block1 %}{{ super() }}BAR{% endblock %}');
-        s.should.equal('FooBarBARBazFizzle');
-    });
-
-    it('should include templates', function() {
-        var s = render('hello world {% include "include.html" %}');
-        s.should.equal('hello world FooInclude ');
-
-        s = render('hello world {% include "include.html" %}',
-                  { name: 'james' });
-        s.should.equal('hello world FooInclude james');
-
-        s = render('hello world {% include tmpl %}',
-                  { name: 'thedude', tmpl: "include.html" });
-        s.should.equal('hello world FooInclude thedude');
-
-        s = render('hello world {% include data.tmpl %}',
-            { name: 'thedude', data: {tmpl: "include.html"} });
-        s.should.equal('hello world FooInclude thedude');
-    });
-
-    it('should maintain nested scopes', function(done) {
-        render('{% for i in [1,2] %}' +
-                   '{% for i in [3,4] %}{{ i }}{% endfor %}' +
-               '{{ i }}{% endfor %}',
-               testCb('341342', done));
-    });
-
-    it('should allow blocks in for loops', function(done) {
-        render('{% extends "base2.html" %}' +
-               '{% block item %}hello{{ item }}{% endblock %}',
-               testCb('hello1hello2', done));
-    });
-
-    it('should make includes inherit scope', function(done) {
-        render('{% for item in [1,2] %}' +
-               '{% include "item.html" %}' +
-               '{% endfor %}',
-               testCb('showing 1showing 2', done));
-    });
-
-    it('should compile a set block', function() {
-        var s = render('{% set username = "foo" %}{{ username }}',
-                       { username: 'james' });
-        s.should.equal('foo');
-
-        s = render('{% set x, y = "foo" %}{{ x }}{{ y }}');
-        s.should.equal('foofoo');
-
-        s = render('{% set x = 1 + 2 %}{{ x }}');
-        s.should.equal('3');
-
-        s = render('{% for i in [1] %}{% set foo=1 %}{% endfor %}{{ foo }}',
-                   { foo: 2 });
-        s.should.equal('2');
-
-        s = render('{% include "set.html" %}{{ foo }}',
-                   { foo: 'bar' });
-        s.should.equal('bar');
-    });
-
-    it('should compile set with frame references', function(done) {
-        render('{% set username = user.name %}{{ username }}',
-               { user: { name: 'james' } },
-               testCb('james', done));
-    });
-
-    it('should throw errors', function() {
-        (function() {
-            render('{% from "import.html" import boozle %}');
-        }).should.throw(/cannot import 'boozle'/);
->>>>>>> devoidfury/async_templates
+            var t = new Template('{{ foo | hallo }}', e);
+            expect(t.render({ foo: 1, bar: 2 })).to.be('3');
+        });
     });
 })();

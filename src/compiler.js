@@ -115,7 +115,9 @@ var Compiler = Object.extend({
     },
 
     _compileAggregate: function(node, frame, startChar, endChar) {
-        this.emit(startChar);
+        if(startChar) {
+            this.emit(startChar);
+        }
 
         for(var i=0; i<node.children.length; i++) {
             if(i > 0) {
@@ -125,7 +127,9 @@ var Compiler = Object.extend({
             this.compile(node.children[i], frame);
         }
 
-        this.emit(endChar);
+        if(endChar) {
+            this.emit(endChar);
+        }
     },
 
     _compileExpression: function(node, frame) {
@@ -408,8 +412,9 @@ var Compiler = Object.extend({
         var name = node.name;
         this.assertType(name, nodes.Symbol);
 
-        this.emit('env.getFilter("' + name.value + '")');
-        this._compileAggregate(node.args, frame, '(', ')');
+        this.emit('env.getFilter("' + name.value + '").call(context, ');
+        this._compileAggregate(node.args, frame);
+        this.emit(')');
     },
 
     compileKeywordArgs: function(node, frame) {
@@ -906,8 +911,8 @@ var Compiler = Object.extend({
 
 // var fs = require("fs");
 //var src = '{{ foo({a:1}) }} {% block content %}foo{% endblock %}';
-var c = new Compiler();
-var src = '{% extends "../tests/templates/base.html" %}{% block block1 %}BAR{% endblock %}';
+// var c = new Compiler();
+// var src = '{{ foo | poop(1, 2, 3) }}';
 //var extensions = [new testExtension()];
 
 var ns = parser.parse(src);
