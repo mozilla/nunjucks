@@ -38,7 +38,7 @@ function walk(ast, func, depthFirst) {
         });
 
         if(children !== ast.children) {
-            ast = new nodes.NodeList(ast.lineno, ast.colno, children);
+            ast = new nodes[ast.typename](ast.lineno, ast.colno, children);
         }
     }
     else {
@@ -72,29 +72,38 @@ function cps(ast) {
         return 'hole_' + sym++;
     }
 
-    return depthWalk(ast, function(node) {
-        if(node instanceof nodes.NodeList) {
-            var filters = [];
-
-            node = depthWalk(node, function(node) {
-                if(node instanceof nodes.Filter) {
-                    var symbol = gensym();
-
-                    filters.push(new nodes.FilterAsync(node.lineno,
-                                                       node.colno,
-                                                       node.name, 
-                                                       node.args,
-                                                       symbol));
-                    return new nodes.Value(node.lineno, node.colno, symbol);
-                }
-            });
-
-            node.children = filters.map(function(f) {
-                return f.node;
-            }).concat(node.children);
-
-            return node;
+    return walk(ast, function(outNode) {
+        if(!(outNode instanceof nodes.Output)) {
+            return;
         }
+
+        var children = [];
+
+        outNode = depthWalk(outNode, function(node) {
+            if(node instanceof nodes.Block) {
+                return node;
+            }
+            else if(node instanceof nodes.Filter) {
+                var symbol = new nodes.Symbol(node.lineno,
+                                              node.colno,
+                                              gensym());
+
+                children.push(new nodes.FilterAsync(node.lineno,
+                                                    node.colno,
+                                                    node.name, 
+                                                    node.args,
+                                                    symbol));
+                return symbol;
+            }
+        });
+
+        children.push(outNode);
+
+        return new nodes.NodeList(
+            outNode.lineno,
+            outNode.colno,
+            children
+        );
     });
 }
 
@@ -111,10 +120,10 @@ function transform(ast, extensions, name) {
     return cps(ast);
 }
 
-// var parser = require('./parser');
-// var src = 'sdfd {{ foo | poop(1, 2, 3 | bar) }}';
-// var ast = transform(parser.parse(src));
-// nodes.printNodes(ast);
+var parser = require('./parser');
+var src = '{{ foo | poop(1, 2, 3) }}';
+var ast = transform(parser.parse(src));
+nodes.printNodes(ast);
 
 module.exports = {
     transform: transform

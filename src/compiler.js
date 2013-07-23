@@ -432,9 +432,12 @@ var Compiler = Object.extend({
         var name = node.name;
         this.assertType(name, nodes.Symbol);
 
-        this.emit('env.getFilter("', name.value, '").call(context, ');
+        var symbol = node.symbol.value;
+        frame.set(symbol, symbol);
+
+        this.emit('env.getFilter("' + name.value + '").call(context, ');
         this._compileAggregate(node.args, frame);
-        this.emit(', function(' + node.symbol + ') {');
+        this.emit(', function(' + symbol + ') {');
 
         this.addScopeLevel();
     },
@@ -934,10 +937,10 @@ var Compiler = Object.extend({
 // var fs = require("fs");
 //var src = '{{ foo({a:1}) }} {% block content %}foo{% endblock %}';
 var c = new Compiler();
-var src = '{% extends "poop.html" %} {{ foo | poop(1, 2, 3) }}';
+var src = 'before {{ foo | poop(1, 2, 3 | baz) }} after';
 // var extensions = [new testExtension()];
 
-var ast = parser.parse(src);
+var ast = transformer.transform(parser.parse(src));
 nodes.printNodes(ast);
 c.compile(ast);
 
@@ -948,7 +951,7 @@ module.exports = {
     compile: function(src, extensions, name) {
         var c = new Compiler(extensions);
 
-        c.compile(parser.parse(src, extensions),
+        c.compile(transformer.transform(parser.parse(src, extensions)),
                   extensions,
                   name);
         return c.getCode();
