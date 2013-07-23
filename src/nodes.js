@@ -102,7 +102,9 @@ var FromImport = Node.extend("FromImport", {
 });
 var FunCall = Node.extend("FunCall", { fields: ['name', 'args'] });
 var Filter = FunCall.extend("Filter");
-var FilterAsync = Filter.extend("FilterAsync");
+var FilterAsync = Filter.extend("FilterAsync", {
+    fields: ['name', 'args', 'symbol']
+});
 var KeywordArgs = Dict.extend("KeywordArgs");
 var Block = Node.extend("Block", { fields: ['name', 'body'] });
 var TemplateRef = Node.extend("TemplateRef", { fields: ['template'] });

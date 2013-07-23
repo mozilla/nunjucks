@@ -39,6 +39,7 @@ var Compiler = Object.extend({
         this.buffer = null;
         this.bufferStack = [];
         this.isChild = false;
+        this.scopeLevel = 0;
 
         this.extensions = extensions || [];
     },
@@ -76,6 +77,7 @@ var Compiler = Object.extend({
 
     emitFuncBegin: function(name) {
         this.buffer = 'output';
+        this.scopeLevel = 0;
         this.emitLine('function ' + name + '(env, context, frame, runtime, cb) {');
         this.emitLine('var lineno = null;');
         this.emitLine('var colno = null;');
@@ -86,9 +88,13 @@ var Compiler = Object.extend({
     emitFuncEnd: function(noReturn) {
         if(!noReturn) {
             this.emitLine('cb(' + this.buffer +');');
-        } else {
-            this.emitLine('cb();');
         }
+
+        while(this.scopeLevel--) {
+            this.emit('})');
+        }
+        this.emitLine(';');
+
 
         this.emitLine('} catch (e) {');
         this.emitLine('  runtime.handleError(e, lineno, colno);');
@@ -100,6 +106,10 @@ var Compiler = Object.extend({
     tmpid: function() {
         this.lastId++;
         return 't_' + this.lastId;
+    },
+
+    addScopeLevel: function() {
+        this.scopeLevel++;
     },
 
     _bufferAppend: function(func) {
@@ -416,6 +426,17 @@ var Compiler = Object.extend({
         this.emit('env.getFilter("' + name.value + '").call(context, ');
         this._compileAggregate(node.args, frame);
         this.emit(')');
+    },
+
+    compileFilterAsync: function(node, frame) {
+        var name = node.name;
+        this.assertType(name, nodes.Symbol);
+
+        this.emit('env.getFilter("', name.value, '").call(context, ');
+        this._compileAggregate(node.args, frame);
+        this.emit(', function(' + node.symbol + ') {');
+
+        this.addScopeLevel();
     },
 
     compileKeywordArgs: function(node, frame) {
@@ -912,24 +933,24 @@ var Compiler = Object.extend({
 
 // var fs = require("fs");
 //var src = '{{ foo({a:1}) }} {% block content %}foo{% endblock %}';
-// var c = new Compiler();
-// var src = '{{ foo | poop(1, 2, 3) }}';
-//var extensions = [new testExtension()];
+var c = new Compiler();
+var src = '{% extends "poop.html" %} {{ foo | poop(1, 2, 3) }}';
+// var extensions = [new testExtension()];
 
-// var ast = parser.parse(src);
-// nodes.printNodes(ast);
-// c.compile(ast);
+var ast = parser.parse(src);
+nodes.printNodes(ast);
+c.compile(ast);
 
-// var tmpl = c.getCode();
-// console.log(tmpl);
+var tmpl = c.getCode();
+console.log(tmpl);
 
 module.exports = {
     compile: function(src, extensions, name) {
         var c = new Compiler(extensions);
 
-        c.compile(transformer.transform(parser.parse(src, extensions),
-                                        extensions,
-                                        name));
+        c.compile(parser.parse(src, extensions),
+                  extensions,
+                  name);
         return c.getCode();
     },
 

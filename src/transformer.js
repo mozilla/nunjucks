@@ -78,16 +78,14 @@ function cps(ast) {
 
             node = depthWalk(node, function(node) {
                 if(node instanceof nodes.Filter) {
-                    var filter = {
-                        node: new nodes.FilterAsync(node.lineno,
-                                                    node.colno,
-                                                    node.name, 
-                                                    node.args),
-                        symbol: gensym()
-                    };
+                    var symbol = gensym();
 
-                    filters.push(filter);
-                    return new nodes.Value(node.lineno, node.colno, filter.symbol);
+                    filters.push(new nodes.FilterAsync(node.lineno,
+                                                       node.colno,
+                                                       node.name, 
+                                                       node.args,
+                                                       symbol));
+                    return new nodes.Value(node.lineno, node.colno, symbol);
                 }
             });
 
@@ -102,9 +100,9 @@ function cps(ast) {
 
 function transform(ast, extensions, name) {
     // Run the extension preprocessors against the source.
-    if (extensions && extensions.length) {
-        for (var i = 0; i < extensions.length; i++) {
-            if ('preprocess' in extensions[i]) {
+    if(extensions && extensions.length) {
+        for(var i=0; i<extensions.length; i++) {
+            if('preprocess' in extensions[i]) {
                 src = extensions[i].preprocess(src, name);
             }
         }
@@ -113,10 +111,10 @@ function transform(ast, extensions, name) {
     return cps(ast);
 }
 
-var parser = require('./parser');
-var src = 'sdfd {{ foo | poop(1, 2, 3 | bar) }}';
-var ast = transform(parser.parse(src));
-nodes.printNodes(ast);
+// var parser = require('./parser');
+// var src = 'sdfd {{ foo | poop(1, 2, 3 | bar) }}';
+// var ast = transform(parser.parse(src));
+// nodes.printNodes(ast);
 
 module.exports = {
     transform: transform
