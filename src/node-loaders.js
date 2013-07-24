@@ -65,7 +65,7 @@ var FileSystemLoader = Object.extend({
                     src: result[1],
                     path: fullpath,
                     upToDate: result[0]
-                })
+                });
             });
         });
     },

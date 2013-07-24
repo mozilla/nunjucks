@@ -107,6 +107,7 @@ var FilterAsync = Filter.extend("FilterAsync", {
 });
 var KeywordArgs = Dict.extend("KeywordArgs");
 var Block = Node.extend("Block", { fields: ['name', 'body'] });
+var Super = Node.extend("Super", { fields: ['blockName', 'symbol'] });
 var TemplateRef = Node.extend("TemplateRef", { fields: ['template'] });
 var Extends = TemplateRef.extend("Extends");
 var Include = TemplateRef.extend("Include");
@@ -248,6 +249,7 @@ module.exports = {
     FilterAsync: FilterAsync,
     KeywordArgs: KeywordArgs,
     Block: Block,
+    Super: Super,
     Extends: Extends,
     Include: Include,
     Set: Set,

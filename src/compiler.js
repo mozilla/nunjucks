@@ -753,9 +753,12 @@ var Compiler = Object.extend({
         var id = this.tmpid();
         var target = node.target.value;
 
-        this.emit('var ' + id + ' = env.getTemplate(');
+        this.emit('env.getTemplate(');
         this._compileExpression(node.template, frame);
-        this.emitLine(').getExported();');
+        this.emitLine(', function(' + id + ') {');
+        this.emitLine(id + ' = ' + id + '.getExported();');
+        this.addScopeLevel();
+
         frame.set(target, id);
 
         if(frame.parent) {
@@ -767,9 +770,13 @@ var Compiler = Object.extend({
     },
 
     compileFromImport: function(node, frame) {
-        this.emit('var imported = env.getTemplate(');
-        this.compile(node.template, frame);
-        this.emitLine(').getExported();');
+        var id = this.tmpid();
+
+        this.emit('env.getTemplate(');
+        this._compileExpression(node.template, frame);
+        this.emitLine(', function(' + id + ') {');
+        this.emitLine(id + ' = ' + id + '.getExported();');
+        this.addScopeLevel();
 
         lib.each(node.names.children, function(nameNode) {
             var name;
@@ -804,14 +811,27 @@ var Compiler = Object.extend({
 
     compileBlock: function(node, frame) {
         if(!this.isChild) {
-            this.suspend(function(resume) {
-                this.buffer += 'context.getBlock("' + node.name.value + '")' +
-                    '(env, context, frame, runtime, ' + resume + ')';
-            });
+            var id = this.tmpid();
 
-            // this.emitLine(this.buffer + ' += context.getBlock("' +
-            //               node.name.value + '")(env, context, frame, runtime, function() {});');
+            this.emitLine('context.getBlock("' + node.name.value + '")' +
+                          '(env, context, frame, runtime, function(' + id + ') {');
+            this.emitLine(this.buffer + ' += ' + id + ';');
+            this.addScopeLevel();
         }
+    },
+
+    compileSuper: function(node, frame) {
+        var name = node.blockName.value;
+        var id = node.symbol.value;
+
+        this.emitLine('context.getSuper(env, ' +
+                      '"' + name + '", ' +
+                      'b_' + name + ', ' +
+                      'frame, runtime, '+
+                      'function(' + id + ') {');
+        this.emitLine(id + ' = runtime.markSafe(' + id + ');');
+        this.addScopeLevel();
+        frame.set(id, id);
     },
 
     compileExtends: function(node, frame) {
@@ -825,25 +845,30 @@ var Compiler = Object.extend({
 
         this.emit('env.getTemplate(');
         this._compileExpression(node.template, frame);
-        this.emitLine(', true, continue_'+ k +');');
-
-        this.emitLine('function continue_' + k + '(parentTemplate){');
+        this.emitLine(', true, function(parentTemplate) {');
 
         this.emitLine('for(var ' + k + ' in parentTemplate.blocks) {');
         this.emitLine('context.addBlock(' + k +
                       ', parentTemplate.blocks[' + k + ']);');
         this.emitLine('}');
 
+        this.addScopeLevel();
         this.isChild = true;
     },
 
     compileInclude: function(node, frame) {
-        this.emit('var includeTemplate = env.getTemplate(');
+        var id = this.tmpid();
+        var id2 = this.tmpid();
+
+        this.emit('env.getTemplate(');
         this._compileExpression(node.template, frame);
-        this.emitLine(');');
-        this.emitLine(this.buffer +
-                      ' += includeTemplate.render(' +
-                      'context.getVariables(), frame.push());');
+        this.emitLine(', function(' + id + ') {');
+        this.addScopeLevel();
+
+        this.emitLine(id + '.render(' +
+                      'context.getVariables(), frame.push(), function(' + id2 + ') {');
+        this.emitLine(this.buffer + ' += ' + id2);
+        this.addScopeLevel();
     },
 
     compileTemplateData: function(node, frame) {
@@ -880,9 +905,7 @@ var Compiler = Object.extend({
         this.emitFuncBegin('root');
         this._compileChildren(node, frame);
         if(this.isChild) {
-            this.emitLine('return ' +
-                          'parentTemplate.rootRenderFunc(env, context, frame, runtime, cb);');
-            this.emitLine('}'); // close continue_<id>
+            this.emitLine('parentTemplate.rootRenderFunc(env, context, frame, runtime, cb);');
         }
         this.emitFuncEnd(this.isChild);
 
@@ -895,15 +918,8 @@ var Compiler = Object.extend({
             var name = block.name.value;
 
             this.emitFuncBegin('b_' + name);
-            this.emitLine('var l_super = runtime.markSafe(' +
-                          'context.getSuper(env, ' +
-                          '"' + name + '", ' +
-                          'b_' + name + ', ' +
-                          'frame, ' +
-                          'runtime));');
 
             var tmpFrame = new Frame();
-            tmpFrame.set('super', 'l_super');
             this.compile(block.body, tmpFrame);
             this.emitFuncEnd();
         }
@@ -934,26 +950,22 @@ var Compiler = Object.extend({
     }
 });
 
-// var fs = require("fs");
-//var src = '{{ foo({a:1}) }} {% block content %}foo{% endblock %}';
-var c = new Compiler();
-var src = 'before {{ foo | poop(1, 2, 3 | baz) }} after';
-// var extensions = [new testExtension()];
+// var c = new Compiler();
+// var src = '{{ "fooo" | center }}';
+// var ast = transformer.transform(parser.parse(src));
+// nodes.printNodes(ast);
+// c.compile(ast);
 
-var ast = transformer.transform(parser.parse(src));
-nodes.printNodes(ast);
-c.compile(ast);
-
-var tmpl = c.getCode();
-console.log(tmpl);
+// var tmpl = c.getCode();
+// console.log(tmpl);
 
 module.exports = {
     compile: function(src, extensions, name) {
         var c = new Compiler(extensions);
 
-        c.compile(transformer.transform(parser.parse(src, extensions)),
-                  extensions,
-                  name);
+        c.compile(transformer.transform(parser.parse(src, extensions),
+                                        extensions,
+                                        name));
         return c.getCode();
     },
 

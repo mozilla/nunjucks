@@ -1,5 +1,10 @@
 var nodes = require('./nodes');
 
+var sym = 0;
+function gensym() {
+    return 'hole_' + sym++;
+}
+
 // copy-on-write version of map
 function mapCOW(arr, func) {
     var res = null;
@@ -66,14 +71,10 @@ function depthWalk(ast, func) {
     return walk(ast, func, true);
 }
 
-function cps(ast) {
-    var sym = 0;
-    function gensym() {
-        return 'hole_' + sym++;
-    }
-
+function liftFilters(ast) {
     return walk(ast, function(outNode) {
-        if(!(outNode instanceof nodes.Output)) {
+        if(!(outNode instanceof nodes.Output) &&
+           !(outNode instanceof nodes.For)) {
             return;
         }
 
@@ -97,14 +98,48 @@ function cps(ast) {
             }
         });
 
-        children.push(outNode);
+        if(children.length) {
+            children.push(outNode);
 
-        return new nodes.NodeList(
-            outNode.lineno,
-            outNode.colno,
-            children
-        );
+            return new nodes.NodeList(
+                outNode.lineno,
+                outNode.colno,
+                children
+            );
+        }
+        else {
+            return outNode;
+        }
     });
+}
+
+function liftSuper(ast) {
+    return walk(ast, function(blockNode) {
+        if(!(blockNode instanceof nodes.Block)) {
+            return;
+        }
+
+        var hasSuper = false;
+        var symbol = gensym();
+
+        blockNode.body = walk(blockNode.body, function(node) {
+            if(node instanceof nodes.FunCall &&
+               node.name.value == 'super') {
+                hasSuper = true;
+                return new nodes.Symbol(node.lineno, node.colno, symbol);
+            }
+        });
+
+        if(hasSuper) {
+            blockNode.body.children.unshift(new nodes.Super(
+                0, 0, blockNode.name, new nodes.Symbol(0, 0, symbol)
+            ));
+        }
+    });
+}
+
+function cps(ast) {
+    return liftSuper(liftFilters(ast));
 }
 
 function transform(ast, extensions, name) {
@@ -120,10 +155,12 @@ function transform(ast, extensions, name) {
     return cps(ast);
 }
 
-var parser = require('./parser');
-var src = '{{ foo | poop(1, 2, 3) }}';
-var ast = transform(parser.parse(src));
-nodes.printNodes(ast);
+//var parser = require('./parser');
+//var src = '{% extends "far.html" %} {% block content %}foo {{ super() }} {{ super() }}{% endblock %}';
+//var src = 'afdsf {{ dsfd }} {% for a in [1,2,3,4,5,6] | batch(2) %}{{ a }}{% endfor %}';
+//var src = 'dsfdsf {{ poop | far }} dcxccx';
+// var ast = transform(parser.parse(src));
+// nodes.printNodes(ast);
 
 module.exports = {
     transform: transform

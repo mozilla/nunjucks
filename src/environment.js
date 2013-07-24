@@ -42,10 +42,14 @@ var Environment = Object.extend({
             lexer.setTags(opts.tags);
         }
 
-        this.filters = builtin_filters;
+        this.filters = {};
         this.cache = {};
         this.extensions = {};
         this.extensionsList = [];
+
+        for(var name in builtin_filters) {
+            this.addFilter(name, builtin_filters[name]);
+        }
     },
 
     addExtension: function(name, extension) {
@@ -58,8 +62,29 @@ var Environment = Object.extend({
         return this.extensions[name];
     },
 
-    addFilter: function(name, func) {
-        this.filters[name] = func;
+    addFilter: function(name, func, async) {
+        var wrapped = func;
+
+        if(!async) {
+            wrapped = function() {
+                var args = arguments;
+                
+                // The callback was passed as the last parameter,
+
+                var arglen = args.length - 1;
+                if(args.length - 1 < func.length) {
+                    args = Array.prototype.slice.call(arguments, 0, arguments.length - 1);
+
+                    while(args.length < func.length) {
+                        args.push(undefined);
+                    }
+                }
+                var cb = arguments[arguments.length - 1];
+                cb(func.apply(this, args));
+            };
+        }
+
+        this.filters[name] = wrapped;
     },
 
     getFilter: function(name) {
@@ -70,9 +95,14 @@ var Environment = Object.extend({
     },
 
     getTemplate: function(name, eagerCompile, callback) {
-        if (name && name.raw) {
+        if(name && name.raw) {
             // this fixes autoescape for templates referenced in symbols
             name = name.raw;
+        }
+
+        if(lib.isFunction(eagerCompile)) {
+            callback = eagerCompile;
+            eagerCompile = false;
         }
 
         var self = this;
@@ -92,7 +122,7 @@ var Environment = Object.extend({
             var getSource = function (cb) {
                 self.loaders[index].getSource(name, function (info) {
                     if (info) {
-                        cb(info)
+                        cb(info);
                     } else {
                         (++index < self.loaders.length) ? getSource(cb) : cb(null);
                     }
@@ -203,7 +233,7 @@ var Environment = Object.extend({
     render: function(name, ctx, callback) {
         this.getTemplate(name, function(tmpl) {
             callback(tmpl.render(ctx));
-        })
+        });
     }
 });
 
@@ -250,18 +280,16 @@ var Context = Object.extend({
         return this.blocks[name][0];
     },
 
-    getSuper: function(env, name, block, frame, runtime) {
+    getSuper: function(env, name, block, frame, runtime, cb) {
         var idx = (this.blocks[name] || []).indexOf(block);
         var blk = this.blocks[name][idx + 1];
         var context = this;
 
-        return function() {
-            if(idx == -1 || !blk) {
-                throw new Error('no super block available for "' + name + '"');
-            }
+        if(idx == -1 || !blk) {
+            throw new Error('no super block available for "' + name + '"');
+        }
 
-            return blk(env, context, frame, runtime);
-        };
+        blk(env, context, frame, runtime, cb);
     },
 
     addExport: function(name) {
@@ -300,44 +328,38 @@ var Template = Object.extend({
         this.upToDate = upToDate || function() { return false; };
 
         if(eagerCompile) {
-            var _this = this;
             lib.withPrettyErrors(this.path,
                                  this.env.dev,
-                                 function() { _this._compile(); });
+                                 this._compile.bind(this));
         }
         else {
             this.compiled = false;
         }
     },
 
-    render: function(ctx, frame, callback) {
-        var self = this;
+    render: function(ctx, frame, cb) {
         if (typeof ctx === 'function') {
-            callback = ctx;
+            cb = ctx;
             ctx = {};
         }
         else if (typeof frame === 'function') {
-            callback = frame;
+            cb = frame;
             frame = null;
         }
 
-        var render = function() {
-            if(!self.compiled) {
-                self._compile();
+        return lib.withPrettyErrors(this.path, this.env.dev, function() {
+            if(!this.compiled) {
+                this._compile();
             }
 
-            var context = new Context(ctx || {}, self.blocks);
+            var context = new Context(ctx || {}, this.blocks);
 
-            self.rootRenderFunc(self.env,
-                context,
-                frame || new Frame(),
-                runtime,
-                function(s) {
-                    callback(s);
-                });
-        };
-
-        return lib.withPrettyErrors(this.path, this.env.dev, render);
+            this.rootRenderFunc(this.env,
+                                context,
+                                frame || new Frame(),
+                                runtime,
+                                cb);
+        }.bind(this));
     },
 
     getExported: function() {
@@ -386,23 +408,15 @@ var Template = Object.extend({
 
 // var fs = require('fs');
 // var src = fs.readFileSync('test.html', 'utf-8');
-var src = '{% extends "../tests/templates/base.html" %}{% block block1 %}BAR{% endblock %}';
-var env = new Environment(null, { autoescape: true, dev: true });
+// var src = '{{ "fooo" | center }}';
+// var env = new Environment(null, { autoescape: true, dev: true });
 
-// env.addFilter('bar', function(x) {
-//     return runtime.copySafeness(x, x.substring(3, 1) + x.substring(0, 2));
+// var tmpl = new Template(src, env, null, null, true);
+// console.log("OUTPUT ---");
+
+// tmpl.render({ foo: 'numbers' }, function(res) {
+//     console.log(res);
 // });
-
-// //env.addExtension('testExtension', new testExtension());
-// console.log(compiler.compile(src));
-
-
-var x = 5000;
-var tmpl = new Template(src, env);
-console.log("OUTPUT ---");
-console.log(tmpl.render({ bar: '<>&' }, function(res) {
-    console.log(res);
-}));
 
 module.exports = {
     Environment: Environment,
