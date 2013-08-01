@@ -235,6 +235,28 @@ function handleError(error, lineno, colno) {
     }
 }
 
+function asyncIter(arr, dimen, iter, cb) {
+    if(lib.isArray(arr)) {
+        var len = arr.length;
+
+        lib.asyncEach(arr, function(item, i, next) {
+            switch(dimen) {
+            case 1: iter(item, i, len, next); break;
+            case 2: iter(item[0], item[1], i, len, next); break;
+            case 3: iter(item[0], item[1], item[2], i, len, next); break;
+            default:
+                item.push(i, next);
+                iter.apply(this, item);
+            }
+        }, cb);
+    }
+    else {
+        lib.asyncFor(arr, function(key, val, i, len, next) {
+            iter(key, val, i, len, next);
+        }, cb);
+    }
+}
+
 module.exports = {
     Frame: Frame,
     makeMacro: makeMacro,
@@ -246,7 +268,9 @@ module.exports = {
     callWrap: callWrap,
     handleError: handleError,
     isArray: lib.isArray,
+    asyncEach: lib.asyncEach,
     SafeString: SafeString,
     copySafeness: copySafeness,
-    markSafe: markSafe
+    markSafe: markSafe,
+    asyncIter: asyncIter
 };

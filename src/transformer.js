@@ -155,10 +155,10 @@ function transform(ast, extensions, name) {
     return cps(ast);
 }
 
-//var parser = require('./parser');
-//var src = '{% extends "far.html" %} {% block content %}foo {{ super() }} {{ super() }}{% endblock %}';
-//var src = 'afdsf {{ dsfd }} {% for a in [1,2,3,4,5,6] | batch(2) %}{{ a }}{% endfor %}';
-//var src = 'dsfdsf {{ poop | far }} dcxccx';
+// var parser = require('./parser');
+// var src = '{% for i in [1,2] %}' +
+//     '{% include "poop.html" %}' +
+//     '{% endfor %}';
 // var ast = transform(parser.parse(src));
 // nodes.printNodes(ast);
 

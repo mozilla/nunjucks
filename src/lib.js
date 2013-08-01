@@ -207,6 +207,43 @@ exports.asyncParallel = function(funcs, done) {
     }
 };
 
+exports.asyncEach = function(arr, iter, cb) {
+    var i = -1;
+    
+    function next() {
+        i++;
+
+        if(i < arr.length) {
+            iter(arr[i], i, next);
+        }
+        else {
+            cb();
+        }
+    }
+
+    next();
+};
+
+exports.asyncFor = function(obj, iter, cb) {
+    var keys = exports.keys(obj);
+    var len = keys.length;
+    var i = -1;
+
+    function next() {
+        i++;
+        var k = keys[i];
+
+        if(i < len) {
+            iter(k, obj[k], i, len, next);
+        }
+        else {
+            cb();
+        }
+    }
+
+    next();
+};
+
 if(!Array.prototype.indexOf) {
     Array.prototype.indexOf = function(array, searchElement /*, fromIndex */) {
         if (array == null) {
@@ -243,4 +280,19 @@ if(!Array.prototype.map) {
     Array.prototype.map = function() {
         throw new Error("map is unimplemented for this js engine");
     };
+}
+
+exports.keys = function(obj) {
+    if(Object.prototype.keys) {
+        return obj.keys();
+    }
+    else {
+        var keys = [];
+        for(var k in obj) {
+            if(obj.hasOwnProperty(k)) {
+                keys.push(k);
+            }
+        }
+        return keys;
+    }
 }

@@ -76,7 +76,7 @@ var FileSystemLoader = Object.extend({
             var mtime = stats.mtime.toString();
 
             callback(function (cb) {
-                fs.stat(function (err, stats) {
+                fs.stat(file, function (err, stats) {
                     // todo: catch potential errors here
                     cb(mtime === stats.mtime.toString());
                 });

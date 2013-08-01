@@ -362,7 +362,7 @@ var Template = Object.extend({
         }.bind(this));
     },
 
-    getExported: function() {
+    getExported: function(cb) {
         if(!this.compiled) {
             this._compile();
         }
@@ -372,8 +372,10 @@ var Template = Object.extend({
         this.rootRenderFunc(this.env,
                             context,
                             new Frame(),
-                            runtime);
-        return context.getExported();
+                            runtime,
+                            function() {
+                                cb(context.getExported());
+                            });
     },
 
     _compile: function() {
@@ -407,8 +409,7 @@ var Template = Object.extend({
 });
 
 // var fs = require('fs');
-// var src = fs.readFileSync('test.html', 'utf-8');
-// var src = '{{ "fooo" | center }}';
+// var src = '{% for a in [1,2,3,4,5,6]|batch(2) %}{{ a }}{% endfor %}';
 // var env = new Environment(null, { autoescape: true, dev: true });
 
 // var tmpl = new Template(src, env, null, null, true);
