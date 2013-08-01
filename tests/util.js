@@ -34,7 +34,7 @@
             ctx = null;
         }
 
-        render(str, ctx, null, function(res) {
+        render(str, ctx, null, function(err, res) {
             expect(res).to.be(str2);
         });
     }
@@ -73,8 +73,8 @@
         var t = new Template(str, e);
 
         setTimeout(function() {
-            return t.render(ctx, function(res) {
-                cb(res);
+            return t.render(ctx, function(err, res) {
+                cb(err, res);
 
                 doneAsyncs++;
 

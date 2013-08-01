@@ -87,7 +87,7 @@ var Compiler = Object.extend({
 
     emitFuncEnd: function(noReturn) {
         if(!noReturn) {
-            this.emitLine('cb(' + this.buffer +');');
+            this.emitLine('cb(null, ' + this.buffer +');');
         }
 
         this.closeScopeLevels();
@@ -105,6 +105,13 @@ var Compiler = Object.extend({
     closeScopeLevels: function() {
         this.emitLine(this.scopeClosers + ';');
         this.scopeClosers = '';
+    },
+
+    makeCallback: function(res) {
+        var err = this.tmpid();
+
+        return 'function(' + err + (res ? ',' + res : '') + ') {\n' +
+            'if(' + err + ') { cb(' + err + '); return; }';
     },
 
     tmpid: function() {
@@ -437,7 +444,7 @@ var Compiler = Object.extend({
 
         this.emit('env.getFilter("' + name.value + '").call(context, ');
         this._compileAggregate(node.args, frame);
-        this.emit(', function(' + symbol + ') {');
+        this.emitLine(', ' + this.makeCallback(symbol));
 
         this.addScopeLevel();
     },
@@ -582,7 +589,7 @@ var Compiler = Object.extend({
         this.closeScopeLevels();
         this.scopeClosers = scopeClosers;
 
-        this.emitLine('}, function() {');
+        this.emitLine('}, ' + this.makeCallback());
         this.addScopeLevel();
 
         this.emitLine('frame = frame.pop();');
@@ -693,10 +700,10 @@ var Compiler = Object.extend({
 
         this.emit('env.getTemplate(');
         this._compileExpression(node.template, frame);
-        this.emitLine(', function(' + id + ') {');
+        this.emitLine(', ' + this.makeCallback(id));
         this.addScopeLevel();
 
-        this.emitLine(id + '.getExported(function(' + id + ') {');
+        this.emitLine(id + '.getExported(' + this.makeCallback(id));
         this.addScopeLevel();
 
         frame.set(target, id);
@@ -714,10 +721,10 @@ var Compiler = Object.extend({
 
         this.emit('env.getTemplate(');
         this._compileExpression(node.template, frame);
-        this.emitLine(', function(' + importedId + ') {');
+        this.emitLine(', ' + this.makeCallback(importedId));
         this.addScopeLevel();
 
-        this.emitLine(importedId + '.getExported(function(' + importedId + ') {');
+        this.emitLine(importedId + '.getExported(' + this.makeCallback(importedId));
         this.addScopeLevel();
 
         lib.each(node.names.children, function(nameNode) {
@@ -737,7 +744,7 @@ var Compiler = Object.extend({
             this.emitLine('if(' + importedId + '.hasOwnProperty("' + name + '")) {');
             this.emitLine('var ' + id + ' = ' + importedId + '.' + name + ';');
             this.emitLine('} else {');
-            this.emitLine('throw new Error("cannot import \'' + name + '\'")');
+            this.emitLine('cb(new Error("cannot import \'' + name + '\'")); return;');
             this.emitLine('}');
 
             frame.set(alias, id);
@@ -756,7 +763,7 @@ var Compiler = Object.extend({
             var id = this.tmpid();
 
             this.emitLine('context.getBlock("' + node.name.value + '")' +
-                          '(env, context, frame, runtime, function(' + id + ') {');
+                          '(env, context, frame, runtime, ' + this.makeCallback(id));
             this.emitLine(this.buffer + ' += ' + id + ';');
             this.addScopeLevel();
         }
@@ -770,7 +777,7 @@ var Compiler = Object.extend({
                       '"' + name + '", ' +
                       'b_' + name + ', ' +
                       'frame, runtime, '+
-                      'function(' + id + ') {');
+                      this.makeCallback(id));
         this.emitLine(id + ' = runtime.markSafe(' + id + ');');
         this.addScopeLevel();
         frame.set(id, id);
@@ -787,7 +794,7 @@ var Compiler = Object.extend({
 
         this.emit('env.getTemplate(');
         this._compileExpression(node.template, frame);
-        this.emitLine(', true, function(parentTemplate) {');
+        this.emitLine(', true, ' + this.makeCallback('parentTemplate'));
 
         this.emitLine('for(var ' + k + ' in parentTemplate.blocks) {');
         this.emitLine('context.addBlock(' + k +
@@ -804,11 +811,11 @@ var Compiler = Object.extend({
 
         this.emit('env.getTemplate(');
         this._compileExpression(node.template, frame);
-        this.emitLine(', function(' + id + ') {');
+        this.emitLine(', ' + this.makeCallback(id));
         this.addScopeLevel();
 
         this.emitLine(id + '.render(' +
-                      'context.getVariables(), frame.push(), function(' + id2 + ') {');
+                      'context.getVariables(), frame.push(), ' + this.makeCallback(id2));
         this.emitLine(this.buffer + ' += ' + id2);
         this.addScopeLevel();
     },
@@ -893,12 +900,7 @@ var Compiler = Object.extend({
 });
 
 // var c = new Compiler();
-// var src = '{% for i in [1,2] %}' +
-//                   'start: {{ num }}' +
-//                   '{% from "import.html" import bar as num %}' +
-//                   'end: {{ num }}' +
-//                   '{% endfor %}' +
-//                   'final: {{ num }}';
+// var src = '{{ 3 }}';
 // var ast = transformer.transform(parser.parse(src));
 // nodes.printNodes(ast);
 // c.compile(ast);

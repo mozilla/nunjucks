@@ -80,7 +80,13 @@ var Environment = Object.extend({
                     }
                 }
                 var cb = arguments[arguments.length - 1];
-                cb(func.apply(this, args));
+
+                try {
+                    cb(null, func.apply(this, args));
+                }
+                catch(e) {
+                    cb(e);
+                }
             };
         }
 
@@ -114,7 +120,7 @@ var Environment = Object.extend({
         }
 
         var finalize = function() {
-            callback(self.cache[name]);
+            callback(null, self.cache[name]);
         };
 
         var _getTemplate = function() {
@@ -140,7 +146,7 @@ var Environment = Object.extend({
                     info.upToDate,
                     eagerCompile);
 
-                callback(self.cache[name]);
+                callback(null, self.cache[name]);
             });
         };
 
@@ -231,8 +237,8 @@ var Environment = Object.extend({
     },
 
     render: function(name, ctx, callback) {
-        this.getTemplate(name, function(tmpl) {
-            callback(tmpl.render(ctx));
+        this.getTemplate(name, function(err, tmpl) {
+            tmpl.render(ctx, callback);
         });
     }
 });
@@ -374,7 +380,7 @@ var Template = Object.extend({
                             new Frame(),
                             runtime,
                             function() {
-                                cb(context.getExported());
+                                cb(null, context.getExported());
                             });
     },
 
@@ -409,13 +415,13 @@ var Template = Object.extend({
 });
 
 // var fs = require('fs');
-// var src = '{% for a in [1,2,3,4,5,6]|batch(2) %}{{ a }}{% endfor %}';
+// var src = '{{ -3|abs }}';
 // var env = new Environment(null, { autoescape: true, dev: true });
 
 // var tmpl = new Template(src, env, null, null, true);
 // console.log("OUTPUT ---");
 
-// tmpl.render({ foo: 'numbers' }, function(res) {
+// tmpl.render({ foo: 'numbers' }, function(err, res) {
 //     console.log(res);
 // });
 

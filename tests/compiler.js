@@ -289,134 +289,150 @@
             finish(done);
         });
 
-        // it('should inherit templates', function() {
-        //     var s = render('{% extends "base.html" %}');
-        //     expect(s).to.be('FooBarBazFizzle');
+        it('should inherit templates', function(done) {
+            equal('{% extends "base.html" %}', 'FooBarBazFizzle');
+            equal('hola {% extends "base.html" %} hizzle mumble', 'FooBarBazFizzle');
 
-        //     s = render('hola {% extends "base.html" %} hizzle mumble');
-        //     expect(s).to.be('FooBarBazFizzle');
+            equal('{% extends "base.html" %}{% block block1 %}BAR{% endblock %}',
+                  'FooBARBazFizzle');
 
-        //     s = render('{% extends "base.html" %}' +
-        //                '{% block block1 %}BAR{% endblock %}');
-        //     expect(s).to.be('FooBARBazFizzle');
+            equal('{% extends "base.html" %}' +
+                  '{% block block1 %}BAR{% endblock %}' +
+                  '{% block block2 %}BAZ{% endblock %}',
+                  'FooBARBAZFizzle');
 
-        //     s = render('{% extends "base.html" %}' +
-        //                '{% block block1 %}BAR{% endblock %}' +
-        //                '{% block block2 %}BAZ{% endblock %}');
-        //     expect(s).to.be('FooBARBAZFizzle');
+            equal('hola {% extends tmpl %} hizzle mumble',
+                  { tmpl: 'base.html' },
+                  'FooBarBazFizzle');
 
-        //     s = render('hola {% extends tmpl %} hizzle mumble',
-        //                { tmpl: 'base.html' });
-        //     expect(s).to.be('FooBarBazFizzle');
+            var count = 0;
+            render('{% extends "base.html" %}' + 
+                   '{% block notReal %}{{ foo() }}{% endblock %}',
+                   { foo: function() { count++; }},
+                   function(err, res) {
+                       expect(count).to.be(0);
+                   });
 
-        //     var count = 0;
-        //     render('{% extends "base.html" %}' + 
-        //            '{% block notReal %}{{ foo() }}{% endblock %}',
-        //            {
-        //                foo: function() {
-        //                    count++;
-        //                }
-        //            });
-        //     expect(count).to.be(0);
-        // });
+            finish(done);
+        });
 
-        // it('should render nested blocks in child template', function() {
-        //     var s = render('{% extends "base.html" %}' +
-        //                    '{% block block1 %}{% block nested %}BAR{% endblock %}{% endblock %}');
-        //     expect(s).to.be('FooBARBazFizzle');
-        // });
+        it('should render nested blocks in child template', function(done) {
+            equal('{% extends "base.html" %}' +
+                  '{% block block1 %}{% block nested %}BAR{% endblock %}{% endblock %}',
+                  'FooBARBazFizzle');
 
-        // it('should render parent blocks with super()', function() {
-        //     var s = render('{% extends "base.html" %}' +
-        //                    '{% block block1 %}{{ super() }}BAR{% endblock %}');
-        //     expect(s).to.be('FooBarBARBazFizzle');
+            finish(done);
+        });
 
-        //     // two levels of `super` should work 
-        //     s = render('{% extends "base-inherit.html" %}' +
-        //                '{% block block1 %}*{{ super() }}*{% endblock %}');
-        //     expect(s).to.be('Foo**Bar**BazFizzle');
-        // });
+        it('should render parent blocks with super()', function(done) {
+            equal('{% extends "base.html" %}' +
+                  '{% block block1 %}{{ super() }}BAR{% endblock %}',
+                  'FooBarBARBazFizzle');
 
-        // it('should include templates', function() {
-        //     var s = render('hello world {% include "include.html" %}');
-        //     expect(s).to.be('hello world FooInclude ');
+            // two levels of `super` should work 
+            equal('{% extends "base-inherit.html" %}' +
+                  '{% block block1 %}*{{ super() }}*{% endblock %}',
+                  'Foo**Bar**BazFizzle');
 
-        //     s = render('hello world {% include "include.html" %}',
-        //                { name: 'james' });
-        //     expect(s).to.be('hello world FooInclude james');
+            finish(done);
+        });
 
-        //     s = render('hello world {% include tmpl %}',
-        //                { name: 'thedude', tmpl: "include.html" });
-        //     expect(s).to.be('hello world FooInclude thedude');
+        it('should include templates', function(done) {
+            equal('hello world {% include "include.html" %}',
+                  'hello world FooInclude ');
 
-        //     s = render('hello world {% include data.tmpl %}',
-        //                { name: 'thedude', data: {tmpl: "include.html"} });
-        //     expect(s).to.be('hello world FooInclude thedude');
-        // });
+            equal('hello world {% include "include.html" %}',
+                  { name: 'james' },
+                  'hello world FooInclude james');
 
-        // it('should maintain nested scopes', function() {
-        //     var s = render('{% for i in [1,2] %}' +
-        //                    '{% for i in [3,4] %}{{ i }}{% endfor %}' +
-        //                    '{{ i }}{% endfor %}');
-        //     expect(s).to.be('341342');
-        // });
+            equal('hello world {% include tmpl %}',
+                  { name: 'thedude', tmpl: "include.html" },
+                  'hello world FooInclude thedude');
 
-        // it('should allow blocks in for loops', function() {
-        //     var s = render('{% extends "base2.html" %}' +
-        //                    '{% block item %}hello{{ item }}{% endblock %}');
-        //     expect(s).to.be('hello1hello2');
-        // });
+            equal('hello world {% include data.tmpl %}',
+                  { name: 'thedude', data: {tmpl: "include.html"} },
+                  'hello world FooInclude thedude');
 
-        // it('should make includes inherit scope', function() {
-        //     var s = render('{% for item in [1,2] %}' +
-        //                    '{% include "item.html" %}' +
-        //                    '{% endfor %}');
-        //     expect(s).to.be('showing 1showing 2');
-        // });
+            finish(done);
+        });
 
-        // it('should compile a set block', function() {
-        //     var s = render('{% set username = "foo" %}{{ username }}',
-        //                    { username: 'james' });
-        //     expect(s).to.be('foo');
+        it('should maintain nested scopes', function(done) {
+            equal('{% for i in [1,2] %}' +
+                  '{% for i in [3,4] %}{{ i }}{% endfor %}' +
+                  '{{ i }}{% endfor %}',
+                  '341342');
 
-        //     s = render('{% set x, y = "foo" %}{{ x }}{{ y }}');
-        //     expect(s).to.be('foofoo');
+            finish(done);
+        });
 
-        //     s = render('{% set x = 1 + 2 %}{{ x }}');
-        //     expect(s).to.be('3');
+        it('should allow blocks in for loops', function(done) {
+            equal('{% extends "base2.html" %}' +
+                  '{% block item %}hello{{ item }}{% endblock %}',
+                  'hello1hello2');
 
-        //     s = render('{% for i in [1] %}{% set foo=1 %}{% endfor %}{{ foo }}',
-        //                { foo: 2 });
-        //     expect(s).to.be('2');
+            finish(done);
+        });
 
-        //     s = render('{% include "set.html" %}{{ foo }}',
-        //                { foo: 'bar' });
-        //     expect(s).to.be('bar');
-        // });
+        it('should make includes inherit scope', function(done) {
+            equal('{% for item in [1,2] %}' +
+                  '{% include "item.html" %}' +
+                  '{% endfor %}',
+                  'showing 1showing 2');
 
-        // it('should compile set with frame references', function() {
-        //     var s = render('{% set username = user.name %}{{ username }}',
-        //                    { user: { name: 'james' } });
-        //     expect(s).to.be('james');
-        // });
+            finish(done);
+        });
 
-        // it('should compile set assignments of the same variable', function() {
-        //     var s = render('{% set x = "hello" %}' +
-        //                    '{% if false %}{% set x = "world" %}{% endif %}' +
-        //                    '{{ x }}');
-        //     expect(s).to.be('hello');
+        it('should compile a set block', function(done) {
+            equal('{% set username = "foo" %}{{ username }}',
+                  { username: 'james' },
+                  'foo');
 
-        //     s = render('{% set x = "blue" %}' +
-        //                '{% if true %}{% set x = "green" %}{% endif %}' +
-        //                '{{ x }}');
-        //     expect(s).to.be('green');
-        // });
+            equal('{% set x, y = "foo" %}{{ x }}{{ y }}',
+                  'foofoo');
 
-        // it('should throw errors', function() {
-        //     expect(function() {
-        //         render('{% from "import.html" import boozle %}');
-        //     }).to.throwException(/cannot import 'boozle'/);
-        // });
+            equal('{% set x = 1 + 2 %}{{ x }}',
+                  '3');
+
+            equal('{% for i in [1] %}{% set foo=1 %}{% endfor %}{{ foo }}',
+                  { foo: 2 },
+                  '2');
+
+            equal('{% include "set.html" %}{{ foo }}',
+                  { foo: 'bar' },
+                  'bar');
+
+            finish(done);
+        });
+
+        it('should compile set with frame references', function(done) {
+            equal('{% set username = user.name %}{{ username }}',
+                  { user: { name: 'james' } },
+                  'james');
+
+            finish(done);
+        });
+
+        it('should compile set assignments of the same variable', function(done) {
+            equal('{% set x = "hello" %}' +
+                  '{% if false %}{% set x = "world" %}{% endif %}' +
+                  '{{ x }}',
+                  'hello');
+
+            equal('{% set x = "blue" %}' +
+                  '{% if true %}{% set x = "green" %}{% endif %}' +
+                  '{{ x }}',
+                  'green');
+
+            finish(done);
+        });
+
+        it('should throw errors', function(done) {
+            render('{% from "import.html" import boozle %}', function(err) {
+                expect(err).to.match(/cannot import 'boozle'/);
+            });
+
+            finish(done);
+        });
 
         // it('should allow custom tag compilation', function() {
         //     function testExtension() {
