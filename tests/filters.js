@@ -196,7 +196,7 @@
 
         it('random', function(done) {
             for(var i=0; i<100; i++) {
-                render('{{ [1,2,3,4,5,6,7,8,9] | random }}', function(res) {
+                render('{{ [1,2,3,4,5,6,7,8,9] | random }}', function(err, res) {
                     var val = parseInt(res);
                     expect(val).to.be.within(1, 9);
                 });

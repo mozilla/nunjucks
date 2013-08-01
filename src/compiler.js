@@ -107,6 +107,16 @@ var Compiler = Object.extend({
         this.scopeClosers = '';
     },
 
+    withScopedSyntax: function(func) {
+        var scopeClosers = this.scopeClosers;
+        this.scopeClosers = '';
+
+        func.call(this);
+
+        this.closeScopeLevels();
+        this.scopeClosers = scopeClosers;
+    },
+
     makeCallback: function(res) {
         var err = this.tmpid();
 
@@ -581,13 +591,10 @@ var Compiler = Object.extend({
             }
         }
 
-        var scopeClosers = this.scopeClosers;
-        this.scopeClosers = '';
-
-        this.compile(node.body, frame);
-        this.emitLine('next();');
-        this.closeScopeLevels();
-        this.scopeClosers = scopeClosers;
+        this.withScopedSyntax(function() {
+            this.compile(node.body, frame);
+            this.emitLine('next();');
+        });
 
         this.emitLine('}, ' + this.makeCallback());
         this.addScopeLevel();
@@ -900,7 +907,8 @@ var Compiler = Object.extend({
 });
 
 // var c = new Compiler();
-// var src = '{{ 3 }}';
+// var src = '{% macro foo(x) %}{{ x|title }}{% endmacro %}' +
+//     '{{ foo("foo") }}';
 // var ast = transformer.transform(parser.parse(src));
 // nodes.printNodes(ast);
 // c.compile(ast);

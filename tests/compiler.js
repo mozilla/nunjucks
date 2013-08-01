@@ -205,6 +205,10 @@
                   '{{ foo(1) }}',
                   '');
 
+            // equal('{% macro foo(x) %}{{ x|title }}{% endmacro %}' +
+            //       '{{ foo("foo") }}',
+            //       'Foo');
+
             equal('{% macro foo(x, y) %}{{ y }}{% endmacro %}' +
                   '{{ foo(1, 2) }}',
                   '2');
@@ -434,210 +438,247 @@
             finish(done);
         });
 
-        // it('should allow custom tag compilation', function() {
-        //     function testExtension() {
-        //         this.tags = ['test'];
+        it('should allow custom tag compilation', function(done) {
+            function testExtension() {
+                this.tags = ['test'];
 
-        //         this.parse = function(parser, nodes) {
-        //             parser.advanceAfterBlockEnd();
+                this.parse = function(parser, nodes) {
+                    parser.advanceAfterBlockEnd();
 
-        //             var content = parser.parseUntilBlocks("endtest");
-        //             var tag = new nodes.CallExtension(this, 'run', null, [content]);
-        //             parser.advanceAfterBlockEnd();
+                    var content = parser.parseUntilBlocks("endtest");
+                    var tag = new nodes.CallExtension(this, 'run', null, [content]);
+                    parser.advanceAfterBlockEnd();
 
-        //             return tag;
-        //         };
+                    return tag;
+                };
 
-        //         this.run = function(context, content) {
-        //             // Reverse the string
-        //             return content().split("").reverse().join("");
-        //         };
-        //     }
+                this.run = function(context, content) {
+                    // Reverse the string
+                    return content().split("").reverse().join("");
+                };
+            }
 
-        //     var opts = { extensions: { 'testExtension': new testExtension() }};
-        //     var output = render('{% test %}123456789{% endtest %}', null, opts);
-        //     expect(output).to.be('987654321');
+            var opts = { extensions: { 'testExtension': new testExtension() }};
+            render('{% test %}123456789{% endtest %}', null, opts, function(err, res) {
+                expect(res).to.be('987654321');
+            });
 
-        // });
+            finish(done);
+        });
 
-        // it('should allow custom tag compilation without content', function() {
-        //     function testExtension() {
-        //         this.tags = ['test'];
+        it('should allow custom tag compilation without content', function(done) {
+            function testExtension() {
+                this.tags = ['test'];
 
-        //         this.parse = function(parser, nodes) {
-        //             var tok = parser.nextToken();
-        //             var args = parser.parseSignature(null, true);
-        //             parser.advanceAfterBlockEnd(tok.value);
+                this.parse = function(parser, nodes) {
+                    var tok = parser.nextToken();
+                    var args = parser.parseSignature(null, true);
+                    parser.advanceAfterBlockEnd(tok.value);
 
-        //             return new nodes.CallExtension(this, 'run', args, null);
-        //         };
+                    return new nodes.CallExtension(this, 'run', args, null);
+                };
 
-        //         this.run = function(context, arg1) {
-        //             // Reverse the string
-        //             return arg1.split("").reverse().join("");
-        //         };
-        //     }
+                this.run = function(context, arg1) {
+                    // Reverse the string
+                    return arg1.split("").reverse().join("");
+                };
+            }
 
-        //     var opts = { extensions: { 'testExtension': new testExtension() }};
-        //     var output = render('{% test "123456" %}', null, opts);
-        //     expect(output).to.be('654321');
+            var opts = { extensions: { 'testExtension': new testExtension() }};
+            render('{% test "123456" %}', null, opts, function(err, res) {
+                expect(res).to.be('654321');
+            });
 
-        // });
+            finish(done);
+        });
 
-        // it('should allow complicated custom tag compilation', function() {
-        //     function testExtension() {
-        //         this.tags = ['test'];
+        it('should allow complicated custom tag compilation', function(done) {
+            function testExtension() {
+                this.tags = ['test'];
 
-        //         /* normally this is automatically done by Environment */
-        //         this._name = 'testExtension';
+                /* normally this is automatically done by Environment */
+                this._name = 'testExtension';
 
-        //         this.parse = function(parser, nodes, lexer) {
-        //             var body, intermediate = null;
-        //             parser.advanceAfterBlockEnd();
+                this.parse = function(parser, nodes, lexer) {
+                    var body, intermediate = null;
+                    parser.advanceAfterBlockEnd();
 
-        //             body = parser.parseUntilBlocks('intermediate', 'endtest');
+                    body = parser.parseUntilBlocks('intermediate', 'endtest');
 
-        //             if(parser.skipSymbol('intermediate')) {
-        //                 parser.skip(lexer.TOKEN_BLOCK_END);
-        //                 intermediate = parser.parseUntilBlocks('endtest');
-        //             }
+                    if(parser.skipSymbol('intermediate')) {
+                        parser.skip(lexer.TOKEN_BLOCK_END);
+                        intermediate = parser.parseUntilBlocks('endtest');
+                    }
 
-        //             parser.advanceAfterBlockEnd();
+                    parser.advanceAfterBlockEnd();
 
-        //             return new nodes.CallExtension(this, 'run', null, [body, intermediate]);
-        //         };
+                    return new nodes.CallExtension(this, 'run', null, [body, intermediate]);
+                };
 
-        //         this.run = function(context, body, intermediate) {
-        //             var output = body().split("").join(",");
-        //             if(intermediate) {
-        //                 // Reverse the string.
-        //                 output += intermediate().split("").reverse().join("");
-        //             }
-        //             return output;
-        //         };
-        //     }
+                this.run = function(context, body, intermediate) {
+                    var output = body().split("").join(",");
+                    if(intermediate) {
+                        // Reverse the string.
+                        output += intermediate().split("").reverse().join("");
+                    }
+                    return output;
+                };
+            }
 
-        //     var opts = { extensions: { 'testExtension': new testExtension() }};
+            var opts = { extensions: { 'testExtension': new testExtension() }};
 
-        //     var output = render('{% test %}abcdefg{% endtest %}', null, opts);
-        //     expect(output).to.be('a,b,c,d,e,f,g');
+            render('{% test %}abcdefg{% endtest %}', null, opts, function(err, res) {
+                expect(res).to.be('a,b,c,d,e,f,g');
+            });
 
-        //     output = render(
-        //         '{% test %}abcdefg{% intermediate %}second half{% endtest %}',
-        //         null, 
-        //         opts
-        //     );
-        //     expect(output).to.be('a,b,c,d,e,f,gflah dnoces');
-        // });
+            render('{% test %}abcdefg{% intermediate %}second half{% endtest %}',
+                   null, 
+                   opts,
+                   function(err, res) {
+                       expect(res).to.be('a,b,c,d,e,f,gflah dnoces');
+                   });
 
-        // it('should allow custom tag with args compilation', function() {
-        //     function testExtension() {
-        //         this.tags = ['test'];
+            finish(done);
+        });
 
-        //         /* normally this is automatically done by Environment */
-        //         this._name = 'testExtension';
+        it('should allow custom tag with args compilation', function(done) {
+            function testExtension() {
+                this.tags = ['test'];
 
-        //         this.parse = function(parser, nodes, lexer) {
-        //             var body, args = null;
-        //             var tok = parser.nextToken();
+                /* normally this is automatically done by Environment */
+                this._name = 'testExtension';
 
-        //             // passing true makes it tolerate when no args exist
-        //             args = parser.parseSignature(true);
-        //             parser.advanceAfterBlockEnd(tok.value);
+                this.parse = function(parser, nodes, lexer) {
+                    var body, args = null;
+                    var tok = parser.nextToken();
 
-        //             body = parser.parseUntilBlocks('endtest');
-        //             parser.advanceAfterBlockEnd();
+                    // passing true makes it tolerate when no args exist
+                    args = parser.parseSignature(true);
+                    parser.advanceAfterBlockEnd(tok.value);
 
-        //             return new nodes.CallExtension(this, 'run', args, [body]);
-        //         };
+                    body = parser.parseUntilBlocks('endtest');
+                    parser.advanceAfterBlockEnd();
 
-        //         this.run = function(context, prefix, kwargs, body) {
-        //             if(typeof prefix == 'function') {
-        //                 body = prefix;
-        //                 prefix = '';
-        //                 kwargs = {};
-        //             }
-        //             else if(typeof kwargs == 'function') {
-        //                 body = kwargs;
-        //                 kwargs = {};
-        //             }
+                    return new nodes.CallExtension(this, 'run', args, [body]);
+                };
 
-        //             var output = prefix + body().split('').reverse().join('');
-        //             if(kwargs.cutoff) {
-        //                 output = output.slice(0, kwargs.cutoff);
-        //             }
+                this.run = function(context, prefix, kwargs, body) {
+                    if(typeof prefix == 'function') {
+                        body = prefix;
+                        prefix = '';
+                        kwargs = {};
+                    }
+                    else if(typeof kwargs == 'function') {
+                        body = kwargs;
+                        kwargs = {};
+                    }
 
-        //             return output;
-        //         };
-        //     }
+                    var output = prefix + body().split('').reverse().join('');
+                    if(kwargs.cutoff) {
+                        output = output.slice(0, kwargs.cutoff);
+                    }
 
-        //     var opts = { extensions: {'testExtension': new testExtension() }};
+                    return output;
+                };
+            }
 
-        //     var output = render('{% test %}foobar{% endtest %}', null, opts);
-        //     expect(output).to.be('raboof');
+            var opts = { extensions: {'testExtension': new testExtension() }};
 
-        //     output = render('{% test("biz") %}foobar{% endtest %}', null, opts);
-        //     expect(output).to.be('bizraboof');
+            render('{% test %}foobar{% endtest %}', null, opts, function(err, res) {
+                expect(res).to.be('raboof');
+            });
 
-        //     output = render('{% test("biz", cutoff=5) %}foobar{% endtest %}', null, opts);
-        //     expect(output).to.be('bizra');
-        // });
+            render('{% test("biz") %}foobar{% endtest %}', null, opts, function(err, res) {
+                expect(res).to.be('bizraboof');
+            });
 
-        // it('should not autoescape by default', function() {
-        //     var s = render('{{ foo }}', { foo: '"\'<>&'});
-        //     expect(s).to.be('"\'<>&');
-        // });
+            render('{% test("biz", cutoff=5) %}foobar{% endtest %}', null, opts, function(err, res) {
+                expect(res).to.be('bizra');
+            });
 
-        // it('should autoescape if autoescape is on', function() {
-        //     var s = render('{{ foo }}', { foo: '"\'<>&'}, { autoescape: true });
-        //     expect(s).to.be('&quot;&#39;&lt;&gt;&amp;');
+            finish(done);
+        });
 
-        //     var s = render('{{ foo|reverse }}', { foo: '"\'<>&'}, { autoescape: true });
-        //     expect(s).to.be('&amp;&gt;&lt;&#39;&quot;');
+        it('should not autoescape by default', function(done) {
+            equal('{{ foo }}', { foo: '"\'<>&'}, '"\'<>&');
+            finish(done);
+        });
 
-        //     var s = render('{{ foo|reverse|safe }}', { foo: '"\'<>&'}, { autoescape: true });
-        //     expect(s).to.be('&><\'"');
-        // });
+        it('should autoescape if autoescape is on', function(done) {
+            render('{{ foo }}', { foo: '"\'<>&'}, { autoescape: true }, function(err, res) {
+                expect(res).to.be('&quot;&#39;&lt;&gt;&amp;');
+            });
 
-        // it('should not autoescape safe strings', function() {
-        //     var s = render('{{ foo|safe }}', { foo: '"\'<>&'}, { autoescape: true });
-        //     expect(s).to.be('"\'<>&');
-        // });
+            render('{{ foo|reverse }}', { foo: '"\'<>&'}, { autoescape: true }, function(err, res) {
+                expect(res).to.be('&amp;&gt;&lt;&#39;&quot;');
+            });
 
-        // it('should not autoescape macros', function() {
-        //     var s = render(
-        //         '{% macro foo(x, y) %}{{ x }} and {{ y }}{% endmacro %}' +
-        //             '{{ foo("<>&", "<>") }}',
-        //         null,
-        //         { autoescape: true }
-        //     );
-        //     expect(s).to.be('&lt;&gt;&amp; and &lt;&gt;');
+            render('{{ foo|reverse|safe }}', { foo: '"\'<>&'}, { autoescape: true }, function(err, res) {
+                expect(res).to.be('&><\'"');
+            });
 
-        //     var s = render(
-        //         '{% macro foo(x, y) %}{{ x|safe }} and {{ y }}{% endmacro %}' +
-        //             '{{ foo("<>&", "<>") }}',
-        //         null,
-        //         { autoescape: true }
-        //     );
-        //     expect(s).to.be('<>& and &lt;&gt;');
-        // });
+            finish(done);
+        });
 
-        // it('should not autoescape super()', function() {
-        //     var s = render(
-        //       '{% extends "base3.html" %}' +
-        //       '{% block block1 %}{{ super() }}{% endblock %}',
-        //       null,
-        //       { autoescape: true }
-        //     );
-        //     expect(s).to.be('<b>Foo</b>');
-        // });
+        it('should not autoescape safe strings', function(done) {
+            render('{{ foo|safe }}', { foo: '"\'<>&'}, { autoescape: true }, function(err, res) {
+                expect(res).to.be('"\'<>&');
+            });
 
-        // it('should pass context as this to filters', function() {
-        //     var e = new Environment();
-        //     e.addFilter('hallo', function(foo) { return foo + this.lookup('bar'); });
+            finish(done);
+        });
 
-        //     var t = new Template('{{ foo | hallo }}', e);
-        //     expect(t.render({ foo: 1, bar: 2 })).to.be('3');
-        // });
+        it('should not autoescape macros', function(done) {
+            render(
+                '{% macro foo(x, y) %}{{ x }} and {{ y }}{% endmacro %}' +
+                    '{{ foo("<>&", "<>") }}',
+                null,
+                { autoescape: true },
+                function(err, res) {
+                    expect(res).to.be('&lt;&gt;&amp; and &lt;&gt;');
+                }
+            );
+
+            // render(
+            //     '{% macro foo(x, y) %}{{ x|safe }} and {{ y }}{% endmacro %}' +
+            //         '{{ foo("<>&", "<>") }}',
+            //     null,
+            //     { autoescape: true },
+            //     function(err, res) {
+            //         expect(res).to.be('<>& and &lt;&gt;');
+            //     }
+            // );
+
+            finish(done);
+        });
+
+        it('should not autoescape super()', function(done) {
+            render(
+                '{% extends "base3.html" %}' +
+                    '{% block block1 %}{{ super() }}{% endblock %}',
+                null,
+                { autoescape: true },
+                function(err, res) {
+                    expect(res).to.be('<b>Foo</b>');
+                }
+            );
+
+            finish(done);
+        });
+
+        it('should pass context as this to filters', function(done) {
+            render(
+                '{{ foo | hallo }}',
+                { foo: 1, bar: 2 },
+                { filters: {
+                    'hallo': function(foo) { return foo + this.lookup('bar'); }
+                }},
+                function(err, res) {
+                    expect(res).to.be('3');
+                }
+            );
+
+            finish(done);
+        });
     });
 })();
