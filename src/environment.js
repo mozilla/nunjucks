@@ -66,35 +66,9 @@ var Environment = Object.extend({
     addFilter: function(name, func, async) {
         var wrapped = func;
 
-        // if(!async) {
-        //     wrapped = function() {
-        //         var args = arguments;
-                
-        //         // The callback was passed as the last parameter,
-
-        //         var arglen = args.length - 1;
-        //         if(args.length - 1 < func.length) {
-        //             args = Array.prototype.slice.call(arguments, 0, arguments.length - 1);
-
-        //             while(args.length < func.length) {
-        //                 args.push(undefined);
-        //             }
-        //         }
-        //         var cb = arguments[arguments.length - 1];
-
-        //         try {
-        //             cb(null, func.apply(this, args));
-        //         }
-        //         catch(e) {
-        //             cb(e);
-        //         }
-        //     };
-        // }
-
         if(async) {
             this.asyncFilters.push(name);
         }
-
         this.filters[name] = wrapped;
     },
 
@@ -118,15 +92,10 @@ var Environment = Object.extend({
 
         var self = this;
         var info = null;
-        var tmpl = this.cache[name];
 
         if(typeof name !== 'string') {
             throw new Error('template names must be a string: ' + name);
         }
-
-        var finalize = function() {
-            callback(null, self.cache[name]);
-        };
 
         var _getTemplate = function() {
             var index = 0;
@@ -155,12 +124,12 @@ var Environment = Object.extend({
             });
         };
 
-        if(!tmpl) {
+        if(!this.cache[name]) {
             _getTemplate();
         } else {
-            tmpl.upToDate(function (isUpToDate) {
+            this.cache[name].upToDate(function (isUpToDate) {
                 if (isUpToDate) {
-                    finalize();
+                    callback(null, self.cache[name]);
                 } else {
                     _getTemplate();
                 }
@@ -426,85 +395,22 @@ var Template = Object.extend({
     }
 });
 
-// var fs = require('fs');
-// var src = '{% for i in [1,2,3] %}{{ i }}{% endfor %}';
+var fs = require('fs');
+var src = '{% for i in [1,2] %}' +
+    'start: {{ num }}' +
+    '{% from "import.html" import bar as num %}' +
+    'end: {{ num }}' +
+    '{% endfor %}' +
+    'final: {{ num }}';
+var env = new Environment(new builtin_loaders.FileSystemLoader('tests/templates'), { dev: true });
 
-// var src = '<h1>{{ header }}</h1>' +
-//     '{% if items.length %}' +
-//     '<ul>' +
-//     '{% for item in items %}' +
-//     '    {% if item.current %}' +
-//     '    <li><strong>{{ item.name }}</strong></li>' +
-//     '    {% else %}' +
-//     '    <li><a href="{{ item.url }}">{{ item.name }}</a></li>' +
-//     '    {% endif %}' +
-//     '{% endfor %}' +
-//     '</ul>' +
-//     '{% else %}' +
-//     '<p>The list is empty.</p>' +
-//     '{% endif %}';
+var ctx = {};
+var tmpl = new Template(src, env, null, null, true);
+console.log("OUTPUT ---");
 
-// var env = new Environment(null, { autoescape: true, dev: true });
-
-// var ctx = {
-//     items: [
-//         {
-//             current: true,
-//             name: "James"
-//         },
-//         { 
-//             name: "Foo",
-//             url: "http://example.com"
-//         },
-//         { 
-//             name: "Foo",
-//             url: "http://example.com"
-//         },
-//         { 
-//             name: "Foo",
-//             url: "http://example.com"
-//         },
-//         { 
-//             name: "Foo",
-//             url: "http://example.com"
-//         },
-//         { 
-//             name: "Foo",
-//             url: "http://example.com"
-//         },
-//         { 
-//             name: "Foo",
-//             url: "http://example.com"
-//         },
-//         { 
-//             name: "Foo",
-//             url: "http://example.com"
-//         },
-//         { 
-//             name: "Foo",
-//             url: "http://example.com"
-//         },
-//         { 
-//             name: "Foo",
-//             url: "http://example.com"
-//         },
-//         { 
-//             name: "Foo",
-//             url: "http://example.com"
-//         },
-//         { 
-//             name: "Foo",
-//             url: "http://example.com"
-//         }
-//     ]
-// };
-
-// var tmpl = new Template(src, env, null, null, true);
-// console.log("OUTPUT ---");
-
-// tmpl.render(ctx, function(err, res) {
-//     console.log(res);
-// });
+tmpl.render(ctx, function(err, res) {
+    console.log(res);
+});
 
 module.exports = {
     Environment: Environment,

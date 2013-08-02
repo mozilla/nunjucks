@@ -4,7 +4,7 @@ var lib = require('./lib');
 var Object = require('./object');
 
 // Node <0.7.1 compatibility
-var exists = fs.exists || path.exists;
+var exists = fs.existsSync || path.existsSync;
 
 var FileSystemLoader = Object.extend({
     init: function(searchPaths) {
@@ -28,15 +28,15 @@ var FileSystemLoader = Object.extend({
             var p = path.join(paths[index], name);
             if (p.indexOf(paths[index]) === 0) {
                 // template is in path
-                exists(p, function(answer) {
-                    if (answer) {
-                        // template found
-                        cb(p);
-                    } else {
-                        // template not found, move on
-                        (++index < paths.length) ? runExists(cb) : cb(null);
-                    }
-                });
+                var answer = exists(p);
+
+                if (answer) {
+                    // template found
+                    cb(p);
+                } else {
+                    // template not found, move on
+                    (++index < paths.length) ? runExists(cb) : cb(null);
+                }
             } else {
                 // template not in path, skip exists, move on
                 (++index < paths.length) ? runExists(cb) : cb(null);
@@ -55,10 +55,13 @@ var FileSystemLoader = Object.extend({
                     });
                 },
                 function (done) {
-                    fs.readFile(fullpath, 'utf-8', function (err, src) {
-                        // todo: catch potential errors here
-                        done(src);
-                    });
+                    // turn off async for now
+                    done(fs.readFileSync(fullpath, 'utf-8'));
+
+                    // fs.readFile(fullpath, 'utf-8', function (err, src) {
+                    //     // todo: catch potential errors here
+                    //     done(src);
+                    // });
                 }
             ], function(result) {
                 callback({
@@ -71,17 +74,19 @@ var FileSystemLoader = Object.extend({
     },
 
     upToDateFunc: function(file, callback) {
-        fs.stat(file, function (err, stats) {
-            // todo: catch potential errors here
-            var mtime = stats.mtime.toString();
+        callback(function(cb) { cb(false); });
 
-            callback(function (cb) {
-                fs.stat(file, function (err, stats) {
-                    // todo: catch potential errors here
-                    cb(mtime === stats.mtime.toString());
-                });
-            });
-        });
+        // fs.stat(file, function (err, stats) {
+        //     // todo: catch potential errors here
+        //     var mtime = stats.mtime.toString();
+
+        //     callback(function (cb) {
+        //         fs.stat(file, function (err, stats) {
+        //             // todo: catch potential errors here
+        //             cb(mtime === stats.mtime.toString());
+        //         });
+        //     });
+        // });
     }
 });
 
