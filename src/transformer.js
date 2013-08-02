@@ -71,10 +71,9 @@ function depthWalk(ast, func) {
     return walk(ast, func, true);
 }
 
-function liftFilters(ast) {
+function liftFilters(ast, asyncFilters) {
     return walk(ast, function(outNode) {
-        if(!(outNode instanceof nodes.Output) &&
-           !(outNode instanceof nodes.For)) {
+        if(!(outNode instanceof nodes.Output)) {
             return;
         }
 
@@ -84,7 +83,8 @@ function liftFilters(ast) {
             if(node instanceof nodes.Block) {
                 return node;
             }
-            else if(node instanceof nodes.Filter) {
+            else if(node instanceof nodes.Filter &&
+                    asyncFilters.indexOf(node.name.value) !== -1) {
                 var symbol = new nodes.Symbol(node.lineno,
                                               node.colno,
                                               gensym());
@@ -138,11 +138,11 @@ function liftSuper(ast) {
     });
 }
 
-function cps(ast) {
-    return liftSuper(liftFilters(ast));
+function cps(ast, asyncFilters) {
+    return liftSuper(liftFilters(ast, asyncFilters));
 }
 
-function transform(ast, extensions, name) {
+function transform(ast, asyncFilters, extensions, name) {
     // Run the extension preprocessors against the source.
     if(extensions && extensions.length) {
         for(var i=0; i<extensions.length; i++) {
@@ -152,7 +152,7 @@ function transform(ast, extensions, name) {
         }
     }
 
-    return cps(ast);
+    return cps(ast, asyncFilters || []);
 }
 
 // var parser = require('./parser');

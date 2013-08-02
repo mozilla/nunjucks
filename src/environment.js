@@ -43,6 +43,7 @@ var Environment = Object.extend({
         }
 
         this.filters = {};
+        this.asyncFilters = [];
         this.cache = {};
         this.extensions = {};
         this.extensionsList = [];
@@ -65,29 +66,33 @@ var Environment = Object.extend({
     addFilter: function(name, func, async) {
         var wrapped = func;
 
-        if(!async) {
-            wrapped = function() {
-                var args = arguments;
+        // if(!async) {
+        //     wrapped = function() {
+        //         var args = arguments;
                 
-                // The callback was passed as the last parameter,
+        //         // The callback was passed as the last parameter,
 
-                var arglen = args.length - 1;
-                if(args.length - 1 < func.length) {
-                    args = Array.prototype.slice.call(arguments, 0, arguments.length - 1);
+        //         var arglen = args.length - 1;
+        //         if(args.length - 1 < func.length) {
+        //             args = Array.prototype.slice.call(arguments, 0, arguments.length - 1);
 
-                    while(args.length < func.length) {
-                        args.push(undefined);
-                    }
-                }
-                var cb = arguments[arguments.length - 1];
+        //             while(args.length < func.length) {
+        //                 args.push(undefined);
+        //             }
+        //         }
+        //         var cb = arguments[arguments.length - 1];
 
-                try {
-                    cb(null, func.apply(this, args));
-                }
-                catch(e) {
-                    cb(e);
-                }
-            };
+        //         try {
+        //             cb(null, func.apply(this, args));
+        //         }
+        //         catch(e) {
+        //             cb(e);
+        //         }
+        //     };
+        // }
+
+        if(async) {
+            this.asyncFilters.push(name);
         }
 
         this.filters[name] = wrapped;
@@ -353,6 +358,10 @@ var Template = Object.extend({
             frame = null;
         }
 
+        if(!cb) {
+            throw new Error("you must specify a callback to `render`");
+        }
+
         return lib.withPrettyErrors(this.path, this.env.dev, function() {
             if(!this.compiled) {
                 this._compile();
@@ -391,7 +400,10 @@ var Template = Object.extend({
             props = this.tmplProps;
         }
         else {
-            var source = compiler.compile(this.tmplStr, this.env.extensionsList, this.path);
+            var source = compiler.compile(this.tmplStr, 
+                                          this.env.asyncFilters,
+                                          this.env.extensionsList,
+                                          this.path);
             var func = new Function(source);
             props = func();
         }
@@ -415,13 +427,82 @@ var Template = Object.extend({
 });
 
 // var fs = require('fs');
-// var src = '{{ -3|abs }}';
+// var src = '{% for i in [1,2,3] %}{{ i }}{% endfor %}';
+
+// var src = '<h1>{{ header }}</h1>' +
+//     '{% if items.length %}' +
+//     '<ul>' +
+//     '{% for item in items %}' +
+//     '    {% if item.current %}' +
+//     '    <li><strong>{{ item.name }}</strong></li>' +
+//     '    {% else %}' +
+//     '    <li><a href="{{ item.url }}">{{ item.name }}</a></li>' +
+//     '    {% endif %}' +
+//     '{% endfor %}' +
+//     '</ul>' +
+//     '{% else %}' +
+//     '<p>The list is empty.</p>' +
+//     '{% endif %}';
+
 // var env = new Environment(null, { autoescape: true, dev: true });
+
+// var ctx = {
+//     items: [
+//         {
+//             current: true,
+//             name: "James"
+//         },
+//         { 
+//             name: "Foo",
+//             url: "http://example.com"
+//         },
+//         { 
+//             name: "Foo",
+//             url: "http://example.com"
+//         },
+//         { 
+//             name: "Foo",
+//             url: "http://example.com"
+//         },
+//         { 
+//             name: "Foo",
+//             url: "http://example.com"
+//         },
+//         { 
+//             name: "Foo",
+//             url: "http://example.com"
+//         },
+//         { 
+//             name: "Foo",
+//             url: "http://example.com"
+//         },
+//         { 
+//             name: "Foo",
+//             url: "http://example.com"
+//         },
+//         { 
+//             name: "Foo",
+//             url: "http://example.com"
+//         },
+//         { 
+//             name: "Foo",
+//             url: "http://example.com"
+//         },
+//         { 
+//             name: "Foo",
+//             url: "http://example.com"
+//         },
+//         { 
+//             name: "Foo",
+//             url: "http://example.com"
+//         }
+//     ]
+// };
 
 // var tmpl = new Template(src, env, null, null, true);
 // console.log("OUTPUT ---");
 
-// tmpl.render({ foo: 'numbers' }, function(err, res) {
+// tmpl.render(ctx, function(err, res) {
 //     console.log(res);
 // });
 

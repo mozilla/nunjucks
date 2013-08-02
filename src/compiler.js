@@ -517,17 +517,93 @@ var Compiler = Object.extend({
         this.emit('if(');
         this._compileExpression(node.cond, frame);
         this.emitLine(') {');
-        this.compile(node.body, frame);
+
+        this.withScopedSyntax(function() {
+            this.compile(node.body, frame);
+        });
 
         if(node.else_) {
             this.emitLine('}\nelse {');
-            this.compile(node.else_, frame);
+
+            this.withScopedSyntax(function() {
+                this.compile(node.else_, frame);
+            });
         }
 
         this.emitLine('}');
     },
 
     compileFor: function(node, frame) {
+        var i = this.tmpid();
+        var len = this.tmpid();
+        var arr = this.tmpid();
+        frame = frame.push();
+
+        this.emitLine('frame = frame.push();');
+
+        this.emit('var ' + arr + ' = ');
+        this._compileExpression(node.arr, frame);
+        this.emitLine(';');
+
+        var loopUses = {};
+        node.iterFields(function(field) {
+            var lookups = field.findAll(nodes.LookupVal);
+
+            lib.each(lookups, function(lookup) {
+                if (lookup.target instanceof nodes.Symbol &&
+                    lookup.target.value == 'loop' &&
+                    lookup.val instanceof nodes.Literal) {
+                    loopUses[lookup.val.value] = true;
+                }
+            });
+        });
+
+        if(node.name instanceof nodes.Array) {
+            this.emitLine('var ' + i + ';');
+
+            // did they pass an array of tuples or a dict?
+            this.emitLine('if (runtime.isArray(' + arr + ')) {');
+
+
+            this.emitLine('}');
+            this.emitLine('} else {');
+
+            this.emitLine('}');
+            this.emitLine('}');
+        }
+        else {
+            var v = this.tmpid();
+            frame.set(node.name.value, v);
+
+            this.emitLine('for(var ' + i + '=0; ' + i + ' < ' + arr + '.length; ' + 
+                          i + '++) {');
+            this.emitLine('var ' + v + ' = ' + arr + '[' + i + '];');
+            this.emitLine('frame.set("' + node.name.value + '", ' + v + ');');
+
+            var bindings = {
+                index: i + ' + 1',
+                index0: i,
+                revindex: len + ' - ' + i,
+                revindex0: len + ' - ' + i + ' - 1',
+                first: i + ' === 0',
+                last: i + ' === ' + len + ' - 1',
+                length: len
+            };
+
+            for(var name in bindings) {
+                if(name in loopUses) {
+                    this.emitLine('frame.set("loop.' + name + '", ' + bindings[name] + ');');
+                }
+            }
+
+            this.compile(node.body, frame);
+            this.emitLine('}');
+        }
+        
+        this.emitLine('frame = frame.pop();');
+    },
+
+    compileForAsync: function(node, frame) {
         var i = this.tmpid();
         var len = this.tmpid();
         var arr = this.tmpid();
@@ -907,8 +983,7 @@ var Compiler = Object.extend({
 });
 
 // var c = new Compiler();
-// var src = '{% macro foo(x) %}{{ x|title }}{% endmacro %}' +
-//     '{{ foo("foo") }}';
+// var src = '{% for i in [1,2,3] %}{{ i }}{% endfor %}';
 // var ast = transformer.transform(parser.parse(src));
 // nodes.printNodes(ast);
 // c.compile(ast);
@@ -917,10 +992,11 @@ var Compiler = Object.extend({
 // console.log(tmpl);
 
 module.exports = {
-    compile: function(src, extensions, name) {
+    compile: function(src, asyncFilters, extensions, name) {
         var c = new Compiler(extensions);
 
         c.compile(transformer.transform(parser.parse(src, extensions),
+                                        asyncFilters,
                                         extensions,
                                         name));
         return c.getCode();
