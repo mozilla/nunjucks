@@ -3,11 +3,6 @@ var Object = require('./object');
 
 var HttpLoader = Object.extend({
     init: function(baseURL, neverUpdate) {
-        if (typeof(console) !== "undefined" && console.log &&
-            typeof(nunjucks) == "object" && !nunjucks.testing) {
-          console.log("[nunjucks] Warning: only use HttpLoader in " +
-                      "development. Otherwise precompile your templates.");
-        }
         this.baseURL = baseURL || '';
         this.neverUpdate = neverUpdate;
     },
@@ -19,7 +14,7 @@ var HttpLoader = Object.extend({
         if(!src) {
             return null;
         }
-        
+
         return { src: src,
                  path: name,
                  upToDate: function() { return _this.neverUpdate; }};
@@ -36,7 +31,7 @@ var HttpLoader = Object.extend({
             }
         };
 
-        url += (url.indexOf('?') === -1 ? '?' : '&') + 's=' + 
+        url += (url.indexOf('?') === -1 ? '?' : '&') + 's=' +
                (new Date().getTime());
 
         // Synchronous because this API shouldn't be used in
