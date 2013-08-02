@@ -89,6 +89,7 @@ var LookupVal = Node.extend("LookupVal", { fields: ['target', 'val'] });
 var If = Node.extend("If", { fields: ['cond', 'body', 'else_'] });
 var InlineIf = Node.extend("InlineIf", { fields: ['cond', 'body', 'else_'] });
 var For = Node.extend("For", { fields: ['arr', 'name', 'body'] });
+var ForAsync = For.extend("ForAsync");
 var Macro = Node.extend("Macro", { fields: ['name', 'args', 'body'] });
 var Import = Node.extend("Import", { fields: ['template', 'target'] });
 var FromImport = Node.extend("FromImport", {

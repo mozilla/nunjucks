@@ -134,7 +134,7 @@ var Parser = Object.extend({
 
     parseFor: function() {
         var forTok = this.peekToken();
-        if(!this.skipSymbol('for')) {
+        if(!this.skipSymbol('for') && !this.skipSymbol('forasync')) {
             this.fail("parseFor: expected for", forTok.lineno, forTok.colno);
         }
 
@@ -420,7 +420,9 @@ var Parser = Object.extend({
         switch(tok.value) {
         case 'raw': return this.parseRaw();
         case 'if': return this.parseIf();
-        case 'for': return this.parseFor();
+        case 'for': 
+        case 'forasync':
+            return this.parseFor();
         case 'block': return this.parseBlock();
         case 'extends': return this.parseExtends();
         case 'include': return this.parseInclude();

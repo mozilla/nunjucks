@@ -140,33 +140,69 @@
             finish(done);
         });
 
-        it('should compile for blocks', function(done) {
-            equal('{% for i in arr %}{{ i }}{% endfor %}',
+        function runLoopTests(block) {
+            equal('{% ' + block + ' i in arr %}{{ i }}{% endfor %}',
                   { arr: [1, 2, 3, 4, 5] }, '12345');
 
-            equal('{% for a, b, c in arr %}' +
+            equal('{% ' + block + ' a, b, c in arr %}' +
                        '{{ a }},{{ b }},{{ c }}.{% endfor %}',
                   { arr: [['x', 'y', 'z'], ['1', '2', '3']] }, 'x,y,z.1,2,3.');
 
-            equal('{% for item in arr | batch(2) %}{{ item[0] }}{% endfor %}',
+            equal('{% ' + block + ' item in arr | batch(2) %}{{ item[0] }}{% endfor %}',
                   { arr: ['a', 'b', 'c', 'd'] }, 'ac');
 
-            equal('{% for k, v in { one: 1, two: 2 } %}' +
+            equal('{% ' + block + ' k, v in { one: 1, two: 2 } %}' +
                   '-{{ k }}:{{ v }}-{% endfor %}', '-one:1--two:2-');
 
-            equal('{% for i in [7,3,6] %}{{ loop.index }}{% endfor %}', '123');
-            equal('{% for i in [7,3,6] %}{{ loop.index0 }}{% endfor %}', '012');
-            equal('{% for i in [7,3,6] %}{{ loop.revindex }}{% endfor %}', '321');
-            equal('{% for i in [7,3,6] %}{{ loop.revindex0 }}{% endfor %}', '210');
-            equal('{% for i in [7,3,6] %}{% if loop.first %}{{ i }}{% endif %}{% endfor %}', 
+            equal('{% ' + block + ' i in [7,3,6] %}{{ loop.index }}{% endfor %}', '123');
+            equal('{% ' + block + ' i in [7,3,6] %}{{ loop.index0 }}{% endfor %}', '012');
+            equal('{% ' + block + ' i in [7,3,6] %}{{ loop.revindex }}{% endfor %}', '321');
+            equal('{% ' + block + ' i in [7,3,6] %}{{ loop.revindex0 }}{% endfor %}', '210');
+            equal('{% ' + block + ' i in [7,3,6] %}{% if loop.first %}{{ i }}{% endif %}{% endfor %}', 
                   '7');
-            equal('{% for i in [7,3,6] %}{% if loop.last %}{{ i }}{% endif %}{% endfor %}',
+            equal('{% ' + block + ' i in [7,3,6] %}{% if loop.last %}{{ i }}{% endif %}{% endfor %}',
                   '6');
-            equal('{% for i in [7,3,6] %}{{ loop.length }}{% endfor %}', '333');
-            equal('{% for i in foo %}{{ i }}{% endfor %}', '');
-            equal('{% for i in foo.bar %}{{ i }}{% endfor %}', { foo: {} }, '');
-            equal('{% for i in foo %}{{ i }}{% endfor %}', { foo: null }, '');
+            equal('{% ' + block + ' i in [7,3,6] %}{{ loop.length }}{% endfor %}', '333');
+            equal('{% ' + block + ' i in foo %}{{ i }}{% endfor %}', '');
+            equal('{% ' + block + ' i in foo.bar %}{{ i }}{% endfor %}', { foo: {} }, '');
+            equal('{% ' + block + ' i in foo %}{{ i }}{% endfor %}', { foo: null }, '');
 
+            equal('{% ' + block + ' x, y in points %}[{{ x }},{{ y }}]{% endfor %}',
+                  { points: [[1,2], [3,4], [5,6]] },
+                  '[1,2][3,4][5,6]');
+
+            equal('{% ' + block + ' x, y in points %}{{ loop.index }}{% endfor %}',
+                  { points: [[1,2], [3,4], [5,6]] },
+                  '123');
+
+            equal('{% ' + block + ' x, y in points %}{{ loop.revindex }}{% endfor %}',
+                  { points: [[1,2], [3,4], [5,6]] },
+                  '321');
+
+            equal('{% ' + block + ' k, v in items %}({{ k }},{{ v }}){% endfor %}',
+                  { items: { foo: 1, bar: 2 }},
+                  '(foo,1)(bar,2)');
+
+            equal('{% ' + block + ' k, v in items %}{{ loop.index }}{% endfor %}',
+                  { items: { foo: 1, bar: 2 }},
+                  '12');
+
+            equal('{% ' + block + ' k, v in items %}{{ loop.revindex }}{% endfor %}',
+                  { items: { foo: 1, bar: 2 }},
+                  '21');
+
+            equal('{% ' + block + ' k, v in items %}{{ loop.length }}{% endfor %}',
+                  { items: { foo: 1, bar: 2 }},
+                  '22');
+        }
+
+        it('should compile for blocks', function(done) {
+            runLoopTests('for');
+            finish(done);
+        });
+
+        it('should compile for async', function(done) {
+            runLoopTests('forasync');
             finish(done);
         });
 

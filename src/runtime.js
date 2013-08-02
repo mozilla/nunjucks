@@ -269,6 +269,7 @@ module.exports = {
     handleError: handleError,
     isArray: lib.isArray,
     asyncEach: lib.asyncEach,
+    keys: lib.keys,
     SafeString: SafeString,
     copySafeness: copySafeness,
     markSafe: markSafe,

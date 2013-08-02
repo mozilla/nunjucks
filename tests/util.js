@@ -72,17 +72,17 @@
         numAsyncs++;
         var t = new Template(str, e);
 
-        setTimeout(function() {
-            return t.render(ctx, function(err, res) {
-                cb(err, res);
+        return t.render(ctx, function(err, res) {
+            cb(err, res);
 
+            setTimeout(function() {
                 doneAsyncs++;
 
                 if(numAsyncs == doneAsyncs && doneHandler) {
                     doneHandler();
                 }
-            });
-        }, 0);
+            }, 0);
+        });
     }
 
     if(typeof module != 'undefined') {

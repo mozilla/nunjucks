@@ -533,19 +533,9 @@ var Compiler = Object.extend({
         this.emitLine('}');
     },
 
-    compileFor: function(node, frame) {
-        var i = this.tmpid();
-        var len = this.tmpid();
-        var arr = this.tmpid();
-        frame = frame.push();
-
-        this.emitLine('frame = frame.push();');
-
-        this.emit('var ' + arr + ' = ');
-        this._compileExpression(node.arr, frame);
-        this.emitLine(';');
-
+    scanLoop: function(node) {
         var loopUses = {};
+
         node.iterFields(function(field) {
             var lookups = field.findAll(nodes.LookupVal);
 
@@ -558,20 +548,105 @@ var Compiler = Object.extend({
             });
         });
 
+        return loopUses;
+    },
+
+    emitLoopBindings: function(node, loopUses, arr, i, len) {
+        len = len || arr + '.length';
+
+        var bindings = {
+            index: i + ' + 1',
+            index0: i,
+            revindex: len + ' - ' + i,
+            revindex0: len + ' - ' + i + ' - 1',
+            first: i + ' === 0',
+            last: i + ' === ' + len + ' - 1',
+            length: len
+        };
+
+        for(var name in bindings) {
+            if(name in loopUses) {
+                this.emitLine('frame.set("loop.' + name + '", ' + bindings[name] + ');');
+            }
+        }
+    },
+
+    compileFor: function(node, frame) {
+        // Some of this code is ugly, but it keeps the generated code
+        // as fast as possible. ForAsync also shares some of this, but
+        // not much.
+
+        var i = this.tmpid();
+        var len = this.tmpid();
+        var arr = this.tmpid();
+        var loopUses = this.scanLoop(node);
+        frame = frame.push();
+
+        this.emitLine('frame = frame.push();');
+
+        this.emit('var ' + arr + ' = ');
+        this._compileExpression(node.arr, frame);
+        this.emitLine(';');
+
+        this.emit('if(' + arr + ') {');
+
+        // If multiple names are passed, we need to bind them
+        // appropriately
         if(node.name instanceof nodes.Array) {
             this.emitLine('var ' + i + ';');
 
-            // did they pass an array of tuples or a dict?
-            this.emitLine('if (runtime.isArray(' + arr + ')) {');
+            // The object could be an arroy or object. Note that the
+            // body of the loop is duplicated for each condition, but
+            // we are optimizing for speed over size.
+            this.emitLine('if(runtime.isArray(' + arr + ')) {'); {
+                this.emitLine('for(' + i + '=0; ' + i + ' < ' + arr + '.length; '
+                              + i + '++) {');
 
+                // Bind each declared var
+                for (var u=0; u < node.name.children.length; u++) {
+                    var tid = this.tmpid();
+                    this.emitLine('var ' + tid + ' = ' + arr + '[' + i + '][' + u + ']');
+                    this.emitLine('frame.set("' + node.name.children[u].value
+                                  + '", ' + arr + '[' + i + '][' + u + ']' + ');');
+                    frame.set(node.name.children[u].value, tid);
+                }
 
-            this.emitLine('}');
-            this.emitLine('} else {');
+                this.emitLoopBindings(node, loopUses, arr, i);
+                this.compile(node.body, frame);
+                this.emitLine('}');
+            }
 
-            this.emitLine('}');
+            this.emitLine('} else {'); {
+                // Iterate over the key/values of an object
+                var key = node.name.children[0];
+                var val = node.name.children[1];
+                var k = this.tmpid();
+                var v = this.tmpid();
+                frame.set(key.value, k);
+                frame.set(val.value, v);
+
+                this.emitLine(i + ' = -1;');
+
+                if(loopUses['revindex'] || loopUses['revindex0'] ||
+                   loopUses['last'] || loopUses['length']) {
+                    this.emitLine('var ' + len + ' = runtime.keys(' + arr + ').length;');
+                }
+
+                this.emitLine('for(var ' + k + ' in ' + arr + ') {');
+                this.emitLine(i + '++;');
+                this.emitLine('var ' + v + ' = ' + arr + '[' + k + '];');
+                this.emitLine('frame.set("' + key.value + '", ' + k + ');');
+                this.emitLine('frame.set("' + val.value + '", ' + v + ');');
+
+                this.emitLoopBindings(node, loopUses, arr, i, len);
+                this.compile(node.body, frame);
+                this.emitLine('}');
+            }
+
             this.emitLine('}');
         }
         else {
+            // Generate a typical array iteration
             var v = this.tmpid();
             frame.set(node.name.value, v);
 
@@ -580,33 +655,24 @@ var Compiler = Object.extend({
             this.emitLine('var ' + v + ' = ' + arr + '[' + i + '];');
             this.emitLine('frame.set("' + node.name.value + '", ' + v + ');');
 
-            var bindings = {
-                index: i + ' + 1',
-                index0: i,
-                revindex: len + ' - ' + i,
-                revindex0: len + ' - ' + i + ' - 1',
-                first: i + ' === 0',
-                last: i + ' === ' + len + ' - 1',
-                length: len
-            };
-
-            for(var name in bindings) {
-                if(name in loopUses) {
-                    this.emitLine('frame.set("loop.' + name + '", ' + bindings[name] + ');');
-                }
-            }
-
+            this.emitLoopBindings(node, loopUses, arr, i);
             this.compile(node.body, frame);
             this.emitLine('}');
         }
         
+        this.emitLine('}');
         this.emitLine('frame = frame.pop();');
     },
 
     compileForAsync: function(node, frame) {
+        // This shares some code with the For tag, but not enough to
+        // worry about. This iterates across an object asynchronously,
+        // but not in parallel.
+
         var i = this.tmpid();
         var len = this.tmpid();
         var arr = this.tmpid();
+        var loopUses = this.scanLoop(node);
         frame = frame.push();
 
         this.emitLine('frame = frame.push();');
@@ -614,19 +680,6 @@ var Compiler = Object.extend({
         this.emit('var ' + arr + ' = ');
         this._compileExpression(node.arr, frame);
         this.emitLine(';');
-
-        var loopUses = {};
-        node.iterFields(function(field) {
-            var lookups = field.findAll(nodes.LookupVal);
-
-            lib.each(lookups, function(lookup) {
-                if (lookup.target instanceof nodes.Symbol &&
-                    lookup.target.value == 'loop' &&
-                    lookup.val instanceof nodes.Literal) {
-                    loopUses[lookup.val.value] = true;
-                }
-            });
-        });
 
         if(node.name instanceof nodes.Array) {
             this.emit('runtime.asyncIter(' + arr + ', ' +
@@ -651,22 +704,8 @@ var Compiler = Object.extend({
             frame.set(id, id);
         }
 
-        var bindings = {
-            index: i + ' + 1',
-            index0: i,
-            revindex: len + ' - ' + i,
-            revindex0: len + ' - ' + i + ' - 1',
-            first: i + ' === 0',
-            last: i + ' === ' + len + ' - 1',
-            length: len
-        };
-
-        for(var name in bindings) {
-            if(name in loopUses) {
-                this.emitLine('frame.set("loop.' + name + '", ' + bindings[name] + ');');
-            }
-        }
-
+        this.emitLoopBindings(node, loopUses, arr, i, len);
+        
         this.withScopedSyntax(function() {
             this.compile(node.body, frame);
             this.emitLine('next();');
@@ -983,7 +1022,13 @@ var Compiler = Object.extend({
 });
 
 // var c = new Compiler();
-// var src = '{% for i in [1,2,3] %}{{ i }}{% endfor %}';
+// var src = '{% for i in [1,2] %}' +
+//     'start: {{ num }}' +
+//     '{% from "import.html" import bar as num %}' +
+//     'end: {{ num }}' +
+//     '{% endfor %}' +
+//     'final: {{ num }}';
+
 // var ast = transformer.transform(parser.parse(src));
 // nodes.printNodes(ast);
 // c.compile(ast);
