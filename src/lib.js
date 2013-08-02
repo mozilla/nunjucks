@@ -214,7 +214,7 @@ exports.asyncEach = function(arr, iter, cb) {
         i++;
 
         if(i < arr.length) {
-            iter(arr[i], i, next);
+            iter(arr[i], i, next, cb);
         }
         else {
             cb();

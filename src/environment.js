@@ -1,5 +1,5 @@
 var lib = require('./lib');
-var Object = require('./object');
+var Obj = require('./object');
 var lexer = require('./lexer');
 var compiler = require('./compiler');
 var builtin_filters = require('./filters');
@@ -8,7 +8,7 @@ var runtime = require('./runtime');
 var globals = require('./globals');
 var Frame = runtime.Frame;
 
-var Environment = Object.extend({
+var Environment = Obj.extend({
     init: function(loaders, opts) {
         // The dev flag determines the trace that'll be shown on errors.
         // If set to true, returns the full trace from the error point,
@@ -90,51 +90,61 @@ var Environment = Object.extend({
             eagerCompile = false;
         }
 
-        var self = this;
-        var info = null;
-
         if(typeof name !== 'string') {
             throw new Error('template names must be a string: ' + name);
         }
 
-        var _getTemplate = function() {
-            var index = 0;
-            var getSource = function (cb) {
-                self.loaders[index].getSource(name, function (info) {
-                    if (info) {
-                        cb(info);
-                    } else {
-                        (++index < self.loaders.length) ? getSource(cb) : cb(null);
-                    }
-                });
-            };
+        var tmpl = this.cache[name];
 
-            getSource(function (info) {
-                if (!info) {
-                    throw new Error('template not found: ' + name);
-                }
-
-                self.cache[name] = new Template(info.src,
-                    self,
-                    info.path,
-                    info.upToDate,
-                    eagerCompile);
-
-                callback(null, self.cache[name]);
-            });
-        };
-
-        if(!this.cache[name]) {
-            _getTemplate();
+        if(!tmpl) {
+            this._loadTemplate(name, eagerCompile, callback);
         } else {
-            this.cache[name].upToDate(function (isUpToDate) {
-                if (isUpToDate) {
-                    callback(null, self.cache[name]);
+            tmpl.upToDate(function (up) {
+                if(up) {
+                    callback(null, tmpl);
                 } else {
-                    _getTemplate();
+                    this._loadTemplate(name, eagerCompile, callback);
                 }
             });
         }
+    },
+
+    _loadTemplate: function(name, eagerCompile, cb) {
+        lib.asyncEach(this.loaders, function(loader, i, next, done) {
+            if(loader.async) {
+                loader.getSource(name, function(err, info) {
+                    if(err) {
+                        next();
+                    }
+                    else {
+                        done(info);
+                    }
+                });
+            }
+            else {
+                try {
+                    var src = loader.getSource(name);
+                    console.log(src);
+                    done(src);
+                }
+                catch(e) {
+                    next();
+                }
+            }
+        }, function(info) {
+            if(!info) {
+                cb(new Error('template not found: ' + name));                
+            }
+            else {
+                // TODO: an error is being thrown here but is swalled for some reason
+                this.cache[name] = new Template(info.src,
+                                                this,
+                                                info.path,
+                                                info.upToDate,
+                                                eagerCompile);
+                cb(null, this.cache[name]);
+            }
+        });
     },
 
     registerPrecompiled: function(templates) {
@@ -217,7 +227,7 @@ var Environment = Object.extend({
     }
 });
 
-var Context = Object.extend({
+var Context = Obj.extend({
     init: function(ctx, blocks) {
         this.ctx = ctx;
         this.blocks = {};
@@ -286,7 +296,7 @@ var Context = Object.extend({
     }
 });
 
-var Template = Object.extend({
+var Template = Obj.extend({
     init: function (src, env, path, upToDate, eagerCompile) {
         this.env = env || new Environment();
 
@@ -369,7 +379,7 @@ var Template = Object.extend({
             props = this.tmplProps;
         }
         else {
-            var source = compiler.compile(this.tmplStr, 
+            var source = compiler.compile(this.tmplStr,
                                           this.env.asyncFilters,
                                           this.env.extensionsList,
                                           this.path);

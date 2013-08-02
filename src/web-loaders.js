@@ -1,7 +1,6 @@
+var Obj = require('./object');
 
-var Object = require('./object');
-
-var HttpLoader = Object.extend({
+var HttpLoader = Obj.extend({
     init: function(baseURL, neverUpdate) {
         if (typeof(console) !== "undefined" && console.log &&
             typeof(nunjucks) == "object" && !nunjucks.testing) {
