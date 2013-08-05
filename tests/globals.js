@@ -12,7 +12,6 @@
         lib = nunjucks.require('lib');
     }
 
-    var render = util.render;
     var equal = util.equal;
     var finish = util.finish;
 

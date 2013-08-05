@@ -228,10 +228,10 @@ function contextOrFrameLookup(context, frame, name) {
 
 function handleError(error, lineno, colno) {
     if(error.lineno) {
-        throw error;
+        return error;
     }
     else {
-        throw new lib.TemplateError(error, lineno, colno);
+        return new lib.TemplateError(error, lineno, colno);
     }
 }
 

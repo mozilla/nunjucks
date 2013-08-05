@@ -92,7 +92,7 @@ var Compiler = Object.extend({
 
         this.closeScopeLevels();
         this.emitLine('} catch (e) {');
-        this.emitLine('  runtime.handleError(e, lineno, colno);');
+        this.emitLine('  cb(runtime.handleError(e, lineno, colno));');
         this.emitLine('}');
         this.emitLine('}');
         this.buffer = null;

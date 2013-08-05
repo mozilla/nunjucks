@@ -73,9 +73,9 @@
         var t = new Template(str, e);
 
         return t.render(ctx, function(err, res) {
-            cb(err, res);
-
             setTimeout(function() {
+                cb(err, res);
+
                 doneAsyncs++;
 
                 if(numAsyncs == doneAsyncs && doneHandler) {
