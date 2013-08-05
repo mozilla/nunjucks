@@ -35,6 +35,10 @@
         }
 
         render(str, ctx, null, function(err, res) {
+            if(err) {
+                throw err;
+            }
+
             expect(res).to.be(str2);
         });
     }
@@ -56,9 +60,16 @@
 
         opts = opts || { dev: true };
         var e = new Environment(new loader(templatesPath), opts);
+
         if(opts.filters) {
             for(var name in opts.filters) {
                 e.addFilter(name, opts.filters[name]);
+            }        
+        }
+
+        if(opts.asyncFilters) {
+            for(var name in opts.asyncFilters) {
+                e.addFilter(name, opts.asyncFilters[name], true);
             }        
         }
 
@@ -74,6 +85,10 @@
 
         return t.render(ctx, function(err, res) {
             setTimeout(function() {
+                if(err && !opts.noThrow) {
+                    throw err;
+                }
+
                 cb(err, res);
 
                 doneAsyncs++;

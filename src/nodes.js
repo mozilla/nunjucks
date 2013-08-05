@@ -87,6 +87,7 @@ var Pair = Node.extend("Pair", { fields: ['key', 'value'] });
 var Dict = NodeList.extend("Dict");
 var LookupVal = Node.extend("LookupVal", { fields: ['target', 'val'] });
 var If = Node.extend("If", { fields: ['cond', 'body', 'else_'] });
+var IfAsync = If.extend("IfAsync");
 var InlineIf = Node.extend("InlineIf", { fields: ['cond', 'body', 'else_'] });
 var For = Node.extend("For", { fields: ['arr', 'name', 'body'] });
 var ForAsync = For.extend("ForAsync");
@@ -240,8 +241,10 @@ module.exports = {
     Output: Output,
     TemplateData: TemplateData,
     If: If,
+    IfAsync: IfAsync,
     InlineIf: InlineIf,
     For: For,
+    ForAsync: ForAsync,
     Macro: Macro,
     Import: Import,
     FromImport: FromImport,

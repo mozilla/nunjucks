@@ -1,5 +1,5 @@
 (function() {
-    var expect, util, Environment, Template;
+    var expect, util, Environment, Template, fs;
 
     if(typeof require != 'undefined') {
         expect = require('expect.js');
@@ -7,6 +7,7 @@
         render = require('./util').render;
         Environment = require('../src/environment').Environment;
         Template = require('../src/environment').Template;
+        fs = require('fs');
     }
     else {
         expect = window.expect;
@@ -202,7 +203,51 @@
         });
 
         it('should compile for async', function(done) {
-            runLoopTests('forasync');
+            runLoopTests('forAsync');            
+            finish(done);
+        });
+
+        it('should compile async control', function(done) {
+            if(fs) {
+                var opts = { 
+                    asyncFilters: {
+                        getContents: function(tmpl, cb) {
+                            fs.readFile(tmpl, cb);
+                        }
+                    }
+                };
+
+                render('{{ tmpl | getContents }}',
+                       { tmpl: 'tests/templates/for-async-content.html' },
+                       opts,
+                       function(err, res) {
+                           expect(res).to.be('somecontenthere');
+                       });
+
+                render('{% ifAsync tmpl %}{{ tmpl | getContents }}{% endif %}',
+                       { tmpl: 'tests/templates/for-async-content.html' },
+                       opts,
+                       function(err, res) {
+                           expect(res).to.be('somecontenthere');
+                       });
+
+                render('{% forAsync t in [tmpl, tmpl] %}{{ t | getContents }}*{% endfor %}',
+                       { tmpl: 'tests/templates/for-async-content.html' },
+                       opts,
+                       function(err, res) {
+                           expect(res).to.be('somecontenthere*somecontenthere*');
+                       });
+
+                render('{% ifAsync tmpl %}' +
+                       '{% forAsync i in [0, 1] %}{{ tmpl | getContents }}*{% endfor %}' +
+                       '{% endif %}',
+                       { tmpl: 'tests/templates/for-async-content.html' },
+                       opts,
+                       function(err, res) {
+                           expect(res).to.be('somecontenthere*somecontenthere*');
+                       });
+            }
+
             finish(done);
         });
 
@@ -467,9 +512,12 @@
         });
 
         it('should throw errors', function(done) {
-            render('{% from "import.html" import boozle %}', function(err) {
-                expect(err).to.match(/cannot import 'boozle'/);
-            });
+            render('{% from "import.html" import boozle %}',
+                   {},
+                   { noThrow: true },
+                   function(err) {
+                       expect(err).to.match(/cannot import 'boozle'/);
+                   });
 
             finish(done);
         });

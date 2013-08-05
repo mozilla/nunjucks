@@ -513,13 +513,17 @@ var Compiler = Object.extend({
         }, this);
     },
 
-    compileIf: function(node, frame) {
+    compileIf: function(node, frame, async) {
         this.emit('if(');
         this._compileExpression(node.cond, frame);
         this.emitLine(') {');
 
         this.withScopedSyntax(function() {
             this.compile(node.body, frame);
+
+            if(async) {
+                this.emit('cb()');
+            }
         });
 
         if(node.else_) {
@@ -527,10 +531,21 @@ var Compiler = Object.extend({
 
             this.withScopedSyntax(function() {
                 this.compile(node.else_, frame);
+
+                if(async) {
+                    this.emit('cb()');
+                }
             });
         }
 
         this.emitLine('}');
+    },
+
+    compileIfAsync: function(node, frame) {
+        this.emit('(function(cb) {');
+        this.compileIf(node, frame, true);
+        this.emit('})(function() {');
+        this.addScopeLevel();
     },
 
     scanLoop: function(node) {
@@ -1026,14 +1041,8 @@ var Compiler = Object.extend({
 });
 
 // var c = new Compiler();
-// var src = '{% for i in [1,2] %}' +
-//     'start: {{ num }}' +
-//     '{% from "import.html" import bar as num %}' +
-//     'end: {{ num }}' +
-//     '{% endfor %}' +
-//     'final: {{ num }}';
-
-// var ast = transformer.transform(parser.parse(src));
+// var src = '{% ifAsync tmpl %}{{ tmpl | getContents }}{% endif %}';
+// var ast = transformer.transform(parser.parse(src), ['getContents']);
 // nodes.printNodes(ast);
 // c.compile(ast);
 

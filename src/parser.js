@@ -134,11 +134,17 @@ var Parser = Object.extend({
 
     parseFor: function() {
         var forTok = this.peekToken();
-        if(!this.skipSymbol('for') && !this.skipSymbol('forasync')) {
-            this.fail("parseFor: expected for", forTok.lineno, forTok.colno);
-        }
+        var node;
 
-        var node = new nodes.For(forTok.lineno, forTok.colno);
+        if(this.skipSymbol('for')) {
+            node = new nodes.For(forTok.lineno, forTok.colno);
+        }
+        else if(this.skipSymbol('forAsync')) {
+            node = new nodes.ForAsync(forTok.lineno, forTok.colno);            
+        }
+        else {
+            this.fail("parseFor: expected for{Async}", forTok.lineno, forTok.colno);
+        }
 
         node.name = this.parsePrimary();
 
@@ -340,13 +346,19 @@ var Parser = Object.extend({
 
     parseIf: function() {
         var tag = this.peekToken();
-        if(!this.skipSymbol('if') && !this.skipSymbol('elif')) {
+        var node;
+
+        if(this.skipSymbol('if') || this.skipSymbol('elif')) {
+            node = new nodes.If(tag.lineno, tag.colno);
+        }
+        else if(this.skipSymbol('ifAsync')) {
+            node = new nodes.IfAsync(tag.lineno, tag.colno);
+        }
+        else {
             this.fail("parseIf: expected if or elif",
                       tag.lineno,
                       tag.colno);
         }
-
-        var node = new nodes.If(tag.lineno, tag.colno);
 
         node.cond = this.parseExpression();
         this.advanceAfterBlockEnd(tag.value);
@@ -419,9 +431,11 @@ var Parser = Object.extend({
 
         switch(tok.value) {
         case 'raw': return this.parseRaw();
-        case 'if': return this.parseIf();
+        case 'if':
+        case 'ifAsync':
+            return this.parseIf();
         case 'for': 
-        case 'forasync':
+        case 'forAsync':
             return this.parseFor();
         case 'block': return this.parseBlock();
         case 'extends': return this.parseExtends();

@@ -156,10 +156,8 @@ function transform(ast, asyncFilters, extensions, name) {
 }
 
 // var parser = require('./parser');
-// var src = '{% for i in [1,2] %}' +
-//     '{% include "poop.html" %}' +
-//     '{% endfor %}';
-// var ast = transform(parser.parse(src));
+// var src = '{% if tmpl %}{{ foo(t | getContents) }}{% endif %}';
+// var ast = transform(parser.parse(src), ['getContents']);
 // nodes.printNodes(ast);
 
 module.exports = {
