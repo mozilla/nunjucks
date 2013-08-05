@@ -1,6 +1,6 @@
-var Obj = require('./object');
+var Loader = require('./loader');
 
-var HttpLoader = Obj.extend({
+var HttpLoader = Loader.extend({
     init: function(baseURL, neverUpdate) {
         if (typeof(console) !== "undefined" && console.log &&
             typeof(nunjucks) == "object" && !nunjucks.testing) {
@@ -21,7 +21,7 @@ var HttpLoader = Obj.extend({
 
             return { src:src,
                      path:name,
-                     upToDate:function (cb) {
+                     upToDate: function (cb) {
                          cb(_this.neverUpdate);
                      }};
         });

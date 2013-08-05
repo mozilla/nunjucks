@@ -1,13 +1,15 @@
 var fs = require('fs');
 var path = require('path');
 var lib = require('./lib');
-var Obj = require('./object');
+var Loader = require('./loader');
 
 // Node <0.7.1 compatibility
 var existsSync = fs.existsSync || path.existsSync;
 
-var FileSystemLoader = Obj.extend({
-    init: function(searchPaths) {
+var FileSystemLoader = Loader.extend({
+    init: function(searchPaths, watch) {
+        this.pathsToNames = {};
+
         if(searchPaths) {
             searchPaths = lib.isArray(searchPaths) ? searchPaths : [searchPaths];
             // For windows, convert to forward slashes
@@ -17,11 +19,24 @@ var FileSystemLoader = Obj.extend({
             this.searchPaths = [];
         }
 
+        if(watch) {
+            // Watch all the templates in the paths and fire an event when
+            // they change
+            lib.each(this.searchPaths, function(p) {
+                fs.watch(p, function(event, filename) {
+                    var fullname = path.join(p, filename);
+                    if(event == 'change' && fullname in this.pathsToNames) {
+                        this.emit('update', this.pathsToNames[fullname]);
+                    }
+                }.bind(this));
+            }.bind(this));
+        }
     },
 
     getSource: function(name) {
         var fullpath = null;
-        var paths = this.searchPaths.concat(['', __dirname]);
+        var paths = this.searchPaths;
+
         for(var i=0; i<paths.length; i++) {
             var p = path.join(paths[i], name);
             if(p.indexOf(paths[i]) === 0 && existsSync(p)) {
@@ -34,16 +49,10 @@ var FileSystemLoader = Obj.extend({
             return null;
         }
 
-        return { src: fs.readFileSync(fullpath, 'utf-8'),
-                 path: fullpath,
-                 upToDate: this.upToDateFunc(fullpath) };
-    },
+        this.pathsToNames[fullpath] = name;
 
-    upToDateFunc: function(file) {
-        var mtime = fs.statSync(file).mtime.toString();
-        return function() {
-            return fs.statSync(file).mtime.toString() == mtime;
-        };
+        return { src: fs.readFileSync(fullpath, 'utf-8'),
+                 path: fullpath };
     }
 });
 

@@ -28,7 +28,7 @@ var Environment = Obj.extend({
         if(!loaders) {
             // The filesystem loader is only available client-side
             if(builtin_loaders.FileSystemLoader) {
-                this.loaders = [new builtin_loaders.FileSystemLoader()];
+                this.loaders = [new builtin_loaders.FileSystemLoader('views')];
             }
             else {
                 this.loaders = [new builtin_loaders.HttpLoader('/views')];
@@ -38,13 +38,23 @@ var Environment = Obj.extend({
             this.loaders = lib.isArray(loaders) ? loaders : [loaders];
         }
 
+        // Caching and cache busting
+
+        var cache = {};
+
+        lib.each(this.loaders, function(loader) {
+            loader.on('update', function(template) {
+                cache[template] = null;
+            });
+        });
+
         if(opts.tags) {
             lexer.setTags(opts.tags);
         }
 
+        this.cache = cache;
         this.filters = {};
         this.asyncFilters = [];
-        this.cache = {};
         this.extensions = {};
         this.extensionsList = [];
 
@@ -79,14 +89,14 @@ var Environment = Obj.extend({
         return this.filters[name];
     },
 
-    getTemplate: function(name, eagerCompile, callback) {
+    getTemplate: function(name, eagerCompile, cb) {
         if(name && name.raw) {
             // this fixes autoescape for templates referenced in symbols
             name = name.raw;
         }
 
         if(lib.isFunction(eagerCompile)) {
-            callback = eagerCompile;
+            cb = eagerCompile;
             eagerCompile = false;
         }
 
@@ -96,55 +106,41 @@ var Environment = Obj.extend({
 
         var tmpl = this.cache[name];
 
-        if(!tmpl) {
-            this._loadTemplate(name, eagerCompile, callback);
+        if(tmpl) {
+            cb(null, tmpl);
         } else {
-            tmpl.upToDate(function (up) {
-                if(up) {
-                    callback(null, tmpl);
-                } else {
-                    this._loadTemplate(name, eagerCompile, callback);
-                }
-            });
-        }
-    },
-
-    _loadTemplate: function(name, eagerCompile, cb) {
-        lib.asyncEach(this.loaders, function(loader, i, next, done) {
-            if(loader.async) {
-                loader.getSource(name, function(err, info) {
-                    if(err) {
-                        next();
+            lib.asyncEach(this.loaders, function(loader, i, next, done) {
+                function handle(src) {
+                    if(src) {
+                        done(src);
                     }
                     else {
-                        done(info);
+                        next();
                     }
-                });
-            }
-            else {
-                try {
-                    var src = loader.getSource(name);
-                    console.log(src);
-                    done(src);
                 }
-                catch(e) {
-                    next();
+
+                if(loader.async) {
+                    loader.getSource(name, function(err, src) {
+                        if(err) { throw err; }
+                        handle(src);
+                    });
                 }
-            }
-        }, function(info) {
-            if(!info) {
-                cb(new Error('template not found: ' + name));                
-            }
-            else {
-                // TODO: an error is being thrown here but is swalled for some reason
-                this.cache[name] = new Template(info.src,
-                                                this,
-                                                info.path,
-                                                info.upToDate,
-                                                eagerCompile);
-                cb(null, this.cache[name]);
-            }
-        });
+                else {
+                    handle(loader.getSource(name));
+                }
+            }, function(info) {
+                if(!info) {
+                    cb(new Error('template not found: ' + name));
+                }
+                else {
+                    this.cache[name] = new Template(info.src,
+                                                    this,
+                                                    info.path,
+                                                    eagerCompile);
+                    cb(null, this.cache[name]);
+                }
+            }.bind(this));
+        }
     },
 
     registerPrecompiled: function(templates) {
@@ -179,9 +175,7 @@ var Environment = Obj.extend({
 
                 context = lib.extend(context, ctx);
 
-                env.render(name, context, function(res) {
-                    k(null, res);
-                });
+                env.render(name, context, k);
             };
         }
         else {
@@ -208,9 +202,9 @@ var Environment = Obj.extend({
 
                 context = lib.extend(context, app._locals);
 
-                env.render(name, context, function (str) {
+                env.render(name, context, function (err, str) {
                     if (k) {
-                        k(null, str);
+                        k(err, str);
                     }
                     else {
                         self.send(str);
@@ -297,7 +291,7 @@ var Context = Obj.extend({
 });
 
 var Template = Obj.extend({
-    init: function (src, env, path, upToDate, eagerCompile) {
+    init: function (src, env, path, eagerCompile) {
         this.env = env || new Environment();
 
         if(lib.isObject(src)) {
@@ -315,7 +309,6 @@ var Template = Obj.extend({
         }
 
         this.path = path;
-        this.upToDate = upToDate || function() { return false; };
 
         if(eagerCompile) {
             lib.withPrettyErrors(this.path,
@@ -405,22 +398,25 @@ var Template = Obj.extend({
     }
 });
 
-var fs = require('fs');
-var src = '{% for i in [1,2] %}' +
-    'start: {{ num }}' +
-    '{% from "import.html" import bar as num %}' +
-    'end: {{ num }}' +
-    '{% endfor %}' +
-    'final: {{ num }}';
-var env = new Environment(new builtin_loaders.FileSystemLoader('tests/templates'), { dev: true });
+// var fs = require('fs');
+// var src = '{% for i in [1,2] %}' +
+//     'start: {{ num }}' +
+//     '{% from "import.html" import bar as num %}' +
+//     'end: {{ num }}\n' +
+//     '{% endfor %}' +
+//     'final: {{ num }}';
+// var env = new Environment(new builtin_loaders.FileSystemLoader('tests/templates'), { dev: true });
 
-var ctx = {};
-var tmpl = new Template(src, env, null, null, true);
-console.log("OUTPUT ---");
+// var ctx = {};
+// var tmpl = new Template(src, env, null, null, true);
+// console.log("OUTPUT ---");
 
-tmpl.render(ctx, function(err, res) {
-    console.log(res);
-});
+// tmpl.render(ctx, function(err, res) {
+//     if(err) {
+//         throw err;
+//     }
+//     console.log(res);
+// });
 
 module.exports = {
     Environment: Environment,

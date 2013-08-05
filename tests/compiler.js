@@ -675,15 +675,15 @@
                 }
             );
 
-            // render(
-            //     '{% macro foo(x, y) %}{{ x|safe }} and {{ y }}{% endmacro %}' +
-            //         '{{ foo("<>&", "<>") }}',
-            //     null,
-            //     { autoescape: true },
-            //     function(err, res) {
-            //         expect(res).to.be('<>& and &lt;&gt;');
-            //     }
-            // );
+            render(
+                '{% macro foo(x, y) %}{{ x|safe }} and {{ y }}{% endmacro %}' +
+                    '{{ foo("<>&", "<>") }}',
+                null,
+                { autoescape: true },
+                function(err, res) {
+                    expect(res).to.be('<>& and &lt;&gt;');
+                }
+            );
 
             finish(done);
         });
