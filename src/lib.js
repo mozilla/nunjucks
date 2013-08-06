@@ -48,7 +48,7 @@ exports.TemplateError = function(message, lineno, colno) {
         }
     }
 
-    err.name = "Template render error";
+    err.name = 'Template render error';
     err.message = message;
     err.lineno = lineno;
     err.colno = colno;

@@ -114,7 +114,7 @@ exports.TemplateError = function(message, lineno, colno) {
         }
     }
 
-    err.name = "Template render error";
+    err.name = 'Template render error';
     err.message = message;
     err.lineno = lineno;
     err.colno = colno;
@@ -453,6 +453,7 @@ var Pair = Node.extend("Pair", { fields: ['key', 'value'] });
 var Dict = NodeList.extend("Dict");
 var LookupVal = Node.extend("LookupVal", { fields: ['target', 'val'] });
 var If = Node.extend("If", { fields: ['cond', 'body', 'else_'] });
+var IfAsync = If.extend("IfAsync");
 var InlineIf = Node.extend("InlineIf", { fields: ['cond', 'body', 'else_'] });
 var For = Node.extend("For", { fields: ['arr', 'name', 'body'] });
 var ForAsync = For.extend("ForAsync");
@@ -606,8 +607,10 @@ modules['nodes'] = {
     Output: Output,
     TemplateData: TemplateData,
     If: If,
+    IfAsync: IfAsync,
     InlineIf: InlineIf,
     For: For,
+    ForAsync: ForAsync,
     Macro: Macro,
     Import: Import,
     FromImport: FromImport,
@@ -1475,11 +1478,17 @@ var Parser = Object.extend({
 
     parseFor: function() {
         var forTok = this.peekToken();
-        if(!this.skipSymbol('for') && !this.skipSymbol('forasync')) {
-            this.fail("parseFor: expected for", forTok.lineno, forTok.colno);
-        }
+        var node;
 
-        var node = new nodes.For(forTok.lineno, forTok.colno);
+        if(this.skipSymbol('for')) {
+            node = new nodes.For(forTok.lineno, forTok.colno);
+        }
+        else if(this.skipSymbol('forAsync')) {
+            node = new nodes.ForAsync(forTok.lineno, forTok.colno);            
+        }
+        else {
+            this.fail("parseFor: expected for{Async}", forTok.lineno, forTok.colno);
+        }
 
         node.name = this.parsePrimary();
 
@@ -1681,13 +1690,19 @@ var Parser = Object.extend({
 
     parseIf: function() {
         var tag = this.peekToken();
-        if(!this.skipSymbol('if') && !this.skipSymbol('elif')) {
+        var node;
+
+        if(this.skipSymbol('if') || this.skipSymbol('elif')) {
+            node = new nodes.If(tag.lineno, tag.colno);
+        }
+        else if(this.skipSymbol('ifAsync')) {
+            node = new nodes.IfAsync(tag.lineno, tag.colno);
+        }
+        else {
             this.fail("parseIf: expected if or elif",
                       tag.lineno,
                       tag.colno);
         }
-
-        var node = new nodes.If(tag.lineno, tag.colno);
 
         node.cond = this.parseExpression();
         this.advanceAfterBlockEnd(tag.value);
@@ -1760,9 +1775,11 @@ var Parser = Object.extend({
 
         switch(tok.value) {
         case 'raw': return this.parseRaw();
-        case 'if': return this.parseIf();
+        case 'if':
+        case 'ifAsync':
+            return this.parseIf();
         case 'for': 
-        case 'forasync':
+        case 'forAsync':
             return this.parseFor();
         case 'block': return this.parseBlock();
         case 'extends': return this.parseExtends();
@@ -2419,6 +2436,227 @@ modules['parser'] = {
 };
 })();
 (function() {
+var nodes = modules["nodes"];
+
+var sym = 0;
+function gensym() {
+    return 'hole_' + sym++;
+}
+
+// copy-on-write version of map
+function mapCOW(arr, func) {
+    var res = null;
+
+    for(var i=0; i<arr.length; i++) {
+        var item = func(arr[i]);
+
+        if(item !== arr[i]) {
+            if(!res) {
+                res = arr.slice();
+            }
+
+            res[i] = item;
+        }
+    }
+
+    return res || arr;
+}
+
+function walk(ast, func, depthFirst) {
+    if(!(ast instanceof nodes.Node)) {
+        return ast;
+    }
+
+    if(!depthFirst) {
+        var astT = func(ast);
+        
+        if(astT && astT !== ast) {
+            return astT;
+        }
+    }
+    
+    if(ast instanceof nodes.NodeList) {
+        var children = mapCOW(ast.children, function(node) {
+            return walk(node, func, depthFirst);
+        });
+
+        if(children !== ast.children) {
+            ast = new nodes[ast.typename](ast.lineno, ast.colno, children);
+        }
+    }
+    else {
+        var props = ast.fields.map(function(field) {
+            return ast[field];
+        });
+
+        var propsT = mapCOW(props, function(prop) {
+            return walk(prop, func, depthFirst);
+        });
+
+        if(propsT !== props) {
+            ast = new nodes[ast.typename](ast.lineno, ast.colno);
+
+            propsT.forEach(function(prop, i) {
+                ast[ast.fields[i]] = prop;
+            });
+        }
+    }
+
+    return depthFirst ? (func(ast) || ast) : ast;
+}
+
+function depthWalk(ast, func) {
+    return walk(ast, func, true);
+}
+
+function _liftFilters(node, asyncFilters, prop) {
+    var children = [];
+
+    var walked = depthWalk(prop ? node[prop] : node, function(node) {
+        if(node instanceof nodes.Block) {
+            return node;
+        }
+        else if(node instanceof nodes.Filter &&
+                asyncFilters.indexOf(node.name.value) !== -1) {
+            var symbol = new nodes.Symbol(node.lineno,
+                                          node.colno,
+                                          gensym());
+
+            children.push(new nodes.FilterAsync(node.lineno,
+                                                node.colno,
+                                                node.name, 
+                                                node.args,
+                                                symbol));
+            return symbol;
+        }
+    });
+
+    if(prop) {
+        node[prop] = walked;
+    }
+    else {
+        node = walked;
+    }
+
+    if(children.length) {
+        children.push(node);
+
+        return new nodes.NodeList(
+            node.lineno,
+            node.colno,
+            children
+        );
+    }
+    else {
+        return node;
+    }
+}
+
+function liftFilters(ast, asyncFilters) {
+    return walk(ast, function(node) {
+        if(node instanceof nodes.Output) {
+            return _liftFilters(node, asyncFilters);
+        }
+        else if(node instanceof nodes.For) {
+            return _liftFilters(node, asyncFilters, 'arr');
+        }
+        else if(node instanceof nodes.If) {
+            return _liftFilters(node, asyncFilters, 'cond');
+        }
+    });
+}
+
+function liftSuper(ast) {
+    return walk(ast, function(blockNode) {
+        if(!(blockNode instanceof nodes.Block)) {
+            return;
+        }
+
+        var hasSuper = false;
+        var symbol = gensym();
+
+        blockNode.body = walk(blockNode.body, function(node) {
+            if(node instanceof nodes.FunCall &&
+               node.name.value == 'super') {
+                hasSuper = true;
+                return new nodes.Symbol(node.lineno, node.colno, symbol);
+            }
+        });
+
+        if(hasSuper) {
+            blockNode.body.children.unshift(new nodes.Super(
+                0, 0, blockNode.name, new nodes.Symbol(0, 0, symbol)
+            ));
+        }
+    });
+}
+
+function convertStatements(ast) {
+    return depthWalk(ast, function(node) {
+        if(!(node instanceof nodes.If) &&
+           !(node instanceof nodes.For)) {
+            return;
+        }
+
+        var async = false;
+        walk(node, function(node) {
+            if(node instanceof nodes.FilterAsync) {
+                async = true;
+                // Stop iterating by returning the node
+                return node;
+            }
+        });
+
+        if(async) {
+	        if(node instanceof nodes.If) {
+                return new nodes.IfAsync(
+                    node.lineno,
+                    node.colno,
+                    node.cond,
+                    node.body,
+                    node.else_
+                );
+            }
+            else if(node instanceof nodes.For) {
+                return new nodes.ForAsync(
+                    node.lineno,
+                    node.colno,
+                    node.arr,
+                    node.name,
+                    node.body
+                );
+            }
+        }
+    });
+}
+
+function cps(ast, asyncFilters) {
+    return convertStatements(liftSuper(liftFilters(ast, asyncFilters)));
+}
+
+function transform(ast, asyncFilters, extensions, name) {
+    // Run the extension preprocessors against the source.
+    if(extensions && extensions.length) {
+        for(var i=0; i<extensions.length; i++) {
+            if('preprocess' in extensions[i]) {
+                src = extensions[i].preprocess(src, name);
+            }
+        }
+    }
+
+    return cps(ast, asyncFilters || []);
+}
+
+// var parser = modules["parser"];
+// var src = '{% block content %}hello{% endblock %} {{ tmpl | getContents }}';
+// var ast = transform(parser.parse(src), ['getContents']);
+// nodes.printNodes(ast);
+
+modules['transformer'] = {
+    transform: transform
+};
+})();
+(function() {
 var lib = modules["lib"];
 var parser = modules["parser"];
 var transformer = modules["transformer"];
@@ -2608,7 +2846,8 @@ var Compiler = Object.extend({
             nodes.Pow,
             nodes.Neg,
             nodes.Pos,
-            nodes.Compare
+            nodes.Compare,
+            nodes.NodeList
         );
         this.compile(node, frame);
     },
@@ -2934,13 +3173,17 @@ var Compiler = Object.extend({
         }, this);
     },
 
-    compileIf: function(node, frame) {
+    compileIf: function(node, frame, async) {
         this.emit('if(');
         this._compileExpression(node.cond, frame);
         this.emitLine(') {');
 
         this.withScopedSyntax(function() {
             this.compile(node.body, frame);
+
+            if(async) {
+                this.emit('cb()');
+            }
         });
 
         if(node.else_) {
@@ -2948,10 +3191,21 @@ var Compiler = Object.extend({
 
             this.withScopedSyntax(function() {
                 this.compile(node.else_, frame);
+
+                if(async) {
+                    this.emit('cb()');
+                }
             });
         }
 
         this.emitLine('}');
+    },
+
+    compileIfAsync: function(node, frame) {
+        this.emit('(function(cb) {');
+        this.compileIf(node, frame, true);
+        this.emit('})(function() {');
+        this.addScopeLevel();
     },
 
     scanLoop: function(node) {
@@ -3447,14 +3701,8 @@ var Compiler = Object.extend({
 });
 
 // var c = new Compiler();
-// var src = '{% for i in [1,2] %}' +
-//     'start: {{ num }}' +
-//     '{% from "import.html" import bar as num %}' +
-//     'end: {{ num }}' +
-//     '{% endfor %}' +
-//     'final: {{ num }}';
-
-// var ast = transformer.transform(parser.parse(src));
+// var src = '{% block content %}hello{% endblock %} {{ tmpl | getContents }}';
+// var ast = transformer.transform(parser.parse(src), ['getContents']);
 // nodes.printNodes(ast);
 // c.compile(ast);
 
@@ -3473,175 +3721,6 @@ modules['compiler'] = {
     },
 
     Compiler: Compiler
-};
-})();
-(function() {
-var nodes = modules["nodes"];
-
-var sym = 0;
-function gensym() {
-    return 'hole_' + sym++;
-}
-
-// copy-on-write version of map
-function mapCOW(arr, func) {
-    var res = null;
-
-    for(var i=0; i<arr.length; i++) {
-        var item = func(arr[i]);
-
-        if(item !== arr[i]) {
-            if(!res) {
-                res = arr.slice();
-            }
-
-            res[i] = item;
-        }
-    }
-
-    return res || arr;
-}
-
-function walk(ast, func, depthFirst) {
-    if(!(ast instanceof nodes.Node)) {
-        return ast;
-    }
-
-    if(!depthFirst) {
-        var astT = func(ast);
-        
-        if(astT && astT !== ast) {
-            return astT;
-        }
-    }
-    
-    if(ast instanceof nodes.NodeList) {
-        var children = mapCOW(ast.children, function(node) {
-            return walk(node, func, depthFirst);
-        });
-
-        if(children !== ast.children) {
-            ast = new nodes[ast.typename](ast.lineno, ast.colno, children);
-        }
-    }
-    else {
-        var props = ast.fields.map(function(field) {
-            return ast[field];
-        });
-
-        var propsT = mapCOW(props, function(prop) {
-            return walk(prop, func, depthFirst);
-        });
-
-        if(propsT !== props) {
-            ast = new nodes[ast.typename](ast.lineno, ast.colno);
-
-            propsT.forEach(function(prop, i) {
-                ast[ast.fields[i]] = prop;
-            });
-        }
-    }
-
-    return depthFirst ? (func(ast) || ast) : ast;
-}
-
-function depthWalk(ast, func) {
-    return walk(ast, func, true);
-}
-
-function liftFilters(ast, asyncFilters) {
-    return walk(ast, function(outNode) {
-        if(!(outNode instanceof nodes.Output)) {
-            return;
-        }
-
-        var children = [];
-
-        outNode = depthWalk(outNode, function(node) {
-            if(node instanceof nodes.Block) {
-                return node;
-            }
-            else if(node instanceof nodes.Filter &&
-                    asyncFilters.indexOf(node.name.value) !== -1) {
-                var symbol = new nodes.Symbol(node.lineno,
-                                              node.colno,
-                                              gensym());
-
-                children.push(new nodes.FilterAsync(node.lineno,
-                                                    node.colno,
-                                                    node.name, 
-                                                    node.args,
-                                                    symbol));
-                return symbol;
-            }
-        });
-
-        if(children.length) {
-            children.push(outNode);
-
-            return new nodes.NodeList(
-                outNode.lineno,
-                outNode.colno,
-                children
-            );
-        }
-        else {
-            return outNode;
-        }
-    });
-}
-
-function liftSuper(ast) {
-    return walk(ast, function(blockNode) {
-        if(!(blockNode instanceof nodes.Block)) {
-            return;
-        }
-
-        var hasSuper = false;
-        var symbol = gensym();
-
-        blockNode.body = walk(blockNode.body, function(node) {
-            if(node instanceof nodes.FunCall &&
-               node.name.value == 'super') {
-                hasSuper = true;
-                return new nodes.Symbol(node.lineno, node.colno, symbol);
-            }
-        });
-
-        if(hasSuper) {
-            blockNode.body.children.unshift(new nodes.Super(
-                0, 0, blockNode.name, new nodes.Symbol(0, 0, symbol)
-            ));
-        }
-    });
-}
-
-function cps(ast, asyncFilters) {
-    return liftSuper(liftFilters(ast, asyncFilters));
-}
-
-function transform(ast, asyncFilters, extensions, name) {
-    // Run the extension preprocessors against the source.
-    if(extensions && extensions.length) {
-        for(var i=0; i<extensions.length; i++) {
-            if('preprocess' in extensions[i]) {
-                src = extensions[i].preprocess(src, name);
-            }
-        }
-    }
-
-    return cps(ast, asyncFilters || []);
-}
-
-// var parser = modules["parser"];
-// var src = '{% for i in [1,2] %}' +
-//     '{% include "poop.html" %}' +
-//     '{% endfor %}';
-// var ast = transform(parser.parse(src));
-// nodes.printNodes(ast);
-
-modules['transformer'] = {
-    transform: transform
 };
 })();
 (function() {
@@ -4122,25 +4201,21 @@ var HttpLoader = Loader.extend({
     },
 
     getSource: function(name, callback) {
-        var _this = this;
+        var src = this.fetch(this.baseURL + '/' + name);
 
-        this.fetch(this.baseURL + '/' + name, function(src) {
-            if (!src) {
-                return callback(null);
-            }
+        if (!src) {
+            return null;
+        }
 
-            return { src:src,
-                     path:name,
-                     upToDate: function (cb) {
-                         cb(_this.neverUpdate);
-                     }};
-        });
+        return { src: src,
+                 path: name };
     },
 
     fetch: function(url, callback) {
         // Only in the browser please
-        var ajax,
-            loading = true;
+        var ajax;
+        var loading = true;
+        var src;
 
         if (window.XMLHttpRequest) { // Mozilla, Safari, ...
             ajax = new XMLHttpRequest();
@@ -4151,15 +4226,19 @@ var HttpLoader = Loader.extend({
         ajax.onreadystatechange = function() {
             if(ajax.readyState == 4 && ajax.status == 200 && loading) {
                 loading = false;
-                callback(ajax.responseText);
+                src = ajax.responseText;
             }
         };
 
         url += (url.indexOf('?') === -1 ? '?' : '&') + 's=' + 
                (new Date().getTime());
 
-        ajax.open('GET', url, true);
+        // Synchronous because this API shouldn't be used in
+        // production (pre-load compiled templates instead)
+        ajax.open('GET', url, false);
         ajax.send();
+
+        return src;
     }
 });
 
@@ -4576,13 +4655,7 @@ var Template = Obj.extend({
     }
 });
 
-// var fs = modules["fs"];
-// var src = '{% for i in [1,2] %}' +
-//     'start: {{ num }}' +
-//     '{% from "import.html" import bar as num %}' +
-//     'end: {{ num }}\n' +
-//     '{% endfor %}' +
-//     'final: {{ num }}';
+// var src = '{% block content %}{% include "async.html" %}{% endblock %}';
 // var env = new Environment(new builtin_loaders.FileSystemLoader('tests/templates'), { dev: true });
 
 // var ctx = {};

@@ -12,25 +12,21 @@ var HttpLoader = Loader.extend({
     },
 
     getSource: function(name, callback) {
-        var _this = this;
+        var src = this.fetch(this.baseURL + '/' + name);
 
-        this.fetch(this.baseURL + '/' + name, function(src) {
-            if (!src) {
-                return callback(null);
-            }
+        if (!src) {
+            return null;
+        }
 
-            return { src:src,
-                     path:name,
-                     upToDate: function (cb) {
-                         cb(_this.neverUpdate);
-                     }};
-        });
+        return { src: src,
+                 path: name };
     },
 
     fetch: function(url, callback) {
         // Only in the browser please
-        var ajax,
-            loading = true;
+        var ajax;
+        var loading = true;
+        var src;
 
         if (window.XMLHttpRequest) { // Mozilla, Safari, ...
             ajax = new XMLHttpRequest();
@@ -41,15 +37,19 @@ var HttpLoader = Loader.extend({
         ajax.onreadystatechange = function() {
             if(ajax.readyState == 4 && ajax.status == 200 && loading) {
                 loading = false;
-                callback(ajax.responseText);
+                src = ajax.responseText;
             }
         };
 
         url += (url.indexOf('?') === -1 ? '?' : '&') + 's=' + 
                (new Date().getTime());
 
-        ajax.open('GET', url, true);
+        // Synchronous because this API shouldn't be used in
+        // production (pre-load compiled templates instead)
+        ajax.open('GET', url, false);
         ajax.send();
+
+        return src;
     }
 });
 

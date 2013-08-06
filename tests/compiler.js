@@ -4,7 +4,6 @@
     if(typeof require != 'undefined') {
         expect = require('expect.js');
         util = require('./util');
-        render = require('./util').render;
         Environment = require('../src/environment').Environment;
         Template = require('../src/environment').Template;
         fs = require('fs');

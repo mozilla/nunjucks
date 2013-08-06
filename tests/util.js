@@ -1,5 +1,5 @@
 (function() {
-    var Environment, Template, loader, templatesPath, expect, lib;
+    var Environment, Template, loader, templatesPath, expect;
 
     if(typeof require != 'undefined') {
         Environment = require('../src/environment').Environment;
@@ -7,7 +7,6 @@
         loader = require('../src/node-loaders').FileSystemLoader;
         templatesPath = 'tests/templates';
         expect = require('expect.js');
-        lib = require('../src/lib');
     }
     else {
         Environment = nunjucks.Environment;
@@ -15,7 +14,6 @@
         loader = nunjucks.HttpLoader;
         templatesPath = '../templates';
         expect = window.expect;
-        lib = window.lib;
     }
 
     var numAsyncs;
@@ -34,7 +32,7 @@
             ctx = null;
         }
 
-        render(str, ctx, null, function(err, res) {
+        render(str, ctx, {}, function(err, res) {
             if(err) {
                 throw err;
             }
@@ -44,21 +42,27 @@
     }
 
     function finish(done) {
-        doneHandler = done;
+        if(numAsyncs > 0) {
+            doneHandler = done;
+        }
+        else {
+            done();
+        }
     }
 
     function render(str, ctx, opts, cb) {
-        if(lib.isFunction(ctx)) {
+        if(!opts) {
             cb = ctx;
             ctx = null;
             opts = null;
         }
-        else if(lib.isFunction(opts)) {
+        else if(!cb) {
             cb = opts;
             opts = null;
         }
 
-        opts = opts || { dev: true };
+        opts = opts || {};
+        opts.dev = true;
         var e = new Environment(new loader(templatesPath), opts);
 
         if(opts.filters) {
@@ -106,8 +110,10 @@
         module.exports.finish = finish;
     }
     else {
-        window.render = render;
-        window.equal = equal;
-        window.finish = finish;
+        window.util = {
+            render: render,
+            equal: equal,
+            finish: finish
+        };
     }
 })();

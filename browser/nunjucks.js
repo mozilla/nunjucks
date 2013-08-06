@@ -114,7 +114,7 @@ exports.TemplateError = function(message, lineno, colno) {
         }
     }
 
-    err.name = "Template render error";
+    err.name = 'Template render error';
     err.message = message;
     err.lineno = lineno;
     err.colno = colno;
@@ -1482,13 +1482,7 @@ var Template = Obj.extend({
     }
 });
 
-// var fs = modules["fs"];
-// var src = '{% for i in [1,2] %}' +
-//     'start: {{ num }}' +
-//     '{% from "import.html" import bar as num %}' +
-//     'end: {{ num }}\n' +
-//     '{% endfor %}' +
-//     'final: {{ num }}';
+// var src = '{% block content %}{% include "async.html" %}{% endblock %}';
 // var env = new Environment(new builtin_loaders.FileSystemLoader('tests/templates'), { dev: true });
 
 // var ctx = {};
