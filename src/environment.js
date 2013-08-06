@@ -398,8 +398,7 @@ var Template = Obj.extend({
     }
 });
 
-// var fs = require('fs');
-// var src = '{% for i in [1,2]|fetch %}{{ i }}{% endfor %}';
+// var src = '{% block content %}{% include "async.html" %}{% endblock %}';
 // var env = new Environment(new builtin_loaders.FileSystemLoader('tests/templates'), { dev: true });
 
 // var ctx = {};

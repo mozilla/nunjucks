@@ -280,6 +280,20 @@
                        function(err, res) {
                            expect(res).to.be('hello somecontenthere');
                        });
+
+                render('{% block content %}{% include "async.html" %}{% endblock %}',
+                       { tmpl: 'tests/templates/for-async-content.html' },
+                       opts,
+                       function(err, res) {
+                           expect(res).to.be('somecontenthere\n');
+                       });
+
+                render('{% forAsync i in [0, 1] %}{% include "async.html" %}{% endfor %}',
+                       { tmpl: 'tests/templates/for-async-content.html' },
+                       opts,
+                       function(err, res) {
+                           expect(res).to.be('somecontenthere\nsomecontenthere\n');
+                       });
             }
 
             finish(done);
