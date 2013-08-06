@@ -187,7 +187,8 @@ var Compiler = Object.extend({
             nodes.Pow,
             nodes.Neg,
             nodes.Pos,
-            nodes.Compare
+            nodes.Compare,
+            nodes.NodeList
         );
         this.compile(node, frame);
     },
@@ -1041,7 +1042,7 @@ var Compiler = Object.extend({
 });
 
 // var c = new Compiler();
-// var src = '{% ifAsync tmpl %}{{ tmpl | getContents }}{% endif %}';
+// var src = '{% block content %}hello{% endblock %} {{ tmpl | getContents }}';
 // var ast = transformer.transform(parser.parse(src), ['getContents']);
 // nodes.printNodes(ast);
 // c.compile(ast);

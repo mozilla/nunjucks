@@ -213,6 +213,12 @@
                     asyncFilters: {
                         getContents: function(tmpl, cb) {
                             fs.readFile(tmpl, cb);
+                        },
+
+                        getContentsArr: function(arr, cb) {
+                            fs.readFile(arr[0], function(err, res) {
+                                cb(err, [res]);
+                            });
                         }
                     }
                 };
@@ -224,27 +230,55 @@
                            expect(res).to.be('somecontenthere');
                        });
 
-                render('{% ifAsync tmpl %}{{ tmpl | getContents }}{% endif %}',
+                render('{% if tmpl %}{{ tmpl | getContents }}{% endif %}',
                        { tmpl: 'tests/templates/for-async-content.html' },
                        opts,
                        function(err, res) {
                            expect(res).to.be('somecontenthere');
                        });
 
-                render('{% forAsync t in [tmpl, tmpl] %}{{ t | getContents }}*{% endfor %}',
+                render('{% if tmpl | getContents %}yes{% endif %}',
+                       { tmpl: 'tests/templates/for-async-content.html' },
+                       opts,
+                       function(err, res) {
+                           expect(res).to.be('yes');
+                       });
+
+                render('{% for t in [tmpl, tmpl] %}{{ t | getContents }}*{% endfor %}',
                        { tmpl: 'tests/templates/for-async-content.html' },
                        opts,
                        function(err, res) {
                            expect(res).to.be('somecontenthere*somecontenthere*');
                        });
 
-                render('{% ifAsync tmpl %}' +
-                       '{% forAsync i in [0, 1] %}{{ tmpl | getContents }}*{% endfor %}' +
+                render('{% for t in [tmpl, tmpl] | getContentsArr %}{{ t }}{% endfor %}',
+                       { tmpl: 'tests/templates/for-async-content.html' },
+                       opts,
+                       function(err, res) {
+                           expect(res).to.be('somecontenthere');
+                       });
+
+                render('{% if tmpl %}' +
+                       '{% for i in [0, 1] %}{{ tmpl | getContents }}*{% endfor %}' +
                        '{% endif %}',
                        { tmpl: 'tests/templates/for-async-content.html' },
                        opts,
                        function(err, res) {
                            expect(res).to.be('somecontenthere*somecontenthere*');
+                       });
+
+                render('{% block content %}{{ tmpl | getContents }}{% endblock %}',
+                       { tmpl: 'tests/templates/for-async-content.html' },
+                       opts,
+                       function(err, res) {
+                           expect(res).to.be('somecontenthere');
+                       });
+
+                render('{% block content %}hello{% endblock %} {{ tmpl | getContents }}',
+                       { tmpl: 'tests/templates/for-async-content.html' },
+                       opts,
+                       function(err, res) {
+                           expect(res).to.be('hello somecontenthere');
                        });
             }
 

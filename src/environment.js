@@ -399,12 +399,7 @@ var Template = Obj.extend({
 });
 
 // var fs = require('fs');
-// var src = '{% for i in [1,2] %}' +
-//     'start: {{ num }}' +
-//     '{% from "import.html" import bar as num %}' +
-//     'end: {{ num }}\n' +
-//     '{% endfor %}' +
-//     'final: {{ num }}';
+// var src = '{% for i in [1,2]|fetch %}{{ i }}{% endfor %}';
 // var env = new Environment(new builtin_loaders.FileSystemLoader('tests/templates'), { dev: true });
 
 // var ctx = {};

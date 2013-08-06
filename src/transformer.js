@@ -71,44 +71,59 @@ function depthWalk(ast, func) {
     return walk(ast, func, true);
 }
 
+function _liftFilters(node, asyncFilters, prop) {
+    var children = [];
+
+    var walked = depthWalk(prop ? node[prop] : node, function(node) {
+        if(node instanceof nodes.Block) {
+            return node;
+        }
+        else if(node instanceof nodes.Filter &&
+                asyncFilters.indexOf(node.name.value) !== -1) {
+            var symbol = new nodes.Symbol(node.lineno,
+                                          node.colno,
+                                          gensym());
+
+            children.push(new nodes.FilterAsync(node.lineno,
+                                                node.colno,
+                                                node.name, 
+                                                node.args,
+                                                symbol));
+            return symbol;
+        }
+    });
+
+    if(prop) {
+        node[prop] = walked;
+    }
+    else {
+        node = walked;
+    }
+
+    if(children.length) {
+        children.push(node);
+
+        return new nodes.NodeList(
+            node.lineno,
+            node.colno,
+            children
+        );
+    }
+    else {
+        return node;
+    }
+}
+
 function liftFilters(ast, asyncFilters) {
-    return walk(ast, function(outNode) {
-        if(!(outNode instanceof nodes.Output)) {
-            return;
+    return walk(ast, function(node) {
+        if(node instanceof nodes.Output) {
+            return _liftFilters(node, asyncFilters);
         }
-
-        var children = [];
-
-        outNode = depthWalk(outNode, function(node) {
-            if(node instanceof nodes.Block) {
-                return node;
-            }
-            else if(node instanceof nodes.Filter &&
-                    asyncFilters.indexOf(node.name.value) !== -1) {
-                var symbol = new nodes.Symbol(node.lineno,
-                                              node.colno,
-                                              gensym());
-
-                children.push(new nodes.FilterAsync(node.lineno,
-                                                    node.colno,
-                                                    node.name, 
-                                                    node.args,
-                                                    symbol));
-                return symbol;
-            }
-        });
-
-        if(children.length) {
-            children.push(outNode);
-
-            return new nodes.NodeList(
-                outNode.lineno,
-                outNode.colno,
-                children
-            );
+        else if(node instanceof nodes.For) {
+            return _liftFilters(node, asyncFilters, 'arr');
         }
-        else {
-            return outNode;
+        else if(node instanceof nodes.If) {
+            return _liftFilters(node, asyncFilters, 'cond');
         }
     });
 }
@@ -138,8 +153,47 @@ function liftSuper(ast) {
     });
 }
 
+function convertStatements(ast) {
+    return depthWalk(ast, function(node) {
+        if(!(node instanceof nodes.If) &&
+           !(node instanceof nodes.For)) {
+            return;
+        }
+
+        var async = false;
+        walk(node, function(node) {
+            if(node instanceof nodes.FilterAsync) {
+                async = true;
+                // Stop iterating by returning the node
+                return node;
+            }
+        });
+
+        if(async) {
+	        if(node instanceof nodes.If) {
+                return new nodes.IfAsync(
+                    node.lineno,
+                    node.colno,
+                    node.cond,
+                    node.body,
+                    node.else_
+                );
+            }
+            else if(node instanceof nodes.For) {
+                return new nodes.ForAsync(
+                    node.lineno,
+                    node.colno,
+                    node.arr,
+                    node.name,
+                    node.body
+                );
+            }
+        }
+    });
+}
+
 function cps(ast, asyncFilters) {
-    return liftSuper(liftFilters(ast, asyncFilters));
+    return convertStatements(liftSuper(liftFilters(ast, asyncFilters)));
 }
 
 function transform(ast, asyncFilters, extensions, name) {
@@ -156,7 +210,7 @@ function transform(ast, asyncFilters, extensions, name) {
 }
 
 // var parser = require('./parser');
-// var src = '{% if tmpl %}{{ foo(t | getContents) }}{% endif %}';
+// var src = '{% block content %}hello{% endblock %} {{ tmpl | getContents }}';
 // var ast = transform(parser.parse(src), ['getContents']);
 // nodes.printNodes(ast);
 
