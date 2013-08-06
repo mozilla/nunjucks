@@ -5,6 +5,9 @@ Changelog for versions previous to v0.1.9 are located at http://nunjucks.tumblr.
 * async
 * can no longer import variables introduced by a `{% set %}` block
 
+TODO: refactor the precompile script, add support for specifying extensions and async filters
+TODO: expose API for async-ness in custom extensions
+
 # v0.1.9 (May 31, 2013)
 
 * autoescaping ([docs](http://nunjucks.jlongster.com/api#Autoescaping))
