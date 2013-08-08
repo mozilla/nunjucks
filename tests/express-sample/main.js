@@ -3,8 +3,7 @@ var runtime = require('../../src/runtime');
 var loaders = require('../../src/node-loaders');
 var express = require('express');
 
-var app = express.createServer();
-
+var app = express();
 var e = new env.Environment();
 e.express(app, 'views');
 

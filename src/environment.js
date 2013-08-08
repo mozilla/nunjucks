@@ -31,7 +31,7 @@ var Environment = Obj.extend({
                 this.loaders = [new builtin_loaders.FileSystemLoader('views')];
             }
             else {
-                this.loaders = [new builtin_loaders.HttpLoader('/views')];
+                this.loaders = [new builtin_loaders.WebLoader('/views')];
             }
         }
         else {
@@ -136,26 +136,29 @@ var Environment = Obj.extend({
                     cb(new Error('template not found: ' + name));
                 }
                 else {
-                    this.cache[name] = new Template(info.src,
-                                                    this,
-                                                    info.path,
-                                                    eagerCompile);
-                    cb(null, this.cache[name]);
+                    var tmpl = new Template(info.src, this,
+                                            info.path, eagerCompile);
+
+                    if(!info.noCache) {
+                        this.cache[name] = tmpl;
+                    }
+
+                    cb(null, tmpl);
                 }
             }.bind(this));
         }
     },
 
-    registerPrecompiled: function(templates) {
-        for(var name in templates) {
-            this.cache[name] = new Template({ type: 'code',
-                                              obj: templates[name] },
-                                            this,
-                                            name,
-                                            function() { return true; },
-                                            true);
-        }
-    },
+    // registerPrecompiled: function(templates) {
+    //     for(var name in templates) {
+    //         this.cache[name] = new Template({ type: 'code',
+    //                                           obj: templates[name] },
+    //                                         this,
+    //                                         name,
+    //                                         function() { return true; },
+    //                                         true);
+    //     }
+    // },
 
     express: function(app, dir) {
         app.engine('.html', this.expressRender.bind(this));
