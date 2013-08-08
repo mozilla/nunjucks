@@ -7,7 +7,7 @@ var Loader = require('./loader');
 var existsSync = fs.existsSync || path.existsSync;
 
 var FileSystemLoader = Loader.extend({
-    init: function(searchPaths, watch) {
+    init: function(searchPaths, noWatch) {
         this.pathsToNames = {};
 
         if(searchPaths) {
@@ -19,7 +19,7 @@ var FileSystemLoader = Loader.extend({
             this.searchPaths = [];
         }
 
-        if(watch) {
+        if(!noWatch) {
             // Watch all the templates in the paths and fire an event when
             // they change
             lib.each(this.searchPaths, function(p) {

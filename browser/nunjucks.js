@@ -653,6 +653,110 @@ modules['runtime'] = {
 };
 })();
 (function() {
+var Obj = modules["object"];
+var lib = modules["lib"];
+
+var Loader = Obj.extend({
+    on: function(name, func) {
+        this.listeners = this.listeners || {};
+        this.listeners[name] = this.listeners[name] || [];
+        this.listeners[name].push(func);
+    },
+
+    emit: function(name /*, arg1, arg2, ...*/) {
+        var args = Array.prototype.slice.call(arguments, 1);
+
+        if(this.listeners && this.listeners[name]) {
+            lib.each(this.listeners[name], function(listener) {
+                listener.apply(null, args);
+            });
+        }
+    }
+});
+
+modules['loader'] = Loader;
+})();
+(function() {
+var Loader = modules["loader"];
+
+var WebLoader = Loader.extend({
+    init: function(baseURL, neverUpdate) {
+        // It's easy to use precompiled templates: just include them
+        // before you configure nunjucks and this will automatically
+        // pick it up and use it
+        if(window.nunjucksPrecompiled) {
+            this.precompiled = window.nunjucksPrecompiled;
+        }
+
+        this.baseURL = baseURL || '';
+        this.neverUpdate = neverUpdate;
+    },
+
+    getSource: function(name) {
+        if(this.precompiled) {
+            return {
+                src: { type: "code",
+                       obj: this.precompiled[name] },
+                path: name
+            };
+        }
+        else {
+            var src = this.fetch(this.baseURL + '/' + name);
+            if(!src) {
+                return null;
+            }
+
+            return { src: src,
+                     path: name,
+                     noCache: this.neverUpdate };
+        }
+    },
+
+    fetch: function(url, callback) {
+        // Only in the browser please
+        var ajax;
+        var loading = true;
+        var src;
+
+        if(window.XMLHttpRequest) { // Mozilla, Safari, ...
+            ajax = new XMLHttpRequest();
+        }
+        else if(window.ActiveXObject) { // IE 8 and older
+            ajax = new ActiveXObject("Microsoft.XMLHTTP");
+        }
+
+        ajax.onreadystatechange = function() {
+            if(ajax.readyState == 4 && ajax.status == 200 && loading) {
+                loading = false;
+                src = ajax.responseText;
+            }
+        };
+
+        url += (url.indexOf('?') === -1 ? '?' : '&') + 's=' + 
+               (new Date().getTime());
+
+        // Synchronous because this API shouldn't be used in
+        // production (pre-load compiled templates instead)
+        ajax.open('GET', url, false);
+        ajax.send();
+
+        return src;
+    }
+});
+
+modules['web-loaders'] = {
+    WebLoader: WebLoader
+};
+})();
+(function() {
+if(typeof window === 'undefined') {
+    modules['loaders'] = modules["node-loaders"];
+}
+else {
+    modules['loaders'] = modules["web-loaders"];
+}
+})();
+(function() {
 
 var lib = modules["lib"];
 var r = modules["runtime"];
@@ -1125,15 +1229,30 @@ var Environment = Obj.extend({
                 this.loaders = [new builtin_loaders.FileSystemLoader('views')];
             }
             else {
-                this.loaders = [new builtin_loaders.HttpLoader('/views')];
+                this.loaders = [new builtin_loaders.WebLoader('/views')];
             }
         }
         else {
             this.loaders = lib.isArray(loaders) ? loaders : [loaders];
         }
 
-        // Caching and cache busting
+        this.initCache();
+        this.filters = {};
+        this.asyncFilters = [];
+        this.extensions = {};
+        this.extensionsList = [];
 
+        if(opts.tags) {
+            lexer.setTags(opts.tags);
+        }
+
+        for(var name in builtin_filters) {
+            this.addFilter(name, builtin_filters[name]);
+        }
+    },
+
+    initCache: function() {
+        // Caching and cache busting
         var cache = {};
 
         lib.each(this.loaders, function(loader) {
@@ -1142,19 +1261,7 @@ var Environment = Obj.extend({
             });
         });
 
-        if(opts.tags) {
-            lexer.setTags(opts.tags);
-        }
-
         this.cache = cache;
-        this.filters = {};
-        this.asyncFilters = [];
-        this.extensions = {};
-        this.extensionsList = [];
-
-        for(var name in builtin_filters) {
-            this.addFilter(name, builtin_filters[name]);
-        }
     },
 
     addExtension: function(name, extension) {
@@ -1227,90 +1334,60 @@ var Environment = Obj.extend({
                     cb(new Error('template not found: ' + name));
                 }
                 else {
-                    this.cache[name] = new Template(info.src,
-                                                    this,
-                                                    info.path,
-                                                    eagerCompile);
-                    cb(null, this.cache[name]);
+                    var tmpl = new Template(info.src, this,
+                                            info.path, eagerCompile);
+
+                    if(!info.noCache) {
+                        this.cache[name] = tmpl;
+                    }
+
+                    cb(null, tmpl);
                 }
             }.bind(this));
         }
     },
 
-    registerPrecompiled: function(templates) {
-        for(var name in templates) {
-            this.cache[name] = new Template({ type: 'code',
-                                              obj: templates[name] },
-                                            this,
-                                            name,
-                                            function() { return true; },
-                                            true);
-        }
-    },
+    // registerPrecompiled: function(templates) {
+    //     for(var name in templates) {
+    //         this.cache[name] = new Template({ type: 'code',
+    //                                           obj: templates[name] },
+    //                                         this,
+    //                                         name,
+    //                                         function() { return true; },
+    //                                         true);
+    //     }
+    // },
 
     express: function(app) {
+        app.engine('.html', this.expressRender.bind(this));
+        app.set('view engine', 'html');
+
         var env = this;
 
-        if(app.render) {
-            // Express >2.5.11
-            app.render = function(name, ctx, k) {
-                var context = {};
-
-                if(lib.isFunction(ctx)) {
-                    k = ctx;
-                    ctx = {};
-                }
-
-                context = lib.extend(context, this.locals);
-
-                if(ctx._locals) {
-                    context = lib.extend(context, ctx._locals);
-                }
-
-                context = lib.extend(context, ctx);
-
-                env.render(name, context, k);
-            };
+        function NunjucksView(name, opts) {
+            this.name = name;
+            this.path = name;
         }
-        else {
-            // Express <2.5.11
-            var http = modules["http"];
-            var self = this;
-            var res = http.ServerResponse.prototype;
 
-            res._render = function(name, ctx, k) {
-                var app = this.app;
-                var context = {};
+        NunjucksView.prototype.render = function(opts, cb) {
+            env.render(this.name, opts, cb);
+        };
 
-                if(this._locals) {
-                    context = lib.extend(context, this._locals);
-                }
-
-                if(ctx) {
-                    context = lib.extend(context, ctx);
-
-                    if(ctx.locals) {
-                        context = lib.extend(context, ctx.locals);
-                    }
-                }
-
-                context = lib.extend(context, app._locals);
-
-                env.render(name, context, function (err, str) {
-                    if (k) {
-                        k(err, str);
-                    }
-                    else {
-                        self.send(str);
-                    }
-                });
-            };
-        }
+        app.set('view', NunjucksView);
     },
 
-    render: function(name, ctx, callback) {
+    expressRender: function(name, opts, cb) {
+        this.render(name, {}, cb);
+    },
+
+    render: function(name, ctx, cb) {
         this.getTemplate(name, function(err, tmpl) {
-            tmpl.render(ctx, callback);
+            if(err) {
+                cb(err);
+            }
+            else {
+                tmpl.render(ctx, cb);
+            }
         });
     }
 });
@@ -1524,22 +1601,37 @@ var loaders = modules["loaders"];
 nunjucks = {};
 nunjucks.Environment = env.Environment;
 nunjucks.Template = env.Template;
-nunjucks.Loader = env.Loader;
 
-// loaders is not available when using precompiled templates
-if(loaders) {
-    if(loaders.FileSystemLoader) {
-        nunjucks.FileSystemLoader = loaders.FileSystemLoader;
-    }
-    else {
-        nunjucks.HttpLoader = loaders.HttpLoader;
-    }
-}
+nunjucks.Loader = env.Loader;
+nunjucks.FileSystemLoader = loaders.FileSystemLoader;
+nunjucks.WebLoader = loaders.WebLoader;
 
 nunjucks.compiler = compiler;
 nunjucks.parser = parser;
 nunjucks.lexer = lexer;
 nunjucks.runtime = runtime;
+
+// A single instance of an environment, since this is so commonly used
+
+var e = new env.Environment();
+nunjucks.configure = function(dirOrURL, opts) {
+    if(typeof dirOrURL != 'string') {
+        throw new Error('must pass templates path or URL to `configure` ' +
+                        'as first argument');
+    }
+
+    e = new env.Environment(new (loaders.FileSystemLoader || loaders.WebLoader)(dirOrURL),
+                            opts);
+
+    if(opts && opts.express) {
+        e.express(opts.express);
+    }
+    return e;
+};
+
+nunjucks.render = function(name, ctx, cb) {
+    e.render(name, ctx, cb);
+};
 
 nunjucks.require = function(name) { return modules[name]; };
 

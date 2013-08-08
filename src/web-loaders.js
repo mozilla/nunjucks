@@ -1,20 +1,29 @@
 var Loader = require('./loader');
 
-var HttpLoader = Loader.extend({
+var WebLoader = Loader.extend({
     init: function(baseURL, neverUpdate) {
         this.baseURL = baseURL || '';
         this.neverUpdate = neverUpdate;
     },
 
-    getSource: function(name, callback) {
-        var src = this.fetch(this.baseURL + '/' + name);
-
-        if (!src) {
-            return null;
+    getSource: function(name) {
+        if(this.precompiled) {
+            return {
+                src: { type: "code",
+                       obj: this.precompiled[name] },
+                path: name
+            };
         }
+        else {
+            var src = this.fetch(this.baseURL + '/' + name);
+            if(!src) {
+                return null;
+            }
 
-        return { src: src,
-                 path: name };
+            return { src: src,
+                     path: name,
+                     noCache: this.neverUpdate };
+        }
     },
 
     fetch: function(url, callback) {
@@ -23,9 +32,10 @@ var HttpLoader = Loader.extend({
         var loading = true;
         var src;
 
-        if (window.XMLHttpRequest) { // Mozilla, Safari, ...
+        if(window.XMLHttpRequest) { // Mozilla, Safari, ...
             ajax = new XMLHttpRequest();
-        } else if (window.ActiveXObject) { // IE 8 and older
+        }
+        else if(window.ActiveXObject) { // IE 8 and older
             ajax = new ActiveXObject("Microsoft.XMLHTTP");
         }
 
@@ -49,5 +59,5 @@ var HttpLoader = Loader.extend({
 });
 
 module.exports = {
-    HttpLoader: HttpLoader
+    WebLoader: WebLoader
 };
