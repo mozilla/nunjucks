@@ -19,3 +19,20 @@ module.exports.compiler = compiler;
 module.exports.parser = parser;
 module.exports.lexer = lexer;
 module.exports.runtime = runtime;
+
+// A single instance of an environment, since this is so commonly used
+
+var e = new env.Environment();
+module.exports.configure = function(dirOrURL, opts) {
+    e = new env.Environment(new (loaders.FileSystemLoader || loaders.WebLoader)(dirOrURL),
+                            opts);
+
+    if(opts.express) {
+        e.express(opts.express);
+    }
+    return e;
+};
+
+module.exports.render = function(name, ctx, cb) {
+    e.render(name, ctx, cb);
+};

@@ -160,41 +160,36 @@ var Environment = Obj.extend({
     //     }
     // },
 
-    express: function(app, dir) {
+    express: function(app) {
         app.engine('.html', this.expressRender.bind(this));
         app.set('view engine', 'html');
-        this.app = app;
 
-        if(dir) {
-            app.set('views', dir);
-            this.loaders = [new builtin_loaders.FileSystemLoader(dir)];
-        }
-        else {
-            var env = this;
+        var env = this;
 
-            function NunjucksView(name, opts) {
-                this.name = name;
-                this.path = name;
-            }
-
-            NunjucksView.prototype.render = function(opts, cb) {
-                env.render(this.name, opts, cb);
-            };
-
-            app.set('view', NunjucksView);
+        function NunjucksView(name, opts) {
+            this.name = name;
+            this.path = name;
         }
 
-        this.initCache();
+        NunjucksView.prototype.render = function(opts, cb) {
+            env.render(this.name, opts, cb);
+        };
+
+        app.set('view', NunjucksView);
     },
 
-    expressRender: function(path, opts, cb) {
-        var name = path.substr(this.app.get('views').length + 1);
+    expressRender: function(name, opts, cb) {
         this.render(name, {}, cb);
     },
 
     render: function(name, ctx, cb) {
         this.getTemplate(name, function(err, tmpl) {
-            tmpl.render(ctx, cb);
+            if(err) {
+                cb(err);
+            }
+            else {
+                tmpl.render(ctx, cb);
+            }
         });
     }
 });
@@ -392,6 +387,5 @@ var Template = Obj.extend({
 
 module.exports = {
     Environment: Environment,
-    Template: Template,
-    //__express: __express
+    Template: Template
 };

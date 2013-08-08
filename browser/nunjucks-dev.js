@@ -4661,8 +4661,7 @@ var Template = Obj.extend({
 
 modules['environment'] = {
     Environment: Environment,
-    Template: Template,
-    //__express: __express
+    Template: Template
 };
 })();
 var nunjucks;
@@ -4687,6 +4686,14 @@ nunjucks.compiler = compiler;
 nunjucks.parser = parser;
 nunjucks.lexer = lexer;
 nunjucks.runtime = runtime;
+
+nunjucks.configure = function() {
+    var env = new env.Environment();
+    
+    nunjucks.render = function() {
+        return env.render();
+    }
+};
 
 nunjucks.require = function(name) { return modules[name]; };
 

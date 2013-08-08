@@ -11,7 +11,7 @@
     else {
         Environment = nunjucks.Environment;
         Template = nunjucks.Template;
-        loader = nunjucks.HttpLoader;
+        loader = nunjucks.WebLoader;
         templatesPath = '../templates';
         expect = window.expect;
     }
@@ -63,7 +63,7 @@
 
         opts = opts || {};
         opts.dev = true;
-        var e = new Environment(new loader(templatesPath), opts);
+        var e = new Environment(new loader(templatesPath, true), opts);
 
         if(opts.filters) {
             for(var name in opts.filters) {
