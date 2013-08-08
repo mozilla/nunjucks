@@ -24,6 +24,11 @@ module.exports.runtime = runtime;
 
 var e = new env.Environment();
 module.exports.configure = function(dirOrURL, opts) {
+    if(typeof dirOrURL != 'string') {
+        throw new Error('must pass templates path or URL to `configure` ' +
+                        'as first argument');
+    }
+
     e = new env.Environment(new (loaders.FileSystemLoader || loaders.WebLoader)(dirOrURL),
                             opts);
 

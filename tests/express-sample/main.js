@@ -1,11 +1,9 @@
-var env = require('../../src/environment');
-var runtime = require('../../src/runtime');
-var loaders = require('../../src/node-loaders');
+var nunjucks = require('../../index');
 var express = require('express');
 
 var app = express();
-var e = new env.Environment();
-e.express(app, 'views');
+nunjucks.configure('views', { autoescape: true,
+                              express: app });
 
 // app
 
