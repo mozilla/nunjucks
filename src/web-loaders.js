@@ -2,6 +2,13 @@ var Loader = require('./loader');
 
 var WebLoader = Loader.extend({
     init: function(baseURL, neverUpdate) {
+        // It's easy to use precompiled templates: just include them
+        // before you configure nunjucks and this will automatically
+        // pick it up and use it
+        if(window.nunjucksPrecompiled) {
+            this.precompiled = window.nunjucksPrecompiled;
+        }
+
         this.baseURL = baseURL || '';
         this.neverUpdate = neverUpdate;
     },
