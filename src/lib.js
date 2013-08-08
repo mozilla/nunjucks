@@ -34,7 +34,7 @@ exports.withPrettyErrors = function(path, withInternals, func) {
 
         throw e;
     }
-}
+};
 
 exports.TemplateError = function(message, lineno, colno) {
     var err = this;
@@ -48,7 +48,7 @@ exports.TemplateError = function(message, lineno, colno) {
         }
     }
 
-    err.name = "Template render error";
+    err.name = 'Template render error';
     err.message = message;
     err.lineno = lineno;
     err.colno = colno;
@@ -186,6 +186,64 @@ exports.map = function(obj, func) {
     return results;
 };
 
+exports.asyncParallel = function(funcs, done) {
+    var count = funcs.length,
+        result = new Array(count),
+        current = 0;
+
+    var makeNext = function(i) {
+        return function(res) {
+            result[i] = res;
+            current += 1;
+
+            if (current === count) {
+                done(result);
+            }
+        };
+    };
+
+    for (var i = 0; i < count; i++) {
+        funcs[i](makeNext(i));
+    }
+};
+
+exports.asyncEach = function(arr, iter, cb) {
+    var i = -1;
+    
+    function next() {
+        i++;
+
+        if(i < arr.length) {
+            iter(arr[i], i, next, cb);
+        }
+        else {
+            cb();
+        }
+    }
+
+    next();
+};
+
+exports.asyncFor = function(obj, iter, cb) {
+    var keys = exports.keys(obj);
+    var len = keys.length;
+    var i = -1;
+
+    function next() {
+        i++;
+        var k = keys[i];
+
+        if(i < len) {
+            iter(k, obj[k], i, len, next);
+        }
+        else {
+            cb();
+        }
+    }
+
+    next();
+};
+
 if(!Array.prototype.indexOf) {
     Array.prototype.indexOf = function(array, searchElement /*, fromIndex */) {
         if (array == null) {
@@ -216,4 +274,25 @@ if(!Array.prototype.indexOf) {
         }
         return -1;
     };
+}
+
+if(!Array.prototype.map) {
+    Array.prototype.map = function() {
+        throw new Error("map is unimplemented for this js engine");
+    };
+}
+
+exports.keys = function(obj) {
+    if(Object.prototype.keys) {
+        return obj.keys();
+    }
+    else {
+        var keys = [];
+        for(var k in obj) {
+            if(obj.hasOwnProperty(k)) {
+                keys.push(k);
+            }
+        }
+        return keys;
+    }
 }

@@ -1,5 +1,6 @@
 var lib = require('./lib');
 var parser = require('./parser');
+var transformer = require('./transformer');
 var nodes = require('./nodes');
 var Object = require('./object');
 var Frame = require('./runtime').Frame;
@@ -38,6 +39,7 @@ var Compiler = Object.extend({
         this.buffer = null;
         this.bufferStack = [];
         this.isChild = false;
+        this.scopeClosers = '';
 
         this.extensions = extensions || [];
     },
@@ -75,7 +77,8 @@ var Compiler = Object.extend({
 
     emitFuncBegin: function(name) {
         this.buffer = 'output';
-        this.emitLine('function ' + name + '(env, context, frame, runtime) {');
+        this.scopeClosers = '';
+        this.emitLine('function ' + name + '(env, context, frame, runtime, cb) {');
         this.emitLine('var lineno = null;');
         this.emitLine('var colno = null;');
         this.emitLine('var ' + this.buffer + ' = "";');
@@ -84,14 +87,41 @@ var Compiler = Object.extend({
 
     emitFuncEnd: function(noReturn) {
         if(!noReturn) {
-            this.emitLine('return ' + this.buffer + ';');
+            this.emitLine('cb(null, ' + this.buffer +');');
         }
 
+        this.closeScopeLevels();
         this.emitLine('} catch (e) {');
-        this.emitLine('  runtime.handleError(e, lineno, colno);');
+        this.emitLine('  cb(runtime.handleError(e, lineno, colno));');
         this.emitLine('}');
         this.emitLine('}');
         this.buffer = null;
+    },
+
+    addScopeLevel: function(closingDelim) {
+        this.scopeClosers += closingDelim || '})';
+    },
+
+    closeScopeLevels: function() {
+        this.emitLine(this.scopeClosers + ';');
+        this.scopeClosers = '';
+    },
+
+    withScopedSyntax: function(func) {
+        var scopeClosers = this.scopeClosers;
+        this.scopeClosers = '';
+
+        func.call(this);
+
+        this.closeScopeLevels();
+        this.scopeClosers = scopeClosers;
+    },
+
+    makeCallback: function(res) {
+        var err = this.tmpid();
+
+        return 'function(' + err + (res ? ',' + res : '') + ') {\n' +
+            'if(' + err + ') { cb(' + err + '); return; }';
     },
 
     tmpid: function() {
@@ -157,7 +187,8 @@ var Compiler = Object.extend({
             nodes.Pow,
             nodes.Neg,
             nodes.Pos,
-            nodes.Compare
+            nodes.Compare,
+            nodes.NodeList
         );
         this.compile(node, frame);
     },
@@ -415,6 +446,20 @@ var Compiler = Object.extend({
         this.emit(')');
     },
 
+    compileFilterAsync: function(node, frame) {
+        var name = node.name;
+        this.assertType(name, nodes.Symbol);
+
+        var symbol = node.symbol.value;
+        frame.set(symbol, symbol);
+
+        this.emit('env.getFilter("' + name.value + '").call(context, ');
+        this._compileAggregate(node.args, frame);
+        this.emitLine(', ' + this.makeCallback(symbol));
+
+        this.addScopeLevel();
+    },
+
     compileKeywordArgs: function(node, frame) {
         var names = [];
 
@@ -469,32 +514,44 @@ var Compiler = Object.extend({
         }, this);
     },
 
-    compileIf: function(node, frame) {
+    compileIf: function(node, frame, async) {
         this.emit('if(');
         this._compileExpression(node.cond, frame);
         this.emitLine(') {');
-        this.compile(node.body, frame);
+
+        this.withScopedSyntax(function() {
+            this.compile(node.body, frame);
+
+            if(async) {
+                this.emit('cb()');
+            }
+        });
 
         if(node.else_) {
             this.emitLine('}\nelse {');
-            this.compile(node.else_, frame);
+
+            this.withScopedSyntax(function() {
+                this.compile(node.else_, frame);
+
+                if(async) {
+                    this.emit('cb()');
+                }
+            });
         }
 
         this.emitLine('}');
     },
 
-    compileFor: function(node, frame) {
-        var i = this.tmpid();
-        var arr = this.tmpid();
-        frame = frame.push();
+    compileIfAsync: function(node, frame) {
+        this.emit('(function(cb) {');
+        this.compileIf(node, frame, true);
+        this.emit('})(function() {');
+        this.addScopeLevel();
+    },
 
-        this.emitLine('frame = frame.push();');
-
-        this.emit('var ' + arr + ' = ');
-        this._compileExpression(node.arr, frame);
-        this.emitLine(';');
-
+    scanLoop: function(node) {
         var loopUses = {};
+
         node.iterFields(function(field) {
             var lookups = field.findAll(nodes.LookupVal);
 
@@ -507,119 +564,176 @@ var Compiler = Object.extend({
             });
         });
 
+        return loopUses;
+    },
+
+    emitLoopBindings: function(node, loopUses, arr, i, len) {
+        len = len || arr + '.length';
+
+        var bindings = {
+            index: i + ' + 1',
+            index0: i,
+            revindex: len + ' - ' + i,
+            revindex0: len + ' - ' + i + ' - 1',
+            first: i + ' === 0',
+            last: i + ' === ' + len + ' - 1',
+            length: len
+        };
+
+        for(var name in bindings) {
+            if(name in loopUses) {
+                this.emitLine('frame.set("loop.' + name + '", ' + bindings[name] + ');');
+            }
+        }
+    },
+
+    compileFor: function(node, frame) {
+        // Some of this code is ugly, but it keeps the generated code
+        // as fast as possible. ForAsync also shares some of this, but
+        // not much.
+
+        var i = this.tmpid();
+        var len = this.tmpid();
+        var arr = this.tmpid();
+        var loopUses = this.scanLoop(node);
+        frame = frame.push();
+
+        this.emitLine('frame = frame.push();');
+
+        this.emit('var ' + arr + ' = ');
+        this._compileExpression(node.arr, frame);
+        this.emitLine(';');
+
         this.emit('if(' + arr + ') {');
 
+        // If multiple names are passed, we need to bind them
+        // appropriately
         if(node.name instanceof nodes.Array) {
-            // key/value iteration. the user could have passed a dict
-            // amd two elements to be unpacked - "for k,v in { a: b }"
-            // or they could have passed an array of arrays -
-            // for a,b,c in [[a,b,c],[c,d,e]] where the number of
-            // elements to be unpacked is variable.
-            //
-            // we cant known in advance which has been passed so we
-            // have to emit code that handles both cases
             this.emitLine('var ' + i + ';');
 
-            // did they pass an array of tuples or a dict?
-            this.emitLine('if (runtime.isArray(' + arr + ')) {');
+            // The object could be an arroy or object. Note that the
+            // body of the loop is duplicated for each condition, but
+            // we are optimizing for speed over size.
+            this.emitLine('if(runtime.isArray(' + arr + ')) {'); {
+                this.emitLine('for(' + i + '=0; ' + i + ' < ' + arr + '.length; '
+                              + i + '++) {');
 
-            // array of tuples
-            this.emitLine('for (' + i + '=0; ' + i + ' < ' + arr + '.length; '
-                            + i + '++) {');
+                // Bind each declared var
+                for (var u=0; u < node.name.children.length; u++) {
+                    var tid = this.tmpid();
+                    this.emitLine('var ' + tid + ' = ' + arr + '[' + i + '][' + u + ']');
+                    this.emitLine('frame.set("' + node.name.children[u].value
+                                  + '", ' + arr + '[' + i + '][' + u + ']' + ');');
+                    frame.set(node.name.children[u].value, tid);
+                }
 
-            // create one frame var for each element in the unpacking expr
-            for (var u=0; u < node.name.children.length; u++) {
-                var tid = this.tmpid();
-                this.emitLine('var ' + tid + ' = ' + arr + '[' + i + '][' + u + ']');
-                this.emitLine('frame.set("' + node.name.children[u].value
-                    + '", ' + arr + '[' + i + '][' + u + ']' + ');');
-                frame.set(node.name.children[u].value, tid);
+                this.emitLoopBindings(node, loopUses, arr, i);
+                this.compile(node.body, frame);
+                this.emitLine('}');
             }
 
-            if ('index' in loopUses) {
-                this.emitLine('frame.set("loop.index", ' + i + ' + 1);');
-            }
-            if ('index0' in loopUses) {
-                this.emitLine('frame.set("loop.index0", ' + i + ');');
-            }
-            if ('first' in loopUses) {
-                this.emitLine('frame.set("loop.first", ' + i + ' === 0);');
+            this.emitLine('} else {'); {
+                // Iterate over the key/values of an object
+                var key = node.name.children[0];
+                var val = node.name.children[1];
+                var k = this.tmpid();
+                var v = this.tmpid();
+                frame.set(key.value, k);
+                frame.set(val.value, v);
+
+                this.emitLine(i + ' = -1;');
+
+                if(loopUses['revindex'] || loopUses['revindex0'] ||
+                   loopUses['last'] || loopUses['length']) {
+                    this.emitLine('var ' + len + ' = runtime.keys(' + arr + ').length;');
+                }
+
+                this.emitLine('for(var ' + k + ' in ' + arr + ') {');
+                this.emitLine(i + '++;');
+                this.emitLine('var ' + v + ' = ' + arr + '[' + k + '];');
+                this.emitLine('frame.set("' + key.value + '", ' + k + ');');
+                this.emitLine('frame.set("' + val.value + '", ' + v + ');');
+
+                this.emitLoopBindings(node, loopUses, arr, i, len);
+                this.compile(node.body, frame);
+                this.emitLine('}');
             }
 
-            this.compile(node.body, frame);
-
-            this.emitLine('}'); // end for
-
-            this.emitLine('} else {');
-
-            // caller passed a dict
-            this.emitLine(i + ' = -1;');
-
-            var key = node.name.children[0];
-            var val = node.name.children[1];
-            var k = this.tmpid();
-            var v = this.tmpid();
-
-            frame.set(key.value, k);
-            frame.set(val.value, v);
-
-            this.emitLine('for(var ' + k + ' in ' + arr + ') {');
-            this.emitLine(i + '++;');
-            this.emitLine('var ' + v + ' = ' + arr + '[' + k + '];');
-            this.emitLine('frame.set("' + key.value + '", ' + k + ');');
-            this.emitLine('frame.set("' + val.value + '", ' + v + ');');
-            if ('index' in loopUses) {
-                this.emitLine('frame.set("loop.index", ' + i + ' + 1);');
-            }
-            if ('index0' in loopUses) {
-                this.emitLine('frame.set("loop.index0", ' + i + ');');
-            }
-            if ('first' in loopUses) {
-                this.emitLine('frame.set("loop.first", ' + i + ' === 0);');
-            }
-            this.compile(node.body, frame);
-
-            this.emitLine('}'); // end for
-
-            this.emitLine('}'); // end if
-        }
-        else {
-            var v = this.tmpid();
-
-            frame.set(node.name.value, v);
-
-            this.emitLine('for(var ' + i + '=0; ' + i + ' < ' + arr + '.length; ' +
-                          i + '++) {');
-            this.emitLine('var ' + v + ' = ' + arr + '[' + i + '];');
-            this.emitLine('frame.set("' + node.name.value +
-                          '", ' + v + ');');
-            if ('index' in loopUses) {
-                this.emitLine('frame.set("loop.index", ' + i + ' + 1);');
-            }
-            if ('index0' in loopUses) {
-                this.emitLine('frame.set("loop.index0", ' + i + ');');
-            }
-            if ('revindex' in loopUses) {
-                this.emitLine('frame.set("loop.revindex", ' + arr + '.length - ' + i + ');');
-            }
-            if ('revindex0' in loopUses) {
-                this.emitLine('frame.set("loop.revindex0", ' + arr + '.length - ' + i + ' - 1);');
-            }
-            if ('first' in loopUses) {
-                this.emitLine('frame.set("loop.first", ' + i + ' === 0);');
-            }
-            if ('last' in loopUses) {
-                this.emitLine('frame.set("loop.last", ' + i + ' === ' + arr + '.length - 1);');
-            }
-            if ('length' in loopUses) {
-                this.emitLine('frame.set("loop.length", ' + arr + '.length);');
-            }
-
-            this.compile(node.body, frame);
             this.emitLine('}');
         }
+        else {
+            // Generate a typical array iteration
+            var v = this.tmpid();
+            frame.set(node.name.value, v);
 
-        this.emit('}');
+            this.emitLine('for(var ' + i + '=0; ' + i + ' < ' + arr + '.length; ' + 
+                          i + '++) {');
+            this.emitLine('var ' + v + ' = ' + arr + '[' + i + '];');
+            this.emitLine('frame.set("' + node.name.value + '", ' + v + ');');
+
+            this.emitLoopBindings(node, loopUses, arr, i);
+
+            this.withScopedSyntax(function() {
+                this.compile(node.body, frame);
+            });
+
+            this.emitLine('}');
+        }
+        
+        this.emitLine('}');
+        this.emitLine('frame = frame.pop();');
+    },
+
+    compileForAsync: function(node, frame) {
+        // This shares some code with the For tag, but not enough to
+        // worry about. This iterates across an object asynchronously,
+        // but not in parallel.
+
+        var i = this.tmpid();
+        var len = this.tmpid();
+        var arr = this.tmpid();
+        var loopUses = this.scanLoop(node);
+        frame = frame.push();
+
+        this.emitLine('frame = frame.push();');
+
+        this.emit('var ' + arr + ' = ');
+        this._compileExpression(node.arr, frame);
+        this.emitLine(';');
+
+        if(node.name instanceof nodes.Array) {
+            this.emit('runtime.asyncIter(' + arr + ', ' +
+                      node.name.children.length + ', function(');
+
+            lib.each(node.name.children, function(name) {
+                this.emit(name.value + ',');
+            }, this);
+
+            this.emit(i + ',' + len + ',next) {');
+
+            lib.each(node.name.children, function(name) {
+                var id = name.value;
+                frame.set(id, id);
+                this.emitLine('frame.set("' + id + '", ' + id + ');');
+            }, this);
+        }
+        else {
+            var id = node.name.value;
+            this.emitLine('runtime.asyncIter(' + arr + ', 1, function(' + id + ', ' + i + ', ' + len + ',next) {');
+            this.emitLine('frame.set("' + id + '", ' + id + ');');
+            frame.set(id, id);
+        }
+
+        this.emitLoopBindings(node, loopUses, arr, i, len);
+        
+        this.withScopedSyntax(function() {
+            this.compile(node.body, frame);
+            this.emitLine('next();');
+        });
+
+        this.emitLine('}, ' + this.makeCallback());
+        this.addScopeLevel();
+
         this.emitLine('frame = frame.pop();');
     },
 
@@ -726,9 +840,14 @@ var Compiler = Object.extend({
         var id = this.tmpid();
         var target = node.target.value;
 
-        this.emit('var ' + id + ' = env.getTemplate(');
+        this.emit('env.getTemplate(');
         this._compileExpression(node.template, frame);
-        this.emitLine(').getExported();');
+        this.emitLine(', ' + this.makeCallback(id));
+        this.addScopeLevel();
+
+        this.emitLine(id + '.getExported(' + this.makeCallback(id));
+        this.addScopeLevel();
+
         frame.set(target, id);
 
         if(frame.parent) {
@@ -740,9 +859,15 @@ var Compiler = Object.extend({
     },
 
     compileFromImport: function(node, frame) {
-        this.emit('var imported = env.getTemplate(');
-        this.compile(node.template, frame);
-        this.emitLine(').getExported();');
+        var importedId = this.tmpid();
+
+        this.emit('env.getTemplate(');
+        this._compileExpression(node.template, frame);
+        this.emitLine(', ' + this.makeCallback(importedId));
+        this.addScopeLevel();
+
+        this.emitLine(importedId + '.getExported(' + this.makeCallback(importedId));
+        this.addScopeLevel();
 
         lib.each(node.names.children, function(nameNode) {
             var name;
@@ -758,10 +883,10 @@ var Compiler = Object.extend({
                 alias = name;
             }
 
-            this.emitLine('if(imported.hasOwnProperty("' + name + '")) {');
-            this.emitLine('var ' + id + ' = imported.' + name + ';');
+            this.emitLine('if(' + importedId + '.hasOwnProperty("' + name + '")) {');
+            this.emitLine('var ' + id + ' = ' + importedId + '.' + name + ';');
             this.emitLine('} else {');
-            this.emitLine('throw new Error("cannot import \'' + name + '\'")');
+            this.emitLine('cb(new Error("cannot import \'' + name + '\'")); return;');
             this.emitLine('}');
 
             frame.set(alias, id);
@@ -777,9 +902,27 @@ var Compiler = Object.extend({
 
     compileBlock: function(node, frame) {
         if(!this.isChild) {
-            this.emitLine(this.buffer + ' += context.getBlock("' +
-                          node.name.value + '")(env, context, frame, runtime);');
+            var id = this.tmpid();
+
+            this.emitLine('context.getBlock("' + node.name.value + '")' +
+                          '(env, context, frame, runtime, ' + this.makeCallback(id));
+            this.emitLine(this.buffer + ' += ' + id + ';');
+            this.addScopeLevel();
         }
+    },
+
+    compileSuper: function(node, frame) {
+        var name = node.blockName.value;
+        var id = node.symbol.value;
+
+        this.emitLine('context.getSuper(env, ' +
+                      '"' + name + '", ' +
+                      'b_' + name + ', ' +
+                      'frame, runtime, '+
+                      this.makeCallback(id));
+        this.emitLine(id + ' = runtime.markSafe(' + id + ');');
+        this.addScopeLevel();
+        frame.set(id, id);
     },
 
     compileExtends: function(node, frame) {
@@ -789,27 +932,34 @@ var Compiler = Object.extend({
                       node.template.colno);
         }
 
-        this.emit('var parentTemplate = env.getTemplate(');
-        this._compileExpression(node.template, frame);
-        this.emitLine(', true);');
-
         var k = this.tmpid();
+
+        this.emit('env.getTemplate(');
+        this._compileExpression(node.template, frame);
+        this.emitLine(', true, ' + this.makeCallback('parentTemplate'));
 
         this.emitLine('for(var ' + k + ' in parentTemplate.blocks) {');
         this.emitLine('context.addBlock(' + k +
                       ', parentTemplate.blocks[' + k + ']);');
         this.emitLine('}');
 
+        this.addScopeLevel();
         this.isChild = true;
     },
 
     compileInclude: function(node, frame) {
-        this.emit('var includeTemplate = env.getTemplate(');
+        var id = this.tmpid();
+        var id2 = this.tmpid();
+
+        this.emit('env.getTemplate(');
         this._compileExpression(node.template, frame);
-        this.emitLine(');');
-        this.emitLine(this.buffer +
-                      ' += includeTemplate.render(' +
-                      'context.getVariables(), frame.push());');
+        this.emitLine(', ' + this.makeCallback(id));
+        this.addScopeLevel();
+
+        this.emitLine(id + '.render(' +
+                      'context.getVariables(), frame.push(), ' + this.makeCallback(id2));
+        this.emitLine(this.buffer + ' += ' + id2);
+        this.addScopeLevel();
     },
 
     compileTemplateData: function(node, frame) {
@@ -846,8 +996,7 @@ var Compiler = Object.extend({
         this.emitFuncBegin('root');
         this._compileChildren(node, frame);
         if(this.isChild) {
-            this.emitLine('return ' +
-                          'parentTemplate.rootRenderFunc(env, context, frame, runtime);');
+            this.emitLine('parentTemplate.rootRenderFunc(env, context, frame, runtime, cb);');
         }
         this.emitFuncEnd(this.isChild);
 
@@ -860,15 +1009,8 @@ var Compiler = Object.extend({
             var name = block.name.value;
 
             this.emitFuncBegin('b_' + name);
-            this.emitLine('var l_super = runtime.markSafe(' +
-                          'context.getSuper(env, ' +
-                          '"' + name + '", ' +
-                          'b_' + name + ', ' +
-                          'frame, ' +
-                          'runtime));');
 
             var tmpFrame = new Frame();
-            tmpFrame.set('super', 'l_super');
             this.compile(block.body, tmpFrame);
             this.emitFuncEnd();
         }
@@ -899,33 +1041,23 @@ var Compiler = Object.extend({
     }
 });
 
-// var fs = require("fs");
-//var src = '{{ foo({a:1}) }} {% block content %}foo{% endblock %}';
 // var c = new Compiler();
-// var src = '{{ foo | poop(1, 2, 3) }}';
-//var extensions = [new testExtension()];
-
-// var ns = parser.parse(src);
-// nodes.printNodes(ns);
-// c.compile(ns);
+// var src = '{% block content %}hello{% endblock %} {{ tmpl | getContents }}';
+// var ast = transformer.transform(parser.parse(src), ['getContents']);
+// nodes.printNodes(ast);
+// c.compile(ast);
 
 // var tmpl = c.getCode();
 // console.log(tmpl);
 
 module.exports = {
-    compile: function(src, extensions, name) {
+    compile: function(src, asyncFilters, extensions, name) {
         var c = new Compiler(extensions);
 
-        // Run the extension preprocessors against the source.
-        if (extensions && extensions.length) {
-            for (var i = 0; i < extensions.length; i++) {
-                if ('preprocess' in extensions[i]) {
-                    src = extensions[i].preprocess(src, name);
-                }
-            }
-        }
-
-        c.compile(parser.parse(src, extensions));
+        c.compile(transformer.transform(parser.parse(src, extensions),
+                                        asyncFilters,
+                                        extensions,
+                                        name));
         return c.getCode();
     },
 

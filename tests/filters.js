@@ -1,240 +1,232 @@
 (function() {
-    var expect, render, lib;
+    var expect, util, lib;
 
     if(typeof require != 'undefined') {
         expect = require('expect.js');
-        render = require('./util').render;
+        util = require('./util');
         lib = require('../src/lib');
     }
     else {
         expect = window.expect;
-        render = window.render;
+        util = window.util;
         lib = nunjucks.require('lib');
     }
 
+    var render = util.render;
+    var equal = util.equal;
+    var finish = util.finish;
+
     describe('filter', function() {
-        it('abs', function() {
-            expect(render('{{ -3|abs }}')).to.be('3');
-            expect(render('{{ -3.456|abs }}')).to.be('3.456');
+        it('abs', function(done) {
+            equal('{{ -3|abs }}', '3');
+            equal('{{ -3.456|abs }}', '3.456');
+            finish(done);
         });
 
-        it('batch', function() {
-            var s = render('{% for a in [1,2,3,4,5,6]|batch(2) %}' +
-                           '-{% for b in a %}' +
-                           '{{ b }}' +
-                           '{% endfor %}-' +
-                           '{% endfor %}');
-            expect(s).to.be('-12--34--56-');
+        it('batch', function(done) {
+            equal('{% for a in [1,2,3,4,5,6]|batch(2) %}' +
+                  '-{% for b in a %}' +
+                  '{{ b }}' +
+                  '{% endfor %}-' +
+                  '{% endfor %}',
+
+                  '-12--34--56-');
+
+            finish(done);
         });
 
-        it('capitalize', function() {
-            var s = render('{{ "foo" | capitalize }}');
-            expect(s).to.be('Foo');
+        it('capitalize', function(done) {
+            equal('{{ "foo" | capitalize }}', 'Foo');
+            finish(done);
         });
 
-        it('center', function() {
-            var s = render('{{ "fooo" | center }}');
-            expect(s).to.be(lib.repeat(' ', 38) + 'fooo' + 
-                            lib.repeat(' ', 38));
+        it('center', function(done) {
+            equal('{{ "fooo" | center }}',
+                  lib.repeat(' ', 38) + 'fooo' +
+                  lib.repeat(' ', 38));
 
-            s = render('{{ "foo" | center }}');
-            expect(s).to.be(lib.repeat(' ', 38) + 'foo' +
-                            lib.repeat(' ', 39));
+            equal('{{ "foo" | center }}',
+                  lib.repeat(' ', 38) + 'foo' +
+                  lib.repeat(' ', 39));
+            finish(done);
         });
 
-        it('default', function() {
-            var s = render('{{ false | default("foo") }}');
-            expect(s).to.be('foo');
-
-            s = render('{{ "bar" | default("foo") }}');
-            expect(s).to.be('bar');
+        it('default', function(done) {
+            equal('{{ false | default("foo") }}', 'foo');
+            equal('{{ "bar" | default("foo") }}', 'bar');
+            finish(done);
         });
 
-        it('escape', function() {
-            var s = render('{{ "<html>" | escape }}');
-            expect(s).to.be('&lt;html&gt;');
+        it('escape', function(done) {
+            equal('{{ "<html>" | escape }}', '&lt;html&gt;');
+            finish(done);
         });
 
-        it("dictsort", function() {
-            // no real foolproof way to test that a js obj has been transformed 
-            // from unsorted -> sorted, as its enumeration ordering is undefined 
+        it("dictsort", function(done) {
+            // no real foolproof way to test that a js obj has been transformed
+            // from unsorted -> sorted, as its enumeration ordering is undefined
             // and might fluke being sorted originally .. lets just init with some jumbled
-            // keys 
+            // keys
 
             // no params - should be case insensitive, by key
-            var s = render('{% for item in items | dictsort %}' +
-                           '{{ item[0] }}{% endfor %}', { 
-                               items: { 
-                                   "e": 1,  
-                                   "d": 2,
-                                   "c": 3,
-                                   "a": 4,
-                                   "f": 5,
-                                   "b": 6
-                               }
-                           });
-            expect(s).to.be("abcdef");
+            equal('{% for item in items | dictsort %}' +
+                   '{{ item[0] }}{% endfor %}',
+                   {
+                       items: {
+                           "e": 1,
+                           "d": 2,
+                           "c": 3,
+                           "a": 4,
+                           "f": 5,
+                           "b": 6
+                       }
+                   },
+                   'abcdef');
 
             // case sensitive = true
-            var s = render('{% for item in items | dictsort(true) %}' +
-                           '{{ item[0] }},{% endfor %}', { 
-                               items: { 
-                                   "ABC": 6,
-                                   "ABc": 5,
-                                   "Abc": 1,
-                                   "abc": 2
-                               }
-                           });
+            equal('{% for item in items | dictsort(true) %}' +
+                   '{{ item[0] }},{% endfor %}', {
+                       items: {
+                           "ABC": 6,
+                           "ABc": 5,
+                           "Abc": 1,
+                           "abc": 2
+                       }
+                   },
+                   "ABC,ABc,Abc,abc,");
 
-            expect(s).to.be("ABC,ABc,Abc,abc,");
+            // use values for sort
+            equal('{% for item in items | dictsort(false, "value") %}' +
+                   '{{ item[0] }}{% endfor %}', {
+                       items: {
+                           "a": 6,
+                           "b": 5,
+                           "c": 1,
+                           "d": 2
+                       }
+                   },
+                   'cdba');
 
-            // use values for sort 
-            var s = render('{% for item in items | dictsort(false, "value") %}' +
-                           '{{ item[0] }}{% endfor %}', { 
-                               items: { 
-                                   "a": 6,
-                                   "b": 5,
-                                   "c": 1,
-                                   "d": 2
-                               }
-                           });
-
-            expect(s).to.be("cdba");
+            finish(done);
         });
 
-        it('first', function() {
-            var s = render('{{ [1,2,3] | first }}');
-            expect(s).to.be('1');
+        it('first', function(done) {
+            equal('{{ [1,2,3] | first }}', '1');
+            finish(done);
         });
 
-        it('float/int', function() {
-            var s = render('{{ "3.5" | float }}');
-            expect(s).to.be('3.5');
+        it('float/int', function(done) {
+            equal('{{ "3.5" | float }}', '3.5');
+            equal('{{ "3.5" | int }}', '3');
+            equal('{{ "0" | int }}', '0');
+            equal('{{ "0" | float }}', '0');
+            equal('{{ "bob" | int("cat") }}', 'cat');
+            equal('{{ "bob" | float("cat") }}', 'cat');
 
-            s = render('{{ "3.5" | int }}');
-            expect(s).to.be('3');
-
-            s = render('{{ "0" | int }}');
-            expect(s).to.be('0');
-
-            s = render('{{ "0" | float }}');
-            expect(s).to.be('0');
-
-            s = render('{{ "bob" | int("cat") }}');
-            expect(s).to.be('cat');
-
-            s = render('{{ "bob" | float("cat") }}');
-            expect(s).to.be('cat');
+            finish(done);
         });
 
-        it('groupby', function() {
-            var s = render('{% for type, items in items | groupby("type") %}' +
-                           ':{{ type }}:' +
-                           '{% for item in items %}' +
-                           '{{ item.name }}' +
-                           '{% endfor %}' +
-                           '{% endfor %}',
-                           { items: [{ name: 'james',
-                                       type: 'green' },
-                                     { name: 'john',
-                                       type: 'blue' },
-                                     { name: 'jim',
-                                       type: 'blue' },
-                                     { name: 'jessie',
-                                       type: 'green' }]});
+        it('groupby', function(done) {
+            equal('{% for type, items in items | groupby("type") %}' +
+                  ':{{ type }}:' +
+                  '{% for item in items %}' +
+                  '{{ item.name }}' +
+                  '{% endfor %}' +
+                  '{% endfor %}',
+                  { items: [{ name: 'james',
+                              type: 'green' },
+                            { name: 'john',
+                              type: 'blue' },
+                            { name: 'jim',
+                              type: 'blue' },
+                            { name: 'jessie',
+                              type: 'green' }]},
+                  ':green:jamesjessie:blue:johnjim');
 
-            expect(s).to.be(':green:jamesjessie:blue:johnjim');
+            finish(done);
         });
 
-        it('indent', function() {
-            var s = render('{{ "one\ntwo\nthree" | indent }}');
-            expect(s).to.be('one\n    two\n    three\n');
-
-            s = render('{{ "one\ntwo\nthree" | indent(2) }}');
-            expect(s).to.be('one\n  two\n  three\n');
-
-            s = render('{{ "one\ntwo\nthree" | indent(2, true) }}');
-            expect(s).to.be('  one\n  two\n  three\n');
+        it('indent', function(done) {
+            equal('{{ "one\ntwo\nthree" | indent }}',
+                  'one\n    two\n    three\n');
+            equal('{{ "one\ntwo\nthree" | indent(2) }}',
+                  'one\n  two\n  three\n');
+            equal('{{ "one\ntwo\nthree" | indent(2, true) }}',
+                  '  one\n  two\n  three\n');
+            finish(done);
         });
 
-        it('join', function() {
-            var s = render('{{ items | join }}',
-                           { items: [1, 2, 3] });
-            expect(s).to.be('123');
+        it('join', function(done) {
+            equal('{{ items | join }}',
+                  { items: [1, 2, 3] },
+                  '123');
 
-            s = render('{{ items | join(",") }}',
-                       { items: ['foo', 'bar', 'bear'] });
-            expect(s).to.be('foo,bar,bear');
+            equal('{{ items | join(",") }}',
+                  { items: ['foo', 'bar', 'bear'] },
+                  'foo,bar,bear');
 
-            s = render('{{ items | join(",", "name") }}',
-                       { items: [{ name: 'foo' },
-                                 { name: 'bar' },
-                                 { name: 'bear' }] });
-            expect(s).to.be('foo,bar,bear');
+            equal('{{ items | join(",", "name") }}',
+                  { items: [{ name: 'foo' },
+                            { name: 'bar' },
+                            { name: 'bear' }] },
+                  'foo,bar,bear');
+            finish(done);
         });
 
-        it('last', function() {
-            var s = render('{{ [1,2,3] | last }}');
-            expect(s).to.be('3');
+        it('last', function(done) {
+            equal('{{ [1,2,3] | last }}', '3');
+            finish(done);
         });
 
-        it('length', function() {
-            var s = render('{{ [1,2,3] | length }}');
-            expect(s).to.be('3');        
+        it('length', function(done) {
+            equal('{{ [1,2,3] | length }}', '3');
+            finish(done);
         });
 
-        it('list', function() {
-            var s = render('{% for i in "foobar" | list %}{{ i }},{% endfor %}');
-            expect(s).to.be('f,o,o,b,a,r,');
+        it('list', function(done) {
+            equal('{% for i in "foobar" | list %}{{ i }},{% endfor %}',
+                  'f,o,o,b,a,r,');
+            finish(done);
         });
 
-        it('lower', function() {
-            var s = render('{{ "fOObAr" | lower }}');
-            expect(s).to.be('foobar');
+        it('lower', function(done) {
+            equal('{{ "fOObAr" | lower }}', 'foobar');
+            finish(done);
         });
 
-        it('random', function() {
+        it('random', function(done) {
             for(var i=0; i<100; i++) {
-                var s = render('{{ [1,2,3,4,5,6,7,8,9] | random }}');
-                var val = parseInt(s);
-                expect(val).to.be.within(1, 9);
+                render('{{ [1,2,3,4,5,6,7,8,9] | random }}', function(err, res) {
+                    var val = parseInt(res);
+                    expect(val).to.be.within(1, 9);
+                });
             }
+
+            finish(done);
         });
 
-        it('replace', function() {
-            var s = render('{{ "aaabbbccc" | replace("a", "x") }}');
-            expect(s).to.be('xxxbbbccc');
-
-            s = render('{{ "aaabbbccc" | replace("a", "x", 2) }}');
-            expect(s).to.be('xxabbbccc');
-
-            s = render('{{ "aaabbbbbccc" | replace("b", "y", 4) }}');
-            expect(s).to.be('aaayyyybccc');
+        it('replace', function(done) {
+            equal('{{ "aaabbbccc" | replace("a", "x") }}', 'xxxbbbccc');
+            equal('{{ "aaabbbccc" | replace("a", "x", 2) }}', 'xxabbbccc');
+            equal('{{ "aaabbbbbccc" | replace("b", "y", 4) }}', 'aaayyyybccc');
+            finish(done);
         });
 
-        it('reverse', function() {
-            var s = render('{{ "abcdef" | reverse }}');
-            expect(s).to.be('fedcba');
-
-            s = render('{% for i in [1, 2, 3, 4] | reverse %}{{ i }}{% endfor %}');
-            expect(s).to.be('4321');
+        it('reverse', function(done) {
+            equal('{{ "abcdef" | reverse }}', 'fedcba');
+            equal('{% for i in [1, 2, 3, 4] | reverse %}{{ i }}{% endfor %}', '4321');
+            finish(done);
         });
 
-        it('round', function() {
-            var s = render('{{ 4.5 | round }}');
-            expect(s).to.be('5');
-
-            s = render('{{ 4.5 | round(0, "floor") }}');
-            expect(s).to.be('4');
-
-            s = render('{{ 4.12345 | round(4) }}');
-            expect(s).to.be('4.1235');
-
-            s = render('{{ 4.12344 | round(4) }}');
-            expect(s).to.be('4.1234');
+        it('round', function(done) {
+            equal('{{ 4.5 | round }}', '5');
+            equal('{{ 4.5 | round(0, "floor") }}', '4');
+            equal('{{ 4.12345 | round(4) }}', '4.1235');
+            equal('{{ 4.12344 | round(4) }}', ('4.1234'));
+            finish(done);
         });
 
-        it('slice', function() {
+        it('slice', function(done) {
             var tmpl = '{% for items in arr | slice(3) %}' +
                 '--' +
                 '{% for item in items %}' +
@@ -243,79 +235,76 @@
                 '--' +
                 '{% endfor %}';
 
-            var s = render(tmpl,
-                           { arr: [1,2,3,4,5,6,7,8,9] });
-            expect(s).to.be('--123----456----789--');
+            equal(tmpl,
+                  { arr: [1,2,3,4,5,6,7,8,9] },
+                  '--123----456----789--');
 
-            s = render(tmpl,
-                       { arr: [1,2,3,4,5,6,7,8,9,10] });
-            expect(s).to.be('--1234----567----8910--');
+            equal(tmpl,
+                  { arr: [1,2,3,4,5,6,7,8,9,10] },
+                  '--1234----567----8910--');
+
+            finish(done);
         });
 
-        it('sort', function() {
-            var s = render('{% for i in [3,5,2,1,4,6] | sort %}{{ i }}{% endfor %}');
-            expect(s).to.be('123456');
+        it('sort', function(done) {
+            equal('{% for i in [3,5,2,1,4,6] | sort %}{{ i }}{% endfor %}',
+                  '123456');
 
-            s = render('{% for i in ["fOo", "Foo"] | sort %}{{ i }}{% endfor %}');
-            expect(s).to.be('fOoFoo');
+            equal('{% for i in ["fOo", "Foo"] | sort %}{{ i }}{% endfor %}',
+                  'fOoFoo');
 
-            s = render('{% for i in [1,6,3,7] | sort(true) %}' +
-                       '{{ i }}{% endfor %}');
-            expect(s).to.be('7631');
+            equal('{% for i in [1,6,3,7] | sort(true) %}' +
+                       '{{ i }}{% endfor %}',
+                  '7631');
 
-            s = render('{% for i in ["fOo", "Foo"] | sort(false, true) %}' +
-                       '{{ i }}{% endfor %}');
-            expect(s).to.be('FoofOo');
+            equal('{% for i in ["fOo", "Foo"] | sort(false, true) %}' +
+                       '{{ i }}{% endfor %}',
+                  'FoofOo');
 
-            s = render('{% for item in items | sort(false, false, "name") %}' +
+            equal('{% for item in items | sort(false, false, "name") %}' +
                        '{{ item.name }}{% endfor %}',
                        { items: [{ name: 'james' },
                                  { name: 'fred' },
-                                 { name: 'john' }]});
-            expect(s).to.be('fredjamesjohn');
+                                 { name: 'john' }]},
+                  'fredjamesjohn');
+
+            finish(done);
         });
 
-        it('string', function() {
-            var s = render('{% for i in 1234 | string | list %}{{ i }},{% endfor %}');
-            expect(s).to.be('1,2,3,4,');
+        it('string', function(done) {
+            equal('{% for i in 1234 | string | list %}{{ i }},{% endfor %}',
+                  '1,2,3,4,');
+            finish(done);
         });
 
-        it('title', function() {
-            var s = render('{{ "foo bar baz" | title }}');
-            expect(s).to.be('Foo Bar Baz');
+        it('title', function(done) {
+            equal('{{ "foo bar baz" | title }}', 'Foo Bar Baz');
+            finish(done);
         });
 
-
-        it('trim', function() {
-            var s = render('{{ "  foo " | trim }}');
-            expect(s).to.be('foo');
+        it('trim', function(done) {
+            equal('{{ "  foo " | trim }}', 'foo');
+            finish(done);
         });
 
-        it('truncate', function() {
-            var s = render('{{ "foo bar" | truncate(3) }}');
-            expect(s).to.be('foo...');
+        it('truncate', function(done) {
+            equal('{{ "foo bar" | truncate(3) }}', 'foo...');
+            equal('{{ "foo bar baz" | truncate(6) }}', 'foo...');
+            equal('{{ "foo bar baz" | truncate(7) }}', 'foo bar...');
+            equal('{{ "foo bar baz" | truncate(5, true) }}', 'foo b...');
+            equal('{{ "foo bar baz" | truncate(6, true, "?") }}', 'foo ba?');
 
-            var s = render('{{ "foo bar baz" | truncate(6) }}');
-            expect(s).to.be('foo...');
-
-            var s = render('{{ "foo bar baz" | truncate(7) }}');
-            expect(s).to.be('foo bar...');
-
-            var s = render('{{ "foo bar baz" | truncate(5, true) }}');
-            expect(s).to.be('foo b...');
-            
-            var s = render('{{ "foo bar baz" | truncate(6, true, "?") }}');
-            expect(s).to.be('foo ba?');
+            finish(done);
         });
 
-        it('upper', function() {
-            var s = render('{{ "foo" | upper }}');
-            expect(s).to.be('FOO');
+        it('upper', function(done) {
+            equal('{{ "foo" | upper }}', 'FOO');
+            finish(done);
         });
 
-        it('wordcount', function() {
-            var s = render('{{ "foo bar baz" | wordcount }}');
-            expect(s).to.be('3');
+        it('wordcount', function(done) {
+            equal('{{ "foo bar baz" | wordcount }}', '3');
+            finish(done);
         });
     });
 })();

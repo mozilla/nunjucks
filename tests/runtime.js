@@ -1,50 +1,71 @@
 (function() {
-    var expect, render;
+    var expect, util;
 
     if(typeof require != 'undefined') {
         expect = require('expect.js');
-        render = require('./util').render;
+        util = require('./util');
     }
     else {
         expect = window.expect;
-        render = window.render;
+        util = window.util;
     }
 
+    var equal = util.equal;
+    var finish = util.finish;
+    var render = util.render;
+
     describe('runtime', function() {
-        it('should report the failed function calls to symbols', function() {
-            expect(function() {
-                render('{{ foo("cvan") }}');
-            }).to.throwException(/Unable to call `foo`, which is undefined/);
+        it('should report the failed function calls to symbols', function(done) {
+            render('{{ foo("cvan") }}', {}, { noThrow: true }, function(err) {
+                expect(err).to.match(/Unable to call `foo`, which is undefined/);
+            });
+
+            finish(done);
         });
 
-        it('should report the failed function calls to lookups', function() {
-            expect(function() {
-                render('{{ foo["bar"]("cvan") }}');
-            }).to.throwException(/foo\["bar"\]/);
+        it('should report the failed function calls to lookups', function(done) {
+            render('{{ foo["bar"]("cvan") }}', {}, { noThrow: true }, function(err) {
+                expect(err).to.match(/foo\["bar"\]/);
+            });
+
+            finish(done);
         });
 
-        it('should report the failed function calls to calls', function() {
-            expect(function() {
-                render('{{ foo.bar("second call") }}');
-            }).to.throwException(/foo\["bar"\]/);
+        it('should report the failed function calls to calls', function(done) {
+            render('{{ foo.bar("second call") }}', {}, { noThrow: true }, function(err) {
+                expect(err).to.match(/foo\["bar"\]/);
+            });
+
+            finish(done);
         });
 
-        it('should report the failed function calls w/multiple args', function() {
-            expect(function() {
-                render('{{ foo.bar("multiple", "args") }}');
-            }).to.throwException(/foo\["bar"\]/);
+        it('should report the failed function calls w/multiple args', function(done) {
+            render('{{ foo.bar("multiple", "args") }}', {}, { noThrow: true }, function(err) {
+                expect(err).to.match(/foo\["bar"\]/);
+            });
 
-            expect(function() {
-                render('{{ foo["bar"]["zip"]("multiple", "args") }}');
-            }).to.throwException(/foo\["bar"\]\["zip"\]/);
+            render('{{ foo["bar"]["zip"]("multiple", "args") }}',
+                   {},
+                   { noThrow: true },
+                   function(err) {
+                       expect(err).to.match(/foo\["bar"\]\["zip"\]/);
+                   });
+
+            finish(done);
         });
 
-        it('should allow for undefined macro arguments in the last position', function() {
-            expect(function() {
-                render('{% macro foo(bar, baz) %}' +
-                       '{{ bar }} {{ baz }}{% endmacro %}' +
-                       '{{ foo("hello", none) }}');
-            }).to.not.throwException();
+        it('should allow for undefined macro arguments in the last position', function(done) {
+            render('{% macro foo(bar, baz) %}' +
+                   '{{ bar }} {{ baz }}{% endmacro %}' +
+                   '{{ foo("hello", none) }}',
+                   {},
+                   { noThrow: true },
+                   function(err, res) {
+                       expect(err).to.equal(null);
+                       expect(typeof res).to.be('string');
+                   });
+
+            finish(done);
         });
     });
 })();

@@ -1,32 +1,37 @@
+var Loader = require('./loader');
 
-var Object = require('./object');
-
-var HttpLoader = Object.extend({
+var HttpLoader = Loader.extend({
     init: function(baseURL, neverUpdate) {
         this.baseURL = baseURL || '';
         this.neverUpdate = neverUpdate;
     },
 
-    getSource: function(name) {
+    getSource: function(name, callback) {
         var src = this.fetch(this.baseURL + '/' + name);
-        var _this = this;
 
-        if(!src) {
+        if (!src) {
             return null;
         }
 
         return { src: src,
-                 path: name,
-                 upToDate: function() { return _this.neverUpdate; }};
+                 path: name };
     },
 
-    fetch: function(url) {
+    fetch: function(url, callback) {
         // Only in the browser please
-        var ajax = new XMLHttpRequest();
-        var src = null;
+        var ajax;
+        var loading = true;
+        var src;
+
+        if (window.XMLHttpRequest) { // Mozilla, Safari, ...
+            ajax = new XMLHttpRequest();
+        } else if (window.ActiveXObject) { // IE 8 and older
+            ajax = new ActiveXObject("Microsoft.XMLHTTP");
+        }
 
         ajax.onreadystatechange = function() {
-            if(ajax.readyState == 4 && ajax.status == 200) {
+            if(ajax.readyState == 4 && ajax.status == 200 && loading) {
+                loading = false;
                 src = ajax.responseText;
             }
         };

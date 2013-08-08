@@ -1,450 +1,575 @@
 (function() {
-    var expect, render, Environment, Template;
+    var expect, util, Environment, Template, fs;
 
     if(typeof require != 'undefined') {
         expect = require('expect.js');
-        render = require('./util').render;
+        util = require('./util');
         Environment = require('../src/environment').Environment;
         Template = require('../src/environment').Template;
+        fs = require('fs');
     }
     else {
         expect = window.expect;
-        render = window.render;
+        util = window.util;
         Environment = nunjucks.Environment;
         Template = nunjucks.Template;
     }
 
+    var render = util.render;
+    var equal = util.equal;
+    var finish = util.finish;
+
     describe('compiler', function() {
-        it('should compile templates', function() {
-            var s = render('Hello world');
-            expect(s).to.equal('Hello world');
+        it('should compile templates', function(done) {
+            equal('Hello world', 'Hello world');
+            equal('Hello world, {{ name }}',
+                  { name: 'James' },
+                  'Hello world, James');
 
-            s = render('Hello world, {{ name }}',
-                       { name: 'James' });
-            expect(s).to.equal('Hello world, James');
+            equal('Hello world, {{name}}{{suffix}}, how are you',
+                  { name: 'James',
+                    suffix: ' Long'},
+                  'Hello world, James Long, how are you');
 
-            s = render('Hello world, {{name}}{{suffix}}, how are you',
-                       { name: 'James',
-                         suffix: ' Long'});
-            expect(s).to.equal('Hello world, James Long, how are you');
+            finish(done);
         });
 
-        it('should escape newlines', function() {
-            expect(render('foo\\nbar')).to.be('foo\\nbar');
+        it('should escape newlines', function(done) {
+            equal('foo\\nbar', 'foo\\nbar');
+            finish(done);
         });
 
-        it('should compile references', function() {
-            var s = render('{{ foo.bar }}',
-                           { foo: { bar: 'baz' }});
-            expect(s).to.be('baz');
+        it('should compile references', function(done) {
+            equal('{{ foo.bar }}',
+                  { foo: { bar: 'baz' }},
+                  'baz');
 
-            s = render('{{ foo["bar"] }}',
-                       { foo: { bar: 'baz' }});
-            expect(s).to.be('baz');
+            equal('{{ foo["bar"] }}',
+                  { foo: { bar: 'baz' }},
+                  'baz');
+
+            finish(done);
         });
 
-        it('should fail silently on undefined values', function() {
-            var s = render('{{ foo }}');
-            expect(s).to.be('');
-
-            s = render('{{ foo.bar }}');
-            expect(s).to.be('');
-
-            s = render('{{ foo.bar.baz }}');
-            expect(s).to.be('');
-
-            s = render('{{ foo.bar.baz["biz"].mumble }}');
-            expect(s).to.be('');
+        it('should fail silently on undefined values', function(done) {
+            equal('{{ foo }}', '');
+            equal('{{ foo.bar }}', '');
+            equal('{{ foo.bar.baz }}', '');
+            equal('{{ foo.bar.baz["biz"].mumble }}', '');
+            finish(done);
         });
 
-        it('should not treat falsy values the same as undefined', function() {
-            var s = render('{{ foo }}', {foo: 0});
-            expect(s).to.be('0');
-
-            s = render('{{ foo }}', {foo: false});
-            expect(s).to.be('false');
+        it('should not treat falsy values the same as undefined', function(done) {
+            equal('{{ foo }}', {foo: 0}, '0');
+            equal('{{ foo }}', {foo: false}, 'false');
+            finish(done);
         });
 
-        it('should compile function calls', function() {
-            var s = render('{{ foo("msg") }}',
-                           { foo: function(str) { return str + 'hi'; }});
-            expect(s).to.be('msghi');
+        it('should compile function calls', function(done) {
+            equal('{{ foo("msg") }}',
+                  { foo: function(str) { return str + 'hi'; }},
+                  'msghi');
+            finish(done);
         });
 
-        it('should compile function calls with correct scope', function() {
-            var s = render('{{ foo.bar() }}', {
+        it('should compile function calls with correct scope', function(done) {
+            equal('{{ foo.bar() }}', {
                 foo: { 
                     bar: function() { return this.baz; },
                     baz: 'hello'
                 }
-            });
+            }, 'hello');
 
-            expect(s).to.be('hello');
+            finish(done);
         });
 
-        it('should compile if blocks', function() {
+        it('should compile if blocks', function(done) {
             var tmpl = ('Give me some {% if hungry %}pizza' +
                         '{% else %}water{% endif %}');
 
-            var s = render(tmpl, { hungry: true });
-            expect(s).to.be('Give me some pizza');
+            equal(tmpl, { hungry: true }, 'Give me some pizza');
+            equal(tmpl, { hungry: false }, 'Give me some water');
+            equal('{% if not hungry %}good{% endif %}',
+                  { hungry: false },
+                  'good');
 
-            s = render(tmpl, { hungry: false });
-            expect(s).to.be('Give me some water');
+            equal('{% if hungry and like_pizza %}good{% endif %}',
+                  { hungry: true, like_pizza: true },
+                  'good');
 
-            s = render('{% if not hungry %}good{% endif %}',
-                       { hungry: false });
-            expect(s).to.be('good');
+            equal('{% if hungry or like_pizza %}good{% endif %}',
+                  { hungry: false, like_pizza: true },
+                  'good');
 
-            s = render('{% if hungry and like_pizza %}good{% endif %}',
-                       { hungry: true, like_pizza: true });
-            expect(s).to.be('good');
+            equal('{% if (hungry or like_pizza) and anchovies %}good{% endif %}',
+                  { hungry: false, like_pizza: true, anchovies: true },
+                  'good');
 
-            s = render('{% if hungry or like_pizza %}good{% endif %}',
-                       { hungry: false, like_pizza: true });
-            expect(s).to.be('good');
+            equal('{% if food == "pizza" %}pizza{% endif %}' +
+                  '{% if food =="beer" %}beer{% endif %}',
+                  { food: 'beer' },
+                  'beer');
 
-            s = render('{% if (hungry or like_pizza) and anchovies %}good{% endif %}',
-                       { hungry: false, like_pizza: true, anchovies: true });
-            expect(s).to.be('good');
-
-            s = render('{% if food == "pizza" %}pizza{% endif %}' +
-                       '{% if food =="beer" %}beer{% endif %}',
-                       { food: 'beer' });
-            expect(s).to.be('beer');
+            finish(done);
         });
 
-        it('should compile the ternary operator', function() {
-            var s = render('{{ "foo" if bar else "baz" }}');
-            expect(s).to.be('baz');
+        it('should compile the ternary operator', function(done) {
+            equal('{{ "foo" if bar else "baz" }}', 'baz');
+            equal('{{ "foo" if bar else "baz" }}', { bar: true }, 'foo');
 
-            var s = render('{{ "foo" if bar else "baz" }}', { bar: true });
-            expect(s).to.be('foo');
+            finish(done);
         });
 
-        it('should compile inline conditionals', function() {
+        it('should compile inline conditionals', function(done) {
             var tmpl = 'Give me some {{ "pizza" if hungry else "water" }}';
 
-            var s = render(tmpl, { hungry: true });
-            expect(s).to.be('Give me some pizza');
+            equal(tmpl, { hungry: true }, 'Give me some pizza');
+            equal(tmpl, { hungry: false }, 'Give me some water');
+            equal('{{ "good" if not hungry }}',
+                  { hungry: false }, 'good');
+            equal('{{ "good" if hungry and like_pizza }}',
+                  { hungry: true, like_pizza: true }, 'good');
+            equal('{{ "good" if hungry or like_pizza }}',
+                  { hungry: false, like_pizza: true }, 'good');
+            equal('{{ "good" if (hungry or like_pizza) and anchovies }}',
+                  { hungry: false, like_pizza: true, anchovies: true }, 'good');
+            equal('{{ "pizza" if food == "pizza" }}' +
+                  '{{ "beer" if food == "beer" }}',
+                  { food: 'beer' }, 'beer');
 
-            s = render(tmpl, { hungry: false });
-            expect(s).to.be('Give me some water');
-
-            s = render('{{ "good" if not hungry }}',
-                       { hungry: false });
-            expect(s).to.be('good');
-
-            s = render('{{ "good" if hungry and like_pizza }}',
-                       { hungry: true, like_pizza: true });
-            expect(s).to.be('good');
-
-            s = render('{{ "good" if hungry or like_pizza }}',
-                       { hungry: false, like_pizza: true });
-            expect(s).to.be('good');
-
-            s = render('{{ "good" if (hungry or like_pizza) and anchovies }}',
-                       { hungry: false, like_pizza: true, anchovies: true });
-            expect(s).to.be('good');
-
-            s = render('{{ "pizza" if food == "pizza" }}' +
-                       '{{ "beer" if food == "beer" }}',
-                       { food: 'beer' });
-            expect(s).to.be('beer');
+            finish(done);
         });
 
-        it('should compile for blocks', function() {
-            var s = render('{% for i in arr %}{{ i }}{% endfor %}',
-                           { arr: [1, 2, 3, 4, 5] });
-            expect(s).to.be('12345');
+        function runLoopTests(block) {
+            equal('{% ' + block + ' i in arr %}{{ i }}{% endfor %}',
+                  { arr: [1, 2, 3, 4, 5] }, '12345');
 
-            s = render('{% for a, b, c in arr %}' +
+            equal('{% ' + block + ' a, b, c in arr %}' +
                        '{{ a }},{{ b }},{{ c }}.{% endfor %}',
-                       { arr: [['x', 'y', 'z'], ['1', '2', '3']] });
-            expect(s).to.be('x,y,z.1,2,3.');
+                  { arr: [['x', 'y', 'z'], ['1', '2', '3']] }, 'x,y,z.1,2,3.');
 
-            s = render('{% for item in arr | batch(2) %}{{ item[0] }}{% endfor %}',
-                       { arr: ['a', 'b', 'c', 'd'] });
-            expect(s).to.be('ac');
+            equal('{% ' + block + ' item in arr | batch(2) %}{{ item[0] }}{% endfor %}',
+                  { arr: ['a', 'b', 'c', 'd'] }, 'ac');
 
-            s = render('{% for k, v in { one: 1, two: 2 } %}' +
-                       '-{{ k }}:{{ v }}-{% endfor %}');
-            expect(s).to.be('-one:1--two:2-');
+            equal('{% ' + block + ' k, v in { one: 1, two: 2 } %}' +
+                  '-{{ k }}:{{ v }}-{% endfor %}', '-one:1--two:2-');
 
-            s = render('{% for i in [7,3,6] %}{{ loop.index }}{% endfor %}');
-            expect(s).to.be('123');
+            equal('{% ' + block + ' i in [7,3,6] %}{{ loop.index }}{% endfor %}', '123');
+            equal('{% ' + block + ' i in [7,3,6] %}{{ loop.index0 }}{% endfor %}', '012');
+            equal('{% ' + block + ' i in [7,3,6] %}{{ loop.revindex }}{% endfor %}', '321');
+            equal('{% ' + block + ' i in [7,3,6] %}{{ loop.revindex0 }}{% endfor %}', '210');
+            equal('{% ' + block + ' i in [7,3,6] %}{% if loop.first %}{{ i }}{% endif %}{% endfor %}', 
+                  '7');
+            equal('{% ' + block + ' i in [7,3,6] %}{% if loop.last %}{{ i }}{% endif %}{% endfor %}',
+                  '6');
+            equal('{% ' + block + ' i in [7,3,6] %}{{ loop.length }}{% endfor %}', '333');
+            equal('{% ' + block + ' i in foo %}{{ i }}{% endfor %}', '');
+            equal('{% ' + block + ' i in foo.bar %}{{ i }}{% endfor %}', { foo: {} }, '');
+            equal('{% ' + block + ' i in foo %}{{ i }}{% endfor %}', { foo: null }, '');
 
-            s = render('{% for i in [7,3,6] %}{{ loop.index0 }}{% endfor %}');
-            expect(s).to.be('012');
+            equal('{% ' + block + ' x, y in points %}[{{ x }},{{ y }}]{% endfor %}',
+                  { points: [[1,2], [3,4], [5,6]] },
+                  '[1,2][3,4][5,6]');
 
-            s = render('{% for i in [7,3,6] %}{{ loop.revindex }}{% endfor %}');
-            expect(s).to.be('321');
+            equal('{% ' + block + ' x, y in points %}{{ loop.index }}{% endfor %}',
+                  { points: [[1,2], [3,4], [5,6]] },
+                  '123');
 
-            s = render('{% for i in [7,3,6] %}{{ loop.revindex0 }}{% endfor %}');
-            expect(s).to.be('210');
+            equal('{% ' + block + ' x, y in points %}{{ loop.revindex }}{% endfor %}',
+                  { points: [[1,2], [3,4], [5,6]] },
+                  '321');
 
-            s = render('{% for i in [7,3,6] %}{% if loop.first %}{{ i }}{% endif %}{% endfor %}');
-            expect(s).to.be('7');
+            equal('{% ' + block + ' k, v in items %}({{ k }},{{ v }}){% endfor %}',
+                  { items: { foo: 1, bar: 2 }},
+                  '(foo,1)(bar,2)');
 
-            s = render('{% for i in [7,3,6] %}{% if loop.last %}{{ i }}{% endif %}{% endfor %}');
-            expect(s).to.be('6');
+            equal('{% ' + block + ' k, v in items %}{{ loop.index }}{% endfor %}',
+                  { items: { foo: 1, bar: 2 }},
+                  '12');
 
-            s = render('{% for i in [7,3,6] %}{{ loop.length }}{% endfor %}');
-            expect(s).to.be('333');
+            equal('{% ' + block + ' k, v in items %}{{ loop.revindex }}{% endfor %}',
+                  { items: { foo: 1, bar: 2 }},
+                  '21');
 
-            s = render('{% for i in foo %}{{ i }}{% endfor %}');
-            expect(s).to.be('');
+            equal('{% ' + block + ' k, v in items %}{{ loop.length }}{% endfor %}',
+                  { items: { foo: 1, bar: 2 }},
+                  '22');
+        }
 
-            s = render('{% for i in foo.bar %}{{ i }}{% endfor %}', { foo: {} });
-            expect(s).to.be('');
-
-            s = render('{% for i in foo %}{{ i }}{% endfor %}', { foo: null });
-            expect(s).to.be('');
+        it('should compile for blocks', function(done) {
+            runLoopTests('for');
+            finish(done);
         });
 
-        it('should compile operators', function() {
-            expect(render('{{ 3 + 4 - 5 * 6 / 10 }}')).to.be('4');
-            expect(render('{{ 4**5 }}')).to.be('1024');
-            expect(render('{{ 9//5 }}')).to.be('1');
-            expect(render('{{ 9%5 }}')).to.be('4');
-            expect(render('{{ -5 }}')).to.be('-5');
-
-            expect(render('{% if 3 < 4 %}yes{% endif %}')).to.be('yes');
-            expect(render('{% if 3 > 4 %}yes{% endif %}')).to.be('');
-            expect(render('{% if 9 >= 10 %}yes{% endif %}')).to.be('');
-            expect(render('{% if 10 >= 10 %}yes{% endif %}')).to.be('yes');
-            expect(render('{% if 9 <= 10 %}yes{% endif %}')).to.be('yes');
-            expect(render('{% if 10 <= 10 %}yes{% endif %}')).to.be('yes');
-            expect(render('{% if 11 <= 10 %}yes{% endif %}')).to.be('');
-
-            expect(render('{% if 10 != 10 %}yes{% endif %}')).to.be('');
-            expect(render('{% if 10 == 10 %}yes{% endif %}')).to.be('yes');
-
-            var s = render('{% if foo(20) > bar %}yes{% endif %}',
-                           { foo: function(n) { return n - 1; },
-                             bar: 15 });
-            expect(s).to.be('yes');
+        it('should compile for async', function(done) {
+            runLoopTests('forAsync');            
+            finish(done);
         });
 
-        it('should compile macros', function() {
-            var s = render('{% macro foo() %}This is a macro{% endmacro %}' +
-                           '{{ foo() }}');
-            expect(s).to.be('This is a macro');
+        it('should compile async control', function(done) {
+            if(fs) {
+                var opts = { 
+                    asyncFilters: {
+                        getContents: function(tmpl, cb) {
+                            fs.readFile(tmpl, cb);
+                        },
 
-            s = render('{% macro foo(x, y) %}{{ y }}{% endmacro %}' +
-                       '{{ foo(1) }}');
-            expect(s).to.be('');
+                        getContentsArr: function(arr, cb) {
+                            fs.readFile(arr[0], function(err, res) {
+                                cb(err, [res]);
+                            });
+                        }
+                    }
+                };
 
-            s = render('{% macro foo(x, y) %}{{ y }}{% endmacro %}' +
-                       '{{ foo(1, 2) }}');
-            expect(s).to.be('2');
+                render('{{ tmpl | getContents }}',
+                       { tmpl: 'tests/templates/for-async-content.html' },
+                       opts,
+                       function(err, res) {
+                           expect(res).to.be('somecontenthere');
+                       });
 
-            s = render('{% macro foo(x, y, z=5) %}{{ y }}{% endmacro %}' +
-                       '{{ foo(1, 2) }}');
-            expect(s).to.be('2');
+                render('{% if tmpl %}{{ tmpl | getContents }}{% endif %}',
+                       { tmpl: 'tests/templates/for-async-content.html' },
+                       opts,
+                       function(err, res) {
+                           expect(res).to.be('somecontenthere');
+                       });
 
-            s = render('{% macro foo(x, y, z=5) %}{{ z }}{% endmacro %}' +
-                       '{{ foo(1, 2) }}');
-            expect(s).to.be('5');
+                render('{% if tmpl | getContents %}yes{% endif %}',
+                       { tmpl: 'tests/templates/for-async-content.html' },
+                       opts,
+                       function(err, res) {
+                           expect(res).to.be('yes');
+                       });
 
-            s = render('{% macro foo(x, y, z=5) %}{{ y }}{% endmacro %}' +
-                       '{{ foo(1, y=2) }}');
-            expect(s).to.be('2');
+                render('{% for t in [tmpl, tmpl] %}{{ t | getContents }}*{% endfor %}',
+                       { tmpl: 'tests/templates/for-async-content.html' },
+                       opts,
+                       function(err, res) {
+                           expect(res).to.be('somecontenthere*somecontenthere*');
+                       });
 
-            s = render('{% macro foo(x, y, z=5) %}{{ x }}{{ y }}{{ z }}' +
-                       '{% endmacro %}' +
-                       '{{ foo(x=1, y=2) }}');
-            expect(s).to.be('125');
+                render('{% for t in [tmpl, tmpl] | getContentsArr %}{{ t }}{% endfor %}',
+                       { tmpl: 'tests/templates/for-async-content.html' },
+                       opts,
+                       function(err, res) {
+                           expect(res).to.be('somecontenthere');
+                       });
 
-            s = render('{% macro foo(x, y, z=5) %}{{ x }}{{ y }}{{ z }}' +
-                       '{% endmacro %}' +
-                       '{{ foo(x=1, y=2, z=3) }}');
-            expect(s).to.be('123');
+                render('{% if tmpl %}' +
+                       '{% for i in [0, 1] %}{{ tmpl | getContents }}*{% endfor %}' +
+                       '{% endif %}',
+                       { tmpl: 'tests/templates/for-async-content.html' },
+                       opts,
+                       function(err, res) {
+                           expect(res).to.be('somecontenthere*somecontenthere*');
+                       });
 
-            s = render('{% macro foo(x, y=2, z=5) %}{{ x }}{{ y }}{{ z }}' +
-                       '{% endmacro %}' +
-                       '{{ foo(1, z=3) }}');
-            expect(s).to.be('123');
+                render('{% block content %}{{ tmpl | getContents }}{% endblock %}',
+                       { tmpl: 'tests/templates/for-async-content.html' },
+                       opts,
+                       function(err, res) {
+                           expect(res).to.be('somecontenthere');
+                       });
 
-            s = render('{% macro foo(x, y=2, z=5) %}{{ x }}{{ y }}{{ z }}' +
-                       '{% endmacro %}' +
-                       '{{ foo(1) }}');
-            expect(s).to.be('125');
+                render('{% block content %}hello{% endblock %} {{ tmpl | getContents }}',
+                       { tmpl: 'tests/templates/for-async-content.html' },
+                       opts,
+                       function(err, res) {
+                           expect(res).to.be('hello somecontenthere');
+                       });
 
-            s = render('{% macro foo(x, y=2, z=5) %}{{ x }}{{ y }}{{ z }}' +
-                       '{% endmacro %}' +
-                       '{{ foo(1, 10, 20) }}');
-            expect(s).to.be('11020');
+                render('{% block content %}{% include "async.html" %}{% endblock %}',
+                       { tmpl: 'tests/templates/for-async-content.html' },
+                       opts,
+                       function(err, res) {
+                           expect(res).to.be('somecontenthere\n');
+                       });
 
-            s = render('{% extends "base.html" %}' +
-                       '{% macro foo(x, y=2, z=5) %}{{ x }}{{ y }}{{ z }}' +
-                       '{% endmacro %}' +
-                       '{% block block1 %}' +
-                       '{{ foo(1) }}' +
-                       '{% endblock %}');
-            expect(s).to.be('Foo125BazFizzle');
+                render('{% forAsync i in [0, 1] %}{% include "async.html" %}{% endfor %}',
+                       { tmpl: 'tests/templates/for-async-content.html' },
+                       opts,
+                       function(err, res) {
+                           expect(res).to.be('somecontenthere\nsomecontenthere\n');
+                       });
+            }
 
-            s = render('{% block bar %}' +
-                       '{% macro foo(x, y=2, z=5) %}{{ x }}{{ y }}{{ z }}' +
-                       '{% endmacro %}' +
-                       '{% endblock %}' +
-                       '{% block baz %}' +
-                       '{{ foo(1) }}' +
-                       '{% endblock %}');
-            expect(s).to.be('125');
+            finish(done);
         });
 
-        it('should import templates', function() {
-            var s = render('{% import "import.html" as imp %}' +
-                           '{{ imp.foo() }} {{ imp.bar }}');
-            expect(s).to.be("Here's a macro baz");
+        it('should compile operators', function(done) {
+            equal('{{ 3 + 4 - 5 * 6 / 10 }}', '4');
+            equal('{{ 4**5 }}', '1024');
+            equal('{{ 9//5 }}', '1');
+            equal('{{ 9%5 }}', '4');
+            equal('{{ -5 }}', '-5');
+            
+            equal('{% if 3 < 4 %}yes{% endif %}', 'yes');
+            equal('{% if 3 > 4 %}yes{% endif %}', '');
+            equal('{% if 9 >= 10 %}yes{% endif %}', '');
+            equal('{% if 10 >= 10 %}yes{% endif %}', 'yes');
+            equal('{% if 9 <= 10 %}yes{% endif %}', 'yes');
+            equal('{% if 10 <= 10 %}yes{% endif %}', 'yes');
+            equal('{% if 11 <= 10 %}yes{% endif %}', '');
 
-            s = render('{% from "import.html" import foo as baz, bar %}' +
-                       '{{ bar }} {{ baz() }}');
-            expect(s).to.be("baz Here's a macro");
+            equal('{% if 10 != 10 %}yes{% endif %}', '');
+            equal('{% if 10 == 10 %}yes{% endif %}', 'yes');
+            
+            equal('{% if foo(20) > bar %}yes{% endif %}',
+                  { foo: function(n) { return n - 1; },
+                    bar: 15 },
+                  'yes');
 
-            s = render('{% for i in [1,2] %}' +
-                       'start: {{ num }}' +
-                       '{% from "import.html" import bar as num %}' +
-                       'end: {{ num }}' +
-                       '{% endfor %}' +
-                       'final: {{ num }}');
+            finish(done);
+        });
+
+        it('should compile macros', function(done) {
+            equal('{% macro foo() %}This is a macro{% endmacro %}' +
+                  '{{ foo() }}',
+                  'This is a macro');
+
+            equal('{% macro foo(x, y) %}{{ y }}{% endmacro %}' +
+                  '{{ foo(1) }}',
+                  '');
+
+            // equal('{% macro foo(x) %}{{ x|title }}{% endmacro %}' +
+            //       '{{ foo("foo") }}',
+            //       'Foo');
+
+            equal('{% macro foo(x, y) %}{{ y }}{% endmacro %}' +
+                  '{{ foo(1, 2) }}',
+                  '2');
+
+            equal('{% macro foo(x, y, z=5) %}{{ y }}{% endmacro %}' +
+                  '{{ foo(1, 2) }}',
+                  '2');
+
+            equal('{% macro foo(x, y, z=5) %}{{ z }}{% endmacro %}' +
+                  '{{ foo(1, 2) }}',
+                  '5');
+
+            equal('{% macro foo(x, y, z=5) %}{{ y }}{% endmacro %}' +
+                  '{{ foo(1, y=2) }}',
+                  '2');
+
+            equal('{% macro foo(x, y, z=5) %}{{ x }}{{ y }}{{ z }}' +
+                  '{% endmacro %}' +
+                  '{{ foo(x=1, y=2) }}',
+                  '125');
+
+            equal('{% macro foo(x, y, z=5) %}{{ x }}{{ y }}{{ z }}' +
+                  '{% endmacro %}' +
+                  '{{ foo(x=1, y=2, z=3) }}',
+                  '123');
+
+            equal('{% macro foo(x, y=2, z=5) %}{{ x }}{{ y }}{{ z }}' +
+                  '{% endmacro %}' +
+                  '{{ foo(1, z=3) }}',
+                  '123');
+
+            equal('{% macro foo(x, y=2, z=5) %}{{ x }}{{ y }}{{ z }}' +
+                  '{% endmacro %}' +
+                  '{{ foo(1) }}',
+                  '125');
+
+            equal('{% macro foo(x, y=2, z=5) %}{{ x }}{{ y }}{{ z }}' +
+                  '{% endmacro %}' +
+                  '{{ foo(1, 10, 20) }}',
+                  '11020');
+
+            equal('{% extends "base.html" %}' +
+                  '{% macro foo(x, y=2, z=5) %}{{ x }}{{ y }}{{ z }}' +
+                  '{% endmacro %}' +
+                  '{% block block1 %}' +
+                  '{{ foo(1) }}' +
+                  '{% endblock %}',
+                  'Foo125BazFizzle');
+
+            equal('{% block bar %}' +
+                  '{% macro foo(x, y=2, z=5) %}{{ x }}{{ y }}{{ z }}' +
+                  '{% endmacro %}' +
+                  '{% endblock %}' +
+                  '{% block baz %}' +
+                  '{{ foo(1) }}' +
+                  '{% endblock %}',
+                  '125');
+
+            finish(done);
+        });
+
+        it('should import templates', function(done) {
+            equal('{% import "import.html" as imp %}' +
+                  '{{ imp.foo() }} {{ imp.bar }}',
+                  "Here's a macro baz");
+
+            equal('{% from "import.html" import foo as baz, bar %}' +
+                  '{{ bar }} {{ baz() }}', 
+                  "baz Here's a macro");
+
             // TODO: Should the for loop create a new frame for each
             // iteration? As it is, `num` is set on all iterations after
             // the first one sets it
-            expect(s).to.be('start: end: bazstart: bazend: bazfinal: ');
+            equal('{% for i in [1,2] %}' +
+                  'start: {{ num }}' +
+                  '{% from "import.html" import bar as num %}' +
+                  'end: {{ num }}' +
+                  '{% endfor %}' +
+                  'final: {{ num }}',
+                  'start: end: bazstart: bazend: bazfinal: ');
+
+            finish(done);
         });
 
-        it('should inherit templates', function() {
-            var s = render('{% extends "base.html" %}');
-            expect(s).to.be('FooBarBazFizzle');
+        it('should inherit templates', function(done) {
+            equal('{% extends "base.html" %}', 'FooBarBazFizzle');
+            equal('hola {% extends "base.html" %} hizzle mumble', 'FooBarBazFizzle');
 
-            s = render('hola {% extends "base.html" %} hizzle mumble');
-            expect(s).to.be('FooBarBazFizzle');
+            equal('{% extends "base.html" %}{% block block1 %}BAR{% endblock %}',
+                  'FooBARBazFizzle');
 
-            s = render('{% extends "base.html" %}' +
-                       '{% block block1 %}BAR{% endblock %}');
-            expect(s).to.be('FooBARBazFizzle');
+            equal('{% extends "base.html" %}' +
+                  '{% block block1 %}BAR{% endblock %}' +
+                  '{% block block2 %}BAZ{% endblock %}',
+                  'FooBARBAZFizzle');
 
-            s = render('{% extends "base.html" %}' +
-                       '{% block block1 %}BAR{% endblock %}' +
-                       '{% block block2 %}BAZ{% endblock %}');
-            expect(s).to.be('FooBARBAZFizzle');
-
-            s = render('hola {% extends tmpl %} hizzle mumble',
-                       { tmpl: 'base.html' });
-            expect(s).to.be('FooBarBazFizzle');
+            equal('hola {% extends tmpl %} hizzle mumble',
+                  { tmpl: 'base.html' },
+                  'FooBarBazFizzle');
 
             var count = 0;
             render('{% extends "base.html" %}' + 
                    '{% block notReal %}{{ foo() }}{% endblock %}',
-                   {
-                       foo: function() {
-                           count++;
-                       }
+                   { foo: function() { count++; }},
+                   function(err, res) {
+                       expect(count).to.be(0);
                    });
-            expect(count).to.be(0);
+
+            finish(done);
         });
 
-        it('should render nested blocks in child template', function() {
-            var s = render('{% extends "base.html" %}' +
-                           '{% block block1 %}{% block nested %}BAR{% endblock %}{% endblock %}');
-            expect(s).to.be('FooBARBazFizzle');
+        it('should render nested blocks in child template', function(done) {
+            equal('{% extends "base.html" %}' +
+                  '{% block block1 %}{% block nested %}BAR{% endblock %}{% endblock %}',
+                  'FooBARBazFizzle');
+
+            finish(done);
         });
 
-        it('should render parent blocks with super()', function() {
-            var s = render('{% extends "base.html" %}' +
-                           '{% block block1 %}{{ super() }}BAR{% endblock %}');
-            expect(s).to.be('FooBarBARBazFizzle');
+        it('should render parent blocks with super()', function(done) {
+            equal('{% extends "base.html" %}' +
+                  '{% block block1 %}{{ super() }}BAR{% endblock %}',
+                  'FooBarBARBazFizzle');
 
             // two levels of `super` should work 
-            s = render('{% extends "base-inherit.html" %}' +
-                       '{% block block1 %}*{{ super() }}*{% endblock %}');
-            expect(s).to.be('Foo**Bar**BazFizzle');
+            equal('{% extends "base-inherit.html" %}' +
+                  '{% block block1 %}*{{ super() }}*{% endblock %}',
+                  'Foo**Bar**BazFizzle');
+
+            finish(done);
         });
 
-        it('should include templates', function() {
-            var s = render('hello world {% include "include.html" %}');
-            expect(s).to.be('hello world FooInclude ');
+        it('should include templates', function(done) {
+            equal('hello world {% include "include.html" %}',
+                  'hello world FooInclude ');
 
-            s = render('hello world {% include "include.html" %}',
-                       { name: 'james' });
-            expect(s).to.be('hello world FooInclude james');
+            equal('hello world {% include "include.html" %}',
+                  { name: 'james' },
+                  'hello world FooInclude james');
 
-            s = render('hello world {% include tmpl %}',
-                       { name: 'thedude', tmpl: "include.html" });
-            expect(s).to.be('hello world FooInclude thedude');
+            equal('hello world {% include tmpl %}',
+                  { name: 'thedude', tmpl: "include.html" },
+                  'hello world FooInclude thedude');
 
-            s = render('hello world {% include data.tmpl %}',
-                       { name: 'thedude', data: {tmpl: "include.html"} });
-            expect(s).to.be('hello world FooInclude thedude');
+            equal('hello world {% include data.tmpl %}',
+                  { name: 'thedude', data: {tmpl: "include.html"} },
+                  'hello world FooInclude thedude');
+
+            finish(done);
         });
 
-        it('should maintain nested scopes', function() {
-            var s = render('{% for i in [1,2] %}' +
-                           '{% for i in [3,4] %}{{ i }}{% endfor %}' +
-                           '{{ i }}{% endfor %}');
-            expect(s).to.be('341342');
+        it('should maintain nested scopes', function(done) {
+            equal('{% for i in [1,2] %}' +
+                  '{% for i in [3,4] %}{{ i }}{% endfor %}' +
+                  '{{ i }}{% endfor %}',
+                  '341342');
+
+            finish(done);
         });
 
-        it('should allow blocks in for loops', function() {
-            var s = render('{% extends "base2.html" %}' +
-                           '{% block item %}hello{{ item }}{% endblock %}');
-            expect(s).to.be('hello1hello2');
+        it('should allow blocks in for loops', function(done) {
+            equal('{% extends "base2.html" %}' +
+                  '{% block item %}hello{{ item }}{% endblock %}',
+                  'hello1hello2');
+
+            finish(done);
         });
 
-        it('should make includes inherit scope', function() {
-            var s = render('{% for item in [1,2] %}' +
-                           '{% include "item.html" %}' +
-                           '{% endfor %}');
-            expect(s).to.be('showing 1showing 2');
+        it('should make includes inherit scope', function(done) {
+            equal('{% for item in [1,2] %}' +
+                  '{% include "item.html" %}' +
+                  '{% endfor %}',
+                  'showing 1showing 2');
+
+            finish(done);
         });
 
-        it('should compile a set block', function() {
-            var s = render('{% set username = "foo" %}{{ username }}',
-                           { username: 'james' });
-            expect(s).to.be('foo');
+        it('should compile a set block', function(done) {
+            equal('{% set username = "foo" %}{{ username }}',
+                  { username: 'james' },
+                  'foo');
 
-            s = render('{% set x, y = "foo" %}{{ x }}{{ y }}');
-            expect(s).to.be('foofoo');
+            equal('{% set x, y = "foo" %}{{ x }}{{ y }}',
+                  'foofoo');
 
-            s = render('{% set x = 1 + 2 %}{{ x }}');
-            expect(s).to.be('3');
+            equal('{% set x = 1 + 2 %}{{ x }}',
+                  '3');
 
-            s = render('{% for i in [1] %}{% set foo=1 %}{% endfor %}{{ foo }}',
-                       { foo: 2 });
-            expect(s).to.be('2');
+            equal('{% for i in [1] %}{% set foo=1 %}{% endfor %}{{ foo }}',
+                  { foo: 2 },
+                  '2');
 
-            s = render('{% include "set.html" %}{{ foo }}',
-                       { foo: 'bar' });
-            expect(s).to.be('bar');
+            equal('{% include "set.html" %}{{ foo }}',
+                  { foo: 'bar' },
+                  'bar');
+
+            finish(done);
         });
 
-        it('should compile set with frame references', function() {
-            var s = render('{% set username = user.name %}{{ username }}',
-                           { user: { name: 'james' } });
-            expect(s).to.be('james');
+        it('should compile set with frame references', function(done) {
+            equal('{% set username = user.name %}{{ username }}',
+                  { user: { name: 'james' } },
+                  'james');
+
+            finish(done);
         });
 
-        it('should compile set assignments of the same variable', function() {
-            var s = render('{% set x = "hello" %}' +
-                           '{% if false %}{% set x = "world" %}{% endif %}' +
-                           '{{ x }}');
-            expect(s).to.be('hello');
+        it('should compile set assignments of the same variable', function(done) {
+            equal('{% set x = "hello" %}' +
+                  '{% if false %}{% set x = "world" %}{% endif %}' +
+                  '{{ x }}',
+                  'hello');
 
-            s = render('{% set x = "blue" %}' +
-                       '{% if true %}{% set x = "green" %}{% endif %}' +
-                       '{{ x }}');
-            expect(s).to.be('green');
+            equal('{% set x = "blue" %}' +
+                  '{% if true %}{% set x = "green" %}{% endif %}' +
+                  '{{ x }}',
+                  'green');
+
+            finish(done);
         });
 
-        it('should throw errors', function() {
-            expect(function() {
-                render('{% from "import.html" import boozle %}');
-            }).to.throwException(/cannot import 'boozle'/);
+        it('should throw errors', function(done) {
+            render('{% from "import.html" import boozle %}',
+                   {},
+                   { noThrow: true },
+                   function(err) {
+                       expect(err).to.match(/cannot import 'boozle'/);
+                   });
+
+            finish(done);
         });
 
-        it('should allow custom tag compilation', function() {
+        it('should allow custom tag compilation', function(done) {
             function testExtension() {
                 this.tags = ['test'];
 
@@ -465,12 +590,14 @@
             }
 
             var opts = { extensions: { 'testExtension': new testExtension() }};
-            var output = render('{% test %}123456789{% endtest %}', null, opts);
-            expect(output).to.be('987654321');
+            render('{% test %}123456789{% endtest %}', null, opts, function(err, res) {
+                expect(res).to.be('987654321');
+            });
 
+            finish(done);
         });
 
-        it('should allow custom tag compilation without content', function() {
+        it('should allow custom tag compilation without content', function(done) {
             function testExtension() {
                 this.tags = ['test'];
 
@@ -489,12 +616,14 @@
             }
 
             var opts = { extensions: { 'testExtension': new testExtension() }};
-            var output = render('{% test "123456" %}', null, opts);
-            expect(output).to.be('654321');
+            render('{% test "123456" %}', null, opts, function(err, res) {
+                expect(res).to.be('654321');
+            });
 
+            finish(done);
         });
 
-        it('should allow complicated custom tag compilation', function() {
+        it('should allow complicated custom tag compilation', function(done) {
             function testExtension() {
                 this.tags = ['test'];
 
@@ -529,18 +658,21 @@
 
             var opts = { extensions: { 'testExtension': new testExtension() }};
 
-            var output = render('{% test %}abcdefg{% endtest %}', null, opts);
-            expect(output).to.be('a,b,c,d,e,f,g');
+            render('{% test %}abcdefg{% endtest %}', null, opts, function(err, res) {
+                expect(res).to.be('a,b,c,d,e,f,g');
+            });
 
-            output = render(
-                '{% test %}abcdefg{% intermediate %}second half{% endtest %}',
-                null, 
-                opts
-            );
-            expect(output).to.be('a,b,c,d,e,f,gflah dnoces');
+            render('{% test %}abcdefg{% intermediate %}second half{% endtest %}',
+                   null, 
+                   opts,
+                   function(err, res) {
+                       expect(res).to.be('a,b,c,d,e,f,gflah dnoces');
+                   });
+
+            finish(done);
         });
 
-        it('should allow custom tag with args compilation', function() {
+        it('should allow custom tag with args compilation', function(done) {
             function testExtension() {
                 this.tags = ['test'];
 
@@ -583,71 +715,101 @@
 
             var opts = { extensions: {'testExtension': new testExtension() }};
 
-            var output = render('{% test %}foobar{% endtest %}', null, opts);
-            expect(output).to.be('raboof');
+            render('{% test %}foobar{% endtest %}', null, opts, function(err, res) {
+                expect(res).to.be('raboof');
+            });
 
-            output = render('{% test("biz") %}foobar{% endtest %}', null, opts);
-            expect(output).to.be('bizraboof');
+            render('{% test("biz") %}foobar{% endtest %}', null, opts, function(err, res) {
+                expect(res).to.be('bizraboof');
+            });
 
-            output = render('{% test("biz", cutoff=5) %}foobar{% endtest %}', null, opts);
-            expect(output).to.be('bizra');
+            render('{% test("biz", cutoff=5) %}foobar{% endtest %}', null, opts, function(err, res) {
+                expect(res).to.be('bizra');
+            });
+
+            finish(done);
         });
 
-        it('should not autoescape by default', function() {
-            var s = render('{{ foo }}', { foo: '"\'<>&'});
-            expect(s).to.be('"\'<>&');
+        it('should not autoescape by default', function(done) {
+            equal('{{ foo }}', { foo: '"\'<>&'}, '"\'<>&');
+            finish(done);
         });
 
-        it('should autoescape if autoescape is on', function() {
-            var s = render('{{ foo }}', { foo: '"\'<>&'}, { autoescape: true });
-            expect(s).to.be('&quot;&#39;&lt;&gt;&amp;');
+        it('should autoescape if autoescape is on', function(done) {
+            render('{{ foo }}', { foo: '"\'<>&'}, { autoescape: true }, function(err, res) {
+                expect(res).to.be('&quot;&#39;&lt;&gt;&amp;');
+            });
 
-            var s = render('{{ foo|reverse }}', { foo: '"\'<>&'}, { autoescape: true });
-            expect(s).to.be('&amp;&gt;&lt;&#39;&quot;');
+            render('{{ foo|reverse }}', { foo: '"\'<>&'}, { autoescape: true }, function(err, res) {
+                expect(res).to.be('&amp;&gt;&lt;&#39;&quot;');
+            });
 
-            var s = render('{{ foo|reverse|safe }}', { foo: '"\'<>&'}, { autoescape: true });
-            expect(s).to.be('&><\'"');
+            render('{{ foo|reverse|safe }}', { foo: '"\'<>&'}, { autoescape: true }, function(err, res) {
+                expect(res).to.be('&><\'"');
+            });
+
+            finish(done);
         });
 
-        it('should not autoescape safe strings', function() {
-            var s = render('{{ foo|safe }}', { foo: '"\'<>&'}, { autoescape: true });
-            expect(s).to.be('"\'<>&');
+        it('should not autoescape safe strings', function(done) {
+            render('{{ foo|safe }}', { foo: '"\'<>&'}, { autoescape: true }, function(err, res) {
+                expect(res).to.be('"\'<>&');
+            });
+
+            finish(done);
         });
 
-        it('should not autoescape macros', function() {
-            var s = render(
+        it('should not autoescape macros', function(done) {
+            render(
                 '{% macro foo(x, y) %}{{ x }} and {{ y }}{% endmacro %}' +
                     '{{ foo("<>&", "<>") }}',
                 null,
-                { autoescape: true }
+                { autoescape: true },
+                function(err, res) {
+                    expect(res).to.be('&lt;&gt;&amp; and &lt;&gt;');
+                }
             );
-            expect(s).to.be('&lt;&gt;&amp; and &lt;&gt;');
 
-            var s = render(
+            render(
                 '{% macro foo(x, y) %}{{ x|safe }} and {{ y }}{% endmacro %}' +
                     '{{ foo("<>&", "<>") }}',
                 null,
-                { autoescape: true }
+                { autoescape: true },
+                function(err, res) {
+                    expect(res).to.be('<>& and &lt;&gt;');
+                }
             );
-            expect(s).to.be('<>& and &lt;&gt;');
+
+            finish(done);
         });
 
-        it('should not autoescape super()', function() {
-            var s = render(
-              '{% extends "base3.html" %}' +
-              '{% block block1 %}{{ super() }}{% endblock %}',
-              null,
-              { autoescape: true }
+        it('should not autoescape super()', function(done) {
+            render(
+                '{% extends "base3.html" %}' +
+                    '{% block block1 %}{{ super() }}{% endblock %}',
+                null,
+                { autoescape: true },
+                function(err, res) {
+                    expect(res).to.be('<b>Foo</b>');
+                }
             );
-            expect(s).to.be('<b>Foo</b>');
+
+            finish(done);
         });
 
-        it('should pass context as this to filters', function() {
-            var e = new Environment();
-            e.addFilter('hallo', function(foo) { return foo + this.lookup('bar'); });
+        it('should pass context as this to filters', function(done) {
+            render(
+                '{{ foo | hallo }}',
+                { foo: 1, bar: 2 },
+                { filters: {
+                    'hallo': function(foo) { return foo + this.lookup('bar'); }
+                }},
+                function(err, res) {
+                    expect(res).to.be('3');
+                }
+            );
 
-            var t = new Template('{{ foo | hallo }}', e);
-            expect(t.render({ foo: 1, bar: 2 })).to.be('3');
+            finish(done);
         });
     });
 })();

@@ -87,8 +87,10 @@ var Pair = Node.extend("Pair", { fields: ['key', 'value'] });
 var Dict = NodeList.extend("Dict");
 var LookupVal = Node.extend("LookupVal", { fields: ['target', 'val'] });
 var If = Node.extend("If", { fields: ['cond', 'body', 'else_'] });
+var IfAsync = If.extend("IfAsync");
 var InlineIf = Node.extend("InlineIf", { fields: ['cond', 'body', 'else_'] });
 var For = Node.extend("For", { fields: ['arr', 'name', 'body'] });
+var ForAsync = For.extend("ForAsync");
 var Macro = Node.extend("Macro", { fields: ['name', 'args', 'body'] });
 var Import = Node.extend("Import", { fields: ['template', 'target'] });
 var FromImport = Node.extend("FromImport", {
@@ -102,8 +104,12 @@ var FromImport = Node.extend("FromImport", {
 });
 var FunCall = Node.extend("FunCall", { fields: ['name', 'args'] });
 var Filter = FunCall.extend("Filter");
+var FilterAsync = Filter.extend("FilterAsync", {
+    fields: ['name', 'args', 'symbol']
+});
 var KeywordArgs = Dict.extend("KeywordArgs");
 var Block = Node.extend("Block", { fields: ['name', 'body'] });
+var Super = Node.extend("Super", { fields: ['blockName', 'symbol'] });
 var TemplateRef = Node.extend("TemplateRef", { fields: ['template'] });
 var Extends = TemplateRef.extend("Extends");
 var Include = TemplateRef.extend("Include");
@@ -235,15 +241,19 @@ module.exports = {
     Output: Output,
     TemplateData: TemplateData,
     If: If,
+    IfAsync: IfAsync,
     InlineIf: InlineIf,
     For: For,
+    ForAsync: ForAsync,
     Macro: Macro,
     Import: Import,
     FromImport: FromImport,
     FunCall: FunCall,
     Filter: Filter,
+    FilterAsync: FilterAsync,
     KeywordArgs: KeywordArgs,
     Block: Block,
+    Super: Super,
     Extends: Extends,
     Include: Include,
     Set: Set,

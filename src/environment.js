@@ -1,5 +1,5 @@
 var lib = require('./lib');
-var Object = require('./object');
+var Obj = require('./object');
 var lexer = require('./lexer');
 var compiler = require('./compiler');
 var builtin_filters = require('./filters');
@@ -8,7 +8,7 @@ var runtime = require('./runtime');
 var globals = require('./globals');
 var Frame = runtime.Frame;
 
-var Environment = Object.extend({
+var Environment = Obj.extend({
     init: function(loaders, opts) {
         // The dev flag determines the trace that'll be shown on errors.
         // If set to true, returns the full trace from the error point,
@@ -28,7 +28,7 @@ var Environment = Object.extend({
         if(!loaders) {
             // The filesystem loader is only available client-side
             if(builtin_loaders.FileSystemLoader) {
-                this.loaders = [new builtin_loaders.FileSystemLoader()];
+                this.loaders = [new builtin_loaders.FileSystemLoader('views')];
             }
             else {
                 this.loaders = [new builtin_loaders.HttpLoader('/views')];
@@ -38,14 +38,29 @@ var Environment = Object.extend({
             this.loaders = lib.isArray(loaders) ? loaders : [loaders];
         }
 
+        // Caching and cache busting
+
+        var cache = {};
+
+        lib.each(this.loaders, function(loader) {
+            loader.on('update', function(template) {
+                cache[template] = null;
+            });
+        });
+
         if(opts.tags) {
             lexer.setTags(opts.tags);
         }
 
-        this.filters = builtin_filters;
-        this.cache = {};
+        this.cache = cache;
+        this.filters = {};
+        this.asyncFilters = [];
         this.extensions = {};
         this.extensionsList = [];
+
+        for(var name in builtin_filters) {
+            this.addFilter(name, builtin_filters[name]);
+        }
     },
 
     addExtension: function(name, extension) {
@@ -58,8 +73,13 @@ var Environment = Object.extend({
         return this.extensions[name];
     },
 
-    addFilter: function(name, func) {
-        this.filters[name] = func;
+    addFilter: function(name, func, async) {
+        var wrapped = func;
+
+        if(async) {
+            this.asyncFilters.push(name);
+        }
+        this.filters[name] = wrapped;
     },
 
     getFilter: function(name) {
@@ -69,38 +89,58 @@ var Environment = Object.extend({
         return this.filters[name];
     },
 
-    getTemplate: function(name, eagerCompile) {
-        if (name && name.raw) {
+    getTemplate: function(name, eagerCompile, cb) {
+        if(name && name.raw) {
             // this fixes autoescape for templates referenced in symbols
             name = name.raw;
         }
-        var info = null;
-        var tmpl = this.cache[name];
-        var upToDate;
+
+        if(lib.isFunction(eagerCompile)) {
+            cb = eagerCompile;
+            eagerCompile = false;
+        }
 
         if(typeof name !== 'string') {
             throw new Error('template names must be a string: ' + name);
         }
 
-        if(!tmpl || !tmpl.isUpToDate()) {
-            for(var i=0; i<this.loaders.length; i++) {
-                if((info = this.loaders[i].getSource(name))) {
-                    break;
+        var tmpl = this.cache[name];
+
+        if(tmpl) {
+            cb(null, tmpl);
+        } else {
+            lib.asyncEach(this.loaders, function(loader, i, next, done) {
+                function handle(src) {
+                    if(src) {
+                        done(src);
+                    }
+                    else {
+                        next();
+                    }
                 }
-            }
 
-            if(!info) {
-                throw new Error('template not found: ' + name);
-            }
-
-            this.cache[name] = new Template(info.src,
-                                            this,
-                                            info.path,
-                                            info.upToDate,
-                                            eagerCompile);
+                if(loader.async) {
+                    loader.getSource(name, function(err, src) {
+                        if(err) { throw err; }
+                        handle(src);
+                    });
+                }
+                else {
+                    handle(loader.getSource(name));
+                }
+            }, function(info) {
+                if(!info) {
+                    cb(new Error('template not found: ' + name));
+                }
+                else {
+                    this.cache[name] = new Template(info.src,
+                                                    this,
+                                                    info.path,
+                                                    eagerCompile);
+                    cb(null, this.cache[name]);
+                }
+            }.bind(this));
         }
-
-        return this.cache[name];
     },
 
     registerPrecompiled: function(templates) {
@@ -135,13 +175,13 @@ var Environment = Object.extend({
 
                 context = lib.extend(context, ctx);
 
-                var res = env.render(name, context);
-                k(null, res);
+                env.render(name, context, k);
             };
         }
         else {
             // Express <2.5.11
             var http = require('http');
+            var self = this;
             var res = http.ServerResponse.prototype;
 
             res._render = function(name, ctx, k) {
@@ -161,24 +201,27 @@ var Environment = Object.extend({
                 }
 
                 context = lib.extend(context, app._locals);
-                var str = env.render(name, context);
 
-                if(k) {
-                    k(null, str);
-                }
-                else {
-                    this.send(str);
-                }
+                env.render(name, context, function (err, str) {
+                    if (k) {
+                        k(err, str);
+                    }
+                    else {
+                        self.send(str);
+                    }
+                });
             };
         }
     },
 
-    render: function(name, ctx) {
-        return this.getTemplate(name).render(ctx);
+    render: function(name, ctx, callback) {
+        this.getTemplate(name, function(err, tmpl) {
+            tmpl.render(ctx, callback);
+        });
     }
 });
 
-var Context = Object.extend({
+var Context = Obj.extend({
     init: function(ctx, blocks) {
         this.ctx = ctx;
         this.blocks = {};
@@ -221,18 +264,16 @@ var Context = Object.extend({
         return this.blocks[name][0];
     },
 
-    getSuper: function(env, name, block, frame, runtime) {
+    getSuper: function(env, name, block, frame, runtime, cb) {
         var idx = (this.blocks[name] || []).indexOf(block);
         var blk = this.blocks[name][idx + 1];
         var context = this;
 
-        return function() {
-            if(idx == -1 || !blk) {
-                throw new Error('no super block available for "' + name + '"');
-            }
+        if(idx == -1 || !blk) {
+            throw new Error('no super block available for "' + name + '"');
+        }
 
-            return blk(env, context, frame, runtime);
-        };
+        blk(env, context, frame, runtime, cb);
     },
 
     addExport: function(name) {
@@ -249,8 +290,8 @@ var Context = Object.extend({
     }
 });
 
-var Template = Object.extend({
-    init: function (src, env, path, upToDate, eagerCompile) {
+var Template = Obj.extend({
+    init: function (src, env, path, eagerCompile) {
         this.env = env || new Environment();
 
         if(lib.isObject(src)) {
@@ -268,43 +309,47 @@ var Template = Object.extend({
         }
 
         this.path = path;
-        this.upToDate = upToDate || function() { return false; };
 
         if(eagerCompile) {
-            var _this = this;
             lib.withPrettyErrors(this.path,
                                  this.env.dev,
-                                 function() { _this._compile(); });
+                                 this._compile.bind(this));
         }
         else {
             this.compiled = false;
         }
     },
 
-    render: function(ctx, frame) {
-        var self = this;
+    render: function(ctx, frame, cb) {
+        if (typeof ctx === 'function') {
+            cb = ctx;
+            ctx = {};
+        }
+        else if (typeof frame === 'function') {
+            cb = frame;
+            frame = null;
+        }
 
-        var render = function() {
-            if(!self.compiled) {
-                self._compile();
+        if(!cb) {
+            throw new Error("you must specify a callback to `render`");
+        }
+
+        return lib.withPrettyErrors(this.path, this.env.dev, function() {
+            if(!this.compiled) {
+                this._compile();
             }
 
-            var context = new Context(ctx || {}, self.blocks);
+            var context = new Context(ctx || {}, this.blocks);
 
-            return self.rootRenderFunc(self.env,
-                context,
-                frame || new Frame(),
-                runtime);
-        };
-
-        return lib.withPrettyErrors(this.path, this.env.dev, render);
+            this.rootRenderFunc(this.env,
+                                context,
+                                frame || new Frame(),
+                                runtime,
+                                cb);
+        }.bind(this));
     },
 
-    isUpToDate: function() {
-        return this.upToDate();
-    },
-
-    getExported: function() {
+    getExported: function(cb) {
         if(!this.compiled) {
             this._compile();
         }
@@ -314,8 +359,10 @@ var Template = Object.extend({
         this.rootRenderFunc(this.env,
                             context,
                             new Frame(),
-                            runtime);
-        return context.getExported();
+                            runtime,
+                            function() {
+                                cb(null, context.getExported());
+                            });
     },
 
     _compile: function() {
@@ -325,7 +372,10 @@ var Template = Object.extend({
             props = this.tmplProps;
         }
         else {
-            var source = compiler.compile(this.tmplStr, this.env.extensionsList, this.path);
+            var source = compiler.compile(this.tmplStr,
+                                          this.env.asyncFilters,
+                                          this.env.extensionsList,
+                                          this.path);
             var func = new Function(source);
             props = func();
         }
@@ -348,21 +398,19 @@ var Template = Object.extend({
     }
 });
 
-// var fs = require('fs');
-// var src = fs.readFileSync('test.html', 'utf-8');
-// var src = '{% macro foo(x) %}{{ x }}{% endmacro %}{{ foo("<>") }}';
-// var env = new Environment(null, { autoescape: true, dev: true });
+// var src = '{% block content %}{% include "async.html" %}{% endblock %}';
+// var env = new Environment(new builtin_loaders.FileSystemLoader('tests/templates'), { dev: true });
 
-// env.addFilter('bar', function(x) {
-//     return runtime.copySafeness(x, x.substring(3, 1) + x.substring(0, 2));
-// });
-
-// //env.addExtension('testExtension', new testExtension());
-// console.log(compiler.compile(src));
-
-// var tmpl = new Template(src, env);
+// var ctx = {};
+// var tmpl = new Template(src, env, null, null, true);
 // console.log("OUTPUT ---");
-// console.log(tmpl.render({ bar: '<>&' }));
+
+// tmpl.render(ctx, function(err, res) {
+//     if(err) {
+//         throw err;
+//     }
+//     console.log(res);
+// });
 
 module.exports = {
     Environment: Environment,

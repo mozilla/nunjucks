@@ -1,70 +1,61 @@
 (function() {
-    var expect, render, lib;
+    var expect, util, lib;
 
     if(typeof require != 'undefined') {
         expect = require('expect.js');
-        render = require('./util').render;
+        util = require('./util');
         lib = require('../src/lib');
     }
     else {
         expect = window.expect;
-        render = window.render;
+        util = window.util;
         lib = nunjucks.require('lib');
     }
 
+    var equal = util.equal;
+    var finish = util.finish;
+
     describe('global', function() {
-        it('should have range', function() {
-            expect(render('{% for i in range(0, 10) %}{{ i }}{% endfor %}'))
-                .to.be('0123456789');
+        it('should have range', function(done) {
+            equal('{% for i in range(0, 10) %}{{ i }}{% endfor %}', '0123456789');
+            equal('{% for i in range(10) %}{{ i }}{% endfor %}', '0123456789');
+            equal('{% for i in range(5, 10) %}{{ i }}{% endfor %}', '56789');
+            equal('{% for i in range(5, 10, 2) %}{{ i }}{% endfor %}', '579');
+            equal('{% for i in range(5, 10, 2.5) %}{{ i }}{% endfor %}', '57.5');
+            equal('{% for i in range(5, 10, 2.5) %}{{ i }}{% endfor %}', '57.5');
 
-            expect(render('{% for i in range(10) %}{{ i }}{% endfor %}'))
-                .to.be('0123456789');
+            //equal('{% for i in range(5, 10, -1) %}{{ i }}{% endfor %}', '56789');
+            //equal('{% for i in range(5, 10, -1 | abs) %}{{ i }}{% endfor %}','56789');
 
-            expect(render('{% for i in range(5, 10) %}{{ i }}{% endfor %}'))
-                .to.be('56789');
-
-            expect(render('{% for i in range(5, 10, 2) %}{{ i }}{% endfor %}'))
-                .to.be('579');
-
-            expect(render('{% for i in range(5, 10, 2.5) %}{{ i }}{% endfor %}'))
-                .to.be('57.5');
-
-            expect(render('{% for i in range(5, 10, 2.5) %}{{ i }}{% endfor %}'))
-                .to.be('57.5');
-
-            // render('{% for i in range(5, 10, -1) %}{{ i }}{% endfor %}')
-            //     .should.equal('56789');
-
-            // render('{% for i in range(5, 10, -1 | abs) %}{{ i }}{% endfor %}')
-            //     .should.equal('56789');
+            finish(done);
         });
 
-        // it('lipsum', function() {
-        //     render('{{ lipsum() }}').should.equal('lip');
-        // });
+        it('should have cycler', function(done) {
+            equal('{% set cls = cycler("odd", "even") %}' +
+                  '{{ cls.next() }}' +
+                  '{{ cls.next() }}' +
+                  '{{ cls.next() }}',
+                  'oddevenodd');
 
-        it('should have cycler', function() {
-            expect(render('{% set cls = cycler("odd", "even") %}' +
-                          '{{ cls.next() }}' +
-                          '{{ cls.next() }}' +
-                          '{{ cls.next() }}'))
-                .to.be('oddevenodd');
+            equal('{% set cls = cycler("odd", "even") %}' +
+                  '{{ cls.next() }}' +
+                  '{{ cls.reset() }}' +
+                  '{{ cls.next() }}',
+                  'oddodd');
 
-            expect(render('{% set cls = cycler("odd", "even") %}' +
-                          '{{ cls.next() }}' +
-                          '{{ cls.reset() }}' +
-                          '{{ cls.next() }}'))
-                .to.be('oddodd');
+            finish(done);
         });
 
-        it('should have joiner', function() {
-            expect(render('{% set comma = joiner() %}' +
-                          'foo{{ comma() }}bar{{ comma() }}baz{{ comma() }}'))
-                .to.be('foobar,baz,');
+        it('should have joiner', function(done) {
+            equal('{% set comma = joiner() %}' +
+                          'foo{{ comma() }}bar{{ comma() }}baz{{ comma() }}',
+                  'foobar,baz,');
 
-            expect(render('{% set pipe = joiner("|") %}' +
-                          'foo{{ pipe() }}bar{{ pipe() }}baz{{ pipe() }}'))
-                .to.be('foobar|baz|');
+            equal('{% set pipe = joiner("|") %}' +
+                  'foo{{ pipe() }}bar{{ pipe() }}baz{{ pipe() }}',
+                  'foobar|baz|');
+
+            finish(done);
         });
     });
 })();

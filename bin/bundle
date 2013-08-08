@@ -5,8 +5,9 @@ output="$1"
 
 if [ -z "$SLIM" ]; then
     # Listed in order of dependency
-    files="object.js lib.js nodes.js runtime.js lexer.js parser.js compiler.js 
-       filters.js globals.js web-loaders.js loaders.js environment.js"
+    files="object.js lib.js nodes.js runtime.js lexer.js parser.js transformer.js
+       compiler.js filters.js globals.js loader.js web-loaders.js loaders.js
+       environment.js"
 else
     # Listed in order of dependency
     files="object.js lib.js runtime.js filters.js globals.js environment.js"
