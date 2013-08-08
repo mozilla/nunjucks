@@ -252,8 +252,6 @@ exports.map = function(obj, func) {
     return results;
 };
 
-<<<<<<< HEAD
-=======
 exports.asyncParallel = function(funcs, done) {
     var count = funcs.length,
         result = new Array(count),
@@ -312,7 +310,6 @@ exports.asyncFor = function(obj, iter, cb) {
     next();
 };
 
->>>>>>> async
 if(!Array.prototype.indexOf) {
     Array.prototype.indexOf = function(array, searchElement /*, fromIndex */) {
         if (array == null) {
@@ -344,8 +341,6 @@ if(!Array.prototype.indexOf) {
         return -1;
     };
 }
-<<<<<<< HEAD
-=======
 
 if(!Array.prototype.map) {
     Array.prototype.map = function() {
@@ -367,7 +362,6 @@ exports.keys = function(obj) {
         return keys;
     }
 }
->>>>>>> async
 })();
 (function() {
 
@@ -644,12 +638,8 @@ modules['runtime'] = {
     keys: lib.keys,
     SafeString: SafeString,
     copySafeness: copySafeness,
-<<<<<<< HEAD
-    markSafe: markSafe
-=======
     markSafe: markSafe,
     asyncIter: asyncIter
->>>>>>> async
 };
 })();
 (function() {
@@ -681,13 +671,6 @@ var Loader = modules["loader"];
 
 var WebLoader = Loader.extend({
     init: function(baseURL, neverUpdate) {
-        // It's easy to use precompiled templates: just include them
-        // before you configure nunjucks and this will automatically
-        // pick it up and use it
-        if(window.nunjucksPrecompiled) {
-            this.precompiled = window.nunjucksPrecompiled;
-        }
-
         this.baseURL = baseURL || '';
         this.neverUpdate = neverUpdate;
     },
@@ -732,7 +715,7 @@ var WebLoader = Loader.extend({
             }
         };
 
-        url += (url.indexOf('?') === -1 ? '?' : '&') + 's=' + 
+        url += (url.indexOf('?') === -1 ? '?' : '&') + 's=' +
                (new Date().getTime());
 
         // Synchronous because this API shouldn't be used in

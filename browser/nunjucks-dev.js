@@ -252,8 +252,6 @@ exports.map = function(obj, func) {
     return results;
 };
 
-<<<<<<< HEAD
-=======
 exports.asyncParallel = function(funcs, done) {
     var count = funcs.length,
         result = new Array(count),
@@ -312,7 +310,6 @@ exports.asyncFor = function(obj, iter, cb) {
     next();
 };
 
->>>>>>> async
 if(!Array.prototype.indexOf) {
     Array.prototype.indexOf = function(array, searchElement /*, fromIndex */) {
         if (array == null) {
@@ -344,8 +341,6 @@ if(!Array.prototype.indexOf) {
         return -1;
     };
 }
-<<<<<<< HEAD
-=======
 
 if(!Array.prototype.map) {
     Array.prototype.map = function() {
@@ -367,7 +362,6 @@ exports.keys = function(obj) {
         return keys;
     }
 }
->>>>>>> async
 })();
 (function() {
 var util = modules["util"];
@@ -927,12 +921,8 @@ modules['runtime'] = {
     keys: lib.keys,
     SafeString: SafeString,
     copySafeness: copySafeness,
-<<<<<<< HEAD
-    markSafe: markSafe
-=======
     markSafe: markSafe,
     asyncIter: asyncIter
->>>>>>> async
 };
 })();
 (function() {
@@ -3113,8 +3103,6 @@ var Compiler = Object.extend({
         this.emit('env.getFilter("' + name.value + '").call(context, ');
         this._compileAggregate(node.args, frame);
         this.emit(')');
-<<<<<<< HEAD
-=======
     },
 
     compileFilterAsync: function(node, frame) {
@@ -3129,7 +3117,6 @@ var Compiler = Object.extend({
         this.emitLine(', ' + this.makeCallback(symbol));
 
         this.addScopeLevel();
->>>>>>> async
     },
 
     compileKeywordArgs: function(node, frame) {
@@ -3236,23 +3223,8 @@ var Compiler = Object.extend({
             });
         });
 
-<<<<<<< HEAD
-        this.emit('if(' + arr + ') {');
-
-        if(node.name instanceof nodes.Array) {
-            // key/value iteration. the user could have passed a dict
-            // amd two elements to be unpacked - "for k,v in { a: b }"
-            // or they could have passed an array of arrays -
-            // for a,b,c in [[a,b,c],[c,d,e]] where the number of
-            // elements to be unpacked is variable.
-            //
-            // we cant known in advance which has been passed so we
-            // have to emit code that handles both cases
-            this.emitLine('var ' + i + ';');
-=======
         return loopUses;
     },
->>>>>>> async
 
     emitLoopBindings: function(node, loopUses, arr, i, len) {
         len = len || arr + '.length';
@@ -3696,15 +3668,6 @@ var Compiler = Object.extend({
             var name = block.name.value;
 
             this.emitFuncBegin('b_' + name);
-<<<<<<< HEAD
-            this.emitLine('var l_super = runtime.markSafe(' +
-                          'context.getSuper(env, ' +
-                          '"' + name + '", ' +
-                          'b_' + name + ', ' +
-                          'frame, ' +
-                          'runtime));');
-=======
->>>>>>> async
 
             var tmpFrame = new Frame();
             this.compile(block.body, tmpFrame);
@@ -3738,19 +3701,10 @@ var Compiler = Object.extend({
 });
 
 // var c = new Compiler();
-<<<<<<< HEAD
-// var src = '{{ foo | poop(1, 2, 3) }}';
-//var extensions = [new testExtension()];
-
-// var ns = parser.parse(src);
-// nodes.printNodes(ns);
-// c.compile(ns);
-=======
 // var src = '{% block content %}hello{% endblock %} {{ tmpl | getContents }}';
 // var ast = transformer.transform(parser.parse(src), ['getContents']);
 // nodes.printNodes(ast);
 // c.compile(ast);
->>>>>>> async
 
 // var tmpl = c.getCode();
 // console.log(tmpl);
@@ -4237,24 +4191,6 @@ var Loader = modules["loader"];
 
 var WebLoader = Loader.extend({
     init: function(baseURL, neverUpdate) {
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-        if (typeof(console) !== "undefined" && console.log &&
-            typeof(nunjucks) == "object" && !nunjucks.testing) {
-          console.log("[nunjucks] Warning: only use HttpLoader in " +
-                      "development. Otherwise precompile your templates.");
-        }
->>>>>>> async
-=======
-        // It's easy to use precompiled templates: just include them
-        // before you configure nunjucks and this will automatically
-        // pick it up and use it
-        if(window.nunjucksPrecompiled) {
-            this.precompiled = window.nunjucksPrecompiled;
-        }
-
->>>>>>> new-api
         this.baseURL = baseURL || '';
         this.neverUpdate = neverUpdate;
     },
@@ -4299,11 +4235,7 @@ var WebLoader = Loader.extend({
             }
         };
 
-<<<<<<< HEAD
         url += (url.indexOf('?') === -1 ? '?' : '&') + 's=' +
-=======
-        url += (url.indexOf('?') === -1 ? '?' : '&') + 's=' + 
->>>>>>> async
                (new Date().getTime());
 
         // Synchronous because this API shouldn't be used in
