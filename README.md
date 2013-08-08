@@ -16,6 +16,10 @@ difficult to work on, has bugs, and is missing features. Nunjucks
 hopes to be a robust, pure javascript, and easily extended port of
 jinja2.
 
+**The new API changes have landed on master, which changes to be
+  asynchronous. If using master and manually calling render, use
+  `render(name, ctx, callback)`.  Nothing should change for express users.**
+
 ## Installation
 
 `npm install nunjucks`
