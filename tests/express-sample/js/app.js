@@ -1,8 +1,6 @@
 
-require(['nunjucks-dev'], function(nunjucks) {
-    var env = new nunjucks.Environment();
-    env.render('index.html', function(err, res) {
-        console.log('done!');
-    });
-});
+nunjucks.configure('/views');
 
+nunjucks.render('index.html', function(err, res) {
+    console.log('done!');
+});

@@ -32,7 +32,7 @@ module.exports.configure = function(dirOrURL, opts) {
     e = new env.Environment(new (loaders.FileSystemLoader || loaders.WebLoader)(dirOrURL),
                             opts);
 
-    if(opts.express) {
+    if(opts && opts.express) {
         e.express(opts.express);
     }
     return e;

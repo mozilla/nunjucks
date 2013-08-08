@@ -1348,41 +1348,36 @@ var Environment = Obj.extend({
     //     }
     // },
 
-    express: function(app, dir) {
+    express: function(app) {
         app.engine('.html', this.expressRender.bind(this));
         app.set('view engine', 'html');
-        this.app = app;
 
-        if(dir) {
-            app.set('views', dir);
-            this.loaders = [new builtin_loaders.FileSystemLoader(dir)];
-        }
-        else {
-            var env = this;
+        var env = this;
 
-            function NunjucksView(name, opts) {
-                this.name = name;
-                this.path = name;
-            }
-
-            NunjucksView.prototype.render = function(opts, cb) {
-                env.render(this.name, opts, cb);
-            };
-
-            app.set('view', NunjucksView);
+        function NunjucksView(name, opts) {
+            this.name = name;
+            this.path = name;
         }
 
-        this.initCache();
+        NunjucksView.prototype.render = function(opts, cb) {
+            env.render(this.name, opts, cb);
+        };
+
+        app.set('view', NunjucksView);
     },
 
-    expressRender: function(path, opts, cb) {
-        var name = path.substr(this.app.get('views').length + 1);
+    expressRender: function(name, opts, cb) {
         this.render(name, {}, cb);
     },
 
     render: function(name, ctx, cb) {
         this.getTemplate(name, function(err, tmpl) {
-            tmpl.render(ctx, cb);
+            if(err) {
+                cb(err);
+            }
+            else {
+                tmpl.render(ctx, cb);
+            }
         });
     }
 });
@@ -1606,12 +1601,26 @@ nunjucks.parser = parser;
 nunjucks.lexer = lexer;
 nunjucks.runtime = runtime;
 
-nunjucks.configure = function() {
-    var env = new env.Environment();
-    
-    nunjucks.render = function() {
-        return env.render();
+// A single instance of an environment, since this is so commonly used
+
+var e = new env.Environment();
+nunjucks.configure = function(dirOrURL, opts) {
+    if(typeof dirOrURL != 'string') {
+        throw new Error('must pass templates path or URL to `configure` ' +
+                        'as first argument');
     }
+
+    e = new env.Environment(new (loaders.FileSystemLoader || loaders.WebLoader)(dirOrURL),
+                            opts);
+
+    if(opts && opts.express) {
+        e.express(opts.express);
+    }
+    return e;
+};
+
+nunjucks.render = function(name, ctx, cb) {
+    e.render(name, ctx, cb);
 };
 
 nunjucks.require = function(name) { return modules[name]; };
