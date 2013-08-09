@@ -23,7 +23,7 @@ jinja2.
 
 `npm install nunjucks`
 
-The current version is v0.1.9 ([changelog](https://github.com/jlongster/nunjucks/blob/master/CHANGELOG.md))
+The current version is v0.1.10 ([changelog](https://github.com/jlongster/nunjucks/blob/master/CHANGELOG.md))
 
 ## Documentation
 

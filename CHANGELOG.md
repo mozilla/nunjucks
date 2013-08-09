@@ -6,7 +6,7 @@ Changelog for versions previous to v0.1.9 are located at http://nunjucks.tumblr.
 * Much simpler higher-level API for initiating/configuring nunjucks is available
 * Express integration is much simpler and better
 
-TODO: expose API for async-ness in custom extensions
+TODO: somehow integrate extensions with precompilation
 
 # v0.1.10 (August 9, 2013)
 
