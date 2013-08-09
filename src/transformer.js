@@ -196,16 +196,7 @@ function cps(ast, asyncFilters) {
     return convertStatements(liftSuper(liftFilters(ast, asyncFilters)));
 }
 
-function transform(ast, asyncFilters, extensions, name) {
-    // Run the extension preprocessors against the source.
-    if(extensions && extensions.length) {
-        for(var i=0; i<extensions.length; i++) {
-            if('preprocess' in extensions[i]) {
-                src = extensions[i].preprocess(src, name);
-            }
-        }
-    }
-
+function transform(ast, asyncFilters, name) {
     return cps(ast, asyncFilters || []);
 }
 

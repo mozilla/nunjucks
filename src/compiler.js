@@ -1054,9 +1054,17 @@ module.exports = {
     compile: function(src, asyncFilters, extensions, name) {
         var c = new Compiler(extensions);
 
+        // Run the extension preprocessors against the source.
+        if(extensions && extensions.length) {
+            for(var i=0; i<extensions.length; i++) {
+                if('preprocess' in extensions[i]) {
+                    src = extensions[i].preprocess(src, name);
+                }
+            }
+        }
+
         c.compile(transformer.transform(parser.parse(src, extensions),
                                         asyncFilters,
-                                        extensions,
                                         name));
         return c.getCode();
     },
