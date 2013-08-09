@@ -1337,21 +1337,7 @@ var Environment = Obj.extend({
         }
     },
 
-    // registerPrecompiled: function(templates) {
-    //     for(var name in templates) {
-    //         this.cache[name] = new Template({ type: 'code',
-    //                                           obj: templates[name] },
-    //                                         this,
-    //                                         name,
-    //                                         function() { return true; },
-    //                                         true);
-    //     }
-    // },
-
     express: function(app) {
-        app.engine('.html', this.expressRender.bind(this));
-        app.set('view engine', 'html');
-
         var env = this;
 
         function NunjucksView(name, opts) {
@@ -1360,25 +1346,28 @@ var Environment = Obj.extend({
         }
 
         NunjucksView.prototype.render = function(opts, cb) {
-            env.render(this.name, opts, cb);
+            cb(null, env.render(this.name, opts));
         };
 
         app.set('view', NunjucksView);
     },
 
-    expressRender: function(name, opts, cb) {
-        this.render(name, {}, cb);
-    },
-
     render: function(name, ctx, cb) {
+        var syncResult = null;
+
         this.getTemplate(name, function(err, tmpl) {
             if(err) {
                 cb(err);
             }
             else {
-                tmpl.render(ctx, cb);
+                tmpl.render(ctx, cb || function(err, res) {
+                    if(err) { throw err; }
+                    syncResult = res;
+                });
             }
         });
+
+        return syncResult;
     }
 });
 
@@ -1491,22 +1480,24 @@ var Template = Obj.extend({
             frame = null;
         }
 
-        if(!cb) {
-            throw new Error("you must specify a callback to `render`");
-        }
-
         return lib.withPrettyErrors(this.path, this.env.dev, function() {
             if(!this.compiled) {
                 this._compile();
             }
 
             var context = new Context(ctx || {}, this.blocks);
+            var syncResult = null;
 
             this.rootRenderFunc(this.env,
                                 context,
                                 frame || new Frame(),
                                 runtime,
-                                cb);
+                                cb || function(err, res) {
+                                    if(err) { throw err; }
+                                    syncResult = res;
+                                });
+
+            return syncResult;
         }.bind(this));
     },
 
