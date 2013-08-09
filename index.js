@@ -29,7 +29,7 @@ module.exports.configure = function(dirOrURL, opts) {
                         'as first argument');
     }
 
-    e = new env.Environment(new (loaders.FileSystemLoader || loaders.WebLoader)(dirOrURL),
+    e = new env.Environment(new (loaders.FileSystemLoader || loaders.WebLoader)(dirOrURL, opts.watch),
                             opts);
 
     if(opts && opts.express) {
@@ -39,5 +39,5 @@ module.exports.configure = function(dirOrURL, opts) {
 };
 
 module.exports.render = function(name, ctx, cb) {
-    e.render(name, ctx, cb);
+    return e.render(name, ctx, cb);
 };
