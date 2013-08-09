@@ -5,7 +5,11 @@ var modules = {};
 // A simple class system, more documentation to come
 
 function extend(cls, name, props) {
-    var prototype = Object.create(cls.prototype);
+    // This does that same thing as Object.create, but with support for IE8
+    var F = function() {};
+    F.prototype = cls.prototype;
+    var prototype = new F();
+
     var fnTest = /xyz/.test(function(){ xyz; }) ? /\bparent\b/ : /.*/;
     props = props || {};
 
@@ -247,6 +251,38 @@ exports.map = function(obj, func) {
 
     return results;
 };
+
+if(!Array.prototype.indexOf) {
+    Array.prototype.indexOf = function(array, searchElement /*, fromIndex */) {
+        if (array == null) {
+            throw new TypeError();
+        }
+        var t = Object(array);
+        var len = t.length >>> 0;
+        if (len === 0) {
+            return -1;
+        }
+        var n = 0;
+        if (arguments.length > 2) {
+            n = Number(arguments[2]);
+            if (n != n) { // shortcut for verifying if it's NaN
+                n = 0;
+            } else if (n != 0 && n != Infinity && n != -Infinity) {
+                n = (n > 0 || -1) * Math.floor(Math.abs(n));
+            }
+        }
+        if (n >= len) {
+            return -1;
+        }
+        var k = n >= 0 ? n : Math.max(len - Math.abs(n), 0);
+        for (; k < len; k++) {
+            if (k in t && t[k] === searchElement) {
+                return k;
+            }
+        }
+        return -1;
+    };
+}
 })();
 (function() {
 var util = modules["util"];
@@ -677,7 +713,7 @@ function SafeString(val) {
     ];
 
     for(var i=0; i<methods.length; i++) {
-        this[methods[i]] = proxyStr(val[methods[i]]);
+        this[methods[i]] = markSafe(val[methods[i]]);
     }
 }
 
@@ -688,15 +724,26 @@ function copySafeness(dest, target) {
     return target.toString();
 }
 
-function proxyStr(func) {
-    return function() {
-        var ret = func.apply(this, arguments);
+function markSafe(val) {
+    var type = typeof val;
 
-        if(typeof ret == 'string') {
-            return new SafeString(ret);
-        }
-        return ret;
-    };
+    if(type === 'string') {
+        return new SafeString(val);
+    }
+    else if(type !== 'function') {
+        return val;
+    }
+    else {
+        return function() {
+            var ret = val.apply(this, arguments);
+
+            if(typeof ret === 'string') {
+                return new SafeString(ret);
+            }
+
+            return ret;
+        };
+    }
 }
 
 function suppressValue(val, autoescape) {
@@ -760,10 +807,12 @@ modules['runtime'] = {
     handleError: handleError,
     isArray: lib.isArray,
     SafeString: SafeString,
-    copySafeness: copySafeness
+    copySafeness: copySafeness,
+    markSafe: markSafe
 };
 })();
 (function() {
+var lib = modules["lib"];
 
 var whitespaceChars = " \n\t\r";
 var delimChars = "()[]{}%*-+/#,:|.<>=!";
@@ -863,7 +912,7 @@ Tokenizer.prototype.nextToken = function() {
             var curComplex = cur + this.current();
             var type;
 
-            if(complexOps.indexOf(curComplex) != -1) {
+            if(complexOps.indexOf(curComplex) !== -1) {
                 this.forward();
                 cur = curComplex;
             }
@@ -913,10 +962,10 @@ Tokenizer.prototype.nextToken = function() {
         // Parse out the template text, breaking on tag
         // delimiters because we need to look for block/variable start
         // tags (don't use the full delimChars for optimization)
-        var beginChars = (BLOCK_START[0] +
-                          VARIABLE_START[0] +
-                          COMMENT_START[0] +
-                          COMMENT_END[0]);
+        var beginChars = (BLOCK_START.charAt(0) +
+                          VARIABLE_START.charAt(0) +
+                          COMMENT_START.charAt(0) +
+                          COMMENT_END.charAt(0));
         var tok;
 
         if(this.is_finished()) {
@@ -1130,13 +1179,13 @@ Tokenizer.prototype.back = function() {
 
 Tokenizer.prototype.current = function() {
     if(!this.is_finished()) {
-        return this.str[this.index];
+        return this.str.charAt(this.index);
     }
     return "";
 };
 
 Tokenizer.prototype.previous = function() {
-    return this.str[this.index-1];
+    return this.str.charAt(this.index-1);
 };
 
 modules['lexer'] = {
@@ -1594,7 +1643,7 @@ var Parser = Object.extend({
         }
 
         if(this.breakOnBlocks &&
-           this.breakOnBlocks.indexOf(tok.value) != -1) {
+           this.breakOnBlocks.indexOf(tok.value) !== -1) {
             return null;
         }
 
@@ -1613,7 +1662,7 @@ var Parser = Object.extend({
             if (this.extensions.length) {
                 for (var i = 0; i < this.extensions.length; i++) {
                     var ext = this.extensions[i];
-                    if ((ext.tags || []).indexOf(tok.value) > -1) {
+                    if ((ext.tags || []).indexOf(tok.value) !== -1) {
                         return ext.parse(this, nodes, lexer);
                     }
                 }
@@ -1801,7 +1850,7 @@ var Parser = Object.extend({
             if(!tok) {
                 break;
             }
-            else if(compareOps.indexOf(tok.value) != -1) {
+            else if(compareOps.indexOf(tok.value) !== -1) {
                 ops.push(new nodes.CompareOperand(tok.lineno,
                                                   tok.colno,
                                                   this.parseAdd(),
@@ -2372,7 +2421,9 @@ var Compiler = Object.extend({
     },
 
     _compileAggregate: function(node, frame, startChar, endChar) {
-        this.emit(startChar);
+        if(startChar) {
+            this.emit(startChar);
+        }
 
         for(var i=0; i<node.children.length; i++) {
             if(i > 0) {
@@ -2382,7 +2433,9 @@ var Compiler = Object.extend({
             this.compile(node.children[i], frame);
         }
 
-        this.emit(endChar);
+        if(endChar) {
+            this.emit(endChar);
+        }
     },
 
     _compileExpression: function(node, frame) {
@@ -2460,7 +2513,7 @@ var Compiler = Object.extend({
                 // object as the last argument, if they exist.
                 this._compileExpression(arg, frame);
 
-                if(i != args.children.length || contentArgs) {
+                if(i != args.children.length - 1 || contentArgs) {
                     this.emit(',');
                 }
             }, this);
@@ -2665,8 +2718,9 @@ var Compiler = Object.extend({
         var name = node.name;
         this.assertType(name, nodes.Symbol);
 
-        this.emit('env.getFilter("' + name.value + '")');
-        this._compileAggregate(node.args, frame, '(', ')');
+        this.emit('env.getFilter("' + name.value + '").call(context, ');
+        this._compileAggregate(node.args, frame);
+        this.emit(')');
     },
 
     compileKeywordArgs: function(node, frame) {
@@ -2761,7 +2815,7 @@ var Compiler = Object.extend({
             });
         });
 
-        this.emit('if(' + arr + ' !== undefined) {');
+        this.emit('if(' + arr + ') {');
 
         if(node.name instanceof nodes.Array) {
             // key/value iteration. the user could have passed a dict
@@ -3114,11 +3168,12 @@ var Compiler = Object.extend({
             var name = block.name.value;
 
             this.emitFuncBegin('b_' + name);
-            this.emitLine('var l_super = context.getSuper(env, ' +
+            this.emitLine('var l_super = runtime.markSafe(' +
+                          'context.getSuper(env, ' +
                           '"' + name + '", ' +
                           'b_' + name + ', ' +
                           'frame, ' +
-                          'runtime);');
+                          'runtime));');
 
             var tmpFrame = new Frame();
             tmpFrame.set('super', 'l_super');
@@ -3155,7 +3210,7 @@ var Compiler = Object.extend({
 // var fs = modules["fs"];
 //var src = '{{ foo({a:1}) }} {% block content %}foo{% endblock %}';
 // var c = new Compiler();
-// var src = '{% extends "b.html" %}{% block block1 %}{% block nested %}BAR{% endblock %}{% endblock %}';
+// var src = '{{ foo | poop(1, 2, 3) }}';
 //var extensions = [new testExtension()];
 
 // var ns = parser.parse(src);
@@ -3223,7 +3278,7 @@ var filters = {
 
     capitalize: function(str) {
         var ret = str.toLowerCase();
-        return r.copySafeness(str, ret[0].toUpperCase() + ret.slice(1));
+        return r.copySafeness(str, ret.charAt(0).toUpperCase() + ret.slice(1));
     },
 
     center: function(str, width) {
@@ -3292,7 +3347,7 @@ var filters = {
     },
 
     safe: function(str) {
-        return new r.SafeString(str);
+        return r.markSafe(str);
     },
 
     first: function(arr) {
@@ -3630,8 +3685,11 @@ var Object = modules["object"];
 
 var HttpLoader = Object.extend({
     init: function(baseURL, neverUpdate) {
-        console.log("[nunjucks] Warning: only use HttpLoader in " +
-                    "development. Otherwise precompile your templates.");
+        if (typeof(console) !== "undefined" && console.log &&
+            typeof(nunjucks) == "object" && !nunjucks.testing) {
+          console.log("[nunjucks] Warning: only use HttpLoader in " +
+                      "development. Otherwise precompile your templates.");
+        }
         this.baseURL = baseURL || '';
         this.neverUpdate = neverUpdate;
     },
@@ -3660,7 +3718,8 @@ var HttpLoader = Object.extend({
             }
         };
 
-        url += (url.indexOf('?') === -1 ? '?' : '&') + 's=' + Date.now();
+        url += (url.indexOf('?') === -1 ? '?' : '&') + 's=' + 
+               (new Date().getTime());
 
         // Synchronous because this API shouldn't be used in
         // production (pre-load compiled templates instead)

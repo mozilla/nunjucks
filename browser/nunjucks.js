@@ -5,7 +5,11 @@ var modules = {};
 // A simple class system, more documentation to come
 
 function extend(cls, name, props) {
-    var prototype = Object.create(cls.prototype);
+    // This does that same thing as Object.create, but with support for IE8
+    var F = function() {};
+    F.prototype = cls.prototype;
+    var prototype = new F();
+
     var fnTest = /xyz/.test(function(){ xyz; }) ? /\bparent\b/ : /.*/;
     props = props || {};
 
@@ -247,6 +251,38 @@ exports.map = function(obj, func) {
 
     return results;
 };
+
+if(!Array.prototype.indexOf) {
+    Array.prototype.indexOf = function(array, searchElement /*, fromIndex */) {
+        if (array == null) {
+            throw new TypeError();
+        }
+        var t = Object(array);
+        var len = t.length >>> 0;
+        if (len === 0) {
+            return -1;
+        }
+        var n = 0;
+        if (arguments.length > 2) {
+            n = Number(arguments[2]);
+            if (n != n) { // shortcut for verifying if it's NaN
+                n = 0;
+            } else if (n != 0 && n != Infinity && n != -Infinity) {
+                n = (n > 0 || -1) * Math.floor(Math.abs(n));
+            }
+        }
+        if (n >= len) {
+            return -1;
+        }
+        var k = n >= 0 ? n : Math.max(len - Math.abs(n), 0);
+        for (; k < len; k++) {
+            if (k in t && t[k] === searchElement) {
+                return k;
+            }
+        }
+        return -1;
+    };
+}
 })();
 (function() {
 
@@ -404,7 +440,7 @@ function SafeString(val) {
     ];
 
     for(var i=0; i<methods.length; i++) {
-        this[methods[i]] = proxyStr(val[methods[i]]);
+        this[methods[i]] = markSafe(val[methods[i]]);
     }
 }
 
@@ -415,15 +451,26 @@ function copySafeness(dest, target) {
     return target.toString();
 }
 
-function proxyStr(func) {
-    return function() {
-        var ret = func.apply(this, arguments);
+function markSafe(val) {
+    var type = typeof val;
 
-        if(typeof ret == 'string') {
-            return new SafeString(ret);
-        }
-        return ret;
-    };
+    if(type === 'string') {
+        return new SafeString(val);
+    }
+    else if(type !== 'function') {
+        return val;
+    }
+    else {
+        return function() {
+            var ret = val.apply(this, arguments);
+
+            if(typeof ret === 'string') {
+                return new SafeString(ret);
+            }
+
+            return ret;
+        };
+    }
 }
 
 function suppressValue(val, autoescape) {
@@ -487,7 +534,8 @@ modules['runtime'] = {
     handleError: handleError,
     isArray: lib.isArray,
     SafeString: SafeString,
-    copySafeness: copySafeness
+    copySafeness: copySafeness,
+    markSafe: markSafe
 };
 })();
 (function() {
@@ -528,7 +576,7 @@ var filters = {
 
     capitalize: function(str) {
         var ret = str.toLowerCase();
-        return r.copySafeness(str, ret[0].toUpperCase() + ret.slice(1));
+        return r.copySafeness(str, ret.charAt(0).toUpperCase() + ret.slice(1));
     },
 
     center: function(str, width) {
@@ -597,7 +645,7 @@ var filters = {
     },
 
     safe: function(str) {
-        return new r.SafeString(str);
+        return r.markSafe(str);
     },
 
     first: function(arr) {

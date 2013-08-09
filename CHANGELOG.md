@@ -1,5 +1,16 @@
 Changelog for versions previous to v0.1.9 are located at http://nunjucks.tumblr.com/.
 
+# v0.1.10 (August 9, 2013)
+
+This is a minor version update that includes several bugfixes.
+
+* fix hang when parsing an unclosed string that hits the end of file (fixes #85)
+* Adds IE8 support
+* `super()` calls are marked safe by default if using autoescaping
+* exposed a `markSafe` function in the runtime module for marking strings as safe inside filters
+* iterating over any "falsey" values will output nothing
+* make "this" be the context object in filters (fixes #109)
+
 # v0.1.9 (May 31, 2013)
 
 * autoescaping ([docs](http://nunjucks.jlongster.com/api#Autoescaping))
