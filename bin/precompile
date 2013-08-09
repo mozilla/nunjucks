@@ -6,8 +6,8 @@ var lib = require('../src/lib');
 var compiler = require('../src/compiler');
 var args = process.argv.slice();
 
-var envOpts = 'null';
 var force = false;
+var asyncFilters = null;
 
 // Remove the "node precompile" arguments
 args.shift();
@@ -19,8 +19,8 @@ while(1) {
         force = true;
         args.shift();
     }
-    else if(args[0] == '-p') {
-        envOpts = args[1];
+    else if(args[0] == '-a') {
+        asyncFilters = args[1].split(',');
         args.shift();
         args.shift();
     }
@@ -34,13 +34,14 @@ var inputPath = args[0];
 if(args.length === 0) {
     console.log('Precompile nunjucks templates to javascript.\n\n' +
                 'Usage: ' + path.basename(process.argv[1]) + 
-                ' [-f] <path to file or directory>\n\n' +
+                ' [-f] [-a <filters>] <file/dir>\n\n' +
                 ' -f   Force compilation to continue on error\n\n' +
-                ' if <path> is a file, outputs compiled javascript for\n' +
-                ' that file only to stdout\n\n' +
-                ' if <path> is a directory, recursively outputs template\n' +
-                ' javascript and code for loading the templates at runtime\n' +
-                ' for all files and subdirectories in that directory');
+                '   if <path> is a file, outputs compiled javascript for\n' +
+                '   that file only to stdout\n\n' +
+                '   if <path> is a directory, outputs compiled javascript\n' +
+                '   for all html files underneath it\n' +
+                ' -a <filters>  Give the compiler a comma-delimited list of\n' +
+                '   asynchronous filters, required for correctly generated code');
     process.exit(1);
 }
 
@@ -61,8 +62,8 @@ if(pathStats.isFile()) {
             inputPath,
             false,
             function() {
-                return compiler.compile(fs.readFileSync(inputPath,
-                                                        'utf-8'));
+                return compiler.compile(fs.readFileSync(inputPath, 'utf-8'),
+                                        asyncFilters);
             }
         );
     } catch (e) {

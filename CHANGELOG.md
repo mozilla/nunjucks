@@ -1,5 +1,13 @@
 Changelog for versions previous to v0.1.9 are located at http://nunjucks.tumblr.com/.
 
+# v0.9.0 (August ?, 2013)
+
+* API is now async, and async filters and loaders is supported. sync API should still work.
+* Much simpler higher-level API for initiating/configuring nunjucks is available
+* Express integration is much simpler and better
+
+TODO: expose API for async-ness in custom extensions
+
 # v0.1.10 (August 9, 2013)
 
 This is a minor version update that includes several bugfixes.
