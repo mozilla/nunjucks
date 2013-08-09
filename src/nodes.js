@@ -147,12 +147,14 @@ var CallExtension = Node.extend("CallExtension", {
     fields: ['extName', 'prop', 'args', 'contentArgs'],
 
     init: function(ext, prop, args, contentArgs) {
-        this.extName = ext._name;
+        this.extName = ext._name || ext;
         this.prop = prop;
-        this.args = args;
-        this.contentArgs = contentArgs;
+        this.args = args || new NodeList();
+        this.contentArgs = contentArgs || [];
     }
 });
+
+var CallExtensionAsync = CallExtension.extend("CallExtensionAsync");
 
 // Print the AST in a nicely formatted tree format for debuggin
 function printNodes(node, indent) {
@@ -187,6 +189,20 @@ function printNodes(node, indent) {
         lib.each(node.children, function(n) {
             printNodes(n, indent + 2);
         });
+    }
+    else if(node instanceof CallExtension) {
+        print(node.extName + '.' + node.prop);
+        print('\n');
+
+        if(node.args) {
+            printNodes(node.args, indent + 2);
+        }
+
+        if(node.contentArgs) {
+            lib.each(node.contentArgs, function(n) {
+                printNodes(n, indent + 2);
+            });
+        }
     }
     else {
         var nodes = null;
@@ -274,8 +290,8 @@ module.exports = {
     Compare: Compare,
     CompareOperand: CompareOperand,
 
-    //CustomTag: CustomTag,
     CallExtension: CallExtension,
+    CallExtensionAsync: CallExtensionAsync,
 
     printNodes: printNodes
 };

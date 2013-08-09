@@ -33,15 +33,13 @@ function quotedArray(arr) {
 }
 
 var Compiler = Object.extend({
-    init: function(extensions) {
+    init: function() {
         this.codebuf = [];
         this.lastId = 0;
         this.buffer = null;
         this.bufferStack = [];
         this.isChild = false;
         this.scopeClosers = '';
-
-        this.extensions = extensions || [];
     },
 
     fail: function (msg, lineno, colno) {
@@ -210,13 +208,16 @@ var Compiler = Object.extend({
         }
     },
 
-    compileCallExtension: function(node, frame) {
+    compileCallExtension: function(node, frame, async) {
         var name = node.extName;
         var args = node.args;
         var contentArgs = node.contentArgs;
         var transformedArgs = [];
 
-        this.emit(this.buffer + ' += runtime.suppressValue(');
+        if(!async) {
+            this.emit(this.buffer + ' += runtime.suppressValue(');
+        }
+
         this.emit('env.getExtension("' + node.extName + '")["' + node.prop + '"](');
         this.emit('context');
 
@@ -236,13 +237,13 @@ var Compiler = Object.extend({
                 // object as the last argument, if they exist.
                 this._compileExpression(arg, frame);
 
-                if(i != args.children.length - 1 || contentArgs) {
+                if(i != args.children.length - 1 || contentArgs.length) {
                     this.emit(',');
                 }
             }, this);
         }
 
-        if(contentArgs) {
+        if(contentArgs.length) {
             lib.each(contentArgs, function(arg, i) {
                 if(i > 0) {
                     this.emit(',');
@@ -251,12 +252,18 @@ var Compiler = Object.extend({
                 if(arg) {
                     var id = this.tmpid();
 
-                    this.emit('function() {');
+                    this.emitLine('function(cb) {');
+                    this.emitLine('if(!cb) { cb = function(err) { if(err) { throw err; }}}');
                     this.pushBufferId(id);
-                    this.compile(arg, frame);
+
+                    this.withScopedSyntax(function() {
+                        this.compile(arg, frame);
+                        this.emitLine('cb(null, ' + id + ');');
+                    });
+
                     this.popBufferId();
-                    this.emitLine('return ' + id + ';\n' +
-                                  '}');
+                    this.emitLine('return ' + id + ';');
+                    this.emitLine('}');
                 }
                 else {
                     this.emit('null');
@@ -264,8 +271,20 @@ var Compiler = Object.extend({
             }, this);
         }
 
-        this.emit(')');
-        this.emit(', env.autoesc);\n');
+        if(async) {
+            var res = this.tmpid();
+            this.emitLine(', ' + this.makeCallback(res));
+            this.emitLine(this.buffer + ' += runtime.suppressValue(' + res + ', env.autoesc);');
+            this.addScopeLevel();
+        }
+        else {
+            this.emit(')');
+            this.emit(', env.autoesc);\n');
+        }
+    },
+
+    compileCallExtensionAsync: function(node, frame) {
+        this.compileCallExtension(node, frame, true);
     },
 
     compileNodeList: function(node, frame) {
@@ -1042,17 +1061,16 @@ var Compiler = Object.extend({
 });
 
 // var c = new Compiler();
-// var src = '{% block content %}hello{% endblock %} {{ tmpl | getContents }}';
-// var ast = transformer.transform(parser.parse(src), ['getContents']);
+// var src = 'hello {% foo %}bar{% endfoo %} end';
+// var ast = transformer.transform(parser.parse(src));
 // nodes.printNodes(ast);
 // c.compile(ast);
-
 // var tmpl = c.getCode();
 // console.log(tmpl);
 
 module.exports = {
     compile: function(src, asyncFilters, extensions, name) {
-        var c = new Compiler(extensions);
+        var c = new Compiler();
 
         // Run the extension preprocessors against the source.
         if(extensions && extensions.length) {

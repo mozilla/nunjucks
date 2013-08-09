@@ -31,12 +31,12 @@ function walk(ast, func, depthFirst) {
 
     if(!depthFirst) {
         var astT = func(ast);
-        
+
         if(astT && astT !== ast) {
             return astT;
         }
     }
-    
+
     if(ast instanceof nodes.NodeList) {
         var children = mapCOW(ast.children, function(node) {
             return walk(node, func, depthFirst);
@@ -44,6 +44,20 @@ function walk(ast, func, depthFirst) {
 
         if(children !== ast.children) {
             ast = new nodes[ast.typename](ast.lineno, ast.colno, children);
+        }
+    }
+    else if(ast instanceof nodes.CallExtension) {
+        var args = walk(ast.args, func, depthFirst);
+
+        var contentArgs = mapCOW(ast.contentArgs, function(node) {
+            return walk(node, func, depthFirst);
+        });
+        
+        if(args !== ast.args || contentArgs !== ast.contentArgs) {
+            ast = new nodes[ast.typename](ast.extName,
+                                          ast.prop,
+                                          args,
+                                          contentArgs);
         }
     }
     else {
@@ -86,7 +100,7 @@ function _liftFilters(node, asyncFilters, prop) {
 
             children.push(new nodes.FilterAsync(node.lineno,
                                                 node.colno,
-                                                node.name, 
+                                                node.name,
                                                 node.args,
                                                 symbol));
             return symbol;
@@ -115,7 +129,7 @@ function _liftFilters(node, asyncFilters, prop) {
 }
 
 function liftFilters(ast, asyncFilters) {
-    return walk(ast, function(node) {
+    return depthWalk(ast, function(node) {
         if(node instanceof nodes.Output) {
             return _liftFilters(node, asyncFilters);
         }
@@ -124,6 +138,9 @@ function liftFilters(ast, asyncFilters) {
         }
         else if(node instanceof nodes.If) {
             return _liftFilters(node, asyncFilters, 'cond');
+        }
+        else if(node instanceof nodes.CallExtension) {
+            return _liftFilters(node, asyncFilters, 'args');
         }
     });
 }
@@ -201,8 +218,8 @@ function transform(ast, asyncFilters, name) {
 }
 
 // var parser = require('./parser');
-// var src = '{% block content %}hello{% endblock %} {{ tmpl | getContents }}';
-// var ast = transform(parser.parse(src), ['getContents']);
+// var src = 'hello {% foo %}{% endfoo %} end';
+// var ast = transform(parser.parse(src, [new FooExtension()]), ['bar']);
 // nodes.printNodes(ast);
 
 module.exports = {

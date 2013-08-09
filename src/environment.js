@@ -165,6 +165,10 @@ var Environment = Obj.extend({
     },
 
     render: function(name, ctx, cb) {
+        // We support a synchronous API to make it easier to migrate
+        // existing code to async. This works because if you don't do
+        // anything async work, the whole thing is actually run
+        // synchronously.
         var syncResult = null;
 
         this.getTemplate(name, function(err, tmpl) {
@@ -362,8 +366,34 @@ var Template = Obj.extend({
     }
 });
 
-// var src = '{% block content %}{% include "async.html" %}{% endblock %}';
-// var env = new Environment(new builtin_loaders.FileSystemLoader('tests/templates'), { dev: true });
+// test code
+// var src = 'hello {% foo baz | bar %}hi{% endfoo %} end';
+// var env = new Environment(new builtin_loaders.FileSystemLoader('tests/templates', true), { dev: true });
+
+// function FooExtension() {
+//     this.tags = ['foo'];
+//     this._name = 'FooExtension';
+    
+//     this.parse = function(parser, nodes) {
+//         var tok = parser.nextToken();
+//         var args = parser.parseSignature(null, true);
+//         parser.advanceAfterBlockEnd(tok.value);
+
+//         var body = parser.parseUntilBlocks('endfoo');
+//         parser.advanceAfterBlockEnd();
+
+//         return new nodes.CallExtensionAsync(this, 'run', args, [body]);
+//     };
+
+//     this.run = function(context, baz, body, cb) {
+//         cb(null, baz + '--' + body());
+//     };
+// }
+
+// env.addExtension('FooExtension', new FooExtension());
+// env.addFilter('bar', function(val, cb) {
+//     cb(null, val + '22222');
+// }, true);
 
 // var ctx = {};
 // var tmpl = new Template(src, env, null, null, true);

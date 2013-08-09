@@ -1077,7 +1077,8 @@ var Parser = Object.extend({
 //     console.log(util.inspect(t));
 // }
 
-// var p = new Parser(lexer.lex('sdfsdf {{ baz(foo | bar(5)) }}'));
+// var p = new Parser(lexer.lex('hello {% foo %} {{ "hi" | bar }} {% endfoo %} end'));
+// p.extensions = [new FooExtension()];
 // var n = p.parseAsRoot();
 // nodes.printNodes(n);
 
