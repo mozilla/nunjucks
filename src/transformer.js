@@ -179,7 +179,10 @@ function convertStatements(ast) {
 
         var async = false;
         walk(node, function(node) {
-            if(node instanceof nodes.FilterAsync) {
+            if(node instanceof nodes.FilterAsync ||
+               node instanceof nodes.IfAsync ||
+               node instanceof nodes.AsyncEach ||
+               node instanceof nodes.AsyncAll) {
                 async = true;
                 // Stop iterating by returning the node
                 return node;
