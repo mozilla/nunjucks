@@ -5,6 +5,11 @@ var compiler = require('./compiler');
 var Environment = require('./environment').Environment;
 
 function precompile(inputPath, env, force) {
+    // Generate the JavaScript for a template or a directory of
+    // templates. `env` is optional, and if passed the installed
+    // filters and extensions will be used. `force` is optional, and
+    // will make the compiler continue on error.
+
     env = env || new Environment([]);
     var asyncFilters = env.asyncFilters;
     var extensions = env.extensionsList;
