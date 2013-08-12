@@ -207,7 +207,7 @@ exports.asyncParallel = function(funcs, done) {
     }
 };
 
-exports.asyncEach = function(arr, iter, cb) {
+exports.asyncIter = function(arr, iter, cb) {
     var i = -1;
     
     function next() {

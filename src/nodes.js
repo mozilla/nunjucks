@@ -90,7 +90,8 @@ var If = Node.extend("If", { fields: ['cond', 'body', 'else_'] });
 var IfAsync = If.extend("IfAsync");
 var InlineIf = Node.extend("InlineIf", { fields: ['cond', 'body', 'else_'] });
 var For = Node.extend("For", { fields: ['arr', 'name', 'body'] });
-var ForAsync = For.extend("ForAsync");
+var AsyncEach = For.extend("AsyncEach");
+var AsyncAll = For.extend("AsyncAll");
 var Macro = Node.extend("Macro", { fields: ['name', 'args', 'body'] });
 var Import = Node.extend("Import", { fields: ['template', 'target'] });
 var FromImport = Node.extend("FromImport", {
@@ -260,7 +261,8 @@ module.exports = {
     IfAsync: IfAsync,
     InlineIf: InlineIf,
     For: For,
-    ForAsync: ForAsync,
+    AsyncEach: AsyncEach,
+    AsyncAll: AsyncAll,
     Macro: Macro,
     Import: Import,
     FromImport: FromImport,

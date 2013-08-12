@@ -112,7 +112,7 @@ var Environment = Obj.extend({
         if(tmpl) {
             cb(null, tmpl);
         } else {
-            lib.asyncEach(this.loaders, function(loader, i, next, done) {
+            lib.asyncIter(this.loaders, function(loader, i, next, done) {
                 function handle(src) {
                     if(src) {
                         done(src);
@@ -370,25 +370,25 @@ var Template = Obj.extend({
 // var src = 'hello {% foo baz | bar %}hi{% endfoo %} end';
 // var env = new Environment(new builtin_loaders.FileSystemLoader('tests/templates', true), { dev: true });
 
-// function FooExtension() {
-//     this.tags = ['foo'];
-//     this._name = 'FooExtension';
+function FooExtension() {
+    this.tags = ['foo'];
+    this._name = 'FooExtension';
     
-//     this.parse = function(parser, nodes) {
-//         var tok = parser.nextToken();
-//         var args = parser.parseSignature(null, true);
-//         parser.advanceAfterBlockEnd(tok.value);
+    this.parse = function(parser, nodes) {
+        var tok = parser.nextToken();
+        var args = parser.parseSignature(null, true);
+        parser.advanceAfterBlockEnd(tok.value);
 
-//         var body = parser.parseUntilBlocks('endfoo');
-//         parser.advanceAfterBlockEnd();
+        var body = parser.parseUntilBlocks('endfoo');
+        parser.advanceAfterBlockEnd();
 
-//         return new nodes.CallExtensionAsync(this, 'run', args, [body]);
-//     };
+        return new nodes.CallExtensionAsync(this, 'run', args, [body]);
+    };
 
-//     this.run = function(context, baz, body, cb) {
-//         cb(null, baz + '--' + body());
-//     };
-// }
+    this.run = function(context, baz, body, cb) {
+        cb(null, baz + '--' + body());
+    };
+}
 
 // env.addExtension('FooExtension', new FooExtension());
 // env.addFilter('bar', function(val, cb) {

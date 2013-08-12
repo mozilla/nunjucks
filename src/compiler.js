@@ -703,7 +703,7 @@ var Compiler = Object.extend({
         this.emitLine('frame = frame.pop();');
     },
 
-    compileForAsync: function(node, frame) {
+    _compileAsyncLoop: function(node, frame, parallel) {
         // This shares some code with the For tag, but not enough to
         // worry about. This iterates across an object asynchronously,
         // but not in parallel.
@@ -712,6 +712,7 @@ var Compiler = Object.extend({
         var len = this.tmpid();
         var arr = this.tmpid();
         var loopUses = this.scanLoop(node);
+        var asyncMethod = parallel ? 'asyncAll' : 'asyncEach';
         frame = frame.push();
 
         this.emitLine('frame = frame.push();');
@@ -721,7 +722,7 @@ var Compiler = Object.extend({
         this.emitLine(';');
 
         if(node.name instanceof nodes.Array) {
-            this.emit('runtime.asyncIter(' + arr + ', ' +
+            this.emit('runtime.' + asyncMethod + '(' + arr + ', ' +
                       node.name.children.length + ', function(');
 
             lib.each(node.name.children, function(name) {
@@ -738,7 +739,7 @@ var Compiler = Object.extend({
         }
         else {
             var id = node.name.value;
-            this.emitLine('runtime.asyncIter(' + arr + ', 1, function(' + id + ', ' + i + ', ' + len + ',next) {');
+            this.emitLine('runtime.' + asyncMethod + '(' + arr + ', 1, function(' + id + ', ' + i + ', ' + len + ',next) {');
             this.emitLine('frame.set("' + id + '", ' + id + ');');
             frame.set(id, id);
         }
@@ -746,14 +747,37 @@ var Compiler = Object.extend({
         this.emitLoopBindings(node, loopUses, arr, i, len);
         
         this.withScopedSyntax(function() {
+            var buf;
+            if(parallel) {
+                buf = this.tmpid();
+                this.pushBufferId(buf);
+            }
+
             this.compile(node.body, frame);
-            this.emitLine('next();');
+            this.emitLine('next(' + i + (buf ? ',' + buf : '') + ');');
+
+            if(parallel) {
+                this.popBufferId();
+            }
         });
 
-        this.emitLine('}, ' + this.makeCallback());
+        var output = this.tmpid();
+        this.emitLine('}, ' + this.makeCallback(output));
         this.addScopeLevel();
 
+        if(parallel) {
+            this.emitLine(this.buffer + ' += ' + output + ';');
+        }
+
         this.emitLine('frame = frame.pop();');
+    },
+
+    compileAsyncEach: function(node, frame) {
+        this._compileAsyncLoop(node, frame);
+    },
+
+    compileAsyncAll: function(node, frame) {
+        this._compileAsyncLoop(node, frame, true);
     },
 
     _emitMacroBegin: function(node, frame) {

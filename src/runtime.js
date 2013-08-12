@@ -235,11 +235,11 @@ function handleError(error, lineno, colno) {
     }
 }
 
-function asyncIter(arr, dimen, iter, cb) {
+function asyncEach(arr, dimen, iter, cb) {
     if(lib.isArray(arr)) {
         var len = arr.length;
 
-        lib.asyncEach(arr, function(item, i, next) {
+        lib.asyncIter(arr, function(item, i, next) {
             switch(dimen) {
             case 1: iter(item, i, len, next); break;
             case 2: iter(item[0], item[1], i, len, next); break;
@@ -254,6 +254,59 @@ function asyncIter(arr, dimen, iter, cb) {
         lib.asyncFor(arr, function(key, val, i, len, next) {
             iter(key, val, i, len, next);
         }, cb);
+    }
+}
+
+function asyncAll(arr, dimen, func, cb) {
+    var finished = 0;
+    var len;
+    var outputArr;
+
+    function done(i, output) {
+        finished++;
+        outputArr[i] = output;
+
+        if(finished == len) {
+            cb(null, outputArr.join(''));
+        }
+    }
+
+    if(lib.isArray(arr)) {
+        len = arr.length;
+        outputArr = new Array(len);
+
+        if(len == 0) {
+            cb(null, '');
+        }
+        else {
+            for(var i=0; i<arr.length; i++) {
+                var item = arr[i];
+
+                switch(dimen) {
+                case 1: func(item, i, len, done); break;
+                case 2: func(item[0], item[1], i, len, done); break;
+                case 3: func(item[0], item[1], item[2], i, len, done); break;
+                default:
+                    item.push(i, done);
+                    func.apply(this, item);
+                }
+            }
+        }
+    }
+    else {
+        var keys = lib.keys(arr);
+        len = keys.length;
+        outputArr = new Array(len);
+
+        if(len == 0) {
+            cb(null, '');
+        }
+        else {
+            for(var i=0; i<keys.length; i++) {
+                var k = keys[i];
+                func(k, arr[k], i, len, done);
+            }
+        }
     }
 }
 
@@ -273,5 +326,6 @@ module.exports = {
     SafeString: SafeString,
     copySafeness: copySafeness,
     markSafe: markSafe,
-    asyncIter: asyncIter
+    asyncEach: asyncEach,
+    asyncAll: asyncAll
 };

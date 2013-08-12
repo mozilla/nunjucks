@@ -197,7 +197,7 @@ function convertStatements(ast) {
                 );
             }
             else if(node instanceof nodes.For) {
-                return new nodes.ForAsync(
+                return new nodes.AsyncEach(
                     node.lineno,
                     node.colno,
                     node.arr,

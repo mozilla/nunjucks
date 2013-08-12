@@ -135,12 +135,19 @@ var Parser = Object.extend({
     parseFor: function() {
         var forTok = this.peekToken();
         var node;
+        var endBlock;
 
         if(this.skipSymbol('for')) {
             node = new nodes.For(forTok.lineno, forTok.colno);
+            endBlock = 'endfor';
         }
-        else if(this.skipSymbol('forAsync')) {
-            node = new nodes.ForAsync(forTok.lineno, forTok.colno);            
+        else if(this.skipSymbol('asyncEach')) {
+            node = new nodes.AsyncEach(forTok.lineno, forTok.colno);
+            endBlock = 'endeach';
+        }
+        else if(this.skipSymbol('asyncAll')) {
+            node = new nodes.AsyncAll(forTok.lineno, forTok.colno);
+            endBlock = 'endall';
         }
         else {
             this.fail("parseFor: expected for{Async}", forTok.lineno, forTok.colno);
@@ -174,7 +181,7 @@ var Parser = Object.extend({
         node.arr = this.parseExpression();
         this.advanceAfterBlockEnd(forTok.value);
 
-        node.body = this.parseUntilBlocks('endfor');
+        node.body = this.parseUntilBlocks(endBlock);
         this.advanceAfterBlockEnd();
 
         return node;
@@ -434,8 +441,9 @@ var Parser = Object.extend({
         case 'if':
         case 'ifAsync':
             return this.parseIf();
-        case 'for': 
-        case 'forAsync':
+        case 'for':
+        case 'asyncEach':
+        case 'asyncAll':
             return this.parseFor();
         case 'block': return this.parseBlock();
         case 'extends': return this.parseExtends();
