@@ -6,6 +6,7 @@ var lexer = require('./src/lexer');
 var runtime = require('./src/runtime');
 var Loader = require('./src/loader');
 var loaders = require('./src/loaders');
+var precompile = require('./src/precompile');
 
 module.exports = {};
 module.exports.Environment = env.Environment;
@@ -22,7 +23,7 @@ module.exports.runtime = runtime;
 
 // A single instance of an environment, since this is so commonly used
 
-var e = new env.Environment();
+var e;
 module.exports.configure = function(dirOrURL, opts) {
     if(typeof dirOrURL != 'string') {
         throw new Error('must pass templates path or URL to `configure` ' +
@@ -41,3 +42,5 @@ module.exports.configure = function(dirOrURL, opts) {
 module.exports.render = function(name, ctx, cb) {
     return e.render(name, ctx, cb);
 };
+
+module.exports.precompile = precompile;

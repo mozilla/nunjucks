@@ -1,12 +1,12 @@
 #!/usr/bin/env node
-var fs = require('fs');
 var path = require('path');
-var util = require('util');
+var precompile = require('../src/precompile');
+var Environment = require('../src/environment').Environment;
 var lib = require('../src/lib');
-var compiler = require('../src/compiler');
 var args = process.argv.slice();
 
 var force = false;
+var help = false;
 var asyncFilters = null;
 
 // Remove the "node precompile" arguments
@@ -15,7 +15,10 @@ args.shift();
 
 // Process any flags
 while(1) {
-    if(args[0] == '-f') {
+    if(args[0] == '-?' || args[0] == '-h') {
+        help = true;
+    }
+    else if(args[0] == '-f') {
         force = true;
         args.shift();
     }
@@ -31,109 +34,25 @@ while(1) {
 
 var inputPath = args[0];
 
-if(args.length === 0) {
-    console.log('Precompile nunjucks templates to javascript.\n\n' +
+if(help || args.length === 0) {
+    console.log('Precompile nunjucks templates to javascript. If you use extensions,\n' +
+                'you need to use the JavaScript API to precompile so you can install any\n' +
+                'extensions you use.\n\n' +
                 'Usage: ' + path.basename(process.argv[1]) + 
                 ' [-f] [-a <filters>] <file/dir>\n\n' +
-                ' -f   Force compilation to continue on error\n\n' +
-                '   if <path> is a file, outputs compiled javascript for\n' +
-                '   that file only to stdout\n\n' +
-                '   if <path> is a directory, outputs compiled javascript\n' +
-                '   for all html files underneath it\n' +
+                ' -f  Force compilation to continue on error.\n' +
+                '     If <file/dir> is a file, outputs compiled javascript for\n' +
+                '     that file to stdout. If <file/dir> is a directory, outputs\n' +
+                '     compiled javascript for all html files underneath it\n\n' +
                 ' -a <filters>  Give the compiler a comma-delimited list of\n' +
-                '   asynchronous filters, required for correctly generated code');
+                '     asynchronous filters, required for correctly generating code');
     process.exit(1);
 }
 
-try {
-    var pathStats = fs.statSync(inputPath);
-} catch (e) {
-    console.log('Unable to stat ' + inputPath + ": " + e);
-    process.exit(2);
-}
+var env = new Environment([]);
 
-if(pathStats.isFile()) {
-    // Compile a single file and exit on first error found.
-    // Note that you don't get an Environment object automatically
-    // with this, so you will have to build your own scaffolding if you 
-    // compile templates individually.
-    try {
-        var src = lib.withPrettyErrors(
-            inputPath,
-            false,
-            function() {
-                return compiler.compile(fs.readFileSync(inputPath, 'utf-8'),
-                                        asyncFilters);
-            }
-        );
-    } catch (e) {
-        console.error(e.toString());
-        process.exit(4);
-    }
+lib.each(asyncFilters, function(name) {
+    env.addFilter(name, function() {}, true);
+});
 
-    util.puts(src);
-    process.exit(0);
-}
-else if(!pathStats.isDirectory()) {
-    console.log(inputPath + ' is not a file or directory');
-    process.exit(3);
-}
-
-var templates = [];
-
-function addTemplates(dir) {
-    var files = fs.readdirSync(dir);
-
-    for(var i=0; i<files.length; i++) {
-        var filepath = path.join(dir, files[i]);
-        var stat = fs.statSync(filepath);
-
-        if(stat && stat.isDirectory()) {
-            addTemplates(filepath);
-        }
-        else if(path.extname(filepath) == '.html') {
-            templates.push(filepath);
-        }
-    }
-}
-
-addTemplates(inputPath);
-
-util.puts('(function() {');
-util.puts('var templates = {};');
-
-for(var i=0; i<templates.length; i++) {
-    var doCompile = function() {
-        var src = lib.withPrettyErrors(
-            templates[i],
-            false,
-            function() {
-                return compiler.compile(fs.readFileSync(templates[i],
-                                                        'utf-8'));
-            }
-        );
-        
-        var name = templates[i].replace(path.join(inputPath, '/'), '');
-
-        util.puts('templates["' + name + '"] = (function() {');
-        util.puts(src);
-        util.puts('})();');
-    };
-
-    // Don't stop generating the output if we're forcing compilation.
-    if(force) {
-        try {
-            doCompile();
-        } catch(e) {
-            console.error(e);
-        }
-    }
-    else {
-        doCompile();
-    }
-}
-
-util.puts(
-    'window.nunjucksPrecompiled = templates;\n' +
-    '})();'
-);
+console.log(precompile(inputPath, env, force));
