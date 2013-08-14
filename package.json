@@ -6,6 +6,10 @@
         "name": "James Long",
         "email": "longster@gmail.com"
     },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/jlongster/nunjucks.git"
+    },
     "devDependencies": {
         "expect.js": "*",
         "mocha": "*",
