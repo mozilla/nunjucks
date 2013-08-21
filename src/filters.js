@@ -184,12 +184,7 @@ var filters = {
     },
 
     random: function(arr) {
-        var i = Math.floor(Math.random() * arr.length);
-        if(i == arr.length) {
-            i--;
-        }
-
-        return arr[i];
+        return arr[Math.floor(Math.random() * arr.length)];
     },
 
     replace: function(str, old, new_, maxCount) {
