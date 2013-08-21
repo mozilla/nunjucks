@@ -502,7 +502,6 @@ var Compiler = Object.extend({
 
             if (id === null) {
                 id = this.tmpid();
-                frame.set(name, id);
 
                 // Note: This relies on js allowing scope across
                 // blocks, in case this is created inside an `if`
@@ -521,6 +520,9 @@ var Compiler = Object.extend({
             var name = target.value;
 
             this.emitLine('frame.set("' + name + '", ' + id + ');');
+            if (frame.get(name) === null) {
+                frame.set(name, id);
+            }
 
             // We are running this for every var, but it's very
             // uncommon to assign to multiple vars anyway

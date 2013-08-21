@@ -549,6 +549,10 @@
                   { foo: 'bar' },
                   'bar');
 
+            equal('{% set username = username + "pasta" %}{{ username }}',
+                  { username: 'basta' },
+                  'bastapasta');
+
             finish(done);
         });
 
