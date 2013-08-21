@@ -220,10 +220,10 @@ function callWrap(obj, name, args) {
 }
 
 function contextOrFrameLookup(context, frame, name) {
-    var val = context.lookup(name);
+    var val = frame.lookup(name);
     return (val !== undefined && val !== null) ?
         val :
-        frame.lookup(name);
+        context.lookup(name);
 }
 
 function handleError(error, lineno, colno) {
