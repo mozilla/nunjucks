@@ -104,9 +104,6 @@ var filters = {
     },
 
     filesizeformat: function(value, binary) {
-        if (binary === undefined) {
-            binary = false;
-        }
         var bytes = parseFloat(value),
             base = binary ? 1024 : 1000,
             prefixes = [
