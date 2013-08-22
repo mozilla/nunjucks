@@ -110,6 +110,36 @@
             finish(done);
         });
 
+        it('filesizeformat', function(done) {
+          equal('{{ 100|filesizeformat }}|' +
+                '{{ 1000|filesizeformat }}|' +
+                '{{ 1000000|filesizeformat }}|' +
+                '{{ 1000000000|filesizeformat }}|' +
+                '{{ 1000000000000|filesizeformat }}|' +
+                '{{ 100|filesizeformat(true) }}|' +
+                '{{ 1000|filesizeformat(true) }}|' +
+                '{{ 1000000|filesizeformat(true) }}|' +
+                '{{ 1000000000|filesizeformat(true) }}|' +
+                '{{ 1000000000000|filesizeformat(true) }}',
+
+                '100 Bytes|1.0 kB|1.0 MB|1.0 GB|1.0 TB|100 Bytes|' +
+                '1000 Bytes|976.6 KiB|953.7 MiB|931.3 GiB');
+
+          equal('{{ 300|filesizeformat }}|' +
+                '{{ 3000|filesizeformat }}|' +
+                '{{ 3000000|filesizeformat }}|' +
+                '{{ 3000000000|filesizeformat }}|' +
+                '{{ 3000000000000|filesizeformat }}|' +
+                '{{ 300|filesizeformat(true) }}|' +
+                '{{ 3000|filesizeformat(true) }}|' +
+                '{{ 3000000|filesizeformat(true) }}',
+
+                '300 Bytes|3.0 kB|3.0 MB|3.0 GB|3.0 TB|300 Bytes|' +
+                '2.9 KiB|2.9 MiB');
+
+          finish(done);
+        });
+
         it('first', function(done) {
             equal('{{ [1,2,3] | first }}', '1');
             finish(done);

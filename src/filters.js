@@ -103,6 +103,43 @@ var filters = {
         return str;
     },
 
+    filesizeformat: function(value, binary) {
+        if (binary === undefined) {
+            binary = false;
+        }
+        var bytes = parseFloat(value),
+            base = binary ? 1024 : 1000,
+            prefixes = [
+                binary ? 'KiB' : 'kB',
+                binary ? 'MiB' : 'MB',
+                binary ? 'GiB' : 'GB',
+                binary ? 'TiB' : 'TB',
+                binary ? 'PiB' : 'PB',
+                binary ? 'EiB' : 'EB',
+                binary ? 'ZiB' : 'ZB',
+                binary ? 'YiB' : 'YB'
+            ];
+
+        if (bytes == 1) {
+            return '1 Byte';
+        } else if (bytes < base) {
+            return '' + bytes + ' Bytes';
+        }
+
+        var format = function(val, prefix) {
+            return '' + val.toFixed(1) + ' ' + prefix;
+        };
+
+        for (var i = 0; i < prefixes.length; i++) {
+            var prefix = prefixes[i],
+                unit = Math.pow(base, i + 2);
+            if (bytes < unit) {
+                return format(base * bytes / unit, prefix);
+            }
+        }
+        return format(base * bytes / unit, prefix);
+    },
+
     safe: function(str) {
         return r.markSafe(str);
     },
