@@ -107,4 +107,24 @@ function precompile(inputPath, env, force) {
     return output;
 }
 
+function precompileString(str, env) {
+    env = env || new Environment([]);
+    var asyncFilters = env.asyncFilters;
+    var extensions = env.extensionsList;
+
+    var out = 'new nunjucks.Template({ type: "code", obj: (function() {';
+    out += lib.withPrettyErrors(
+        '<string>', 
+        false,
+        function() {
+            return compiler.compile(str, 
+                                    asyncFilters,
+                                    extensions,
+                                    '<string>');
+        }
+    );
+    out += '})()})';
+    return out;
+}
+
 module.exports = precompile;
