@@ -5,16 +5,18 @@ var WebLoader = Loader.extend({
         // It's easy to use precompiled templates: just include them
         // before you configure nunjucks and this will automatically
         // pick it up and use it
-        if(window.nunjucksPrecompiled) {
-            this.precompiled = window.nunjucksPrecompiled;
-        }
+        this.precompiled = window.nunjucksPrecompiled || {};
 
         this.baseURL = baseURL || '';
         this.neverUpdate = neverUpdate;
     },
 
+    addPrecompiled: function(name, code) {
+        this.precompiled[name] = code;
+    },
+
     getSource: function(name) {
-        if(this.precompiled) {
+        if(this.precompiled[name]) {
             return {
                 src: { type: "code",
                        obj: this.precompiled[name] },

@@ -43,4 +43,8 @@ module.exports.render = function(name, ctx, cb) {
     return e.render(name, ctx, cb);
 };
 
+module.exports.getLoader = function() {
+    return e.getPrimaryLoader();
+}
+
 module.exports.precompile = precompile;

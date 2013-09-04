@@ -107,24 +107,31 @@ function precompile(inputPath, env, force) {
     return output;
 }
 
-function precompileString(str, env) {
+function precompileString(str, filepath, env) {
     env = env || new Environment([]);
+
+    if(!filepath) {
+        throw new Error("precompileString: filepath is required");
+    }
+
     var asyncFilters = env.asyncFilters;
     var extensions = env.extensionsList;
 
-    var out = 'new nunjucks.Template({ type: "code", obj: (function() {';
+    var out = 'nunjucks.getLoader().addPrecompiled("' + filepath + '", (function() {';
     out += lib.withPrettyErrors(
-        '<string>', 
+        filepath,
         false,
         function() {
             return compiler.compile(str, 
                                     asyncFilters,
                                     extensions,
-                                    '<string>');
+                                    filepath);
         }
     );
-    out += '})()})';
+    out += '})());';
     return out;
 }
 
 module.exports = precompile;
+
+console.log(precompileString('foo'));
