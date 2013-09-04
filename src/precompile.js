@@ -18,26 +18,9 @@ function precompile(inputPath, env, force) {
     var output = '';
 
     if(pathStats.isFile()) {
-        // Compile a single file and exit on first error found.
-        // Note that you don't get an Environment object automatically
-        // with this, so you will have to build your own scaffolding if you 
-        // compile templates individually.
-        try {
-            var src = lib.withPrettyErrors(
-                inputPath,
-                false,
-                function() {
-                    return compiler.compile(fs.readFileSync(inputPath, 'utf-8'),
-                                            asyncFilters,
-                                            extensions,
-                                            inputPath);
-                }
-            );
-        } catch (e) {
-            throw new Error(e.toString());
-        }
-
-        output += src;
+        return precompileString(fs.readFileSync(inputPath, 'utf-8'),
+                                inputPath,
+                                env);
     }
     else {
         if(!pathStats.isDirectory()) {
@@ -65,7 +48,7 @@ function precompile(inputPath, env, force) {
         addTemplates(inputPath);
 
         output += '(function() {';
-        output += 'var templates = {};';
+        output += 'window.nunjucksPrecompiled = window.nunjucksPrecompiled || {};';
 
         for(var i=0; i<templates.length; i++) {
             var doCompile = function() {
@@ -82,7 +65,7 @@ function precompile(inputPath, env, force) {
                 
                 var name = templates[i].replace(path.join(inputPath, '/'), '');
 
-                output += 'templates["' + name + '"] = (function() {';
+                output += 'window.nunjucksPrecompiled["' + name + '"] = (function() {';
                 output += src;
                 output += '})();';
             };
@@ -100,11 +83,9 @@ function precompile(inputPath, env, force) {
             }
         }
 
-        output += 'window.nunjucksPrecompiled = templates;\n' +
-            '})();';
+        output += '})();';
+        return output;
     }
-
-    return output;
 }
 
 function precompileString(str, filepath, env) {
@@ -117,7 +98,8 @@ function precompileString(str, filepath, env) {
     var asyncFilters = env.asyncFilters;
     var extensions = env.extensionsList;
 
-    var out = 'nunjucks.getLoader().addPrecompiled("' + filepath + '", (function() {';
+    var out = '(window.nunjucksPrecompiled = window.nunjucksPrecompiled || {})\n' +
+        '.addPrecompiled("' + filepath + '", (function() {';
     out += lib.withPrettyErrors(
         filepath,
         false,

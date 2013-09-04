@@ -11,10 +11,6 @@ var WebLoader = Loader.extend({
         this.neverUpdate = neverUpdate;
     },
 
-    addPrecompiled: function(name, code) {
-        this.precompiled[name] = code;
-    },
-
     getSource: function(name) {
         if(this.precompiled[name]) {
             return {

@@ -1,4 +1,5 @@
 
+var lib = require('./src/lib');
 var env = require('./src/environment');
 var compiler = require('./src/compiler');
 var parser = require('./src/parser');
@@ -24,27 +25,27 @@ module.exports.runtime = runtime;
 // A single instance of an environment, since this is so commonly used
 
 var e;
-module.exports.configure = function(dirOrURL, opts) {
-    if(typeof dirOrURL != 'string') {
-        throw new Error('must pass templates path or URL to `configure` ' +
-                        'as first argument');
+module.exports.configure = function(templatesPath, opts) {
+    opts = opts || {};
+    if(lib.isObject(templatesPath)) {
+        opts = templatesPath;
+    }
+    else {
+        opts.templatesPath = templatesPath;
     }
 
-    e = new env.Environment(new (loaders.FileSystemLoader || loaders.WebLoader)(dirOrURL, opts.watch),
-                            opts);
+    var loader = loaders.FileSystemLoader || loaders.WebLoader;
+    e = new env.Environment(new loader(opts.templatesPath, opts.watch), opts);
 
     if(opts && opts.express) {
         e.express(opts.express);
     }
+
     return e;
 };
 
 module.exports.render = function(name, ctx, cb) {
     return e.render(name, ctx, cb);
 };
-
-module.exports.getLoader = function() {
-    return e.getPrimaryLoader();
-}
 
 module.exports.precompile = precompile;

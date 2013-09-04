@@ -92,10 +92,6 @@ var Environment = Obj.extend({
         return this.filters[name];
     },
 
-    getPrimaryLoader: function() {
-        return this.loaders[0];
-    },
-
     getTemplate: function(name, eagerCompile, cb) {
         if(name && name.raw) {
             // this fixes autoescape for templates referenced in symbols
@@ -162,7 +158,7 @@ var Environment = Obj.extend({
         }
 
         NunjucksView.prototype.render = function(opts, cb) {
-          env.render(this.name, opts, cb)
+          env.render(this.name, opts, cb);
         };
 
         app.set('view', NunjucksView);
