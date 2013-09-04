@@ -302,6 +302,13 @@
             finish(done);
         });
 
+        it('urlencode', function(done) {
+            equal('{{ "&" | urlencode }}', '%26');
+            equal('{{ arr | urlencode }}', { arr: [[1,2],['&1','&2']] }, '1=2&%261=%262');
+            equal('{{ obj | urlencode }}', { obj: {'1': 2, '&1': '&2'}}, '1=2&%261=%262');
+            finish(done);
+        });
+
         it('wordcount', function(done) {
             equal('{{ "foo bar baz" | wordcount }}', '3');
             finish(done);

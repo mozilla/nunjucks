@@ -184,12 +184,7 @@ var filters = {
     },
 
     random: function(arr) {
-        var i = Math.floor(Math.random() * arr.length);
-        if(i == arr.length) {
-            i--;
-        }
-
-        return arr[i];
+        return arr[Math.floor(Math.random() * arr.length)];
     },
 
     replace: function(str, old, new_, maxCount) {
@@ -345,6 +340,28 @@ var filters = {
 
     upper: function(str) {
         return str.toUpperCase();
+    },
+
+    urlencode: function(obj) {
+        var enc = encodeURIComponent;
+        if (lib.isString(obj)) {
+            return enc(obj);
+        } else {
+            var parts;
+            if (lib.isArray(obj)) {
+                parts = obj.map(function(item) {
+                    return enc(item[0]) + '=' + enc(item[1]);
+                })
+            } else {
+                parts = [];
+                for (var k in obj) {
+                    if (obj.hasOwnProperty(k)) {
+                        parts.push(enc(k) + '=' + enc(obj[k]));
+                    }
+                }
+            }
+            return parts.join('&');
+        }
     },
 
     wordcount: function(str) {

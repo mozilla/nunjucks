@@ -158,7 +158,7 @@ var Environment = Obj.extend({
         }
 
         NunjucksView.prototype.render = function(opts, cb) {
-            cb(null, env.render(this.name, opts));
+          env.render(this.name, opts, cb)
         };
 
         app.set('view', NunjucksView);
@@ -373,7 +373,7 @@ var Template = Obj.extend({
 function FooExtension() {
     this.tags = ['foo'];
     this._name = 'FooExtension';
-    
+
     this.parse = function(parser, nodes) {
         var tok = parser.nextToken();
         var args = parser.parseSignature(null, true);

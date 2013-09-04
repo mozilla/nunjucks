@@ -194,6 +194,21 @@
             equal('{% ' + block + ' k, v in items %}{{ loop.length }}{% ' + end + ' %}',
                   { items: { foo: 1, bar: 2 }},
                   '22');
+
+            render('{% set item = passed_var %}' +
+                   '{% include "item.html" %}\n' +
+                   '{% ' + block + ' i in passed_iter %}' +
+                     '{% set item = i %}' +
+                     '{% include "item.html" %}\n' +
+                   '{% ' + end + ' %}',
+                   {
+                     passed_var: 'test',
+                     passed_iter: ['1', '2', '3']
+                   },
+                   {},
+                   function(err, res) {
+                       expect(res).to.be('showing test\nshowing 1\nshowing 2\nshowing 3\n');
+                   });
         }
 
         it('should compile for blocks', function(done) {
@@ -548,6 +563,10 @@
             equal('{% include "set.html" %}{{ foo }}',
                   { foo: 'bar' },
                   'bar');
+
+            equal('{% set username = username + "pasta" %}{{ username }}',
+                  { username: 'basta' },
+                  'bastapasta');
 
             finish(done);
         });
