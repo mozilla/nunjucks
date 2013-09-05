@@ -45,7 +45,12 @@ module.exports.configure = function(templatesPath, opts) {
 };
 
 module.exports.render = function(name, ctx, cb) {
+    if(!e) {
+        module.exports.configure();
+    }
+
     return e.render(name, ctx, cb);
 };
 
-module.exports.precompile = precompile;
+module.exports.precompile = precompile.precompile;
+module.exports.precompileString = precompile.precompileString;

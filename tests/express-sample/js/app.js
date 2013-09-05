@@ -1,6 +1,7 @@
 
-nunjucks.configure('/views');
+nunjucks.configure({ autoescape: true });
 
-nunjucks.render('index.html', function(err, res) {
-    console.log('done!');
+aboutTmpl({ poop: 'pooop<><>' }, function(err, res) {
+    console.log(res);
 });
+

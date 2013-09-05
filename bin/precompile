@@ -17,6 +17,7 @@ args.shift();
 while(1) {
     if(args[0] == '-?' || args[0] == '-h') {
         help = true;
+        args.shift();
     }
     else if(args[0] == '-f') {
         force = true;

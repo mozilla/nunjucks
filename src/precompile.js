@@ -4,29 +4,46 @@ var lib = require('./lib');
 var compiler = require('./compiler');
 var Environment = require('./environment').Environment;
 
-function precompile(inputPath, env, force) {
-    // Generate the JavaScript for a template or a directory of
-    // templates. `env` is optional, and if passed the installed
-    // filters and extensions will be used. `force` is optional, and
-    // will make the compiler continue on error.
+function precompileString(str, opts) {
+    opts.isString = true;
+    return precompile(str, opts);
+}
 
-    env = env || new Environment([]);
+function precompile(input, opts) {
+    // The following options are available:
+    // 
+    // * name: name of the template (auto-generated when compiling a directory)
+    // * isString: input is a string, not a file path
+    // * asFunction: generate a callable function
+    // * force: keep compiling on error
+    // * env: the Environment to use (gets extensions and async filters from it)
+
+    opts = opts || {};
+    var env = opts.env || new Environment([]);
     var asyncFilters = env.asyncFilters;
     var extensions = env.extensionsList;
 
-    var pathStats = fs.statSync(inputPath);
+    var pathStats = fs.exists(input) && fs.statSync(input);
     var output = '';
-
-    if(pathStats.isFile()) {
-        return precompileString(fs.readFileSync(inputPath, 'utf-8'),
-                                inputPath,
-                                env);
-    }
-    else {
-        if(!pathStats.isDirectory()) {
-            throw new Error(inputPath + ' is not a file or directory');
+    
+    if(opts.isString) {
+        if(!opts.name) {
+            throw new Error('the "name" option is required when ' +
+                            'compiling a string');
         }
 
+        return _precompile(input,
+                           opts.name,
+                           env,
+                           opts.asFunction);
+    }
+    else if(pathStats.isFile()) {
+        return _precompile(fs.readFileSync(input, 'utf-8'), 
+                          opts.name || input,
+                           env,
+                           opts.asFunction);
+    }
+    else if(pathStats.isDirectory()) {
         var templates = [];
 
         function addTemplates(dir) {
@@ -45,75 +62,63 @@ function precompile(inputPath, env, force) {
             }
         }
 
-        addTemplates(inputPath);
-
-        output += '(function() {';
-        output += 'window.nunjucksPrecompiled = window.nunjucksPrecompiled || {};';
+        addTemplates(input);
 
         for(var i=0; i<templates.length; i++) {
-            var doCompile = function() {
-                var src = lib.withPrettyErrors(
-                    templates[i],
-                    false,
-                    function() {
-                        return compiler.compile(fs.readFileSync(templates[i], 'utf-8'),
-                                                asyncFilters,
-                                                extensions,
-                                                templates[i]);
-                    }
-                );
-                
-                var name = templates[i].replace(path.join(inputPath, '/'), '');
+            var name = templates[i].replace(path.join(input, '/'), '');
 
-                output += 'window.nunjucksPrecompiled["' + name + '"] = (function() {';
-                output += src;
-                output += '})();';
-            };
-
-            // Don't stop generating the output if we're forcing compilation.
-            if(force) {
-                try {
-                    doCompile();
-                } catch(e) {
+            try {
+                output += _precompile(fs.readFileSync(templates[i], 'utf-8'),
+                                      name,
+                                      env,
+                                      opts.asFunction);
+            } catch(e) {
+                if(opts.force) {
+                    // Don't stop generating the output if we're
+                    // forcing compilation.
                     console.error(e);
                 }
-            }
-            else {
-                doCompile();
+                else {
+                    throw e;
+                }
             }
         }
 
-        output += '})();';
         return output;
     }
 }
 
-function precompileString(str, filepath, env) {
+function _precompile(str, name, env, asFunction) {
     env = env || new Environment([]);
-
-    if(!filepath) {
-        throw new Error("precompileString: filepath is required");
-    }
 
     var asyncFilters = env.asyncFilters;
     var extensions = env.extensionsList;
 
-    var out = '(window.nunjucksPrecompiled = window.nunjucksPrecompiled || {})\n' +
-        '.addPrecompiled("' + filepath + '", (function() {';
+    var out = '(function() {' +
+        '(window.nunjucksPrecompiled = window.nunjucksPrecompiled || {})' +
+        '["' + name + '"] = (function() {';
+
     out += lib.withPrettyErrors(
-        filepath,
+        name,
         false,
         function() {
             return compiler.compile(str, 
                                     asyncFilters,
                                     extensions,
-                                    filepath);
+                                    name);
         }
     );
-    out += '})());';
+    out += '})();\n';
+
+    if(asFunction) {
+        out += 'return function(ctx, cb) { return nunjucks.render("' + name + '", ctx, cb); }';
+    }
+
+    out += '})();\n';
     return out;
 }
 
-module.exports = precompile;
-
-console.log(precompileString('foo'));
+module.exports = {
+    precompile: precompile,
+    precompileString: precompileString
+}
