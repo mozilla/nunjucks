@@ -23,7 +23,7 @@ var FileSystemLoader = Loader.extend({
             // Watch all the templates in the paths and fire an event when
             // they change
             lib.each(this.searchPaths, function(p) {
-                fs.watch(p, function(event, filename) {
+                fs.watch(p, { persistent: false }, function(event, filename) {
                     var fullname = path.join(p, filename);
                     if(event == 'change' && fullname in this.pathsToNames) {
                         this.emit('update', this.pathsToNames[fullname]);

@@ -4899,6 +4899,15 @@ nunjucks.render = function(name, ctx, cb) {
     return e.render(name, ctx, cb);
 };
 
+nunjucks.renderString = function(src, ctx, cb) {
+    if(!e) {
+        nunjucks.configure();
+    }
+
+    var tmpl = new env.Template(src, e);
+    return tmpl.render(ctx, cb);
+};
+
 nunjucks.precompile = precompile.precompile;
 nunjucks.precompileString = precompile.precompileString;
 

@@ -8,9 +8,7 @@ Changelog for versions previous to v0.1.9 are located at http://nunjucks.tumblr.
 
 TODO:
 
-* tweak output of precompile script to make it easy to call individual templates
 * make grunt task after 0.9.0 release
-* syncify other render functions?
 
 # v0.1.10 (August 9, 2013)
 
