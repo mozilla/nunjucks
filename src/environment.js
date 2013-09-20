@@ -110,8 +110,15 @@ var Environment = Obj.extend({
         var tmpl = this.cache[name];
 
         if(tmpl) {
-            cb(null, tmpl);
+            if(cb) {
+                cb(null, tmpl);
+            }
+            else {
+                return tmpl;
+            }
         } else {
+            var syncResult;
+
             lib.asyncIter(this.loaders, function(loader, i, next, done) {
                 function handle(src) {
                     if(src) {
@@ -133,7 +140,13 @@ var Environment = Obj.extend({
                 }
             }, function(info) {
                 if(!info) {
-                    cb(new Error('template not found: ' + name));
+                    var err = new Error('template not found: ' + name);
+                    if(cb) {
+                        cb(err);
+                    }
+                    else {
+                        throw err;
+                    }
                 }
                 else {
                     var tmpl = new Template(info.src, this,
@@ -143,9 +156,16 @@ var Environment = Obj.extend({
                         this.cache[name] = tmpl;
                     }
 
-                    cb(null, tmpl);
+                    if(cb) {
+                        cb(null, tmpl);
+                    }
+                    else {
+                        syncResult = tmpl;
+                    }
                 }
             }.bind(this));
+
+            return syncResult;
         }
     },
 
@@ -189,6 +209,11 @@ var Environment = Obj.extend({
         });
 
         return syncResult;
+    },
+
+    renderString: function(src, ctx, cb) {
+        var tmpl = new Template(src, this);
+        return tmpl.render(ctx, cb);
     }
 });
 

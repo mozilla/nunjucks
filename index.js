@@ -57,8 +57,7 @@ module.exports.renderString = function(src, ctx, cb) {
         module.exports.configure();
     }
 
-    var tmpl = new env.Template(src, e);
-    return tmpl.render(ctx, cb);
+    return e.renderString(src, ctx, cb);
 };
 
 module.exports.precompile = precompile.precompile;
