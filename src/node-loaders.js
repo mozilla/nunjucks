@@ -16,7 +16,7 @@ var FileSystemLoader = Loader.extend({
             this.searchPaths = searchPaths.map(path.normalize);
         }
         else {
-            this.searchPaths = [];
+            this.searchPaths = ['.'];
         }
 
         if(!noWatch) {
