@@ -23,7 +23,7 @@ function precompile(input, opts) {
     var asyncFilters = env.asyncFilters;
     var extensions = env.extensionsList;
 
-    var pathStats = fs.exists(input) && fs.statSync(input);
+    var pathStats = fs.existsSync(input) && fs.statSync(input);
     var output = '';
     
     if(opts.isString) {

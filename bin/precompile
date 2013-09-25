@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 var path = require('path');
-var precompile = require('../src/precompile');
+var precompile = require('../src/precompile').precompile;
 var Environment = require('../src/environment').Environment;
 var lib = require('../src/lib');
 var args = process.argv.slice();
