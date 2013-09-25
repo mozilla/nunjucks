@@ -29,13 +29,11 @@ module.exports.configure = function(templatesPath, opts) {
     opts = opts || {};
     if(lib.isObject(templatesPath)) {
         opts = templatesPath;
-    }
-    else {
-        opts.templatesPath = templatesPath;
+        templatesPath = null;
     }
 
     var loader = loaders.FileSystemLoader || loaders.WebLoader;
-    e = new env.Environment(new loader(opts.templatesPath, opts.watch), opts);
+    e = new env.Environment(new loader(templatesPath, opts.watch), opts);
 
     if(opts && opts.express) {
         e.express(opts.express);
