@@ -110,6 +110,10 @@ var Environment = Obj.extend({
         var tmpl = this.cache[name];
 
         if(tmpl) {
+            if(eagerCompile) {
+                tmpl.compile();
+            }
+
             if(cb) {
                 cb(null, tmpl);
             }
@@ -327,9 +331,7 @@ var Template = Obj.extend({
         }
 
         return lib.withPrettyErrors(this.path, this.env.dev, function() {
-            if(!this.compiled) {
-                this._compile();
-            }
+            this.compile();
 
             var context = new Context(ctx || {}, this.blocks);
             var syncResult = null;
@@ -348,9 +350,7 @@ var Template = Obj.extend({
     },
 
     getExported: function(cb) {
-        if(!this.compiled) {
-            this._compile();
-        }
+        this.compile();
 
         // Run the rootRenderFunc to populate the context with exported vars
         var context = new Context({}, this.blocks);
@@ -361,6 +361,12 @@ var Template = Obj.extend({
                             function() {
                                 cb(null, context.getExported());
                             });
+    },
+
+    compile: function() {
+        if(!this.compiled) {
+            this._compile();
+        }
     },
 
     _compile: function() {
