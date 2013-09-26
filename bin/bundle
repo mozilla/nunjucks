@@ -10,7 +10,7 @@ if [ -z "$SLIM" ]; then
        environment.js"
 else
     # Listed in order of dependency
-    files="object.js lib.js runtime.js loader.js web-loaders.js loaders.js filters.js 
+    files="object.js lib.js runtime.js loader.js web-loaders.js loaders.js filters.js
        globals.js environment.js"
 fi
 
@@ -33,6 +33,7 @@ echo "var nunjucks;" >> $output
 
 cat index.js | \
     perl -ne 's/require\(\W*\.\/src\/([\w-]*)\W*\)/modules["$1"]/; print' | \
+    fgrep -v '= precompile.precompile' | \
     sed -e 's/module.exports/nunjucks/' \
     >> "$output"
 

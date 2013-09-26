@@ -1367,8 +1367,19 @@ var Environment = Obj.extend({
         var tmpl = this.cache[name];
 
         if(tmpl) {
-            cb(null, tmpl);
+            if(eagerCompile) {
+                tmpl.compile();
+            }
+
+            if(cb) {
+                cb(null, tmpl);
+            }
+            else {
+                return tmpl;
+            }
         } else {
+            var syncResult;
+
             lib.asyncIter(this.loaders, function(loader, i, next, done) {
                 function handle(src) {
                     if(src) {
@@ -1390,7 +1401,13 @@ var Environment = Obj.extend({
                 }
             }, function(info) {
                 if(!info) {
-                    cb(new Error('template not found: ' + name));
+                    var err = new Error('template not found: ' + name);
+                    if(cb) {
+                        cb(err);
+                    }
+                    else {
+                        throw err;
+                    }
                 }
                 else {
                     var tmpl = new Template(info.src, this,
@@ -1400,9 +1417,16 @@ var Environment = Obj.extend({
                         this.cache[name] = tmpl;
                     }
 
-                    cb(null, tmpl);
+                    if(cb) {
+                        cb(null, tmpl);
+                    }
+                    else {
+                        syncResult = tmpl;
+                    }
                 }
             }.bind(this));
+
+            return syncResult;
         }
     },
 
@@ -1446,6 +1470,11 @@ var Environment = Obj.extend({
         });
 
         return syncResult;
+    },
+
+    renderString: function(src, ctx, cb) {
+        var tmpl = new Template(src, this);
+        return tmpl.render(ctx, cb);
     }
 });
 
@@ -1559,9 +1588,7 @@ var Template = Obj.extend({
         }
 
         return lib.withPrettyErrors(this.path, this.env.dev, function() {
-            if(!this.compiled) {
-                this._compile();
-            }
+            this.compile();
 
             var context = new Context(ctx || {}, this.blocks);
             var syncResult = null;
@@ -1580,9 +1607,7 @@ var Template = Obj.extend({
     },
 
     getExported: function(cb) {
-        if(!this.compiled) {
-            this._compile();
-        }
+        this.compile();
 
         // Run the rootRenderFunc to populate the context with exported vars
         var context = new Context({}, this.blocks);
@@ -1593,6 +1618,12 @@ var Template = Obj.extend({
                             function() {
                                 cb(null, context.getExported());
                             });
+    },
+
+    compile: function() {
+        if(!this.compiled) {
+            this._compile();
+        }
     },
 
     _compile: function() {
@@ -1705,13 +1736,11 @@ nunjucks.configure = function(templatesPath, opts) {
     opts = opts || {};
     if(lib.isObject(templatesPath)) {
         opts = templatesPath;
-    }
-    else {
-        opts.templatesPath = templatesPath;
+        templatesPath = null;
     }
 
     var loader = loaders.FileSystemLoader || loaders.WebLoader;
-    e = new env.Environment(new loader(opts.templatesPath, opts.watch), opts);
+    e = new env.Environment(new loader(templatesPath, opts.watch), opts);
 
     if(opts && opts.express) {
         e.express(opts.express);
@@ -1733,12 +1762,9 @@ nunjucks.renderString = function(src, ctx, cb) {
         nunjucks.configure();
     }
 
-    var tmpl = new env.Template(src, e);
-    return tmpl.render(ctx, cb);
+    return e.renderString(src, ctx, cb);
 };
 
-nunjucks.precompile = precompile.precompile;
-nunjucks.precompileString = precompile.precompileString;
 
 nunjucks.require = function(name) { return modules[name]; };
 
