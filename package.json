@@ -2,10 +2,7 @@
     "name": "nunjucks",
     "description": "A jinja inspired templating engine",
     "version": "0.1.10",
-    "author": {
-        "name": "James Long",
-        "email": "longster@gmail.com"
-    },
+    "author": "James Long <longster@gmail.com>",
     "devDependencies": {
         "expect.js": "*",
         "mocha": "*",
@@ -20,6 +17,18 @@
     "bin": {
         "nunjucks-precompile": "./bin/precompile"
     },
-    "main": "index"    
+    "main": "index",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/jlongster/nunjucks.git"
+    },
+    "license": [
+      {
+        "type": "MIT",
+        "url": "https://github.com/jlongster/nunjucks/blob/master/LICENSE"
+      }
+    ],
+    "bugs": {
+        "url": "https://github.com/jlongster/nunjucks/issues"
+    }
 }
-
