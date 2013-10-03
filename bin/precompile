@@ -24,7 +24,7 @@ var optimist = require('optimist')
 
     .describe('include', 'Include a file or folder which match the regex but would otherwise be excluded. You can use this flag multiple times')
         .string('include' )
-        .default('include', [])
+        .default('include', ['\\.html$', '\\.jinja$'])
         .alias('i', 'include')
 
     .describe('exclude', 'Exclude a file or folder which match the regex but would otherwise be included. You can use this flag multiple times')
@@ -52,11 +52,7 @@ console.log(precompile(argv._[0], {
     env : env,
     force : argv.force,
 
-    include : [
-        /\.html$/, /\.jinja$/
-    ].concat(argv.include),
-
-    exclude : [
-    ].concat(argv.exclude)
+    include : [].concat(argv.include),
+    exclude : [].concat(argv.exclude)
 
 }));
