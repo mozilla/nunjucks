@@ -56,7 +56,7 @@ function precompile(input, opts) {
                 if(stat && stat.isDirectory()) {
                     addTemplates(filepath);
                 }
-                else if(path.extname(filepath) == '.html') {
+                else if(['.html', '.jinja'].indexOf(path.extname(filepath)) !== -1) {
                     templates.push(filepath);
                 }
             }
