@@ -3,57 +3,60 @@ var path = require('path');
 var precompile = require('../src/precompile').precompile;
 var Environment = require('../src/environment').Environment;
 var lib = require('../src/lib');
-var args = process.argv.slice();
 
-var force = false;
-var help = false;
-var asyncFilters = null;
+var optimist = require('optimist')
 
-// Remove the "node precompile" arguments
-args.shift();
-args.shift();
+    .usage('$0 [-f|--force] [-a|--filters <filters>] [-i|--include <regex>] [-x|--exclude <regex>] <path>')
+    .wrap(80)
 
-// Process any flags
-while(1) {
-    if(args[0] == '-?' || args[0] == '-h') {
-        help = true;
-        args.shift();
-    }
-    else if(args[0] == '-f') {
-        force = true;
-        args.shift();
-    }
-    else if(args[0] == '-a') {
-        asyncFilters = args[1].split(',');
-        args.shift();
-        args.shift();
-    }
-    else {
-        break;
-    }
-}
+    .describe('help', 'Display this help message')
+        .boolean('help')
+        .alias('h', 'help')
+        .alias('?', 'help')
 
-var inputPath = args[0];
+    .describe('force', 'Force compilation to continue on error')
+        .boolean('force')
+        .alias('f', 'force')
 
-if(help || args.length === 0) {
-    console.log('Precompile nunjucks templates to javascript. If you use extensions,\n' +
-                'you need to use the JavaScript API to precompile so you can install any\n' +
-                'extensions you use.\n\n' +
-                'Usage: ' + path.basename(process.argv[1]) + 
-                ' [-f] [-a <filters>] <file/dir>\n\n' +
-                ' -f  Force compilation to continue on error.\n' +
-                '     If <file/dir> is a file, outputs compiled javascript for\n' +
-                '     that file to stdout. If <file/dir> is a directory, outputs\n' +
-                '     compiled javascript for all html files underneath it\n\n' +
-                ' -a <filters>  Give the compiler a comma-delimited list of\n' +
-                '     asynchronous filters, required for correctly generating code');
+    .describe('filters', 'Give the compiler a comma-delimited list of asynchronous filters, required for correctly generating code')
+        .string('filters')
+        .alias('a', 'filters')
+
+    .describe('include', 'Include a file or folder which match the regex but would otherwise be excluded. You can use this flag multiple times')
+        .string('include' )
+        .default('include', [])
+        .alias('i', 'include')
+
+    .describe('exclude', 'Exclude a file or folder which match the regex but would otherwise be included. You can use this flag multiple times')
+        .string('exclude' )
+        .default('exclude', [])
+        .alias('x', 'exclude')
+
+    .demand(1);
+
+var argv = optimist.argv;
+
+if (argv.help) {
+    optimist.showHelp();
     process.exit(1);
 }
 
 var env = new Environment([]);
 
-lib.each(asyncFilters, function(name) {
+lib.each([].concat(argv.filters).join(',').split(','), function(name) {
     env.addFilter(name, function() {}, true);
 });
 
-console.log(precompile(inputPath, env, force));
+console.log(precompile(argv._[0], {
+
+    env : env,
+    force : argv.force,
+
+    include : [
+        /\.html$/, /\.jinja$/
+    ].concat(argv.include),
+
+    exclude : [
+    ].concat(argv.exclude)
+
+}));
