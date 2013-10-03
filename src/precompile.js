@@ -60,7 +60,7 @@ function precompile(input, opts) {
 
             for(var i=0; i<files.length; i++) {
                 var filepath = path.join(dir, files[i]);
-                var subpath = filepath.substr(input.length + 1);
+                var subpath = filepath.substr(path.join(input, '/').length);
                 var stat = fs.statSync(filepath);
 
                 if(stat && stat.isDirectory()) {
