@@ -6,8 +6,10 @@
         "name": "James Long",
         "email": "longster@gmail.com"
     },
+    "dependencies": {
+        "optimist": "*"
+    },
     "devDependencies": {
-        "optimist": "*",
         "expect.js": "*",
         "mocha": "*",
         "uglify-js": "*"
