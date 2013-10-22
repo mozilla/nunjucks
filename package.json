@@ -6,6 +6,9 @@
         "name": "James Long",
         "email": "longster@gmail.com"
     },
+    "dependencies": {
+        "optimist": "*"
+    },
     "devDependencies": {
         "expect.js": "*",
         "mocha": "*",
@@ -20,6 +23,6 @@
     "bin": {
         "nunjucks-precompile": "./bin/precompile"
     },
-    "main": "index"    
+    "main": "index"
 }
 
