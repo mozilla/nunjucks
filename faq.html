@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Nunjucks</title>
+
+    <link rel="stylesheet" type="text/css"
+          href="bower_components/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="css/highlight.css" />
+    <link rel="stylesheet" type="text/css" href="css/app.css" />
+  </head>
+
+  <body id="faq">
+    <nav class="navbar navbar-default ">
+      <a class="pull-left logo" href="/">Nunjucks</a>
+
+      <ul class="nav navbar-nav navbar-right pull-right">
+        <li><a href="/#download" class="download">Download</a></li>
+        <li><a href="https://github.com/jlongster/nunjucks">Github</a></li>
+        <li class="dropdown">
+          <a href="/getting-started.html" data-toggle="dropdown">Docs</a>
+
+          <ul class="dropdown-menu">
+            <li><a href="/getting-started.html">Getting Started</a></li>
+            <li><a href="/templating.html">Templating</a></li>
+            <li><a href="/api.html">API</a></li>
+            <li><a href="/faq.html">FAQ</a></li>
+          </ul>
+        </li>
+      </ul>
+    </nav>
+
+<div class="content">
+  <aside class="col-sm-3">
+    <div class="pages">
+      <p><strong>Documentation</strong></p>
+
+      <ul>
+        <li><a href="/getting-started.html">Getting Started</a></li>
+        <li><a href="/templating.html">Templating</a></li>
+        <li><a href="/api.html">API</a></li>
+        <li><a href="/faq.html">FAQ</a></li>
+      </ul>
+    </div>
+
+    <div class="toc">
+      <p><strong>FAQ</strong></p>
+      <ul>
+<li>
+<a href="#questions-asked-frequently-enough">Questions Asked Frequently Enough</a>
+<ul>
+<li>
+<a href="#can-i-use-nunjucks-in-node-and-the-browserclient-side">Can I use nunjucks in node and the browser/client-side?</a>
+</li>
+<li>
+<a href="#can-i-use-the-same-templates-between-nunjucks-and-jinja2-what-are-the-differences">Can I use the same templates between nunjucks and jinja2? What are the differences?</a>
+</li>
+</ul>
+</li>
+</ul>
+
+    </div>
+  </aside>
+
+  <div class="col-sm-9 main">
+    <h1 id="questions-asked-frequently-enough">Questions Asked Frequently Enough</h1>
+
+<h2 id="can-i-use-nunjucks-in-node-and-the-browserclient-side">Can I use nunjucks in node and the browser/client-side?</h2>
+
+<p>Yes.</p>
+
+<h2 id="can-i-use-the-same-templates-between-nunjucks-and-jinja2-what-are-the-differences">Can I use the same templates between nunjucks and jinja2? What are the differences?</h2>
+
+<p>Kind of. There are enough differences that it might take some work.
+The first problem is that nunjucks lets you access native JavaScript
+constructs, while <a href="http://jinja.pocoo.org/">jinja2</a> lets you access
+Python. This means that there are minor gotchas like the boolean
+literal being <code>true</code> in nunjucks but <code>True</code> in jinja2, and if you call
+native methods on arrays the API will be different.</p>
+
+<p>However, if you avoid accessing the native language features (like <code>{{ str.trim() }}</code>)
+and rely solely on filters and pure templating
+features, it should be easy to make templates compatible. In the
+<a href="https://marketplace.firefox.com/">Firefox Marketplace</a>, the devs
+actually created a compatibility layer that overrides some of nunjucks
+internals to provide better jinja2 compatiblity (allowing the use of
+<code>True</code> and more). You can <a href="https://github.com/mozilla/fireplace/blob/master/hearth/media/js/lib/nunjucks.compat.js">see it
+here</a>.</p>
+
+<p>Additionally, there are few jinja2 features not implemented in nunjucks:</p>
+
+<ul>
+<li>The special <code>self</code> variable</li>
+<li><code>for</code> does not support <code>if not</code> and <code>else</code></li>
+<li><code>with context</code> modifiers don&#39;t exist</li>
+<li><code>if i is divisibleby(3)</code>-style conditionals</li>
+<li>Names block end tags: <code>{% endblock content %}</code></li>
+<li>Sandboxed mode</li>
+<li>Line statements: <code># for item in seq</code></li>
+</ul>
+
+<p>Lastly, any custom Python filters and extensions will have to be written in JavaScript.</p>
+
+  </div>
+</div>
+
+
+
+    <script src="bower_components/jquery/jquery.min.js"></script>
+    <script src="bower_components/bootstrap/js/affix.js"></script>
+
+    <script src="js/app.js"></script>
+    <script src="js/subpage.js"></script>
+  </body>
+</html>
