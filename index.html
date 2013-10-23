@@ -17,13 +17,13 @@
         <li><a href="/#download" class="download">Download</a></li>
         <li><a href="https://github.com/jlongster/nunjucks">Github</a></li>
         <li class="dropdown">
-          <a href="/getting-started.html" data-toggle="dropdown">Docs</a>
+          <a href="getting-started.html" data-toggle="dropdown">Docs</a>
 
           <ul class="dropdown-menu">
-            <li><a href="/getting-started.html">Getting Started</a></li>
-            <li><a href="/templating.html">Templating</a></li>
-            <li><a href="/api.html">API</a></li>
-            <li><a href="/faq.html">FAQ</a></li>
+            <li><a href="getting-started.html">Getting Started</a></li>
+            <li><a href="templating.html">Templating</a></li>
+            <li><a href="api.html">API</a></li>
+            <li><a href="faq.html">FAQ</a></li>
           </ul>
         </li>
       </ul>
@@ -204,17 +204,29 @@
     <em><a href="https://github.com/search?q=nunjucks&ref=simplesearch&type=Code">Any many, many more...</a></em>
   </section>
 
+  
   <section class="examples">
     <h3>More Examples</h3>
 
     <div class="col-sm-6">
-      It allows you to do all this stuff
+      Template inheritance allows you to reuse templates in a powerful
+      way. Define skeleton structures that child templates fill in.
     </div>
 
     <div class="col-sm-6">
-      <pre>code here</pre>
+      <pre>{% extends &quot;base.html&quot; %}
+
+{% block header %}
+&lt;h3&gt;{{ subtitle }}&lt;/h3&gt;
+{% endblock %}
+
+{% block content %}
+&lt;h1&gt;{{ page.title }}&lt;/h1&gt;
+&lt;p&gt;{{ page.content }}&lt;/p&gt;
+{% endblock %}</pre>
     </div>
   </section>
+  
 </div>
 
 

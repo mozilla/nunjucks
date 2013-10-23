@@ -17,13 +17,13 @@
         <li><a href="/#download" class="download">Download</a></li>
         <li><a href="https://github.com/jlongster/nunjucks">Github</a></li>
         <li class="dropdown">
-          <a href="/getting-started.html" data-toggle="dropdown">Docs</a>
+          <a href="getting-started.html" data-toggle="dropdown">Docs</a>
 
           <ul class="dropdown-menu">
-            <li><a href="/getting-started.html">Getting Started</a></li>
-            <li><a href="/templating.html">Templating</a></li>
-            <li><a href="/api.html">API</a></li>
-            <li><a href="/faq.html">FAQ</a></li>
+            <li><a href="getting-started.html">Getting Started</a></li>
+            <li><a href="templating.html">Templating</a></li>
+            <li><a href="api.html">API</a></li>
+            <li><a href="faq.html">FAQ</a></li>
           </ul>
         </li>
       </ul>
@@ -61,6 +61,9 @@
 <a href="#tags">Tags</a>
 <ul>
 <li>
+<a href="#if">if</a>
+</li>
+<li>
 <a href="#for">for</a>
 </li>
 <li>
@@ -68,9 +71,6 @@
 </li>
 <li>
 <a href="#asyncall">asyncAll</a>
-</li>
-<li>
-<a href="#if">if</a>
 </li>
 <li>
 <a href="#macro">macro</a>
@@ -200,21 +200,85 @@ They are called with a pipe operator (<code>|</code>) and can take arguments.</p
 
 <h2 id="template-inheritance">Template Inheritance</h2>
 
-<p>Template inheritance should work exactly like it does in jinja2.
-<a href="http://jinja.pocoo.org/docs/templates/#template-inheritance">jinja has great documentation on inheritance</a>
-that you can read.</p>
+<p>Template inheritance is a way to make it easy to reuse templates. When
+writing a template, you can define &quot;blocks&quot; that child templates can
+override. The inheritance chain can be as long as you like.</p>
+
+<p>If we have a template <code>parent.html</code> that looks like this:</p>
+<div class="highlight"><pre><code class="jinja language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">block</span> <span class="nv">header</span> <span class="cp">%}</span><span class="x"></span>
+<span class="x">This is the default content</span>
+<span class="cp">{%</span> <span class="k">endblock</span> <span class="cp">%}</span><span class="x"></span>
+
+<span class="x">&lt;section class=&quot;left&quot;&gt;</span>
+<span class="x">  </span><span class="cp">{%</span> <span class="k">block</span> <span class="nv">left</span> <span class="cp">%}{%</span> <span class="k">endblock</span> <span class="cp">%}</span><span class="x"></span>
+<span class="x">&lt;/section&gt;</span>
+
+<span class="x">&lt;section class=&quot;right&quot;&gt;</span>
+<span class="x">  </span><span class="cp">{%</span> <span class="k">block</span> <span class="nv">right</span> <span class="cp">%}</span><span class="x"></span>
+<span class="x">  This is more content</span>
+<span class="x">  </span><span class="cp">{%</span> <span class="k">endblock</span> <span class="cp">%}</span><span class="x"></span>
+<span class="x">&lt;/section&gt;</span>
+</code></pre></div>
+<p>And we render this template:</p>
+<div class="highlight"><pre><code class="jinja language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">extends</span> <span class="s2">&quot;parent.html&quot;</span> <span class="cp">%}</span><span class="x"></span>
+
+<span class="cp">{%</span> <span class="k">block</span> <span class="nv">left</span> <span class="cp">%}</span><span class="x"></span>
+<span class="x">This is the left side!</span>
+<span class="cp">{%</span> <span class="k">endblock</span> <span class="cp">%}</span><span class="x"></span>
+
+<span class="cp">{%</span> <span class="k">block</span> <span class="nv">right</span> <span class="cp">%}</span><span class="x"></span>
+<span class="x">This is the right side!</span>
+<span class="cp">{%</span> <span class="k">endblock</span> <span class="cp">%}</span><span class="x"></span>
+</code></pre></div>
+<p>The output would be:</p>
+<div class="highlight"><pre><code class="jinja language-jinja" data-lang="jinja"><span class="x">This is the default content</span>
+
+<span class="x">&lt;section class=&quot;left&quot;&gt;</span>
+<span class="x">  This is the left side!</span>
+<span class="x">&lt;/section&gt;</span>
+
+<span class="x">&lt;section class=&quot;right&quot;&gt;</span>
+<span class="x">  This is the right side!</span>
+<span class="x">&lt;/section&gt;  </span>
+</code></pre></div>
+<p>You leverage inheritance with the <a href="#extends"><code>extends</code></a> and
+<a href="#block"><code>block</code></a> tags. A more detailed explanation of inheritance can
+be found in the <a href="http://jinja.pocoo.org/docs/templates/#template-inheritance">jinja2
+docs</a>.</p>
 
 <h2 id="tags">Tags</h2>
 
 <p>Tags are special blocks that perform operations on sections of the
-template. Nunjucks comes with several builtin.</p>
+template. Nunjucks comes with several builtin, but <a href="api.html#custom-tags">you can add your own</a>.</p>
 
-<p>Just like filters, you will be able to add your own (this
-functionality is not available yet).</p>
+<h3 id="if">if</h3>
+
+<p><code>if</code> tests a condition and lets you selectively display content. It behaves exactly as javascript&#39;s <code>if</code> behaves.</p>
+<div class="highlight"><pre><code class="jinja language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">if</span> <span class="nv">variable</span> <span class="cp">%}</span><span class="x"></span>
+<span class="x">  It is true</span>
+<span class="cp">{%</span> <span class="k">endif</span> <span class="cp">%}</span><span class="x"></span>
+</code></pre></div>
+<p>If variable is defined and evaluates to true, &quot;It is true&quot; will be displayed. Otherwise, nothing will be.</p>
+
+<p>You can specify alternate conditions with <code>elif</code> and <code>else</code>:</p>
+<div class="highlight"><pre><code class="jinja language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">if</span> <span class="nv">hungry</span> <span class="cp">%}</span><span class="x"></span>
+<span class="x">  I am hungry</span>
+<span class="cp">{%</span> <span class="k">elif</span> <span class="nv">tired</span> <span class="cp">%}</span><span class="x"></span>
+<span class="x">  I am tired</span>
+<span class="cp">{%</span> <span class="k">else</span> <span class="cp">%}</span><span class="x"></span>
+<span class="x">  I am good!</span>
+<span class="cp">{%</span> <span class="k">endif</span> <span class="cp">%}</span><span class="x"></span>
+</code></pre></div>
+<p>You can also use if as an <a href="#if-expression">inline expression</a>.</p>
 
 <h3 id="for">for</h3>
 
 <p><code>for</code> iterates over arrays and dictionaries.</p>
+
+<blockquote>
+<p>If you are using a custom template loader that is asynchronous, see
+<a href="#asynceach"><code>asyncEach</code></a>)</p>
+</blockquote>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="kd">var</span> <span class="nx">items</span> <span class="o">=</span> <span class="p">[{</span> <span class="nx">title</span><span class="o">:</span> <span class="s2">&quot;foo&quot;</span><span class="p">,</span> <span class="nx">id</span><span class="o">:</span> <span class="mi">1</span> <span class="p">},</span> <span class="p">{</span> <span class="nx">title</span><span class="o">:</span> <span class="s2">&quot;bar&quot;</span><span class="p">,</span> <span class="nx">id</span><span class="o">:</span> <span class="mi">2</span><span class="p">}];</span>
 </code></pre></div><div class="highlight"><pre><code class="jinja language-jinja" data-lang="jinja"><span class="x">&lt;h1&gt;Posts&lt;/h1&gt;</span>
 <span class="x">&lt;ul&gt;</span>
@@ -257,32 +321,64 @@ functionality is not available yet).</p>
 
 <h3 id="asynceach">asyncEach</h3>
 
-<p><code>asyncEach</code> is an asynchronous version of <code>for</code>. You only need this if
-you use async filters, extensions, or loaders.</p>
+<blockquote>
+<p>This is only applicable to asynchronous templates. Read about
+them <a href="/api.html#asynchronous-support">here</a></p>
+</blockquote>
 
+<p><code>asyncEach</code> is an asynchronous version of <code>for</code>. You only need this if
+you are using a <a href="#asynchronous">custom template loader that is
+asynchronous</a>; otherwise you will never need it. Async
+filters and extensions also need this, but internally loops are
+automatically converted into <code>asyncEach</code> if any async filters and
+extensions are used within the loop.</p>
+
+<p><code>asyncEach</code> has exactly the same behavior of <code>for</code>, but it enables
+asynchronous control of the loop. The reason those tags are separate
+is performance; most people use templates synchronously and it&#39;s
+much faster for <code>for</code> to compile to a straight JavaScript <code>for</code> loop.</p>
+
+<p>At compile-time, nunjucks is not aware how templates are loaded so
+it&#39;s unable to determine if an <code>include</code> block is asynchronous or not.
+That&#39;s why it can&#39;t automatically convert loops for you, and you must
+use <code>asyncEach</code> for iteration if you are loading templates
+asynchronously inside the loop.</p>
+<div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="c1">// If you are using a custom loader that is async, you need asyncEach</span>
+<span class="kd">var</span> <span class="nx">env</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">Environment</span><span class="p">(</span><span class="nx">AsyncLoaderFromDatabase</span><span class="p">,</span> <span class="nx">opts</span><span class="p">);</span>
+</code></pre></div><div class="highlight"><pre><code class="jinja language-jinja" data-lang="jinja"><span class="x">&lt;h1&gt;Posts&lt;/h1&gt;</span>
+<span class="x">&lt;ul&gt;</span>
+<span class="cp">{%</span> <span class="k">asyncEach</span> <span class="nv">item</span> <span class="k">in</span> <span class="nv">items</span> <span class="cp">%}</span><span class="x"></span>
+<span class="x">  </span><span class="cp">{%</span> <span class="k">include</span> <span class="s2">&quot;item-template.html&quot;</span> <span class="cp">%}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span><span class="x"></span>
+<span class="x">&lt;/ul&gt;</span>
+</code></pre></div>
 <h3 id="asyncall">asyncAll</h3>
 
-<p>parallel async version</p>
+<blockquote>
+<p>This is only applicable to asynchronous templates. Read about
+them <a href="/api.html#asynchronous-support">here</a></p>
+</blockquote>
 
-<h3 id="if">if</h3>
+<p><code>asyncAll</code> is similar to <code>asyncEach</code>, except it renders all the items
+in parallel, preserving the order of the items. This is only helpful
+if you are using asynchronous filters, extensions, or loaders.
+Otherwise you should never use this.</p>
 
-<p><code>if</code> tests a condition and lets you selectively display content. It behaves exactly as javascript&#39;s <code>if</code> behaves.</p>
-<div class="highlight"><pre><code class="jinja language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">if</span> <span class="nv">variable</span> <span class="cp">%}</span><span class="x"></span>
-<span class="x">  It is true</span>
-<span class="cp">{%</span> <span class="k">endif</span> <span class="cp">%}</span><span class="x"></span>
+<p>Let&#39;s say you created a filter named <code>lookup</code> that fetches some text
+from a database. You could then render multiple items in parallel with
+<code>asyncAll</code>:</p>
+<div class="highlight"><pre><code class="jinja language-jinja" data-lang="jinja"><span class="x">&lt;h1&gt;Posts&lt;/h1&gt;</span>
+<span class="x">&lt;ul&gt;</span>
+<span class="cp">{%</span> <span class="k">asyncAll</span> <span class="nv">item</span> <span class="k">in</span> <span class="nv">items</span> <span class="cp">%}</span><span class="x"></span>
+<span class="x">  &lt;li&gt;</span><span class="cp">{{</span> <span class="nv">item.id</span> <span class="o">|</span> <span class="nf">lookup</span> <span class="cp">}}</span><span class="x">&lt;/li&gt;</span>
+<span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span><span class="x"></span>
+<span class="x">&lt;/ul&gt;</span>
 </code></pre></div>
-<p>If variable is defined and evaluates to true, &quot;It is true&quot; will be displayed. Otherwise, nothing will be.</p>
-
-<p>You can specify alternate conditions with <code>elif</code> and <code>else</code>:</p>
-<div class="highlight"><pre><code class="jinja language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">if</span> <span class="nv">hungry</span> <span class="cp">%}</span><span class="x"></span>
-<span class="x">  I am hungry</span>
-<span class="cp">{%</span> <span class="k">elif</span> <span class="nv">tired</span> <span class="cp">%}</span><span class="x"></span>
-<span class="x">  I am tired</span>
-<span class="cp">{%</span> <span class="k">else</span> <span class="cp">%}</span><span class="x"></span>
-<span class="x">  I am good!</span>
-<span class="cp">{%</span> <span class="k">endif</span> <span class="cp">%}</span><span class="x"></span>
-</code></pre></div>
-<p>You can also use if as an <a href="/templating#If-Expression">inline expression</a>.</p>
+<p>If <code>lookup</code> is an asynchronous filter, it&#39;s probably doing something
+slow like fetching something from disk. <code>asyncAll</code> allows you reduce
+the time it would take to execute the loop sequentially by doing all
+the async work in parallel, and the template rendering resumes once
+all the items are done.</p>
 
 <h3 id="macro">macro</h3>
 
@@ -318,14 +414,22 @@ you use async filters, extensions, or loaders.</p>
 
 <h3 id="extends">extends</h3>
 
-<p><code>extends</code> is used to specify template inheritance. The specified template is used as a base template.</p>
+<p><code>extends</code> is used to specify template inheritance. The specified
+template is used as a base template. See <a href="#template-inheritance">Template
+Inheritance</a>.</p>
 <div class="highlight"><pre><code class="jinja language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">extends</span> <span class="s2">&quot;base.html&quot;</span> <span class="cp">%}</span><span class="x"></span>
 </code></pre></div>
-<p>See <a href="http://jinja.pocoo.org/docs/templates/#template-inheritance">jinja&#39;s documentation on template inheritance</a> for more information.</p>
-
+<p>You can use a variable too by emitting quotes. That way you can
+dynamically change which template is inherited when rendering by
+setting it in the context.</p>
+<div class="highlight"><pre><code class="jinja language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">extends</span> <span class="nv">parentTemplate</span> <span class="cp">%}</span><span class="x"></span>
+</code></pre></div>
 <h3 id="block">block</h3>
 
-<p><code>block</code> defines a section on the template and identifies it with a name. This is used by template inheritance. Base templates can specify blocks and child templates can override them with new content.</p>
+<p><code>block</code> defines a section on the template and identifies it with a
+name. This is used by template inheritance. Base templates can specify
+blocks and child templates can override them with new content. See
+<a href="#template-inheritance">Template Inheritance</a>.</p>
 <div class="highlight"><pre><code class="jinja language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">block</span> <span class="nv">css</span> <span class="cp">%}</span><span class="x"></span>
 <span class="x">&lt;link rel=&quot;stylesheet&quot; href=&quot;app.css&quot; /&gt;</span>
 <span class="cp">{%</span> <span class="k">endblock</span> <span class="o">}</span>
@@ -335,10 +439,13 @@ you use async filters, extensions, or loaders.</p>
 <span class="cp">{%</span> <span class="k">block</span> <span class="nv">item</span> <span class="cp">%}{{</span> <span class="nv">item</span> <span class="cp">}}{%</span> <span class="k">endblock</span> <span class="cp">%}</span><span class="x"></span>
 <span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span><span class="x"></span>
 </code></pre></div>
-<p>Child templates can override the <code>item</code> block and change how it is displayed.</p>
+<p>Child templates can override the <code>item</code> block and change how it is displayed:</p>
+<div class="highlight"><pre><code class="jinja language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">extends</span> <span class="s2">&quot;item.html&quot;</span> <span class="cp">%}</span><span class="x"></span>
 
-<p>See <a href="http://jinja.pocoo.org/docs/templates/#template-inheritance">jinja&#39;s documentation on template inheritance</a> for more information.</p>
-
+<span class="cp">{%</span> <span class="k">block</span> <span class="nv">item</span> <span class="cp">%}</span><span class="x"></span>
+<span class="x">The name of the item is: </span><span class="cp">{{</span> <span class="nv">item.name</span> <span class="cp">}}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">endblock</span> <span class="cp">%}</span><span class="x"></span>
+</code></pre></div>
 <h3 id="include">include</h3>
 
 <p><code>include</code> pulls in other templates in place. It&#39;s useful when you need to share smaller chunks across several templates that already inherit other templates.</p>
@@ -558,21 +665,45 @@ you use async filters, extensions, or loaders.</p>
 
 <h2 id="builtin-filters">Builtin Filters</h2>
 
-<p>Nunjucks has ported most of jinja&#39;s filters, so <a href="http://jinja.pocoo.org/docs/templates/#list-of-builtin-filters">go look in its docs</a> for filters.</p>
-
-<p>These filters are currently <strong>not</strong> implemented:</p>
+<p>Nunjucks has ported most of jinja&#39;s filters (click through for documentation):</p>
 
 <ul>
-<li><code>filesizeformat</code></li>
-<li><code>forceescape</code></li>
-<li><code>format</code></li>
-<li><code>pprint</code></li>
-<li><code>striptags</code></li>
-<li><code>sum</code></li>
-<li><code>urlize</code></li>
-<li><code>wordwrap</code></li>
-<li><code>xmlattr</code></li>
+<li><a href="http://jinja.pocoo.org/docs/templates/#abs">abs</a></li>
+<li><a href="http://jinja.pocoo.org/docs/templates/#batch">batch</a></li>
+<li><a href="http://jinja.pocoo.org/docs/templates/#capitalize">capitalize</a></li>
+<li><a href="http://jinja.pocoo.org/docs/templates/#center">center</a></li>
+<li><a href="http://jinja.pocoo.org/docs/templates/#default">default</a> (aliased as <code>d</code>)</li>
+<li><a href="http://jinja.pocoo.org/docs/templates/#dictsort">dictsort</a></li>
+<li><a href="http://jinja.pocoo.org/docs/templates/#escape">escape</a> (aliased as <code>e</code>)</li>
+<li><a href="http://jinja.pocoo.org/docs/templates/#safe">safe</a></li>
+<li><a href="http://jinja.pocoo.org/docs/templates/#first">first</a></li>
+<li><a href="http://jinja.pocoo.org/docs/templates/#groupby">groupby</a></li>
+<li><a href="http://jinja.pocoo.org/docs/templates/#indent">indent</a></li>
+<li><a href="http://jinja.pocoo.org/docs/templates/#join">join</a></li>
+<li><a href="http://jinja.pocoo.org/docs/templates/#last">last</a></li>
+<li><a href="http://jinja.pocoo.org/docs/templates/#length">length</a></li>
+<li><a href="http://jinja.pocoo.org/docs/templates/#list">list</a></li>
+<li><a href="http://jinja.pocoo.org/docs/templates/#lower">lower</a></li>
+<li><a href="http://jinja.pocoo.org/docs/templates/#random">random</a></li>
+<li><a href="http://jinja.pocoo.org/docs/templates/#replace">replace</a></li>
+<li><a href="http://jinja.pocoo.org/docs/templates/#reverse">reverse</a></li>
+<li><a href="http://jinja.pocoo.org/docs/templates/#round">round</a></li>
+<li><a href="http://jinja.pocoo.org/docs/templates/#slice">slice</a></li>
+<li><a href="http://jinja.pocoo.org/docs/templates/#sort">sort</a></li>
+<li><a href="http://jinja.pocoo.org/docs/templates/#string">string</a></li>
+<li><a href="http://jinja.pocoo.org/docs/templates/#title">title</a></li>
+<li><a href="http://jinja.pocoo.org/docs/templates/#trim">trim</a></li>
+<li><a href="http://jinja.pocoo.org/docs/templates/#truncate">truncate</a></li>
+<li><a href="http://jinja.pocoo.org/docs/templates/#upper">upper</a></li>
+<li><a href="http://jinja.pocoo.org/docs/templates/#urlencode">urlencode</a></li>
+<li><a href="http://jinja.pocoo.org/docs/templates/#wordcount">wordcount</a></li>
+<li><a href="http://jinja.pocoo.org/docs/templates/#float">float</a></li>
+<li><a href="http://jinja.pocoo.org/docs/templates/#int">int</a></li>
 </ul>
+
+<p>Alternatively, it&#39;s easy to <a href="https://github.com/jlongster/nunjucks/blob/master/src/filters.js">read the JavaScript
+code</a>
+that implements these filters.</p>
 
   </div>
 </div>

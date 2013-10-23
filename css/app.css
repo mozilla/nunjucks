@@ -17,11 +17,24 @@ h1, h2, h3 {
 
 blockquote {
     margin: 2em 0;
-    color: #666666;
+    color: #999999;
+    font-family: sans-serif;
+}
+
+blockquote p {
+    font-size: 1em;
 }
 
 blockquote p:first-of-type {
     margin-top: 0;
+}
+
+#home blockquote {
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+}
+
+#home blockquote p {
+    font-size: 1.25em;
 }
 
 .navbar-default {
