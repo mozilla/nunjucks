@@ -1,3 +1,5 @@
+// Browser bundle of nunjucks 1.0.0 (slim, only works with precompiled templates)
+
 (function() {
 var modules = {};
 (function() {
@@ -273,7 +275,7 @@ exports.asyncParallel = function(funcs, done) {
     }
 };
 
-exports.asyncEach = function(arr, iter, cb) {
+exports.asyncIter = function(arr, iter, cb) {
     var i = -1;
     
     function next() {
@@ -586,10 +588,10 @@ function callWrap(obj, name, args) {
 }
 
 function contextOrFrameLookup(context, frame, name) {
-    var val = context.lookup(name);
+    var val = frame.lookup(name);
     return (val !== undefined && val !== null) ?
         val :
-        frame.lookup(name);
+        context.lookup(name);
 }
 
 function handleError(error, lineno, colno) {
@@ -601,11 +603,11 @@ function handleError(error, lineno, colno) {
     }
 }
 
-function asyncIter(arr, dimen, iter, cb) {
+function asyncEach(arr, dimen, iter, cb) {
     if(lib.isArray(arr)) {
         var len = arr.length;
 
-        lib.asyncEach(arr, function(item, i, next) {
+        lib.asyncIter(arr, function(item, i, next) {
             switch(dimen) {
             case 1: iter(item, i, len, next); break;
             case 2: iter(item[0], item[1], i, len, next); break;
@@ -620,6 +622,59 @@ function asyncIter(arr, dimen, iter, cb) {
         lib.asyncFor(arr, function(key, val, i, len, next) {
             iter(key, val, i, len, next);
         }, cb);
+    }
+}
+
+function asyncAll(arr, dimen, func, cb) {
+    var finished = 0;
+    var len;
+    var outputArr;
+
+    function done(i, output) {
+        finished++;
+        outputArr[i] = output;
+
+        if(finished == len) {
+            cb(null, outputArr.join(''));
+        }
+    }
+
+    if(lib.isArray(arr)) {
+        len = arr.length;
+        outputArr = new Array(len);
+
+        if(len == 0) {
+            cb(null, '');
+        }
+        else {
+            for(var i=0; i<arr.length; i++) {
+                var item = arr[i];
+
+                switch(dimen) {
+                case 1: func(item, i, len, done); break;
+                case 2: func(item[0], item[1], i, len, done); break;
+                case 3: func(item[0], item[1], item[2], i, len, done); break;
+                default:
+                    item.push(i, done);
+                    func.apply(this, item);
+                }
+            }
+        }
+    }
+    else {
+        var keys = lib.keys(arr);
+        len = keys.length;
+        outputArr = new Array(len);
+
+        if(len == 0) {
+            cb(null, '');
+        }
+        else {
+            for(var i=0; i<keys.length; i++) {
+                var k = keys[i];
+                func(k, arr[k], i, len, done);
+            }
+        }
     }
 }
 
@@ -639,7 +694,8 @@ modules['runtime'] = {
     SafeString: SafeString,
     copySafeness: copySafeness,
     markSafe: markSafe,
-    asyncIter: asyncIter
+    asyncEach: asyncEach,
+    asyncAll: asyncAll
 };
 })();
 (function() {
@@ -674,16 +730,14 @@ var WebLoader = Loader.extend({
         // It's easy to use precompiled templates: just include them
         // before you configure nunjucks and this will automatically
         // pick it up and use it
-        if(window.nunjucksPrecompiled) {
-            this.precompiled = window.nunjucksPrecompiled;
-        }
+        this.precompiled = window.nunjucksPrecompiled || {};
 
         this.baseURL = baseURL || '';
         this.neverUpdate = neverUpdate;
     },
 
     getSource: function(name) {
-        if(this.precompiled) {
+        if(this.precompiled[name]) {
             return {
                 src: { type: "code",
                        obj: this.precompiled[name] },
@@ -722,7 +776,7 @@ var WebLoader = Loader.extend({
             }
         };
 
-        url += (url.indexOf('?') === -1 ? '?' : '&') + 's=' + 
+        url += (url.indexOf('?') === -1 ? '?' : '&') + 's=' +
                (new Date().getTime());
 
         // Synchronous because this API shouldn't be used in
@@ -933,12 +987,7 @@ var filters = {
     },
 
     random: function(arr) {
-        var i = Math.floor(Math.random() * arr.length);
-        if(i == arr.length) {
-            i--;
-        }
-
-        return arr[i];
+        return arr[Math.floor(Math.random() * arr.length)];
     },
 
     replace: function(str, old, new_, maxCount) {
@@ -1094,6 +1143,28 @@ var filters = {
 
     upper: function(str) {
         return str.toUpperCase();
+    },
+
+    urlencode: function(obj) {
+        var enc = encodeURIComponent;
+        if (lib.isString(obj)) {
+            return enc(obj);
+        } else {
+            var parts;
+            if (lib.isArray(obj)) {
+                parts = obj.map(function(item) {
+                    return enc(item[0]) + '=' + enc(item[1]);
+                })
+            } else {
+                parts = [];
+                for (var k in obj) {
+                    if (obj.hasOwnProperty(k)) {
+                        parts.push(enc(k) + '=' + enc(obj[k]));
+                    }
+                }
+            }
+            return parts.join('&');
+        }
     },
 
     wordcount: function(str) {
@@ -1298,9 +1369,20 @@ var Environment = Obj.extend({
         var tmpl = this.cache[name];
 
         if(tmpl) {
-            cb(null, tmpl);
+            if(eagerCompile) {
+                tmpl.compile();
+            }
+
+            if(cb) {
+                cb(null, tmpl);
+            }
+            else {
+                return tmpl;
+            }
         } else {
-            lib.asyncEach(this.loaders, function(loader, i, next, done) {
+            var syncResult;
+
+            lib.asyncIter(this.loaders, function(loader, i, next, done) {
                 function handle(src) {
                     if(src) {
                         done(src);
@@ -1321,7 +1403,13 @@ var Environment = Obj.extend({
                 }
             }, function(info) {
                 if(!info) {
-                    cb(new Error('template not found: ' + name));
+                    var err = new Error('template not found: ' + name);
+                    if(cb) {
+                        cb(err);
+                    }
+                    else {
+                        throw err;
+                    }
                 }
                 else {
                     var tmpl = new Template(info.src, this,
@@ -1331,27 +1419,20 @@ var Environment = Obj.extend({
                         this.cache[name] = tmpl;
                     }
 
-                    cb(null, tmpl);
+                    if(cb) {
+                        cb(null, tmpl);
+                    }
+                    else {
+                        syncResult = tmpl;
+                    }
                 }
             }.bind(this));
+
+            return syncResult;
         }
     },
 
-    // registerPrecompiled: function(templates) {
-    //     for(var name in templates) {
-    //         this.cache[name] = new Template({ type: 'code',
-    //                                           obj: templates[name] },
-    //                                         this,
-    //                                         name,
-    //                                         function() { return true; },
-    //                                         true);
-    //     }
-    // },
-
     express: function(app) {
-        app.engine('.html', this.expressRender.bind(this));
-        app.set('view engine', 'html');
-
         var env = this;
 
         function NunjucksView(name, opts) {
@@ -1360,25 +1441,45 @@ var Environment = Obj.extend({
         }
 
         NunjucksView.prototype.render = function(opts, cb) {
-            env.render(this.name, opts, cb);
+          env.render(this.name, opts, cb);
         };
 
         app.set('view', NunjucksView);
     },
 
-    expressRender: function(name, opts, cb) {
-        this.render(name, {}, cb);
-    },
-
     render: function(name, ctx, cb) {
+        if(lib.isFunction(ctx)) {
+            cb = ctx;
+            ctx = null;
+        }
+
+        // We support a synchronous API to make it easier to migrate
+        // existing code to async. This works because if you don't do
+        // anything async work, the whole thing is actually run
+        // synchronously.
+        var syncResult = null;
+
         this.getTemplate(name, function(err, tmpl) {
-            if(err) {
+            if(err && cb) {
                 cb(err);
             }
+            else if(err) {
+                throw err;
+            }
             else {
-                tmpl.render(ctx, cb);
+                tmpl.render(ctx, cb || function(err, res) {
+                    if(err) { throw err; }
+                    syncResult = res;
+                });
             }
         });
+
+        return syncResult;
+    },
+
+    renderString: function(src, ctx, cb) {
+        var tmpl = new Template(src, this);
+        return tmpl.render(ctx, cb);
     }
 });
 
@@ -1491,29 +1592,27 @@ var Template = Obj.extend({
             frame = null;
         }
 
-        if(!cb) {
-            throw new Error("you must specify a callback to `render`");
-        }
-
         return lib.withPrettyErrors(this.path, this.env.dev, function() {
-            if(!this.compiled) {
-                this._compile();
-            }
+            this.compile();
 
             var context = new Context(ctx || {}, this.blocks);
+            var syncResult = null;
 
             this.rootRenderFunc(this.env,
                                 context,
                                 frame || new Frame(),
                                 runtime,
-                                cb);
+                                cb || function(err, res) {
+                                    if(err) { throw err; }
+                                    syncResult = res;
+                                });
+
+            return syncResult;
         }.bind(this));
     },
 
     getExported: function(cb) {
-        if(!this.compiled) {
-            this._compile();
-        }
+        this.compile();
 
         // Run the rootRenderFunc to populate the context with exported vars
         var context = new Context({}, this.blocks);
@@ -1524,6 +1623,12 @@ var Template = Obj.extend({
                             function() {
                                 cb(null, context.getExported());
                             });
+    },
+
+    compile: function() {
+        if(!this.compiled) {
+            this._compile();
+        }
     },
 
     _compile: function() {
@@ -1559,8 +1664,34 @@ var Template = Obj.extend({
     }
 });
 
-// var src = '{% block content %}{% include "async.html" %}{% endblock %}';
-// var env = new Environment(new builtin_loaders.FileSystemLoader('tests/templates'), { dev: true });
+// test code
+// var src = 'hello {% foo baz | bar %}hi{% endfoo %} end';
+// var env = new Environment(new builtin_loaders.FileSystemLoader('tests/templates', true), { dev: true });
+
+// function FooExtension() {
+//     this.tags = ['foo'];
+//     this._name = 'FooExtension';
+
+//     this.parse = function(parser, nodes) {
+//         var tok = parser.nextToken();
+//         var args = parser.parseSignature(null, true);
+//         parser.advanceAfterBlockEnd(tok.value);
+
+//         var body = parser.parseUntilBlocks('endfoo');
+//         parser.advanceAfterBlockEnd();
+
+//         return new nodes.CallExtensionAsync(this, 'run', args, [body]);
+//     };
+
+//     this.run = function(context, baz, body, cb) {
+//         cb(null, baz + '--' + body());
+//     };
+// }
+
+// env.addExtension('FooExtension', new FooExtension());
+// env.addFilter('bar', function(val, cb) {
+//     cb(null, val + '22222');
+// }, true);
 
 // var ctx = {};
 // var tmpl = new Template(src, env, null, null, true);
@@ -1580,6 +1711,7 @@ modules['environment'] = {
 })();
 var nunjucks;
 
+var lib = modules["lib"];
 var env = modules["environment"];
 var compiler = modules["compiler"];
 var parser = modules["parser"];
@@ -1587,6 +1719,7 @@ var lexer = modules["lexer"];
 var runtime = modules["runtime"];
 var Loader = modules["loader"];
 var loaders = modules["loaders"];
+var precompile = modules["precompile"];
 
 nunjucks = {};
 nunjucks.Environment = env.Environment;
@@ -1603,25 +1736,44 @@ nunjucks.runtime = runtime;
 
 // A single instance of an environment, since this is so commonly used
 
-var e = new env.Environment();
-nunjucks.configure = function(dirOrURL, opts) {
-    if(typeof dirOrURL != 'string') {
-        throw new Error('must pass templates path or URL to `configure` ' +
-                        'as first argument');
+var e;
+nunjucks.configure = function(templatesPath, opts) {
+    opts = opts || {};
+    if(lib.isObject(templatesPath)) {
+        opts = templatesPath;
+        templatesPath = null;
     }
 
-    e = new env.Environment(new (loaders.FileSystemLoader || loaders.WebLoader)(dirOrURL),
-                            opts);
+    var loader = loaders.FileSystemLoader || loaders.WebLoader;
+    e = new env.Environment(new loader(templatesPath, opts.watch), opts);
 
     if(opts && opts.express) {
         e.express(opts.express);
     }
+
     return e;
 };
 
 nunjucks.render = function(name, ctx, cb) {
-    e.render(name, ctx, cb);
+    if(!e) {
+        nunjucks.configure();
+    }
+
+    return e.render(name, ctx, cb);
 };
+
+nunjucks.renderString = function(src, ctx, cb) {
+    if(!e) {
+        nunjucks.configure();
+    }
+
+    return e.renderString(src, ctx, cb);
+};
+
+if(precompile) {
+    nunjucks.precompile = precompile.precompile;
+    nunjucks.precompileString = precompile.precompileString;
+}
 
 nunjucks.require = function(name) { return modules[name]; };
 

@@ -11,10 +11,10 @@
 
   <body id="">
     <nav class="navbar navbar-default ">
-      <a class="pull-left logo" href="/nunjucks">Nunjucks</a>
+      <a class="pull-left logo" href="/">Nunjucks</a>
 
       <ul class="nav navbar-nav navbar-right pull-right">
-        <li><a href="/nunjucks#download" class="download">Download</a></li>
+        <li><a href="/#download" class="download">Download</a></li>
         <li><a href="https://github.com/jlongster/nunjucks">Github</a></li>
         <li class="dropdown">
           <a href="getting-started.html" data-toggle="dropdown">Docs</a>
@@ -29,7 +29,7 @@
       </ul>
     </nav>
 
-<div class="content">
+<div class="content clearfix">
   <aside class="col-sm-3">
     <div class="pages">
       <p><strong>Documentation</strong></p>
@@ -101,7 +101,7 @@
 <a href="#constructor1">constructor</a>
 </li>
 <li>
-<a href="#render1">render</a>
+<a href="#render2">render</a>
 </li>
 </ul>
 </li>
@@ -183,7 +183,7 @@
 <a href="#custom-tags">Custom Tags</a>
 <ul>
 <li>
-<a href="#asynchronous1">Asynchronous</a>
+<a href="#asynchronous2">Asynchronous</a>
 </li>
 </ul>
 </li>
@@ -441,7 +441,7 @@ immediately instead of waiting until the template is rendered.</p>
 </code></pre></div>
 </div>
 
-<h3 id="render1">render</h3>
+<h3 id="render2">render</h3>
 
 <div class="api-sig"><code>tmpl.render(context, [callback])</code></div>
 
@@ -589,7 +589,7 @@ while developing (you can see changes immediately), but uses
 precompiled templates in production.</p>
 
 <ol>
-<li>Load <a href="">nunjucks.js</a> with either a script tag or a module loader.</li>
+<li>Load <a href="files/nunjucks.js">nunjucks.js</a> with either a script tag or a module loader.</li>
 <li>Render templates (<a href="/api.html#simple-api">example</a>)!</li>
 <li>When pushing to production, <a href="#precompiling">precompile</a> the templates into a js file
 and load it on the page</li>
@@ -612,10 +612,10 @@ something that automatically recompiles templates while developing
 unless you want to manually recompile them after every change.</p>
 
 <ol>
-<li>For development, set up something like a <a href="">grunt task</a> to watch
+<li>For development, use the <a href="https://github.com/jlongster/grunt-nunjucks">grunt task</a> to watch
 your template directory for changes and automatically <a href="#precompiling">precompile</a> them
 into a js file</li>
-<li>Load <a href="">nunjucks-slim.js</a> and <code>templates.js</code>, or whatever you named
+<li>Load <a href="files/nunjucks-slim.js">nunjucks-slim.js</a> and <code>templates.js</code>, or whatever you named
 the precompiled js file, with either a script tag or a module loader.</li>
 <li>Render templates (<a href="/api.html#simple-api">example</a>)!</li>
 </ol>
@@ -726,8 +726,8 @@ you should precompile your templates and never use HTTP in production.</p>
    <span class="c1">// check err and handle result</span>
 <span class="p">});</span>
 </code></pre></div>
-<p>Read more about async <a href=""><code>filters</code></a>, <a href=""><code>extensions</code></a>, and
-<a href="#loader"><code>loaders</code></a> under each section.</p>
+<p>Read more about async <a href="#asynchronous1"><code>filters</code></a>, <a href="#asynchronous2"><code>extensions</code></a>, and
+<a href="#asynchronous"><code>loaders</code></a>.</p>
 
 <h3 id="be-careful">Be Careful!</h3>
 
@@ -842,11 +842,21 @@ created by passing <code>true</code> as the third argument to <code>addFilter</c
 </code></pre></div>
 <p>Make sure to call the callback with two arguments: <code>callback(err, res)</code>. <code>err</code> can be null, of course.</p>
 
+<p>Note: When precompiling, <strong>you must tell the precompiler the names of
+all asynchronous filters</strong>. See
+<a href="/api.html#precompiling">Precompiling</a>.</p>
+
 <h2 id="custom-tags">Custom Tags</h2>
 
 <p>You can create more complicated extensions by creating custom tags.
 This exposes the parser API and allows you to do anything you want
 with the template.</p>
+
+<p>Note: When precompiling, <strong>you must install the extensions at
+compile-time</strong>. You have to use the <a href="#api1">precompiling API</a> (or the
+<a href="https://github.com/jlongster/grunt-nunjucks">grunt task</a>) instead of
+the script. You&#39;ll want to create a <a href="#environment"><code>Environment</code></a>
+object, install your extensions, and pass it to the precompiler.</p>
 
 <p>An extension is a javascript object with at least two fields: <code>tags</code>
 and <code>parse</code>. Extensions basically register new tag names and take
@@ -950,7 +960,7 @@ content from a URL and injects it into the page:</p>
 <span class="x">  There was an error fetching /stuff</span>
 <span class="cp">{%</span> <span class="k">endremote</span> <span class="cp">%}</span><span class="x"></span>
 </code></pre></div>
-<h3 id="asynchronous1">Asynchronous</h3>
+<h3 id="asynchronous2">Asynchronous</h3>
 
 <p>Another available node is <code>CallExtensionAsync</code> which is an
 asynchronous version of <code>CallExtension</code>. It calls back into your
@@ -969,6 +979,12 @@ Template rendering is paused until you call the callback to resume.</p>
 </div>
 
 
+
+    <footer>
+      Found a bug in the
+      documentation? <a href="https://github.com/jlongster/nunjucks-docs">Fix
+      it or file an issue</a>!
+    </footer>
 
     <script src="bower_components/jquery/jquery.min.js"></script>
     <script src="bower_components/bootstrap/js/affix.js"></script>

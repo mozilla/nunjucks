@@ -11,10 +11,10 @@
 
   <body id="">
     <nav class="navbar navbar-default ">
-      <a class="pull-left logo" href="/nunjucks">Nunjucks</a>
+      <a class="pull-left logo" href="/">Nunjucks</a>
 
       <ul class="nav navbar-nav navbar-right pull-right">
-        <li><a href="/nunjucks#download" class="download">Download</a></li>
+        <li><a href="/#download" class="download">Download</a></li>
         <li><a href="https://github.com/jlongster/nunjucks">Github</a></li>
         <li class="dropdown">
           <a href="getting-started.html" data-toggle="dropdown">Docs</a>
@@ -29,7 +29,7 @@
       </ul>
     </nav>
 
-<div class="content">
+<div class="content clearfix">
   <aside class="col-sm-3">
     <div class="pages">
       <p><strong>Documentation</strong></p>
@@ -349,7 +349,7 @@ asynchronously inside the loop.</p>
 <span class="x">&lt;ul&gt;</span>
 <span class="cp">{%</span> <span class="k">asyncEach</span> <span class="nv">item</span> <span class="k">in</span> <span class="nv">items</span> <span class="cp">%}</span><span class="x"></span>
 <span class="x">  </span><span class="cp">{%</span> <span class="k">include</span> <span class="s2">&quot;item-template.html&quot;</span> <span class="cp">%}</span><span class="x"></span>
-<span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">endeach</span> <span class="cp">%}</span><span class="x"></span>
 <span class="x">&lt;/ul&gt;</span>
 </code></pre></div>
 <h3 id="asyncall">asyncAll</h3>
@@ -371,7 +371,7 @@ from a database. You could then render multiple items in parallel with
 <span class="x">&lt;ul&gt;</span>
 <span class="cp">{%</span> <span class="k">asyncAll</span> <span class="nv">item</span> <span class="k">in</span> <span class="nv">items</span> <span class="cp">%}</span><span class="x"></span>
 <span class="x">  &lt;li&gt;</span><span class="cp">{{</span> <span class="nv">item.id</span> <span class="o">|</span> <span class="nf">lookup</span> <span class="cp">}}</span><span class="x">&lt;/li&gt;</span>
-<span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">endall</span> <span class="cp">%}</span><span class="x"></span>
 <span class="x">&lt;/ul&gt;</span>
 </code></pre></div>
 <p>If <code>lookup</code> is an asynchronous filter, it&#39;s probably doing something
@@ -709,6 +709,12 @@ that implements these filters.</p>
 </div>
 
 
+
+    <footer>
+      Found a bug in the
+      documentation? <a href="https://github.com/jlongster/nunjucks-docs">Fix
+      it or file an issue</a>!
+    </footer>
 
     <script src="bower_components/jquery/jquery.min.js"></script>
     <script src="bower_components/bootstrap/js/affix.js"></script>

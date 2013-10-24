@@ -11,10 +11,10 @@
 
   <body id="home">
     <nav class="navbar navbar-default navbar-fixed-top">
-      <a class="pull-left logo" href="/nunjucks">Nunjucks</a>
+      <a class="pull-left logo" href="/">Nunjucks</a>
 
       <ul class="nav navbar-nav navbar-right pull-right">
-        <li><a href="/nunjucks#download" class="download">Download</a></li>
+        <li><a href="/#download" class="download">Download</a></li>
         <li><a href="https://github.com/jlongster/nunjucks">Github</a></li>
         <li class="dropdown">
           <a href="getting-started.html" data-toggle="dropdown">Docs</a>
@@ -54,12 +54,13 @@
       <div class="col-sm-6">
         <h1>Browser</h1>
         <p>
-          Download the full library here: <a href="#">nunjucks-dev.js</a>.
-        </p>
-        <p>
-          If you precompile your templates, you should just use
-          <a href="#">nunjucks.js</a> (<a href="#">minified</a>). This excludes a lot
-          of compiler code and is only 8K after minifying and gzipping.
+          Grab <a href="files/nunjucks.js">nunjucks.js</a>
+          (<a href="files/nunjucks.min.js">min</a>) for the full
+          library, or
+          grab <a href="files/nunjucks-slim.js">nunjucks-slim.js</a>
+          (<a href="files/nunjucks-slim.min.js">min</a>) for a slim
+          version that only works with precompiled templates. Read
+          more about the differences of these files in Getting Started.
         </p>
 
         <p>
@@ -71,6 +72,16 @@
 </div>
 
 <div class="page">
+  <section class="links">
+    <ul>
+      <li><a href="/#download" class="download">Download</a></li>
+      <li><a href="https://github.com/jlongster/nunjucks">Github</a></li>
+      <li><a href="templating.html">Templating Docs</a></li>
+      <li><a href="api.html">API Docs</a></li>
+      <li><a href="faq.html">FAQ</a></li>
+    </ul>
+  </section>
+
   <section class="opening">
     <div class="col-sm-6">
       <div class="tagline2">
@@ -142,7 +153,17 @@
     <div class="user">
       <h4>Mozilla Webmaker</h4>
       <div class="col-sm-6">
-        Need content here
+        <blockquote>
+          <p>
+            <a href="https://webmaker.org/">Webmaker</a> from the
+            Mozilla Foundation encourages people to create. Using web
+            technologies, you can create visually rich media with a
+            powerful real-time tool. Using nunjucks, it was easy to
+            collaborate on the templates and implement complex
+            features such as localization. There hasn't been any
+            problems with performance or stability.
+          </p>
+        </blockquote>
       </div>
       <div class="col-sm-6">
         <a href="img/webmaker2x.png"><img src="img/webmaker2x.png" /></a>
@@ -208,27 +229,86 @@
   <section class="examples">
     <h3>More Examples</h3>
 
-    <div class="col-sm-6">
-      Template inheritance allows you to reuse templates in a powerful
-      way. Define skeleton structures that child templates fill in.
+    <div class="example clearfix">
+      <div class="col-sm-6">
+        Use any of the <strong>builtin filters</strong> to work with variables, and
+        even create your own.
+      </div>
+      <div class="col-sm-6">
+        <pre>{{ foo | title }}
+{{ foo | join(",") }}
+{{ foo | replace("foo", "bar") | capitalize }}</pre>
+      </div>
     </div>
 
-    <div class="col-sm-6">
-      <pre>{% extends &quot;base.html&quot; %}
+    <div class="example clearfix">
+      <div class="col-sm-6">
+        Use <strong>keyword arguments</strong> to any function or filter
+      </div>
 
-{% block header %}
+      <div class="col-sm-6">
+        <pre>{{ foo(1, 2, bar=3, baz=4) }}
+{{ bar | transform(level=2) }}</pre>
+      </div>
+    </div>
+
+    <div class="example clearfix">
+      <div class="col-sm-6">
+        <strong>Template inheritance</strong> allows you to reuse templates in a powerful
+        way. Define skeleton structures that child templates fill in.
+      </div>
+
+      <div class="col-sm-6">
+        <pre>{% <span>extends</span> &quot;base.html&quot; %}
+
+{% <span>block</span> header %}
 &lt;h3&gt;{{ subtitle }}&lt;/h3&gt;
-{% endblock %}
+{% <span>endblock</span> %}
 
-{% block content %}
+{% <span>block</span> content %}
 &lt;h1&gt;{{ page.title }}&lt;/h1&gt;
 &lt;p&gt;{{ page.content }}&lt;/p&gt;
-{% endblock %}</pre>
+{% <span>endblock</span> %}</pre>
+      </div>
     </div>
+
+    <div class="example clearfix">
+      <div class="col-sm-6">
+        You can even write <strong>asynchronous templates</strong> if you need to make
+        asynchronous calls in filters! Take advantage
+        of <code><a href="templating.html#asyncall">asyncAll</a></code>
+        to execute all iterations in parallel,
+        assuming <code>lookup</code> is asynchronous.
+      </div>
+      <div class="col-sm-6">
+        <pre>&lt;h1&gt;Posts&lt;/h1&gt;
+&lt;ul&gt;
+{% <span>asyncAll</span> item in items %}
+  &lt;li&gt;{{ item.id | lookup }}&lt;/li&gt;
+{% <span>endall</span> %}
+&lt;/ul&gt;</pre>
+      </div>
+    </div>
+
+    <p class="ending">
+      That's just the beginning. Check the the <a href="/templating.html">docs</a> for a whole range of powerful features!
+    </p>
+
+    <a href="getting-started.html">
+      <button class="btn btn-lg btn-success">Getting Started &rarr;</button>
+    </a>
   </section>
+
+
   
 </div>
 
+
+    <footer>
+      Found a bug in the
+      documentation? <a href="https://github.com/jlongster/nunjucks-docs">Fix
+      it or file an issue</a>!
+    </footer>
 
     <script src="bower_components/jquery/jquery.min.js"></script>
     <script src="bower_components/bootstrap/js/affix.js"></script>

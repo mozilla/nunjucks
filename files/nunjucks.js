@@ -1,3 +1,5 @@
+// Browser bundle of nunjucks 1.0.0 
+
 (function() {
 var modules = {};
 (function() {
@@ -273,7 +275,7 @@ exports.asyncParallel = function(funcs, done) {
     }
 };
 
-exports.asyncEach = function(arr, iter, cb) {
+exports.asyncIter = function(arr, iter, cb) {
     var i = -1;
     
     function next() {
@@ -456,7 +458,8 @@ var If = Node.extend("If", { fields: ['cond', 'body', 'else_'] });
 var IfAsync = If.extend("IfAsync");
 var InlineIf = Node.extend("InlineIf", { fields: ['cond', 'body', 'else_'] });
 var For = Node.extend("For", { fields: ['arr', 'name', 'body'] });
-var ForAsync = For.extend("ForAsync");
+var AsyncEach = For.extend("AsyncEach");
+var AsyncAll = For.extend("AsyncAll");
 var Macro = Node.extend("Macro", { fields: ['name', 'args', 'body'] });
 var Import = Node.extend("Import", { fields: ['template', 'target'] });
 var FromImport = Node.extend("FromImport", {
@@ -513,12 +516,14 @@ var CallExtension = Node.extend("CallExtension", {
     fields: ['extName', 'prop', 'args', 'contentArgs'],
 
     init: function(ext, prop, args, contentArgs) {
-        this.extName = ext._name;
+        this.extName = ext._name || ext;
         this.prop = prop;
-        this.args = args;
-        this.contentArgs = contentArgs;
+        this.args = args || new NodeList();
+        this.contentArgs = contentArgs || [];
     }
 });
+
+var CallExtensionAsync = CallExtension.extend("CallExtensionAsync");
 
 // Print the AST in a nicely formatted tree format for debuggin
 function printNodes(node, indent) {
@@ -553,6 +558,20 @@ function printNodes(node, indent) {
         lib.each(node.children, function(n) {
             printNodes(n, indent + 2);
         });
+    }
+    else if(node instanceof CallExtension) {
+        print(node.extName + '.' + node.prop);
+        print('\n');
+
+        if(node.args) {
+            printNodes(node.args, indent + 2);
+        }
+
+        if(node.contentArgs) {
+            lib.each(node.contentArgs, function(n) {
+                printNodes(n, indent + 2);
+            });
+        }
     }
     else {
         var nodes = null;
@@ -610,7 +629,8 @@ modules['nodes'] = {
     IfAsync: IfAsync,
     InlineIf: InlineIf,
     For: For,
-    ForAsync: ForAsync,
+    AsyncEach: AsyncEach,
+    AsyncAll: AsyncAll,
     Macro: Macro,
     Import: Import,
     FromImport: FromImport,
@@ -640,8 +660,8 @@ modules['nodes'] = {
     Compare: Compare,
     CompareOperand: CompareOperand,
 
-    //CustomTag: CustomTag,
     CallExtension: CallExtension,
+    CallExtensionAsync: CallExtensionAsync,
 
     printNodes: printNodes
 };
@@ -869,10 +889,10 @@ function callWrap(obj, name, args) {
 }
 
 function contextOrFrameLookup(context, frame, name) {
-    var val = context.lookup(name);
+    var val = frame.lookup(name);
     return (val !== undefined && val !== null) ?
         val :
-        frame.lookup(name);
+        context.lookup(name);
 }
 
 function handleError(error, lineno, colno) {
@@ -884,11 +904,11 @@ function handleError(error, lineno, colno) {
     }
 }
 
-function asyncIter(arr, dimen, iter, cb) {
+function asyncEach(arr, dimen, iter, cb) {
     if(lib.isArray(arr)) {
         var len = arr.length;
 
-        lib.asyncEach(arr, function(item, i, next) {
+        lib.asyncIter(arr, function(item, i, next) {
             switch(dimen) {
             case 1: iter(item, i, len, next); break;
             case 2: iter(item[0], item[1], i, len, next); break;
@@ -903,6 +923,59 @@ function asyncIter(arr, dimen, iter, cb) {
         lib.asyncFor(arr, function(key, val, i, len, next) {
             iter(key, val, i, len, next);
         }, cb);
+    }
+}
+
+function asyncAll(arr, dimen, func, cb) {
+    var finished = 0;
+    var len;
+    var outputArr;
+
+    function done(i, output) {
+        finished++;
+        outputArr[i] = output;
+
+        if(finished == len) {
+            cb(null, outputArr.join(''));
+        }
+    }
+
+    if(lib.isArray(arr)) {
+        len = arr.length;
+        outputArr = new Array(len);
+
+        if(len == 0) {
+            cb(null, '');
+        }
+        else {
+            for(var i=0; i<arr.length; i++) {
+                var item = arr[i];
+
+                switch(dimen) {
+                case 1: func(item, i, len, done); break;
+                case 2: func(item[0], item[1], i, len, done); break;
+                case 3: func(item[0], item[1], item[2], i, len, done); break;
+                default:
+                    item.push(i, done);
+                    func.apply(this, item);
+                }
+            }
+        }
+    }
+    else {
+        var keys = lib.keys(arr);
+        len = keys.length;
+        outputArr = new Array(len);
+
+        if(len == 0) {
+            cb(null, '');
+        }
+        else {
+            for(var i=0; i<keys.length; i++) {
+                var k = keys[i];
+                func(k, arr[k], i, len, done);
+            }
+        }
     }
 }
 
@@ -922,7 +995,8 @@ modules['runtime'] = {
     SafeString: SafeString,
     copySafeness: copySafeness,
     markSafe: markSafe,
-    asyncIter: asyncIter
+    asyncEach: asyncEach,
+    asyncAll: asyncAll
 };
 })();
 (function() {
@@ -1479,12 +1553,19 @@ var Parser = Object.extend({
     parseFor: function() {
         var forTok = this.peekToken();
         var node;
+        var endBlock;
 
         if(this.skipSymbol('for')) {
             node = new nodes.For(forTok.lineno, forTok.colno);
+            endBlock = 'endfor';
         }
-        else if(this.skipSymbol('forAsync')) {
-            node = new nodes.ForAsync(forTok.lineno, forTok.colno);            
+        else if(this.skipSymbol('asyncEach')) {
+            node = new nodes.AsyncEach(forTok.lineno, forTok.colno);
+            endBlock = 'endeach';
+        }
+        else if(this.skipSymbol('asyncAll')) {
+            node = new nodes.AsyncAll(forTok.lineno, forTok.colno);
+            endBlock = 'endall';
         }
         else {
             this.fail("parseFor: expected for{Async}", forTok.lineno, forTok.colno);
@@ -1518,7 +1599,7 @@ var Parser = Object.extend({
         node.arr = this.parseExpression();
         this.advanceAfterBlockEnd(forTok.value);
 
-        node.body = this.parseUntilBlocks('endfor');
+        node.body = this.parseUntilBlocks(endBlock);
         this.advanceAfterBlockEnd();
 
         return node;
@@ -1778,8 +1859,9 @@ var Parser = Object.extend({
         case 'if':
         case 'ifAsync':
             return this.parseIf();
-        case 'for': 
-        case 'forAsync':
+        case 'for':
+        case 'asyncEach':
+        case 'asyncAll':
             return this.parseFor();
         case 'block': return this.parseBlock();
         case 'extends': return this.parseExtends();
@@ -2421,7 +2503,8 @@ var Parser = Object.extend({
 //     console.log(util.inspect(t));
 // }
 
-// var p = new Parser(lexer.lex('sdfsdf {{ baz(foo | bar(5)) }}'));
+// var p = new Parser(lexer.lex('hello {% foo %} {{ "hi" | bar }} {% endfoo %} end'));
+// p.extensions = [new FooExtension()];
 // var n = p.parseAsRoot();
 // nodes.printNodes(n);
 
@@ -2469,12 +2552,12 @@ function walk(ast, func, depthFirst) {
 
     if(!depthFirst) {
         var astT = func(ast);
-        
+
         if(astT && astT !== ast) {
             return astT;
         }
     }
-    
+
     if(ast instanceof nodes.NodeList) {
         var children = mapCOW(ast.children, function(node) {
             return walk(node, func, depthFirst);
@@ -2482,6 +2565,20 @@ function walk(ast, func, depthFirst) {
 
         if(children !== ast.children) {
             ast = new nodes[ast.typename](ast.lineno, ast.colno, children);
+        }
+    }
+    else if(ast instanceof nodes.CallExtension) {
+        var args = walk(ast.args, func, depthFirst);
+
+        var contentArgs = mapCOW(ast.contentArgs, function(node) {
+            return walk(node, func, depthFirst);
+        });
+        
+        if(args !== ast.args || contentArgs !== ast.contentArgs) {
+            ast = new nodes[ast.typename](ast.extName,
+                                          ast.prop,
+                                          args,
+                                          contentArgs);
         }
     }
     else {
@@ -2516,15 +2613,16 @@ function _liftFilters(node, asyncFilters, prop) {
         if(node instanceof nodes.Block) {
             return node;
         }
-        else if(node instanceof nodes.Filter &&
-                asyncFilters.indexOf(node.name.value) !== -1) {
+        else if((node instanceof nodes.Filter &&
+                 asyncFilters.indexOf(node.name.value) !== -1) ||
+                node instanceof nodes.CallExtensionAsync) {
             var symbol = new nodes.Symbol(node.lineno,
                                           node.colno,
                                           gensym());
 
             children.push(new nodes.FilterAsync(node.lineno,
                                                 node.colno,
-                                                node.name, 
+                                                node.name,
                                                 node.args,
                                                 symbol));
             return symbol;
@@ -2553,7 +2651,7 @@ function _liftFilters(node, asyncFilters, prop) {
 }
 
 function liftFilters(ast, asyncFilters) {
-    return walk(ast, function(node) {
+    return depthWalk(ast, function(node) {
         if(node instanceof nodes.Output) {
             return _liftFilters(node, asyncFilters);
         }
@@ -2562,6 +2660,9 @@ function liftFilters(ast, asyncFilters) {
         }
         else if(node instanceof nodes.If) {
             return _liftFilters(node, asyncFilters, 'cond');
+        }
+        else if(node instanceof nodes.CallExtension) {
+            return _liftFilters(node, asyncFilters, 'args');
         }
     });
 }
@@ -2600,7 +2701,10 @@ function convertStatements(ast) {
 
         var async = false;
         walk(node, function(node) {
-            if(node instanceof nodes.FilterAsync) {
+            if(node instanceof nodes.FilterAsync ||
+               node instanceof nodes.IfAsync ||
+               node instanceof nodes.AsyncEach ||
+               node instanceof nodes.AsyncAll) {
                 async = true;
                 // Stop iterating by returning the node
                 return node;
@@ -2618,7 +2722,7 @@ function convertStatements(ast) {
                 );
             }
             else if(node instanceof nodes.For) {
-                return new nodes.ForAsync(
+                return new nodes.AsyncEach(
                     node.lineno,
                     node.colno,
                     node.arr,
@@ -2634,22 +2738,13 @@ function cps(ast, asyncFilters) {
     return convertStatements(liftSuper(liftFilters(ast, asyncFilters)));
 }
 
-function transform(ast, asyncFilters, extensions, name) {
-    // Run the extension preprocessors against the source.
-    if(extensions && extensions.length) {
-        for(var i=0; i<extensions.length; i++) {
-            if('preprocess' in extensions[i]) {
-                src = extensions[i].preprocess(src, name);
-            }
-        }
-    }
-
+function transform(ast, asyncFilters, name) {
     return cps(ast, asyncFilters || []);
 }
 
 // var parser = modules["parser"];
-// var src = '{% block content %}hello{% endblock %} {{ tmpl | getContents }}';
-// var ast = transform(parser.parse(src), ['getContents']);
+// var src = 'hello {% foo %}{% endfoo %} end';
+// var ast = transform(parser.parse(src, [new FooExtension()]), ['bar']);
 // nodes.printNodes(ast);
 
 modules['transformer'] = {
@@ -2692,15 +2787,13 @@ function quotedArray(arr) {
 }
 
 var Compiler = Object.extend({
-    init: function(extensions) {
+    init: function() {
         this.codebuf = [];
         this.lastId = 0;
         this.buffer = null;
         this.bufferStack = [];
         this.isChild = false;
         this.scopeClosers = '';
-
-        this.extensions = extensions || [];
     },
 
     fail: function (msg, lineno, colno) {
@@ -2869,13 +2962,16 @@ var Compiler = Object.extend({
         }
     },
 
-    compileCallExtension: function(node, frame) {
+    compileCallExtension: function(node, frame, async) {
         var name = node.extName;
         var args = node.args;
         var contentArgs = node.contentArgs;
         var transformedArgs = [];
 
-        this.emit(this.buffer + ' += runtime.suppressValue(');
+        if(!async) {
+            this.emit(this.buffer + ' += runtime.suppressValue(');
+        }
+
         this.emit('env.getExtension("' + node.extName + '")["' + node.prop + '"](');
         this.emit('context');
 
@@ -2895,13 +2991,13 @@ var Compiler = Object.extend({
                 // object as the last argument, if they exist.
                 this._compileExpression(arg, frame);
 
-                if(i != args.children.length - 1 || contentArgs) {
+                if(i != args.children.length - 1 || contentArgs.length) {
                     this.emit(',');
                 }
             }, this);
         }
 
-        if(contentArgs) {
+        if(contentArgs.length) {
             lib.each(contentArgs, function(arg, i) {
                 if(i > 0) {
                     this.emit(',');
@@ -2910,12 +3006,18 @@ var Compiler = Object.extend({
                 if(arg) {
                     var id = this.tmpid();
 
-                    this.emit('function() {');
+                    this.emitLine('function(cb) {');
+                    this.emitLine('if(!cb) { cb = function(err) { if(err) { throw err; }}}');
                     this.pushBufferId(id);
-                    this.compile(arg, frame);
+
+                    this.withScopedSyntax(function() {
+                        this.compile(arg, frame);
+                        this.emitLine('cb(null, ' + id + ');');
+                    });
+
                     this.popBufferId();
-                    this.emitLine('return ' + id + ';\n' +
-                                  '}');
+                    this.emitLine('return ' + id + ';');
+                    this.emitLine('}');
                 }
                 else {
                     this.emit('null');
@@ -2923,8 +3025,20 @@ var Compiler = Object.extend({
             }, this);
         }
 
-        this.emit(')');
-        this.emit(', env.autoesc);\n');
+        if(async) {
+            var res = this.tmpid();
+            this.emitLine(', ' + this.makeCallback(res));
+            this.emitLine(this.buffer + ' += runtime.suppressValue(' + res + ', env.autoesc);');
+            this.addScopeLevel();
+        }
+        else {
+            this.emit(')');
+            this.emit(', env.autoesc);\n');
+        }
+    },
+
+    compileCallExtensionAsync: function(node, frame) {
+        this.compileCallExtension(node, frame, true);
     },
 
     compileNodeList: function(node, frame) {
@@ -3142,7 +3256,6 @@ var Compiler = Object.extend({
 
             if (id === null) {
                 id = this.tmpid();
-                frame.set(name, id);
 
                 // Note: This relies on js allowing scope across
                 // blocks, in case this is created inside an `if`
@@ -3161,6 +3274,9 @@ var Compiler = Object.extend({
             var name = target.value;
 
             this.emitLine('frame.set("' + name + '", ' + id + ');');
+            if (frame.get(name) === null) {
+                frame.set(name, id);
+            }
 
             // We are running this for every var, but it's very
             // uncommon to assign to multiple vars anyway
@@ -3343,7 +3459,7 @@ var Compiler = Object.extend({
         this.emitLine('frame = frame.pop();');
     },
 
-    compileForAsync: function(node, frame) {
+    _compileAsyncLoop: function(node, frame, parallel) {
         // This shares some code with the For tag, but not enough to
         // worry about. This iterates across an object asynchronously,
         // but not in parallel.
@@ -3352,6 +3468,7 @@ var Compiler = Object.extend({
         var len = this.tmpid();
         var arr = this.tmpid();
         var loopUses = this.scanLoop(node);
+        var asyncMethod = parallel ? 'asyncAll' : 'asyncEach';
         frame = frame.push();
 
         this.emitLine('frame = frame.push();');
@@ -3361,7 +3478,7 @@ var Compiler = Object.extend({
         this.emitLine(';');
 
         if(node.name instanceof nodes.Array) {
-            this.emit('runtime.asyncIter(' + arr + ', ' +
+            this.emit('runtime.' + asyncMethod + '(' + arr + ', ' +
                       node.name.children.length + ', function(');
 
             lib.each(node.name.children, function(name) {
@@ -3378,7 +3495,7 @@ var Compiler = Object.extend({
         }
         else {
             var id = node.name.value;
-            this.emitLine('runtime.asyncIter(' + arr + ', 1, function(' + id + ', ' + i + ', ' + len + ',next) {');
+            this.emitLine('runtime.' + asyncMethod + '(' + arr + ', 1, function(' + id + ', ' + i + ', ' + len + ',next) {');
             this.emitLine('frame.set("' + id + '", ' + id + ');');
             frame.set(id, id);
         }
@@ -3386,14 +3503,37 @@ var Compiler = Object.extend({
         this.emitLoopBindings(node, loopUses, arr, i, len);
         
         this.withScopedSyntax(function() {
+            var buf;
+            if(parallel) {
+                buf = this.tmpid();
+                this.pushBufferId(buf);
+            }
+
             this.compile(node.body, frame);
-            this.emitLine('next();');
+            this.emitLine('next(' + i + (buf ? ',' + buf : '') + ');');
+
+            if(parallel) {
+                this.popBufferId();
+            }
         });
 
-        this.emitLine('}, ' + this.makeCallback());
+        var output = this.tmpid();
+        this.emitLine('}, ' + this.makeCallback(output));
         this.addScopeLevel();
 
+        if(parallel) {
+            this.emitLine(this.buffer + ' += ' + output + ';');
+        }
+
         this.emitLine('frame = frame.pop();');
+    },
+
+    compileAsyncEach: function(node, frame) {
+        this._compileAsyncLoop(node, frame);
+    },
+
+    compileAsyncAll: function(node, frame) {
+        this._compileAsyncLoop(node, frame, true);
     },
 
     _emitMacroBegin: function(node, frame) {
@@ -3701,21 +3841,28 @@ var Compiler = Object.extend({
 });
 
 // var c = new Compiler();
-// var src = '{% block content %}hello{% endblock %} {{ tmpl | getContents }}';
-// var ast = transformer.transform(parser.parse(src), ['getContents']);
+// var src = 'hello {% foo %}bar{% endfoo %} end';
+// var ast = transformer.transform(parser.parse(src));
 // nodes.printNodes(ast);
 // c.compile(ast);
-
 // var tmpl = c.getCode();
 // console.log(tmpl);
 
 modules['compiler'] = {
     compile: function(src, asyncFilters, extensions, name) {
-        var c = new Compiler(extensions);
+        var c = new Compiler();
+
+        // Run the extension preprocessors against the source.
+        if(extensions && extensions.length) {
+            for(var i=0; i<extensions.length; i++) {
+                if('preprocess' in extensions[i]) {
+                    src = extensions[i].preprocess(src, name);
+                }
+            }
+        }
 
         c.compile(transformer.transform(parser.parse(src, extensions),
                                         asyncFilters,
-                                        extensions,
                                         name));
         return c.getCode();
     },
@@ -3910,12 +4057,7 @@ var filters = {
     },
 
     random: function(arr) {
-        var i = Math.floor(Math.random() * arr.length);
-        if(i == arr.length) {
-            i--;
-        }
-
-        return arr[i];
+        return arr[Math.floor(Math.random() * arr.length)];
     },
 
     replace: function(str, old, new_, maxCount) {
@@ -4073,6 +4215,28 @@ var filters = {
         return str.toUpperCase();
     },
 
+    urlencode: function(obj) {
+        var enc = encodeURIComponent;
+        if (lib.isString(obj)) {
+            return enc(obj);
+        } else {
+            var parts;
+            if (lib.isArray(obj)) {
+                parts = obj.map(function(item) {
+                    return enc(item[0]) + '=' + enc(item[1]);
+                })
+            } else {
+                parts = [];
+                for (var k in obj) {
+                    if (obj.hasOwnProperty(k)) {
+                        parts.push(enc(k) + '=' + enc(obj[k]));
+                    }
+                }
+            }
+            return parts.join('&');
+        }
+    },
+
     wordcount: function(str) {
         return str.match(/\w+/g).length;
     },
@@ -4194,16 +4358,14 @@ var WebLoader = Loader.extend({
         // It's easy to use precompiled templates: just include them
         // before you configure nunjucks and this will automatically
         // pick it up and use it
-        if(window.nunjucksPrecompiled) {
-            this.precompiled = window.nunjucksPrecompiled;
-        }
+        this.precompiled = window.nunjucksPrecompiled || {};
 
         this.baseURL = baseURL || '';
         this.neverUpdate = neverUpdate;
     },
 
     getSource: function(name) {
-        if(this.precompiled) {
+        if(this.precompiled[name]) {
             return {
                 src: { type: "code",
                        obj: this.precompiled[name] },
@@ -4242,7 +4404,7 @@ var WebLoader = Loader.extend({
             }
         };
 
-        url += (url.indexOf('?') === -1 ? '?' : '&') + 's=' + 
+        url += (url.indexOf('?') === -1 ? '?' : '&') + 's=' +
                (new Date().getTime());
 
         // Synchronous because this API shouldn't be used in
@@ -4379,9 +4541,20 @@ var Environment = Obj.extend({
         var tmpl = this.cache[name];
 
         if(tmpl) {
-            cb(null, tmpl);
+            if(eagerCompile) {
+                tmpl.compile();
+            }
+
+            if(cb) {
+                cb(null, tmpl);
+            }
+            else {
+                return tmpl;
+            }
         } else {
-            lib.asyncEach(this.loaders, function(loader, i, next, done) {
+            var syncResult;
+
+            lib.asyncIter(this.loaders, function(loader, i, next, done) {
                 function handle(src) {
                     if(src) {
                         done(src);
@@ -4402,7 +4575,13 @@ var Environment = Obj.extend({
                 }
             }, function(info) {
                 if(!info) {
-                    cb(new Error('template not found: ' + name));
+                    var err = new Error('template not found: ' + name);
+                    if(cb) {
+                        cb(err);
+                    }
+                    else {
+                        throw err;
+                    }
                 }
                 else {
                     var tmpl = new Template(info.src, this,
@@ -4412,27 +4591,20 @@ var Environment = Obj.extend({
                         this.cache[name] = tmpl;
                     }
 
-                    cb(null, tmpl);
+                    if(cb) {
+                        cb(null, tmpl);
+                    }
+                    else {
+                        syncResult = tmpl;
+                    }
                 }
             }.bind(this));
+
+            return syncResult;
         }
     },
 
-    // registerPrecompiled: function(templates) {
-    //     for(var name in templates) {
-    //         this.cache[name] = new Template({ type: 'code',
-    //                                           obj: templates[name] },
-    //                                         this,
-    //                                         name,
-    //                                         function() { return true; },
-    //                                         true);
-    //     }
-    // },
-
     express: function(app) {
-        app.engine('.html', this.expressRender.bind(this));
-        app.set('view engine', 'html');
-
         var env = this;
 
         function NunjucksView(name, opts) {
@@ -4441,25 +4613,45 @@ var Environment = Obj.extend({
         }
 
         NunjucksView.prototype.render = function(opts, cb) {
-            env.render(this.name, opts, cb);
+          env.render(this.name, opts, cb);
         };
 
         app.set('view', NunjucksView);
     },
 
-    expressRender: function(name, opts, cb) {
-        this.render(name, {}, cb);
-    },
-
     render: function(name, ctx, cb) {
+        if(lib.isFunction(ctx)) {
+            cb = ctx;
+            ctx = null;
+        }
+
+        // We support a synchronous API to make it easier to migrate
+        // existing code to async. This works because if you don't do
+        // anything async work, the whole thing is actually run
+        // synchronously.
+        var syncResult = null;
+
         this.getTemplate(name, function(err, tmpl) {
-            if(err) {
+            if(err && cb) {
                 cb(err);
             }
+            else if(err) {
+                throw err;
+            }
             else {
-                tmpl.render(ctx, cb);
+                tmpl.render(ctx, cb || function(err, res) {
+                    if(err) { throw err; }
+                    syncResult = res;
+                });
             }
         });
+
+        return syncResult;
+    },
+
+    renderString: function(src, ctx, cb) {
+        var tmpl = new Template(src, this);
+        return tmpl.render(ctx, cb);
     }
 });
 
@@ -4572,29 +4764,27 @@ var Template = Obj.extend({
             frame = null;
         }
 
-        if(!cb) {
-            throw new Error("you must specify a callback to `render`");
-        }
-
         return lib.withPrettyErrors(this.path, this.env.dev, function() {
-            if(!this.compiled) {
-                this._compile();
-            }
+            this.compile();
 
             var context = new Context(ctx || {}, this.blocks);
+            var syncResult = null;
 
             this.rootRenderFunc(this.env,
                                 context,
                                 frame || new Frame(),
                                 runtime,
-                                cb);
+                                cb || function(err, res) {
+                                    if(err) { throw err; }
+                                    syncResult = res;
+                                });
+
+            return syncResult;
         }.bind(this));
     },
 
     getExported: function(cb) {
-        if(!this.compiled) {
-            this._compile();
-        }
+        this.compile();
 
         // Run the rootRenderFunc to populate the context with exported vars
         var context = new Context({}, this.blocks);
@@ -4605,6 +4795,12 @@ var Template = Obj.extend({
                             function() {
                                 cb(null, context.getExported());
                             });
+    },
+
+    compile: function() {
+        if(!this.compiled) {
+            this._compile();
+        }
     },
 
     _compile: function() {
@@ -4640,8 +4836,34 @@ var Template = Obj.extend({
     }
 });
 
-// var src = '{% block content %}{% include "async.html" %}{% endblock %}';
-// var env = new Environment(new builtin_loaders.FileSystemLoader('tests/templates'), { dev: true });
+// test code
+// var src = 'hello {% foo baz | bar %}hi{% endfoo %} end';
+// var env = new Environment(new builtin_loaders.FileSystemLoader('tests/templates', true), { dev: true });
+
+// function FooExtension() {
+//     this.tags = ['foo'];
+//     this._name = 'FooExtension';
+
+//     this.parse = function(parser, nodes) {
+//         var tok = parser.nextToken();
+//         var args = parser.parseSignature(null, true);
+//         parser.advanceAfterBlockEnd(tok.value);
+
+//         var body = parser.parseUntilBlocks('endfoo');
+//         parser.advanceAfterBlockEnd();
+
+//         return new nodes.CallExtensionAsync(this, 'run', args, [body]);
+//     };
+
+//     this.run = function(context, baz, body, cb) {
+//         cb(null, baz + '--' + body());
+//     };
+// }
+
+// env.addExtension('FooExtension', new FooExtension());
+// env.addFilter('bar', function(val, cb) {
+//     cb(null, val + '22222');
+// }, true);
 
 // var ctx = {};
 // var tmpl = new Template(src, env, null, null, true);
@@ -4661,6 +4883,7 @@ modules['environment'] = {
 })();
 var nunjucks;
 
+var lib = modules["lib"];
 var env = modules["environment"];
 var compiler = modules["compiler"];
 var parser = modules["parser"];
@@ -4668,6 +4891,7 @@ var lexer = modules["lexer"];
 var runtime = modules["runtime"];
 var Loader = modules["loader"];
 var loaders = modules["loaders"];
+var precompile = modules["precompile"];
 
 nunjucks = {};
 nunjucks.Environment = env.Environment;
@@ -4684,25 +4908,44 @@ nunjucks.runtime = runtime;
 
 // A single instance of an environment, since this is so commonly used
 
-var e = new env.Environment();
-nunjucks.configure = function(dirOrURL, opts) {
-    if(typeof dirOrURL != 'string') {
-        throw new Error('must pass templates path or URL to `configure` ' +
-                        'as first argument');
+var e;
+nunjucks.configure = function(templatesPath, opts) {
+    opts = opts || {};
+    if(lib.isObject(templatesPath)) {
+        opts = templatesPath;
+        templatesPath = null;
     }
 
-    e = new env.Environment(new (loaders.FileSystemLoader || loaders.WebLoader)(dirOrURL),
-                            opts);
+    var loader = loaders.FileSystemLoader || loaders.WebLoader;
+    e = new env.Environment(new loader(templatesPath, opts.watch), opts);
 
     if(opts && opts.express) {
         e.express(opts.express);
     }
+
     return e;
 };
 
 nunjucks.render = function(name, ctx, cb) {
-    e.render(name, ctx, cb);
+    if(!e) {
+        nunjucks.configure();
+    }
+
+    return e.render(name, ctx, cb);
 };
+
+nunjucks.renderString = function(src, ctx, cb) {
+    if(!e) {
+        nunjucks.configure();
+    }
+
+    return e.renderString(src, ctx, cb);
+};
+
+if(precompile) {
+    nunjucks.precompile = precompile.precompile;
+    nunjucks.precompileString = precompile.precompileString;
+}
 
 nunjucks.require = function(name) { return modules[name]; };
 

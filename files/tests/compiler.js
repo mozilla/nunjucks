@@ -74,7 +74,7 @@
 
         it('should compile function calls with correct scope', function(done) {
             equal('{{ foo.bar() }}', {
-                foo: { 
+                foo: {
                     bar: function() { return this.baz; },
                     baz: 'hello'
                 }
@@ -140,75 +140,95 @@
             finish(done);
         });
 
-        function runLoopTests(block) {
-            equal('{% ' + block + ' i in arr %}{{ i }}{% endfor %}',
+        function runLoopTests(block, end) {
+            equal('{% ' + block + ' i in arr %}{{ i }}{% ' + end + ' %}',
                   { arr: [1, 2, 3, 4, 5] }, '12345');
 
             equal('{% ' + block + ' a, b, c in arr %}' +
-                       '{{ a }},{{ b }},{{ c }}.{% endfor %}',
+                       '{{ a }},{{ b }},{{ c }}.{% ' + end + ' %}',
                   { arr: [['x', 'y', 'z'], ['1', '2', '3']] }, 'x,y,z.1,2,3.');
 
-            equal('{% ' + block + ' item in arr | batch(2) %}{{ item[0] }}{% endfor %}',
+            equal('{% ' + block + ' item in arr | batch(2) %}{{ item[0] }}{% ' + end + ' %}',
                   { arr: ['a', 'b', 'c', 'd'] }, 'ac');
 
             equal('{% ' + block + ' k, v in { one: 1, two: 2 } %}' +
-                  '-{{ k }}:{{ v }}-{% endfor %}', '-one:1--two:2-');
+                  '-{{ k }}:{{ v }}-{% ' + end + ' %}', '-one:1--two:2-');
 
-            equal('{% ' + block + ' i in [7,3,6] %}{{ loop.index }}{% endfor %}', '123');
-            equal('{% ' + block + ' i in [7,3,6] %}{{ loop.index0 }}{% endfor %}', '012');
-            equal('{% ' + block + ' i in [7,3,6] %}{{ loop.revindex }}{% endfor %}', '321');
-            equal('{% ' + block + ' i in [7,3,6] %}{{ loop.revindex0 }}{% endfor %}', '210');
-            equal('{% ' + block + ' i in [7,3,6] %}{% if loop.first %}{{ i }}{% endif %}{% endfor %}', 
+            equal('{% ' + block + ' i in [7,3,6] %}{{ loop.index }}{% ' + end + ' %}', '123');
+            equal('{% ' + block + ' i in [7,3,6] %}{{ loop.index0 }}{% ' + end + ' %}', '012');
+            equal('{% ' + block + ' i in [7,3,6] %}{{ loop.revindex }}{% ' + end + ' %}', '321');
+            equal('{% ' + block + ' i in [7,3,6] %}{{ loop.revindex0 }}{% ' + end + ' %}', '210');
+            equal('{% ' + block + ' i in [7,3,6] %}{% if loop.first %}{{ i }}{% endif %}{% ' + end + ' %}',
                   '7');
-            equal('{% ' + block + ' i in [7,3,6] %}{% if loop.last %}{{ i }}{% endif %}{% endfor %}',
+            equal('{% ' + block + ' i in [7,3,6] %}{% if loop.last %}{{ i }}{% endif %}{% ' + end + ' %}',
                   '6');
-            equal('{% ' + block + ' i in [7,3,6] %}{{ loop.length }}{% endfor %}', '333');
-            equal('{% ' + block + ' i in foo %}{{ i }}{% endfor %}', '');
-            equal('{% ' + block + ' i in foo.bar %}{{ i }}{% endfor %}', { foo: {} }, '');
-            equal('{% ' + block + ' i in foo %}{{ i }}{% endfor %}', { foo: null }, '');
+            equal('{% ' + block + ' i in [7,3,6] %}{{ loop.length }}{% ' + end + ' %}', '333');
+            equal('{% ' + block + ' i in foo %}{{ i }}{% ' + end + ' %}', '');
+            equal('{% ' + block + ' i in foo.bar %}{{ i }}{% ' + end + ' %}', { foo: {} }, '');
+            equal('{% ' + block + ' i in foo %}{{ i }}{% ' + end + ' %}', { foo: null }, '');
 
-            equal('{% ' + block + ' x, y in points %}[{{ x }},{{ y }}]{% endfor %}',
+            equal('{% ' + block + ' x, y in points %}[{{ x }},{{ y }}]{% ' + end + ' %}',
                   { points: [[1,2], [3,4], [5,6]] },
                   '[1,2][3,4][5,6]');
 
-            equal('{% ' + block + ' x, y in points %}{{ loop.index }}{% endfor %}',
+            equal('{% ' + block + ' x, y in points %}{{ loop.index }}{% ' + end + ' %}',
                   { points: [[1,2], [3,4], [5,6]] },
                   '123');
 
-            equal('{% ' + block + ' x, y in points %}{{ loop.revindex }}{% endfor %}',
+            equal('{% ' + block + ' x, y in points %}{{ loop.revindex }}{% ' + end + ' %}',
                   { points: [[1,2], [3,4], [5,6]] },
                   '321');
 
-            equal('{% ' + block + ' k, v in items %}({{ k }},{{ v }}){% endfor %}',
+            equal('{% ' + block + ' k, v in items %}({{ k }},{{ v }}){% ' + end + ' %}',
                   { items: { foo: 1, bar: 2 }},
                   '(foo,1)(bar,2)');
 
-            equal('{% ' + block + ' k, v in items %}{{ loop.index }}{% endfor %}',
+            equal('{% ' + block + ' k, v in items %}{{ loop.index }}{% ' + end + ' %}',
                   { items: { foo: 1, bar: 2 }},
                   '12');
 
-            equal('{% ' + block + ' k, v in items %}{{ loop.revindex }}{% endfor %}',
+            equal('{% ' + block + ' k, v in items %}{{ loop.revindex }}{% ' + end + ' %}',
                   { items: { foo: 1, bar: 2 }},
                   '21');
 
-            equal('{% ' + block + ' k, v in items %}{{ loop.length }}{% endfor %}',
+            equal('{% ' + block + ' k, v in items %}{{ loop.length }}{% ' + end + ' %}',
                   { items: { foo: 1, bar: 2 }},
                   '22');
+
+            render('{% set item = passed_var %}' +
+                   '{% include "item.html" %}\n' +
+                   '{% ' + block + ' i in passed_iter %}' +
+                     '{% set item = i %}' +
+                     '{% include "item.html" %}\n' +
+                   '{% ' + end + ' %}',
+                   {
+                     passed_var: 'test',
+                     passed_iter: ['1', '2', '3']
+                   },
+                   {},
+                   function(err, res) {
+                       expect(res).to.be('showing test\nshowing 1\nshowing 2\nshowing 3\n');
+                   });
         }
 
         it('should compile for blocks', function(done) {
-            runLoopTests('for');
+            runLoopTests('for', 'endfor');
             finish(done);
         });
 
-        it('should compile for async', function(done) {
-            runLoopTests('forAsync');            
+        it('should compile asyncEach', function(done) {
+            runLoopTests('asyncEach', 'endeach');
+            finish(done);
+        });
+
+        it('should compile asyncAll', function(done) {
+            runLoopTests('asyncAll', 'endall');
             finish(done);
         });
 
         it('should compile async control', function(done) {
             if(fs) {
-                var opts = { 
+                var opts = {
                     asyncFilters: {
                         getContents: function(tmpl, cb) {
                             fs.readFile(tmpl, cb);
@@ -287,11 +307,22 @@
                            expect(res).to.be('somecontenthere\n');
                        });
 
-                render('{% forAsync i in [0, 1] %}{% include "async.html" %}{% endfor %}',
+                render('{% asyncEach i in [0, 1] %}{% include "async.html" %}{% endeach %}',
                        { tmpl: 'tests/templates/for-async-content.html' },
                        opts,
                        function(err, res) {
                            expect(res).to.be('somecontenthere\nsomecontenthere\n');
+                       });
+
+                render('{% asyncAll i in [0, 1, 2, 3, 4] %}-{{ i }}:{% include "async.html" %}-{% endall %}',
+                       { tmpl: 'tests/templates/for-async-content.html' },
+                       opts,
+                       function(err, res) {
+                           expect(res).to.be('-0:somecontenthere\n-' +
+                                             '-1:somecontenthere\n-' +
+                                             '-2:somecontenthere\n-' +
+                                             '-3:somecontenthere\n-' +
+                                             '-4:somecontenthere\n-');
                        });
             }
 
@@ -304,7 +335,7 @@
             equal('{{ 9//5 }}', '1');
             equal('{{ 9%5 }}', '4');
             equal('{{ -5 }}', '-5');
-            
+
             equal('{% if 3 < 4 %}yes{% endif %}', 'yes');
             equal('{% if 3 > 4 %}yes{% endif %}', '');
             equal('{% if 9 >= 10 %}yes{% endif %}', '');
@@ -315,7 +346,7 @@
 
             equal('{% if 10 != 10 %}yes{% endif %}', '');
             equal('{% if 10 == 10 %}yes{% endif %}', 'yes');
-            
+
             equal('{% if foo(20) > bar %}yes{% endif %}',
                   { foo: function(n) { return n - 1; },
                     bar: 15 },
@@ -404,7 +435,7 @@
                   "Here's a macro baz");
 
             equal('{% from "import.html" import foo as baz, bar %}' +
-                  '{{ bar }} {{ baz() }}', 
+                  '{{ bar }} {{ baz() }}',
                   "baz Here's a macro");
 
             // TODO: Should the for loop create a new frame for each
@@ -438,7 +469,7 @@
                   'FooBarBazFizzle');
 
             var count = 0;
-            render('{% extends "base.html" %}' + 
+            render('{% extends "base.html" %}' +
                    '{% block notReal %}{{ foo() }}{% endblock %}',
                    { foo: function() { count++; }},
                    function(err, res) {
@@ -461,7 +492,7 @@
                   '{% block block1 %}{{ super() }}BAR{% endblock %}',
                   'FooBarBARBazFizzle');
 
-            // two levels of `super` should work 
+            // two levels of `super` should work
             equal('{% extends "base-inherit.html" %}' +
                   '{% block block1 %}*{{ super() }}*{% endblock %}',
                   'Foo**Bar**BazFizzle');
@@ -532,6 +563,10 @@
             equal('{% include "set.html" %}{{ foo }}',
                   { foo: 'bar' },
                   'bar');
+
+            equal('{% set username = username + "pasta" %}{{ username }}',
+                  { username: 'basta' },
+                  'bastapasta');
 
             finish(done);
         });
@@ -663,7 +698,7 @@
             });
 
             render('{% test %}abcdefg{% intermediate %}second half{% endtest %}',
-                   null, 
+                   null,
                    opts,
                    function(err, res) {
                        expect(res).to.be('a,b,c,d,e,f,gflah dnoces');
