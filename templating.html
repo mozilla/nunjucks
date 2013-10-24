@@ -195,8 +195,8 @@ They are called with a pipe operator (<code>|</code>) and can take arguments.</p
 &quot;Bar&quot;, by first replacing &quot;foo&quot; with &quot;bar&quot; and then capitalizing it.</p>
 
 <p>Nunjucks comes with several
-<a href="/templating#Builtin-Filters">builtin filters</a>, and you can
-<a href="/api#Registering-custom-filters">add your own</a> as well.</p>
+<a href="#builtin-filters">builtin filters</a>, and you can
+<a href="api#Registering-custom-filters">add your own</a> as well.</p>
 
 <h2 id="template-inheritance">Template Inheritance</h2>
 
@@ -323,7 +323,7 @@ template. Nunjucks comes with several builtin, but <a href="api.html#custom-tags
 
 <blockquote>
 <p>This is only applicable to asynchronous templates. Read about
-them <a href="/api.html#asynchronous-support">here</a></p>
+them <a href="api.html#asynchronous-support">here</a></p>
 </blockquote>
 
 <p><code>asyncEach</code> is an asynchronous version of <code>for</code>. You only need this if
@@ -356,7 +356,7 @@ asynchronously inside the loop.</p>
 
 <blockquote>
 <p>This is only applicable to asynchronous templates. Read about
-them <a href="/api.html#asynchronous-support">here</a></p>
+them <a href="api.html#asynchronous-support">here</a></p>
 </blockquote>
 
 <p><code>asyncAll</code> is similar to <code>asyncEach</code>, except it renders all the items
@@ -394,9 +394,9 @@ all the items are done.</p>
 <div class="highlight"><pre><code class="jinja language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">field</span><span class="o">(</span><span class="s1">&#39;user&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
 <span class="cp">{{</span> <span class="nv">field</span><span class="o">(</span><span class="s1">&#39;pass&#39;</span><span class="o">,</span> <span class="nv">type</span><span class="o">=</span><span class="s1">&#39;password&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
 </code></pre></div>
-<p>Keyword/default arguments are available. See <a href="/templating#Keyword-Arguments">keyword arguments</a> for a more detailed explanation.</p>
+<p>Keyword/default arguments are available. See <a href="#keyword-arguments">keyword arguments</a> for a more detailed explanation.</p>
 
-<p>You can <a href="/templating#Import">import</a> macros from other templates, allowing you to reuse them freely across your project.</p>
+<p>You can <a href="#import">import</a> macros from other templates, allowing you to reuse them freely across your project.</p>
 
 <h3 id="set">set</h3>
 
@@ -509,7 +509,7 @@ blocks and child templates can override them with new content. See
 <p><code>bar</code> and <code>baz</code> are keyword arguments. Nunjucks converts them into a hash and passes it as the last argument. It&#39;s equivalent to this call in javascript:</p>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="nx">foo</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="p">{</span> <span class="nx">bar</span><span class="o">:</span> <span class="mi">3</span><span class="p">,</span> <span class="nx">baz</span><span class="o">:</span> <span class="mi">4</span><span class="p">})</span>
 </code></pre></div>
-<p>Since this is a standard calling convention, it works for all functions and filters if they are written to expect them. <a href="/api#Keyword-Arguments">Read more</a> about this in the API section.</p>
+<p>Since this is a standard calling convention, it works for all functions and filters if they are written to expect them. <a href="api#Keyword-Arguments">Read more</a> about this in the API section.</p>
 
 <p>Macros allow you to also use keyword arguments in the definition, which allows you to specify default values. Nunjucks automatically maps the keyword arguments to the ones defined with the macro.</p>
 <div class="highlight"><pre><code class="text language-text" data-lang="text">{% macro foo(x, y, z=5, w=6) %}
