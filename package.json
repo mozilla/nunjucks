@@ -1,6 +1,6 @@
 {
     "name": "nunjucks",
-    "description": "A jinja inspired templating engine",
+    "description": "A powerful templating engine with inheritance, asynchronous control, and more (jinja2 inspired)",
     "version": "1.0.0",
     "author": {
         "name": "James Long",
