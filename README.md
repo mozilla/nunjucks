@@ -20,7 +20,7 @@ templating engine for javascript. It is heavily inspired by
 
 See [here](http://jlongster.github.io/nunjucks/).
 
-Run all the tests at http://jlongster.github.io/nunjucks/tests/browser/.
+Run all the tests at http://jlongster.github.io/nunjucks/files/tests/browser/.
 
 ## Mailing List
 
