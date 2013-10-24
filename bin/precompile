@@ -44,7 +44,7 @@ if (argv.help) {
 var env = new Environment([]);
 
 lib.each([].concat(argv.filters).join(',').split(','), function(name) {
-    env.addFilter(name, function() {}, true);
+    env.addFilter(name.trim(), function() {}, true);
 });
 
 console.log(precompile(argv._[0], {

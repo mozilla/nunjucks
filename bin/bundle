@@ -1,8 +1,10 @@
 #!/bin/sh
 
 ROOT=`dirname "$0"`
-output="$1"
+VERSION=`node -e "var fs = require('fs'); var p = JSON.parse(fs.readFileSync('./package.json')); console.log(p.version)"`
+TYPE=""
 
+output="$1"
 if [ -z "$SLIM" ]; then
     # Listed in order of dependency
     files="object.js lib.js nodes.js runtime.js lexer.js parser.js transformer.js
@@ -12,10 +14,12 @@ else
     # Listed in order of dependency
     files="object.js lib.js runtime.js loader.js web-loaders.js loaders.js filters.js 
        globals.js environment.js"
+    TYPE="(slim, only works with precompiled templates)"
 fi
 
 rm -f "$output"
 
+echo "// Browser bundle of nunjucks $VERSION $TYPE\n" >> "$output"
 echo "(function() {" >> "$output"
 echo "var modules = {};" >> "$output"
 

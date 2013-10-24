@@ -201,8 +201,11 @@ var Environment = Obj.extend({
         var syncResult = null;
 
         this.getTemplate(name, function(err, tmpl) {
-            if(err) {
+            if(err && cb) {
                 cb(err);
+            }
+            else if(err) {
+                throw err;
             }
             else {
                 tmpl.render(ctx, cb || function(err, res) {

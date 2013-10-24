@@ -58,5 +58,7 @@ module.exports.renderString = function(src, ctx, cb) {
     return e.renderString(src, ctx, cb);
 };
 
-module.exports.precompile = precompile.precompile;
-module.exports.precompileString = precompile.precompileString;
+if(precompile) {
+    module.exports.precompile = precompile.precompile;
+    module.exports.precompileString = precompile.precompileString;
+}

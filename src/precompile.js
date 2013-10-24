@@ -12,6 +12,7 @@ function match(filename, patterns) {
 }
 
 function precompileString(str, opts) {
+    opts = opts || {};
     opts.isString = true;
     return precompile(str, opts);
 }
@@ -48,7 +49,7 @@ function precompile(input, opts) {
     }
     else if(pathStats.isFile()) {
         return _precompile(fs.readFileSync(input, 'utf-8'),
-                          opts.name || input,
+                           opts.name || input,
                            env,
                            opts.asFunction);
     }

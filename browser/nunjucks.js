@@ -1,3 +1,5 @@
+// Browser bundle of nunjucks 1.0.0 
+
 (function() {
 var modules = {};
 (function() {
@@ -2611,8 +2613,9 @@ function _liftFilters(node, asyncFilters, prop) {
         if(node instanceof nodes.Block) {
             return node;
         }
-        else if(node instanceof nodes.Filter &&
-                asyncFilters.indexOf(node.name.value) !== -1) {
+        else if((node instanceof nodes.Filter &&
+                 asyncFilters.indexOf(node.name.value) !== -1) ||
+                node instanceof nodes.CallExtensionAsync) {
             var symbol = new nodes.Symbol(node.lineno,
                                           node.colno,
                                           gensym());
@@ -4629,8 +4632,11 @@ var Environment = Obj.extend({
         var syncResult = null;
 
         this.getTemplate(name, function(err, tmpl) {
-            if(err) {
+            if(err && cb) {
                 cb(err);
+            }
+            else if(err) {
+                throw err;
             }
             else {
                 tmpl.render(ctx, cb || function(err, res) {
@@ -4936,8 +4942,10 @@ nunjucks.renderString = function(src, ctx, cb) {
     return e.renderString(src, ctx, cb);
 };
 
-nunjucks.precompile = precompile.precompile;
-nunjucks.precompileString = precompile.precompileString;
+if(precompile) {
+    nunjucks.precompile = precompile.precompile;
+    nunjucks.precompileString = precompile.precompileString;
+}
 
 nunjucks.require = function(name) { return modules[name]; };
 

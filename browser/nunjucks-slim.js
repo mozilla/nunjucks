@@ -1,3 +1,5 @@
+// Browser bundle of nunjucks 1.0.0 (slim, only works with precompiled templates)
+
 (function() {
 var modules = {};
 (function() {
@@ -1458,8 +1460,11 @@ var Environment = Obj.extend({
         var syncResult = null;
 
         this.getTemplate(name, function(err, tmpl) {
-            if(err) {
+            if(err && cb) {
                 cb(err);
+            }
+            else if(err) {
+                throw err;
             }
             else {
                 tmpl.render(ctx, cb || function(err, res) {
@@ -1765,8 +1770,10 @@ nunjucks.renderString = function(src, ctx, cb) {
     return e.renderString(src, ctx, cb);
 };
 
-nunjucks.precompile = precompile.precompile;
-nunjucks.precompileString = precompile.precompileString;
+if(precompile) {
+    nunjucks.precompile = precompile.precompile;
+    nunjucks.precompileString = precompile.precompileString;
+}
 
 nunjucks.require = function(name) { return modules[name]; };
 

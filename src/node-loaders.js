@@ -23,12 +23,14 @@ var FileSystemLoader = Loader.extend({
             // Watch all the templates in the paths and fire an event when
             // they change
             lib.each(this.searchPaths, function(p) {
-                fs.watch(p, { persistent: false }, function(event, filename) {
-                    var fullname = path.join(p, filename);
-                    if(event == 'change' && fullname in this.pathsToNames) {
-                        this.emit('update', this.pathsToNames[fullname]);
-                    }
-                }.bind(this));
+                if(existsSync(p)) {
+                    fs.watch(p, { persistent: false }, function(event, filename) {
+                        var fullname = path.join(p, filename);
+                        if(event == 'change' && fullname in this.pathsToNames) {
+                            this.emit('update', this.pathsToNames[fullname]);
+                        }
+                    }.bind(this));
+                }
             }.bind(this));
         }
     },
@@ -39,7 +41,11 @@ var FileSystemLoader = Loader.extend({
 
         for(var i=0; i<paths.length; i++) {
             var p = path.join(paths[i], name);
-            if(p.indexOf(paths[i]) === 0 && existsSync(p)) {
+
+            // Only allow the current directory and anything
+            // underneath it to be searched
+            if((paths[i] == '.' || p.indexOf(paths[i]) === 0) &&
+               existsSync(p)) {
                 fullpath = p;
                 break;
             }

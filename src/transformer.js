@@ -92,8 +92,9 @@ function _liftFilters(node, asyncFilters, prop) {
         if(node instanceof nodes.Block) {
             return node;
         }
-        else if(node instanceof nodes.Filter &&
-                asyncFilters.indexOf(node.name.value) !== -1) {
+        else if((node instanceof nodes.Filter &&
+                 asyncFilters.indexOf(node.name.value) !== -1) ||
+                node instanceof nodes.CallExtensionAsync) {
             var symbol = new nodes.Symbol(node.lineno,
                                           node.colno,
                                           gensym());
