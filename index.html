@@ -110,9 +110,9 @@
 
 {% <span>block</span> content %}
 &lt;ul&gt;
-{% <span>for</span> name, item in items %}
-&lt;li&gt;{{ name }}: {{ item }}&lt;/li&gt;
-{% <span>endfor</span> %}
+  {% <span>for</span> name, item in items %}
+  &lt;li&gt;{{ name }}: {{ item }}&lt;/li&gt;
+  {% <span>endfor</span> %}
 &lt;/ul&gt;
 {% <span>endblock</span> %}
       </pre>
