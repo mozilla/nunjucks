@@ -37,6 +37,13 @@ blockquote p:first-of-type {
     font-size: 1.25em;
 }
 
+.twitter {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin-top: 1em;
+}
+
 .navbar-default {
     padding-right: 10%;
     padding-left: 10%;
