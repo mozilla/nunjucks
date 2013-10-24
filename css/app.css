@@ -42,6 +42,7 @@ blockquote p:first-of-type {
     top: 0;
     right: 0;
     margin-top: 1em;
+    z-index: 300;
 }
 
 .navbar-default {
