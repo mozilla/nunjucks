@@ -6,15 +6,16 @@ templating engine for javascript. It is heavily inspired by
 [jinja2](http://jinja.pocoo.org/). View the docs
 [here](http://jlongster.github.io/nunjucks/).
 
-**Note**: 1.0 was just pushed out and the client-side browser
-  filenames have changed. [Read
-  here](http://jlongster.github.io/nunjucks/getting-started.html).
-
 ## Installation
 
 `npm install nunjucks`
 
 (View the [CHANGELOG](https://github.com/jlongster/nunjucks/blob/master/CHANGELOG.md))
+
+**Note**: 1.0 was just pushed out, so if you are currently using
+  nunjucks read the CHANGELOG. Especially important: the client-side
+  browser filenames have changed. [Read
+  here](http://jlongster.github.io/nunjucks/getting-started.html).
 
 ## Documentation
 
