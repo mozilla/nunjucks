@@ -73,7 +73,7 @@ var Parser = Object.extend({
 
     expect: function(type) {
         var tok = this.nextToken();
-        if(!tok.type == type) {
+        if(tok.type !== type) {
             this.fail('expected ' + type + ', got ' + tok.type,
                       tok.lineno,
                       tok.colno);
