@@ -4,8 +4,25 @@
   <meta charset="utf-8">
   <title>Mocha Tests</title>
   <link rel="stylesheet" href="mocha.css" />
+  <style type="text/css">
+    div.note {
+      font-size: .8em;
+      width: 50%;
+    }
+  </style>
 </head>
 <body>
+  <div class="note">
+    Tests do not indicate performance. They are much slower because a
+    new environment is created for every single template and is
+    recompiled from scratch, and you can see there are
+    <a href="https://github.com/jlongster/nunjucks/blob/master/tests/compiler.js">quite</a>
+    a
+    <a href="https://github.com/jlongster/nunjucks/blob/master/tests/parser.js">lot</a>
+    of
+    <a href="https://github.com/jlongster/nunjucks/tree/master/tests">tests</a>.
+  </div>
+
   <div id="mocha"></div>
 
   <script src="expect.js"></script>
