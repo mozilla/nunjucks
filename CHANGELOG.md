@@ -1,5 +1,8 @@
 Changelog for versions previous to v0.1.9 are located at http://nunjucks.tumblr.com/.
 
+TODO: Document SafeString and writing filters with them
+TODO: source maps
+
 # v1.0.0 (October 24, 2013)
 
 We've hit 1.0! Thanks for helping nunjucks stabilize and become
