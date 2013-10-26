@@ -229,7 +229,7 @@ See <a href="#asynchronous-support">asynchronous support</a> for more info.</p>
 
 <div class="api-desc"><p>Same as <a href="#render"><code>render</code></a>, but renders a raw string instead of
 loading a template.</p>
-<div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="kd">var</span> <span class="nx">res</span> <span class="o">=</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="s1">&#39;Hello {{ username }}&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">username</span><span class="o">:</span> <span class="s1">&#39;James&#39;</span> <span class="p">});</span>
+<div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="kd">var</span> <span class="nx">res</span> <span class="o">=</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">renderString</span><span class="p">(</span><span class="s1">&#39;Hello {{ username }}&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">username</span><span class="o">:</span> <span class="s1">&#39;James&#39;</span> <span class="p">});</span>
 </code></pre></div>
 </div>
 
@@ -355,8 +355,8 @@ loading a template.</p>
 
 <div class="api-desc"><p>Add a custom filter named <strong>name</strong> which calls <strong>func</strong> whenever
 invoked. If the filter needs to be async, <strong>async</strong> must be <code>true</code>
-(see <a href="#asynchronous-support">asynchronous support</a>). See <a
-href="/api.html#custom-filters">Custom Filters</a>.</p>
+(see <a href="#asynchronous-support">asynchronous support</a>). See 
+<a href="#custom-filters">Custom Filters</a>.</p>
 </div>
 
 <h3 id="getfilter">getFilter</h3>
