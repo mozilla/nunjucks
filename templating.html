@@ -241,6 +241,11 @@ override. The inheritance chain can be as long as you like.</p>
 <span class="x">  This is the right side!</span>
 <span class="x">&lt;/section&gt;  </span>
 </code></pre></div>
+<p>You can store the template to inherit in a variable and use it by
+emitting quotes. That way you can dynamically change which template is
+inherited when rendering by setting it in the context.</p>
+<div class="highlight"><pre><code class="jinja language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">extends</span> <span class="nv">parentTemplate</span> <span class="cp">%}</span><span class="x"></span>
+</code></pre></div>
 <p>You leverage inheritance with the <a href="#extends"><code>extends</code></a> and
 <a href="#block"><code>block</code></a> tags. A more detailed explanation of inheritance can
 be found in the <a href="http://jinja.pocoo.org/docs/templates/#template-inheritance">jinja2
@@ -419,9 +424,9 @@ template is used as a base template. See <a href="#template-inheritance">Templat
 Inheritance</a>.</p>
 <div class="highlight"><pre><code class="jinja language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">extends</span> <span class="s2">&quot;base.html&quot;</span> <span class="cp">%}</span><span class="x"></span>
 </code></pre></div>
-<p>You can use a variable too by emitting quotes. That way you can
-dynamically change which template is inherited when rendering by
-setting it in the context.</p>
+<p>You can store the template to inherit in a variable and use it by
+emitting quotes. That way you can dynamically change which template is
+inherited when rendering by setting it in the context.</p>
 <div class="highlight"><pre><code class="jinja language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">extends</span> <span class="nv">parentTemplate</span> <span class="cp">%}</span><span class="x"></span>
 </code></pre></div>
 <h3 id="block">block</h3>
