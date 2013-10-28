@@ -51,8 +51,9 @@ var filters = {
         return r.copySafeness(str, pre + str + post);
     },
 
-    'default': function(val, def) {
-        return val ? val : def;
+    'default': function(val, def, bool) {
+        var useVal = bool ? val : (val !== undefined);
+        return useVal ? val : def;
     },
 
     dictsort: function(val, case_sensitive, by) {

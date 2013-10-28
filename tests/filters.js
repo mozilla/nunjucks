@@ -52,8 +52,11 @@
         });
 
         it('default', function(done) {
-            equal('{{ false | default("foo") }}', 'foo');
+            equal('{{ false | default("foo", true) }}', 'foo');
+            equal('{{ false | default("foo", false) }}', 'false');
+            equal('{{ false | default("foo") }}', 'false');
             equal('{{ "bar" | default("foo") }}', 'bar');
+            equal('{{ undefined | default("foo") }}', 'foo');
             finish(done);
         });
 
