@@ -2,8 +2,7 @@
     "name": "nunjucks",
     "description": "A powerful templating engine with inheritance, asynchronous control, and more (jinja2 inspired)",
     "version": "1.0.0",
-    "author": {
-        "name": "James Long",
+    "author": "James Long <longster@gmail.com>",
         "email": "longster@gmail.com"
     },
     "dependencies": {
@@ -23,6 +22,16 @@
     "bin": {
         "nunjucks-precompile": "./bin/precompile"
     },
-    "main": "index"
+    "main": "index",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/jlongster/nunjucks.git"
+    },
+    "license": [{
+        "type": "BSD",
+        "url": "https://github.com/jlongster/nunjucks/blob/master/LICENSE"
+    }],
+    "bugs": {
+        "url": "https://github.com/jlongster/nunjucks/issues"
+    }
 }
-
