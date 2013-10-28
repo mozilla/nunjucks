@@ -3,8 +3,6 @@
     "description": "A powerful templating engine with inheritance, asynchronous control, and more (jinja2 inspired)",
     "version": "1.0.0",
     "author": "James Long <longster@gmail.com>",
-        "email": "longster@gmail.com"
-    },
     "dependencies": {
         "optimist": "*"
     },
