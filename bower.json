@@ -1,7 +1,7 @@
 {
   "name": "nunjucks",
-  "version": "0.1.9",
-  "main": "browser/nunjucks-min.js",
+  "version": "1.0.0",
+  "main": "browser/nunjucks.min.js",
   "ignore": [
     "Makefile",
     "package.json",
