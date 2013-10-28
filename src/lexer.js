@@ -338,12 +338,6 @@ Tokenizer.prototype.forward = function() {
     }
 };
 
-Tokenizer.prototype.backN = function(n) {
-    for(var i=0; i<n; i++) {
-        self.back();
-    }
-};
-
 Tokenizer.prototype.back = function() {
     this.index--;
 
