@@ -45,7 +45,7 @@ var WebLoader = Loader.extend({
         }
 
         ajax.onreadystatechange = function() {
-            if(ajax.readyState == 4 && ajax.status == 200 && loading) {
+            if(ajax.readyState === 4 && (ajax.status === 0 || ajax.status === 200) && loading) {
                 loading = false;
                 src = ajax.responseText;
             }
