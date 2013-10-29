@@ -2,8 +2,11 @@ Changelog for versions previous to v0.1.9 are located at http://nunjucks.tumblr.
 
 Next version:
 
-* Document SafeString and writing filters with them
+* document SafeString and writing filters with them
+* document app.locals with express
 * source maps
+* publish in bower
+* cleanup WebLoader.fetch
 
 # v1.0.0 (October 24, 2013)
 

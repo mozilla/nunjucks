@@ -1340,12 +1340,6 @@ Tokenizer.prototype.forward = function() {
     }
 };
 
-Tokenizer.prototype.backN = function(n) {
-    for(var i=0; i<n; i++) {
-        self.back();
-    }
-};
-
 Tokenizer.prototype.back = function() {
     this.index--;
 
@@ -1491,7 +1485,7 @@ var Parser = Object.extend({
 
     expect: function(type) {
         var tok = this.nextToken();
-        if(!tok.type == type) {
+        if(tok.type !== type) {
             this.fail('expected ' + type + ', got ' + tok.type,
                       tok.lineno,
                       tok.colno);
@@ -4398,7 +4392,7 @@ var WebLoader = Loader.extend({
         }
 
         ajax.onreadystatechange = function() {
-            if(ajax.readyState == 4 && ajax.status == 200 && loading) {
+            if(ajax.readyState === 4 && (ajax.status === 0 || ajax.status === 200) && loading) {
                 loading = false;
                 src = ajax.responseText;
             }
@@ -4916,8 +4910,9 @@ nunjucks.configure = function(templatesPath, opts) {
         templatesPath = null;
     }
 
+    var watch = 'watch' in opts ? !opts.watch : true;
     var loader = loaders.FileSystemLoader || loaders.WebLoader;
-    e = new env.Environment(new loader(templatesPath, opts.watch), opts);
+    e = new env.Environment(new loader(templatesPath, watch), opts);
 
     if(opts && opts.express) {
         e.express(opts.express);

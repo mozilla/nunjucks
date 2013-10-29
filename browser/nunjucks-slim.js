@@ -770,7 +770,7 @@ var WebLoader = Loader.extend({
         }
 
         ajax.onreadystatechange = function() {
-            if(ajax.readyState == 4 && ajax.status == 200 && loading) {
+            if(ajax.readyState === 4 && (ajax.status === 0 || ajax.status === 200) && loading) {
                 loading = false;
                 src = ajax.responseText;
             }
@@ -1744,8 +1744,9 @@ nunjucks.configure = function(templatesPath, opts) {
         templatesPath = null;
     }
 
+    var watch = 'watch' in opts ? !opts.watch : true;
     var loader = loaders.FileSystemLoader || loaders.WebLoader;
-    e = new env.Environment(new loader(templatesPath, opts.watch), opts);
+    e = new env.Environment(new loader(templatesPath, watch), opts);
 
     if(opts && opts.express) {
         e.express(opts.express);
