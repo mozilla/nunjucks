@@ -32,8 +32,9 @@ module.exports.configure = function(templatesPath, opts) {
         templatesPath = null;
     }
 
+    var noWatch = 'watch' in opts ? !opts.watch : false;
     var loader = loaders.FileSystemLoader || loaders.WebLoader;
-    e = new env.Environment(new loader(templatesPath, opts.watch), opts);
+    e = new env.Environment(new loader(templatesPath, noWatch), opts);
 
     if(opts && opts.express) {
         e.express(opts.express);
