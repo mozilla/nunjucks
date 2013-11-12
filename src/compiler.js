@@ -649,7 +649,9 @@ var Compiler = Object.extend({
                 }
 
                 this.emitLoopBindings(node, loopUses, arr, i);
-                this.compile(node.body, frame);
+                this.withScopedSyntax(function() {
+                    this.compile(node.body, frame);
+                });
                 this.emitLine('}');
             }
 
@@ -676,7 +678,9 @@ var Compiler = Object.extend({
                 this.emitLine('frame.set("' + val.value + '", ' + v + ');');
 
                 this.emitLoopBindings(node, loopUses, arr, i, len);
-                this.compile(node.body, frame);
+                this.withScopedSyntax(function() {
+                    this.compile(node.body, frame);
+                });
                 this.emitLine('}');
             }
 
