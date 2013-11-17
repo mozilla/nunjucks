@@ -25,7 +25,7 @@ var FileSystemLoader = Loader.extend({
             lib.each(this.searchPaths, function(p) {
                 if(existsSync(p)) {
                     fs.watch(p, { persistent: false }, function(event, filename) {
-                        var fullname = path.join(p, filename);
+                        var fullname = path.join(p, filename || '');
                         if(event == 'change' && fullname in this.pathsToNames) {
                             this.emit('update', this.pathsToNames[fullname]);
                         }
