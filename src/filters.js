@@ -76,7 +76,7 @@ var filters = {
                 "dictsort filter: You can only sort by either key or value");
         }
 
-        array.sort(function(t1, t2) { 
+        array.sort(function(t1, t2) {
             var a = t1[si];
             var b = t2[si];
 
@@ -94,9 +94,9 @@ var filters = {
 
         return array;
     },
-    
+
     escape: function(str) {
-        if(typeof str == 'string' || 
+        if(typeof str == 'string' ||
            str instanceof r.SafeString) {
             return lib.escape(str);
         }
@@ -285,7 +285,7 @@ var filters = {
                 x = x.toLowerCase();
                 y = y.toLowerCase();
             }
-               
+
             if(x < y) {
                 return reverse ? 1 : -1;
             }
@@ -362,6 +362,52 @@ var filters = {
             }
             return parts.join('&');
         }
+    },
+
+    urlize: function(str, length, nofollow) {
+        if (isNaN(length)) length = Infinity;
+
+        var noFollowAttr = (nofollow === true ? ' rel="nofollow"' : '');
+
+        // For the jinja regexp, see
+        // https://github.com/mitsuhiko/jinja2/blob/f15b814dcba6aa12bc74d1f7d0c881d55f7126be/jinja2/utils.py#L20-L23
+        var puncRE = /^(?:\(|<|&lt;)?(.*?)(?:\.|,|\)|\n|&gt;)?$/;
+        // from http://blog.gerv.net/2011/05/html5_email_address_regexp/
+        var emailRE = /^[\w.!#$%&'*+\-\/=?\^`{|}~]+@[a-z\d\-]+(\.[a-z\d\-]+)+$/i;
+        var httpHttpsRE = /^https?:\/\/.*$/;
+        var wwwRE = /^www\./;
+        var tldRE = /\.(?:org|net|com)(?:\:|\/|$)/;
+
+        var words = str.split(/\s+/).filter(function(word) {
+          // If the word has no length, bail. This can happen for str with
+          // trailing whitespace.
+          return word && word.length;
+        }).map(function(word) {
+          var matches = word.match(puncRE);
+
+          var possibleUrl = matches && matches[1] || word;
+
+          // url that starts with http or https
+          if (httpHttpsRE.test(possibleUrl))
+            return '<a href="' + possibleUrl + '"' + noFollowAttr + '>' + possibleUrl.substr(0, length) + '</a>';
+
+          // url that starts with www.
+          if (wwwRE.test(possibleUrl))
+            return '<a href="http://' + possibleUrl + '"' + noFollowAttr + '>' + possibleUrl.substr(0, length) + '</a>';
+
+          // an email address of the form username@domain.tld
+          if (emailRE.test(possibleUrl))
+            return '<a href="mailto:' + possibleUrl + '">' + possibleUrl + '</a>';
+
+          // url that ends in .com, .org or .net that is not an email address
+          if (tldRE.test(possibleUrl))
+            return '<a href="http://' + possibleUrl + '"' + noFollowAttr + '>' + possibleUrl.substr(0, length) + '</a>';
+
+          return possibleUrl;
+
+        });
+
+        return words.join(' ');
     },
 
     wordcount: function(str) {
