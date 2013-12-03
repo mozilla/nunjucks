@@ -96,8 +96,8 @@ var Compiler = Object.extend({
         this.buffer = null;
     },
 
-    addScopeLevel: function(closingDelim) {
-        this.scopeClosers += closingDelim || '})';
+    addScopeLevel: function() {
+        this.scopeClosers += '})';
     },
 
     closeScopeLevels: function() {
