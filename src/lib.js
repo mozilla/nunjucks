@@ -186,27 +186,6 @@ exports.map = function(obj, func) {
     return results;
 };
 
-exports.asyncParallel = function(funcs, done) {
-    var count = funcs.length,
-        result = new Array(count),
-        current = 0;
-
-    var makeNext = function(i) {
-        return function(res) {
-            result[i] = res;
-            current += 1;
-
-            if (current === count) {
-                done(result);
-            }
-        };
-    };
-
-    for (var i = 0; i < count; i++) {
-        funcs[i](makeNext(i));
-    }
-};
-
 exports.asyncIter = function(arr, iter, cb) {
     var i = -1;
     
