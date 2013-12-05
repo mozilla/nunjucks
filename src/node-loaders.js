@@ -2,6 +2,7 @@ var fs = require('fs');
 var path = require('path');
 var lib = require('./lib');
 var Loader = require('./loader');
+var chokidar = require('chokidar');
 
 // Node <0.7.1 compatibility
 var existsSync = fs.existsSync || path.existsSync;
@@ -24,9 +25,10 @@ var FileSystemLoader = Loader.extend({
             // they change
             lib.each(this.searchPaths, function(p) {
                 if(existsSync(p)) {
-                    fs.watch(p, { persistent: false }, function(event, filename) {
-                        var fullname = path.join(p, filename || '');
-                        if((event == 'change' || event == 'rename') && fullname in this.pathsToNames) {
+                    var watcher = chokidar.watch(p, { ignoreInitial: true });
+
+                    watcher.on("all", function(event, fullname) {
+                        if(event == "change" && fullname in this.pathsToNames) {
                             this.emit('update', this.pathsToNames[fullname]);
                         }
                     }.bind(this));

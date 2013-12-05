@@ -4,7 +4,8 @@
     "version": "1.0.0",
     "author": "James Long <longster@gmail.com>",
     "dependencies": {
-        "optimist": "*"
+        "optimist": "*",
+        "chokidar": "~0.8.0"
     },
     "devDependencies": {
         "expect.js": "*",
