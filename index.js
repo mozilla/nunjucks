@@ -13,7 +13,7 @@ module.exports = {};
 module.exports.Environment = env.Environment;
 module.exports.Template = env.Template;
 
-module.exports.Loader = env.Loader;
+module.exports.Loader = Loader;
 module.exports.FileSystemLoader = loaders.FileSystemLoader;
 module.exports.WebLoader = loaders.WebLoader;
 
