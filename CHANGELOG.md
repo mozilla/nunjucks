@@ -8,6 +8,13 @@ Next version:
 * publish in bower
 * cleanup WebLoader.fetch
 
+# v1.0.1 (December 16, 2013)
+
+This is mostly bugfix and code cleanup release. The only added things are:
+
+* New `nunjucks.compile` function which takes a string and returns a `Template` object
+* The `urlize` filter has been added
+
 # v1.0.0 (October 24, 2013)
 
 We've hit 1.0! Thanks for helping nunjucks stabilize and become
