@@ -100,7 +100,7 @@ exports.isString = function(obj) {
 };
 
 exports.isObject = function(obj) {
-    return obj === Object(obj);
+    return ObjProto.toString.call(obj) == '[object Object]';
 };
 
 exports.groupBy = function(obj, val) {
