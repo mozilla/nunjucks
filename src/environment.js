@@ -58,9 +58,11 @@ var Environment = Obj.extend({
         var cache = {};
 
         lib.each(this.loaders, function(loader) {
-            loader.on('update', function(template) {
-                cache[template] = null;
-            });
+            if(typeof loader.on === 'function'){
+                loader.on('update', function(template) {
+                    cache[template] = null;
+                });
+            }
         });
 
         this.cache = cache;
