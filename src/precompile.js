@@ -110,7 +110,7 @@ function _precompile(str, name, env, asFunction) {
 
     var out = '(function() {' +
         '(window.nunjucksPrecompiled = window.nunjucksPrecompiled || {})' +
-        '["' + name.replace(/\\/, '/') + '"] = (function() {';
+        '["' + name.replace(/\\/g, '/') + '"] = (function() {';
 
     out += lib.withPrettyErrors(
         name,
