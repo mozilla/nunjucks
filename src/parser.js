@@ -506,6 +506,9 @@ var Parser = Object.extend({
                     str += name.value;
                 }
             }
+            else if(tok.type === lexer.TOKEN_STRING) {
+                str += '"' + tok.value + '"';
+            }
             else {
                 str += tok.value;
             }
