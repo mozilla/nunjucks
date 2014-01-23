@@ -558,6 +558,9 @@ var Compiler = Object.extend({
                     this.emit('cb()');
                 }
             });
+        } else if(async) {
+            this.emitLine('}\nelse {');
+            this.emit('cb()');
         }
 
         this.emitLine('}');
