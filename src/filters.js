@@ -1,10 +1,15 @@
 
 var lib = require('./lib');
 var r = require('./runtime');
+url = require('url');
 
 var filters = {
     abs: function(n) {
         return Math.abs(n);
+    },
+
+    absolutize: function(str, base) {
+        return url.resolve(base, str);
     },
 
     batch: function(arr, linecount, fill_with) {
