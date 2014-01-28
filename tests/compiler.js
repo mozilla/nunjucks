@@ -281,6 +281,13 @@
                            expect(res).to.be('somecontenthere');
                        });
 
+                render('{% if test %}{{ tmpl | getContents }}{% endif %}oof',
+                       { tmpl: 'tests/templates/for-async-content.html' },
+                       opts,
+                       function(err, res) {
+                           expect(res).to.be('oof');
+                       });
+
                 render('{% if tmpl %}' +
                        '{% for i in [0, 1] %}{{ tmpl | getContents }}*{% endfor %}' +
                        '{% endif %}',
