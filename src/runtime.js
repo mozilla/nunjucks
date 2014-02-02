@@ -321,7 +321,6 @@ module.exports = {
     callWrap: callWrap,
     handleError: handleError,
     isArray: lib.isArray,
-    asyncEach: lib.asyncEach,
     keys: lib.keys,
     SafeString: SafeString,
     copySafeness: copySafeness,
