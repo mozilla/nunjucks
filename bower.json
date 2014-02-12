@@ -1,6 +1,6 @@
 {
   "name": "nunjucks",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "browser/nunjucks.min.js",
   "ignore": [
     "Makefile",
