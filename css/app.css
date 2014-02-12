@@ -100,6 +100,17 @@ nav a.logo, nav a.logo:visited, nav a.logo:active, nav a.logo:hover {
     color: #3d8137;
 }
 
+.locale {
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
+.locale .btn-success a,
+.locale .btn-success a:visited {
+    color: white;
+}
+
 .banner {
     background-color: transparent;
     text-align: center;
@@ -250,7 +261,7 @@ aside .pages ul {
     /* margin-right: auto; */
 }
 
-.main > h1:first-child {
+.main > h1 {
     margin-top: 0;
 }
 

@@ -195,6 +195,10 @@
                   { items: { foo: 1, bar: 2 }},
                   '22');
 
+            equal('{% ' + block + ' item, v in items %}{% include "item.html" %}{% ' + end + ' %}',
+                  { items: { foo: 1, bar: 2 }},
+                  'showing fooshowing bar');
+
             render('{% set item = passed_var %}' +
                    '{% include "item.html" %}\n' +
                    '{% ' + block + ' i in passed_iter %}' +

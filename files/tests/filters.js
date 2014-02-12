@@ -309,6 +309,79 @@
             finish(done);
         });
 
+        it('urlize', function(done) {
+            // from jinja test suite:
+            // https://github.com/mitsuhiko/jinja2/blob/8db47916de0e888dd8664b2511e220ab5ecf5c15/jinja2/testsuite/filters.py#L236-L239
+            equal('{{ "foo http://www.example.com/ bar"|urlize }}',
+                    'foo <a href="http://www.example.com/">' +
+                    'http://www.example.com/</a> bar')
+
+            // additional tests
+            equal('{{ "" | urlize }}', '');
+            equal('{{ "foo" | urlize }}', 'foo');
+
+
+            // http
+            equal('{{ "http://jinja.pocoo.org/docs/templates/" | urlize }}',
+                '<a href="http://jinja.pocoo.org/docs/templates/">http://jinja.pocoo.org/docs/templates/</a>');
+
+            // https
+            equal('{{ "https://jinja.pocoo.org/docs/templates/" | urlize }}',
+                '<a href="https://jinja.pocoo.org/docs/templates/">https://jinja.pocoo.org/docs/templates/</a>');
+
+            // www without protocol
+            equal('{{ "www.pocoo.org/docs/templates/" | urlize }}',
+                '<a href="http://www.pocoo.org/docs/templates/">www.pocoo.org/docs/templates/</a>');
+
+            // .org, .net, .com without protocol or www
+            equal('{{ "pocoo.org/docs/templates/" | urlize }}',
+                '<a href="http://pocoo.org/docs/templates/">pocoo.org/docs/templates/</a>');
+            equal('{{ "pocoo.net/docs/templates/" | urlize }}',
+                '<a href="http://pocoo.net/docs/templates/">pocoo.net/docs/templates/</a>');
+            equal('{{ "pocoo.com/docs/templates/" | urlize }}',
+                '<a href="http://pocoo.com/docs/templates/">pocoo.com/docs/templates/</a>');
+            equal('{{ "pocoo.com:80" | urlize }}',
+                '<a href="http://pocoo.com:80">pocoo.com:80</a>');
+            equal('{{ "pocoo.com" | urlize }}',
+                '<a href="http://pocoo.com">pocoo.com</a>');
+            equal('{{ "pocoo.commune" | urlize }}',
+                'pocoo.commune');
+
+            // truncate the printed URL
+            equal('{{ "http://jinja.pocoo.org/docs/templates/" | urlize(12, true) }}',
+                '<a href="http://jinja.pocoo.org/docs/templates/" rel="nofollow">http://jinja</a>');
+
+            // punctuation on the beginning of line.
+            equal('{{ "(http://jinja.pocoo.org/docs/templates/" | urlize }}',
+                '<a href="http://jinja.pocoo.org/docs/templates/">http://jinja.pocoo.org/docs/templates/</a>');
+            equal('{{ "<http://jinja.pocoo.org/docs/templates/" | urlize }}',
+                '<a href="http://jinja.pocoo.org/docs/templates/">http://jinja.pocoo.org/docs/templates/</a>');
+            equal('{{ "&lt;http://jinja.pocoo.org/docs/templates/" | urlize }}',
+                '<a href="http://jinja.pocoo.org/docs/templates/">http://jinja.pocoo.org/docs/templates/</a>');
+
+            // punctuation on the end of line
+            equal('{{ "http://jinja.pocoo.org/docs/templates/," | urlize }}',
+                '<a href="http://jinja.pocoo.org/docs/templates/">http://jinja.pocoo.org/docs/templates/</a>');
+            equal('{{ "http://jinja.pocoo.org/docs/templates/." | urlize }}',
+                '<a href="http://jinja.pocoo.org/docs/templates/">http://jinja.pocoo.org/docs/templates/</a>');
+            equal('{{ "http://jinja.pocoo.org/docs/templates/)" | urlize }}',
+                '<a href="http://jinja.pocoo.org/docs/templates/">http://jinja.pocoo.org/docs/templates/</a>');
+            equal('{{ "http://jinja.pocoo.org/docs/templates/\n" | urlize }}',
+                '<a href="http://jinja.pocoo.org/docs/templates/">http://jinja.pocoo.org/docs/templates/</a>');
+            equal('{{ "http://jinja.pocoo.org/docs/templates/&gt;" | urlize }}',
+                '<a href="http://jinja.pocoo.org/docs/templates/">http://jinja.pocoo.org/docs/templates/</a>');
+
+            // http url with username
+            equal('{{ "http://testuser@testuser.com" | urlize }}',
+                '<a href="http://testuser@testuser.com">http://testuser@testuser.com</a>');
+
+            // email addresses
+            equal('{{ "testuser@testuser.com" | urlize }}',
+                '<a href="mailto:testuser@testuser.com">testuser@testuser.com</a>');
+
+            finish(done);
+        });
+
         it('wordcount', function(done) {
             equal('{{ "foo bar baz" | wordcount }}', '3');
             finish(done);

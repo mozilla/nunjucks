@@ -1,4 +1,4 @@
-// Browser bundle of nunjucks 1.0.0 
+// Browser bundle of nunjucks 1.0.1 
 
 (function() {
 var modules = {};
@@ -252,27 +252,6 @@ exports.map = function(obj, func) {
     }
 
     return results;
-};
-
-exports.asyncParallel = function(funcs, done) {
-    var count = funcs.length,
-        result = new Array(count),
-        current = 0;
-
-    var makeNext = function(i) {
-        return function(res) {
-            result[i] = res;
-            current += 1;
-
-            if (current === count) {
-                done(result);
-            }
-        };
-    };
-
-    for (var i = 0; i < count; i++) {
-        funcs[i](makeNext(i));
-    }
 };
 
 exports.asyncIter = function(arr, iter, cb) {
@@ -1340,12 +1319,6 @@ Tokenizer.prototype.forward = function() {
     }
 };
 
-Tokenizer.prototype.backN = function(n) {
-    for(var i=0; i<n; i++) {
-        self.back();
-    }
-};
-
 Tokenizer.prototype.back = function() {
     this.index--;
 
@@ -1491,7 +1464,7 @@ var Parser = Object.extend({
 
     expect: function(type) {
         var tok = this.nextToken();
-        if(!tok.type == type) {
+        if(tok.type !== type) {
             this.fail('expected ' + type + ', got ' + tok.type,
                       tok.lineno,
                       tok.colno);
@@ -2704,7 +2677,8 @@ function convertStatements(ast) {
             if(node instanceof nodes.FilterAsync ||
                node instanceof nodes.IfAsync ||
                node instanceof nodes.AsyncEach ||
-               node instanceof nodes.AsyncAll) {
+               node instanceof nodes.AsyncAll ||
+               node instanceof nodes.CallExtensionAsync) {
                 async = true;
                 // Stop iterating by returning the node
                 return node;
@@ -2850,8 +2824,8 @@ var Compiler = Object.extend({
         this.buffer = null;
     },
 
-    addScopeLevel: function(closingDelim) {
-        this.scopeClosers += closingDelim || '})';
+    addScopeLevel: function() {
+        this.scopeClosers += '})';
     },
 
     closeScopeLevels: function() {
@@ -3403,7 +3377,9 @@ var Compiler = Object.extend({
                 }
 
                 this.emitLoopBindings(node, loopUses, arr, i);
-                this.compile(node.body, frame);
+                this.withScopedSyntax(function() {
+                    this.compile(node.body, frame);
+                });
                 this.emitLine('}');
             }
 
@@ -3430,7 +3406,9 @@ var Compiler = Object.extend({
                 this.emitLine('frame.set("' + val.value + '", ' + v + ');');
 
                 this.emitLoopBindings(node, loopUses, arr, i, len);
-                this.compile(node.body, frame);
+                this.withScopedSyntax(function() {
+                    this.compile(node.body, frame);
+                });
                 this.emitLine('}');
             }
 
@@ -3949,7 +3927,7 @@ var filters = {
                 "dictsort filter: You can only sort by either key or value");
         }
 
-        array.sort(function(t1, t2) { 
+        array.sort(function(t1, t2) {
             var a = t1[si];
             var b = t2[si];
 
@@ -3967,9 +3945,9 @@ var filters = {
 
         return array;
     },
-    
+
     escape: function(str) {
-        if(typeof str == 'string' || 
+        if(typeof str == 'string' ||
            str instanceof r.SafeString) {
             return lib.escape(str);
         }
@@ -4158,7 +4136,7 @@ var filters = {
                 x = x.toLowerCase();
                 y = y.toLowerCase();
             }
-               
+
             if(x < y) {
                 return reverse ? 1 : -1;
             }
@@ -4235,6 +4213,52 @@ var filters = {
             }
             return parts.join('&');
         }
+    },
+
+    urlize: function(str, length, nofollow) {
+        if (isNaN(length)) length = Infinity;
+
+        var noFollowAttr = (nofollow === true ? ' rel="nofollow"' : '');
+
+        // For the jinja regexp, see
+        // https://github.com/mitsuhiko/jinja2/blob/f15b814dcba6aa12bc74d1f7d0c881d55f7126be/jinja2/utils.py#L20-L23
+        var puncRE = /^(?:\(|<|&lt;)?(.*?)(?:\.|,|\)|\n|&gt;)?$/;
+        // from http://blog.gerv.net/2011/05/html5_email_address_regexp/
+        var emailRE = /^[\w.!#$%&'*+\-\/=?\^`{|}~]+@[a-z\d\-]+(\.[a-z\d\-]+)+$/i;
+        var httpHttpsRE = /^https?:\/\/.*$/;
+        var wwwRE = /^www\./;
+        var tldRE = /\.(?:org|net|com)(?:\:|\/|$)/;
+
+        var words = str.split(/\s+/).filter(function(word) {
+          // If the word has no length, bail. This can happen for str with
+          // trailing whitespace.
+          return word && word.length;
+        }).map(function(word) {
+          var matches = word.match(puncRE);
+
+          var possibleUrl = matches && matches[1] || word;
+
+          // url that starts with http or https
+          if (httpHttpsRE.test(possibleUrl))
+            return '<a href="' + possibleUrl + '"' + noFollowAttr + '>' + possibleUrl.substr(0, length) + '</a>';
+
+          // url that starts with www.
+          if (wwwRE.test(possibleUrl))
+            return '<a href="http://' + possibleUrl + '"' + noFollowAttr + '>' + possibleUrl.substr(0, length) + '</a>';
+
+          // an email address of the form username@domain.tld
+          if (emailRE.test(possibleUrl))
+            return '<a href="mailto:' + possibleUrl + '">' + possibleUrl + '</a>';
+
+          // url that ends in .com, .org or .net that is not an email address
+          if (tldRE.test(possibleUrl))
+            return '<a href="http://' + possibleUrl + '"' + noFollowAttr + '>' + possibleUrl.substr(0, length) + '</a>';
+
+          return possibleUrl;
+
+        });
+
+        return words.join(' ');
     },
 
     wordcount: function(str) {
@@ -4398,7 +4422,7 @@ var WebLoader = Loader.extend({
         }
 
         ajax.onreadystatechange = function() {
-            if(ajax.readyState == 4 && ajax.status == 200 && loading) {
+            if(ajax.readyState === 4 && (ajax.status === 0 || ajax.status === 200) && loading) {
                 loading = false;
                 src = ajax.responseText;
             }
@@ -4916,14 +4940,22 @@ nunjucks.configure = function(templatesPath, opts) {
         templatesPath = null;
     }
 
+    var noWatch = 'watch' in opts ? !opts.watch : false;
     var loader = loaders.FileSystemLoader || loaders.WebLoader;
-    e = new env.Environment(new loader(templatesPath, opts.watch), opts);
+    e = new env.Environment(new loader(templatesPath, noWatch), opts);
 
     if(opts && opts.express) {
         e.express(opts.express);
     }
 
     return e;
+};
+
+nunjucks.compile = function(src, env, path, eagerCompile) {
+    if(!e) {
+        nunjucks.configure();
+    }
+    return new nunjucks.Template(src, env, path, eagerCompile);
 };
 
 nunjucks.render = function(name, ctx, cb) {

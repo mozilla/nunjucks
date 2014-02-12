@@ -47,24 +47,24 @@
       <p><strong></strong></p>
       <ul>
 <li>
-<a href="#getting-started">Getting Started</a>
+<a href="#">快速上手</a>
 <ul>
 <li>
-<a href="#when-using-node">When Using Node...</a>
+<a href="#node-">Node 端使用</a>
 </li>
 <li>
-<a href="#when-in-the-browser">When in the Browser...</a>
+<a href="#1">浏览器端使用</a>
 <ul>
 <li>
-<a href="#which-file-should-you-use">Which file should you use?</a>
+<a href="#2">你应该使用哪个文件</a>
 </li>
 </ul>
 </li>
 <li>
-<a href="#using">Using</a>
+<a href="#3">使用说明</a>
 </li>
 <li>
-<a href="#more-information">More Information</a>
+<a href="#4">更多信息</a>
 </li>
 </ul>
 </li>
@@ -74,69 +74,51 @@
   </aside>
 
   <div class="col-sm-9 main">
-    <div class="locale btn-group"><a href="/getting-started.html" class="btn btn-success">English</a><a href="/cn/getting-started.html" class="btn btn-default">中国的</a></div>
-    <h1 id="getting-started">Getting Started</h1>
+    <div class="locale btn-group"><a href="/getting-started.html" class="btn btn-default">English</a><a href="/cn/getting-started.html" class="btn btn-success">中国的</a></div>
+    <h1 id="">快速上手</h1>
 
-<h2 id="when-using-node">When Using Node...</h2>
+<h2 id="node-">Node 端使用</h2>
 <div class="highlight"><pre><code class="text language-text" data-lang="text">$ npm install nunjucks
 </code></pre></div>
-<p>Once installed, simply use <code>require(&#39;nunjucks&#39;)</code> to load it.</p>
+<p>下载后可直接 <code>require(&#39;nunjucks&#39;)</code> 使用</p>
 
-<h2 id="when-in-the-browser">When in the Browser...</h2>
+<h2 id="1">浏览器端使用</h2>
 
-<p>Grab <a href="files/nunjucks.js">nunjucks.js</a> (<a href="files/nunjucks.min.js">min</a>) for the full library, or
-<a href="files/nunjucks-slim.js">nunjucks-slim.js</a> (<a href="files/nunjucks-slim.min.js">min</a>) for the slim version
-which only works with precompiled templates.</p>
+<p>可直接使用 <a href="files/nunjucks.js">nunjucks.js</a> (<a href="files/nunjucks.min.js">min</a>)，如果针对编译后的模板可使用 <a href="files/nunjucks-slim.js">nunjucks-slim.js</a> (<a href="files/nunjucks-slim.min.js">min</a>)。</p>
 
-<h3 id="which-file-should-you-use">Which file should you use?</h3>
+<h3 id="2">你应该使用哪个文件</h3>
 
 <ul>
-<li><p>Use <strong>nunjucks.js</strong> to dynamically load templates, auto-reload
-templates when they are changed, and use precompiled templates.
-Comes with the full compiler so is larger (20K min/gzipped). Use
-this to get started, and use in production if you don&#39;t mind a
-larger file size.</p></li>
-<li><p>Use <strong>nunjucks-slim.js</strong> to load precompiled templates and use them. Only
-comes with runtime so is smaller (8K min/gzipped), but <em>only</em> works with
-precompiled templates. Typically used for production, and possibly
-development if you use the <a href="https://github.com/jlongster/grunt-nunjucks">grunt task</a> to
-automatically recompile templates.</p></li>
+<li><p><strong>nunjucks.js</strong> 可用于动态加载模板，当模板变化时重新加载，也可以用于预编译后的模板。包含编译器，所以会比较大 (20K min/gzipped)。如果你刚接触 nunjucks 可使用这个文件，如果你不在意大小也可以在生产环境使用。</p></li>
+<li><p><strong>nunjucks-slim.js</strong> 只能用于预编译后的模板，只包含运行时的代码，所以比较小 (8K min/gzipped)。一般用于生产环境，如果你使用 <a href="https://github.com/jlongster/grunt-nunjucks">grunt task</a> 自动预编译，也可以在开发环境使用。</p></li>
 </ul>
 
-<p>Simply include nunjucks with a <code>script</code> tag on the page:</p>
+<p>直接用 <code>script</code> 引入文件：</p>
 <div class="highlight"><pre><code class="html language-html" data-lang="html"><span class="nt">&lt;script </span><span class="na">src=</span><span class="s">&quot;nunjucks.js&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
 </code></pre></div>
-<p>or load it as an AMD module:</p>
+<p>或者可以作为一个 AMD 模块加载：</p>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="nx">define</span><span class="p">([</span><span class="s1">&#39;nunjucks&#39;</span><span class="p">],</span> <span class="kd">function</span><span class="p">(</span><span class="nx">nunjucks</span><span class="p">)</span> <span class="p">{</span>
 <span class="p">});</span>
 </code></pre></div>
 <blockquote>
-<p>Whatever you do, make sure to precompile your templates in
-production! There is a <a href="https://github.com/jlongster/grunt-nunjucks">grunt
-task</a> to help with
-that. Read more about optimal client-side configurations in <a href="api.html#browser-usage">Browser
-Usage</a>.</p>
+<p>确保在生产环境使用预编译版本，可使用 <a href="https://github.com/jlongster/grunt-nunjucks">grunt
+task</a>，可在 <a href="api.html#browser-usage">浏览器使用</a> 查看客户端优化的配置。</p>
 </blockquote>
 
-<h2 id="using">Using</h2>
+<h2 id="3">使用说明</h2>
 
-<p>This is the simplest way to use nunjucks. First, set any configuration
-flags like autoescaping and then render a string:</p>
+<p>这是最简单使用 nunjucks 的方式，首先设置配置项(如 autoescaping)，然后渲染一个字符串：</p>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="nx">nunjucks</span><span class="p">.</span><span class="nx">configure</span><span class="p">({</span> <span class="nx">autoescape</span><span class="o">:</span> <span class="kc">true</span> <span class="p">});</span>
 <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">renderString</span><span class="p">(</span><span class="s1">&#39;Hello {{ username }}&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">username</span><span class="o">:</span> <span class="s1">&#39;James&#39;</span> <span class="p">});</span>
 </code></pre></div>
-<p>You usually won&#39;t use <code>renderString</code>, instead you should write
-templates in individual files and use <code>render</code>. That way you can
-inherit and include templates. In this case, you need to tell nunjucks
-where these files live with the first argument of <code>configure</code>:</p>
+<p><code>renderString</code> 并不常用，而是使用 <code>render</code> 来直接渲染文件，这种方式支持继承(extends)和包含(include)模板。使用之前需要配置文件的路径：</p>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="nx">nunjucks</span><span class="p">.</span><span class="nx">configure</span><span class="p">(</span><span class="s1">&#39;views&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">autoescape</span><span class="o">:</span> <span class="kc">true</span> <span class="p">});</span>
 <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="s1">&#39;index.html&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">foo</span><span class="o">:</span> <span class="s1">&#39;bar&#39;</span> <span class="p">});</span>
 </code></pre></div>
-<p>In node, <code>&#39;views&#39;</code> would be a path relative to the current working
-directory. In the browser, it would be a relative URL, and you
-probably want it to be absolute, like <code>&#39;/views&#39;</code>.</p>
+<p>在 node 端，<code>&#39;views&#39;</code> 为相对于当前工作目录 (working
+directory) 的路径。在浏览器端则为一个相对的 url，最好指定为绝对路径 (如 <code>&#39;/views&#39;</code>)。</p>
 
-<p>Using express? Simply pass your express app into <code>configure</code>:</p>
+<p>如果使用 express 可直接传入 <code>configure</code>：</p>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="kd">var</span> <span class="nx">app</span> <span class="o">=</span> <span class="nx">express</span><span class="p">();</span>
 
 <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">configure</span><span class="p">(</span><span class="s1">&#39;views&#39;</span><span class="p">,</span> <span class="p">{</span>
@@ -148,9 +130,7 @@ probably want it to be absolute, like <code>&#39;/views&#39;</code>.</p>
     <span class="nx">res</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="s1">&#39;index.html&#39;</span><span class="p">);</span>
 <span class="p">});</span>
 </code></pre></div>
-<p>The above API works in node and in the browser (express is only in
-node, obviously). In node, nunjucks loads templates from the
-filesystem by default, and in the browser loads them over HTTP.</p>
+<p>上面的 API 适用于 node 端和浏览器端 (express 只适用于 node 端)，在 node 端 nunjucks 从文件系统加载模板，在浏览器端通过 http 加载模板。</p>
 
 <p>If you <a href="api.html#precompiling">precompiled</a> your templates in the browser, they will
 automatically be picked up by the system and you don&#39;t have to do
@@ -158,10 +138,9 @@ anything different. This makes it easy to use the same code in
 development and production, while only using precompiled templates in
 production.</p>
 
-<h2 id="more-information">More Information</h2>
+<h2 id="4">更多信息</h2>
 
-<p>That&#39;s only the tip of the iceberg. See <a href="api.html">API</a> for API docs
-and <a href="templating.html">Templating</a> about the templating language.</p>
+<p>这只是冰山一角，可继续查看 <a href="api.html">API</a> 文档和<a href="templating.html">模板语言</a>。</p>
 
   </div>
 </div>

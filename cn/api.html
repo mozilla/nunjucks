@@ -196,26 +196,20 @@
   </aside>
 
   <div class="col-sm-9 main">
-    <div class="locale btn-group"><a href="/api.html" class="btn btn-success">English</a><a href="/cn/api.html" class="btn btn-default">中国的</a></div>
+    <div class="locale btn-group"><a href="/api.html" class="btn btn-default">English</a><a href="/cn/api.html" class="btn btn-success">中国的</a></div>
     <h1 id="api">API</h1>
 
-<p>The API for nunjucks covers rendering templates, adding filters and
-extensions, customizing template loading, and more.</p>
+<p>Nunjucks 的 API 包括渲染模板，添加过滤器和扩展，自定义模板加载器等等。</p>
 
 <h2 id="simple-api">Simple API</h2>
 
-<p>If you don&#39;t need deep customization of the system, you can use this simple
-higher-level API for loading and rendering templates.</p>
+<p>如果你不需要深度定制，可以直接使用初级(higher-level) api 来加载和渲染模板。</p>
 
 <h3 id="render">render</h3>
 
 <div class="api-sig"><code>nunjucks.render(name, [context], [callback])</code></div>
 
-<div class="api-desc"><p>Renders the template named <strong>name</strong> with the <strong>context</strong> hash. If
-<strong>callback</strong> is provided, it will be called when done with any
-possible error as the first argument and the result as the second.
-Otherwise, the result is returned from <code>render</code> and errors are thrown.
-See <a href="#asynchronous-support">asynchronous support</a> for more info.</p>
+<div class="api-desc"><p>渲染模式时需要两个参数，模板名 <strong>name</strong> 和数据 <strong>context</strong>。如果 <strong>callback</strong> 存在，当渲染完成后会被调用，第一个参数是错误，第二个为返回的结果；如果不存在，<code>render</code> 方法会直接返回结果，错误时会抛错。更多查看<a href="#asynchronous-support">异步的支持</a>。</p>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="kd">var</span> <span class="nx">res</span> <span class="o">=</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="s1">&#39;foo.html&#39;</span><span class="p">);</span>
 
 <span class="kd">var</span> <span class="nx">res</span> <span class="o">=</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="s1">&#39;foo.html&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">username</span><span class="o">:</span> <span class="s1">&#39;James&#39;</span> <span class="p">});</span>
@@ -229,8 +223,7 @@ See <a href="#asynchronous-support">asynchronous support</a> for more info.</p>
 
 <div class="api-sig"><code>nunjucks.renderString(str, context, [callback])</code></div>
 
-<div class="api-desc"><p>Same as <a href="#render"><code>render</code></a>, but renders a raw string instead of
-loading a template.</p>
+<div class="api-desc"><p>与 <a href="#render"><code>render</code></a> 类似，只是渲染一个字符串而不是渲染加载的模板。</p>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="kd">var</span> <span class="nx">res</span> <span class="o">=</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">renderString</span><span class="p">(</span><span class="s1">&#39;Hello {{ username }}&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">username</span><span class="o">:</span> <span class="s1">&#39;James&#39;</span> <span class="p">});</span>
 </code></pre></div>
 </div>
@@ -239,26 +232,19 @@ loading a template.</p>
 
 <div class="api-sig"><code>nunjucks.configure([path], [opts]);</code></div>
 
-<div class="api-desc"><p>Tell nunjucks that your templates live at <strong>path</strong> and flip any
-feature on or off with the <strong>opts</strong> hash. You can provide both
-arguments or either of them. <strong>path</strong> defaults to the current working
-directory, and the following options are available in <strong>opts</strong>:</p>
+<div class="api-desc"><p>传入 <strong>path</strong> 指定存放模板的目录，<strong>opts</strong> 可让某些功能开启或关闭，这两个变量都是可选的。<strong>path</strong> 的默认值为当前的工作目录，<strong>opts</strong> 提供以下功能：</p>
 
 <ul>
-<li><strong>watch</strong> <em>(default: true)</em> reload templates when they are changed</li>
-<li><strong>express</strong> an express app that nunjucks should install to</li>
-<li><strong>autoescape</strong> <em>(default: false)</em> controls if output with dangerous characters are
-escaped automatically. See <a href="#autoescaping">Autoescaping</a></li>
-<li><strong>tags:</strong> <em>(default: see nunjucks syntax)</em> defines the syntax for
-nunjucks tags. See <a href="#customizing-syntax">Customizing Syntax</a></li>
+<li><strong>watch</strong> <em>(默认值: true)</em> 当模板变化时重新加载</li>
+<li><strong>express</strong> 传入 express 实例初始化模板设置</li>
+<li><strong>autoescape</strong> <em>(默认值: false)</em> 控制输出是否被转义，查看 <a href="#autoescaping">Autoescaping</a></li>
+<li><strong>tags:</strong> <em>(默认值: see nunjucks syntax)</em> 定义模板语法，查看 <a href="#customizing-syntax">Customizing Syntax</a></li>
 </ul>
 
-<p><code>configure</code> returns an <code>Environment</code> instance, which lets you add
-filters and extensions while still using the simple API. See below for
-more information on <code>Environment</code>.</p>
+<p><code>configure</code> 返回一个 <code>Environment</code> 实例, 他提供了简单的 api 添加过滤器 (filters) 和扩展 (extensions)，可在 <code>Environment</code> 查看更多的使用方法。</p>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="nx">nunjucks</span><span class="p">.</span><span class="nx">configure</span><span class="p">(</span><span class="s1">&#39;views&#39;</span><span class="p">);</span>
 
-<span class="c1">// if in the browser, you probably want to use an absolute URL</span>
+<span class="c1">// 在浏览器端最好使用绝对地址</span>
 <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">configure</span><span class="p">(</span><span class="s1">&#39;/views&#39;</span><span class="p">);</span>
 
 <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">configure</span><span class="p">({</span> <span class="nx">autoescape</span><span class="o">:</span> <span class="kc">true</span> <span class="p">});</span>
@@ -274,42 +260,23 @@ more information on <code>Environment</code>.</p>
 </code></pre></div>
 </div>
 
-<p>That&#39;s it for the simple API! If you want total control over how
-templates are loaded, and more customization, you need to manually
-set up the system as seen below.</p>
+<p>就是这么简单，如果希望自己定义模板加载等更多的个性化设置，那么可以继续往下看。</p>
 
 <h2 id="environment">Environment</h2>
 
-<p>The <code>Environment</code> class is the central object which handles templates.
-It knows how to load your templates, and internally templates depend
-on it for inheritance and including templates. The simple API above
-dispatches everything to an <code>Environment</code> instance that it keeps for
-you.</p>
+<p><code>Environment</code> 类用来管理模板，使用他可以加载模板，模板之间可以继承和包含，上面提到的 api 都是调用了 <code>Environment</code> 的 api。</p>
 
-<p>You can manually handle it if you want, which allows you to specify
-custom template loaders.</p>
+<p>你可以根据需要来定制，比如定制模板加载。</p>
 
 <h3 id="constructor">constructor</h3>
 
 <div class="api-sig"><code>new Environment([loaders], [opts])</code></div>
 
-<div class="api-desc"><p>The constructor takes a list of <strong>loaders</strong> and a hash of
-configuration parameters as <strong>opts</strong>. If <strong>loaders</strong> is null, it
-defaults to loading from the current directory or URL. You can pass a
-single loader or an array of loaders. If you pass an array of loaders,
-nunjucks will walk through them in order until one of them finds a
-template. See <a href="#loader"><code>Loader</code></a> for more info about loaders.</p>
+<div class="api-desc"><p>实例化 <code>Environment</code> 时传入两个参数，一组 <strong>loaders</strong> 和配置项 <strong>opts</strong>。如果 <strong>loaders</strong> 不存在，则默认从当前目录或地址加载。<strong>loaders</strong> 可为一个或多个，如果传入一个数组，nunjucks 会按顺序查找直到找到模板。更多查看 <a href="#loader"><code>Loader</code></a></p>
 
-<p>The available flags in <strong>opts</strong> is <strong>autoescape</strong> and <strong>tags</strong>. Read
-more about those options in <a href="#configure"><code>configure</code></a> (the express and
-watch options are not applicable here and configured elsewhere like <a href="#express"><code>env.express</code></a>).</p>
+<p><strong>opts</strong> 的配置有 <strong>autoescape</strong> and <strong>tags</strong>，在 <a href="#configure"><code>configure</code></a> 查看具体配置（express 和 watch 配置在这里不适用，而是在 <a href="#express"><code>env.express</code></a> 进行配置）。</p>
 
-<p>In node, the <a href="#filesystemloader"><code>FileSystemLoader</code></a> is available to
-load templates off the filesystem, and in the browser the <a href="#webloader"><code>WebLoader</code></a>
-is available to load over HTTP (or use precompiled templates). If you
-use the simple <a href="#configure"><code>configure</code></a> API, nunjucks automatically
-creates the appropriate loader for you, depending if your in node or
-the browser. See <a href="#loader"><code>Loader</code></a> for more information.</p>
+<p>在 node 端使用 <a href="#filesystemloader"><code>FileSystemLoader</code></a> 加载模板，浏览器端则使用 <a href="#webloader"><code>WebLoader</code></a> 通过 http 加载（或使用编译后的模板）。如果你使用了 <a href="#configure"><code>configure</code></a> 的 api，nunjucks 会根据平台（node 或浏览器）自动选择对应的 loader。查看更多 <a href="#loader"><code>Loader</code></a>。</p>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="c1">// the FileSystemLoader is available if in node</span>
 <span class="kd">var</span> <span class="nx">env</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Environment</span><span class="p">(</span><span class="k">new</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">FileSystemLoader</span><span class="p">(</span><span class="s1">&#39;views&#39;</span><span class="p">));</span>
 
@@ -328,10 +295,7 @@ the browser. See <a href="#loader"><code>Loader</code></a> for more information.
 
 <div class="api-sig"><code>env.render(name, [context], [callback])</code></div>
 
-<div class="api-desc"><p>Render the template named <strong>name</strong> with the optional <strong>context</strong> hash.
-If <strong>callback</strong> is supplied, call it when done with any errors and the
-result (see <a href="#asynchronous-support">asynchronous support</a>), otherwise
-return the rendered string.</p>
+<div class="api-desc"><p>渲染名为 <strong>name</strong> 的模板，使用 <strong>context</strong> 作为数据，如果 <strong>callback</strong> 存在，在完成时会调用，回调有两个参数：错误和结果（ 查看 <a href="#asynchronous-support">asynchronous support</a>）。如果 <strong>callback</strong> 不存在则直接回返结果。</p>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="kd">var</span> <span class="nx">res</span> <span class="o">=</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="s1">&#39;foo.html&#39;</span><span class="p">);</span>
 
 <span class="kd">var</span> <span class="nx">res</span> <span class="o">=</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="s1">&#39;foo.html&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">username</span><span class="o">:</span> <span class="s1">&#39;James&#39;</span> <span class="p">});</span>
@@ -345,8 +309,7 @@ return the rendered string.</p>
 
 <div class="api-sig"><code>env.renderString(src, [context], [callback])</code></div>
 
-<div class="api-desc"><p>Same as <a href="#render1"><code>render</code></a>, but renders a raw string instead of
-loading a template.</p>
+<div class="api-desc"><p>和 <a href="#render1"><code>render</code></a> 相同，只是渲染一个字符串而不是加载的模块。</p>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="kd">var</span> <span class="nx">res</span> <span class="o">=</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="s1">&#39;Hello {{ username }}&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">username</span><span class="o">:</span> <span class="s1">&#39;James&#39;</span> <span class="p">});</span>
 </code></pre></div>
 </div>
@@ -355,45 +318,35 @@ loading a template.</p>
 
 <div class="api-sig"><code>env.addFilter(name, func, [async])</code></div>
 
-<div class="api-desc"><p>Add a custom filter named <strong>name</strong> which calls <strong>func</strong> whenever
-invoked. If the filter needs to be async, <strong>async</strong> must be <code>true</code>
-(see <a href="#asynchronous-support">asynchronous support</a>). See 
-<a href="#custom-filters">Custom Filters</a>.</p>
+<div class="api-desc"><p>添加名为 <strong>name</strong> 的自定义过滤器，<strong>func</strong> 为调用的函数，如果过滤器需要异步的，<strong>async</strong> 应该为 <code>true</code> （查看 <a href="#asynchronous-support">asynchronous support</a>)。查看 <a href="#custom-filters">Custom Filters</a>。</p>
 </div>
 
 <h3 id="getfilter">getFilter</h3>
 
 <div class="api-sig"><code>env.getFilter(name)</code></div>
 
-<div class="api-desc"><p>Get the filter, which is just a function, named <strong>name</strong>.</p>
+<div class="api-desc"><p>获取过滤器，传入名字返回一个函数。</p>
 </div>
 
 <h3 id="addextension">addExtension</h3>
 
 <div class="api-sig"><code>env.addExtension(name, ext)</code></div>
 
-<div class="api-desc"><p>Add the custom extension <strong>ext</strong> named <strong>name</strong>. <strong>ext</strong> is an object
-with a few specific methods that are called by the extension system.
-See <a href="#custom-tags">Custom Tags</a>.</p>
+<div class="api-desc"><p>添加一个名为 <strong>name</strong> 的扩展，<strong>ext</strong> 为一个对象，并存在几个指定的方法供系统调用，查看 <a href="#custom-tags">Custom Tags</a>。</p>
 </div>
 
 <h3 id="getextension">getExtension</h3>
 
 <div class="api-sig"><code>env.getExtension(name)</code></div>
 
-<div class="api-desc"><p>Get an extension named <strong>name</strong>.</p>
+<div class="api-desc"><p>获取扩展，传入名字返回一个函数。</p>
 </div>
 
 <h3 id="gettemplate">getTemplate</h3>
 
 <div class="api-sig"><code>env.getTemplate(name, [eagerCompile], [callback])</code></div>
 
-<div class="api-desc"><p>Retrieve the template named <strong>name</strong>. If <strong>eagerCompile</strong> is <code>true</code>,
-compile it now instead of on render. If <strong>callback</strong> is supplied, call
-it with any errors and a template (if found), otherwise return
-synchronously. If using any async loaders, you must use the async API.
-The builtin loaders do not require this. See
-<a href="#asynchronous-support">asynchronous support</a> and <a href="#loader">loaders</a>.</p>
+<div class="api-desc"><p>获取一个名为 <strong>name</strong> 的模板。如果 <strong>eagerCompile</strong> 为 <code>true</code>，模板会立即编译而不是在渲染的时候再编译。如果 <strong>callback</strong> 存在会被调用，参数为错误和模板，否则会直接返回。如果使用异步加载器，则必须使用异步的 api，内置的加载器不需要。查看 <a href="#asynchronous-support">asynchronous support</a> 和 <a href="#loader">loaders</a>。</p>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="kd">var</span> <span class="nx">tmpl</span> <span class="o">=</span> <span class="nx">env</span><span class="p">.</span><span class="nx">getTemplate</span><span class="p">(</span><span class="s1">&#39;page.html&#39;</span><span class="p">);</span>
 
 <span class="kd">var</span> <span class="nx">tmpl</span> <span class="o">=</span> <span class="nx">env</span><span class="p">.</span><span class="nx">getTemplate</span><span class="p">(</span><span class="s1">&#39;page.html&#39;</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
@@ -407,10 +360,7 @@ The builtin loaders do not require this. See
 
 <div class="api-sig"><code>env.express(app)</code></div>
 
-<div class="api-desc"><p>Install nunjucks as the rendering engine for the express <strong>app</strong>.
-After doing this, you can use express normally. Note that you can do
-this automatically with the simple API call <a href="#configure"><code>configure</code></a>
-by passing in the app as the <strong>express</strong> option.</p>
+<div class="api-desc"><p>使用 nunjucks 作为 express 的模板引擎，调用后可正常使用 express。你也可以调用 <a href="#configure"><code>configure</code></a>，将 app 作为 express 参数传入。</p>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="kd">var</span> <span class="nx">app</span> <span class="o">=</span> <span class="nx">express</span><span class="p">();</span>
 <span class="nx">env</span><span class="p">.</span><span class="nx">express</span><span class="p">(</span><span class="nx">app</span><span class="p">);</span>
 
@@ -422,21 +372,14 @@ by passing in the app as the <strong>express</strong> option.</p>
 
 <h2 id="template">Template</h2>
 
-<p>A <code>Template</code> is an object that handles the compiling of template
-strings and rendering them. Usually the <code>Environment</code> handles them for
-you, but you can easily use it yourself. If you don&#39;t connect a
-template with an environment, you can&#39;t include or inherit any other
-templates.</p>
+<p><code>Template</code> 是一个模板编译后的对象，然后进行渲染。通常情况下，<code>Environment</code> 已经帮你处理了，但你也可以自己进行处理。
+如果使用 <code>Template</code> 渲染模板时未指定 <code>Environment</code>，那么这个模板不支持包含 (include) 和继承 (inherit) 其他模板。</p>
 
 <h3 id="constructor1">constructor</h3>
 
 <div class="api-sig"><code>new Template(src, [env], [path], [eagerCompile])</code></div>
 
-<div class="api-desc"><p>The constructor takes a template string <strong>src</strong>, an optional
-<code>Environment</code> instance <strong>env</strong> to use for loading other templates, a
-string <strong>path</strong> describing the location/path for debugging purposes,
-and a boolean <strong>eagerCompile</strong> which, if <code>true</code>, kicks off compilation
-immediately instead of waiting until the template is rendered.</p>
+<div class="api-desc"><p>实例化 <code>Template</code> 时需要四个参数，<strong>src</strong> 为模板的字符串，<code>Environment</code> 的实例 <strong>env</strong>（可选）用来加载其他模板，<strong>path</strong> 为一个路径，在调试中使用，如果 <strong>eagerCompile</strong> 为 <code>true</code>，模板会立即编译而不是在渲染的时候再编译。</p>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="kd">var</span> <span class="nx">tmpl</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">Template</span><span class="p">(</span><span class="s1">&#39;Hello {{ username }}&#39;</span><span class="p">);</span>
 
 <span class="nx">tmpl</span><span class="p">.</span><span class="nx">render</span><span class="p">({</span> <span class="nx">username</span><span class="o">:</span> <span class="s2">&quot;James&quot;</span> <span class="p">});</span> <span class="c1">// -&gt; &quot;Hello James&quot;</span>
@@ -447,15 +390,13 @@ immediately instead of waiting until the template is rendered.</p>
 
 <div class="api-sig"><code>tmpl.render(context, [callback])</code></div>
 
-<div class="api-desc"><p>Renders the template with the optional <strong>context</strong> hash. If
-<strong>callback</strong> is supplied, call it when done with any errors and the
-result (see <a href="#asynchronous-support">asynchronous support</a>), otherwise
-return the rendered string.</p>
+<div class="api-desc"><p>渲染模板，<strong>context</strong> 为数据，如果 <strong>callback</strong> 存在会在渲染完成后调用，参数为错误和结果 (查看 <a href="#asynchronous-support">asynchronous support</a>)，否则直接返回。</p>
 </div>
 
 <h2 id="loader">Loader</h2>
 
-<p>A loader is an object that takes a template name and loads it from a
+<p>加载器是一个对象，从资源（如文件系统或网络）中加载模板，以下为两个内置的加载器。
+A loader is an object that takes a template name and loads it from a
 source, such as the filesystem or network. The following two builtin
 loaders exist, each for different contexts.</p>
 
@@ -463,12 +404,7 @@ loaders exist, each for different contexts.</p>
 
 <div class="api-sig"><code>new FileSystemLoader([searchPaths], [noWatch])</code></div>
 
-<div class="api-desc"><p>This is only available to node. It will load templates from the
-filesystem, using the <strong>searchPaths</strong> array as paths to look for
-templates. <strong>searchPaths</strong> can also be a single path for where
-templates live, and it defaults to the current working directory. If
-<strong>noWatch</strong> is <code>true</code>, templates are permanently cached and you won&#39;t
-see any changes; otherwise it uses <code>fs.watch</code> to watch for changes.</p>
+<div class="api-desc"><p>只在 node 端可用，他可从文件系统中加载模板，<strong>searchPaths</strong> 为查找模板的路径，可以是一个也可以是多个，默认为当前的工作目录。如果 <strong>noWatch</strong> 为 <code>true</code>，模板会永久缓存，否则使用 <code>fs.watch</code> 来监听文件的变化。</p>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="c1">// Loads templates from the &quot;views&quot; folder</span>
 <span class="kd">var</span> <span class="nx">env</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">Environment</span><span class="p">(</span><span class="k">new</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">FileSystemLoader</span><span class="p">(</span><span class="s1">&#39;views&#39;</span><span class="p">));</span>
 </code></pre></div>
@@ -478,17 +414,9 @@ see any changes; otherwise it uses <code>fs.watch</code> to watch for changes.</
 
 <div class="api-sig"><code>new WebLoader([baseURL], [neverUpdate])</code></div>
 
-<div class="api-desc"><p>This is only available in the browser. <strong>baseURL</strong> is the URL to load
-templates from (must be the same domain), and it defaults to the
-current relative directory. If <strong>neverUpdate</strong> is <code>true</code> templates
-will only ever be fetched once, so you won&#39;t see any updates to
-templates; the default is to load the template every time it is
-rendered.</p>
+<div class="api-desc"><p>只在浏览器端可用，通过 <strong>baseURL</strong>（必须为同域）加载模板，默认为当前相对目录。如果 <strong>neverUpdate</strong> 为 <code>true</code>，模板只会加载一次，以后不会变化，默认每次渲染的时候都会加载。</p>
 
-<p>This loader also recognizes when precompiled templates are available
-and automatically uses them instead of fetching over HTTP. In
-production, this should always be the case. See
-<a href="#precompiling-templates">Precompiling Templates</a>.</p>
+<p>他还能加载预编译后的模板，自动使用这些模板而不是通过 http 获取，在生产环境应该使用预编译。查看 <a href="#precompiling-templates">Precompiling Templates</a>。</p>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="c1">// Load templates from /views</span>
 <span class="kd">var</span> <span class="nx">env</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">Environment</span><span class="p">(</span><span class="k">new</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">WebLoader</span><span class="p">(</span><span class="s1">&#39;/views&#39;</span><span class="p">))</span>
 </code></pre></div>
@@ -496,9 +424,7 @@ production, this should always be the case. See
 
 <h3 id="writing-a-loader">Writing a Loader</h3>
 
-<p>You can write loaders for more complex loading, like from a database.
-If you want to do this, just create an object that has a method
-<code>getSource(name)</code>, where <strong>name</strong> is the name of the template. That&#39;s it.</p>
+<p>你可以自己写一个更复杂一点的加载器（如从数据库加载），只需建一个对象，添加一个 <code>getSource(name)</code> 的方法，<strong>name</strong> 为模板名。</p>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="kd">function</span> <span class="nx">MyLoader</span><span class="p">(</span><span class="nx">opts</span><span class="p">)</span> <span class="p">{</span>
     <span class="c1">// configuration</span>
 <span class="p">}</span>
@@ -507,10 +433,7 @@ If you want to do this, just create an object that has a method
     <span class="c1">// load the template</span>
 <span class="p">}</span>
 </code></pre></div>
-<p>It can get a little more complex. If you want to track updates to
-templates and bust the internal cache so that you can see updates, you
-need to extend the <code>Loader</code> class. This gives you <code>emit</code> method that
-can fire events. You need to call it </p>
+<p>如果你希望跟踪模板的更新，并当有更新时清除缓存，这样就有一点复杂了。但你可以继承 <code>Loader</code> 类，可以通过 <code>emit</code> 方法触发事件。</p>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="kd">var</span> <span class="nx">MyLoader</span> <span class="o">=</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">Loader</span><span class="p">.</span><span class="nx">extend</span><span class="p">({</span>
     <span class="nx">init</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
         <span class="c1">// setup a process which watches templates here</span>
@@ -525,14 +448,9 @@ can fire events. You need to call it </p>
 </code></pre></div>
 <h4 id="asynchronous">Asynchronous</h4>
 
-<p>There&#39;s one last piece: asynchronous loaders. So far, all of the
-loaders have been synchronous; <code>getSource</code> returns the source
-immediately. The benefit of this is that the user isn&#39;t forced to use
-the asynchronous API and be aware of edge cases about async templates.
-You might want to load from a database, however.</p>
+<p>这是最后一部分：异步加载器。到现在为止，所有的加载器都是同步，<code>getSource</code> 立即返回资源。这个的好处是用户不必强制使用异步 api，也不用担心异步模板的边缘问题。但是，你可以希望从数据库加载</p>
 
-<p>Just add an <code>async: true</code> property to your loader and it will be used
-asynchronously.</p>
+<p>只需在 load 中添加 <code>async: true</code> 属性就可支持异步调用</p>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="kd">var</span> <span class="nx">MyLoader</span> <span class="o">=</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">Loader</span><span class="p">.</span><span class="nx">extend</span><span class="p">({</span>
     <span class="nx">async</span><span class="o">:</span> <span class="kc">true</span><span class="p">,</span>
 
@@ -543,94 +461,57 @@ asynchronously.</p>
     <span class="p">}</span>
 <span class="p">});</span>
 </code></pre></div>
-<p>Remember that you now have to use the asynchronous API. See
-<a href="#asynchronous-support">asynchronous support</a>.</p>
+<p>记住现在必须使用异步 api，查看 <a href="#asynchronous-support">asynchronous support</a>。</p>
 
-<p><strong>Warning</strong>: if you are using an asynchronous loader, you can&#39;t load
-  templates inside <code>for</code> loops. You need to explicitly use the
-  <code>asyncEach</code> tag if you need to load templates, which is exactly the
-  same as <code>for</code> but asynchronous. More info can be found at
-  <a href="#be-careful">Be Careful!</a>.</p>
+<p><strong>注意</strong>: 如果使用了异步加载器，你将不能在 <code>for</code> 循环中加载模块，但可以使用 <code>asyncEach</code> 替换之。<code>asyncEach</code> 和 <code>for</code> 相同，只是在异步的时候使用。更多查看 <a href="#be-careful">Be Careful!</a>。</p>
 
 <h2 id="browser-usage">Browser Usage</h2>
 
-<p>Using nunjucks in the browser takes a little more thought because you
-care about load and compile time. On the server-side, templates are
-compiled once and cached in memory and you never have to worry about
-it. On the client-side however, you don&#39;t want to compile templates
-even once, as it would result in slow page render time.</p>
+<p>在浏览器端使用 nunjucks 需要考虑更多，因为需要非常关注加载和编译时间。在服务端，模板一次编译后就缓存在内存中，就不用担心了。在浏览器端，你甚至不想编译他，因为会降低渲染的速度。</p>
 
-<p>The solution is to precompile your templates into JavaScript, and load
-them as a simple <code>.js</code> file on page load.</p>
+<p>解决方案是将模板预编译成 javascript，和普通的 js 一样加载。</p>
 
-<p>Maybe you do want to dynamically load templates while developing,
-however, so that you can see changes immediately without recompiling.
-Nunjucks tries to adapt to whatever workflow you want.</p>
+<p>可能你想在开发时动态的加载模板，这样你可以在文件变化的时候马上看到而不需要预编译。Nunjucks 已经帮你适配了你想要的工作流。</p>
 
-<p>The only rule you must follow: <strong>always precompile your templates in
-production</strong>. Why? Not only is it slow to compile all your templates
-on page load, they are loaded <em>synchronously</em> over HTTP, blocking the
-whole page. It is slow. It does this because nunjucks isn&#39;t async by
-default.</p>
+<p>有一点必须遵守：<strong>在生产环境一定要预编译模板</strong>。为什么？不仅因为在页面加载时编译模板速度很慢，而且是<strong>同步</strong>加载模板的，会阻塞整个页面。这很慢，因为 nunjucks 模板不是异步的。</p>
 
 <h3 id="recommended-setups">Recommended Setups</h3>
 
-<p>These are two of the most popular ways to set up nunjucks on the
-client-side. Note that there are two different js files: one with the
-compiler, nunjucks.js, and one without the compiler, nunjucks-slim.js.
-Read <a href="getting-started.html">Getting Started</a> for a brief overview of
-the differences.</p>
+<p>在客户端，有两种最常用的方式来初始设置 nunjucks。注意这是两个不同的文件，其中一个包括编译器 nunjucks.js，另一个不包括 nunjucks-slim.js。查看 <a href="getting-started.html">Getting Started</a> 区分两者。</p>
 
-<p>See <a href="#precompiling">Precompiling</a> for information on precompiling
-templates.</p>
+<p>查看 <a href="#precompiling">Precompiling</a> 了解预编译。</p>
 
 <h4 id="setup-1-only-precompile-in-production">Setup #1: only precompile in production</h4>
 
-<p>This method will give you a setup that dynamically loads templates
-while developing (you can see changes immediately), but uses
-precompiled templates in production.</p>
+<p>这个方法可以让你在开发环境可以动态加载模板（可以马上看到变化），在生产环境使用预编译的模板。</p>
 
 <ol>
-<li>Load <a href="files/nunjucks.js">nunjucks.js</a> with either a script tag or a module loader.</li>
-<li>Render templates (<a href="#simple-api">example</a>)!</li>
-<li>When pushing to production, <a href="#precompiling">precompile</a> the templates into a js file
-and load it on the page</li>
+<li>使用 script 或模块加载器加载 <a href="files/nunjucks.js">nunjucks.js</a>。</li>
+<li>渲染模板 (<a href="#simple-api">example</a>)!</li>
+<li>当发布到生产环境时，When pushing to production, 将模板<a href="#precompiling">预编译</a> 成 js 文件。</li>
 </ol>
 
 <blockquote>
-<p>An optimization is to use <code>nunjucks-slim.js</code> instead of
-<code>nunjucks.js</code> in production since you are using precompiled
-templates there. It&#39;s 8K instead of 20K because it doesn&#39;t contain
-the compiler. This complicates the setup though because you are
-using different js files between dev and prod, so it may or may not
-be worth it.</p>
+<p>在生产环境中，你可以使用 <code>nunjucks-slim.js</code> 代替 <code>nunjucks.js</code> 进行优化，因为你使用了预编译的模板。
+<code>nunjucks-slim.js</code> 只有 8K 而不是 20K，因为不包括编译器。
+但是这使初始设置复杂化了，因为在开发和生产环境需要不同的 js 文件，是否值得完全在你如何使用。</p>
 </blockquote>
 
 <h4 id="setup-2-always-precompile">Setup #2: always precompile</h4>
 
-<p>This method always uses precompiled templates while developing and in
-production, which simplifies the setup. However, you&#39;re going to want
-something that automatically recompiles templates while developing
-unless you want to manually recompile them after every change.</p>
+<p>这个方法是在开发和生产环境都使用预编译的模板，这样可以简化初始设置。但是在开发时，你需要一些工具来自动预编译，而不是手动编译。</p>
 
 <ol>
-<li>For development, use the <a href="https://github.com/jlongster/grunt-nunjucks">grunt task</a> to watch
-your template directory for changes and automatically <a href="#precompiling">precompile</a> them
-into a js file</li>
-<li>Load <a href="files/nunjucks-slim.js">nunjucks-slim.js</a> and <code>templates.js</code>, or whatever you named
-the precompiled js file, with either a script tag or a module loader.</li>
-<li>Render templates (<a href="#simple-api">example</a>)!</li>
+<li>开发时，使用 <a href="https://github.com/jlongster/grunt-nunjucks">grunt task</a> 监听文件目录，当文件变化后自动编译成 js 文件。</li>
+<li>使用 script 或模块加载器加载 <a href="files/nunjucks-slim.js">nunjucks-slim.js</a> 和你编译的 js 文件（如 <code>templates.js</code>）。</li>
+<li>渲染模板 (<a href="#simple-api">example</a>)!</li>
 </ol>
 
-<p>With this method, there are no differences between development and
-production code. Simply commit the templates.js file and deploy the
-same code to production.</p>
+<p>使用这个方法，开发和生产环境无区别，只需提交 templates.js 并部署到生产环境。</p>
 
 <h2 id="precompiling">Precompiling</h2>
 
-<p>To precompile your templates, use the <code>nunjucks-precompile</code> script
-that comes with nunjucks. You can pass it a directory or a file and it
-will generate all the JavaScript for your templates.</p>
+<p>使用 <code>nunjucks-precompile</code> 脚本来预编译模板，可传入一个目录或一个文件，他将把所有的模板生成 javascript。</p>
 <div class="highlight"><pre><code class="text language-text" data-lang="text">// Precompiling a whole directory
 $ nunjucks-precompile views &gt; templates.js
 
@@ -639,45 +520,29 @@ $ nunjucks-precompile views/base.html &gt;&gt; templates.js
 $ nunjucks-precompile views/index.html &gt;&gt; templates.js
 $ nunjucks-precompile views/about.html &gt;&gt; templates.js
 </code></pre></div>
-<p>All you have to do is simply load <code>templates.js</code> on the page, and the
-system will automatically use the precompiled templates. There are
-zero changes necessary.</p>
+<p>你只需要在页面上加载 <code>templates.js</code>，系统会自动使用预编译的模板，没有改变的必要。</p>
 
-<p>There are various options available to the script. Simply invoke
-<code>nunjucks-precompile</code> to see more info about them. Note that <strong>names
-of all asynchronous filters need to passed to the script</strong> since they
-need to be known at compile-time. You can pass a comma-delimited list
-of async filters with <code>-a</code>, like <code>-a foo,bar,baz</code>. If you only use
-normal synchronous filters, you don&#39;t need to do anything.</p>
+<p>这个脚本还有很多可选项，直接调用 <code>nunjucks-precompile</code> 可以看到更多信息。注意<strong>所有的异步过滤器需要当参数传入</strong>，因为编译时需要他们，你可以使用 <code>-a</code> 参数来传入（如 <code>-a foo,bar,baz</code>）。如果只使用同步过滤器则不需要处理。</p>
 
-<p>Extensions cannot be specified with this script. You must use the
-precompile API below if you use them.</p>
+<p>这个脚本无法指定扩展，所以你需要使用如下的预编译 api。</p>
 
 <h3 id="api1">API</h3>
 
-<p>There is also an API if you want to programmatically precompile
-templates. You&#39;ll want to do this if you use extensions or you use
-asynchronous filters, both of which need to be known at compile-time.
-You can pass an <code>Environment</code> object straight into the precompiler and
-it will get the extensions and filters from it. You should share the
-same <code>Environment</code> object between the client and server to keep
-everything in sync.</p>
+<p>如果你希望通过代码来预编译模板，nunjucks 也提供了 api，特别是在使用扩展和异步过滤器的时候需要使用这些 api。可以将 <code>Environment</code> 的实例传给预编译器，其中将包括扩展和过滤器。你需要在客户端和服务器使用同一个 <code>Environment</code> 对象保证同步。</p>
 
 <h3 id="precompile">precompile</h3>
 
 <div class="api-sig"><code>nunjucks.precompile(path, [opts])</code></div>
 
-<div class="api-desc"><p>Precompile a file or directory at <strong>path</strong>. <strong>opts</strong> is a hash with any of the following options:</p>
+<div class="api-desc"><p>传入 <strong>path</strong> 预编译一个文件或目录，<strong>opts</strong> 为如下的一些配置：</p>
 
 <ul>
-<li><strong>name</strong>: name of the template, when compiling a string (required)
-or a file (optional, defaults to <strong>path</strong>). names are
-auto-generated when compiling a directory.</li>
-<li><strong>asFunction</strong>: generate a callable function</li>
-<li><strong>force</strong>: keep compiling on error</li>
-<li><strong>env</strong>: the Environment to use (gets extensions and async filters from it)</li>
-<li><strong>include</strong>: array of file/folders to include (folders are auto-included, files are auto-excluded)</li>
-<li><strong>exclude</strong>: array of file/folders to exclude (folders are auto-included, files are auto-excluded)</li>
+<li><strong>name</strong>: 模板的名字，当编译一个字符串的时候需要，如果是一个文件则是可选的（默认为 <strong>path</strong>）,如果是目录名字会自动生成。</li>
+<li><strong>asFunction</strong>: 生成一个函数</li>
+<li><strong>force</strong>: 如果出错还继续编译</li>
+<li><strong>env</strong>: <code>Environment</code> 的实例</li>
+<li><strong>include</strong>: 包括额外的文件和文件夹 (folders are auto-included, files are auto-excluded)</li>
+<li><strong>exclude</strong>: 排除额外的文件和文件夹 (folders are auto-included, files are auto-excluded)</li>
 </ul>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="kd">var</span> <span class="nx">env</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">Environment</span><span class="p">();</span>
 
@@ -697,75 +562,46 @@ auto-generated when compiling a directory.</li>
 
 <div class="api-sig"><code>nunjucks.precompileString(str, [opts])</code></div>
 
-<div class="api-desc"><p>Exactly the same as <a href="#precompile"><code>precompile</code></a>, but compiles a raw string.</p>
+<div class="api-desc"><p>和 <a href="#precompile"><code>precompile</code></a> 相同，只是编译字符串。</p>
 </div>
 
 <h2 id="asynchronous-support">Asynchronous Support</h2>
 
-<p>You only need to read this section if you are interested in
-asynchronous rendering. There is no performance benefit to this, it is
-soley to allow custom filters and extensions to make async calls. If
-you don&#39;t care about this, you should simply use the normal API like
-<code>var res = env.render(&#39;foo.html&#39;);</code>. There&#39;s no need to force the
-<code>callback</code> on you, and it&#39;s why it&#39;s optional in all the rendering
-functions.</p>
+<p>如果你对异步渲染感兴趣才需要看这节，并没有性能上的优势，只是支持异步的过滤器和扩展，如果你不关注异步，那么应该使用同步 api，如 <code>var res = env.render(&#39;foo.html&#39;);</code>。你不必每次都写 <code>callback</code>，这就是为什么在所有的渲染函数中是一个可选项。</p>
 
-<p>As of version 1.0, nunjucks provides a way to render templates
-asynchronously. This means that custom filters and extensions can do
-stuff like fetch things from the database, and template rendering is
-&quot;paused&quot; until the callback is called.</p>
+<p>nunjucks 1.0 会提供一种异步渲染模板的方式，这意味着自定义的过滤器和扩展可以做些类似从数据库获取内容的操作，模板渲染会等待直到调用回调。</p>
 
-<p>Template loaders can be async as well, allowing you to load templates
-from a database or somewhere else. See
-<a href="#writing-a-loader">Writing a Loader</a>. If you are using an async
-template loader, you must use the async API. The builtin loaders that
-load from the filesystem and over HTTP are synchronous, which is not a
-performance problem because they are cached from the filesystem and
-you should precompile your templates and never use HTTP in production.</p>
+<p>模板加载器也可以异步，可使你从数据库或其他地方加载模板。查看 <a href="#writing-a-loader">Writing a Loader</a>。如果你在使用一个异步的模板加载，你需要使用异步的 api。内置的加载器是同步的，但并没有性能问题，因为文件系统是可以缓存的，而浏览器端会将模板编译成 js。</p>
 
-<p>If you are using anything async, you need to use the async API like this:</p>
+<p>如果你使用了异步的，那么你需要使用异步的 api：</p>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="nx">nunjucks</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="s1">&#39;foo.html&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">res</span><span class="p">)</span> <span class="p">{</span>
    <span class="c1">// check err and handle result</span>
 <span class="p">});</span>
 </code></pre></div>
-<p>Read more about async <a href="#asynchronous1"><code>filters</code></a>, <a href="#asynchronous2"><code>extensions</code></a>, and
+<p>了解更多异步相关的查看 <a href="#asynchronous1"><code>filters</code></a>, <a href="#asynchronous2"><code>extensions</code></a> 和
 <a href="#asynchronous"><code>loaders</code></a>.</p>
 
 <h3 id="be-careful">Be Careful!</h3>
 
-<p>Nunjucks is synchronous by default. Because of this, you need to
-follow a few rules when writing asynchronous templates:</p>
+<p>Nunjucks 默认是同步的，因此你需要按照如下规则写异步模板：</p>
 
 <ul>
-<li>Always use the async API. <code>render</code> should take a function that takes
-a callback.</li>
-<li>Async filters and extensions need to be known at compile-time, so
-you need to specify them explicitly when precompiling (see
-<a href="#precompiling">Precompiling</a>).</li>
-<li>If you are using a custom template loader that is asynchronous, you
-can&#39;t include templates inside a <code>for</code> loop. This is because <code>for</code>
-will compile to an imperative JavaScript <code>for</code> loop. You need to
-explicitly use the async <code>asyncEach</code> tag to iterate, which is
-exactly the same as <code>for</code> except asynchronous.</li>
+<li>总是使用异步 api，调用 <code>render</code> 方法时应该有回调。</li>
+<li>在编译时需要提供异步过滤器和扩展，所以在预编译时(查看
+<a href="#precompiling">Precompiling</a>)需要指定。</li>
+<li>如果你使用一个自定义的异步加载器，你不能在 <code>for</code> 中使用 include 模板，因为在 <code>for</code> 循环中会立即执行。而你需要使用 <code>asyncEach</code> 来循环，这和 <code>for</code> 的功能时相同的，但只用于异步场景。</li>
 </ul>
 
 <h2 id="autoescaping">Autoescaping</h2>
 
-<p>By default, nunjucks will render all output as it is. If turn on
-autoescaping, nunjucks will escape all output by default. It&#39;s
-recommended that you do this for security reasons.</p>
+<p>在默认情况下，nunjuck 渲染时会按原样输出，如果开启了自动转义 (autoescaping)，nunjuck 会转义所有的输出，为了安全建议一直开启。</p>
 
-<p>Autoescaping is rather simplistic in nunjucks right now. All you have
-to do is pass the <code>autoescape</code> option as <code>true</code> to the <code>Environment</code>
-object. In the future, you will have more control over which files
-this kicks in.</p>
+<p>自动转义在 nunjucks 中非常简单，你只需将 <code>autoescape</code> 为 <code>true</code> 传入 <code>Environment</code> 对象。</p>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="kd">var</span> <span class="nx">env</span> <span class="o">=</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">configure</span><span class="p">(</span><span class="s1">&#39;/path/to/templates&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">autoescape</span><span class="o">:</span> <span class="kc">true</span> <span class="p">});</span>
 </code></pre></div>
 <h2 id="customizing-syntax">Customizing Syntax</h2>
 
-<p>If you want different tokens than <code>{{</code> and the rest for variables,
-blocks, and comments, you can specify different tokens as the <code>tags</code>
-option:</p>
+<p>如果你希望使用其他的 token 而不是 <code>{{</code>，其中包括变量、区块和注释，你可以使用 <code>tags</code> 来定义不同的 token：</p>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="kd">var</span> <span class="nx">env</span> <span class="o">=</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">configure</span><span class="p">(</span><span class="s1">&#39;/path/to/templates&#39;</span><span class="p">,</span> <span class="p">{</span>
   <span class="nx">tags</span><span class="o">:</span> <span class="p">{</span>
     <span class="nx">blockStart</span><span class="o">:</span> <span class="s1">&#39;&lt;%&#39;</span><span class="p">,</span>
@@ -777,7 +613,7 @@ option:</p>
   <span class="p">}</span>
 <span class="p">});</span>
 </code></pre></div>
-<p>Using this environment, templates will look like this:</p>
+<p>使用这个 env，模板如下所示：</p>
 <div class="highlight"><pre><code class="text language-text" data-lang="text">&lt;ul&gt;
 &lt;% for item in items %&gt;
   &lt;li&gt;&lt;$ item $&gt;&lt;/li&gt;
@@ -786,10 +622,7 @@ option:</p>
 </code></pre></div>
 <h2 id="custom-filters">Custom Filters</h2>
 
-<p>To install a custom filter, use the <code>Environment</code> method <code>addFilter</code>.
-A filter is simply a function that takes the target object as the
-first argument and any arguments passed to the filter as the other
-arguments, in order.</p>
+<p>使用 <code>Environment</code> 的 <code>addFilter</code> 方法添加一个自定义的过滤器，过滤器时一个函数，第一个参数为目标元素，剩下的参数为传入过滤器的参数。</p>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="kd">var</span> <span class="nx">nunjucks</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;nunjucks&#39;</span><span class="p">);</span>
 <span class="kd">var</span> <span class="nx">env</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">Environment</span><span class="p">();</span>
 
@@ -797,9 +630,7 @@ arguments, in order.</p>
     <span class="k">return</span> <span class="nx">str</span><span class="p">.</span><span class="nx">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nx">count</span> <span class="o">||</span> <span class="mi">5</span><span class="p">);</span>
 <span class="p">});</span>
 </code></pre></div>
-<p>This adds a filter <code>shorten</code> which returns the first <code>count</code>
-characters in a string, with <code>count</code> defaulting to 5. Here is how it
-is used:</p>
+<p>添加了一个 <code>shorten</code> 的过滤器，返回前 <code>count</code> 位数的字符，<code>count</code> 默认为 5，如下为如何使用：</p>
 <div class="highlight"><pre><code class="jinja language-jinja" data-lang="jinja"><span class="c">{# Show the first 5 characters #}</span><span class="x"></span>
 <span class="x">A message for you: </span><span class="cp">{{</span> <span class="nv">message</span><span class="o">|</span><span class="nf">shorten</span> <span class="cp">}}</span><span class="x"></span>
 
@@ -808,101 +639,60 @@ is used:</p>
 </code></pre></div>
 <h3 id="keyworddefault-arguments">Keyword/Default Arguments</h3>
 
-<p>As described in the
-<a href="templating#Keyword-Arguments">templating section</a>, nunjucks supports
-keyword/default arguments. You can write a normal javascript filter
-that leverages them.</p>
+<p>在<a href="templating#Keyword-Arguments">模板</a>中说道，nunjucks 支持关键字参数，你可以在 filter 中使用他。</p>
 
-<p>All keyword arguments are passed in as a hash as the last argument.
-This is a filter <code>foo</code> that uses keyword arguments:</p>
+<p>所有的关键字参数会以最后一个参数传入，以下为使用了关键字参数的 <code>foo</code> 过滤器：</p>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="nx">env</span><span class="p">.</span><span class="nx">addFilter</span><span class="p">(</span><span class="s1">&#39;foo&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">num</span><span class="p">,</span> <span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">,</span> <span class="nx">kwargs</span><span class="p">)</span> <span class="p">{</span>
    <span class="k">return</span> <span class="nx">num</span> <span class="o">+</span> <span class="p">(</span><span class="nx">kwargs</span><span class="p">.</span><span class="nx">bar</span> <span class="o">||</span> <span class="mi">10</span><span class="p">);</span>
 <span class="p">})</span>
 </code></pre></div>
-<p>The template can use it like this:</p>
+<p>模板可如下使用：</p>
 <div class="highlight"><pre><code class="jinja language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="m">5</span> <span class="o">|</span> <span class="nf">foo</span><span class="o">(</span><span class="m">1</span><span class="o">,</span> <span class="m">2</span><span class="o">)</span> <span class="cp">}}</span><span class="x">          -&gt; 15</span>
 <span class="cp">{{</span> <span class="m">5</span> <span class="o">|</span> <span class="nf">foo</span><span class="o">(</span><span class="m">1</span><span class="o">,</span> <span class="m">2</span><span class="o">,</span> <span class="nv">bar</span><span class="o">=</span><span class="m">3</span><span class="o">)</span> <span class="cp">}}</span><span class="x">   -&gt; 8</span>
 </code></pre></div>
-<p>You <em>must</em> pass all of the positional arguments before keyword
-arguments (<code>foo(1)</code> is valid but <code>foo(1, bar=10)</code> is not). Also, you
-cannot set a positional argument with a keyword argument like you can
-in Python (such as <code>foo(1, y=1)</code>)</p>
+<p>你<em>必须</em>在关键字参数之前传入所有的位置参数 (<code>foo(1)</code> 是有效的，而 <code>foo(1, bar=10)</code> 不是)，你不能使用将一个位置参数当作关键字参数来用 (如 <code>foo(1, y=1)</code>)。</p>
 
 <h3 id="asynchronous1">Asynchronous</h3>
 
-<p>Asynchronous filters receive a callback to resume rendering, and are
-created by passing <code>true</code> as the third argument to <code>addFilter</code>.</p>
+<p>异步过滤器接受一个回调继续渲染，调用 <code>addFilter</code> 时需传入第三个参数 <code>true</code>。</p>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="kd">var</span> <span class="nx">env</span> <span class="o">=</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">configure</span><span class="p">(</span><span class="s1">&#39;views&#39;</span><span class="p">);</span>
 
 <span class="nx">env</span><span class="p">.</span><span class="nx">addFilter</span><span class="p">(</span><span class="s1">&#39;lookup&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">name</span><span class="p">,</span> <span class="nx">callback</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">db</span><span class="p">.</span><span class="nx">getItem</span><span class="p">(</span><span class="nx">name</span><span class="p">,</span> <span class="nx">callback</span><span class="p">);</span>
 <span class="p">},</span> <span class="kc">true</span><span class="p">);</span>
 
-<span class="nx">env</span><span class="p">.</span><span class="nx">renderString</span><span class="p">(</span><span class="s1">&#39;{{ item|lookup }}&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">res</span><span class="p">)</span> <span class="p">{</span>
+<span class="nx">env</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="s1">&#39;{{ item|lookup }}&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">res</span><span class="p">)</span> <span class="p">{</span>
     <span class="c1">// do something with res</span>
 <span class="p">});</span>
 </code></pre></div>
-<p>Make sure to call the callback with two arguments: <code>callback(err, res)</code>. <code>err</code> can be null, of course.</p>
+<p>回调需要两个参数 <code>callback(err, res)</code>，<code>err</code> 可以为 null。</p>
 
-<p>Note: When precompiling, <strong>you must tell the precompiler the names of
-all asynchronous filters</strong>. See
-<a href="#precompiling">Precompiling</a>.</p>
+<p>注意：当预编译时，<strong>你必须指定所有的异步过滤器</strong>，查看 <a href="#precompiling">Precompiling</a>。</p>
 
 <h2 id="custom-tags">Custom Tags</h2>
 
-<p>You can create more complicated extensions by creating custom tags.
-This exposes the parser API and allows you to do anything you want
-with the template.</p>
+<p>你可以添加更多的自定义扩展，nunjucks 提供了 parser api 可以对模板做更多的事。</p>
 
-<p>Note: When precompiling, <strong>you must install the extensions at
-compile-time</strong>. You have to use the <a href="#api1">precompiling API</a> (or the
-<a href="https://github.com/jlongster/grunt-nunjucks">grunt task</a>) instead of
-the script. You&#39;ll want to create a <a href="#environment"><code>Environment</code></a>
-object, install your extensions, and pass it to the precompiler.</p>
+<p>注意：当预编译时，<strong>你必须在编译时添加这些扩展</strong>，你应该使用 <a href="#api1">precompiling API</a> (或者 <a href="https://github.com/jlongster/grunt-nunjucks">grunt task</a>)，而不是预编译脚本。你需要创建一个 <a href="#environment"><code>Environment</code></a>
+ 实例，添加扩展，传到预编译器中。</p>
 
-<p>An extension is a javascript object with at least two fields: <code>tags</code>
-and <code>parse</code>. Extensions basically register new tag names and take
-control of the parser when they are hit.</p>
+<p>一个扩展至少有两个字段 <code>tags</code> 和 <code>parse</code>，扩展注册一个标签名，如果运行到这个标签则调用 parse。</p>
 
-<p><code>tags</code> is an array of tag names that the extension should handle.
-<code>parse</code> is the method that actually parses them when the template is
-compiled. Additionally, there is a special node type <code>CallExtension</code>
-that you can use to call any method on your extension at runtime. This
-is explained more below.</p>
+<p><code>tags</code> 为这个扩展支持的一组标签名。<code>parse</code> 为一个函数，当编译时会解析模板。除此之外，还有一个特殊的节点名为 <code>CallExtension</code>，在运行时你可以调用本扩展的其他方法，下面会详细说明。</p>
 
-<p>Because you have to interact directly with the parse API and construct
-ASTs manually, this is a bit cumbersome. It&#39;s necessary if you want to
-do really complex stuff, however. Here are a few key parser methods
-you&#39;ll want to use:</p>
+<p>因为你需要直接使用 parse api，并且需要手动分析初 AST，所以有一点麻烦。如果你希望做一些复杂的扩展这是必须的。所以介绍一下你会用到的方法：</p>
 
 <ul>
-<li><p><code>parseSignature([throwErrors], [noParens])</code> - Parse a list of
-arguments. By default it requires the parser to be pointing at the
-left opening paranthesis, and parses up the right one. However, for
-custom tags you shouldn&#39;t use parantheses, so passing <code>true</code> to the
-second argument tells it to parse a list of arguments up until the
-block end tag. A comma is required between arguments. Example: <code>{%
-mytag foo, bar, baz=10 %}</code></p></li>
-<li><p><code>parseUntilBlocks(names)</code> - Parse content up until it hits a block
-with a name in the <code>names</code> array. This is useful for parsing content
-between tags.</p></li>
+<li><p><code>parseSignature([throwErrors], [noParens])</code> - 解析标签的参数。默认情况下，解析器会从括号左边解析到括号右边。但是自定义标签不应该时括号，所以将第二个参数设为 <code>true</code> 告诉解析器解析参数直到标签关闭。参数之间应该用逗号分隔，如 <code>{%
+mytag foo, bar, baz=10 %}</code>。</p></li>
+<li><p><code>parseUntilBlocks(names)</code> - 解析内容直到下一个名为 <code>names</code> 的标签，非常有用解析标签之间的内容。</p></li>
 </ul>
 
-<p>The parser API needs to be more documented, but for now read the above
-and check out the example below. You can also look at the
-<a href="https://github.com/jlongster/nunjucks/blob/master/src/parser.js">source</a>.</p>
+<p>parser API 还需要更多的文档，但现在对照上面的文档和下面的例子，你还可以看下<a href="https://github.com/jlongster/nunjucks/blob/master/src/parser.js">源码</a>。</p>
 
-<p>The most common usage is to process the content within some tags at
-runtime. It&#39;s like filters, but on steroids because you aren&#39;t
-confined to a single expression. You basically want to lightly parse
-the template and then get a callback into your extension with the
-content. This is done with the <code>CallExtension</code> node, which takes an
-extension instance, the method to call, list of arguments parsed from
-the tag, and a list of content blocks (parsed with
-<code>parseUntilBlocks</code>).</p>
+<p>最常用使用的是在运行时解析标签间的内容，就像过滤器一样，但是更灵活，因为不只是局限在一个表达式中。通常情况下你会解析模板，然后将内容传入回调。你可以使用 <code>CallExtension</code>，需要传扩展的实例，方法名，解析的参数和内容（使用 <code>parseUntilBlocks</code> 解析的）。</p>
 
-<p>For example, here&#39;s how you would implement an extension that fetches
-content from a URL and injects it into the page:</p>
+<p>例如，下面实现了从远程获取内容并插入的扩展：</p>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="kd">function</span> <span class="nx">RemoteExtension</span><span class="p">()</span> <span class="p">{</span>
     <span class="k">this</span><span class="p">.</span><span class="nx">tags</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;remote&#39;</span><span class="p">];</span>
 
@@ -955,7 +745,7 @@ content from a URL and injects it into the page:</p>
 
 <span class="nx">env</span><span class="p">.</span><span class="nx">addExtension</span><span class="p">(</span><span class="s1">&#39;RemoteExtension&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">RemoteExtension</span><span class="p">());</span>
 </code></pre></div>
-<p>Use it like this:</p>
+<p>模板可以这么写：</p>
 <div class="highlight"><pre><code class="jinja language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">remote</span> <span class="s2">&quot;/stuff&quot;</span> <span class="cp">%}</span><span class="x"></span>
 <span class="x">  This content will be replaced with the content from /stuff</span>
 <span class="cp">{%</span> <span class="k">error</span> <span class="cp">%}</span><span class="x"></span>
@@ -964,12 +754,9 @@ content from a URL and injects it into the page:</p>
 </code></pre></div>
 <h3 id="asynchronous2">Asynchronous</h3>
 
-<p>Another available node is <code>CallExtensionAsync</code> which is an
-asynchronous version of <code>CallExtension</code>. It calls back into your
-extension at runtime, with an additional parameter: a callback.
-Template rendering is paused until you call the callback to resume.</p>
+<p>如果是异步的可以使用 <code>CallExtensionAsync</code>，在运行时扩展有一个回调作为最后一个参数，模板渲染会等待回调返回。</p>
 
-<p>The <code>run</code> function from the above example would now look like:</p>
+<p>上面例子中的 <code>run</code> 如下使用</p>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="k">this</span><span class="p">.</span><span class="nx">run</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">context</span><span class="p">,</span> <span class="nx">url</span><span class="p">,</span> <span class="nx">body</span><span class="p">,</span> <span class="nx">errorBody</span><span class="p">,</span> <span class="nx">callback</span><span class="p">)</span> <span class="p">{</span>
    <span class="c1">// do async stuff and then call callback(err, res)</span>
 <span class="p">};</span>
