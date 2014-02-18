@@ -211,7 +211,9 @@ var Compiler = Object.extend({
     compileCallExtension: function(node, frame, async) {
         var name = node.extName;
         var args = node.args;
+        var opt = node.opt;
         var contentArgs = node.contentArgs;
+        var autoescape = typeof opt.autoescape === 'boolean' ? opt.autoescape : true;
         var transformedArgs = [];
 
         if(!async) {
@@ -274,12 +276,12 @@ var Compiler = Object.extend({
         if(async) {
             var res = this.tmpid();
             this.emitLine(', ' + this.makeCallback(res));
-            this.emitLine(this.buffer + ' += runtime.suppressValue(' + res + ', env.autoesc);');
+            this.emitLine(this.buffer + ' += runtime.suppressValue(' + res + ', ' + autoescape + ' && env.autoesc);');
             this.addScopeLevel();
         }
         else {
             this.emit(')');
-            this.emit(', env.autoesc);\n');
+            this.emit(', ' + autoescape + ' && env.autoesc);\n');
         }
     },
 
