@@ -152,7 +152,7 @@ var CallExtension = Node.extend("CallExtension", {
         this.prop = prop;
         this.args = args || new NodeList();
         this.contentArgs = contentArgs || [];
-        this.opt = ext.opt || {};
+        this.autoescape = ext.autoescape;
     }
 });
 

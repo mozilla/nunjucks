@@ -211,9 +211,8 @@ var Compiler = Object.extend({
     compileCallExtension: function(node, frame, async) {
         var name = node.extName;
         var args = node.args;
-        var opt = node.opt;
         var contentArgs = node.contentArgs;
-        var autoescape = typeof opt.autoescape === 'boolean' ? opt.autoescape : true;
+        var autoescape = typeof node.autoescape === 'boolean' ? node.autoescape : true;
         var transformedArgs = [];
 
         if(!async) {

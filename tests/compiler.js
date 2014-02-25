@@ -847,9 +847,7 @@
             function testExtension() {
                 this.tags = ['test'];
 
-                this.opt = {
-                    autoescape: false
-                };
+                this.autoescape = false;
 
                 this.parse = function(parser, nodes) {
                     var tok = parser.nextToken();
@@ -874,7 +872,6 @@
                 null,
                 opts,
                 function(err, res) {
-                    console.log(res)
                     expect(res).to.be('<b>Foo</b>');
                 }
             );
