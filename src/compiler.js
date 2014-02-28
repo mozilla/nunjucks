@@ -212,6 +212,7 @@ var Compiler = Object.extend({
         var name = node.extName;
         var args = node.args;
         var contentArgs = node.contentArgs;
+        var autoescape = typeof node.autoescape === 'boolean' ? node.autoescape : true;
         var transformedArgs = [];
 
         if(!async) {
@@ -274,12 +275,12 @@ var Compiler = Object.extend({
         if(async) {
             var res = this.tmpid();
             this.emitLine(', ' + this.makeCallback(res));
-            this.emitLine(this.buffer + ' += runtime.suppressValue(' + res + ', env.autoesc);');
+            this.emitLine(this.buffer + ' += runtime.suppressValue(' + res + ', ' + autoescape + ' && env.autoesc);');
             this.addScopeLevel();
         }
         else {
             this.emit(')');
-            this.emit(', env.autoesc);\n');
+            this.emit(', ' + autoescape + ' && env.autoesc);\n');
         }
     },
 

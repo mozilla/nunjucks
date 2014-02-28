@@ -843,6 +843,42 @@
             finish(done);
         });
 
+        it('should not autoescape when extension set false', function(done) {
+            function testExtension() {
+                this.tags = ['test'];
+
+                this.autoescape = false;
+
+                this.parse = function(parser, nodes) {
+                    var tok = parser.nextToken();
+                    var args = parser.parseSignature(null, true);
+                    parser.advanceAfterBlockEnd(tok.value);
+                    return new nodes.CallExtension(this, 'run', args, null);
+                };
+
+                this.run = function(context) {
+                    // Reverse the string
+                    return '<b>Foo</b>';
+                };
+            }
+
+            var opts = {
+                extensions: { 'testExtension': new testExtension() },
+                autoescape: true
+            };
+
+            render(
+                '{% test "123456" %}',
+                null,
+                opts,
+                function(err, res) {
+                    expect(res).to.be('<b>Foo</b>');
+                }
+            );
+
+            finish(done);
+        });
+
         it('should pass context as this to filters', function(done) {
             render(
                 '{{ foo | hallo }}',
