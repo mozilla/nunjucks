@@ -13,6 +13,7 @@ Next version:
 * Use chokidar for watching file changes. This should fix a lot of problems on OS X machines.
 * Always use `/` in paths when precompiling templates
 * Fix bug where async filters hang indefinitely inside `if` statements
+* Extensions now can override autoescaping with an `autoescape` property
 * Other various minor bugfixes
 
 # v1.0.1 (December 16, 2013)
