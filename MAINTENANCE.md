@@ -29,7 +29,7 @@ $ make browserfiles
 npm publish
 ```
 
-7. Go to https://github.com/jlongster/nunjucks/releases and click "Draft a new release". Fill out title and copy what you entered in CHANGELOG.md in the description. (CHANGELOG.md could go away I guess with github's release stuff)
+7. Go to https://github.com/mozilla/nunjucks/releases and click "Draft a new release". Fill out title and copy what you entered in CHANGELOG.md in the description. (CHANGELOG.md could go away I guess with github's release stuff)
 
 8. Make sure docs are up-to-date. If anything, you need to copy all the nunjucks*.js files in `browser/` to the [nunjucks-docs repo](https://github.com/mozilla/nunjucks-docs) in the `files` directory. This is where the "download" link points to in the docs. In `nunjucks-docs`, build the docs:
 
