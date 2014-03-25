@@ -27,7 +27,7 @@ var WebLoader = Loader.extend({
 
             return { src: src,
                      path: name,
-                     noCache: this.neverUpdate };
+                     noCache: !this.neverUpdate };
         }
     },
 
