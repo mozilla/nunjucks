@@ -1,4 +1,4 @@
-// Browser bundle of nunjucks 1.0.1 (slim, only works with precompiled templates)
+// Browser bundle of nunjucks 1.0.2 (slim, only works with precompiled templates)
 
 (function() {
 var modules = {};
@@ -730,7 +730,7 @@ var WebLoader = Loader.extend({
 
             return { src: src,
                      path: name,
-                     noCache: this.neverUpdate };
+                     noCache: !this.neverUpdate };
         }
     },
 

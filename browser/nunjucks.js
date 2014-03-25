@@ -1,4 +1,4 @@
-// Browser bundle of nunjucks 1.0.1 
+// Browser bundle of nunjucks 1.0.2 
 
 (function() {
 var modules = {};
@@ -499,6 +499,7 @@ var CallExtension = Node.extend("CallExtension", {
         this.prop = prop;
         this.args = args || new NodeList();
         this.contentArgs = contentArgs || [];
+        this.autoescape = ext.autoescape;
     }
 });
 
@@ -2942,6 +2943,7 @@ var Compiler = Object.extend({
         var name = node.extName;
         var args = node.args;
         var contentArgs = node.contentArgs;
+        var autoescape = typeof node.autoescape === 'boolean' ? node.autoescape : true;
         var transformedArgs = [];
 
         if(!async) {
@@ -3004,12 +3006,12 @@ var Compiler = Object.extend({
         if(async) {
             var res = this.tmpid();
             this.emitLine(', ' + this.makeCallback(res));
-            this.emitLine(this.buffer + ' += runtime.suppressValue(' + res + ', env.autoesc);');
+            this.emitLine(this.buffer + ' += runtime.suppressValue(' + res + ', ' + autoescape + ' && env.autoesc);');
             this.addScopeLevel();
         }
         else {
             this.emit(')');
-            this.emit(', env.autoesc);\n');
+            this.emit(', ' + autoescape + ' && env.autoesc);\n');
         }
     },
 
@@ -4409,7 +4411,7 @@ var WebLoader = Loader.extend({
 
             return { src: src,
                      path: name,
-                     noCache: this.neverUpdate };
+                     noCache: !this.neverUpdate };
         }
     },
 
