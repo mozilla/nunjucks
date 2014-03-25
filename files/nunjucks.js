@@ -1,4 +1,4 @@
-// Browser bundle of nunjucks 1.0.1 
+// Browser bundle of nunjucks 1.0.2 
 
 (function() {
 var modules = {};
@@ -168,7 +168,7 @@ exports.isString = function(obj) {
 };
 
 exports.isObject = function(obj) {
-    return obj === Object(obj);
+    return ObjProto.toString.call(obj) == '[object Object]';
 };
 
 exports.groupBy = function(obj, val) {
@@ -499,6 +499,7 @@ var CallExtension = Node.extend("CallExtension", {
         this.prop = prop;
         this.args = args || new NodeList();
         this.contentArgs = contentArgs || [];
+        this.autoescape = ext.autoescape;
     }
 });
 
@@ -969,7 +970,6 @@ modules['runtime'] = {
     callWrap: callWrap,
     handleError: handleError,
     isArray: lib.isArray,
-    asyncEach: lib.asyncEach,
     keys: lib.keys,
     SafeString: SafeString,
     copySafeness: copySafeness,
@@ -1896,6 +1896,9 @@ var Parser = Object.extend({
                     }
                     str += name.value;
                 }
+            }
+            else if(tok.type === lexer.TOKEN_STRING) {
+                str += '"' + tok.value + '"';
             }
             else {
                 str += tok.value;
@@ -2940,6 +2943,7 @@ var Compiler = Object.extend({
         var name = node.extName;
         var args = node.args;
         var contentArgs = node.contentArgs;
+        var autoescape = typeof node.autoescape === 'boolean' ? node.autoescape : true;
         var transformedArgs = [];
 
         if(!async) {
@@ -3002,12 +3006,12 @@ var Compiler = Object.extend({
         if(async) {
             var res = this.tmpid();
             this.emitLine(', ' + this.makeCallback(res));
-            this.emitLine(this.buffer + ' += runtime.suppressValue(' + res + ', env.autoesc);');
+            this.emitLine(this.buffer + ' += runtime.suppressValue(' + res + ', ' + autoescape + ' && env.autoesc);');
             this.addScopeLevel();
         }
         else {
             this.emit(')');
-            this.emit(', env.autoesc);\n');
+            this.emit(', ' + autoescape + ' && env.autoesc);\n');
         }
     },
 
@@ -3286,6 +3290,9 @@ var Compiler = Object.extend({
                     this.emit('cb()');
                 }
             });
+        } else if(async) {
+            this.emitLine('}\nelse {');
+            this.emit('cb()');
         }
 
         this.emitLine('}');
@@ -4404,7 +4411,7 @@ var WebLoader = Loader.extend({
 
             return { src: src,
                      path: name,
-                     noCache: this.neverUpdate };
+                     noCache: !this.neverUpdate };
         }
     },
 
@@ -4513,9 +4520,11 @@ var Environment = Obj.extend({
         var cache = {};
 
         lib.each(this.loaders, function(loader) {
-            loader.on('update', function(template) {
-                cache[template] = null;
-            });
+            if(typeof loader.on === 'function'){
+                loader.on('update', function(template) {
+                    cache[template] = null;
+                });
+            }
         });
 
         this.cache = cache;
@@ -4921,7 +4930,7 @@ nunjucks = {};
 nunjucks.Environment = env.Environment;
 nunjucks.Template = env.Template;
 
-nunjucks.Loader = env.Loader;
+nunjucks.Loader = Loader;
 nunjucks.FileSystemLoader = loaders.FileSystemLoader;
 nunjucks.WebLoader = loaders.WebLoader;
 

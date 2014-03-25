@@ -59,6 +59,9 @@
 <a href="#renderstring">renderString</a>
 </li>
 <li>
+<a href="#compile">compile</a>
+</li>
+<li>
 <a href="#configure">configure</a>
 </li>
 </ul>
@@ -232,6 +235,16 @@ See <a href="#asynchronous-support">asynchronous support</a> for more info.</p>
 <div class="api-desc"><p>Same as <a href="#render"><code>render</code></a>, but renders a raw string instead of
 loading a template.</p>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="kd">var</span> <span class="nx">res</span> <span class="o">=</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">renderString</span><span class="p">(</span><span class="s1">&#39;Hello {{ username }}&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">username</span><span class="o">:</span> <span class="s1">&#39;James&#39;</span> <span class="p">});</span>
+</code></pre></div>
+</div>
+
+<h3 id="compile">compile</h3>
+
+<div class="api-sig"><code>nunjucks.compile(str, [env], [path])</code></div>
+
+<div class="api-desc"><p>Compile the given string into a reusable nunjucks Template object.</p>
+<div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="kd">var</span> <span class="nx">template</span> <span class="o">=</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">compile</span><span class="p">(</span><span class="s1">&#39;Hello {{ username }}&#39;</span><span class="p">);</span>
+<span class="nx">template</span><span class="p">.</span><span class="nx">render</span><span class="p">({</span> <span class="nx">username</span><span class="o">:</span> <span class="s1">&#39;James&#39;</span> <span class="p">});</span>
 </code></pre></div>
 </div>
 

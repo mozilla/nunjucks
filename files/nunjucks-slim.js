@@ -1,4 +1,4 @@
-// Browser bundle of nunjucks 1.0.1 (slim, only works with precompiled templates)
+// Browser bundle of nunjucks 1.0.2 (slim, only works with precompiled templates)
 
 (function() {
 var modules = {};
@@ -168,7 +168,7 @@ exports.isString = function(obj) {
 };
 
 exports.isObject = function(obj) {
-    return obj === Object(obj);
+    return ObjProto.toString.call(obj) == '[object Object]';
 };
 
 exports.groupBy = function(obj, val) {
@@ -668,7 +668,6 @@ modules['runtime'] = {
     callWrap: callWrap,
     handleError: handleError,
     isArray: lib.isArray,
-    asyncEach: lib.asyncEach,
     keys: lib.keys,
     SafeString: SafeString,
     copySafeness: copySafeness,
@@ -731,7 +730,7 @@ var WebLoader = Loader.extend({
 
             return { src: src,
                      path: name,
-                     noCache: this.neverUpdate };
+                     noCache: !this.neverUpdate };
         }
     },
 
@@ -1342,9 +1341,11 @@ var Environment = Obj.extend({
         var cache = {};
 
         lib.each(this.loaders, function(loader) {
-            loader.on('update', function(template) {
-                cache[template] = null;
-            });
+            if(typeof loader.on === 'function'){
+                loader.on('update', function(template) {
+                    cache[template] = null;
+                });
+            }
         });
 
         this.cache = cache;
@@ -1750,7 +1751,7 @@ nunjucks = {};
 nunjucks.Environment = env.Environment;
 nunjucks.Template = env.Template;
 
-nunjucks.Loader = env.Loader;
+nunjucks.Loader = Loader;
 nunjucks.FileSystemLoader = loaders.FileSystemLoader;
 nunjucks.WebLoader = loaders.WebLoader;
 
