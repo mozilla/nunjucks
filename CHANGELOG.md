@@ -4,9 +4,16 @@ Next version:
 
 * document SafeString and writing filters with them
 * document app.locals with express
-* source maps
+* source maps?
 * publish in bower
 * cleanup WebLoader.fetch
+
+# v1.0.2 (March 25, 2013)
+
+* Use chokidar for watching file changes. This should fix a lot of problems on OS X machines.
+* Always use `/` in paths when precompiling templates
+* Fix bug where async filters hang indefinitely inside `if` statements
+* Other various minor bugfixes
 
 # v1.0.1 (December 16, 2013)
 
