@@ -7,6 +7,7 @@
         "optimist": "*",
         "chokidar": "git://github.com/appleifreak/chokidar.git"
     },
+    "browser" : "./browser/nunjucks.js",
     "devDependencies": {
         "expect.js": "*",
         "mocha": "*",
