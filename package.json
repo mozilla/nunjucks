@@ -5,7 +5,7 @@
     "author": "James Long <longster@gmail.com>",
     "dependencies": {
         "optimist": "*",
-        "chokidar": "git://github.com/appleifreak/chokidar.git"
+        "chokidar": "git://github.com/tyler-johnson/chokidar.git"
     },
     "devDependencies": {
         "expect.js": "*",
