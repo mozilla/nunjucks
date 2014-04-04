@@ -1,4 +1,4 @@
-// Browser bundle of nunjucks 1.0.3 (slim, only works with precompiled templates)
+// Browser bundle of nunjucks 1.0.4 (slim, only works with precompiled templates)
 
 (function() {
 var modules = {};
