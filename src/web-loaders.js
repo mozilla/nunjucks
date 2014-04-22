@@ -41,6 +41,7 @@ var WebLoader = Loader.extend({
                 };
             };
 
+            // Test both name AND name + defaultExt for fetch success
             var success = lib.firstof(paths, test);
             if(!success) {
                 return null;

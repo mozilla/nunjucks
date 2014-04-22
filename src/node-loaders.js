@@ -53,13 +53,19 @@ var FileSystemLoader = Loader.extend({
                 path.join(paths[i], name + this.defaultExt)
             ];
 
-            // Only allow the current directory and anything
-            // underneath it to be searched
-            if(paths[i] == '.' || p.indexOf(paths[i]) === 0) {
-                // Check both name AND name + defaultExt for exists match
-                fullpath = lib.firstof(p, existsSync);
-                if(fullpath) { break; }
-            }
+            var test = function(path) {
+                // Only allow the current directory and anything
+                // underneath it to be searched
+                if (paths[i] == '.' || path.indexOf(paths[i] === 0)
+                    && existsSync(path)) {
+                        return path;
+                }
+                return null;
+            };
+
+            // Test both name AND name + defaultExt for exists match
+            fullpath = lib.firstof(p, test);
+            if(fullpath) { break; }
         }
 
         if(!fullpath) {
