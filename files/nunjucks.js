@@ -1,4 +1,4 @@
-// Browser bundle of nunjucks 1.0.2 
+// Browser bundle of nunjucks 1.0.4 
 
 (function() {
 var modules = {};
@@ -77,6 +77,8 @@ var escapeMap = {
     ">": '&gt;'
 };
 
+var escapeRegex = /[&"'<>]/g;
+
 var lookupEscape = function(ch) {
     return escapeMap[ch];
 };
@@ -152,7 +154,7 @@ exports.TemplateError = function(message, lineno, colno) {
 exports.TemplateError.prototype = Error.prototype;
 
 exports.escape = function(val) {
-    return val.replace(/[&"'<>]/g, lookupEscape);
+  return val.replace(escapeRegex, lookupEscape);
 };
 
 exports.isFunction = function(obj) {
@@ -649,12 +651,12 @@ modules['nodes'] = {
 (function() {
 
 var lib = modules["lib"];
-var Object = modules["object"];
+var Obj = modules["object"];
 
 // Frames keep track of scoping both at compile-time and run-time so
 // we know how to access variables. Block tags can introduce special
 // variables, for example.
-var Frame = Object.extend({
+var Frame = Obj.extend({
     init: function(parent) {
         this.variables = {};
         this.parent = parent;
@@ -786,25 +788,16 @@ function SafeString(val) {
         return val;
     }
 
-    this.toString = function() {
-        return val;
-    };
-
-    this.length = val.length;
-
-    var methods = [
-        'charAt', 'charCodeAt', 'concat', 'contains',
-        'endsWith', 'fromCharCode', 'indexOf', 'lastIndexOf',
-        'length', 'localeCompare', 'match', 'quote', 'replace',
-        'search', 'slice', 'split', 'startsWith', 'substr',
-        'substring', 'toLocaleLowerCase', 'toLocaleUpperCase',
-        'toLowerCase', 'toUpperCase', 'trim', 'trimLeft', 'trimRight'
-    ];
-
-    for(var i=0; i<methods.length; i++) {
-        this[methods[i]] = markSafe(val[methods[i]]);
-    }
+    this.val = val;
 }
+
+SafeString.prototype = Object.create(String.prototype);
+SafeString.prototype.valueOf = function() {
+    return this.val;
+};
+SafeString.prototype.toString = function() {
+    return this.val;
+};
 
 function copySafeness(dest, target) {
     if(dest instanceof SafeString) {
