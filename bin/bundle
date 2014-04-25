@@ -4,7 +4,8 @@ ROOT=`dirname "$0"`
 VERSION=`node -e "var fs = require('fs'); var p = JSON.parse(fs.readFileSync('./package.json')); console.log(p.version)"`
 TYPE=""
 
-output="$1"
+output="$1.js"
+minoutput="$1.min.js"
 if [ -z "$SLIM" ]; then
     # Listed in order of dependency
     files="object.js lib.js nodes.js runtime.js lexer.js parser.js transformer.js
@@ -53,3 +54,5 @@ else {
 
 echo "})();" >> "$output"
 
+echo "// Browser bundle of nunjucks $VERSION $TYPE\n" > "$minoutput"
+./node_modules/.bin/uglifyjs "$output" >> "$minoutput"
