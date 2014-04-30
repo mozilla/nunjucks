@@ -8,7 +8,7 @@ Next version:
 * publish in bower
 * cleanup WebLoader.fetch
 
-# v1.0.2 (March 25, 2013)
+# v1.0.2 (March 25, 2014)
 
 * Use chokidar for watching file changes. This should fix a lot of problems on OS X machines.
 * Always use `/` in paths when precompiling templates
