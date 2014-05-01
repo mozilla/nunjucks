@@ -764,7 +764,7 @@ modules['web-loaders'] = {
 };
 })();
 (function() {
-if(typeof window === 'undefined') {
+if(typeof window === 'undefined' || window !== this) {
     modules['loaders'] = modules["node-loaders"];
 }
 else {
@@ -772,7 +772,6 @@ else {
 }
 })();
 (function() {
-
 var lib = modules["lib"];
 var r = modules["runtime"];
 
@@ -1185,7 +1184,8 @@ var filters = {
     },
 
     wordcount: function(str) {
-        return str.match(/\w+/g).length;
+        var words = (str) ? str.match(/\w+/g) : null;
+        return (words) ? words.length : null;
     },
 
     'float': function(val, def) {
@@ -1809,6 +1809,7 @@ if(typeof define === 'function' && define.amd) {
 }
 else {
     window.nunjucks = nunjucks;
+    if(typeof module !== 'undefined') module.exports = nunjucks;
 }
 
 })();
