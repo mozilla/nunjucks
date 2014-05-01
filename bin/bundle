@@ -49,6 +49,7 @@ if(typeof define === 'function' && define.amd) {
 }
 else {
     window.nunjucks = nunjucks;
+    if(typeof module !== 'undefined') module.exports = nunjucks;
 }
 " >> "$output"
 
