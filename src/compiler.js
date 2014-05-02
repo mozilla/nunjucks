@@ -695,7 +695,7 @@ var Compiler = Object.extend({
             var v = this.tmpid();
             frame.set(node.name.value, v);
 
-            this.emitLine('for(var ' + i + '=0; ' + i + ' < ' + arr + '.length; ' + 
+            this.emitLine('for(var ' + i + '=0; ' + i + ' < ' + arr + '.length; ' +
                           i + '++) {');
             this.emitLine('var ' + v + ' = ' + arr + '[' + i + '];');
             this.emitLine('frame.set("' + node.name.value + '", ' + v + ');');
@@ -708,7 +708,7 @@ var Compiler = Object.extend({
 
             this.emitLine('}');
         }
-        
+
         this.emitLine('}');
         this.emitLine('frame = frame.pop();');
     },
@@ -755,7 +755,7 @@ var Compiler = Object.extend({
         }
 
         this.emitLoopBindings(node, loopUses, arr, i, len);
-        
+
         this.withScopedSyntax(function() {
             var buf;
             if(parallel) {

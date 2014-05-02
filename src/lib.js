@@ -190,7 +190,7 @@ exports.map = function(obj, func) {
 
 exports.asyncIter = function(arr, iter, cb) {
     var i = -1;
-    
+
     function next() {
         i++;
 
