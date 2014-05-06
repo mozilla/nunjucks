@@ -1,4 +1,4 @@
-// Browser bundle of nunjucks 1.0.4 
+// Browser bundle of nunjucks 1.0.5 
 
 (function() {
 var modules = {};
@@ -43,7 +43,7 @@ function extend(cls, name, props) {
 
     prototype.typename = name;
 
-    var new_cls = function() { 
+    var new_cls = function() {
         if(prototype.init) {
             prototype.init.apply(this, arguments);
         }
@@ -258,7 +258,7 @@ exports.map = function(obj, func) {
 
 exports.asyncIter = function(arr, iter, cb) {
     var i = -1;
-    
+
     function next() {
         i++;
 
@@ -2542,7 +2542,7 @@ function walk(ast, func, depthFirst) {
         var contentArgs = mapCOW(ast.contentArgs, function(node) {
             return walk(node, func, depthFirst);
         });
-        
+
         if(args !== ast.args || contentArgs !== ast.contentArgs) {
             ast = new nodes[ast.typename](ast.extName,
                                           ast.prop,
@@ -3419,7 +3419,7 @@ var Compiler = Object.extend({
             var v = this.tmpid();
             frame.set(node.name.value, v);
 
-            this.emitLine('for(var ' + i + '=0; ' + i + ' < ' + arr + '.length; ' + 
+            this.emitLine('for(var ' + i + '=0; ' + i + ' < ' + arr + '.length; ' +
                           i + '++) {');
             this.emitLine('var ' + v + ' = ' + arr + '[' + i + '];');
             this.emitLine('frame.set("' + node.name.value + '", ' + v + ');');
@@ -3432,7 +3432,7 @@ var Compiler = Object.extend({
 
             this.emitLine('}');
         }
-        
+
         this.emitLine('}');
         this.emitLine('frame = frame.pop();');
     },
@@ -3479,7 +3479,7 @@ var Compiler = Object.extend({
         }
 
         this.emitLoopBindings(node, loopUses, arr, i, len);
-        
+
         this.withScopedSyntax(function() {
             var buf;
             if(parallel) {
@@ -3849,7 +3849,6 @@ modules['compiler'] = {
 };
 })();
 (function() {
-
 var lib = modules["lib"];
 var r = modules["runtime"];
 
@@ -4262,7 +4261,8 @@ var filters = {
     },
 
     wordcount: function(str) {
-        return str.match(/\w+/g).length;
+        var words = (str) ? str.match(/\w+/g) : null;
+        return (words) ? words.length : null;
     },
 
     'float': function(val, def) {
@@ -4445,7 +4445,7 @@ modules['web-loaders'] = {
 };
 })();
 (function() {
-if(typeof window === 'undefined') {
+if(typeof window === 'undefined' || window !== this) {
     modules['loaders'] = modules["node-loaders"];
 }
 else {
@@ -4988,6 +4988,7 @@ if(typeof define === 'function' && define.amd) {
 }
 else {
     window.nunjucks = nunjucks;
+    if(typeof module !== 'undefined') module.exports = nunjucks;
 }
 
 })();
