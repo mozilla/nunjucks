@@ -130,7 +130,7 @@ exports.without = function(array) {
     contains = exports.toArray(arguments).slice(1);
 
     while(++index < length) {
-        if(contains.indexOf(array[index]) === -1) {
+        if(exports.indexOf(contains, array[index]) === -1) {
             result.push(array[index]);
         }
     }
@@ -226,12 +226,11 @@ exports.asyncFor = function(obj, iter, cb) {
 };
 
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/indexOf#Polyfill
-if(!Array.prototype.indexOf) {
-    Array.prototype.indexOf = function (searchElement, fromIndex) {
-        if(this === undefined || this === null) {
-            throw new TypeError('"this" is null or not defined');
-        }
-
+exports.indexOf = Array.prototype.indexOf ?
+    function (arr, searchElement, fromIndex) {
+        return Array.prototype.indexOf.call(arr, searchElement, fromIndex);
+    } :
+    function (arr, searchElement, fromIndex) {
         var length = this.length >>> 0; // Hack to convert object.length to a UInt32
 
         fromIndex = +fromIndex || 0;
@@ -248,14 +247,13 @@ if(!Array.prototype.indexOf) {
         }
 
         for(;fromIndex < length; fromIndex++) {
-            if (this[fromIndex] === searchElement) {
+            if (arr[fromIndex] === searchElement) {
                 return fromIndex;
             }
         }
 
         return -1;
     };
-}
 
 if(!Array.prototype.map) {
     Array.prototype.map = function() {
