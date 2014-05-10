@@ -8,7 +8,21 @@ Next version:
 * publish in bower
 * cleanup WebLoader.fetch
 
-# v1.0.2 (March 25, 2013)
+# v1.0.5 (May 1, 2014)
+
+* Added support for browserify
+* Added option to specify template output path when precompiling templates
+* Keep version comment in browser minified files
+* Speed up SafeString implementation
+* Handle null and non-matching cases for word count filter
+* Added support for node-webkit
+* Other various minor bugfixes
+
+# v1.0.4 (April 4, 2014)
+
+* Use v0.8.2 of chokidar from NPM rather than Github
+
+# v1.0.2 (March 25, 2014)
 
 * Use chokidar for watching file changes. This should fix a lot of problems on OS X machines.
 * Always use `/` in paths when precompiling templates
