@@ -3,6 +3,9 @@ var r = require('./runtime');
 
 var filters = {
     abs: function(n) {
+        if (isNaN(n)) {
+            return null;
+        }
         return Math.abs(n);
     },
 
@@ -33,6 +36,9 @@ var filters = {
     },
 
     capitalize: function(str) {
+        if (typeof(str) != 'string') {
+            return null;
+        }
         var ret = str.toLowerCase();
         return r.copySafeness(str, ret.charAt(0).toUpperCase() + ret.slice(1));
     },
