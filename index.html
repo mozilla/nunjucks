@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Nunjucks</title>
+
+    <meta charset="utf-8" />
+    <link rel="stylesheet" type="text/css"
+          href="/nunjucks/bower_components/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="/nunjucks/css/highlight.css" />
+    <link rel="stylesheet" type="text/css" href="/nunjucks/css/app.css" />
+  </head>
+
+  <body id="home">
+    <nav class="navbar navbar-default navbar-fixed-top">
+      <a class="pull-left logo" href="/nunjucks/">Nunjucks</a>
+
+      <ul class="nav navbar-nav navbar-right pull-right">
+        <li><a href="/nunjucks/#download" class="download">Download</a></li>
+        <li><a href="https://github.com/mozilla/nunjucks">Github</a></li>
+        <li class="dropdown">
+          <a href="getting-started.html" data-toggle="dropdown">Docs</a>
+
+          <ul class="dropdown-menu">
+            <li><a href="getting-started.html">Getting Started</a></li>
+            <li><a href="templating.html">Templating</a></li>
+            <li><a href="api.html">API</a></li>
+            <li><a href="faq.html">FAQ</a></li>
+          </ul>
+        </li>
+      </ul>
+    </nav>
+
+<div class="twitter">
+  <a href="https://twitter.com/share" class="twitter-share-button" data-text="Nunjucks - node templates with inheritance, asynchronous control, and much more" data-url="http://mozilla.github.io/nunjucks/" data-via="mozilla">Tweet</a>
+  <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+</div>
+
+<div class="banner">
+  <div class="banner-screen">
+    <h1>Nunjucks</h1>
+    <div class="tagline">
+      A rich and powerful templating language for JavaScript.
+    </div>
+  </div>
+
+  <div class="download-screen">
+    <div class="inner">
+      <a href="#" class="close">x</a>
+
+      <div class="col-sm-6">
+        <h1>Node</h1>
+        <p>
+          Just use npm to install it:
+          <pre><code>$ npm install nunjucks</code></pre>
+        </p>
+        <p>
+          <a href="getting-started.html">Getting Started &rarr;</a>
+        </p>
+      </div>
+      <div class="col-sm-6">
+        <h1>Browser</h1>
+        <p>
+          Grab <a href="files/nunjucks.js">nunjucks.js</a>
+          (<a href="files/nunjucks.min.js">min</a>) for the full
+          library, or
+          grab <a href="files/nunjucks-slim.js">nunjucks-slim.js</a>
+          (<a href="files/nunjucks-slim.min.js">min</a>) for a slim
+          version that only works with precompiled templates. Read
+          more about the differences of these files in Getting Started.
+        </p>
+
+        <p>
+          <a href="getting-started.html">Getting Started &rarr;</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page">
+  <section class="links">
+    <ul>
+      <li><a href="/nunjucks/#download" class="download">Download</a></li>
+      <li><a href="https://github.com/mozilla/nunjucks">Github</a></li>
+      <li><a href="templating.html">Templating Docs</a></li>
+      <li><a href="api.html">API Docs</a></li>
+      <li><a href="faq.html">FAQ</a></li>
+    </ul>
+  </section>
+
+  <section class="opening">
+    <div class="col-sm-6">
+      <div class="tagline2">
+        You've been looking for a more sophisticated templating
+        engine for JavaScript. Here it is.
+      </div>
+
+      <ul>
+        <li><strong>Rich</strong> Powerful language with block
+          inheritance, autoescaping, macros, asynchronous
+          control, and more. Heavily inspired by <a href="http://jinja.pocoo.org/">jinja2</a></li>
+        <li><strong>Fast & Lean</strong> High-performant. Small 8K
+          gzipped runtime with precompiled templates in the browser</li>
+        <li><strong>Extensible</strong> Crazy extensible with custom filters and extensions</li>
+        <li><strong>Everywhere</strong> Available in node and all modern web browsers, with
+          thorough precompilation options</li>
+      </ul>
+    </div>
+
+    <div class="col-sm-6">
+      <pre>{% <span>extends</span> "base.html" %}
+
+{% <span>block</span> header %}
+&lt;h1&gt;{{ title }}&lt;/h1&gt;
+{% <span>endblock</span> %}
+
+{% <span>block</span> content %}
+&lt;ul&gt;
+  {% <span>for</span> name, item in items %}
+  &lt;li&gt;{{ name }}: {{ item }}&lt;/li&gt;
+  {% <span>endfor</span> %}
+&lt;/ul&gt;
+{% <span>endblock</span> %}
+      </pre>
+    </div>
+  </section>
+
+  <section class="getting-started">
+    <a href="getting-started.html">
+      <button class="btn btn-lg btn-success">Getting Started &rarr;</button>
+    </a>
+  </section>
+
+  <section class="whos-using">
+    <h3>Who's Using It?</h3>
+
+    <div class="user">
+      <h4>Firefox Marketplace</h4>
+      <div class="col-sm-6">
+        <blockquote>
+          <p>
+            &ldquo;Nunjucks has allowed us to port all of our existing
+            templates from a Django project to something that's easier
+            to manage. By moving our templates to the client, transfer
+            sizes are reduced and page responsiveness increases
+            significantly. Our API supplies data, meaning we can
+            decouple testing the front-end from testing the back-end.
+            Nunjucks has made our app feel native.&rdquo;
+          </p>
+          <p>&ndash; Matt Basta, <a href="http://marketplace.firefox.com/">Firefox Marketplace</a> team</p>
+        </blockquote>
+      </div>
+      <div class="col-sm-6">
+        <a href="img/marketplace2x.png"><img src="img/marketplace2x.png" /></a>
+      </div>
+    </div>
+
+    <div class="user">
+      <h4>Mozilla Webmaker</h4>
+      <div class="col-sm-6">
+        <blockquote>
+          <p>
+            <a href="https://webmaker.org/">Webmaker</a> from the
+            Mozilla Foundation encourages people to create. Using web
+            technologies, you can create visually rich media with a
+            powerful real-time tool. Using nunjucks, it was easy to
+            collaborate on the templates and implement complex
+            features such as localization. There hasn't been any
+            problems with performance or stability.
+          </p>
+        </blockquote>
+      </div>
+      <div class="col-sm-6">
+        <a href="img/webmaker2x.png"><img src="img/webmaker2x.png" /></a>
+      </div>
+    </div>
+
+    <div class="user">
+      <h4>Backbeam</h4>
+
+      <div class="col-sm-6">
+        <blockquote>
+          <p>
+            &ldquo;Backbeam provides tools for mobile and web
+            development. When we were planning the web developing
+            features we needed an easy-to-use yet powerful
+            templating engine. But almost all JavaScript
+            templating engines lacked of important features such
+            as template inheritance or flexibility to add custom
+            behaviours (e.g. custom filters). Then we just saw the
+            announcement of nunjucks on James' website. Since that
+            moment we knew that nunjucks would be THE choice. Now
+            we use nunjucks in many parts of our product. Users
+            can edit HTML and email templates using nunjucks right
+            in their browsers. We are really happy with our choice
+            :)&rdquo;
+          </p>
+
+          <p>&ndash; Alberto Gimeno, founder of <a href="http://backbeam.io/">backbeam.io</a></p>
+        </blockquote>
+      </div>
+      <div class="col-sm-6">
+        <a href="img/backbeam2x.png"><img src="img/backbeam2x.png" /></a>
+      </div>
+    </div>
+
+    <div class="user">
+      <h4>Apostrophe CMS</h4>
+      <div class="col-sm-6">
+        <blockquote>
+          <p>
+            &ldquo;P'unk Avenue chose Nunjucks as the template language for the
+            <a href="http://apostrophenow.org/">Apostrophe</a>
+            content management system, an open source CMS for node
+            developers. We chose Nunjucks because of its close
+            relationship with the Jinja and Twig languages, and
+            also for its test coverage and robust
+            implementation.&rdquo;
+          </p>
+          <p>
+            &ndash; Tom Boutell, Senior Developer at <a href="http://punkave.com/">P'unk Avenue</a>
+          </p>
+        </blockquote>
+      </div>
+      <div class="col-sm-6">
+        <a href="img/apostrophe2x.png"><img src="img/apostrophe2x.png" /></a>
+      </div>
+    </div>
+
+    <em><a href="https://github.com/search?q=nunjucks&ref=simplesearch&type=Code">And many, many more...</a></em>
+  </section>
+
+  
+  <section class="examples">
+    <h3>More Examples</h3>
+
+    <div class="example clearfix">
+      <div class="col-sm-6">
+        Use any of the <strong>builtin filters</strong> to work with variables, and
+        even create your own.
+      </div>
+      <div class="col-sm-6">
+        <pre>{{ foo | title }}
+{{ foo | join(",") }}
+{{ foo | replace("foo", "bar") | capitalize }}</pre>
+      </div>
+    </div>
+
+    <div class="example clearfix">
+      <div class="col-sm-6">
+        Use <strong>keyword arguments</strong> to any function or filter
+      </div>
+
+      <div class="col-sm-6">
+        <pre>{{ foo(1, 2, bar=3, baz=4) }}
+{{ bar | transform(level=2) }}</pre>
+      </div>
+    </div>
+
+    <div class="example clearfix">
+      <div class="col-sm-6">
+        <strong>Template inheritance</strong> allows you to reuse templates in a powerful
+        way. Define skeleton structures that child templates fill in.
+      </div>
+
+      <div class="col-sm-6">
+        <pre>{% <span>extends</span> &quot;base.html&quot; %}
+
+{% <span>block</span> header %}
+&lt;h3&gt;{{ subtitle }}&lt;/h3&gt;
+{% <span>endblock</span> %}
+
+{% <span>block</span> content %}
+&lt;h1&gt;{{ page.title }}&lt;/h1&gt;
+&lt;p&gt;{{ page.content }}&lt;/p&gt;
+{% <span>endblock</span> %}</pre>
+      </div>
+    </div>
+
+    <div class="example clearfix">
+      <div class="col-sm-6">
+        You can even write <strong>asynchronous templates</strong> if you need to make
+        asynchronous calls in filters! Take advantage
+        of <code><a href="templating.html#asyncall">asyncAll</a></code>
+        to execute all iterations in parallel,
+        assuming <code>lookup</code> is asynchronous.
+      </div>
+      <div class="col-sm-6">
+        <pre>&lt;h1&gt;Posts&lt;/h1&gt;
+&lt;ul&gt;
+{% <span>asyncAll</span> item in items %}
+  &lt;li&gt;{{ item.id | lookup }}&lt;/li&gt;
+{% <span>endall</span> %}
+&lt;/ul&gt;</pre>
+      </div>
+    </div>
+
+    <p class="ending">
+      That's just the beginning. Check the the <a href="templating.html">docs</a> for a whole range of powerful features!
+    </p>
+
+    <a href="getting-started.html">
+      <button class="btn btn-lg btn-success">Getting Started &rarr;</button>
+    </a>
+  </section>
+
+
+  
+</div>
+
+
+    <footer>
+      Found a bug in the
+      documentation? <a href="https://github.com/mozilla/nunjucks-docs">Fix
+      it or file an issue</a>!
+    </footer>
+
+    <script src="/nunjucks/bower_components/jquery/jquery.min.js"></script>
+    <script src="/nunjucks/bower_components/bootstrap/js/affix.js"></script>
+
+    <script src="/nunjucks/js/app.js"></script>
+    <script src="/nunjucks/js/subpage.js"></script>
+
+<!-- commented out temporarily while we figure out how to get GA for mozilla.github.io
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-9014321-3', 'jlongster.github.io');
+  ga('send', 'pageview');
+</script>
+-->
+  </body>
+</html>

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Nunjucks</title>
+
+    <meta charset="utf-8" />
+    <link rel="stylesheet" type="text/css"
+          href="/nunjucks/bower_components/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="/nunjucks/css/highlight.css" />
+    <link rel="stylesheet" type="text/css" href="/nunjucks/css/app.css" />
+  </head>
+
+  <body id="faq">
+    <nav class="navbar navbar-default ">
+      <a class="pull-left logo" href="/nunjucks/">Nunjucks</a>
+
+      <ul class="nav navbar-nav navbar-right pull-right">
+        <li><a href="/nunjucks/#download" class="download">Download</a></li>
+        <li><a href="https://github.com/mozilla/nunjucks">Github</a></li>
+        <li class="dropdown">
+          <a href="getting-started.html" data-toggle="dropdown">Docs</a>
+
+          <ul class="dropdown-menu">
+            <li><a href="getting-started.html">Getting Started</a></li>
+            <li><a href="templating.html">Templating</a></li>
+            <li><a href="api.html">API</a></li>
+            <li><a href="faq.html">FAQ</a></li>
+          </ul>
+        </li>
+      </ul>
+    </nav>
+
+<div class="content clearfix">
+  <aside class="col-sm-3">
+    <div class="pages">
+      <p><strong>Documentation</strong></p>
+
+      <ul>
+        <li><a href="getting-started.html">Getting Started</a></li>
+        <li><a href="templating.html">Templating</a></li>
+        <li><a href="api.html">API</a></li>
+        <li><a href="faq.html">FAQ</a></li>
+      </ul>
+    </div>
+
+    <div class="toc">
+      <p><strong>FAQ</strong></p>
+      <ul>
+<li>
+<a href="#">常见问题</a>
+<ul>
+<li>
+<a href="#nunjucks--node-">nunjucks 是否可同时在 node 端和浏览器端使用?</a>
+</li>
+<li>
+<a href="#-nunjucks--jinja2-">是否可在 nunjucks 和 jinja2 使用同一个模板？两者有什么区别？</a>
+</li>
+</ul>
+</li>
+</ul>
+
+    </div>
+  </aside>
+
+  <div class="col-sm-9 main">
+    <div class="locale btn-group"><a href="/nunjucks/faq.html" class="btn btn-default">English</a><a href="/nunjucks/cn/faq.html" class="btn btn-success">中国的</a></div>
+    <h1 id="">常见问题</h1>
+
+<h2 id="nunjucks--node-">nunjucks 是否可同时在 node 端和浏览器端使用?</h2>
+
+<p>是.</p>
+
+<h2 id="-nunjucks--jinja2-">是否可在 nunjucks 和 jinja2 使用同一个模板？两者有什么区别？</h2>
+
+<p>有一些区别。</p>
+
+<p>首先，nunjucks 可以操作原生的 Javascript 而 <a href="http://jinja.pocoo.org/">jinja2</a> 操作的是 python，比如在 nunjucks 中布尔值为 <code>true</code> 而 jinja2 为 <code>True</code>，在调用数组原生方法的时候也不同。</p>
+
+<p>但是，如果你避免使用原生语言的特性（如 <code>{{ str.trim() }}</code>） 而完全使用模板的特性和过滤器，那么两者的模块可以兼容。在 <a href="https://marketplace.firefox.com/">Firefox Marketplace</a> 中，开发者开发了一个兼容层来覆盖 nunjucks 的一些内部实现，能更好的兼容 jinja2（如可使用 <code>True</code>），可查看<a href="https://github.com/mozilla/fireplace/blob/master/hearth/media/js/lib/nunjucks.compat.js">源码</a>.</p>
+
+<p>除此之外，nunjucks 还有一些未实现的功能：</p>
+
+<ul>
+<li><code>self</code> 变量</li>
+<li><code>for</code> 不支持 <code>if not</code> and <code>else</code></li>
+<li>不存在 <code>with context</code></li>
+<li><code>if i is divisibleby(3)</code> 式的条件判断</li>
+<li>可命名的结束区块： <code>{% endblock content %}</code></li>
+<li>沙箱模式 (Sandboxed mode)</li>
+<li>行语句： <code># for item in seq</code></li>
+</ul>
+
+<p>最后，自定义的 python 过滤器和扩展需要用 Javascript 重写。</p>
+
+  </div>
+</div>
+
+
+
+    <footer>
+      Found a bug in the
+      documentation? <a href="https://github.com/mozilla/nunjucks-docs">Fix
+      it or file an issue</a>!
+    </footer>
+
+    <script src="/nunjucks/bower_components/jquery/jquery.min.js"></script>
+    <script src="/nunjucks/bower_components/bootstrap/js/affix.js"></script>
+
+    <script src="/nunjucks/js/app.js"></script>
+    <script src="/nunjucks/js/subpage.js"></script>
+
+<!-- commented out temporarily while we figure out how to get GA for mozilla.github.io
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-9014321-3', 'jlongster.github.io');
+  ga('send', 'pageview');
+</script>
+-->
+  </body>
+</html>

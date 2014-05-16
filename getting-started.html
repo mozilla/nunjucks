@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Nunjucks</title>
+
+    <meta charset="utf-8" />
+    <link rel="stylesheet" type="text/css"
+          href="/nunjucks/bower_components/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="/nunjucks/css/highlight.css" />
+    <link rel="stylesheet" type="text/css" href="/nunjucks/css/app.css" />
+  </head>
+
+  <body id="getting-started">
+    <nav class="navbar navbar-default ">
+      <a class="pull-left logo" href="/nunjucks/">Nunjucks</a>
+
+      <ul class="nav navbar-nav navbar-right pull-right">
+        <li><a href="/nunjucks/#download" class="download">Download</a></li>
+        <li><a href="https://github.com/mozilla/nunjucks">Github</a></li>
+        <li class="dropdown">
+          <a href="getting-started.html" data-toggle="dropdown">Docs</a>
+
+          <ul class="dropdown-menu">
+            <li><a href="getting-started.html">Getting Started</a></li>
+            <li><a href="templating.html">Templating</a></li>
+            <li><a href="api.html">API</a></li>
+            <li><a href="faq.html">FAQ</a></li>
+          </ul>
+        </li>
+      </ul>
+    </nav>
+
+<div class="content clearfix">
+  <aside class="col-sm-3">
+    <div class="pages">
+      <p><strong>Documentation</strong></p>
+
+      <ul>
+        <li><a href="getting-started.html">Getting Started</a></li>
+        <li><a href="templating.html">Templating</a></li>
+        <li><a href="api.html">API</a></li>
+        <li><a href="faq.html">FAQ</a></li>
+      </ul>
+    </div>
+
+    <div class="toc">
+      <p><strong></strong></p>
+      <ul>
+<li>
+<a href="#getting-started">Getting Started</a>
+<ul>
+<li>
+<a href="#when-using-node">When Using Node...</a>
+</li>
+<li>
+<a href="#when-in-the-browser">When in the Browser...</a>
+<ul>
+<li>
+<a href="#which-file-should-you-use">Which file should you use?</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="#using">Using</a>
+</li>
+<li>
+<a href="#more-information">More Information</a>
+</li>
+</ul>
+</li>
+</ul>
+
+    </div>
+  </aside>
+
+  <div class="col-sm-9 main">
+    <div class="locale btn-group"><a href="/nunjucks/getting-started.html" class="btn btn-success">English</a><a href="/nunjucks/cn/getting-started.html" class="btn btn-default">中国的</a></div>
+    <h1 id="getting-started">Getting Started</h1>
+
+<h2 id="when-using-node">When Using Node...</h2>
+<div class="highlight"><pre><code class="text language-text" data-lang="text">$ npm install nunjucks
+</code></pre></div>
+<p>Once installed, simply use <code>require(&#39;nunjucks&#39;)</code> to load it.</p>
+
+<h2 id="when-in-the-browser">When in the Browser...</h2>
+
+<p>Grab <a href="files/nunjucks.js">nunjucks.js</a> (<a href="files/nunjucks.min.js">min</a>) for the full library, or
+<a href="files/nunjucks-slim.js">nunjucks-slim.js</a> (<a href="files/nunjucks-slim.min.js">min</a>) for the slim version
+which only works with precompiled templates.</p>
+
+<h3 id="which-file-should-you-use">Which file should you use?</h3>
+
+<ul>
+<li><p>Use <strong>nunjucks.js</strong> to dynamically load templates, auto-reload
+templates when they are changed, and use precompiled templates.
+Comes with the full compiler so is larger (20K min/gzipped). Use
+this to get started, and use in production if you don&#39;t mind a
+larger file size.</p></li>
+<li><p>Use <strong>nunjucks-slim.js</strong> to load precompiled templates and use them. Only
+comes with runtime so is smaller (8K min/gzipped), but <em>only</em> works with
+precompiled templates. Typically used for production, and possibly
+development if you use the <a href="https://github.com/jlongster/grunt-nunjucks">grunt task</a> to
+automatically recompile templates.</p></li>
+</ul>
+
+<p>Simply include nunjucks with a <code>script</code> tag on the page:</p>
+<div class="highlight"><pre><code class="html language-html" data-lang="html"><span class="nt">&lt;script </span><span class="na">src=</span><span class="s">&quot;nunjucks.js&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
+</code></pre></div>
+<p>or load it as an AMD module:</p>
+<div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="nx">define</span><span class="p">([</span><span class="s1">&#39;nunjucks&#39;</span><span class="p">],</span> <span class="kd">function</span><span class="p">(</span><span class="nx">nunjucks</span><span class="p">)</span> <span class="p">{</span>
+<span class="p">});</span>
+</code></pre></div>
+<blockquote>
+<p>Whatever you do, make sure to precompile your templates in
+production! There is a <a href="https://github.com/jlongster/grunt-nunjucks">grunt
+task</a> to help with
+that. Read more about optimal client-side configurations in <a href="api.html#browser-usage">Browser
+Usage</a>.</p>
+</blockquote>
+
+<h2 id="using">Using</h2>
+
+<p>This is the simplest way to use nunjucks. First, set any configuration
+flags like autoescaping and then render a string:</p>
+<div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="nx">nunjucks</span><span class="p">.</span><span class="nx">configure</span><span class="p">({</span> <span class="nx">autoescape</span><span class="o">:</span> <span class="kc">true</span> <span class="p">});</span>
+<span class="nx">nunjucks</span><span class="p">.</span><span class="nx">renderString</span><span class="p">(</span><span class="s1">&#39;Hello {{ username }}&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">username</span><span class="o">:</span> <span class="s1">&#39;James&#39;</span> <span class="p">});</span>
+</code></pre></div>
+<p>You usually won&#39;t use <code>renderString</code>, instead you should write
+templates in individual files and use <code>render</code>. That way you can
+inherit and include templates. In this case, you need to tell nunjucks
+where these files live with the first argument of <code>configure</code>:</p>
+<div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="nx">nunjucks</span><span class="p">.</span><span class="nx">configure</span><span class="p">(</span><span class="s1">&#39;views&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">autoescape</span><span class="o">:</span> <span class="kc">true</span> <span class="p">});</span>
+<span class="nx">nunjucks</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="s1">&#39;index.html&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">foo</span><span class="o">:</span> <span class="s1">&#39;bar&#39;</span> <span class="p">});</span>
+</code></pre></div>
+<p>In node, <code>&#39;views&#39;</code> would be a path relative to the current working
+directory. In the browser, it would be a relative URL, and you
+probably want it to be absolute, like <code>&#39;/views&#39;</code>.</p>
+
+<p>Using express? Simply pass your express app into <code>configure</code>:</p>
+<div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="kd">var</span> <span class="nx">app</span> <span class="o">=</span> <span class="nx">express</span><span class="p">();</span>
+
+<span class="nx">nunjucks</span><span class="p">.</span><span class="nx">configure</span><span class="p">(</span><span class="s1">&#39;views&#39;</span><span class="p">,</span> <span class="p">{</span>
+    <span class="nx">autoescape</span><span class="o">:</span> <span class="kc">true</span><span class="p">,</span>
+    <span class="nx">express</span><span class="o">:</span> <span class="nx">app</span>
+<span class="p">});</span>
+
+<span class="nx">app</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">req</span><span class="p">,</span> <span class="nx">res</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">res</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="s1">&#39;index.html&#39;</span><span class="p">);</span>
+<span class="p">});</span>
+</code></pre></div>
+<p>The above API works in node and in the browser (express is only in
+node, obviously). In node, nunjucks loads templates from the
+filesystem by default, and in the browser loads them over HTTP.</p>
+
+<p>If you <a href="api.html#precompiling">precompiled</a> your templates in the browser, they will
+automatically be picked up by the system and you don&#39;t have to do
+anything different. This makes it easy to use the same code in
+development and production, while only using precompiled templates in
+production.</p>
+
+<h2 id="more-information">More Information</h2>
+
+<p>That&#39;s only the tip of the iceberg. See <a href="api.html">API</a> for API docs
+and <a href="templating.html">Templating</a> about the templating language.</p>
+
+  </div>
+</div>
+
+
+
+    <footer>
+      Found a bug in the
+      documentation? <a href="https://github.com/mozilla/nunjucks-docs">Fix
+      it or file an issue</a>!
+    </footer>
+
+    <script src="/nunjucks/bower_components/jquery/jquery.min.js"></script>
+    <script src="/nunjucks/bower_components/bootstrap/js/affix.js"></script>
+
+    <script src="/nunjucks/js/app.js"></script>
+    <script src="/nunjucks/js/subpage.js"></script>
+
+<!-- commented out temporarily while we figure out how to get GA for mozilla.github.io
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-9014321-3', 'jlongster.github.io');
+  ga('send', 'pageview');
+</script>
+-->
+  </body>
+</html>
