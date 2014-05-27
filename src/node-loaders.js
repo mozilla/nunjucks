@@ -8,7 +8,7 @@ var chokidar = require('chokidar');
 var existsSync = fs.existsSync || path.existsSync;
 
 var FileSystemLoader = Loader.extend({
-    init: function(searchPaths, noWatch) {
+    init: function(searchPaths, noWatch, defaultExt) {
         this.pathsToNames = {};
 
         if(searchPaths) {
@@ -35,6 +35,12 @@ var FileSystemLoader = Loader.extend({
                 }
             }.bind(this));
         }
+
+        // set defaultExt in format of '.ext' if passed, otherwise use '.html'
+        defaultExt = (typeof(defaultExt) === 'string' && defaultExt.length) ? defaultExt : '.html';
+        defaultExt = defaultExt[0] === '.' ? defaultExt : '.'.concat(defaultExt);
+        this.defaultExt = defaultExt;
+
     },
 
     getSource: function(name) {
@@ -42,15 +48,24 @@ var FileSystemLoader = Loader.extend({
         var paths = this.searchPaths;
 
         for(var i=0; i<paths.length; i++) {
-            var p = path.join(paths[i], name);
+            var p = [
+                path.join(paths[i], name),
+                path.join(paths[i], name + this.defaultExt)
+            ];
 
-            // Only allow the current directory and anything
-            // underneath it to be searched
-            if((paths[i] == '.' || p.indexOf(paths[i]) === 0) &&
-               existsSync(p)) {
-                fullpath = p;
-                break;
-            }
+            var test = function(path) {
+                // Only allow the current directory and anything
+                // underneath it to be searched
+                if (paths[i] == '.' || path.indexOf(paths[i] === 0)
+                    && existsSync(path)) {
+                        return path;
+                }
+                return null;
+            };
+
+            // Test both name AND name + defaultExt for exists match
+            fullpath = lib.firstof(p, test);
+            if(fullpath) { break; }
         }
 
         if(!fullpath) {

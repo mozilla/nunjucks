@@ -1,7 +1,7 @@
 var Loader = require('./loader');
 
 var WebLoader = Loader.extend({
-    init: function(baseURL, neverUpdate) {
+    init: function(baseURL, neverUpdate, defaultExt) {
         // It's easy to use precompiled templates: just include them
         // before you configure nunjucks and this will automatically
         // pick it up and use it
@@ -9,6 +9,11 @@ var WebLoader = Loader.extend({
 
         this.baseURL = baseURL || '';
         this.neverUpdate = neverUpdate;
+
+        // set defaultExt in format of '.ext' if passed, otherwise use '.html'
+        defaultExt = (typeof(defaultExt) === 'string' && defaultExt.length) ? defaultExt : '.html';
+        defaultExt = defaultExt[0] === '.' ? defaultExt : '.'.concat(defaultExt);
+        this.defaultExt = defaultExt;
     },
 
     getSource: function(name) {
@@ -20,13 +25,30 @@ var WebLoader = Loader.extend({
             };
         }
         else {
-            var src = this.fetch(this.baseURL + '/' + name);
-            if(!src) {
+            var paths = [
+                this.baseURL + '/' + name,
+                this.baseURL + '/' + name + defaultExt
+            ];
+
+            var test = function(path) {
+                var src = this.fetch(path);
+                if (!src) {
+                    return null;
+                }
+                return {
+                    src: src,
+                    path: path
+                };
+            };
+
+            // Test both name AND name + defaultExt for fetch success
+            var success = lib.firstof(paths, test);
+            if(!success) {
                 return null;
             }
 
-            return { src: src,
-                     path: name,
+            return { src: success.src,
+                     path: success.path,
                      noCache: !this.neverUpdate };
         }
     },

@@ -188,6 +188,20 @@ exports.map = function(obj, func) {
     return results;
 };
 
+exports.firstof = function(obj, func) {
+    var result;
+    if(obj == null) {
+        return result;
+    }
+
+    for(var i=0; i<obj.length; i++) {
+        result = func(obj[i], i);
+        if (result) { break; }
+    }
+
+    return result;
+};
+
 exports.asyncIter = function(arr, iter, cb) {
     var i = -1;
 
