@@ -78,6 +78,10 @@ var Environment = Obj.extend({
         return this.extensions[name];
     },
 
+    addGlobal: function(name, func) {
+        globals[name] = func;
+    },
+
     addFilter: function(name, func, async) {
         var wrapped = func;
 

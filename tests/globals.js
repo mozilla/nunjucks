@@ -5,11 +5,17 @@
         expect = require('expect.js');
         util = require('./util');
         lib = require('../src/lib');
+        Environment = require('../src/environment').Environment;
+        Loader = require('../src/node-loaders').FileSystemLoader;
+        templatesPath = 'tests/templates';
     }
     else {
         expect = window.expect;
         util = window.util;
         lib = nunjucks.require('lib');
+        Environment = nunjucks.Environment;
+        Loader = nunjucks.WebLoader;
+        templatesPath = '../templates';
     }
 
     var equal = util.equal;
@@ -57,5 +63,18 @@
 
             finish(done);
         });
+
+        it('should allow adding of global function', function(done) {
+          var env = new Environment(new Loader(templatesPath));
+
+          env.addGlobal('hello', function(arg1) {
+            return 'Hello ' + arg1;
+          });
+
+          equal('{{ hello("World!") }}', 'Hello World!');
+
+          finish(done);
+        });
+        
     });
 })();
