@@ -11,7 +11,9 @@
     "devDependencies": {
         "expect.js": "*",
         "mocha": "*",
-        "uglify-js": "*"
+        "uglify-js": "*",
+        "express": "4.x",
+        "supertest": "*"
     },
     "engines": {
         "node": "*"
