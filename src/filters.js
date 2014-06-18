@@ -149,7 +149,7 @@ var filters = {
     },
 
     length: function(arr) {
-        return arr.length;
+        return arr !== undefined ? arr.length : 0;
     },
 
     list: function(val) {
