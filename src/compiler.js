@@ -169,6 +169,7 @@ var Compiler = Object.extend({
             nodes.Array,
             nodes.Dict,
             nodes.FunCall,
+            nodes.Caller,
             nodes.Filter,
             nodes.LookupVal,
             nodes.Compare,
@@ -769,7 +770,7 @@ var Compiler = Object.extend({
         this._compileAsyncLoop(node, frame, true);
     },
 
-    _emitMacroBegin: function(node, frame) {
+    _compileMacro: function(node, frame) {
         var args = [];
         var kwargs = null;
         var funcId = 'macro_' + this.tmpid();
@@ -798,13 +799,16 @@ var Compiler = Object.extend({
         // arguments so support setting positional args with keywords
         // args and passing keyword args as positional args
         // (essentially default values). See runtime.js.
+        frame = frame.push();
         this.emitLines(
             'var ' + funcId + ' = runtime.makeMacro(',
             '[' + argNames.join(', ') + '], ',
             '[' + kwargNames.join(', ') + '], ',
             'function (' + realNames.join(', ') + ') {',
             'frame = frame.push();',
-            'kwargs = kwargs || {};'
+            'kwargs = kwargs || {};',
+            'if (kwargs.hasOwnProperty("caller")) {',
+            'frame.set("caller", kwargs.caller); }'
         );
 
         // Expose the arguments to the template. Don't need to use
@@ -828,31 +832,27 @@ var Compiler = Object.extend({
             }, this);
         }
 
-        return funcId;
-    },
+        var bufferId = this.tmpid();
+        this.pushBufferId(bufferId);
 
-    _emitMacroEnd: function(bufferId) {
+        this.withScopedSyntax(function () {
+          this.compile(node.body, frame);
+        });
+
+        frame = frame.pop();
         this.emitLine('frame = frame.pop();');
         this.emitLine('return new runtime.SafeString(' + bufferId + ');');
         this.emitLine('});');
+        this.popBufferId();
+
+        return funcId;
     },
 
     compileMacro: function(node, frame) {
-        frame = frame.push();
-        var funcId = this._emitMacroBegin(node, frame);
-        var id = this.tmpid();
-        this.pushBufferId(id);
-
-        this.withScopedSyntax(function() {
-            this.compile(node.body, frame);
-        });
-
-        this._emitMacroEnd(id);
-        this.popBufferId();
+        var funcId = this._compileMacro(node, frame);
 
         // Expose the macro to the templates
         var name = node.name.value;
-        frame = frame.pop();
         frame.set(name, funcId);
 
         if(frame.parent) {
@@ -864,6 +864,13 @@ var Compiler = Object.extend({
             }
             this.emitLine('context.setVariable("' + name + '", ' + funcId + ');');
         }
+    },
+
+    compileCaller: function(node, frame) {
+        // basically an anonymous "macro expression"
+        this.emit('(function (){');
+        var funcId = this._compileMacro(node, frame);
+        this.emit('return ' + funcId + ';})()');
     },
 
     compileImport: function(node, frame) {

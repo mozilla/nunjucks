@@ -93,6 +93,7 @@ var For = Node.extend("For", { fields: ['arr', 'name', 'body'] });
 var AsyncEach = For.extend("AsyncEach");
 var AsyncAll = For.extend("AsyncAll");
 var Macro = Node.extend("Macro", { fields: ['name', 'args', 'body'] });
+var Caller = Macro.extend("Caller");
 var Import = Node.extend("Import", { fields: ['template', 'target'] });
 var FromImport = Node.extend("FromImport", {
     fields: ['template', 'names'],
@@ -266,6 +267,7 @@ module.exports = {
     AsyncEach: AsyncEach,
     AsyncAll: AsyncAll,
     Macro: Macro,
+    Caller: Caller,
     Import: Import,
     FromImport: FromImport,
     FunCall: FunCall,

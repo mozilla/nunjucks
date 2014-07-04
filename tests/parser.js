@@ -290,6 +290,54 @@
                       [nodes.TemplateData, 'This is a macro']]]]]);
         });
 
+        it('should parse call blocks', function() {
+            var ast = parser.parse('{% call foo("bar") %}' +
+                                   'This is the caller' +
+                                   '{% endcall %}');
+            isAST(ast,
+                  [nodes.Root,
+                   [nodes.Output,
+                    [nodes.FunCall,
+                     [nodes.Symbol, 'foo'],
+                     [nodes.NodeList,
+                      [nodes.Literal, 'bar'],
+                      [nodes.KeywordArgs,
+                       [nodes.Pair,
+                        [nodes.Symbol, 'caller'],
+                        [nodes.Caller,
+                         [nodes.Symbol, 'caller'],
+                         [nodes.NodeList],
+                         [nodes.NodeList,
+                          [nodes.Output,
+                           [nodes.TemplateData, 'This is the caller']]]]]]]]]]);
+        });
+
+        it('should parse call blocks with args', function() {
+            var ast = parser.parse('{% call(i) foo("bar", baz="foobar") %}' +
+                                   'This is {{ i }}' +
+                                   '{% endcall %}');
+            isAST(ast,
+                  [nodes.Root,
+                   [nodes.Output,
+                    [nodes.FunCall,
+                     [nodes.Symbol, 'foo'],
+                     [nodes.NodeList,
+                      [nodes.Literal, 'bar'],
+                      [nodes.KeywordArgs,
+                       [nodes.Pair,
+                        [nodes.Symbol, 'baz'], [nodes.Literal, 'foobar']],
+                       [nodes.Pair,
+                        [nodes.Symbol, 'caller'],
+                        [nodes.Caller,
+                         [nodes.Symbol, 'caller'],
+                         [nodes.NodeList, [nodes.Symbol, 'i']],
+                         [nodes.NodeList,
+                          [nodes.Output,
+                           [nodes.TemplateData, 'This is ']],
+                          [nodes.Output,
+                           [nodes.Symbol, 'i']]]]]]]]]]);
+        });
+
         it('should parse raw', function() {
             isAST(parser.parse('{% raw %}hello {{ {% %} }}{% endraw %}'),
                   [nodes.Root,

@@ -207,6 +207,46 @@ var Parser = Object.extend({
         return node;
     },
 
+    parseCall: function() {
+        // a call block is parsed as a normal FunCall, but with an added
+        // 'caller' kwarg which is a Caller node.
+        var callTok = this.peekToken();
+        if(!this.skipSymbol('call')) {
+            this.fail("expected call");
+        }
+
+        var callerArgs = this.parseSignature(true) || new nodes.NodeList();
+        var macroCall = this.parsePrimary();
+
+        this.advanceAfterBlockEnd(callTok.value);
+        var body = this.parseUntilBlocks('endcall');
+        this.advanceAfterBlockEnd();
+
+        var callerName = new nodes.Symbol(callTok.lineno,
+                                          callTok.colno,
+                                          'caller');
+        var callerNode = new nodes.Caller(callTok.lineno,
+                                          callTok.colno,
+                                          callerName,
+                                          callerArgs,
+                                          body);
+
+        // add the additional caller kwarg, adding kwargs if necessary
+        var args = macroCall.args.children;
+        if (!(args[args.length-1] instanceof nodes.KeywordArgs)) {
+          args.push(new nodes.KeywordArgs());
+        }
+        var kwargs = args[args.length - 1];
+        kwargs.addChild(new nodes.Pair(callTok.lineno,
+                                       callTok.colno,
+                                       callerName,
+                                       callerNode));
+
+        return new nodes.Output(callTok.lineno,
+                                callTok.colno,
+                                [macroCall]);
+    },
+
     parseImport: function() {
         var importTok = this.peekToken();
         if(!this.skipSymbol('import')) {
@@ -450,6 +490,7 @@ var Parser = Object.extend({
         case 'include': return this.parseInclude();
         case 'set': return this.parseSet();
         case 'macro': return this.parseMacro();
+        case 'call': return this.parseCall();
         case 'import': return this.parseImport();
         case 'from': return this.parseFrom();
         default:

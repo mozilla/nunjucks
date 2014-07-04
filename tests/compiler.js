@@ -452,6 +452,35 @@
             finish(done);
         });
 
+        it('should compile call blocks', function(done) {
+          equal('{% macro wrap(el) %}' +
+                '<{{ el }}>{{ caller() }}</{{ el }}>' +
+                '{% endmacro %}' +
+                '{% call wrap("div") %}Hello{% endcall %}',
+                '<div>Hello</div>');
+
+          finish(done);
+        });
+
+        it('should compile call blocks with args', function(done) {
+          equal('{% macro list(items) %}' +
+                '<ul>{% for i in items %}' +
+                '<li>{{ caller(i) }}</li>' +
+                '{% endfor %}</ul>' +
+                '{% endmacro %}' +
+                '{% call(item) list(["a", "b"]) %}{{ item }}{% endcall %}',
+                '<ul><li>a</li><li>b</li></ul>');
+
+          finish(done);
+        });
+
+        it('should compile call blocks using imported macros', function(done) {
+          equal('{% import "import.html" as imp %}' +
+                '{% call imp.wrap("span") %}Hey{% endcall %}',
+                '<span>Hey</span>');
+          finish(done);
+        });
+
         it('should import templates', function(done) {
             equal('{% import "import.html" as imp %}' +
                   '{{ imp.foo() }} {{ imp.bar }}',
