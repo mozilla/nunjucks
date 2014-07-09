@@ -119,6 +119,7 @@ var Output = NodeList.extend("Output");
 var TemplateData = Literal.extend("TemplateData");
 var UnaryOp = Node.extend("UnaryOp", { fields: ['target'] });
 var BinOp = Node.extend("BinOp", { fields: ['left', 'right'] });
+var In = BinOp.extend("In");
 var Or = BinOp.extend("Or");
 var And = BinOp.extend("And");
 var Not = UnaryOp.extend("Not");
@@ -278,6 +279,7 @@ module.exports = {
     Set: Set,
     LookupVal: LookupVal,
     BinOp: BinOp,
+    In: In,
     Or: Or,
     And: And,
     Not: Not,

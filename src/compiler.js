@@ -173,6 +173,7 @@ var Compiler = Object.extend({
             nodes.LookupVal,
             nodes.Compare,
             nodes.InlineIf,
+            nodes.In,
             nodes.And,
             nodes.Or,
             nodes.Not,
@@ -361,6 +362,14 @@ var Compiler = Object.extend({
         else
             this.emit('""');
         this.emit(')');
+    },
+
+    compileIn: function(node, frame) {
+      this.emit('(');
+      this.compile(node.right, frame);
+      this.emit('.indexOf(');
+      this.compile(node.left, frame);
+      this.emit(') !== -1)');
     },
 
     compileOr: binOpEmitter(' || '),

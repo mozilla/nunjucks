@@ -363,6 +363,13 @@
                     bar: 15 },
                   'yes');
 
+            equal('{% if 1 in [1, 2] %}yes{% endif %}', 'yes');
+            equal('{% if 1 in [2, 3] %}yes{% endif %}', '');
+            equal('{% if 1 not in [1, 2] %}yes{% endif %}', '');
+            equal('{% if 1 not in [2, 3] %}yes{% endif %}', 'yes');
+            equal('{% if "a" in vals %}yes{% endif %}',
+                  {'vals': ['a', 'b']}, 'yes');
+
             finish(done);
         });
 
