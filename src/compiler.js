@@ -499,9 +499,9 @@ var Compiler = Object.extend({
         // new ones if necessary
         lib.each(node.targets, function(target) {
             var name = target.value;
-            var id = frame.get(name);
+            var id = frame.lookup(name);
 
-            if (id === null) {
+            if (id == null) {
                 id = this.tmpid();
 
                 // Note: This relies on js allowing scope across
@@ -520,10 +520,7 @@ var Compiler = Object.extend({
             var id = ids[i];
             var name = target.value;
 
-            this.emitLine('frame.set("' + name + '", ' + id + ');');
-            if (frame.get(name) === null) {
-                frame.set(name, id);
-            }
+            this.emitLine('frame.set("' + name + '", ' + id + ');'); 
 
             // We are running this for every var, but it's very
             // uncommon to assign to multiple vars anyway
