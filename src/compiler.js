@@ -520,7 +520,7 @@ var Compiler = Object.extend({
             var id = ids[i];
             var name = target.value;
 
-            this.emitLine('frame.set("' + name + '", ' + id + ');'); 
+            this.emitLine('frame.set("' + name + '", ' + id + ', true);'); 
 
             // We are running this for every var, but it's very
             // uncommon to assign to multiple vars anyway

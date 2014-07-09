@@ -1,4 +1,3 @@
-
 var lib = require('./lib');
 var Obj = require('./object');
 
@@ -11,11 +10,20 @@ var Frame = Obj.extend({
         this.parent = parent;
     },
 
-    set: function(name, val) {
+    set: function(name, val, resolveUp) {
         // Allow variables with dots by automatically creating the
         // nested structure
         var parts = name.split('.');
         var obj = this.variables;
+        var frame = this;
+        
+        if(resolveUp) {
+            if((frame = this.resolve(parts[0]))) {
+                frame.set(name, val);
+                return;
+            }
+            frame = this;
+        }
 
         for(var i=0; i<parts.length - 1; i++) {
             var id = parts[i];
@@ -44,6 +52,15 @@ var Frame = Obj.extend({
             return val;
         }
         return p && p.lookup(name);
+    },
+
+    resolve: function(name) {
+        var p = this.parent;
+        var val = this.variables[name];
+        if(val != null) {
+            return this;
+        }
+        return p && p.resolve(name);
     },
 
     push: function() {
