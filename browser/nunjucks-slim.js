@@ -43,7 +43,7 @@ function extend(cls, name, props) {
 
     prototype.typename = name;
 
-    var new_cls = function() { 
+    var new_cls = function() {
         if(prototype.init) {
             prototype.init.apply(this, arguments);
         }
@@ -258,7 +258,7 @@ exports.map = function(obj, func) {
 
 exports.asyncIter = function(arr, iter, cb) {
     var i = -1;
-    
+
     function next() {
         i++;
 
@@ -347,7 +347,6 @@ exports.keys = function(obj) {
 }
 })();
 (function() {
-
 var lib = modules["lib"];
 var Obj = modules["object"];
 
@@ -360,11 +359,20 @@ var Frame = Obj.extend({
         this.parent = parent;
     },
 
-    set: function(name, val) {
+    set: function(name, val, resolveUp) {
         // Allow variables with dots by automatically creating the
         // nested structure
         var parts = name.split('.');
         var obj = this.variables;
+        var frame = this;
+        
+        if(resolveUp) {
+            if((frame = this.resolve(parts[0]))) {
+                frame.set(name, val);
+                return;
+            }
+            frame = this;
+        }
 
         for(var i=0; i<parts.length - 1; i++) {
             var id = parts[i];
@@ -393,6 +401,15 @@ var Frame = Obj.extend({
             return val;
         }
         return p && p.lookup(name);
+    },
+
+    resolve: function(name) {
+        var p = this.parent;
+        var val = this.variables[name];
+        if(val != null) {
+            return this;
+        }
+        return p && p.resolve(name);
     },
 
     push: function() {
@@ -1274,6 +1291,7 @@ var globals = {
 modules['globals'] = globals;
 })();
 (function() {
+var path = modules["path"];
 var lib = modules["lib"];
 var Obj = modules["object"];
 var lexer = modules["lexer"];
@@ -1455,8 +1473,12 @@ var Environment = Obj.extend({
         var env = this;
 
         function NunjucksView(name, opts) {
-            this.name = name;
-            this.path = name;
+            this.name          = name;
+            this.path          = name;
+            this.defaultEngine = opts.defaultEngine;
+            this.ext           = path.extname(name);
+            if (!this.ext && !this.defaultEngine) throw new Error('No default engine was specified and no extension was provided.');
+            if (!this.ext) this.name += (this.ext = ('.' !== this.defaultEngine[0] ? '.' : '') + this.defaultEngine);
         }
 
         NunjucksView.prototype.render = function(opts, cb) {

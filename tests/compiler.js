@@ -579,6 +579,33 @@
                   { username: 'basta' },
                   'bastapasta');
 
+            // `set` should only set within its current scope
+            equal('{% for i in [1] %}{% set val=5 %}{% endfor %}' +
+                  '{{ val }}',
+                  '');
+
+            equal('{% for i in [1,2,3] %}' +
+                  '{% if not val %}{% set val=5 %}{% endif %}' +
+                  '{% set val=val+1 %}{{ val }}' +
+                  '{% endfor %}' +
+                  'afterwards: {{ val }}',
+                  '678afterwards: ');
+
+            // however, like Python, if a variable has been set in an
+            // above scope, any other set should correctly resolve to
+            // that frame
+            equal('{% set val=1 %}' +
+                  '{% for i in [1] %}{% set val=5 %}{% endfor %}' +
+                  '{{ val }}',
+                  '5');
+            
+            equal('{% set val=5 %}' +
+                  '{% for i in [1,2,3] %}' +
+                  '{% set val=val+1 %}{{ val }}' +
+                  '{% endfor %}' +
+                  'afterwards: {{ val }}',
+                  '678afterwards: 8');
+
             finish(done);
         });
 
