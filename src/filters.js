@@ -1,5 +1,6 @@
 var lib = require('./lib');
 var r = require('./runtime');
+var moment = require('moment');
 
 var filters = {
     abs: function(n) {
@@ -92,6 +93,17 @@ var filters = {
         });
 
         return array;
+    },
+
+    formatdate: function(str, format, meridiem) {
+        if (str !== undefined) {
+          if (!meridiem) {
+            return moment(str).format(format);
+          }
+          else {
+            return moment(str).format(format).replace(/(a{1,2}|p)\.?m{1}?\.?/i, "$1.m.");
+          }
+        }
     },
 
     escape: function(str) {
