@@ -6,7 +6,7 @@
     "dependencies": {
         "optimist": "*",
         "chokidar": "~0.8.2",
-        "moment": "^2.4.0"
+        "moment": "~2.7.0"
     },
     "browser" : "./browser/nunjucks.js",
     "devDependencies": {
