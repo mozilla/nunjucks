@@ -1,21 +1,29 @@
-
 var lib = require('./lib');
-var Object = require('./object');
+var Obj = require('./object');
 
 // Frames keep track of scoping both at compile-time and run-time so
 // we know how to access variables. Block tags can introduce special
 // variables, for example.
-var Frame = Object.extend({
+var Frame = Obj.extend({
     init: function(parent) {
         this.variables = {};
         this.parent = parent;
     },
 
-    set: function(name, val) {
+    set: function(name, val, resolveUp) {
         // Allow variables with dots by automatically creating the
         // nested structure
         var parts = name.split('.');
         var obj = this.variables;
+        var frame = this;
+        
+        if(resolveUp) {
+            if((frame = this.resolve(parts[0]))) {
+                frame.set(name, val);
+                return;
+            }
+            frame = this;
+        }
 
         for(var i=0; i<parts.length - 1; i++) {
             var id = parts[i];
@@ -44,6 +52,15 @@ var Frame = Object.extend({
             return val;
         }
         return p && p.lookup(name);
+    },
+
+    resolve: function(name) {
+        var p = this.parent;
+        var val = this.variables[name];
+        if(val != null) {
+            return this;
+        }
+        return p && p.resolve(name);
     },
 
     push: function() {
@@ -137,25 +154,16 @@ function SafeString(val) {
         return val;
     }
 
-    this.toString = function() {
-        return val;
-    };
-
-    this.length = val.length;
-
-    var methods = [
-        'charAt', 'charCodeAt', 'concat', 'contains',
-        'endsWith', 'fromCharCode', 'indexOf', 'lastIndexOf',
-        'length', 'localeCompare', 'match', 'quote', 'replace',
-        'search', 'slice', 'split', 'startsWith', 'substr',
-        'substring', 'toLocaleLowerCase', 'toLocaleUpperCase',
-        'toLowerCase', 'toUpperCase', 'trim', 'trimLeft', 'trimRight'
-    ];
-
-    for(var i=0; i<methods.length; i++) {
-        this[methods[i]] = markSafe(val[methods[i]]);
-    }
+    this.val = val;
 }
+
+SafeString.prototype = Object.create(String.prototype);
+SafeString.prototype.valueOf = function() {
+    return this.val;
+};
+SafeString.prototype.toString = function() {
+    return this.val;
+};
 
 function copySafeness(dest, target) {
     if(dest instanceof SafeString) {

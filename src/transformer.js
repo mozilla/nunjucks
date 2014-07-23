@@ -52,7 +52,7 @@ function walk(ast, func, depthFirst) {
         var contentArgs = mapCOW(ast.contentArgs, function(node) {
             return walk(node, func, depthFirst);
         });
-        
+
         if(args !== ast.args || contentArgs !== ast.contentArgs) {
             ast = new nodes[ast.typename](ast.extName,
                                           ast.prop,

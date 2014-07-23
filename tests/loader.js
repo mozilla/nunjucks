@@ -15,7 +15,7 @@
 
     describe('loader', function() {
         it('should allow a simple loader to be created', function() {
-            // From Docs: http://jlongster.github.io/nunjucks/api.html#writing-a-loader
+            // From Docs: http://mozilla.github.io/nunjucks/api.html#writing-a-loader
             // We should be able to create a loader that only exposes getSource
             function MyLoader(opts) {
                 // configuration

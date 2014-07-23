@@ -1,4 +1,4 @@
-// Browser bundle of nunjucks 1.0.3 
+// Browser bundle of nunjucks 1.0.5 
 
 (function() {
 var modules = {};
@@ -43,7 +43,7 @@ function extend(cls, name, props) {
 
     prototype.typename = name;
 
-    var new_cls = function() { 
+    var new_cls = function() {
         if(prototype.init) {
             prototype.init.apply(this, arguments);
         }
@@ -76,6 +76,8 @@ var escapeMap = {
     "<": '&lt;',
     ">": '&gt;'
 };
+
+var escapeRegex = /[&"'<>]/g;
 
 var lookupEscape = function(ch) {
     return escapeMap[ch];
@@ -152,7 +154,7 @@ exports.TemplateError = function(message, lineno, colno) {
 exports.TemplateError.prototype = Error.prototype;
 
 exports.escape = function(val) {
-    return val.replace(/[&"'<>]/g, lookupEscape);
+  return val.replace(escapeRegex, lookupEscape);
 };
 
 exports.isFunction = function(obj) {
@@ -256,7 +258,7 @@ exports.map = function(obj, func) {
 
 exports.asyncIter = function(arr, iter, cb) {
     var i = -1;
-    
+
     function next() {
         i++;
 
@@ -647,24 +649,32 @@ modules['nodes'] = {
 };
 })();
 (function() {
-
 var lib = modules["lib"];
-var Object = modules["object"];
+var Obj = modules["object"];
 
 // Frames keep track of scoping both at compile-time and run-time so
 // we know how to access variables. Block tags can introduce special
 // variables, for example.
-var Frame = Object.extend({
+var Frame = Obj.extend({
     init: function(parent) {
         this.variables = {};
         this.parent = parent;
     },
 
-    set: function(name, val) {
+    set: function(name, val, resolveUp) {
         // Allow variables with dots by automatically creating the
         // nested structure
         var parts = name.split('.');
         var obj = this.variables;
+        var frame = this;
+        
+        if(resolveUp) {
+            if((frame = this.resolve(parts[0]))) {
+                frame.set(name, val);
+                return;
+            }
+            frame = this;
+        }
 
         for(var i=0; i<parts.length - 1; i++) {
             var id = parts[i];
@@ -693,6 +703,15 @@ var Frame = Object.extend({
             return val;
         }
         return p && p.lookup(name);
+    },
+
+    resolve: function(name) {
+        var p = this.parent;
+        var val = this.variables[name];
+        if(val != null) {
+            return this;
+        }
+        return p && p.resolve(name);
     },
 
     push: function() {
@@ -786,25 +805,16 @@ function SafeString(val) {
         return val;
     }
 
-    this.toString = function() {
-        return val;
-    };
-
-    this.length = val.length;
-
-    var methods = [
-        'charAt', 'charCodeAt', 'concat', 'contains',
-        'endsWith', 'fromCharCode', 'indexOf', 'lastIndexOf',
-        'length', 'localeCompare', 'match', 'quote', 'replace',
-        'search', 'slice', 'split', 'startsWith', 'substr',
-        'substring', 'toLocaleLowerCase', 'toLocaleUpperCase',
-        'toLowerCase', 'toUpperCase', 'trim', 'trimLeft', 'trimRight'
-    ];
-
-    for(var i=0; i<methods.length; i++) {
-        this[methods[i]] = markSafe(val[methods[i]]);
-    }
+    this.val = val;
 }
+
+SafeString.prototype = Object.create(String.prototype);
+SafeString.prototype.valueOf = function() {
+    return this.val;
+};
+SafeString.prototype.toString = function() {
+    return this.val;
+};
 
 function copySafeness(dest, target) {
     if(dest instanceof SafeString) {
@@ -2549,7 +2559,7 @@ function walk(ast, func, depthFirst) {
         var contentArgs = mapCOW(ast.contentArgs, function(node) {
             return walk(node, func, depthFirst);
         });
-        
+
         if(args !== ast.args || contentArgs !== ast.contentArgs) {
             ast = new nodes[ast.typename](ast.extName,
                                           ast.prop,
@@ -3230,9 +3240,9 @@ var Compiler = Object.extend({
         // new ones if necessary
         lib.each(node.targets, function(target) {
             var name = target.value;
-            var id = frame.get(name);
+            var id = frame.lookup(name);
 
-            if (id === null) {
+            if (id == null) {
                 id = this.tmpid();
 
                 // Note: This relies on js allowing scope across
@@ -3251,10 +3261,7 @@ var Compiler = Object.extend({
             var id = ids[i];
             var name = target.value;
 
-            this.emitLine('frame.set("' + name + '", ' + id + ');');
-            if (frame.get(name) === null) {
-                frame.set(name, id);
-            }
+            this.emitLine('frame.set("' + name + '", ' + id + ', true);'); 
 
             // We are running this for every var, but it's very
             // uncommon to assign to multiple vars anyway
@@ -3426,7 +3433,7 @@ var Compiler = Object.extend({
             var v = this.tmpid();
             frame.set(node.name.value, v);
 
-            this.emitLine('for(var ' + i + '=0; ' + i + ' < ' + arr + '.length; ' + 
+            this.emitLine('for(var ' + i + '=0; ' + i + ' < ' + arr + '.length; ' +
                           i + '++) {');
             this.emitLine('var ' + v + ' = ' + arr + '[' + i + '];');
             this.emitLine('frame.set("' + node.name.value + '", ' + v + ');');
@@ -3439,7 +3446,7 @@ var Compiler = Object.extend({
 
             this.emitLine('}');
         }
-        
+
         this.emitLine('}');
         this.emitLine('frame = frame.pop();');
     },
@@ -3486,7 +3493,7 @@ var Compiler = Object.extend({
         }
 
         this.emitLoopBindings(node, loopUses, arr, i, len);
-        
+
         this.withScopedSyntax(function() {
             var buf;
             if(parallel) {
@@ -3856,7 +3863,6 @@ modules['compiler'] = {
 };
 })();
 (function() {
-
 var lib = modules["lib"];
 var r = modules["runtime"];
 
@@ -4269,7 +4275,8 @@ var filters = {
     },
 
     wordcount: function(str) {
-        return str.match(/\w+/g).length;
+        var words = (str) ? str.match(/\w+/g) : null;
+        return (words) ? words.length : null;
     },
 
     'float': function(val, def) {
@@ -4452,7 +4459,7 @@ modules['web-loaders'] = {
 };
 })();
 (function() {
-if(typeof window === 'undefined') {
+if(typeof window === 'undefined' || window !== this) {
     modules['loaders'] = modules["node-loaders"];
 }
 else {
@@ -4460,6 +4467,7 @@ else {
 }
 })();
 (function() {
+var path = modules["path"];
 var lib = modules["lib"];
 var Obj = modules["object"];
 var lexer = modules["lexer"];
@@ -4641,8 +4649,12 @@ var Environment = Obj.extend({
         var env = this;
 
         function NunjucksView(name, opts) {
-            this.name = name;
-            this.path = name;
+            this.name          = name;
+            this.path          = name;
+            this.defaultEngine = opts.defaultEngine;
+            this.ext           = path.extname(name);
+            if (!this.ext && !this.defaultEngine) throw new Error('No default engine was specified and no extension was provided.');
+            if (!this.ext) this.name += (this.ext = ('.' !== this.defaultEngine[0] ? '.' : '') + this.defaultEngine);
         }
 
         NunjucksView.prototype.render = function(opts, cb) {
@@ -4995,6 +5007,7 @@ if(typeof define === 'function' && define.amd) {
 }
 else {
     window.nunjucks = nunjucks;
+    if(typeof module !== 'undefined') module.exports = nunjucks;
 }
 
 })();

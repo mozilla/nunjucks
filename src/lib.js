@@ -9,6 +9,8 @@ var escapeMap = {
     ">": '&gt;'
 };
 
+var escapeRegex = /[&"'<>]/g;
+
 var lookupEscape = function(ch) {
     return escapeMap[ch];
 };
@@ -84,7 +86,7 @@ exports.TemplateError = function(message, lineno, colno) {
 exports.TemplateError.prototype = Error.prototype;
 
 exports.escape = function(val) {
-    return val.replace(/[&"'<>]/g, lookupEscape);
+  return val.replace(escapeRegex, lookupEscape);
 };
 
 exports.isFunction = function(obj) {
@@ -188,7 +190,7 @@ exports.map = function(obj, func) {
 
 exports.asyncIter = function(arr, iter, cb) {
     var i = -1;
-    
+
     function next() {
         i++;
 

@@ -1,3 +1,4 @@
+var path = require('path');
 var lib = require('./lib');
 var Obj = require('./object');
 var lexer = require('./lexer');
@@ -76,6 +77,10 @@ var Environment = Obj.extend({
 
     getExtension: function(name) {
         return this.extensions[name];
+    },
+
+    addGlobal: function(name, func) {
+        globals[name] = func;
     },
 
     addFilter: function(name, func, async) {
@@ -179,8 +184,12 @@ var Environment = Obj.extend({
         var env = this;
 
         function NunjucksView(name, opts) {
-            this.name = name;
-            this.path = name;
+            this.name          = name;
+            this.path          = name;
+            this.defaultEngine = opts.defaultEngine;
+            this.ext           = path.extname(name);
+            if (!this.ext && !this.defaultEngine) throw new Error('No default engine was specified and no extension was provided.');
+            if (!this.ext) this.name += (this.ext = ('.' !== this.defaultEngine[0] ? '.' : '') + this.defaultEngine);
         }
 
         NunjucksView.prototype.render = function(opts, cb) {
