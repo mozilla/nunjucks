@@ -504,8 +504,7 @@ blocks and child templates can override them with new content. See
 <h3 id="raw">raw</h3>
 
 <p>If you want to output any of the special nunjucks tags like <code>{{</code>, you can use <code>raw</code> and anything inside of it will be output as plain text.</p>
-<div class="highlight"><pre><code class="jinja language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">raw</span> <span class="cp">%}</span>this will {{ not be processed }}{%<span class="cp">{%</span> <span class="k">endraw</span> <span class="cp">%}{%</span> <span class="k">raw</span> <span class="cp">%}</span><span class="x"> endraw %}</span>
-</code></pre></div>
+<div class="highlight"><pre><code class="jinja language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">raw</span> <span class="cp">%}</span>this will {{ not be processed }}{%<span class="cp">{%</span> <span class="k">endraw</span> <span class="cp">%}</span></code></pre></div>
 <h2 id="keyword-arguments">Keyword Arguments</h2>
 
 <p>jinja2 uses Python&#39;s keyword arguments support to allow keyword arguments in functions, filters, and macros. Nunjucks supports keyword arguments as well by introduction a new calling convention.</p>
