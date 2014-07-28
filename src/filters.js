@@ -337,6 +337,10 @@ var filters = {
         return r.copySafeness(orig, input);
     },
 
+    typeof: function(x) {
+        return typeof x;
+    },
+
     upper: function(str) {
         return str.toUpperCase();
     },
