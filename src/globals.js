@@ -1,12 +1,12 @@
 
 function cycler(items) {
     var index = -1;
-    var current = null;
+    this.current = null;
 
     return {
         reset: function() {
             index = -1;
-            current = null;
+            this.current = null;
         },
 
         next: function() {
@@ -15,9 +15,9 @@ function cycler(items) {
                 index = 0;
             }
 
-            current = items[index];
-            return current;
-        }
+            this.current = items[index];
+            return this.current;
+        },
     };
 
 }
