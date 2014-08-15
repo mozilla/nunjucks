@@ -1,6 +1,6 @@
 
 This is a jekyll site that generates the docs for
-[nunjucks](https://github.com/jlongster/nunjucks). If you find a bug
+[nunjucks](https://github.com/mozilla/nunjucks). If you find a bug
 in the docs, please file an issue, or even better, fork it and fix it!
 
 Run `make` to publish and look it at locally.

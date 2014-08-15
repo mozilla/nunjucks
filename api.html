@@ -16,7 +16,7 @@
 
       <ul class="nav navbar-nav navbar-right pull-right">
         <li><a href="/nunjucks/#download" class="download">Download</a></li>
-        <li><a href="https://github.com/jlongster/nunjucks">Github</a></li>
+        <li><a href="https://github.com/mozilla/nunjucks">Github</a></li>
         <li class="dropdown">
           <a href="getting-started.html" data-toggle="dropdown">Docs</a>
 
@@ -528,6 +528,10 @@ If you want to do this, just create an object that has a method
 
 <span class="nx">MyLoader</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">getSource</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
     <span class="c1">// load the template</span>
+    <span class="c1">// return an object with:</span>
+    <span class="c1">//   - src:     String. The template source.</span>
+    <span class="c1">//   - path:    String. Path to template.</span>
+    <span class="c1">//   - noCache: Bool. Don&#39;t cache the template (optional).</span>
 <span class="p">}</span>
 </code></pre></div>
 <p>It can get a little more complex. If you want to track updates to
@@ -913,7 +917,7 @@ between tags.</p></li>
 
 <p>The parser API needs to be more documented, but for now read the above
 and check out the example below. You can also look at the
-<a href="https://github.com/jlongster/nunjucks/blob/master/src/parser.js">source</a>.</p>
+<a href="https://github.com/mozilla/nunjucks/blob/master/src/parser.js">source</a>.</p>
 
 <p>The most common usage is to process the content within some tags at
 runtime. It&#39;s like filters, but on steroids because you aren&#39;t
@@ -998,7 +1002,7 @@ Template rendering is paused until you call the callback to resume.</p>
 <span class="p">};</span>
 </code></pre></div>
 <p>If you create anything interesting, make sure to
-<a href="https://github.com/jlongster/nunjucks/wiki/Custom-Tags">add it to the wiki!</a></p>
+<a href="https://github.com/mozilla/nunjucks/wiki/Custom-Tags">add it to the wiki!</a></p>
 
   </div>
 </div>
@@ -1007,7 +1011,7 @@ Template rendering is paused until you call the callback to resume.</p>
 
     <footer>
       Found a bug in the
-      documentation? <a href="https://github.com/jlongster/nunjucks-docs">Fix
+      documentation? <a href="https://github.com/mozilla/nunjucks-docs">Fix
       it or file an issue</a>!
     </footer>
 
@@ -1017,6 +1021,7 @@ Template rendering is paused until you call the callback to resume.</p>
     <script src="/nunjucks/js/app.js"></script>
     <script src="/nunjucks/js/subpage.js"></script>
 
+<!-- commented out temporarily while we figure out how to get GA for mozilla.github.io
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -1026,5 +1031,6 @@ Template rendering is paused until you call the callback to resume.</p>
   ga('create', 'UA-9014321-3', 'jlongster.github.io');
   ga('send', 'pageview');
 </script>
+-->
   </body>
 </html>

@@ -1,4 +1,4 @@
-// Browser bundle of nunjucks 1.0.5 
+// Browser bundle of nunjucks 1.0.7 
 
 (function() {
 var modules = {};
@@ -4012,7 +4012,7 @@ var filters = {
     },
 
     length: function(arr) {
-        return arr.length;
+        return arr !== undefined ? arr.length : 0;
     },
 
     list: function(val) {

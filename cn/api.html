@@ -16,7 +16,7 @@
 
       <ul class="nav navbar-nav navbar-right pull-right">
         <li><a href="/nunjucks/#download" class="download">Download</a></li>
-        <li><a href="https://github.com/jlongster/nunjucks">Github</a></li>
+        <li><a href="https://github.com/mozilla/nunjucks">Github</a></li>
         <li class="dropdown">
           <a href="getting-started.html" data-toggle="dropdown">Docs</a>
 
@@ -688,7 +688,7 @@ mytag foo, bar, baz=10 %}</code>。</p></li>
 <li><p><code>parseUntilBlocks(names)</code> - 解析内容直到下一个名为 <code>names</code> 的标签，非常有用解析标签之间的内容。</p></li>
 </ul>
 
-<p>parser API 还需要更多的文档，但现在对照上面的文档和下面的例子，你还可以看下<a href="https://github.com/jlongster/nunjucks/blob/master/src/parser.js">源码</a>。</p>
+<p>parser API 还需要更多的文档，但现在对照上面的文档和下面的例子，你还可以看下<a href="https://github.com/mozilla/nunjucks/blob/master/src/parser.js">源码</a>。</p>
 
 <p>最常用使用的是在运行时解析标签间的内容，就像过滤器一样，但是更灵活，因为不只是局限在一个表达式中。通常情况下你会解析模板，然后将内容传入回调。你可以使用 <code>CallExtension</code>，需要传扩展的实例，方法名，解析的参数和内容（使用 <code>parseUntilBlocks</code> 解析的）。</p>
 
@@ -762,7 +762,7 @@ mytag foo, bar, baz=10 %}</code>。</p></li>
 <span class="p">};</span>
 </code></pre></div>
 <p>If you create anything interesting, make sure to
-<a href="https://github.com/jlongster/nunjucks/wiki/Custom-Tags">add it to the wiki!</a></p>
+<a href="https://github.com/mozilla/nunjucks/wiki/Custom-Tags">add it to the wiki!</a></p>
 
   </div>
 </div>
@@ -771,7 +771,7 @@ mytag foo, bar, baz=10 %}</code>。</p></li>
 
     <footer>
       Found a bug in the
-      documentation? <a href="https://github.com/jlongster/nunjucks-docs">Fix
+      documentation? <a href="https://github.com/mozilla/nunjucks-docs">Fix
       it or file an issue</a>!
     </footer>
 
@@ -781,6 +781,7 @@ mytag foo, bar, baz=10 %}</code>。</p></li>
     <script src="/nunjucks/js/app.js"></script>
     <script src="/nunjucks/js/subpage.js"></script>
 
+<!-- commented out temporarily while we figure out how to get GA for mozilla.github.io
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -790,5 +791,6 @@ mytag foo, bar, baz=10 %}</code>。</p></li>
   ga('create', 'UA-9014321-3', 'jlongster.github.io');
   ga('send', 'pageview');
 </script>
+-->
   </body>
 </html>

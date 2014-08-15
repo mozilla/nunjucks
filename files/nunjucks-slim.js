@@ -1,4 +1,4 @@
-// Browser bundle of nunjucks 1.0.5 (slim, only works with precompiled templates)
+// Browser bundle of nunjucks 1.0.7 (slim, only works with precompiled templates)
 
 (function() {
 var modules = {};
@@ -940,7 +940,7 @@ var filters = {
     },
 
     length: function(arr) {
-        return arr.length;
+        return arr !== undefined ? arr.length : 0;
     },
 
     list: function(val) {
