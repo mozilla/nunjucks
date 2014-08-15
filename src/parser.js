@@ -337,7 +337,7 @@ var Parser = Object.extend({
         }
 
         var node = new nodeType(tag.lineno, tag.colno);
-        node.template = this.parsePrimary();
+        node.template = this.parseExpression();
 
         this.advanceAfterBlockEnd(tag.value);
         return node;
