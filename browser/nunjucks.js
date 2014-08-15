@@ -1616,7 +1616,7 @@ var Parser = Object.extend({
                       importTok.colno);
         }
 
-        var template = this.parsePrimary();
+        var template = this.parseExpression();
 
         if(!this.skipSymbol('as')) {
             this.fail('parseImport: expected "as" keyword',
@@ -1738,7 +1738,7 @@ var Parser = Object.extend({
         }
 
         var node = new nodeType(tag.lineno, tag.colno);
-        node.template = this.parsePrimary();
+        node.template = this.parseExpression();
 
         this.advanceAfterBlockEnd(tag.value);
         return node;
@@ -3590,26 +3590,24 @@ var Compiler = Object.extend({
         return funcId;
     },
 
-    _emitMacroEnd: function() {
+    _emitMacroEnd: function(bufferId) {
         this.emitLine('frame = frame.pop();');
-        this.emitLine('return new runtime.SafeString(' + this.buffer + ');');
+        this.emitLine('return new runtime.SafeString(' + bufferId + ');');
         this.emitLine('});');
     },
 
     compileMacro: function(node, frame) {
         frame = frame.push();
         var funcId = this._emitMacroBegin(node, frame);
+        var id = this.tmpid();
+        this.pushBufferId(id);
 
-        // Start a new output buffer, and set the old one back after
-        // we're done
-        var prevBuffer = this.buffer;
-        this.buffer = 'output';
-        this.emitLine('var ' + this.buffer + '= "";');
+        this.withScopedSyntax(function() {
+            this.compile(node.body, frame);
+        });
 
-        this.compile(node.body, frame);
-
-        this._emitMacroEnd();
-        this.buffer = prevBuffer;
+        this._emitMacroEnd(id);
+        this.popBufferId();
 
         // Expose the macro to the templates
         var name = node.name.value;
@@ -3833,9 +3831,9 @@ var Compiler = Object.extend({
 });
 
 // var c = new Compiler();
-// var src = 'hello {% foo %}bar{% endfoo %} end';
+// var src = '{% macro foo() %}{% include "include.html" %}{% endmacro %} This is my template {{ foo() }}';
 // var ast = transformer.transform(parser.parse(src));
-// nodes.printNodes(ast);
+//nodes.printNodes(ast);
 // c.compile(ast);
 // var tmpl = c.getCode();
 // console.log(tmpl);
@@ -4548,6 +4546,10 @@ var Environment = Obj.extend({
         return this.extensions[name];
     },
 
+    addGlobal: function(name, value) {
+        globals[name] = value;
+    },
+
     addFilter: function(name, func, async) {
         var wrapped = func;
 
@@ -4882,44 +4884,9 @@ var Template = Obj.extend({
 });
 
 // test code
-// var src = 'hello {% foo baz | bar %}hi{% endfoo %} end';
-// var env = new Environment(new builtin_loaders.FileSystemLoader('tests/templates', true), { dev: true });
-
-// function FooExtension() {
-//     this.tags = ['foo'];
-//     this._name = 'FooExtension';
-
-//     this.parse = function(parser, nodes) {
-//         var tok = parser.nextToken();
-//         var args = parser.parseSignature(null, true);
-//         parser.advanceAfterBlockEnd(tok.value);
-
-//         var body = parser.parseUntilBlocks('endfoo');
-//         parser.advanceAfterBlockEnd();
-
-//         return new nodes.CallExtensionAsync(this, 'run', args, [body]);
-//     };
-
-//     this.run = function(context, baz, body, cb) {
-//         cb(null, baz + '--' + body());
-//     };
-// }
-
-// env.addExtension('FooExtension', new FooExtension());
-// env.addFilter('bar', function(val, cb) {
-//     cb(null, val + '22222');
-// }, true);
-
-// var ctx = {};
-// var tmpl = new Template(src, env, null, null, true);
-// console.log("OUTPUT ---");
-
-// tmpl.render(ctx, function(err, res) {
-//     if(err) {
-//         throw err;
-//     }
-//     console.log(res);
-// });
+// var src = '{% macro foo() %}{% include "include.html" %}{% endmacro %}{{ foo() }}';
+// var env = new Environment(new builtin_loaders.FileSystemLoader('../tests/templates', true), { dev: true });
+// console.log(env.renderString(src, { name: 'poop' }));
 
 modules['environment'] = {
     Environment: Environment,

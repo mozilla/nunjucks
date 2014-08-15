@@ -1372,6 +1372,10 @@ var Environment = Obj.extend({
         return this.extensions[name];
     },
 
+    addGlobal: function(name, value) {
+        globals[name] = value;
+    },
+
     addFilter: function(name, func, async) {
         var wrapped = func;
 
@@ -1706,44 +1710,9 @@ var Template = Obj.extend({
 });
 
 // test code
-// var src = 'hello {% foo baz | bar %}hi{% endfoo %} end';
-// var env = new Environment(new builtin_loaders.FileSystemLoader('tests/templates', true), { dev: true });
-
-// function FooExtension() {
-//     this.tags = ['foo'];
-//     this._name = 'FooExtension';
-
-//     this.parse = function(parser, nodes) {
-//         var tok = parser.nextToken();
-//         var args = parser.parseSignature(null, true);
-//         parser.advanceAfterBlockEnd(tok.value);
-
-//         var body = parser.parseUntilBlocks('endfoo');
-//         parser.advanceAfterBlockEnd();
-
-//         return new nodes.CallExtensionAsync(this, 'run', args, [body]);
-//     };
-
-//     this.run = function(context, baz, body, cb) {
-//         cb(null, baz + '--' + body());
-//     };
-// }
-
-// env.addExtension('FooExtension', new FooExtension());
-// env.addFilter('bar', function(val, cb) {
-//     cb(null, val + '22222');
-// }, true);
-
-// var ctx = {};
-// var tmpl = new Template(src, env, null, null, true);
-// console.log("OUTPUT ---");
-
-// tmpl.render(ctx, function(err, res) {
-//     if(err) {
-//         throw err;
-//     }
-//     console.log(res);
-// });
+// var src = '{% macro foo() %}{% include "include.html" %}{% endmacro %}{{ foo() }}';
+// var env = new Environment(new builtin_loaders.FileSystemLoader('../tests/templates', true), { dev: true });
+// console.log(env.renderString(src, { name: 'poop' }));
 
 modules['environment'] = {
     Environment: Environment,

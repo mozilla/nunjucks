@@ -1,12 +1,11 @@
 Changelog for versions previous to v0.1.9 are located at http://nunjucks.tumblr.com/.
 
-Next version:
+# v1.0.6 (August 15, 2014)
 
-* document SafeString and writing filters with them
-* document app.locals with express
-* source maps?
-* publish in bower
-* cleanup WebLoader.fetch
+* Added the `addGlobal` method to the Environment object
+* import/extends/include now can take an arbitrary expression
+* fix bugs in `set`
+* improve express integration (allows rendering templates without an extension)
 
 # v1.0.5 (May 1, 2014)
 
