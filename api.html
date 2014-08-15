@@ -91,6 +91,9 @@
 <a href="#getextension">getExtension</a>
 </li>
 <li>
+<a href="#addglobal">addGlobal</a>
+</li>
+<li>
 <a href="#gettemplate">getTemplate</a>
 </li>
 <li>
@@ -395,6 +398,13 @@ See <a href="#custom-tags">Custom Tags</a>.</p>
 <div class="api-sig"><code>env.getExtension(name)</code></div>
 
 <div class="api-desc"><p>Get an extension named <strong>name</strong>.</p>
+</div>
+
+<h3 id="addglobal">addGlobal</h3>
+
+<div class="api-sig"><code>env.addGlobal(name, value)</code></div>
+
+<div class="api-desc"><p>Add a global value that will be available to all templates. Note: this will overwrite any existing global called <code>name</code>.</p>
 </div>
 
 <h3 id="gettemplate">getTemplate</h3>

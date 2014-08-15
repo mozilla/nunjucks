@@ -347,7 +347,6 @@ exports.keys = function(obj) {
 }
 })();
 (function() {
-
 var lib = modules["lib"];
 var Obj = modules["object"];
 
@@ -360,11 +359,20 @@ var Frame = Obj.extend({
         this.parent = parent;
     },
 
-    set: function(name, val) {
+    set: function(name, val, resolveUp) {
         // Allow variables with dots by automatically creating the
         // nested structure
         var parts = name.split('.');
         var obj = this.variables;
+        var frame = this;
+        
+        if(resolveUp) {
+            if((frame = this.resolve(parts[0]))) {
+                frame.set(name, val);
+                return;
+            }
+            frame = this;
+        }
 
         for(var i=0; i<parts.length - 1; i++) {
             var id = parts[i];
@@ -393,6 +401,15 @@ var Frame = Obj.extend({
             return val;
         }
         return p && p.lookup(name);
+    },
+
+    resolve: function(name) {
+        var p = this.parent;
+        var val = this.variables[name];
+        if(val != null) {
+            return this;
+        }
+        return p && p.resolve(name);
     },
 
     push: function() {
@@ -1274,6 +1291,7 @@ var globals = {
 modules['globals'] = globals;
 })();
 (function() {
+var path = modules["path"];
 var lib = modules["lib"];
 var Obj = modules["object"];
 var lexer = modules["lexer"];
@@ -1352,6 +1370,10 @@ var Environment = Obj.extend({
 
     getExtension: function(name) {
         return this.extensions[name];
+    },
+
+    addGlobal: function(name, value) {
+        globals[name] = value;
     },
 
     addFilter: function(name, func, async) {
@@ -1455,8 +1477,12 @@ var Environment = Obj.extend({
         var env = this;
 
         function NunjucksView(name, opts) {
-            this.name = name;
-            this.path = name;
+            this.name          = name;
+            this.path          = name;
+            this.defaultEngine = opts.defaultEngine;
+            this.ext           = path.extname(name);
+            if (!this.ext && !this.defaultEngine) throw new Error('No default engine was specified and no extension was provided.');
+            if (!this.ext) this.name += (this.ext = ('.' !== this.defaultEngine[0] ? '.' : '') + this.defaultEngine);
         }
 
         NunjucksView.prototype.render = function(opts, cb) {
@@ -1684,44 +1710,9 @@ var Template = Obj.extend({
 });
 
 // test code
-// var src = 'hello {% foo baz | bar %}hi{% endfoo %} end';
-// var env = new Environment(new builtin_loaders.FileSystemLoader('tests/templates', true), { dev: true });
-
-// function FooExtension() {
-//     this.tags = ['foo'];
-//     this._name = 'FooExtension';
-
-//     this.parse = function(parser, nodes) {
-//         var tok = parser.nextToken();
-//         var args = parser.parseSignature(null, true);
-//         parser.advanceAfterBlockEnd(tok.value);
-
-//         var body = parser.parseUntilBlocks('endfoo');
-//         parser.advanceAfterBlockEnd();
-
-//         return new nodes.CallExtensionAsync(this, 'run', args, [body]);
-//     };
-
-//     this.run = function(context, baz, body, cb) {
-//         cb(null, baz + '--' + body());
-//     };
-// }
-
-// env.addExtension('FooExtension', new FooExtension());
-// env.addFilter('bar', function(val, cb) {
-//     cb(null, val + '22222');
-// }, true);
-
-// var ctx = {};
-// var tmpl = new Template(src, env, null, null, true);
-// console.log("OUTPUT ---");
-
-// tmpl.render(ctx, function(err, res) {
-//     if(err) {
-//         throw err;
-//     }
-//     console.log(res);
-// });
+// var src = '{% macro foo() %}{% include "include.html" %}{% endmacro %}{{ foo() }}';
+// var env = new Environment(new builtin_loaders.FileSystemLoader('../tests/templates', true), { dev: true });
+// console.log(env.renderString(src, { name: 'poop' }));
 
 modules['environment'] = {
     Environment: Environment,
