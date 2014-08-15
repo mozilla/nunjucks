@@ -79,8 +79,8 @@ var Environment = Obj.extend({
         return this.extensions[name];
     },
 
-    addGlobal: function(name, func) {
-        globals[name] = func;
+    addGlobal: function(name, value) {
+        globals[name] = value;
     },
 
     addFilter: function(name, func, async) {

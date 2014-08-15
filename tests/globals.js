@@ -64,7 +64,7 @@
             finish(done);
         });
 
-        it('should allow adding of global function', function(done) {
+        it('should allow addition of globals', function(done) {
           var env = new Environment(new Loader(templatesPath));
 
           env.addGlobal('hello', function(arg1) {
@@ -75,6 +75,5 @@
 
           finish(done);
         });
-        
     });
 })();
