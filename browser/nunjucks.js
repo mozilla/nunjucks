@@ -1,4 +1,4 @@
-// Browser bundle of nunjucks 1.0.5 
+// Browser bundle of nunjucks 1.0.7 
 
 (function() {
 var modules = {};

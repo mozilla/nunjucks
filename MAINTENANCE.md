@@ -13,13 +13,13 @@ $ git log --oneline v1.2.3..master
 
 Replace `v1.2.3` with whatever the last version was, and you'll see all the changes going out in this version. Add a new version to CHANGELOG.md and write some notes about what's going out.
 
-3. Run the command to make sure the ready-made files for the browser are up-to-date.
+3. Update the version in `package.json`
+
+4. Run the command to make sure the ready-made files for the browser are up-to-date.
 
 ```
 $ make browserfiles
 ```
-
-4. Update the version in `package.json`
 
 5. Commit above changes and push to `master`
 
