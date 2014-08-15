@@ -215,7 +215,7 @@ var Parser = Object.extend({
                       importTok.colno);
         }
 
-        var template = this.parsePrimary();
+        var template = this.parseExpression();
 
         if(!this.skipSymbol('as')) {
             this.fail('parseImport: expected "as" keyword',
