@@ -849,26 +849,24 @@ var Compiler = Object.extend({
         return funcId;
     },
 
-    _emitMacroEnd: function() {
+    _emitMacroEnd: function(bufferId) {
         this.emitLine('frame = frame.pop();');
-        this.emitLine('return new runtime.SafeString(' + this.buffer + ');');
+        this.emitLine('return new runtime.SafeString(' + bufferId + ');');
         this.emitLine('});');
     },
 
     compileMacro: function(node, frame) {
         frame = frame.push();
         var funcId = this._emitMacroBegin(node, frame);
+        var id = this.tmpid();
+        this.pushBufferId(id);
 
-        // Start a new output buffer, and set the old one back after
-        // we're done
-        var prevBuffer = this.buffer;
-        this.buffer = 'output';
-        this.emitLine('var ' + this.buffer + '= "";');
+        this.withScopedSyntax(function() {
+            this.compile(node.body, frame);
+        });
 
-        this.compile(node.body, frame);
-
-        this._emitMacroEnd();
-        this.buffer = prevBuffer;
+        this._emitMacroEnd(id);
+        this.popBufferId();
 
         // Expose the macro to the templates
         var name = node.name.value;
@@ -1092,9 +1090,9 @@ var Compiler = Object.extend({
 });
 
 // var c = new Compiler();
-// var src = 'hello {% foo %}bar{% endfoo %} end';
+// var src = '{% macro foo() %}{% include "include.html" %}{% endmacro %} This is my template {{ foo() }}';
 // var ast = transformer.transform(parser.parse(src));
-// nodes.printNodes(ast);
+//nodes.printNodes(ast);
 // c.compile(ast);
 // var tmpl = c.getCode();
 // console.log(tmpl);

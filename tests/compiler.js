@@ -375,9 +375,9 @@
                   '{{ foo(1) }}',
                   '');
 
-            // equal('{% macro foo(x) %}{{ x|title }}{% endmacro %}' +
-            //       '{{ foo("foo") }}',
-            //       'Foo');
+            equal('{% macro foo(x) %}{{ x|title }}{% endmacro %}' +
+                  '{{ foo("foo") }}',
+                  'Foo');
 
             equal('{% macro foo(x, y) %}{{ y }}{% endmacro %}' +
                   '{{ foo(1, 2) }}',
@@ -436,6 +436,11 @@
                   '{{ foo(1) }}' +
                   '{% endblock %}',
                   '125');
+
+            equal('{% macro foo() %}{% include "include.html" %}{% endmacro %}' +
+                  '{{ foo() }}',
+                  { name: 'james' },
+                  'FooInclude james');
 
             finish(done);
         });
@@ -598,7 +603,7 @@
                   '{% for i in [1] %}{% set val=5 %}{% endfor %}' +
                   '{{ val }}',
                   '5');
-            
+
             equal('{% set val=5 %}' +
                   '{% for i in [1,2,3] %}' +
                   '{% set val=val+1 %}{{ val }}' +
