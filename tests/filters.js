@@ -183,6 +183,11 @@
             finish(done);
         });
 
+        it('length handle undefined variables', function(done) {
+          equal('{{ blah|length }}', '0');
+          finish(done);
+        });
+
         it('list', function(done) {
             equal('{% for i in "foobar" | list %}{{ i }},{% endfor %}',
                   'f,o,o,b,a,r,');
