@@ -314,6 +314,16 @@
             finish(done);
         });
 
+        it('urlize regression for periods', function(){
+
+            equal('{{ "foo." | urlize }}', 'foo.');
+
+            equal('{{ "foo.foo" | urlize }}', 'foo.foo');
+
+
+
+        });
+
         it('urlize', function(done) {
             // from jinja test suite:
             // https://github.com/mitsuhiko/jinja2/blob/8db47916de0e888dd8664b2511e220ab5ecf5c15/jinja2/testsuite/filters.py#L236-L239
@@ -324,6 +334,9 @@
             // additional tests
             equal('{{ "" | urlize }}', '');
             equal('{{ "foo" | urlize }}', 'foo');
+
+
+
 
 
             // http

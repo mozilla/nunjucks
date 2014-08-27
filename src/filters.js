@@ -384,7 +384,9 @@ var filters = {
         }).map(function(word) {
           var matches = word.match(puncRE);
 
+
           var possibleUrl = matches && matches[1] || word;
+
 
           // url that starts with http or https
           if (httpHttpsRE.test(possibleUrl))
@@ -402,7 +404,7 @@ var filters = {
           if (tldRE.test(possibleUrl))
             return '<a href="http://' + possibleUrl + '"' + noFollowAttr + '>' + possibleUrl.substr(0, length) + '</a>';
 
-          return possibleUrl;
+          return word;
 
         });
 
