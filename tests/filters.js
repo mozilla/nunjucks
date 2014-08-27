@@ -314,9 +314,12 @@
             finish(done);
         });
 
-        it('urlize regression', function(){
+        it('urlize regression for periods', function(){
 
             equal('{{ "foo." | urlize }}', 'foo.');
+
+            equal('{{ "foo.foo" | urlize }}', 'foo.foo');
+
 
 
         });
