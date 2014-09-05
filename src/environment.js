@@ -265,6 +265,20 @@ var Context = Obj.extend({
         return this.ctx;
     },
 
+    /**
+     * Get variables from the context, with the key/value pairs in the argument
+     * taking precenence over pairs with the same key in the context.
+     */
+    getVariablesMergedWith: function(mergeWith) {
+        var merged = mergeWith;
+        for (var name in this.ctx) {
+            if (!merged.hasOwnProperty(name)) {
+                merged[name] = this.ctx[name];
+            }
+        }
+        return merged;
+    },
+
     addBlock: function(name, block) {
         this.blocks[name] = this.blocks[name] || [];
         this.blocks[name].push(block);

@@ -339,6 +339,15 @@ var Parser = Object.extend({
         var node = new nodeType(tag.lineno, tag.colno);
         node.template = this.parseExpression();
 
+        if (this.skipSymbol('with')) {
+            var withParams = this.parseExpression().children;
+            var simpleParams = {};
+            for (var i = 0; i < withParams.length; i++) {
+                simpleParams[withParams[i].key.value] = withParams[i].value.value;
+            }
+            node.with_ = simpleParams;
+        }
+
         this.advanceAfterBlockEnd(tag.value);
         return node;
     },

@@ -1004,8 +1004,15 @@ var Compiler = Object.extend({
         this.emitLine(', ' + this.makeCallback(id));
         this.addScopeLevel();
 
+        var renderVars;
+        if (node.with_) {
+            renderVars = 'context.getVariablesMergedWith(' + JSON.stringify(node.with_) + ')';
+        } else {
+            renderVars = 'context.getVariables()';
+        }
+
         this.emitLine(id + '.render(' +
-                      'context.getVariables(), frame.push(), ' + this.makeCallback(id2));
+                      renderVars + ', frame.push(), ' + this.makeCallback(id2));
         this.emitLine(this.buffer + ' += ' + id2);
         this.addScopeLevel();
     },
