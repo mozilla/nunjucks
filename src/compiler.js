@@ -1098,7 +1098,7 @@ var Compiler = Object.extend({
 // console.log(tmpl);
 
 module.exports = {
-    compile: function(src, asyncFilters, extensions, name) {
+    compile: function(src, asyncFilters, extensions, name, lexerTags) {
         var c = new Compiler();
 
         // Run the extension preprocessors against the source.
@@ -1110,7 +1110,7 @@ module.exports = {
             }
         }
 
-        c.compile(transformer.transform(parser.parse(src, extensions),
+        c.compile(transformer.transform(parser.parse(src, extensions, lexerTags),
                                         asyncFilters,
                                         name));
         return c.getCode();

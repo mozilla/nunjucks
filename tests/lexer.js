@@ -229,6 +229,54 @@
                       lexer.TOKEN_DATA,
                       lexer.TOKEN_COMMENT,
                       lexer.TOKEN_DATA);
+        }),
+
+        it('should allow changing the variable start and end', function() {
+            tokens = lexer.lex('data {= var =}', {variableStart: '{=', variableEnd: '=}'});
+            hasTokens(tokens,
+                      lexer.TOKEN_DATA,
+                      lexer.TOKEN_VARIABLE_START,
+                      lexer.TOKEN_SYMBOL,
+                      lexer.TOKEN_VARIABLE_END);
+        }),
+
+        it('should allow changing the block start and end', function() {
+            tokens = lexer.lex('{= =}', {blockStart: '{=', blockEnd: '=}'});
+            hasTokens(tokens,
+                      lexer.TOKEN_BLOCK_START,
+                      lexer.TOKEN_BLOCK_END);
+        }),
+
+        it('should allow changing the variable start and end', function() {
+            tokens = lexer.lex('data {= var =}', {variableStart: '{=', variableEnd: '=}'});
+            hasTokens(tokens,
+                      lexer.TOKEN_DATA,
+                      lexer.TOKEN_VARIABLE_START,
+                      lexer.TOKEN_SYMBOL,
+                      lexer.TOKEN_VARIABLE_END);
+        }),
+
+        it('should allow changing the comment start and end', function() {
+            tokens = lexer.lex('<!-- A comment! -->', {commentStart: '<!--', commentEnd: '-->'});
+            hasTokens(tokens,
+                      lexer.TOKEN_COMMENT);
+        }),
+
+        /**
+         * Test that this bug is fixed: https://github.com/mozilla/nunjucks/issues/235
+         */
+        it('should have individual lexer tag settings for each environment', function() {
+            tokens = lexer.lex('{=', {variableStart: '{='});
+            hasTokens(tokens, lexer.TOKEN_VARIABLE_START);
+
+            tokens = lexer.lex('{{');
+            hasTokens(tokens, lexer.TOKEN_VARIABLE_START);
+
+            tokens = lexer.lex('{{', {variableStart: '<<<'});
+            hasTokens(tokens, lexer.TOKEN_DATA);
+
+            tokens = lexer.lex('{{');
+            hasTokens(tokens, lexer.TOKEN_VARIABLE_START);
         });
     });
 })();
