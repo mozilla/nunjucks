@@ -1006,7 +1006,11 @@ var Compiler = Object.extend({
 
         var renderVars;
         if (node.with_) {
-            renderVars = 'context.getVariablesMergedWith(' + JSON.stringify(node.with_) + ')';
+            if (node.onlyHasWithScope_) {
+                renderVars = JSON.stringify(node.with_);
+            } else {
+                renderVars = 'context.getVariablesMergedWith(' + JSON.stringify(node.with_) + ')';
+            }
         } else {
             renderVars = 'context.getVariables()';
         }

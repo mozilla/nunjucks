@@ -348,6 +348,10 @@ var Parser = Object.extend({
             node.with_ = simpleParams;
         }
 
+        if (this.skipSymbol('only')) {
+            node.onlyHasWithScope_ = true;
+        }
+
         this.advanceAfterBlockEnd(tag.value);
         return node;
     },
