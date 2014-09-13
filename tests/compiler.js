@@ -535,6 +535,20 @@
             finish(done);
         });
 
+        /**
+         * This test checks that this issue is resolved: http://stackoverflow.com/questions/21777058/loop-index-in-included-nunjucks-file
+         */
+        it('should have access to "loop" inside an include', function(done) {
+            equal('{% for item in [1,2,3] %}{% include "include-in-loop.html" %}{% endfor %}',
+                  '1,0,true\n2,1,false\n3,2,false\n');
+
+            equal('{% for k,v in items %}{% include "include-in-loop.html" %}{% endfor %}',
+                {items: {'a': 'A', 'b': 'B'}},
+                '1,0,true\n2,1,false\n');
+
+            finish(done);
+        });
+
         it('should maintain nested scopes', function(done) {
             equal('{% for i in [1,2] %}' +
                   '{% for i in [3,4] %}{{ i }}{% endfor %}' +

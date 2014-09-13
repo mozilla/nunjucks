@@ -571,25 +571,7 @@ var Compiler = Object.extend({
         this.addScopeLevel();
     },
 
-    scanLoop: function(node) {
-        var loopUses = {};
-
-        node.iterFields(function(field) {
-            var lookups = field.findAll(nodes.LookupVal);
-
-            lib.each(lookups, function(lookup) {
-                if (lookup.target instanceof nodes.Symbol &&
-                    lookup.target.value == 'loop' &&
-                    lookup.val instanceof nodes.Literal) {
-                    loopUses[lookup.val.value] = true;
-                }
-            });
-        });
-
-        return loopUses;
-    },
-
-    emitLoopBindings: function(node, loopUses, arr, i, len) {
+    emitLoopBindings: function(node, arr, i, len) {
         len = len || arr + '.length';
 
         var bindings = {
@@ -602,10 +584,8 @@ var Compiler = Object.extend({
             length: len
         };
 
-        for(var name in bindings) {
-            if(name in loopUses) {
-                this.emitLine('frame.set("loop.' + name + '", ' + bindings[name] + ');');
-            }
+        for (var name in bindings) {
+            this.emitLine('frame.set("loop.' + name + '", ' + bindings[name] + ');');
         }
     },
 
@@ -617,7 +597,6 @@ var Compiler = Object.extend({
         var i = this.tmpid();
         var len = this.tmpid();
         var arr = this.tmpid();
-        var loopUses = this.scanLoop(node);
         frame = frame.push();
 
         this.emitLine('frame = frame.push();');
@@ -649,7 +628,7 @@ var Compiler = Object.extend({
                     frame.set(node.name.children[u].value, tid);
                 }
 
-                this.emitLoopBindings(node, loopUses, arr, i);
+                this.emitLoopBindings(node, arr, i);
                 this.withScopedSyntax(function() {
                     this.compile(node.body, frame);
                 });
@@ -666,19 +645,14 @@ var Compiler = Object.extend({
                 frame.set(val.value, v);
 
                 this.emitLine(i + ' = -1;');
-
-                if(loopUses['revindex'] || loopUses['revindex0'] ||
-                   loopUses['last'] || loopUses['length']) {
-                    this.emitLine('var ' + len + ' = runtime.keys(' + arr + ').length;');
-                }
-
+                this.emitLine('var ' + len + ' = runtime.keys(' + arr + ').length;');
                 this.emitLine('for(var ' + k + ' in ' + arr + ') {');
                 this.emitLine(i + '++;');
                 this.emitLine('var ' + v + ' = ' + arr + '[' + k + '];');
                 this.emitLine('frame.set("' + key.value + '", ' + k + ');');
                 this.emitLine('frame.set("' + val.value + '", ' + v + ');');
 
-                this.emitLoopBindings(node, loopUses, arr, i, len);
+                this.emitLoopBindings(node, arr, i, len);
                 this.withScopedSyntax(function() {
                     this.compile(node.body, frame);
                 });
@@ -697,7 +671,7 @@ var Compiler = Object.extend({
             this.emitLine('var ' + v + ' = ' + arr + '[' + i + '];');
             this.emitLine('frame.set("' + node.name.value + '", ' + v + ');');
 
-            this.emitLoopBindings(node, loopUses, arr, i);
+            this.emitLoopBindings(node, arr, i);
 
             this.withScopedSyntax(function() {
                 this.compile(node.body, frame);
@@ -718,7 +692,6 @@ var Compiler = Object.extend({
         var i = this.tmpid();
         var len = this.tmpid();
         var arr = this.tmpid();
-        var loopUses = this.scanLoop(node);
         var asyncMethod = parallel ? 'asyncAll' : 'asyncEach';
         frame = frame.push();
 
@@ -751,7 +724,7 @@ var Compiler = Object.extend({
             frame.set(id, id);
         }
 
-        this.emitLoopBindings(node, loopUses, arr, i, len);
+        this.emitLoopBindings(node, arr, i, len);
 
         this.withScopedSyntax(function() {
             var buf;
