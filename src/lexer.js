@@ -107,18 +107,32 @@ Tokenizer.prototype.nextToken = function() {
             this.forwardN(2);
 
             // Extract until the end of the regex -- / ends it, \/ does not.
-            var regexContent = '';
+            var regexBody = '';
             while (!this.is_finished()) {
                 if (this.current() === '/' && this.previous() !== '\\') {
                     this.forward();
                     break;
                 } else {
-                    regexContent += this.current();
+                    regexBody += this.current();
                     this.forward();
                 }
             }
 
-            return token(TOKEN_REGEX, regexContent, lineno, colno);
+            // Check for flags.
+            // The possible flags are according to https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/RegExp)
+            var POSSIBLE_FLAGS = ['g', 'i', 'm', 'y'];
+            var regexFlags = '';
+            while (!this.is_finished()) {
+                var isCurrentAFlag = POSSIBLE_FLAGS.indexOf(this.current()) !== -1;
+                if (isCurrentAFlag) {
+                    regexFlags += this.current();
+                    this.forward();
+                } else {
+                    break;
+                }
+            }
+
+            return token(TOKEN_REGEX, {body: regexBody, flags: regexFlags}, lineno, colno);
         }
         else if(delimChars.indexOf(cur) != -1) {
             // We've hit a delimiter (a special char like a bracket)

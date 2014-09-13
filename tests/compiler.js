@@ -944,6 +944,9 @@
             equal('{{ r/name [0-9] \\// }}',
                   '/name [0-9] \\//');
 
+            equal('{{ r/x/gi }}',
+                  '/x/gi');
+
             finish(done);
         });
     });

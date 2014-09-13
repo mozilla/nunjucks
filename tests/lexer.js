@@ -293,6 +293,21 @@
                       lexer.TOKEN_VARIABLE_START,
                       lexer.TOKEN_REGEX,
                       lexer.TOKEN_VARIABLE_END);
+
+            // This one has flags.
+            tokens = lexer.lex('{{ r/^x/gim }}');
+            hasTokens(tokens,
+                      lexer.TOKEN_VARIABLE_START,
+                      lexer.TOKEN_REGEX,
+                      lexer.TOKEN_VARIABLE_END);
+
+            // This one has a valid flag then an invalid flag.
+            tokens = lexer.lex('{{ r/x$/iv }}');
+            hasTokens(tokens,
+                      lexer.TOKEN_VARIABLE_START,
+                      lexer.TOKEN_REGEX,
+                      lexer.TOKEN_SYMBOL,
+                      lexer.TOKEN_VARIABLE_END);
         });
     });
 })();

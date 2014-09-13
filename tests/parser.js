@@ -158,10 +158,10 @@
                    [nodes.Output,
                     [nodes.Symbol, 'foo']]]);
 
-            isAST(parser.parse("{{ r/23/ }}"),
+            isAST(parser.parse("{{ r/23/gi }}"),
                   [nodes.Root,
                    [nodes.Output,
-                     [nodes.Literal, new RegExp('23')]]]);
+                     [nodes.Literal, new RegExp('23', 'gi')]]]);
         });
 
         it('should parse aggregate types', function() {
