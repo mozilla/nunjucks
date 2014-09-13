@@ -1,4 +1,3 @@
-
 # Nunjucks
 
 [Nunjucks](http://mozilla.github.io/nunjucks/) is a full featured
@@ -21,7 +20,11 @@ templating engine for javascript. It is heavily inspired by
 
 See [here](http://mozilla.github.io/nunjucks/).
 
-Run all the tests at http://mozilla.github.io/nunjucks/files/tests/browser/.
+## Tests
+
+Run the tests with `make test`.
+
+Watch `master` branch's tests running at http://mozilla.github.io/nunjucks/files/tests/browser/.
 
 ## Mailing List
 
