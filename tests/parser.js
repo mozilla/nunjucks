@@ -13,7 +13,7 @@
         nodes = nunjucks.require('nodes');
         parser = nunjucks.require('parser');
     }
-    
+
     function _isAST(node1, node2) {
         // Compare ASTs
         // TODO: Clean this up (seriously, really)
@@ -71,6 +71,10 @@
                     // whichever object exists
                     if(!ofield) {
                         expect(value).to.be(ofield);
+                    }
+                    else if (ofield !== null && ofield instanceof RegExp) {
+                        // This conditional check for RegExp is needed because /a/ != /a/
+                        expect(String(ofield)).to.be(String(value));
                     }
                     else {
                         expect(ofield).to.be(value);
@@ -153,6 +157,11 @@
                   [nodes.Root,
                    [nodes.Output,
                     [nodes.Symbol, 'foo']]]);
+
+            isAST(parser.parse("{{ r/23/ }}"),
+                  [nodes.Root,
+                   [nodes.Output,
+                     [nodes.Literal, new RegExp('23')]]]);
         });
 
         it('should parse aggregate types', function() {
@@ -412,7 +421,7 @@
                 parser.parse('{% from "foo" import _bar %}');
             }).to.throwException(/names starting with an underscore cannot be imported/);
         });
-        
+
         it('should parse custom tags', function() {
 
             function testtagExtension() {
@@ -453,7 +462,7 @@
                     var args = null;
 
                     // Skip the name
-                    parser.nextToken(); 
+                    parser.nextToken();
 
                     args = parser.parseSignature(true);
                     parser.advanceAfterBlockEnd(begun.value);
@@ -465,7 +474,7 @@
             var extensions = [new testtagExtension(),
                               new testblocktagExtension(),
                               new testargsExtension()];
-            
+
             isAST(parser.parse('{% testtag %}', extensions),
                   [nodes.Root,
                    [nodes.CallExtension, extensions[0], 'foo', undefined, undefined]]);
@@ -495,7 +504,7 @@
                     [nodes.NodeList,
                      [nodes.Literal, 123],
                      [nodes.Literal, "abc"],
-                     [nodes.KeywordArgs, 
+                     [nodes.KeywordArgs,
                       [nodes.Pair,
                        [nodes.Symbol, "foo"],
                        [nodes.Literal, "bar"]]]]]]);

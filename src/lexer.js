@@ -34,6 +34,7 @@ var TOKEN_FLOAT = "float";
 var TOKEN_BOOLEAN = "boolean";
 var TOKEN_SYMBOL = "symbol";
 var TOKEN_SPECIAL = "special";
+var TOKEN_REGEX = "regex";
 
 function token(type, value, lineno, colno) {
     return {
@@ -100,6 +101,24 @@ Tokenizer.prototype.nextToken = function() {
             // Special check for variable end tag (see above)
             this.in_code = false;
             return token(TOKEN_VARIABLE_END, tok, lineno, colno);
+        }
+        else if (cur === 'r' && this.str.charAt(this.index + 1) === '/') {
+            // Skip past 'r/'.
+            this.forwardN(2);
+
+            // Extract until the end of the regex -- / ends it, \/ does not.
+            var regexContent = '';
+            while (!this.is_finished()) {
+                if (this.current() === '/' && this.previous() !== '\\') {
+                    this.forward();
+                    break;
+                } else {
+                    regexContent += this.current();
+                    this.forward();
+                }
+            }
+
+            return token(TOKEN_REGEX, regexContent, lineno, colno);
         }
         else if(delimChars.indexOf(cur) != -1) {
             // We've hit a delimiter (a special char like a bracket)
@@ -405,5 +424,6 @@ module.exports = {
     TOKEN_FLOAT: TOKEN_FLOAT,
     TOKEN_BOOLEAN: TOKEN_BOOLEAN,
     TOKEN_SYMBOL: TOKEN_SYMBOL,
-    TOKEN_SPECIAL: TOKEN_SPECIAL
+    TOKEN_SPECIAL: TOKEN_SPECIAL,
+    TOKEN_REGEX: TOKEN_REGEX
 };

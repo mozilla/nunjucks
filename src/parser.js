@@ -824,6 +824,9 @@ var Parser = Object.extend({
                           tok.colno);
             }
         }
+        else if (tok.type == lexer.TOKEN_REGEX) {
+            val = new RegExp(tok.value);
+        }
 
         if(val !== null) {
             node = new nodes.Literal(tok.lineno, tok.colno, val);

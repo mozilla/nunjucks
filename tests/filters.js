@@ -214,6 +214,7 @@
             equal('{{ "aaabbbccc" | replace("a", "x") }}', 'xxxbbbccc');
             equal('{{ "aaabbbccc" | replace("a", "x", 2) }}', 'xxabbbccc');
             equal('{{ "aaabbbbbccc" | replace("b", "y", 4) }}', 'aaayyyybccc');
+            equal('{{ "aabbbb" | replace(r/ab{2}/, "z", 4) }}', 'azbb');
             finish(done);
         });
 

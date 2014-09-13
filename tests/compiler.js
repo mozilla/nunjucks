@@ -939,5 +939,12 @@
 
             finish(done);
         });
+
+        it('should render regexs', function(done) {
+            equal('{{ r/name [0-9] \\// }}',
+                  '/name [0-9] \\//');
+
+            finish(done);
+        });
     });
 })();
