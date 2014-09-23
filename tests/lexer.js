@@ -92,7 +92,7 @@
         });
 
         it('should parse basic types', function() {
-            tokens = lexer.lex('{{ 3 4.5 true false foo "hello" \'boo\' }}');
+            tokens = lexer.lex('{{ 3 4.5 true false foo "hello" \'boo\' r/regex/ }}');
             hasTokens(tokens,
                       lexer.TOKEN_VARIABLE_START,
                       lexer.TOKEN_INT,
@@ -102,6 +102,7 @@
                       lexer.TOKEN_SYMBOL,
                       lexer.TOKEN_STRING,
                       lexer.TOKEN_STRING,
+                      lexer.TOKEN_REGEX,
                       lexer.TOKEN_VARIABLE_END);
         }),
 
@@ -277,6 +278,36 @@
 
             tokens = lexer.lex('{{');
             hasTokens(tokens, lexer.TOKEN_VARIABLE_START);
+        });
+
+        it('should parse regular expressions', function() {
+            tokens = lexer.lex('{{ r/basic regex [a-z]/ }}');
+            hasTokens(tokens,
+                      lexer.TOKEN_VARIABLE_START,
+                      lexer.TOKEN_REGEX,
+                      lexer.TOKEN_VARIABLE_END);
+
+            // A more complex regex with escaped slashes.
+            tokens = lexer.lex('{{ r/{a*b} \\/regex! [0-9]\\// }}');
+            hasTokens(tokens,
+                      lexer.TOKEN_VARIABLE_START,
+                      lexer.TOKEN_REGEX,
+                      lexer.TOKEN_VARIABLE_END);
+
+            // This one has flags.
+            tokens = lexer.lex('{{ r/^x/gim }}');
+            hasTokens(tokens,
+                      lexer.TOKEN_VARIABLE_START,
+                      lexer.TOKEN_REGEX,
+                      lexer.TOKEN_VARIABLE_END);
+
+            // This one has a valid flag then an invalid flag.
+            tokens = lexer.lex('{{ r/x$/iv }}');
+            hasTokens(tokens,
+                      lexer.TOKEN_VARIABLE_START,
+                      lexer.TOKEN_REGEX,
+                      lexer.TOKEN_SYMBOL,
+                      lexer.TOKEN_VARIABLE_END);
         });
     });
 })();

@@ -34,6 +34,7 @@ var TOKEN_FLOAT = "float";
 var TOKEN_BOOLEAN = "boolean";
 var TOKEN_SYMBOL = "symbol";
 var TOKEN_SPECIAL = "special";
+var TOKEN_REGEX = "regex";
 
 function token(type, value, lineno, colno) {
     return {
@@ -100,6 +101,38 @@ Tokenizer.prototype.nextToken = function() {
             // Special check for variable end tag (see above)
             this.in_code = false;
             return token(TOKEN_VARIABLE_END, tok, lineno, colno);
+        }
+        else if (cur === 'r' && this.str.charAt(this.index + 1) === '/') {
+            // Skip past 'r/'.
+            this.forwardN(2);
+
+            // Extract until the end of the regex -- / ends it, \/ does not.
+            var regexBody = '';
+            while (!this.is_finished()) {
+                if (this.current() === '/' && this.previous() !== '\\') {
+                    this.forward();
+                    break;
+                } else {
+                    regexBody += this.current();
+                    this.forward();
+                }
+            }
+
+            // Check for flags.
+            // The possible flags are according to https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/RegExp)
+            var POSSIBLE_FLAGS = ['g', 'i', 'm', 'y'];
+            var regexFlags = '';
+            while (!this.is_finished()) {
+                var isCurrentAFlag = POSSIBLE_FLAGS.indexOf(this.current()) !== -1;
+                if (isCurrentAFlag) {
+                    regexFlags += this.current();
+                    this.forward();
+                } else {
+                    break;
+                }
+            }
+
+            return token(TOKEN_REGEX, {body: regexBody, flags: regexFlags}, lineno, colno);
         }
         else if(delimChars.indexOf(cur) != -1) {
             // We've hit a delimiter (a special char like a bracket)
@@ -405,5 +438,6 @@ module.exports = {
     TOKEN_FLOAT: TOKEN_FLOAT,
     TOKEN_BOOLEAN: TOKEN_BOOLEAN,
     TOKEN_SYMBOL: TOKEN_SYMBOL,
-    TOKEN_SPECIAL: TOKEN_SPECIAL
+    TOKEN_SPECIAL: TOKEN_SPECIAL,
+    TOKEN_REGEX: TOKEN_REGEX
 };

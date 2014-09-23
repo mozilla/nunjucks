@@ -214,6 +214,11 @@
             equal('{{ "aaabbbccc" | replace("a", "x") }}', 'xxxbbbccc');
             equal('{{ "aaabbbccc" | replace("a", "x", 2) }}', 'xxabbbccc');
             equal('{{ "aaabbbbbccc" | replace("b", "y", 4) }}', 'aaayyyybccc');
+            equal('{{ "aabbbb" | replace(r/ab{2}/, "z") }}', 'azbb');
+            equal('{{ "aaaAAA" | replace(r/a/i, "z") }}', 'zaaAAA');
+            equal('{{ "aaaAAA" | replace(r/a/g, "z") }}', 'zzzAAA');
+            equal('{{ "aaaAAA" | replace(r/a/gi, "z") }}', 'zzzzzz');
+
             finish(done);
         });
 
