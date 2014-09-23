@@ -585,21 +585,51 @@ var Parser = Object.extend({
     },
 
     parseInlineIf: function() {
-        var node = this.parseOr();
+        var node = this.parseIn();
         if(this.skipSymbol('if')) {
-            var cond_node = this.parseOr();
+            var cond_node = this.parseIn();
             var body_node = node;
             node = new nodes.InlineIf(node.lineno, node.colno);
             node.body = body_node;
             node.cond = cond_node;
             if(this.skipSymbol('else')) {
-                node.else_ = this.parseOr();
+                node.else_ = this.parseIn();
             } else {
                 node.else_ = null;
             }
         }
 
         return node;
+    },
+
+    parseIn: function() {
+      var node = this.parseOr();
+      while(1) {
+        // check if the next token is 'not'
+        var tok = this.nextToken();
+        if (!tok) { break; }
+        var invert = tok.type == lexer.TOKEN_SYMBOL && tok.value == 'not';
+        // if it wasn't 'not', put it back
+        if (!invert) { this.pushToken(tok); }
+        if (this.skipSymbol('in')) {
+          var node2 = this.parseOr();
+          node = new nodes.In(node.lineno,
+                              node.colno,
+                              node,
+                              node2);
+          if (invert) {
+            node = new nodes.Not(node.lineno,
+                                 node.colno,
+                                 node);
+          }
+        }
+        else {
+          // if we'd found a 'not' but this wasn't an 'in', put back the 'not'
+          if (invert) { this.pushToken(tok); }
+          break;
+        }
+      }
+      return node;
     },
 
     parseOr: function() {
@@ -652,21 +682,6 @@ var Parser = Object.extend({
                                                   tok.colno,
                                                   this.parseAdd(),
                                                   tok.value));
-            }
-            else if(tok.type == lexer.TOKEN_SYMBOL &&
-                    tok.value == 'in') {
-                ops.push(new nodes.CompareOperand(tok.lineno,
-                                                  tok.colno,
-                                                  this.parseAdd(),
-                                                  'in'));
-            }
-            else if(tok.type == lexer.TOKEN_SYMBOL &&
-                    tok.value == 'not' &&
-                    this.skipSymbol('in')) {
-                ops.push(new nodes.CompareOperand(tok.lineno,
-                                                  tok.colno,
-                                                  this.parseAdd(),
-                                                  'notin'));
             }
             else {
                 this.pushToken(tok);

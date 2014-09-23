@@ -95,6 +95,10 @@
         }
 
         var type = ast[0];
+        // some nodes have fields (e.g. Compare.ops) which are plain arrays
+        if(type instanceof Array) {
+            return lib.map(ast, toNodes);
+        }
         var F = function() {};
         F.prototype = type.prototype;
 
@@ -190,6 +194,37 @@
                    [nodes.Output, [nodes.TemplateData, 'hello ']],
                    [nodes.Output, [nodes.Symbol, 'foo']],
                    [nodes.Output, [nodes.TemplateData, ', how are you']]]);
+        });
+
+        it('should parse operators', function() {
+            isAST(parser.parse('{{ x == y }}'),
+                  [nodes.Root,
+                   [nodes.Output,
+                    [nodes.Compare,
+                     [nodes.Symbol, 'x'],
+                     [[nodes.CompareOperand, [nodes.Symbol, 'y'], '==']]]]]);
+
+            isAST(parser.parse('{{ x or y }}'),
+                  [nodes.Root,
+                   [nodes.Output,
+                    [nodes.Or,
+                     [nodes.Symbol, 'x'],
+                     [nodes.Symbol, 'y']]]]);
+
+            isAST(parser.parse('{{ x in y }}'),
+                  [nodes.Root,
+                   [nodes.Output,
+                    [nodes.In,
+                     [nodes.Symbol, 'x'],
+                     [nodes.Symbol, 'y']]]]);
+
+            isAST(parser.parse('{{ x not in y }}'),
+                  [nodes.Root,
+                   [nodes.Output,
+                    [nodes.Not,
+                     [nodes.In,
+                      [nodes.Symbol, 'x'],
+                      [nodes.Symbol, 'y']]]]]);
         });
 
         it('should parse blocks', function() {
