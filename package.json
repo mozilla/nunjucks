@@ -13,7 +13,8 @@
         "mocha": "*",
         "uglify-js": "*",
         "express": "4.x",
-        "supertest": "*"
+        "supertest": "*",
+        "istanbul": "0.3.x"
     },
     "engines": {
         "node": "*"

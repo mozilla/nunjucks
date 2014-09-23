@@ -1,6 +1,7 @@
 
-test: 
-	./node_modules/mocha/bin/mocha -b -R tap tests
+test:
+	node_modules/.bin/istanbul cover node_modules/.bin/_mocha \
+		-- -b -R tap tests
 
 browserfiles:
 	./bin/bundle browser/nunjucks
