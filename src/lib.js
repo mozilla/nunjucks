@@ -130,7 +130,7 @@ exports.without = function(array) {
     contains = exports.toArray(arguments).slice(1);
 
     while(++index < length) {
-        if(contains.indexOf(array[index]) === -1) {
+        if(exports.indexOf(contains, array[index]) === -1) {
             result.push(array[index]);
         }
     }
@@ -225,37 +225,35 @@ exports.asyncFor = function(obj, iter, cb) {
     next();
 };
 
-if(!Array.prototype.indexOf) {
-    Array.prototype.indexOf = function(array, searchElement /*, fromIndex */) {
-        if (array == null) {
-            throw new TypeError();
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/indexOf#Polyfill
+exports.indexOf = Array.prototype.indexOf ?
+    function (arr, searchElement, fromIndex) {
+        return Array.prototype.indexOf.call(arr, searchElement, fromIndex);
+    } :
+    function (arr, searchElement, fromIndex) {
+        var length = this.length >>> 0; // Hack to convert object.length to a UInt32
+
+        fromIndex = +fromIndex || 0;
+
+        if(Math.abs(fromIndex) === Infinity) {
+            fromIndex = 0;
         }
-        var t = Object(array);
-        var len = t.length >>> 0;
-        if (len === 0) {
-            return -1;
-        }
-        var n = 0;
-        if (arguments.length > 2) {
-            n = Number(arguments[2]);
-            if (n != n) { // shortcut for verifying if it's NaN
-                n = 0;
-            } else if (n != 0 && n != Infinity && n != -Infinity) {
-                n = (n > 0 || -1) * Math.floor(Math.abs(n));
+
+        if(fromIndex < 0) {
+            fromIndex += length;
+            if (fromIndex < 0) {
+                fromIndex = 0;
             }
         }
-        if (n >= len) {
-            return -1;
-        }
-        var k = n >= 0 ? n : Math.max(len - Math.abs(n), 0);
-        for (; k < len; k++) {
-            if (k in t && t[k] === searchElement) {
-                return k;
+
+        for(;fromIndex < length; fromIndex++) {
+            if (arr[fromIndex] === searchElement) {
+                return fromIndex;
             }
         }
+
         return -1;
     };
-}
 
 if(!Array.prototype.map) {
     Array.prototype.map = function() {

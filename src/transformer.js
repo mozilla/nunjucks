@@ -1,4 +1,5 @@
 var nodes = require('./nodes');
+var lib = require('./lib');
 
 var sym = 0;
 function gensym() {
@@ -93,7 +94,7 @@ function _liftFilters(node, asyncFilters, prop) {
             return node;
         }
         else if((node instanceof nodes.Filter &&
-                 asyncFilters.indexOf(node.name.value) !== -1) ||
+                 lib.indexOf(asyncFilters, node.name.value) !== -1) ||
                 node instanceof nodes.CallExtensionAsync) {
             var symbol = new nodes.Symbol(node.lineno,
                                           node.colno,
