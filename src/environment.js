@@ -19,6 +19,7 @@ var Environment = Obj.extend({
         // defaults to false
         opts = opts || {};
         this.dev = !!opts.dev;
+        this.lexerTags = opts.tags;
 
         // The autoescape flag sets global autoescaping. If true,
         // every string variable will be escaped by default.
@@ -44,10 +45,6 @@ var Environment = Obj.extend({
         this.asyncFilters = [];
         this.extensions = {};
         this.extensionsList = [];
-
-        if(opts.tags) {
-            lexer.setTags(opts.tags);
-        }
 
         for(var name in builtin_filters) {
             this.addFilter(name, builtin_filters[name]);
@@ -393,7 +390,8 @@ var Template = Obj.extend({
             var source = compiler.compile(this.tmplStr,
                                           this.env.asyncFilters,
                                           this.env.extensionsList,
-                                          this.path);
+                                          this.path,
+                                          this.env.lexerTags);
             var func = new Function(source);
             props = func();
         }
