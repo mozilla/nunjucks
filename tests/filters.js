@@ -325,7 +325,6 @@
             equal('{{ "" | urlize }}', '');
             equal('{{ "foo" | urlize }}', 'foo');
 
-
             // http
             equal('{{ "http://jinja.pocoo.org/docs/templates/" | urlize }}',
                 '<a href="http://jinja.pocoo.org/docs/templates/">http://jinja.pocoo.org/docs/templates/</a>');
@@ -383,6 +382,13 @@
             // email addresses
             equal('{{ "testuser@testuser.com" | urlize }}',
                 '<a href="mailto:testuser@testuser.com">testuser@testuser.com</a>');
+
+            //periods in the text
+            equal('{{ "foo." | urlize }}', 'foo.');
+            equal('{{ "foo.foo" | urlize }}', 'foo.foo');
+
+            //markup in the text
+            equal('{{ "<b>what up</b>" | urlize }}', '<b>what up</b>');
 
             finish(done);
         });
