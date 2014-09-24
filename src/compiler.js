@@ -582,8 +582,6 @@ var Compiler = Object.extend({
     },
 
     emitLoopBindings: function(node, arr, i, len) {
-        len = len || arr + '.length';
-
         var bindings = {
             index: i + ' + 1',
             index0: i,
@@ -626,6 +624,7 @@ var Compiler = Object.extend({
             // body of the loop is duplicated for each condition, but
             // we are optimizing for speed over size.
             this.emitLine('if(runtime.isArray(' + arr + ')) {'); {
+                this.emitLine('var ' + len + ' = ' + arr + '.length;');
                 this.emitLine('for(' + i + '=0; ' + i + ' < ' + arr + '.length; '
                               + i + '++) {');
 
@@ -638,7 +637,7 @@ var Compiler = Object.extend({
                     frame.set(node.name.children[u].value, tid);
                 }
 
-                this.emitLoopBindings(node, arr, i);
+                this.emitLoopBindings(node, arr, i, len);
                 this.withScopedSyntax(function() {
                     this.compile(node.body, frame);
                 });
@@ -676,12 +675,13 @@ var Compiler = Object.extend({
             var v = this.tmpid();
             frame.set(node.name.value, v);
 
+            this.emitLine('var ' + len + ' = ' + arr + '.length;');
             this.emitLine('for(var ' + i + '=0; ' + i + ' < ' + arr + '.length; ' +
                           i + '++) {');
             this.emitLine('var ' + v + ' = ' + arr + '[' + i + '];');
             this.emitLine('frame.set("' + node.name.value + '", ' + v + ');');
 
-            this.emitLoopBindings(node, arr, i);
+            this.emitLoopBindings(node, arr, i, len);
 
             this.withScopedSyntax(function() {
                 this.compile(node.body, frame);
@@ -691,6 +691,12 @@ var Compiler = Object.extend({
         }
 
         this.emitLine('}');
+        if (node.else_) {
+          this.emitLine('if (!' + len + ') {');
+          this.compile(node.else_, frame);
+          this.emitLine('}');
+        }
+
         this.emitLine('frame = frame.pop();');
     },
 

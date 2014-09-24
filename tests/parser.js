@@ -251,6 +251,35 @@
             expect(n.children[0].typename).to.be('Include');
         });
 
+        it('should parse for loops', function() {
+          isAST(parser.parse('{% for x in [1, 2] %}{{ x }}{% endfor %}'),
+                [nodes.Root,
+                 [nodes.For,
+                  [nodes.Array,
+                   [nodes.Literal, 1],
+                   [nodes.Literal, 2]],
+                  [nodes.Symbol, 'x'],
+                  [nodes.NodeList,
+                   [nodes.Output,
+                    [nodes.Symbol, 'x']]]]]);
+
+        });
+
+        it('should parse for loops with else', function() {
+          isAST(parser.parse('{% for x in [] %}{{ x }}{% else %}empty{% endfor %}'),
+                [nodes.Root,
+                 [nodes.For,
+                  [nodes.Array],
+                  [nodes.Symbol, 'x'],
+                  [nodes.NodeList,
+                   [nodes.Output,
+                    [nodes.Symbol, 'x']]],
+                  [nodes.NodeList,
+                   [nodes.Output,
+                    [nodes.TemplateData, 'empty']]]]]);
+
+        });
+
         it('should parse filters', function() {
             isAST(parser.parse('{{ foo | bar }}'),
                   [nodes.Root,

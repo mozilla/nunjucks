@@ -181,7 +181,13 @@ var Parser = Object.extend({
         node.arr = this.parseExpression();
         this.advanceAfterBlockEnd(forTok.value);
 
-        node.body = this.parseUntilBlocks(endBlock);
+        node.body = this.parseUntilBlocks(endBlock, 'else');
+
+        if(this.skipSymbol('else')) {
+          this.advanceAfterBlockEnd('else');
+          node.else_ = this.parseUntilBlocks(endBlock);
+        }
+
         this.advanceAfterBlockEnd();
 
         return node;
