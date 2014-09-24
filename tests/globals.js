@@ -49,6 +49,12 @@
                   '{{ cls.next() }}',
                   'oddodd');
 
+            equal('{% set cls = cycler("odd", "even") %}' +
+                  '{{ cls.next() }}' +
+                  '{{ cls.next() }}' +
+                  '{{ cls.current }}',
+                  'oddeveneven');
+
             finish(done);
         });
 
