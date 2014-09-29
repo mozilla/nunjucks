@@ -158,7 +158,7 @@ var Environment = Obj.extend({
                 }
                 else {
                     var tmpl = new Template(info.src, this,
-                                            info.path, eagerCompile);
+                                            info.path, eagerCompile, name);
 
                     if(!info.noCache) {
                         this.cache[name] = tmpl;
@@ -233,13 +233,20 @@ var Environment = Obj.extend({
 });
 
 var Context = Obj.extend({
-    init: function(ctx, blocks) {
+    init: function(ctx, blocks, name) {
         this.ctx = ctx;
         this.blocks = {};
         this.exported = [];
 
         for(var name in blocks) {
             this.addBlock(name, blocks[name]);
+        }
+
+        if (name) {
+            this.setVariable('__filename', name);
+
+            var dir = name.indexOf('/') === -1 ? '' : name.replace(/\/[^\/]+$/, '');
+            this.setVariable('__dirname', dir);
         }
     },
 
@@ -302,8 +309,9 @@ var Context = Obj.extend({
 });
 
 var Template = Obj.extend({
-    init: function (src, env, path, eagerCompile) {
+    init: function (src, env, path, eagerCompile, name) {
         this.env = env || new Environment();
+        this.name = name;
 
         if(lib.isObject(src)) {
             switch(src.type) {
@@ -344,7 +352,7 @@ var Template = Obj.extend({
         return lib.withPrettyErrors(this.path, this.env.dev, function() {
             this.compile();
 
-            var context = new Context(ctx || {}, this.blocks);
+            var context = new Context(ctx || {}, this.blocks, this.name);
             var syncResult = null;
 
             this.rootRenderFunc(this.env,
