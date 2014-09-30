@@ -184,8 +184,8 @@ var Parser = Object.extend({
         node.body = this.parseUntilBlocks(endBlock, 'else');
 
         if(this.skipSymbol('else')) {
-          this.advanceAfterBlockEnd('else');
-          node.else_ = this.parseUntilBlocks(endBlock);
+            this.advanceAfterBlockEnd('else');
+            node.else_ = this.parseUntilBlocks(endBlock);
         }
 
         this.advanceAfterBlockEnd();
@@ -1153,8 +1153,7 @@ var Parser = Object.extend({
 //     console.log(util.inspect(t));
 // }
 
-// var p = new Parser(lexer.lex('hello {% foo %} {{ "hi" | bar }} {% endfoo %} end'));
-// p.extensions = [new FooExtension()];
+// var p = new Parser(lexer.lex('{% if not x %}foo{% endif %}'));
 // var n = p.parseAsRoot();
 // nodes.printNodes(n);
 

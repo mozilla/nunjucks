@@ -765,6 +765,12 @@ var Compiler = Object.extend({
             this.emitLine(this.buffer + ' += ' + output + ';');
         }
 
+        if (node.else_) {
+          this.emitLine('if (!' + arr + '.length) {');
+          this.compile(node.else_, frame);
+          this.emitLine('}');
+        }
+
         this.emitLine('frame = frame.pop();');
     },
 
@@ -1085,9 +1091,9 @@ var Compiler = Object.extend({
 });
 
 // var c = new Compiler();
-// var src = '{% macro foo() %}{% include "include.html" %}{% endmacro %} This is my template {{ foo() }}';
+// var src = '{% asyncEach i in arr %}{{ i }}{% else %}empty{% endeach %}';
 // var ast = transformer.transform(parser.parse(src));
-//nodes.printNodes(ast);
+// nodes.printNodes(ast);
 // c.compile(ast);
 // var tmpl = c.getCode();
 // console.log(tmpl);

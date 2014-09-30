@@ -144,13 +144,11 @@
             equal('{% ' + block + ' i in arr %}{{ i }}{% ' + end + ' %}',
                   { arr: [1, 2, 3, 4, 5] }, '12345');
 
-            if (block == 'for') {
-              equal('{% ' + block + ' i in arr %}{{ i }}{% else %}empty{% ' + end + ' %}',
-                    { arr: [1, 2, 3, 4, 5] }, '12345');
+            equal('{% ' + block + ' i in arr %}{{ i }}{% else %}empty{% ' + end + ' %}',
+                  { arr: [1, 2, 3, 4, 5] }, '12345');
 
-              equal('{% ' + block + ' i in arr %}{{ i }}{% else %}empty{% ' + end + ' %}',
-                    { arr: [] }, 'empty');
-            }
+            equal('{% ' + block + ' i in arr %}{{ i }}{% else %}empty{% ' + end + ' %}',
+                  { arr: [] }, 'empty');
 
             equal('{% ' + block + ' a, b, c in arr %}' +
                        '{{ a }},{{ b }},{{ c }}.{% ' + end + ' %}',

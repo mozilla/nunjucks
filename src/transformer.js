@@ -208,7 +208,8 @@ function convertStatements(ast) {
                     node.colno,
                     node.arr,
                     node.name,
-                    node.body
+                    node.body,
+                    node.else_
                 );
             }
         }
