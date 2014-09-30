@@ -1,4 +1,4 @@
-// Browser bundle of nunjucks 1.0.7 
+// Browser bundle of nunjucks 1.1.0 
 
 (function() {
 var modules = {};
@@ -198,7 +198,7 @@ exports.without = function(array) {
     contains = exports.toArray(arguments).slice(1);
 
     while(++index < length) {
-        if(contains.indexOf(array[index]) === -1) {
+        if(exports.indexOf(contains, array[index]) === -1) {
             result.push(array[index]);
         }
     }
@@ -293,37 +293,35 @@ exports.asyncFor = function(obj, iter, cb) {
     next();
 };
 
-if(!Array.prototype.indexOf) {
-    Array.prototype.indexOf = function(array, searchElement /*, fromIndex */) {
-        if (array == null) {
-            throw new TypeError();
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/indexOf#Polyfill
+exports.indexOf = Array.prototype.indexOf ?
+    function (arr, searchElement, fromIndex) {
+        return Array.prototype.indexOf.call(arr, searchElement, fromIndex);
+    } :
+    function (arr, searchElement, fromIndex) {
+        var length = this.length >>> 0; // Hack to convert object.length to a UInt32
+
+        fromIndex = +fromIndex || 0;
+
+        if(Math.abs(fromIndex) === Infinity) {
+            fromIndex = 0;
         }
-        var t = Object(array);
-        var len = t.length >>> 0;
-        if (len === 0) {
-            return -1;
-        }
-        var n = 0;
-        if (arguments.length > 2) {
-            n = Number(arguments[2]);
-            if (n != n) { // shortcut for verifying if it's NaN
-                n = 0;
-            } else if (n != 0 && n != Infinity && n != -Infinity) {
-                n = (n > 0 || -1) * Math.floor(Math.abs(n));
+
+        if(fromIndex < 0) {
+            fromIndex += length;
+            if (fromIndex < 0) {
+                fromIndex = 0;
             }
         }
-        if (n >= len) {
-            return -1;
-        }
-        var k = n >= 0 ? n : Math.max(len - Math.abs(n), 0);
-        for (; k < len; k++) {
-            if (k in t && t[k] === searchElement) {
-                return k;
+
+        for(;fromIndex < length; fromIndex++) {
+            if (arr[fromIndex] === searchElement) {
+                return fromIndex;
             }
         }
+
         return -1;
     };
-}
 
 if(!Array.prototype.map) {
     Array.prototype.map = function() {
@@ -438,10 +436,11 @@ var LookupVal = Node.extend("LookupVal", { fields: ['target', 'val'] });
 var If = Node.extend("If", { fields: ['cond', 'body', 'else_'] });
 var IfAsync = If.extend("IfAsync");
 var InlineIf = Node.extend("InlineIf", { fields: ['cond', 'body', 'else_'] });
-var For = Node.extend("For", { fields: ['arr', 'name', 'body'] });
+var For = Node.extend("For", { fields: ['arr', 'name', 'body', 'else_'] });
 var AsyncEach = For.extend("AsyncEach");
 var AsyncAll = For.extend("AsyncAll");
 var Macro = Node.extend("Macro", { fields: ['name', 'args', 'body'] });
+var Caller = Macro.extend("Caller");
 var Import = Node.extend("Import", { fields: ['template', 'target'] });
 var FromImport = Node.extend("FromImport", {
     fields: ['template', 'names'],
@@ -468,6 +467,7 @@ var Output = NodeList.extend("Output");
 var TemplateData = Literal.extend("TemplateData");
 var UnaryOp = Node.extend("UnaryOp", { fields: ['target'] });
 var BinOp = Node.extend("BinOp", { fields: ['left', 'right'] });
+var In = BinOp.extend("In");
 var Or = BinOp.extend("Or");
 var And = BinOp.extend("And");
 var Not = UnaryOp.extend("Not");
@@ -614,6 +614,7 @@ modules['nodes'] = {
     AsyncEach: AsyncEach,
     AsyncAll: AsyncAll,
     Macro: Macro,
+    Caller: Caller,
     Import: Import,
     FromImport: FromImport,
     FunCall: FunCall,
@@ -627,6 +628,7 @@ modules['nodes'] = {
     Set: Set,
     LookupVal: LookupVal,
     BinOp: BinOp,
+    In: In,
     Or: Or,
     And: And,
     Not: Not,
@@ -1025,6 +1027,7 @@ var TOKEN_FLOAT = "float";
 var TOKEN_BOOLEAN = "boolean";
 var TOKEN_SYMBOL = "symbol";
 var TOKEN_SPECIAL = "special";
+var TOKEN_REGEX = "regex";
 
 function token(type, value, lineno, colno) {
     return {
@@ -1035,7 +1038,7 @@ function token(type, value, lineno, colno) {
     };
 }
 
-function Tokenizer(str) {
+function Tokenizer(str, tags) {
     this.str = str;
     this.index = 0;
     this.len = str.length;
@@ -1043,6 +1046,16 @@ function Tokenizer(str) {
     this.colno = 0;
 
     this.in_code = false;
+
+    tags = tags || {};
+    this.tags = {
+        BLOCK_START: tags.blockStart || BLOCK_START,
+        BLOCK_END: tags.blockEnd || BLOCK_END,
+        VARIABLE_START: tags.variableStart || VARIABLE_START,
+        VARIABLE_END: tags.variableEnd || VARIABLE_END,
+        COMMENT_START: tags.commentStart || COMMENT_START,
+        COMMENT_END: tags.commentEnd || COMMENT_END
+    };
 }
 
 Tokenizer.prototype.nextToken = function() {
@@ -1066,8 +1079,8 @@ Tokenizer.prototype.nextToken = function() {
             // We hit some whitespace
             return token(TOKEN_WHITESPACE, tok, lineno, colno);
         }
-        else if((tok = this._extractString(BLOCK_END)) ||
-                (tok = this._extractString('-' + BLOCK_END))) {
+        else if((tok = this._extractString(this.tags.BLOCK_END)) ||
+                (tok = this._extractString('-' + this.tags.BLOCK_END))) {
             // Special check for the block end tag
             //
             // It is a requirement that start and end tags are composed of
@@ -1077,10 +1090,42 @@ Tokenizer.prototype.nextToken = function() {
             this.in_code = false;
             return token(TOKEN_BLOCK_END, tok, lineno, colno);
         }
-        else if((tok = this._extractString(VARIABLE_END))) {
+        else if((tok = this._extractString(this.tags.VARIABLE_END))) {
             // Special check for variable end tag (see above)
             this.in_code = false;
             return token(TOKEN_VARIABLE_END, tok, lineno, colno);
+        }
+        else if (cur === 'r' && this.str.charAt(this.index + 1) === '/') {
+            // Skip past 'r/'.
+            this.forwardN(2);
+
+            // Extract until the end of the regex -- / ends it, \/ does not.
+            var regexBody = '';
+            while (!this.is_finished()) {
+                if (this.current() === '/' && this.previous() !== '\\') {
+                    this.forward();
+                    break;
+                } else {
+                    regexBody += this.current();
+                    this.forward();
+                }
+            }
+
+            // Check for flags.
+            // The possible flags are according to https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/RegExp)
+            var POSSIBLE_FLAGS = ['g', 'i', 'm', 'y'];
+            var regexFlags = '';
+            while (!this.is_finished()) {
+                var isCurrentAFlag = POSSIBLE_FLAGS.indexOf(this.current()) !== -1;
+                if (isCurrentAFlag) {
+                    regexFlags += this.current();
+                    this.forward();
+                } else {
+                    break;
+                }
+            }
+
+            return token(TOKEN_REGEX, {body: regexBody, flags: regexFlags}, lineno, colno);
         }
         else if(delimChars.indexOf(cur) != -1) {
             // We've hit a delimiter (a special char like a bracket)
@@ -1089,7 +1134,7 @@ Tokenizer.prototype.nextToken = function() {
             var curComplex = cur + this.current();
             var type;
 
-            if(complexOps.indexOf(curComplex) !== -1) {
+            if(lib.indexOf(complexOps, curComplex) !== -1) {
                 this.forward();
                 cur = curComplex;
             }
@@ -1139,21 +1184,21 @@ Tokenizer.prototype.nextToken = function() {
         // Parse out the template text, breaking on tag
         // delimiters because we need to look for block/variable start
         // tags (don't use the full delimChars for optimization)
-        var beginChars = (BLOCK_START.charAt(0) +
-                          VARIABLE_START.charAt(0) +
-                          COMMENT_START.charAt(0) +
-                          COMMENT_END.charAt(0));
+        var beginChars = (this.tags.BLOCK_START.charAt(0) +
+                          this.tags.VARIABLE_START.charAt(0) +
+                          this.tags.COMMENT_START.charAt(0) +
+                          this.tags.COMMENT_END.charAt(0));
         var tok;
 
         if(this.is_finished()) {
             return null;
         }
-        else if((tok = this._extractString(BLOCK_START + '-')) ||
-                (tok = this._extractString(BLOCK_START))) {
+        else if((tok = this._extractString(this.tags.BLOCK_START + '-')) ||
+                (tok = this._extractString(this.tags.BLOCK_START))) {
             this.in_code = true;
             return token(TOKEN_BLOCK_START, tok, lineno, colno);
         }
-        else if((tok = this._extractString(VARIABLE_START))) {
+        else if((tok = this._extractString(this.tags.VARIABLE_START))) {
             this.in_code = true;
             return token(TOKEN_VARIABLE_START, tok, lineno, colno);
         }
@@ -1162,9 +1207,9 @@ Tokenizer.prototype.nextToken = function() {
             var data;
             var in_comment = false;
 
-            if(this._matches(COMMENT_START)) {
+            if(this._matches(this.tags.COMMENT_START)) {
                 in_comment = true;
-                tok = this._extractString(COMMENT_START);
+                tok = this._extractString(this.tags.COMMENT_START);
             }
 
             // Continually consume text, breaking on the tag delimiter
@@ -1176,18 +1221,18 @@ Tokenizer.prototype.nextToken = function() {
             while((data = this._extractUntil(beginChars)) !== null) {
                 tok += data;
 
-                if((this._matches(BLOCK_START) ||
-                    this._matches(VARIABLE_START) ||
-                    this._matches(COMMENT_START)) &&
+                if((this._matches(this.tags.BLOCK_START) ||
+                    this._matches(this.tags.VARIABLE_START) ||
+                    this._matches(this.tags.COMMENT_START)) &&
                   !in_comment) {
                     // If it is a start tag, stop looping
                     break;
                 }
-                else if(this._matches(COMMENT_END)) {
+                else if(this._matches(this.tags.COMMENT_END)) {
                     if(!in_comment) {
                         throw new Error("unexpected end of comment");
                     }
-                    tok += this._extractString(COMMENT_END);
+                    tok += this._extractString(this.tags.COMMENT_END);
                     break;
                 }
                 else {
@@ -1360,17 +1405,8 @@ Tokenizer.prototype.previous = function() {
 };
 
 modules['lexer'] = {
-    lex: function(src) {
-        return new Tokenizer(src);
-    },
-
-    setTags: function(tags) {
-        BLOCK_START = tags.blockStart || BLOCK_START;
-        BLOCK_END = tags.blockEnd || BLOCK_END;
-        VARIABLE_START = tags.variableStart || VARIABLE_START;
-        VARIABLE_END = tags.variableEnd || VARIABLE_END;
-        COMMENT_START = tags.commentStart || COMMENT_START;
-        COMMENT_END = tags.commentEnd || COMMENT_END;
+    lex: function(src, tags) {
+        return new Tokenizer(src, tags);
     },
 
     TOKEN_STRING: TOKEN_STRING,
@@ -1395,7 +1431,8 @@ modules['lexer'] = {
     TOKEN_FLOAT: TOKEN_FLOAT,
     TOKEN_BOOLEAN: TOKEN_BOOLEAN,
     TOKEN_SYMBOL: TOKEN_SYMBOL,
-    TOKEN_SPECIAL: TOKEN_SPECIAL
+    TOKEN_SPECIAL: TOKEN_SPECIAL,
+    TOKEN_REGEX: TOKEN_REGEX
 };
 })();
 (function() {
@@ -1582,7 +1619,13 @@ var Parser = Object.extend({
         node.arr = this.parseExpression();
         this.advanceAfterBlockEnd(forTok.value);
 
-        node.body = this.parseUntilBlocks(endBlock);
+        node.body = this.parseUntilBlocks(endBlock, 'else');
+
+        if(this.skipSymbol('else')) {
+            this.advanceAfterBlockEnd('else');
+            node.else_ = this.parseUntilBlocks(endBlock);
+        }
+
         this.advanceAfterBlockEnd();
 
         return node;
@@ -1606,6 +1649,46 @@ var Parser = Object.extend({
         this.advanceAfterBlockEnd();
 
         return node;
+    },
+
+    parseCall: function() {
+        // a call block is parsed as a normal FunCall, but with an added
+        // 'caller' kwarg which is a Caller node.
+        var callTok = this.peekToken();
+        if(!this.skipSymbol('call')) {
+            this.fail("expected call");
+        }
+
+        var callerArgs = this.parseSignature(true) || new nodes.NodeList();
+        var macroCall = this.parsePrimary();
+
+        this.advanceAfterBlockEnd(callTok.value);
+        var body = this.parseUntilBlocks('endcall');
+        this.advanceAfterBlockEnd();
+
+        var callerName = new nodes.Symbol(callTok.lineno,
+                                          callTok.colno,
+                                          'caller');
+        var callerNode = new nodes.Caller(callTok.lineno,
+                                          callTok.colno,
+                                          callerName,
+                                          callerArgs,
+                                          body);
+
+        // add the additional caller kwarg, adding kwargs if necessary
+        var args = macroCall.args.children;
+        if (!(args[args.length-1] instanceof nodes.KeywordArgs)) {
+          args.push(new nodes.KeywordArgs());
+        }
+        var kwargs = args[args.length - 1];
+        kwargs.addChild(new nodes.Pair(callTok.lineno,
+                                       callTok.colno,
+                                       callerName,
+                                       callerNode));
+
+        return new nodes.Output(callTok.lineno,
+                                callTok.colno,
+                                [macroCall]);
     },
 
     parseImport: function() {
@@ -1833,7 +1916,7 @@ var Parser = Object.extend({
         }
 
         if(this.breakOnBlocks &&
-           this.breakOnBlocks.indexOf(tok.value) !== -1) {
+           lib.indexOf(this.breakOnBlocks, tok.value) !== -1) {
             return null;
         }
 
@@ -1851,13 +1934,14 @@ var Parser = Object.extend({
         case 'include': return this.parseInclude();
         case 'set': return this.parseSet();
         case 'macro': return this.parseMacro();
+        case 'call': return this.parseCall();
         case 'import': return this.parseImport();
         case 'from': return this.parseFrom();
         default:
             if (this.extensions.length) {
                 for (var i = 0; i < this.extensions.length; i++) {
                     var ext = this.extensions[i];
-                    if ((ext.tags || []).indexOf(tok.value) !== -1) {
+                    if (lib.indexOf(ext.tags || [], tok.value) !== -1) {
                         return ext.parse(this, nodes, lexer);
                     }
                 }
@@ -1986,21 +2070,51 @@ var Parser = Object.extend({
     },
 
     parseInlineIf: function() {
-        var node = this.parseOr();
+        var node = this.parseIn();
         if(this.skipSymbol('if')) {
-            var cond_node = this.parseOr();
+            var cond_node = this.parseIn();
             var body_node = node;
             node = new nodes.InlineIf(node.lineno, node.colno);
             node.body = body_node;
             node.cond = cond_node;
             if(this.skipSymbol('else')) {
-                node.else_ = this.parseOr();
+                node.else_ = this.parseIn();
             } else {
                 node.else_ = null;
             }
         }
 
         return node;
+    },
+
+    parseIn: function() {
+      var node = this.parseOr();
+      while(1) {
+        // check if the next token is 'not'
+        var tok = this.nextToken();
+        if (!tok) { break; }
+        var invert = tok.type == lexer.TOKEN_SYMBOL && tok.value == 'not';
+        // if it wasn't 'not', put it back
+        if (!invert) { this.pushToken(tok); }
+        if (this.skipSymbol('in')) {
+          var node2 = this.parseOr();
+          node = new nodes.In(node.lineno,
+                              node.colno,
+                              node,
+                              node2);
+          if (invert) {
+            node = new nodes.Not(node.lineno,
+                                 node.colno,
+                                 node);
+          }
+        }
+        else {
+          // if we'd found a 'not' but this wasn't an 'in', put back the 'not'
+          if (invert) { this.pushToken(tok); }
+          break;
+        }
+      }
+      return node;
     },
 
     parseOr: function() {
@@ -2048,26 +2162,11 @@ var Parser = Object.extend({
             if(!tok) {
                 break;
             }
-            else if(compareOps.indexOf(tok.value) !== -1) {
+            else if(lib.indexOf(compareOps, tok.value) !== -1) {
                 ops.push(new nodes.CompareOperand(tok.lineno,
                                                   tok.colno,
                                                   this.parseAdd(),
                                                   tok.value));
-            }
-            else if(tok.type == lexer.TOKEN_SYMBOL &&
-                    tok.value == 'in') {
-                ops.push(new nodes.CompareOperand(tok.lineno,
-                                                  tok.colno,
-                                                  this.parseAdd(),
-                                                  'in'));
-            }
-            else if(tok.type == lexer.TOKEN_SYMBOL &&
-                    tok.value == 'not' &&
-                    this.skipSymbol('in')) {
-                ops.push(new nodes.CompareOperand(tok.lineno,
-                                                  tok.colno,
-                                                  this.parseAdd(),
-                                                  'notin'));
             }
             else {
                 this.pushToken(tok);
@@ -2224,6 +2323,9 @@ var Parser = Object.extend({
                           tok.lineno,
                           tok.colno);
             }
+        }
+        else if (tok.type == lexer.TOKEN_REGEX) {
+            val = new RegExp(tok.value.body, tok.value.flags);
         }
 
         if(val !== null) {
@@ -2489,14 +2591,13 @@ var Parser = Object.extend({
 //     console.log(util.inspect(t));
 // }
 
-// var p = new Parser(lexer.lex('hello {% foo %} {{ "hi" | bar }} {% endfoo %} end'));
-// p.extensions = [new FooExtension()];
+// var p = new Parser(lexer.lex('{% if not x %}foo{% endif %}'));
 // var n = p.parseAsRoot();
 // nodes.printNodes(n);
 
 modules['parser'] = {
-    parse: function(src, extensions) {
-        var p = new Parser(lexer.lex(src));
+    parse: function(src, extensions, lexerTags) {
+        var p = new Parser(lexer.lex(src, lexerTags));
         if (extensions !== undefined) {
             p.extensions = extensions;
         }
@@ -2506,6 +2607,7 @@ modules['parser'] = {
 })();
 (function() {
 var nodes = modules["nodes"];
+var lib = modules["lib"];
 
 var sym = 0;
 function gensym() {
@@ -2600,7 +2702,7 @@ function _liftFilters(node, asyncFilters, prop) {
             return node;
         }
         else if((node instanceof nodes.Filter &&
-                 asyncFilters.indexOf(node.name.value) !== -1) ||
+                 lib.indexOf(asyncFilters, node.name.value) !== -1) ||
                 node instanceof nodes.CallExtensionAsync) {
             var symbol = new nodes.Symbol(node.lineno,
                                           node.colno,
@@ -2714,7 +2816,8 @@ function convertStatements(ast) {
                     node.colno,
                     node.arr,
                     node.name,
-                    node.body
+                    node.body,
+                    node.else_
                 );
             }
         }
@@ -2910,10 +3013,12 @@ var Compiler = Object.extend({
             nodes.Array,
             nodes.Dict,
             nodes.FunCall,
+            nodes.Caller,
             nodes.Filter,
             nodes.LookupVal,
             nodes.Compare,
             nodes.InlineIf,
+            nodes.In,
             nodes.And,
             nodes.Or,
             nodes.Not,
@@ -3102,6 +3207,14 @@ var Compiler = Object.extend({
         else
             this.emit('""');
         this.emit(')');
+    },
+
+    compileIn: function(node, frame) {
+      this.emit('(');
+      this.compile(node.right, frame);
+      this.emit('.indexOf(');
+      this.compile(node.left, frame);
+      this.emit(') !== -1)');
     },
 
     compileOr: binOpEmitter(' || '),
@@ -3312,27 +3425,7 @@ var Compiler = Object.extend({
         this.addScopeLevel();
     },
 
-    scanLoop: function(node) {
-        var loopUses = {};
-
-        node.iterFields(function(field) {
-            var lookups = field.findAll(nodes.LookupVal);
-
-            lib.each(lookups, function(lookup) {
-                if (lookup.target instanceof nodes.Symbol &&
-                    lookup.target.value == 'loop' &&
-                    lookup.val instanceof nodes.Literal) {
-                    loopUses[lookup.val.value] = true;
-                }
-            });
-        });
-
-        return loopUses;
-    },
-
-    emitLoopBindings: function(node, loopUses, arr, i, len) {
-        len = len || arr + '.length';
-
+    emitLoopBindings: function(node, arr, i, len) {
         var bindings = {
             index: i + ' + 1',
             index0: i,
@@ -3343,10 +3436,8 @@ var Compiler = Object.extend({
             length: len
         };
 
-        for(var name in bindings) {
-            if(name in loopUses) {
-                this.emitLine('frame.set("loop.' + name + '", ' + bindings[name] + ');');
-            }
+        for (var name in bindings) {
+            this.emitLine('frame.set("loop.' + name + '", ' + bindings[name] + ');');
         }
     },
 
@@ -3358,7 +3449,6 @@ var Compiler = Object.extend({
         var i = this.tmpid();
         var len = this.tmpid();
         var arr = this.tmpid();
-        var loopUses = this.scanLoop(node);
         frame = frame.push();
 
         this.emitLine('frame = frame.push();');
@@ -3378,6 +3468,7 @@ var Compiler = Object.extend({
             // body of the loop is duplicated for each condition, but
             // we are optimizing for speed over size.
             this.emitLine('if(runtime.isArray(' + arr + ')) {'); {
+                this.emitLine('var ' + len + ' = ' + arr + '.length;');
                 this.emitLine('for(' + i + '=0; ' + i + ' < ' + arr + '.length; '
                               + i + '++) {');
 
@@ -3390,7 +3481,7 @@ var Compiler = Object.extend({
                     frame.set(node.name.children[u].value, tid);
                 }
 
-                this.emitLoopBindings(node, loopUses, arr, i);
+                this.emitLoopBindings(node, arr, i, len);
                 this.withScopedSyntax(function() {
                     this.compile(node.body, frame);
                 });
@@ -3407,19 +3498,14 @@ var Compiler = Object.extend({
                 frame.set(val.value, v);
 
                 this.emitLine(i + ' = -1;');
-
-                if(loopUses['revindex'] || loopUses['revindex0'] ||
-                   loopUses['last'] || loopUses['length']) {
-                    this.emitLine('var ' + len + ' = runtime.keys(' + arr + ').length;');
-                }
-
+                this.emitLine('var ' + len + ' = runtime.keys(' + arr + ').length;');
                 this.emitLine('for(var ' + k + ' in ' + arr + ') {');
                 this.emitLine(i + '++;');
                 this.emitLine('var ' + v + ' = ' + arr + '[' + k + '];');
                 this.emitLine('frame.set("' + key.value + '", ' + k + ');');
                 this.emitLine('frame.set("' + val.value + '", ' + v + ');');
 
-                this.emitLoopBindings(node, loopUses, arr, i, len);
+                this.emitLoopBindings(node, arr, i, len);
                 this.withScopedSyntax(function() {
                     this.compile(node.body, frame);
                 });
@@ -3433,12 +3519,13 @@ var Compiler = Object.extend({
             var v = this.tmpid();
             frame.set(node.name.value, v);
 
+            this.emitLine('var ' + len + ' = ' + arr + '.length;');
             this.emitLine('for(var ' + i + '=0; ' + i + ' < ' + arr + '.length; ' +
                           i + '++) {');
             this.emitLine('var ' + v + ' = ' + arr + '[' + i + '];');
             this.emitLine('frame.set("' + node.name.value + '", ' + v + ');');
 
-            this.emitLoopBindings(node, loopUses, arr, i);
+            this.emitLoopBindings(node, arr, i, len);
 
             this.withScopedSyntax(function() {
                 this.compile(node.body, frame);
@@ -3448,6 +3535,12 @@ var Compiler = Object.extend({
         }
 
         this.emitLine('}');
+        if (node.else_) {
+          this.emitLine('if (!' + len + ') {');
+          this.compile(node.else_, frame);
+          this.emitLine('}');
+        }
+
         this.emitLine('frame = frame.pop();');
     },
 
@@ -3459,7 +3552,6 @@ var Compiler = Object.extend({
         var i = this.tmpid();
         var len = this.tmpid();
         var arr = this.tmpid();
-        var loopUses = this.scanLoop(node);
         var asyncMethod = parallel ? 'asyncAll' : 'asyncEach';
         frame = frame.push();
 
@@ -3492,7 +3584,7 @@ var Compiler = Object.extend({
             frame.set(id, id);
         }
 
-        this.emitLoopBindings(node, loopUses, arr, i, len);
+        this.emitLoopBindings(node, arr, i, len);
 
         this.withScopedSyntax(function() {
             var buf;
@@ -3517,6 +3609,12 @@ var Compiler = Object.extend({
             this.emitLine(this.buffer + ' += ' + output + ';');
         }
 
+        if (node.else_) {
+          this.emitLine('if (!' + arr + '.length) {');
+          this.compile(node.else_, frame);
+          this.emitLine('}');
+        }
+
         this.emitLine('frame = frame.pop();');
     },
 
@@ -3528,7 +3626,7 @@ var Compiler = Object.extend({
         this._compileAsyncLoop(node, frame, true);
     },
 
-    _emitMacroBegin: function(node, frame) {
+    _compileMacro: function(node, frame) {
         var args = [];
         var kwargs = null;
         var funcId = 'macro_' + this.tmpid();
@@ -3557,13 +3655,16 @@ var Compiler = Object.extend({
         // arguments so support setting positional args with keywords
         // args and passing keyword args as positional args
         // (essentially default values). See runtime.js.
+        frame = frame.push();
         this.emitLines(
             'var ' + funcId + ' = runtime.makeMacro(',
             '[' + argNames.join(', ') + '], ',
             '[' + kwargNames.join(', ') + '], ',
             'function (' + realNames.join(', ') + ') {',
             'frame = frame.push();',
-            'kwargs = kwargs || {};'
+            'kwargs = kwargs || {};',
+            'if (kwargs.hasOwnProperty("caller")) {',
+            'frame.set("caller", kwargs.caller); }'
         );
 
         // Expose the arguments to the template. Don't need to use
@@ -3587,31 +3688,27 @@ var Compiler = Object.extend({
             }, this);
         }
 
-        return funcId;
-    },
+        var bufferId = this.tmpid();
+        this.pushBufferId(bufferId);
 
-    _emitMacroEnd: function(bufferId) {
+        this.withScopedSyntax(function () {
+          this.compile(node.body, frame);
+        });
+
+        frame = frame.pop();
         this.emitLine('frame = frame.pop();');
         this.emitLine('return new runtime.SafeString(' + bufferId + ');');
         this.emitLine('});');
+        this.popBufferId();
+
+        return funcId;
     },
 
     compileMacro: function(node, frame) {
-        frame = frame.push();
-        var funcId = this._emitMacroBegin(node, frame);
-        var id = this.tmpid();
-        this.pushBufferId(id);
-
-        this.withScopedSyntax(function() {
-            this.compile(node.body, frame);
-        });
-
-        this._emitMacroEnd(id);
-        this.popBufferId();
+        var funcId = this._compileMacro(node, frame);
 
         // Expose the macro to the templates
         var name = node.name.value;
-        frame = frame.pop();
         frame.set(name, funcId);
 
         if(frame.parent) {
@@ -3623,6 +3720,13 @@ var Compiler = Object.extend({
             }
             this.emitLine('context.setVariable("' + name + '", ' + funcId + ');');
         }
+    },
+
+    compileCaller: function(node, frame) {
+        // basically an anonymous "macro expression"
+        this.emit('(function (){');
+        var funcId = this._compileMacro(node, frame);
+        this.emit('return ' + funcId + ';})()');
     },
 
     compileImport: function(node, frame) {
@@ -3831,15 +3935,15 @@ var Compiler = Object.extend({
 });
 
 // var c = new Compiler();
-// var src = '{% macro foo() %}{% include "include.html" %}{% endmacro %} This is my template {{ foo() }}';
+// var src = '{% asyncEach i in arr %}{{ i }}{% else %}empty{% endeach %}';
 // var ast = transformer.transform(parser.parse(src));
-//nodes.printNodes(ast);
+// nodes.printNodes(ast);
 // c.compile(ast);
 // var tmpl = c.getCode();
 // console.log(tmpl);
 
 modules['compiler'] = {
-    compile: function(src, asyncFilters, extensions, name) {
+    compile: function(src, asyncFilters, extensions, name, lexerTags) {
         var c = new Compiler();
 
         // Run the extension preprocessors against the source.
@@ -3851,7 +3955,7 @@ modules['compiler'] = {
             }
         }
 
-        c.compile(transformer.transform(parser.parse(src, extensions),
+        c.compile(transformer.transform(parser.parse(src, extensions, lexerTags),
                                         asyncFilters,
                                         name));
         return c.getCode();
@@ -4050,6 +4154,10 @@ var filters = {
     },
 
     replace: function(str, old, new_, maxCount) {
+        if (old instanceof RegExp) {
+            return str.replace(old, new_);
+        }
+
         var res = str;
         var last = res;
         var count = 1;
@@ -4247,7 +4355,9 @@ var filters = {
         }).map(function(word) {
           var matches = word.match(puncRE);
 
+
           var possibleUrl = matches && matches[1] || word;
+
 
           // url that starts with http or https
           if (httpHttpsRE.test(possibleUrl))
@@ -4265,7 +4375,7 @@ var filters = {
           if (tldRE.test(possibleUrl))
             return '<a href="http://' + possibleUrl + '"' + noFollowAttr + '>' + possibleUrl.substr(0, length) + '</a>';
 
-          return possibleUrl;
+          return word;
 
         });
 
@@ -4298,12 +4408,12 @@ modules['filters'] = filters;
 
 function cycler(items) {
     var index = -1;
-    var current = null;
+    this.current = null;
 
     return {
         reset: function() {
             index = -1;
-            current = null;
+            this.current = null;
         },
 
         next: function() {
@@ -4312,9 +4422,9 @@ function cycler(items) {
                 index = 0;
             }
 
-            current = items[index];
-            return current;
-        }
+            this.current = items[index];
+            return this.current;
+        },
     };
 
 }
@@ -4486,6 +4596,7 @@ var Environment = Obj.extend({
         // defaults to false
         opts = opts || {};
         this.dev = !!opts.dev;
+        this.lexerTags = opts.tags;
 
         // The autoescape flag sets global autoescaping. If true,
         // every string variable will be escaped by default.
@@ -4511,10 +4622,6 @@ var Environment = Obj.extend({
         this.asyncFilters = [];
         this.extensions = {};
         this.extensionsList = [];
-
-        if(opts.tags) {
-            lexer.setTags(opts.tags);
-        }
 
         for(var name in builtin_filters) {
             this.addFilter(name, builtin_filters[name]);
@@ -4746,7 +4853,7 @@ var Context = Obj.extend({
     },
 
     getSuper: function(env, name, block, frame, runtime, cb) {
-        var idx = (this.blocks[name] || []).indexOf(block);
+        var idx = lib.indexOf(this.blocks[name] || [], block);
         var blk = this.blocks[name][idx + 1];
         var context = this;
 
@@ -4860,7 +4967,8 @@ var Template = Obj.extend({
             var source = compiler.compile(this.tmplStr,
                                           this.env.asyncFilters,
                                           this.env.extensionsList,
-                                          this.path);
+                                          this.path,
+                                          this.env.lexerTags);
             var func = new Function(source);
             props = func();
         }
