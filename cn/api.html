@@ -88,6 +88,9 @@
 <a href="#getextension">getExtension</a>
 </li>
 <li>
+<a href="#addglobal">addGlobal</a>
+</li>
+<li>
 <a href="#gettemplate">getTemplate</a>
 </li>
 <li>
@@ -196,7 +199,7 @@
   </aside>
 
   <div class="col-sm-9 main">
-    <div class="locale btn-group"><a href="/nunjucks/api.html" class="btn btn-default">English</a><a href="/nunjucks/cn/api.html" class="btn btn-success">中国的</a></div>
+    <div class="locale btn-group"><a href="/nunjucks/api.html" class="btn btn-default">English</a><a href="/nunjucks/cn/api.html" class="btn btn-success">中文</a></div>
     <h1 id="api">API</h1>
 
 <p>Nunjucks 的 API 包括渲染模板，添加过滤器和扩展，自定义模板加载器等等。</p>
@@ -342,6 +345,13 @@
 <div class="api-desc"><p>获取扩展，传入名字返回一个函数。</p>
 </div>
 
+<h3 id="addglobal">addGlobal</h3>
+
+<div class="api-sig"><code>env.addGlobal(name, value)</code></div>
+
+<div class="api-desc"><p>添加一个全局变量，可以在所有模板使用。注意：这个会覆盖已有的 <code>name</code> 变量。</p>
+</div>
+
 <h3 id="gettemplate">getTemplate</h3>
 
 <div class="api-sig"><code>env.getTemplate(name, [eagerCompile], [callback])</code></div>
@@ -431,6 +441,10 @@ loaders exist, each for different contexts.</p>
 
 <span class="nx">MyLoader</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">getSource</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
     <span class="c1">// load the template</span>
+    <span class="c1">// return an object with:</span>
+    <span class="c1">//   - src:     String. The template source.</span>
+    <span class="c1">//   - path:    String. Path to template.</span>
+    <span class="c1">//   - noCache: Bool. Don&#39;t cache the template (optional).</span>
 <span class="p">}</span>
 </code></pre></div>
 <p>如果你希望跟踪模板的更新，并当有更新时清除缓存，这样就有一点复杂了。但你可以继承 <code>Loader</code> 类，可以通过 <code>emit</code> 方法触发事件。</p>

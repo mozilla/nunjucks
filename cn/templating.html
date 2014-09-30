@@ -153,7 +153,7 @@
   </aside>
 
   <div class="col-sm-9 main">
-    <div class="locale btn-group"><a href="/nunjucks/templating.html" class="btn btn-default">English</a><a href="/nunjucks/cn/templating.html" class="btn btn-success">中国的</a></div>
+    <div class="locale btn-group"><a href="/nunjucks/templating.html" class="btn btn-default">English</a><a href="/nunjucks/cn/templating.html" class="btn btn-success">中文</a></div>
     <h1 id="">模板</h1>
 
 <p>这里包括 nunjuck 所有可用的功能。</p>
@@ -224,7 +224,7 @@ foo.bar }}</code>, <code>{{ foo.bar.baz }}</code> 也不显示)。</p>
 
 <span class="x">&lt;section class=&quot;right&quot;&gt;</span>
 <span class="x">  This is the right side!</span>
-<span class="x">&lt;/section&gt;  </span>
+<span class="x">&lt;/section&gt;</span>
 </code></pre></div>
 <p>你可以将继承的模板设为一个变量，这样就可以动态指定继承的模板。</p>
 <div class="highlight"><pre><code class="jinja language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">extends</span> <span class="nv">parentTemplate</span> <span class="cp">%}</span><span class="x"></span>
@@ -357,6 +357,8 @@ template. Nunjucks 包含一些内置的标签，你也可以<a href="api.html#c
 
 <p>还可以从其他模板 <a href="#import">import</a> 宏，可以使宏在整个项目中复用。</p>
 
+<p><strong>重要</strong>：如果你使用异步 API，请注意你 <strong>不能</strong> 在宏中做任何异步的操作，因为宏只是被简单的函数调用。将来会提供一种异步的调用方式，现在使用是不支持的。</p>
+
 <h3 id="set">set</h3>
 
 <p><code>set</code> 可以设置和修改变量。</p>
@@ -376,6 +378,8 @@ template. Nunjucks 包含一些内置的标签，你也可以<a href="api.html#c
 <p><code>extends</code> 用来指定模板继承，被指定的模板为父级模板，查看<a href="#template-inheritance">模板继承</a>。</p>
 <div class="highlight"><pre><code class="jinja language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">extends</span> <span class="s2">&quot;base.html&quot;</span> <span class="cp">%}</span><span class="x"></span>
 </code></pre></div>
+<p><code>extends</code> 可以接受任何表达式，你可以如下传入: <code>{% extends name + &quot;.html&quot; as obj %}</code>.</p>
+
 <h3 id="block">block</h3>
 
 <p>区块(<code>block</code>) 定义了模板片段并标识一个名字，在模板继承中使用。父级模板可指定一个区块，子模板覆盖这个区块，查看<a href="#template-inheritance">模板继承</a>。</p>
@@ -406,6 +410,8 @@ template. Nunjucks 包含一些内置的标签，你也可以<a href="api.html#c
 <span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span><span class="x"></span>
 </code></pre></div>
 <p>This is especially useful for cutting up templates into pieces so that the browser-side environment can render the small chunks when it needs to change the page.</p>
+
+<p><code>include</code> 可以接受任何表达式，你可以如下传入: <code>{% include name + &quot;.html&quot; as obj %}</code>.</p>
 
 <h3 id="import">import</h3>
 
@@ -443,10 +449,14 @@ template. Nunjucks 包含一些内置的标签，你也可以<a href="api.html#c
 <span class="cp">{{</span> <span class="nv">description</span><span class="o">(</span><span class="s1">&#39;Password&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
 <span class="cp">{{</span> <span class="nv">input</span><span class="o">(</span><span class="s1">&#39;pass&#39;</span><span class="o">,</span> <span class="nv">type</span><span class="o">=</span><span class="s1">&#39;password&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
 </code></pre></div>
+<p><code>import</code> 可以接受任何表达式，你可以如下传入: <code>{% import name + &quot;.html&quot; as obj %}</code>.</p>
+
 <h3 id="raw">raw</h3>
 
 <p>如果你想输出一些 nunjucks 特殊的标签 (如 <code>{{</code>)，可以使用 <code>raw</code> 使所有的内容输出为纯文本。</p>
-<div class="highlight"><pre><code class="jinja language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">raw</span> <span class="cp">%}</span>this will {{ not be processed }}{%<span class="cp">{%</span> <span class="k">endraw</span> <span class="cp">%}{%</span> <span class="k">raw</span> <span class="cp">%}</span><span class="x"> endraw %}</span>
+<div class="highlight"><pre><code class="jinja language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">raw</span> <span class="cp">%}</span><span class="x"></span>
+<span class="x">  this will </span><span class="cp">{{</span> <span class="k">not</span> <span class="nv">be</span> <span class="nv">processed</span> <span class="cp">}}</span><span class="x"></span>
+<span class="x">{％ endraw %}</span>
 </code></pre></div>
 <h2 id="5">关键字参数</h2>
 

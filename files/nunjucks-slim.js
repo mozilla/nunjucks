@@ -1,4 +1,4 @@
-// Browser bundle of nunjucks 1.0.7 (slim, only works with precompiled templates)
+// Browser bundle of nunjucks 1.1.0 (slim, only works with precompiled templates)
 
 (function() {
 var modules = {};
@@ -198,7 +198,7 @@ exports.without = function(array) {
     contains = exports.toArray(arguments).slice(1);
 
     while(++index < length) {
-        if(contains.indexOf(array[index]) === -1) {
+        if(exports.indexOf(contains, array[index]) === -1) {
             result.push(array[index]);
         }
     }
@@ -293,37 +293,35 @@ exports.asyncFor = function(obj, iter, cb) {
     next();
 };
 
-if(!Array.prototype.indexOf) {
-    Array.prototype.indexOf = function(array, searchElement /*, fromIndex */) {
-        if (array == null) {
-            throw new TypeError();
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/indexOf#Polyfill
+exports.indexOf = Array.prototype.indexOf ?
+    function (arr, searchElement, fromIndex) {
+        return Array.prototype.indexOf.call(arr, searchElement, fromIndex);
+    } :
+    function (arr, searchElement, fromIndex) {
+        var length = this.length >>> 0; // Hack to convert object.length to a UInt32
+
+        fromIndex = +fromIndex || 0;
+
+        if(Math.abs(fromIndex) === Infinity) {
+            fromIndex = 0;
         }
-        var t = Object(array);
-        var len = t.length >>> 0;
-        if (len === 0) {
-            return -1;
-        }
-        var n = 0;
-        if (arguments.length > 2) {
-            n = Number(arguments[2]);
-            if (n != n) { // shortcut for verifying if it's NaN
-                n = 0;
-            } else if (n != 0 && n != Infinity && n != -Infinity) {
-                n = (n > 0 || -1) * Math.floor(Math.abs(n));
+
+        if(fromIndex < 0) {
+            fromIndex += length;
+            if (fromIndex < 0) {
+                fromIndex = 0;
             }
         }
-        if (n >= len) {
-            return -1;
-        }
-        var k = n >= 0 ? n : Math.max(len - Math.abs(n), 0);
-        for (; k < len; k++) {
-            if (k in t && t[k] === searchElement) {
-                return k;
+
+        for(;fromIndex < length; fromIndex++) {
+            if (arr[fromIndex] === searchElement) {
+                return fromIndex;
             }
         }
+
         return -1;
     };
-}
 
 if(!Array.prototype.map) {
     Array.prototype.map = function() {
@@ -978,6 +976,10 @@ var filters = {
     },
 
     replace: function(str, old, new_, maxCount) {
+        if (old instanceof RegExp) {
+            return str.replace(old, new_);
+        }
+
         var res = str;
         var last = res;
         var count = 1;
@@ -1175,7 +1177,9 @@ var filters = {
         }).map(function(word) {
           var matches = word.match(puncRE);
 
+
           var possibleUrl = matches && matches[1] || word;
+
 
           // url that starts with http or https
           if (httpHttpsRE.test(possibleUrl))
@@ -1193,7 +1197,7 @@ var filters = {
           if (tldRE.test(possibleUrl))
             return '<a href="http://' + possibleUrl + '"' + noFollowAttr + '>' + possibleUrl.substr(0, length) + '</a>';
 
-          return possibleUrl;
+          return word;
 
         });
 
@@ -1226,12 +1230,12 @@ modules['filters'] = filters;
 
 function cycler(items) {
     var index = -1;
-    var current = null;
+    this.current = null;
 
     return {
         reset: function() {
             index = -1;
-            current = null;
+            this.current = null;
         },
 
         next: function() {
@@ -1240,9 +1244,9 @@ function cycler(items) {
                 index = 0;
             }
 
-            current = items[index];
-            return current;
-        }
+            this.current = items[index];
+            return this.current;
+        },
     };
 
 }
@@ -1312,6 +1316,7 @@ var Environment = Obj.extend({
         // defaults to false
         opts = opts || {};
         this.dev = !!opts.dev;
+        this.lexerTags = opts.tags;
 
         // The autoescape flag sets global autoescaping. If true,
         // every string variable will be escaped by default.
@@ -1337,10 +1342,6 @@ var Environment = Obj.extend({
         this.asyncFilters = [];
         this.extensions = {};
         this.extensionsList = [];
-
-        if(opts.tags) {
-            lexer.setTags(opts.tags);
-        }
 
         for(var name in builtin_filters) {
             this.addFilter(name, builtin_filters[name]);
@@ -1572,7 +1573,7 @@ var Context = Obj.extend({
     },
 
     getSuper: function(env, name, block, frame, runtime, cb) {
-        var idx = (this.blocks[name] || []).indexOf(block);
+        var idx = lib.indexOf(this.blocks[name] || [], block);
         var blk = this.blocks[name][idx + 1];
         var context = this;
 
@@ -1686,7 +1687,8 @@ var Template = Obj.extend({
             var source = compiler.compile(this.tmplStr,
                                           this.env.asyncFilters,
                                           this.env.extensionsList,
-                                          this.path);
+                                          this.path,
+                                          this.env.lexerTags);
             var func = new Function(source);
             props = func();
         }

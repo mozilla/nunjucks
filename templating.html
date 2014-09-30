@@ -94,6 +94,9 @@
 <li>
 <a href="#raw">raw</a>
 </li>
+<li>
+<a href="#call">call</a>
+</li>
 </ul>
 </li>
 <li>
@@ -122,6 +125,9 @@
 </li>
 <li>
 <a href="#function-calls">Function Calls</a>
+</li>
+<li>
+<a href="#regular-expressions">Regular Expressions</a>
 </li>
 </ul>
 </li>
@@ -153,7 +159,7 @@
   </aside>
 
   <div class="col-sm-9 main">
-    <div class="locale btn-group"><a href="/nunjucks/templating.html" class="btn btn-success">English</a><a href="/nunjucks/cn/templating.html" class="btn btn-default">中国的</a></div>
+    <div class="locale btn-group"><a href="/nunjucks/templating.html" class="btn btn-success">English</a><a href="/nunjucks/cn/templating.html" class="btn btn-default">中文</a></div>
     <h1 id="templating">Templating</h1>
 
 <p>This is an overview of the templating features available in nunjucks.</p>
@@ -517,6 +523,19 @@ blocks and child templates can override them with new content. See
 <span class="x">  this will </span><span class="cp">{{</span> <span class="k">not</span> <span class="nv">be</span> <span class="nv">processed</span> <span class="cp">}}</span><span class="x"></span>
 <span class="x">{％ endraw %}</span>
 </code></pre></div>
+<h3 id="call">call</h3>
+
+<p>A <code>call</code> block enables you to call a macro with all the text inside the tag. This is helpful if you want to pass a lot of content into a macro. The content is available inside the macro as <code>caller()</code>.</p>
+<div class="highlight"><pre><code class="jinja language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">macro</span> <span class="nv">add</span><span class="o">(</span><span class="nv">x</span><span class="o">,</span> <span class="nv">y</span><span class="o">)</span> <span class="cp">%}</span><span class="x"></span>
+<span class="cp">{{</span> <span class="nv">caller</span><span class="o">()</span> <span class="cp">}}</span><span class="x">: </span><span class="cp">{{</span> <span class="nv">x</span> <span class="o">+</span> <span class="nv">y</span> <span class="cp">}}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">endmacro</span><span class="cp">%}</span><span class="x"></span>
+
+<span class="cp">{%</span> <span class="k">call</span> <span class="nv">add</span><span class="o">(</span><span class="m">1</span><span class="o">,</span> <span class="m">2</span><span class="o">)</span> -<span class="cp">%}</span><span class="x"></span>
+<span class="x">The result is</span>
+<span class="cp">{%</span>- <span class="k">endcall</span> <span class="cp">%}</span><span class="x"></span>
+</code></pre></div>
+<p>The above example would output &quot;The result is: 3&quot;.</p>
+
 <h2 id="keyword-arguments">Keyword Arguments</h2>
 
 <p>jinja2 uses Python&#39;s keyword arguments support to allow keyword arguments in functions, filters, and macros. Nunjucks supports keyword arguments as well by introduction a new calling convention.</p>
@@ -638,6 +657,21 @@ blocks and child templates can override them with new content. See
 <p>If you have passed a javascript method to your template, you can call it like normal.</p>
 <div class="highlight"><pre><code class="jinja language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">foo</span><span class="o">(</span><span class="m">1</span><span class="o">,</span> <span class="m">2</span><span class="o">,</span> <span class="m">3</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
 </code></pre></div>
+<h3 id="regular-expressions">Regular Expressions</h3>
+
+<p>A regular expression can be created just like JavaScript:</p>
+<div class="highlight"><pre><code class="text language-text" data-lang="text">{{ /^foo.*/ }}
+{{ /bar$/g }}
+</code></pre></div>
+<p>The supported flags are the following. See <a href="https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/RegExp">Regex on MDN</a> for more information.</p>
+
+<ul>
+<li><code>g</code>: apply globally</li>
+<li><code>i</code>: case insensitive</li>
+<li><code>m</code>: multiline</li>
+<li><code>y</code>: sticky</li>
+</ul>
+
 <h2 id="autoescaping">Autoescaping</h2>
 
 <p>If autoescaping is turned on in the environment, all output will automatically be escaped for safe output. To manually mark output as safe, use the <code>safe</code> filter. Nunjucks will not escape this output.</p>
@@ -669,7 +703,8 @@ blocks and child templates can override them with new content. See
 <span class="x">  &lt;div class=&quot;</span><span class="cp">{{</span> <span class="nv">cls.next</span><span class="o">()</span> <span class="cp">}}</span><span class="x">&quot;&gt;</span><span class="cp">{{</span> <span class="nv">row.name</span> <span class="cp">}}</span><span class="x">&lt;/div&gt;</span>
 <span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span><span class="x"></span>
 </code></pre></div>
-<p>In the above example, odd rows have the class &quot;odd&quot; and even rows have the class &quot;even&quot;.</p>
+<p>In the above example, odd rows have the class &quot;odd&quot; and even rows have the class &quot;even&quot;. You can access the current item on the <code>current</code> property s
+(in the above example, <code>cls.current</code>).</p>
 
 <h3 id="joinerseparator">joiner([separator])</h3>
 
@@ -703,7 +738,7 @@ blocks and child templates can override them with new content. See
 <li><a href="http://jinja.pocoo.org/docs/templates/#list">list</a></li>
 <li><a href="http://jinja.pocoo.org/docs/templates/#lower">lower</a></li>
 <li><a href="http://jinja.pocoo.org/docs/templates/#random">random</a></li>
-<li><a href="http://jinja.pocoo.org/docs/templates/#replace">replace</a></li>
+<li><a href="http://jinja.pocoo.org/docs/templates/#replace">replace</a> (the first argument can take a regular expression)</li>
 <li><a href="http://jinja.pocoo.org/docs/templates/#reverse">reverse</a></li>
 <li><a href="http://jinja.pocoo.org/docs/templates/#round">round</a></li>
 <li><a href="http://jinja.pocoo.org/docs/templates/#slice">slice</a></li>
