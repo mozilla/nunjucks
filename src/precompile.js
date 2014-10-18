@@ -3,6 +3,12 @@ var path = require('path');
 var lib = require('./lib');
 var compiler = require('./compiler');
 var Environment = require('./environment').Environment;
+var precompilers = {
+      global: require('./precompile-global'),
+      amd: require('./precompile-amd'),
+      cjs: require('./precompile-cjs'),
+      esm: require('./precompile-esm')
+    };
 
 function match(filename, patterns) {
     if (!Array.isArray(patterns)) return false;
@@ -27,14 +33,20 @@ function precompile(input, opts) {
     // * env: the Environment to use (gets extensions and async filters from it)
     // * include: which file/folders to include (folders are auto-included, files are auto-excluded)
     // * exclude: which file/folders to exclude (folders are auto-included, files are auto-excluded)
+    // * format: change the output format: one of "global" (default), "amd", "cjs" or "esm"
 
     opts = opts || {};
+    var format = opts.format || 'global';
     var env = opts.env || new Environment([]);
     var asyncFilters = env.asyncFilters;
     var extensions = env.extensionsList;
 
     var pathStats = fs.existsSync(input) && fs.statSync(input);
     var output = '';
+
+    if(!precompilers[format]) {
+        throw new Error('Unknown format: "' + format + '"');
+    }
 
     if(opts.isString) {
         if(!opts.name) {
@@ -45,13 +57,15 @@ function precompile(input, opts) {
         return _precompile(input,
                            opts.name,
                            env,
-                           opts.asFunction);
+                           format,
+                           opts);
     }
     else if(pathStats.isFile()) {
         return _precompile(fs.readFileSync(input, 'utf-8'),
                            opts.name || input,
                            env,
-                           opts.asFunction);
+                           format,
+                           opts);
     }
     else if(pathStats.isDirectory()) {
         var templates = [];
@@ -85,7 +99,8 @@ function precompile(input, opts) {
                 output += _precompile(fs.readFileSync(templates[i], 'utf-8'),
                                       name,
                                       env,
-                                      opts.asFunction);
+                                      format,
+                                      opts);
             } catch(e) {
                 if(opts.force) {
                     // Don't stop generating the output if we're
@@ -102,34 +117,25 @@ function precompile(input, opts) {
     }
 }
 
-function _precompile(str, name, env, asFunction) {
+function _precompile(str, name, env, format, opts) {
     env = env || new Environment([]);
 
     var asyncFilters = env.asyncFilters;
     var extensions = env.extensionsList;
+    name = name.replace(/\\/g, '/');
 
-    var out = '(function() {' +
-        '(window.nunjucksPrecompiled = window.nunjucksPrecompiled || {})' +
-        '["' + name.replace(/\\/g, '/') + '"] = (function() {';
+    var body = lib.withPrettyErrors(
+            name,
+            false,
+            function() {
+                return compiler.compile(str,
+                                        asyncFilters,
+                                        extensions,
+                                        name);
+            }
+        );
 
-    out += lib.withPrettyErrors(
-        name,
-        false,
-        function() {
-            return compiler.compile(str,
-                                    asyncFilters,
-                                    extensions,
-                                    name);
-        }
-    );
-    out += '})();\n';
-
-    if(asFunction) {
-        out += 'return function(ctx, cb) { return nunjucks.render("' + name + '", ctx, cb); }';
-    }
-
-    out += '})();\n';
-    return out;
+    return precompilers[format](name, body, opts);
 }
 
 module.exports = {
