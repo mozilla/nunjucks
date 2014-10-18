@@ -6,7 +6,7 @@ var lib = require('../src/lib');
 
 var optimist = require('optimist')
 
-    .usage('$0 [-f|--force] [-a|--filters <filters>] [-n|--name <name>] [-i|--include <regex>] [-x|--exclude <regex>] <path>')
+    .usage('$0 [-f|--force] [-a|--filters <filters>] [-n|--name <name>] [-i|--include <regex>] [-x|--exclude <regex>] [-o|--output <format>] <path>')
     .wrap(80)
 
     .describe('help', 'Display this help message')
@@ -36,6 +36,21 @@ var optimist = require('optimist')
         .default('exclude', [])
         .alias('x', 'exclude')
 
+    .describe('output', 'change the output format. Available options: global, amd, cjs, esm')
+        .string('output' )
+        .default('output', 'global')
+        .alias('o', 'output')
+        .check(function(argv) {
+            var valid = {
+                    global: true,
+                    amd: true,
+                    cjs: true,
+                    esm: true
+                },
+                format = argv.format;
+            if ( format && !valid[format] ) throw 'Invalid output format '+format;
+        })
+
     .demand(1);
 
 var argv = optimist.argv;
@@ -58,6 +73,7 @@ console.log(precompile(argv._[0], {
     name : argv.name,
 
     include : [].concat(argv.include),
-    exclude : [].concat(argv.exclude)
+    exclude : [].concat(argv.exclude),
+    format : argv.output
 
 }));

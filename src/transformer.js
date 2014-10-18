@@ -193,7 +193,7 @@ function convertStatements(ast) {
         });
 
         if(async) {
-	        if(node instanceof nodes.If) {
+            if(node instanceof nodes.If) {
                 return new nodes.IfAsync(
                     node.lineno,
                     node.colno,
