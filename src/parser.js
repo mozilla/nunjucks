@@ -881,7 +881,7 @@ var Parser = Object.extend({
                 val = false;
             }
             else {
-                this.fail("invalid boolean: " + tok.val,
+                this.fail("invalid boolean: " + tok.value,
                           tok.lineno,
                           tok.colno);
             }
