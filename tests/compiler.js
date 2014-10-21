@@ -566,6 +566,26 @@
                   { name: 'james' },
                   'hello world FooInclude james');
 
+            equal('hello {% include "include-with.html" with {with1: "aa", "with2": 2} %}',
+                  { name: 'james' },
+                  "hello james\n==\naa\n2\naa");
+
+            equal('hello {% include "include.html" with {"name": "amy"} %}',
+                  { name: 'james' },
+                  "hello FooInclude amy");
+
+            equal('{{ with1 }} {% include "include.html" with {"with1": "aa"} %}',
+                  { name: 'james' },
+                  " FooInclude james");
+
+            equal('{% include "include-with-only.html" with {withVar: "with"} only %}',
+                  { parentVar: "parent" },
+                  " with");
+
+            equal('{% include "include-with-only.html" with {"parentVar": "parent", withVar: "with"} only %}',
+                  { parent: 'parent2' },
+                  "parent with");
+
             equal('hello world {% include tmpl %}',
                   { name: 'thedude', tmpl: "include.html" },
                   'hello world FooInclude thedude');
