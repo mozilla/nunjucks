@@ -296,7 +296,7 @@ Tokenizer.prototype.parseString = function(delimiter) {
 };
 
 Tokenizer.prototype._matches = function(str) {
-    if(this.index + str.length > this.length) {
+    if(this.index + str.length > this.len) {
         return null;
     }
 
