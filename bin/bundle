@@ -1,59 +1,155 @@
-#!/bin/sh
+#!/usr/bin/env node
+var UglifyJS = require('uglify-js');
 
-ROOT=`dirname "$0"`
-VERSION=`node -e "var fs = require('fs'); var p = JSON.parse(fs.readFileSync('./package.json')); console.log(p.version)"`
-TYPE=""
+process.chdir(__dirname);
 
-output="$1.js"
-minoutput="$1.min.js"
-if [ -z "$SLIM" ]; then
-    # Listed in order of dependency
-    files="object.js lib.js nodes.js runtime.js lexer.js parser.js transformer.js
-       compiler.js filters.js globals.js loader.js web-loaders.js loaders.js
-       environment.js"
-else
-    # Listed in order of dependency
-    files="object.js lib.js runtime.js loader.js web-loaders.js loaders.js filters.js 
-       globals.js environment.js"
-    TYPE="(slim, only works with precompiled templates)"
-fi
+var fs = require('fs');
 
-rm -f "$output"
-
-echo "// Browser bundle of nunjucks $VERSION $TYPE\n" >> "$output"
-echo "(function() {" >> "$output"
-echo "var modules = {};" >> "$output"
-
-for file in $files; do
-    name=${file%%.*}
-    echo "(function() {" >> "$output"
-    cat "src/$file" | \
-        perl -ne 's/^(.*)require\(\W*([\w-]*)\W*\)(.*)$/$1modules["$2"]$3/; print' | \
-        sed -e "s/module.exports/modules['$name']/" \
-        >> "$output"
-    echo "})();" >> "$output"
-done
-
-echo "var nunjucks;" >> $output
-
-cat index.js | \
-    perl -ne 's/require\(\W*\.\/src\/([\w-]*)\W*\)/modules["$1"]/; print' | \
-    sed -e 's/module.exports/nunjucks/' \
-    >> "$output"
-
-echo "
-nunjucks.require = function(name) { return modules[name]; };
-
-if(typeof define === 'function' && define.amd) {
-    define(function() { return nunjucks; });
+function eachObj(obj, iter) {
+  for ( var k in bundles ) {
+    if ( obj.hasOwnProperty(k) ) {
+      iter(obj[k], k);
+    }
+  }
 }
-else {
-    window.nunjucks = nunjucks;
-    if(typeof module !== 'undefined') module.exports = nunjucks;
+
+function eachArr(arr, iter) {
+  for ( var i = 0, ii = arr.length; i < ii; i++ ) {
+    iter(arr[i], i);
+  }
 }
-" >> "$output"
 
-echo "})();" >> "$output"
+var p = JSON.parse(fs.readFileSync('../package.json'));
 
-echo "// Browser bundle of nunjucks $VERSION $TYPE\n" > "$minoutput"
-./node_modules/.bin/uglifyjs "$output" >> "$minoutput"
+var full = 1,
+    slim = 2,
+    bundles = {};
+
+bundles[full] = {};
+bundles[slim] = {
+  suffix: '-slim',
+  type: '(slim, only works with precompiled templates)'
+};
+
+var files = [
+      [ 'object'     , full | slim ],
+      [ 'lib'        , full | slim ],
+      [ 'nodes'      , full        ],
+      [ 'runtime'    , full | slim ],
+      [ 'lexer'      , full        ],
+      [ 'parser'     , full        ],
+      [ 'transformer', full        ],
+      [ 'compiler'   , full        ],
+      [ 'filters'    , full | slim ],
+      [ 'globals'    , full | slim ],
+      [ 'loader'     , full | slim ],
+      [ 'web-loaders', full | slim ],
+      [ 'loaders'    , full | slim ],
+      [ 'environment', full | slim ]
+    ];
+
+function bundleFile(file) {
+  var out = '(function() {\n';
+  out += fs.readFileSync('../src/'+file+'.js', { encoding: 'utf8' })
+    .replace(/require\(\W*([\w-]*)\W*\)/g, 'modules["$1"]')
+    .replace(/module\.exports/g, 'modules[\''+file+'\']');
+  out += '})();\n';
+  return out;
+}
+
+function bundleIndex() {
+  var out = fs.readFileSync('../index.js', { encoding: 'utf8' })
+    .replace(/require\(\W*\.\/src\/([\w-]*)\W*\)/g, 'modules["$1"]')
+    .replace(/module\.exports/g, 'nunjucks');
+  out += '\n';
+  return out;
+}
+
+function bundle(b) {
+  var topComment = 'Browser bundle of nunjucks ' + p.version;
+  if ( b.type ) {
+    topComment += ' ' + b.type;
+  }
+  var out = '// ' + topComment;
+  out += '\n\n(function() {\n';
+  out += 'var modules = {};\n';
+
+  eachArr(b.files, function(file) {
+    out += bundleFile(file);
+  });
+
+  out += 'var nunjucks;\n';
+
+  out += bundleIndex();
+
+  out += '\
+nunjucks.require = function(name) { return modules[name]; };\n\
+\n\
+if(typeof define === \'function\' && define.amd) {\n\
+    define(function() { return nunjucks; });\n\
+}\n\
+else {\n\
+    window.nunjucks = nunjucks;\n\
+    if(typeof module !== \'undefined\') module.exports = nunjucks;\n\
+}\n';
+
+  out += '\n})();\n';
+
+  out = {
+    topComment: topComment,
+    code: out
+  };
+
+  return out;
+}
+
+function uglify(bundle) {
+  var compOpts = {
+    dead_code: false,
+    unused: false,
+    side_effects: false,
+    join_vars: false,
+    conditionals: false,
+    comparisons: false,
+    booleans: false
+  };
+  var streamOpts = {
+    comments: function(node, comment) {
+      return comment.value.indexOf(bundle.topComment) != -1;
+    }
+  };
+  var toplevel_ast = UglifyJS.parse(bundle.code);
+  toplevel_ast.figure_out_scope();
+  var compressor = UglifyJS.Compressor(compOpts);
+  var compressed_ast = toplevel_ast.transform(compressor);
+  var stream = UglifyJS.OutputStream(streamOpts);
+  compressed_ast.print(stream);
+
+  bundle.code = stream.toString();
+
+  return bundle;
+}
+
+function saveBundle(b) {
+
+  var suffix = b.suffix || '';
+
+  b = bundle(b);
+
+  fs.writeFileSync('../browser/nunjucks'+suffix+'.js', b.code);
+
+  b = uglify(b);
+
+  fs.writeFileSync('../browser/nunjucks'+suffix+'.min.js', b.code);
+
+}
+
+eachObj(bundles, function(b, k) {
+  var bfiles = [];
+  eachArr(files, function(file) {
+    if ( file[1] & k ) bfiles.push( file[0] );
+  });
+  b.files = bfiles;
+
+  saveBundle(b);
+});
