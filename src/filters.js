@@ -211,7 +211,7 @@ var filters = {
 
         // ShortCircuits
         if(!old){
-            res = str.split("").join(new_);
+            res = new_ + str.split("").join(new_) + new_;
             return r.copySafeness(str, res);
         }
 

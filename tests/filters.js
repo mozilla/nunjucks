@@ -213,7 +213,7 @@
         it('replace', function(done) {
             equal('{{ 123456 | replace("4", ".") }}', '123.56');
             equal('{{ 12345.6 | replace("4", ".") }}', '123.5.6');
-            equal('{{ "aaabbbccc" | replace("", ".") }}', 'a.a.a.b.b.b.c.c.c');
+            equal('{{ "aaabbbccc" | replace("", ".") }}', '.a.a.a.b.b.b.c.c.c.');
             equal('{{ "aaabbbccc" | replace("a", "x") }}', 'xxxbbbccc');
             equal('{{ "aaabbbccc" | replace("a", "x", 2) }}', 'xxabbbccc');
             equal('{{ "aaabbbbbccc" | replace("b", "y", 4) }}', 'aaayyyybccc');
