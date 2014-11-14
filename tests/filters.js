@@ -271,9 +271,23 @@
         });
 
         it('replace', function(done) {
+            equal('{{ 123456 | replace("4", ".") }}', '123.56');
+            equal('{{ 12345.6 | replace("4", ".") }}', '123.5.6');
+            equal('{{ "aaabbbccc" | replace("", ".") }}', 'a.a.a.b.b.b.c.c.c');
             equal('{{ "aaabbbccc" | replace("a", "x") }}', 'xxxbbbccc');
             equal('{{ "aaabbbccc" | replace("a", "x", 2) }}', 'xxabbbccc');
             equal('{{ "aaabbbbbccc" | replace("b", "y", 4) }}', 'aaayyyybccc');
+            equal('{{ "aaabbbbbccc" | replace("", "") }}', 'aaabbbbbccc');
+            equal('{{ "aaabbbbbccc" | replace("b", "") }}', 'aaaccc');
+            equal('{{ "aaabbbbbccc" | replace("b", "", 4) }}', 'aaabccc');
+            equal('{{ "aaabbbbbccc" | replace("ab", "y", 4) }}', 'aaybbbbccc');
+            equal('{{ "aaabbbbbccc" | replace("b", "y", 4) }}', 'aaayyyybccc');
+            equal('{{ "aaabbbbbccc" | replace("d", "y", 4) }}', 'aaabbbbbccc');
+            equal('{{ "aaabbcccbbb" | replace("b", "y", 4) }}', 'aaayycccyyb');
+            // Infinite loop if unbounded / correctness if not
+            equal('{{ "<img src=" | replace("<img", "<img alt=val") }}', '<img alt=val src=');
+
+            // Regex
             equal('{{ "aabbbb" | replace(r/ab{2}/, "z") }}', 'azbb');
             equal('{{ "aaaAAA" | replace(r/a/i, "z") }}', 'zaaAAA');
             equal('{{ "aaaAAA" | replace(r/a/g, "z") }}', 'zzzAAA');
