@@ -236,6 +236,36 @@
                       [nodes.Symbol, 'y']]]]]);
         });
 
+        it('should parse operators with correct precedence', function() {
+            isAST(parser.parse('{{ x in y and z }}'),
+                  [nodes.Root,
+                   [nodes.Output,
+                    [nodes.And,
+                     [nodes.In,
+                      [nodes.Symbol, 'x'],
+                      [nodes.Symbol, 'y']],
+                     [nodes.Symbol, 'z']]]]);
+
+            isAST(parser.parse('{{ x not in y or z }}'),
+                  [nodes.Root,
+                   [nodes.Output,
+                    [nodes.Or,
+                     [nodes.Not,
+                      [nodes.In,
+                      [nodes.Symbol, 'x'],
+                       [nodes.Symbol, 'y']]],
+                     [nodes.Symbol, 'z']]]]);
+
+            isAST(parser.parse('{{ x or y and z }}'),
+                  [nodes.Root,
+                   [nodes.Output,
+                    [nodes.Or,
+                     [nodes.Symbol, 'x'],
+                     [nodes.And,
+                      [nodes.Symbol, 'y'],
+                      [nodes.Symbol, 'z']]]]]);
+        });
+
         it('should parse blocks', function() {
             var n = parser.parse('want some {% if hungry %}pizza{% else %}' +
                                  'water{% endif %}?');
