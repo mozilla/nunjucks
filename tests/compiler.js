@@ -538,6 +538,20 @@
             finish(done);
         });
 
+        it('should default to importing without context', function(done) {
+            equal('{% set bar = "BAR" %}' +
+                  '{% import "import-context.html" as imp %}' +
+                  '{{ imp.foo() }}',
+                  "Here's ");
+
+            equal('{% set bar = "BAR" %}' +
+                  '{% from "import-context.html" import foo %}' +
+                  '{{ foo() }}',
+                  "Here's ");
+
+            finish(done);
+        });
+
         it('should inherit templates', function(done) {
             equal('{% extends "base.html" %}', 'FooBarBazFizzle');
             equal('hola {% extends "base.html" %} hizzle mumble', 'FooBarBazFizzle');
