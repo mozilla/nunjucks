@@ -69,26 +69,9 @@ var FileSystemLoader = Loader.extend({
     }
 });
 
-var ModuleLoader = Loader.extend({
-    init: function(compiledTemplatesFile, noWatch) {
-        var that = this;
-        this.precompiled = {};
-
-        if(compiledTemplatesFile) {
-            compiledTemplatesFile = lib.isArray(compiledTemplatesFile) ? compiledTemplatesFile : [compiledTemplatesFile];
-            compiledTemplatesFile.forEach(function(compiledTemplateFile) {
-//                try {
-                    var nunjucksPrecompiled = require(compiledTemplateFile).nunjucksPrecompiled;
-                    if (nunjucksPrecompiled && typeof nunjucksPrecompiled === 'object') {
-                        for (var name in nunjucksPrecompiled)
-                            that.precompiled[name] = nunjucksPrecompiled[name];
-                    }
-/*                }
-                catch(e) {
-
-                }*/
-            });
-        }
+var PrecompiledLoader = Loader.extend({
+    init: function(compiledTemplatesFile) {
+        this.precompiled = compiledTemplatesFile || {};
     },
 
     getSource: function(name) {
@@ -106,5 +89,5 @@ var ModuleLoader = Loader.extend({
 
 module.exports = {
     FileSystemLoader: FileSystemLoader,
-    ModuleLoader: ModuleLoader
+    PrecompiledLoader: PrecompiledLoader
 };

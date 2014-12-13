@@ -15,7 +15,7 @@ module.exports.Template = env.Template;
 
 module.exports.Loader = Loader;
 module.exports.FileSystemLoader = loaders.FileSystemLoader;
-module.exports.ModuleLoader = loaders.ModuleLoader;
+module.exports.PrecompiledLoader = loaders.PrecompiledLoader;
 module.exports.WebLoader = loaders.WebLoader;
 
 module.exports.compiler = compiler;
@@ -34,8 +34,8 @@ module.exports.configure = function(templatesPath, opts) {
     }
 
     var myLoaders = [];
-    if (loaders.ModuleLoader && opts.compiledTemplatesFile) {
-      myLoaders.push(new loaders.ModuleLoader(opts.compiledTemplatesFile))
+    if (loaders.PrecompiledLoader && opts.precompiledTemplates) {
+      myLoaders.push(new loaders.PrecompiledLoader(opts.precompiledTemplates))
     }
     var noWatch = 'watch' in opts ? !opts.watch : false;
     var loader = loaders.FileSystemLoader || loaders.WebLoader;
