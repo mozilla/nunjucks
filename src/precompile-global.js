@@ -4,7 +4,8 @@ function precompileGlobal(name, template, opts) {
     name = JSON.stringify(name);
 
     var out = '(function() {' +
-        '(window.nunjucksPrecompiled = window.nunjucksPrecompiled || {})' +
+        'var env = null; try { if (window) env = window; } catch(e) {}; if (!env) env = module.exports = module.exports || {};' +
+        '(env.nunjucksPrecompiled = env.nunjucksPrecompiled || {})' +
         '[' + name + '] = (function() {\n' + template + '\n})();\n';
 
     if(opts.asFunction) {
