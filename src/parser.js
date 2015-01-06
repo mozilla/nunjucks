@@ -253,6 +253,29 @@ var Parser = Object.extend({
                                 [macroCall]);
     },
 
+    parseWithContext: function() {
+        var tok = this.peekToken();
+
+        var withContext = null;
+
+        if(this.skipSymbol('with')) {
+            withContext = true;
+        }
+        else if(this.skipSymbol('without')) {
+            withContext = false;
+        }
+
+        if(withContext !== null) {
+            if(!this.skipSymbol('context')) {
+                this.fail('parseFrom: expected context after with/without',
+                            tok.lineno,
+                            tok.colno);
+            }
+        }
+
+        return withContext;
+    },
+
     parseImport: function() {
         var importTok = this.peekToken();
         if(!this.skipSymbol('import')) {
@@ -270,10 +293,15 @@ var Parser = Object.extend({
         }
 
         var target = this.parsePrimary();
+
+        var withContext = this.parseWithContext();
+
         var node = new nodes.Import(importTok.lineno,
                                     importTok.colno,
                                     template,
-                                    target);
+                                    target,
+                                    withContext);
+
         this.advanceAfterBlockEnd(importTok.value);
 
         return node;
@@ -286,10 +314,6 @@ var Parser = Object.extend({
         }
 
         var template = this.parsePrimary();
-        var node = new nodes.FromImport(fromTok.lineno,
-                                        fromTok.colno,
-                                        template,
-                                        new nodes.NodeList());
 
         if(!this.skipSymbol('import')) {
             this.fail("parseFrom: expected import",
@@ -297,7 +321,8 @@ var Parser = Object.extend({
                             fromTok.colno);
         }
 
-        var names = node.names;
+        var names = new nodes.NodeList(),
+            withContext;
 
         while(1) {
             var nextTok = this.peekToken();
@@ -343,9 +368,15 @@ var Parser = Object.extend({
             else {
                 names.addChild(name);
             }
+
+            withContext = this.parseWithContext();
         }
 
-        return node;
+        return new nodes.FromImport(fromTok.lineno,
+                                    fromTok.colno,
+                                    template,
+                                    names,
+                                    withContext);
     },
 
     parseBlock: function() {

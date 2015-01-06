@@ -510,6 +510,48 @@
             finish(done);
         });
 
+        it('should import templates with context', function(done) {
+            equal('{% set bar = "BAR" %}' +
+                  '{% import "import-context.html" as imp with context %}' +
+                  '{{ imp.foo() }}',
+                  "Here's BAR");
+
+            equal('{% set bar = "BAR" %}' +
+                  '{% from "import-context.html" import foo with context %}' +
+                  '{{ foo() }}',
+                  "Here's BAR");
+
+            finish(done);
+        });
+
+        it('should import templates without context', function(done) {
+            equal('{% set bar = "BAR" %}' +
+                  '{% import "import-context.html" as imp without context %}' +
+                  '{{ imp.foo() }}',
+                  "Here's ");
+
+            equal('{% set bar = "BAR" %}' +
+                  '{% from "import-context.html" import foo without context %}' +
+                  '{{ foo() }}',
+                  "Here's ");
+
+            finish(done);
+        });
+
+        it('should default to importing without context', function(done) {
+            equal('{% set bar = "BAR" %}' +
+                  '{% import "import-context.html" as imp %}' +
+                  '{{ imp.foo() }}',
+                  "Here's ");
+
+            equal('{% set bar = "BAR" %}' +
+                  '{% from "import-context.html" import foo %}' +
+                  '{{ foo() }}',
+                  "Here's ");
+
+            finish(done);
+        });
+
         it('should inherit templates', function(done) {
             equal('{% extends "base.html" %}', 'FooBarBazFizzle');
             equal('hola {% extends "base.html" %} hizzle mumble', 'FooBarBazFizzle');

@@ -94,14 +94,14 @@ var AsyncEach = For.extend("AsyncEach");
 var AsyncAll = For.extend("AsyncAll");
 var Macro = Node.extend("Macro", { fields: ['name', 'args', 'body'] });
 var Caller = Macro.extend("Caller");
-var Import = Node.extend("Import", { fields: ['template', 'target'] });
+var Import = Node.extend("Import", { fields: ['template', 'target', 'withContext'] });
 var FromImport = Node.extend("FromImport", {
-    fields: ['template', 'names'],
+    fields: ['template', 'names', 'withContext'],
 
-    init: function(lineno, colno, template, names) {
+    init: function(lineno, colno, template, names, withContext) {
         this.parent(lineno, colno,
                     template,
-                    names || new NodeList());
+                    names || new NodeList(), withContext);
     }
 });
 var FunCall = Node.extend("FunCall", { fields: ['name', 'args'] });

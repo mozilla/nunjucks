@@ -530,7 +530,7 @@ var Compiler = Object.extend({
             var id = ids[i];
             var name = target.value;
 
-            this.emitLine('frame.set("' + name + '", ' + id + ', true);'); 
+            this.emitLine('frame.set("' + name + '", ' + id + ', true);');
 
             // We are running this for every var, but it's very
             // uncommon to assign to multiple vars anyway
@@ -894,7 +894,9 @@ var Compiler = Object.extend({
         this.emitLine(', ' + this.makeCallback(id));
         this.addScopeLevel();
 
-        this.emitLine(id + '.getExported(' + this.makeCallback(id));
+        this.emitLine(id + '.getExported(' +
+            (node.withContext ? 'context.getVariables(), frame.push(), ' : '') +
+            this.makeCallback(id));
         this.addScopeLevel();
 
         frame.set(target, id);
@@ -915,7 +917,9 @@ var Compiler = Object.extend({
         this.emitLine(', ' + this.makeCallback(importedId));
         this.addScopeLevel();
 
-        this.emitLine(importedId + '.getExported(' + this.makeCallback(importedId));
+        this.emitLine(importedId + '.getExported(' +
+            (node.withContext ? 'context.getVariables(), frame.push(), ' : '') +
+            this.makeCallback(importedId));
         this.addScopeLevel();
 
         lib.each(node.names.children, function(nameNode) {
