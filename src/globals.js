@@ -1,9 +1,9 @@
 
 function cycler(items) {
     var index = -1;
-    this.current = null;
 
     return {
+        current: null,
         reset: function() {
             index = -1;
             this.current = null;
