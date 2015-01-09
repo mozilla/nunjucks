@@ -26,6 +26,11 @@ var optimist = require('optimist')
         .string('name')
         .alias('n', 'n')
 
+    .describe('wrapper', 'Specify the wrapper used for the compiled template. "global" for browser as js to be included, "cjs-module" for server side as module')
+        .string('wrapper')
+        .default('wrapper', 'global')
+        .alias('w', 'wrapper')
+
     .describe('include', 'Include a file or folder which match the regex but would otherwise be excluded. You can use this flag multiple times')
         .string('include' )
         .default('include', ['\\.html$', '\\.jinja$'])
@@ -56,6 +61,7 @@ console.log(precompile(argv._[0], {
     env : env,
     force : argv.force,
     name : argv.name,
+    wrapper : argv.wrapper,
 
     include : [].concat(argv.include),
     exclude : [].concat(argv.exclude)
