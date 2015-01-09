@@ -235,25 +235,28 @@ var filters = {
 
         var res = '';  // Output
 
+        // Cast Numbers in the search term to string
         if(typeof old === 'number'){
             old = old +"";
-            }
+        }else if(typeof old !== "string") {
+            // If it is something other than number or string, return the original string
+            return str;
+        }
 
+        // Cast numbers in the replacement to string
         if(typeof str === 'number'){
             str = str +"";
         }
 
-        if(typeof old !== "string") {
-            return str;
-        }
-
         // ShortCircuits
-        if(!old){
+        if(old === ''){
+            // Mimic the python behaviour: empty string is replaced by replacement e.g. "abc"|replace("", ".") -> .a.b.c.
             res = new_ + str.split("").join(new_) + new_;
             return r.copySafeness(str, res);
         }
 
         var nextIndex = str.indexOf(old);
+        // if # of replacements to perform is 0, or the string to does not contain the old value, return the string
         if(maxCount === 0 || nextIndex == -1){
             return str;
         }

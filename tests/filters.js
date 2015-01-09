@@ -272,8 +272,19 @@
 
         it('replace', function(done) {
             equal('{{ 123456 | replace("4", ".") }}', '123.56');
+            equal('{{ 123456 | replace("4", ".") }}', '123.56');
             equal('{{ 12345.6 | replace("4", ".") }}', '123.5.6');
+            equal('{{ 12345.6 | replace(4, ".") }}', '123.5.6');
+            equal('{{ 12345.6 | replace("4", "7") }}', '12375.6');
+            equal('{{ 12345.6 | replace(4, 7) }}', '12375.6');
+            equal('{{ 123450.6 | replace(0, 7) }}', '123457.6');
             equal('{{ "aaabbbccc" | replace("", ".") }}', '.a.a.a.b.b.b.c.c.c.');
+            equal('{{ "aaabbbccc" | replace(null, ".") }}', 'aaabbbccc');
+            equal('{{ "aaabbbccc" | replace(undefined, ".") }}', 'aaabbbccc');
+            equal('{{ "aaabbbccc" | replace({}, ".") }}', 'aaabbbccc');
+            equal('{{ "aaabbbccc" | replace(true, ".") }}', 'aaabbbccc');
+            equal('{{ "aaabbbccc" | replace(false, ".") }}', 'aaabbbccc');
+            equal('{{ "aaabbbccc" | replace(["wrong"], ".") }}', 'aaabbbccc');
             equal('{{ "aaabbbccc" | replace("a", "x") }}', 'xxxbbbccc');
             equal('{{ "aaabbbccc" | replace("a", "x", 2) }}', 'xxabbbccc');
             equal('{{ "aaabbbbbccc" | replace("b", "y", 4) }}', 'aaayyyybccc');
@@ -284,8 +295,10 @@
             equal('{{ "aaabbbbbccc" | replace("b", "y", 4) }}', 'aaayyyybccc');
             equal('{{ "aaabbbbbccc" | replace("d", "y", 4) }}', 'aaabbbbbccc');
             equal('{{ "aaabbcccbbb" | replace("b", "y", 4) }}', 'aaayycccyyb');
-            // Infinite loop if unbounded / correctness if not
+
+            // Will result in an infinite loop if unbounded otherwise test will pass
             equal('{{ "<img src=" | replace("<img", "<img alt=val") }}', '<img alt=val src=');
+            equal('{{ "<img src=\\"http://www.example.com\\" />" | replace("<img", "replacement text") }}', 'replacement text src=\"http://www.example.com\" />');
 
             // Regex
             equal('{{ "aabbbb" | replace(r/ab{2}/, "z") }}', 'azbb');
