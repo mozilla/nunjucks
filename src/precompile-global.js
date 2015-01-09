@@ -1,7 +1,7 @@
 function precompileGlobal(name, template, opts) {
     opts = opts || {};
 
-		name = JSON.stringify(name);
+    name = JSON.stringify(name);
 
     var out = '(function() {' +
         '(window.nunjucksPrecompiled = window.nunjucksPrecompiled || {})' +
