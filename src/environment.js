@@ -122,7 +122,7 @@ var Environment = Obj.extend({
 
         // Resolve name relative to parentName
         if (parentName && (name.indexOf("./") == 0 || name.indexOf("../") == 0)) {
-            name = path.resolve(parentName, name);
+            name = path.resolve(path.dirname(parentName), name);
         }
 
         var tmpl = this.cache[name];

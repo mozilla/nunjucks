@@ -43,7 +43,7 @@ var FileSystemLoader = Loader.extend({
         var paths = this.searchPaths;
 
         for(var i=0; i<paths.length; i++) {
-            var p = path.join(paths[i], name);
+            var p = path.resolve(paths[i], name);
 
             // Only allow the current directory and anything
             // underneath it to be searched
