@@ -43,12 +43,12 @@ var FileSystemLoader = Loader.extend({
         var paths = this.searchPaths;
 
         for(var i=0; i<paths.length; i++) {
+            var basePath = path.resolve(paths[i]);
             var p = path.resolve(paths[i], name);
 
             // Only allow the current directory and anything
             // underneath it to be searched
-            if((paths[i] == '.' || p.indexOf(paths[i]) === 0) &&
-               existsSync(p)) {
+            if(p.indexOf(basePath) === 0 && existsSync(p)) {
                 fullpath = p;
                 break;
             }
