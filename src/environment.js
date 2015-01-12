@@ -99,15 +99,15 @@ var Environment = Obj.extend({
         return this.filters[name];
     },
 
-    getTemplate: function(name, eagerCompile, fromName, cb) {
+    getTemplate: function(name, eagerCompile, parentName, cb) {
         if(name && name.raw) {
             // this fixes autoescape for templates referenced in symbols
             name = name.raw;
         }
 
-        if(lib.isFunction(fromName)) {
-            cb = fromName;
-            fromName = null;
+        if(lib.isFunction(parentName)) {
+            cb = parentName;
+            parentName = null;
             eagerCompile = eagerCompile || false;
         }
 
@@ -118,6 +118,11 @@ var Environment = Obj.extend({
 
         if(typeof name !== 'string') {
             throw new Error('template names must be a string: ' + name);
+        }
+
+        // Resolve name relative to parentName
+        if (parentName && (name.indexOf("./") == 0 || name.indexOf("../") == 0)) {
+            name = path.resolve(parentName, name);
         }
 
         var tmpl = this.cache[name];
