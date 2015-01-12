@@ -342,7 +342,14 @@ var Template = Obj.extend({
         }
 
         return lib.withPrettyErrors(this.path, this.env.dev, function() {
-            this.compile();
+
+            // ctach compile errors for async rendering
+            try {
+                this.compile();
+            } catch (e) {
+                if (cb) return cb(e);
+                else throw e;
+            }
 
             var context = new Context(ctx || {}, this.blocks);
             var syncResult = null;
@@ -360,6 +367,7 @@ var Template = Obj.extend({
         }.bind(this));
     },
 
+
     getExported: function(ctx, frame, cb) {
         if (typeof ctx === 'function') {
             cb = ctx;
@@ -371,7 +379,13 @@ var Template = Obj.extend({
             frame = null;
         }
 
-        this.compile();
+        // ctach compile errors for async rendering
+        try {
+            this.compile();
+        } catch (e) {
+            if (cb) return cb(e);
+            else throw e;
+        }
 
         // Run the rootRenderFunc to populate the context with exported vars
         var context = new Context(ctx || {}, this.blocks);
