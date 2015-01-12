@@ -99,10 +99,16 @@ var Environment = Obj.extend({
         return this.filters[name];
     },
 
-    getTemplate: function(name, eagerCompile, cb) {
+    getTemplate: function(name, eagerCompile, fromName, cb) {
         if(name && name.raw) {
             // this fixes autoescape for templates referenced in symbols
             name = name.raw;
+        }
+
+        if(lib.isFunction(fromName)) {
+            cb = fromName;
+            fromName = null;
+            eagerCompile = eagerCompile || false;
         }
 
         if(lib.isFunction(eagerCompile)) {
