@@ -343,7 +343,7 @@ var Template = Obj.extend({
 
         return lib.withPrettyErrors(this.path, this.env.dev, function() {
 
-            // ctach compile errors for async rendering
+            // Catch compile errors for async rendering
             try {
                 this.compile();
             } catch (e) {
@@ -379,7 +379,7 @@ var Template = Obj.extend({
             frame = null;
         }
 
-        // ctach compile errors for async rendering
+        // Catch compile errors for async rendering
         try {
             this.compile();
         } catch (e) {
