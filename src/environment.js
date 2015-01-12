@@ -120,11 +120,6 @@ var Environment = Obj.extend({
             throw new Error('template names must be a string: ' + name);
         }
 
-        // Resolve name relative to parentName
-        if (parentName && (name.indexOf("./") == 0 || name.indexOf("../") == 0)) {
-            name = path.resolve(path.dirname(parentName), name);
-        }
-
         var tmpl = this.cache[name];
 
         if(tmpl) {
@@ -149,6 +144,11 @@ var Environment = Obj.extend({
                     else {
                         next();
                     }
+                }
+
+                // Resolve name relative to parentName
+                if (parentName && (name.indexOf("./") == 0 || name.indexOf("../") == 0)) {
+                    name = loader.resolve(parentName, name);
                 }
 
                 if(loader.async) {
