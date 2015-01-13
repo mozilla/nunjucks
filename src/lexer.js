@@ -1,6 +1,6 @@
 var lib = require('./lib');
 
-var whitespaceChars = " \n\t\r";
+var whitespaceChars = " \n\t\r\u00A0";
 var delimChars = "()[]{}%*-+/#,:|.<>=!";
 var intChars = "0123456789";
 

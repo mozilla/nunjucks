@@ -81,6 +81,15 @@
                       lexer.TOKEN_DATA);
         });
 
+        it('should treat the non-breaking space as valid whitespace', function() {
+            tokens = lexer.lex('{{\u00A0foo }}');
+            tok = tokens.nextToken();
+            tok = tokens.nextToken();
+            tok = tokens.nextToken();
+            expect(tok.type).to.be(lexer.TOKEN_SYMBOL);
+            expect(tok.value).to.be("foo");
+        });
+
         it('should parse block start and end', function() {
             tokens = lexer.lex('data {% foo %} bar bizzle');
             hasTokens(tokens,
