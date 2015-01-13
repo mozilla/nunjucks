@@ -82,7 +82,7 @@
         });
 
         it('should treat the non-breaking space as valid whitespace', function() {
-            tokens = lexer.lex('data {{\u00A0foo }} bar bizzle');
+            tokens = lexer.lex('{{\u00A0foo }}');
             tok = tokens.nextToken();
             tok = tokens.nextToken();
             tok = tokens.nextToken();
