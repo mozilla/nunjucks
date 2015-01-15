@@ -240,8 +240,14 @@ var Environment = Obj.extend({
         return syncResult;
     },
 
-    renderString: function(src, ctx, cb) {
-        var tmpl = new Template(src, this);
+    renderString: function(src, ctx, opts, cb) {
+        if(lib.isFunction(opts)) {
+            cb = opts;
+            opts = {};
+        }
+        opts = opts || {};
+
+        var tmpl = new Template(src, this, opts.path);
         return tmpl.render(ctx, cb);
     }
 });

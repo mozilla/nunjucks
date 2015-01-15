@@ -1,5 +1,6 @@
 (function() {
     var expect, Environment, Loader, templatesPath;
+    var path = require('path');
 
     if(typeof require != 'undefined') {
         expect = require('expect.js');
@@ -35,7 +36,9 @@
 
         it('should handle correctly relative paths in renderString', function() {
             var env = new Environment(new Loader(templatesPath));
-            expect(env.renderString('{% extends "./relative/test1.html" %}{% block block1 %}Test3{% endblock %}')).to.be('FooTest3BazFizzle');
+            expect(env.renderString('{% extends "./relative/test1.html" %}{% block block1 %}Test3{% endblock %}', {}, {
+                path: path.resolve(templatesPath, "string.html")
+            })).to.be('FooTest3BazFizzle');
         });
     });
 })();
