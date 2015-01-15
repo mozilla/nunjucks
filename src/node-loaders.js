@@ -8,8 +8,9 @@ var chokidar = require('chokidar');
 var existsSync = fs.existsSync || path.existsSync;
 
 var FileSystemLoader = Loader.extend({
-    init: function(searchPaths, noWatch) {
+    init: function(searchPaths, noWatch, noCache) {
         this.pathsToNames = {};
+        this.noCache = !!noCache;
 
         if(searchPaths) {
             searchPaths = lib.isArray(searchPaths) ? searchPaths : [searchPaths];
@@ -60,7 +61,8 @@ var FileSystemLoader = Loader.extend({
         this.pathsToNames[fullpath] = name;
 
         return { src: fs.readFileSync(fullpath, 'utf-8'),
-                 path: fullpath };
+                 path: fullpath,
+                 noCache: this.noCache };
     }
 });
 
