@@ -32,5 +32,10 @@
             expect(child1.render()).to.be('FooTest1BazFizzle');
             expect(child2.render()).to.be('FooTest2BazFizzle');
         });
+
+        it('should handle correctly relative paths in renderString', function() {
+            var env = new Environment(new Loader(templatesPath));
+            expect(env.renderString('{% extends "./relative/test1.html" %}{% block block1 %}Test3{% endblock %}')).to.be('FooTest3BazFizzle');
+        });
     });
 })();
