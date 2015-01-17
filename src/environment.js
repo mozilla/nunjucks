@@ -27,6 +27,10 @@ var Environment = Obj.extend({
         // defaults to false
         this.autoesc = !!opts.autoescape;
 
+        this.trimBlocks = !!opts.trimBlocks;
+
+        this.lstripBlocks = !!opts.lstripBlocks;
+
         if(!loaders) {
             // The filesystem loader is only available client-side
             if(builtin_loaders.FileSystemLoader) {
@@ -415,7 +419,9 @@ var Template = Obj.extend({
                                           this.env.asyncFilters,
                                           this.env.extensionsList,
                                           this.path,
-                                          this.env.lexerTags);
+                                          this.env.lexerTags,
+                                          this.env.trimBlocks,
+                                          this.env.lstripBlocks);
 
             var func = new Function(source);
             props = func();

@@ -71,6 +71,48 @@
                             lexer.TOKEN_DATA);
         });
 
+        it('should trim blocks', function () {
+            tokens = lexer.lex('  {% if true %}\n    foo\n  {% endif %}\n', undefined, true);
+            hasTokens(tokens,
+                      [lexer.TOKEN_DATA, '  '],
+                      lexer.TOKEN_BLOCK_START,
+                      lexer.TOKEN_SYMBOL,
+                      lexer.TOKEN_BOOLEAN,
+                      lexer.TOKEN_BLOCK_END,
+                      [lexer.TOKEN_DATA, '    foo\n  '],
+                      lexer.TOKEN_BLOCK_START,
+                      lexer.TOKEN_SYMBOL,
+                      lexer.TOKEN_BLOCK_END);
+        });
+
+        it('should lstrip and trim blocks', function () {
+            tokens = lexer.lex('test\n {% if true %}\n  foo\n {% endif %}\n</div>', undefined, true, true);
+            hasTokens(tokens,
+                      [lexer.TOKEN_DATA, 'test\n'],
+                      lexer.TOKEN_BLOCK_START,
+                      lexer.TOKEN_SYMBOL,
+                      lexer.TOKEN_BOOLEAN,
+                      lexer.TOKEN_BLOCK_END,
+                      [lexer.TOKEN_DATA, '  foo\n'],
+                      lexer.TOKEN_BLOCK_START,
+                      lexer.TOKEN_SYMBOL,
+                      lexer.TOKEN_BLOCK_END,
+                      [lexer.TOKEN_DATA, '</div>']);
+        });
+
+        it('should lstrip and not collapse whitespace between blocks', function () {
+            tokens = lexer.lex('   {% t %} {% t %}', undefined, false, true);
+            hasTokens(tokens,
+                      lexer.TOKEN_BLOCK_START,
+                      lexer.TOKEN_SYMBOL,
+                      lexer.TOKEN_BLOCK_END,
+                      [lexer.TOKEN_DATA, ' '],
+                      lexer.TOKEN_BLOCK_START,
+                      lexer.TOKEN_SYMBOL,
+                      lexer.TOKEN_BLOCK_END);
+        });
+
+
         it('should parse variable start and end', function() {
             tokens = lexer.lex('data {{ foo }} bar bizzle');
             hasTokens(tokens,
