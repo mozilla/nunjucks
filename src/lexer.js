@@ -45,7 +45,7 @@ function token(type, value, lineno, colno) {
     };
 }
 
-function Tokenizer(str, tags, trimBlocks, lstripBlocks) {
+function Tokenizer(str, opts) {
     this.str = str;
     this.index = 0;
     this.len = str.length;
@@ -54,7 +54,9 @@ function Tokenizer(str, tags, trimBlocks, lstripBlocks) {
 
     this.in_code = false;
 
-    tags = tags || {};
+    opts = opts || {};
+
+    tags = opts.tags || {};
     this.tags = {
         BLOCK_START: tags.blockStart || BLOCK_START,
         BLOCK_END: tags.blockEnd || BLOCK_END,
@@ -64,18 +66,18 @@ function Tokenizer(str, tags, trimBlocks, lstripBlocks) {
         COMMENT_END: tags.commentEnd || COMMENT_END
     };
 
-    this.trimBlocks = !!trimBlocks;
-    this.lstripBlocks = !!lstripBlocks;
+    this.trimBlocks = !!opts.trimBlocks;
+    this.lstripBlocks = !!opts.lstripBlocks;
 }
 
 Tokenizer.prototype.nextToken = function() {
     var lineno = this.lineno;
     var colno = this.colno;
+    var tok;
 
     if(this.in_code) {
         // Otherwise, if we are in a block parse it as code
         var cur = this.current();
-        var tok;
 
         if(this.is_finished()) {
             // We have nothing else to parse
@@ -205,7 +207,6 @@ Tokenizer.prototype.nextToken = function() {
                           this.tags.VARIABLE_START.charAt(0) +
                           this.tags.COMMENT_START.charAt(0) +
                           this.tags.COMMENT_END.charAt(0));
-        var tok;
 
         if(this.is_finished()) {
             return null;
@@ -437,8 +438,8 @@ Tokenizer.prototype.previous = function() {
 };
 
 module.exports = {
-    lex: function(src, tags, trimBlocks, lstripBlocks) {
-        return new Tokenizer(src, tags, trimBlocks, lstripBlocks);
+    lex: function(src, opts) {
+        return new Tokenizer(src, opts);
     },
 
     TOKEN_STRING: TOKEN_STRING,

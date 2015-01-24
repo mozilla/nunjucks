@@ -72,7 +72,7 @@
         });
 
         it('should trim blocks', function () {
-            tokens = lexer.lex('  {% if true %}\n    foo\n  {% endif %}\n', undefined, true);
+            tokens = lexer.lex('  {% if true %}\n    foo\n  {% endif %}\n', {trimBlocks: true});
             hasTokens(tokens,
                       [lexer.TOKEN_DATA, '  '],
                       lexer.TOKEN_BLOCK_START,
@@ -86,7 +86,10 @@
         });
 
         it('should lstrip and trim blocks', function () {
-            tokens = lexer.lex('test\n {% if true %}\n  foo\n {% endif %}\n</div>', undefined, true, true);
+            tokens = lexer.lex('test\n {% if true %}\n  foo\n {% endif %}\n</div>', {
+                lstripBlocks: true,
+                trimBlocks: true
+            });
             hasTokens(tokens,
                       [lexer.TOKEN_DATA, 'test\n'],
                       lexer.TOKEN_BLOCK_START,
@@ -101,7 +104,7 @@
         });
 
         it('should lstrip and not collapse whitespace between blocks', function () {
-            tokens = lexer.lex('   {% t %} {% t %}', undefined, false, true);
+            tokens = lexer.lex('   {% t %} {% t %}', {lstripBlocks: true});
             hasTokens(tokens,
                       lexer.TOKEN_BLOCK_START,
                       lexer.TOKEN_SYMBOL,
@@ -284,7 +287,7 @@
         }),
 
         it('should allow changing the variable start and end', function() {
-            tokens = lexer.lex('data {= var =}', {variableStart: '{=', variableEnd: '=}'});
+            tokens = lexer.lex('data {= var =}', {tags: {variableStart: '{=', variableEnd: '=}'}});
             hasTokens(tokens,
                       lexer.TOKEN_DATA,
                       lexer.TOKEN_VARIABLE_START,
@@ -293,14 +296,14 @@
         }),
 
         it('should allow changing the block start and end', function() {
-            tokens = lexer.lex('{= =}', {blockStart: '{=', blockEnd: '=}'});
+            tokens = lexer.lex('{= =}', {tags: {blockStart: '{=', blockEnd: '=}'}});
             hasTokens(tokens,
                       lexer.TOKEN_BLOCK_START,
                       lexer.TOKEN_BLOCK_END);
         }),
 
         it('should allow changing the variable start and end', function() {
-            tokens = lexer.lex('data {= var =}', {variableStart: '{=', variableEnd: '=}'});
+            tokens = lexer.lex('data {= var =}', {tags: {variableStart: '{=', variableEnd: '=}'}});
             hasTokens(tokens,
                       lexer.TOKEN_DATA,
                       lexer.TOKEN_VARIABLE_START,
@@ -309,7 +312,7 @@
         }),
 
         it('should allow changing the comment start and end', function() {
-            tokens = lexer.lex('<!-- A comment! -->', {commentStart: '<!--', commentEnd: '-->'});
+            tokens = lexer.lex('<!-- A comment! -->', {tags: {commentStart: '<!--', commentEnd: '-->'}});
             hasTokens(tokens,
                       lexer.TOKEN_COMMENT);
         }),
@@ -318,13 +321,13 @@
          * Test that this bug is fixed: https://github.com/mozilla/nunjucks/issues/235
          */
         it('should have individual lexer tag settings for each environment', function() {
-            tokens = lexer.lex('{=', {variableStart: '{='});
+            tokens = lexer.lex('{=', {tags: {variableStart: '{='}});
             hasTokens(tokens, lexer.TOKEN_VARIABLE_START);
 
             tokens = lexer.lex('{{');
             hasTokens(tokens, lexer.TOKEN_VARIABLE_START);
 
-            tokens = lexer.lex('{{', {variableStart: '<<<'});
+            tokens = lexer.lex('{{', {tags: {variableStart: '<<<'}});
             hasTokens(tokens, lexer.TOKEN_DATA);
 
             tokens = lexer.lex('{{');
