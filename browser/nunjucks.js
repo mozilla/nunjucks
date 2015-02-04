@@ -441,14 +441,14 @@ var AsyncEach = For.extend("AsyncEach");
 var AsyncAll = For.extend("AsyncAll");
 var Macro = Node.extend("Macro", { fields: ['name', 'args', 'body'] });
 var Caller = Macro.extend("Caller");
-var Import = Node.extend("Import", { fields: ['template', 'target'] });
+var Import = Node.extend("Import", { fields: ['template', 'target', 'withContext'] });
 var FromImport = Node.extend("FromImport", {
-    fields: ['template', 'names'],
+    fields: ['template', 'names', 'withContext'],
 
-    init: function(lineno, colno, template, names) {
+    init: function(lineno, colno, template, names, withContext) {
         this.parent(lineno, colno,
                     template,
-                    names || new NodeList());
+                    names || new NodeList(), withContext);
     }
 });
 var FunCall = Node.extend("FunCall", { fields: ['name', 'args'] });
@@ -993,7 +993,7 @@ modules['runtime'] = {
 (function() {
 var lib = modules["lib"];
 
-var whitespaceChars = " \n\t\r";
+var whitespaceChars = " \n\t\r\u00A0";
 var delimChars = "()[]{}%*-+/#,:|.<>=!";
 var intChars = "0123456789";
 
@@ -1289,7 +1289,7 @@ Tokenizer.prototype.parseString = function(delimiter) {
 };
 
 Tokenizer.prototype._matches = function(str) {
-    if(this.index + str.length > this.length) {
+    if(this.index + str.length > this.len) {
         return null;
     }
 
@@ -1691,6 +1691,29 @@ var Parser = Object.extend({
                                 [macroCall]);
     },
 
+    parseWithContext: function() {
+        var tok = this.peekToken();
+
+        var withContext = null;
+
+        if(this.skipSymbol('with')) {
+            withContext = true;
+        }
+        else if(this.skipSymbol('without')) {
+            withContext = false;
+        }
+
+        if(withContext !== null) {
+            if(!this.skipSymbol('context')) {
+                this.fail('parseFrom: expected context after with/without',
+                            tok.lineno,
+                            tok.colno);
+            }
+        }
+
+        return withContext;
+    },
+
     parseImport: function() {
         var importTok = this.peekToken();
         if(!this.skipSymbol('import')) {
@@ -1708,10 +1731,15 @@ var Parser = Object.extend({
         }
 
         var target = this.parsePrimary();
+
+        var withContext = this.parseWithContext();
+
         var node = new nodes.Import(importTok.lineno,
                                     importTok.colno,
                                     template,
-                                    target);
+                                    target,
+                                    withContext);
+
         this.advanceAfterBlockEnd(importTok.value);
 
         return node;
@@ -1724,10 +1752,6 @@ var Parser = Object.extend({
         }
 
         var template = this.parsePrimary();
-        var node = new nodes.FromImport(fromTok.lineno,
-                                        fromTok.colno,
-                                        template,
-                                        new nodes.NodeList());
 
         if(!this.skipSymbol('import')) {
             this.fail("parseFrom: expected import",
@@ -1735,7 +1759,8 @@ var Parser = Object.extend({
                             fromTok.colno);
         }
 
-        var names = node.names;
+        var names = new nodes.NodeList(),
+            withContext;
 
         while(1) {
             var nextTok = this.peekToken();
@@ -1781,9 +1806,15 @@ var Parser = Object.extend({
             else {
                 names.addChild(name);
             }
+
+            withContext = this.parseWithContext();
         }
 
-        return node;
+        return new nodes.FromImport(fromTok.lineno,
+                                    fromTok.colno,
+                                    template,
+                                    names,
+                                    withContext);
     },
 
     parseBlock: function() {
@@ -2070,51 +2101,21 @@ var Parser = Object.extend({
     },
 
     parseInlineIf: function() {
-        var node = this.parseIn();
+        var node = this.parseOr();
         if(this.skipSymbol('if')) {
-            var cond_node = this.parseIn();
+            var cond_node = this.parseOr();
             var body_node = node;
             node = new nodes.InlineIf(node.lineno, node.colno);
             node.body = body_node;
             node.cond = cond_node;
             if(this.skipSymbol('else')) {
-                node.else_ = this.parseIn();
+                node.else_ = this.parseOr();
             } else {
                 node.else_ = null;
             }
         }
 
         return node;
-    },
-
-    parseIn: function() {
-      var node = this.parseOr();
-      while(1) {
-        // check if the next token is 'not'
-        var tok = this.nextToken();
-        if (!tok) { break; }
-        var invert = tok.type == lexer.TOKEN_SYMBOL && tok.value == 'not';
-        // if it wasn't 'not', put it back
-        if (!invert) { this.pushToken(tok); }
-        if (this.skipSymbol('in')) {
-          var node2 = this.parseOr();
-          node = new nodes.In(node.lineno,
-                              node.colno,
-                              node,
-                              node2);
-          if (invert) {
-            node = new nodes.Not(node.lineno,
-                                 node.colno,
-                                 node);
-          }
-        }
-        else {
-          // if we'd found a 'not' but this wasn't an 'in', put back the 'not'
-          if (invert) { this.pushToken(tok); }
-          break;
-        }
-      }
-      return node;
     },
 
     parseOr: function() {
@@ -2148,7 +2149,37 @@ var Parser = Object.extend({
                                  tok.colno,
                                  this.parseNot());
         }
-        return this.parseCompare();
+        return this.parseIn();
+    },
+
+    parseIn: function() {
+      var node = this.parseCompare();
+      while(1) {
+        // check if the next token is 'not'
+        var tok = this.nextToken();
+        if (!tok) { break; }
+        var invert = tok.type == lexer.TOKEN_SYMBOL && tok.value == 'not';
+        // if it wasn't 'not', put it back
+        if (!invert) { this.pushToken(tok); }
+        if (this.skipSymbol('in')) {
+          var node2 = this.parseCompare();
+          node = new nodes.In(node.lineno,
+                              node.colno,
+                              node,
+                              node2);
+          if (invert) {
+            node = new nodes.Not(node.lineno,
+                                 node.colno,
+                                 node);
+          }
+        }
+        else {
+          // if we'd found a 'not' but this wasn't an 'in', put back the 'not'
+          if (invert) { this.pushToken(tok); }
+          break;
+        }
+      }
+      return node;
     },
 
     parseCompare: function() {
@@ -2319,7 +2350,7 @@ var Parser = Object.extend({
                 val = false;
             }
             else {
-                this.fail("invalid boolean: " + tok.val,
+                this.fail("invalid boolean: " + tok.value,
                           tok.lineno,
                           tok.colno);
             }
@@ -3374,7 +3405,7 @@ var Compiler = Object.extend({
             var id = ids[i];
             var name = target.value;
 
-            this.emitLine('frame.set("' + name + '", ' + id + ', true);'); 
+            this.emitLine('frame.set("' + name + '", ' + id + ', true);');
 
             // We are running this for every var, but it's very
             // uncommon to assign to multiple vars anyway
@@ -3738,7 +3769,9 @@ var Compiler = Object.extend({
         this.emitLine(', ' + this.makeCallback(id));
         this.addScopeLevel();
 
-        this.emitLine(id + '.getExported(' + this.makeCallback(id));
+        this.emitLine(id + '.getExported(' +
+            (node.withContext ? 'context.getVariables(), frame.push(), ' : '') +
+            this.makeCallback(id));
         this.addScopeLevel();
 
         frame.set(target, id);
@@ -3759,7 +3792,9 @@ var Compiler = Object.extend({
         this.emitLine(', ' + this.makeCallback(importedId));
         this.addScopeLevel();
 
-        this.emitLine(importedId + '.getExported(' + this.makeCallback(importedId));
+        this.emitLine(importedId + '.getExported(' +
+            (node.withContext ? 'context.getVariables(), frame.push(), ' : '') +
+            this.makeCallback(importedId));
         this.addScopeLevel();
 
         lib.each(node.names.children, function(nameNode) {
@@ -4408,9 +4443,9 @@ modules['filters'] = filters;
 
 function cycler(items) {
     var index = -1;
-    this.current = null;
 
     return {
+        current: null,
         reset: function() {
             index = -1;
             this.current = null;
@@ -4919,7 +4954,14 @@ var Template = Obj.extend({
         }
 
         return lib.withPrettyErrors(this.path, this.env.dev, function() {
-            this.compile();
+
+            // Catch compile errors for async rendering
+            try {
+                this.compile();
+            } catch (e) {
+                if (cb) return cb(e);
+                else throw e;
+            }
 
             var context = new Context(ctx || {}, this.blocks);
             var syncResult = null;
@@ -4937,14 +4979,31 @@ var Template = Obj.extend({
         }.bind(this));
     },
 
-    getExported: function(cb) {
-        this.compile();
+
+    getExported: function(ctx, frame, cb) {
+        if (typeof ctx === 'function') {
+            cb = ctx;
+            ctx = {};
+        }
+
+        if (typeof frame === 'function') {
+            cb = frame;
+            frame = null;
+        }
+
+        // Catch compile errors for async rendering
+        try {
+            this.compile();
+        } catch (e) {
+            if (cb) return cb(e);
+            else throw e;
+        }
 
         // Run the rootRenderFunc to populate the context with exported vars
-        var context = new Context({}, this.blocks);
+        var context = new Context(ctx || {}, this.blocks);
         this.rootRenderFunc(this.env,
                             context,
-                            new Frame(),
+                            frame || new Frame(),
                             runtime,
                             function() {
                                 cb(null, context.getExported());
@@ -4969,6 +5028,7 @@ var Template = Obj.extend({
                                           this.env.extensionsList,
                                           this.path,
                                           this.env.lexerTags);
+
             var func = new Function(source);
             props = func();
         }
