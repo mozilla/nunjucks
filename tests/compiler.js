@@ -1033,5 +1033,32 @@
 
             finish(done);
         });
+
+        describe('globals called __filename and __dirname', function() {
+            it('should not be set when rendering a string not from a file', function(done) {
+                equal('{{ __filename }} ~ {{ __dirname }}',
+                      {},
+                      ' ~ ');
+
+                finish(done);
+            });
+
+            it('should be set when there is a filename known', function(done) {
+                equal('{% include "filename-and-dirname.html" %}',
+                      {},
+                      'filename-and-dirname.html ~ \n' +
+                      'dir/filename-and-dirname-2.html ~ dir');
+
+                finish(done);
+            });
+
+            it('should not be able to override them', function(done) {
+                equal('{% include "dir/filename-and-dirname-2.html" %}',
+                      {__filename: 'override'},
+                      'dir/filename-and-dirname-2.html ~ dir');
+
+                finish(done);
+            });
+        });
     });
 })();
