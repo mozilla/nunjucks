@@ -189,8 +189,12 @@
         });
 
         it('list', function(done) {
+            var person = {name: "Joe", age: 83};
             equal('{% for i in "foobar" | list %}{{ i }},{% endfor %}',
                   'f,o,o,b,a,r,');
+            equal('{% for pair in person | list %}{{ pair.key }}: {{ pair.value }} - {% endfor %}',
+                  {person: person}, 'name: Joe - age: 83 - ');
+            equal('{% for i in [1, 2] | list %}{{ i }}{% endfor %}', '12');
             finish(done);
         });
 
