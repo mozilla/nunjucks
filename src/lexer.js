@@ -45,7 +45,7 @@ function token(type, value, lineno, colno) {
     };
 }
 
-function Tokenizer(str, tags) {
+function Tokenizer(str, opts) {
     this.str = str;
     this.index = 0;
     this.len = str.length;
@@ -54,7 +54,9 @@ function Tokenizer(str, tags) {
 
     this.in_code = false;
 
-    tags = tags || {};
+    opts = opts || {};
+
+    tags = opts.tags || {};
     this.tags = {
         BLOCK_START: tags.blockStart || BLOCK_START,
         BLOCK_END: tags.blockEnd || BLOCK_END,
@@ -63,16 +65,19 @@ function Tokenizer(str, tags) {
         COMMENT_START: tags.commentStart || COMMENT_START,
         COMMENT_END: tags.commentEnd || COMMENT_END
     };
+
+    this.trimBlocks = !!opts.trimBlocks;
+    this.lstripBlocks = !!opts.lstripBlocks;
 }
 
 Tokenizer.prototype.nextToken = function() {
     var lineno = this.lineno;
     var colno = this.colno;
+    var tok;
 
     if(this.in_code) {
         // Otherwise, if we are in a block parse it as code
         var cur = this.current();
-        var tok;
 
         if(this.is_finished()) {
             // We have nothing else to parse
@@ -95,6 +100,13 @@ Tokenizer.prototype.nextToken = function() {
             // breaks on delimiters so we can assume the token parsing
             // doesn't consume these elsewhere
             this.in_code = false;
+            if(this.trimBlocks) {
+                cur = this.current();
+                if(cur === '\n') {
+                    // Skip newline
+                    this.forward();
+                }
+            }
             return token(TOKEN_BLOCK_END, tok, lineno, colno);
         }
         else if((tok = this._extractString(this.tags.VARIABLE_END))) {
@@ -195,7 +207,6 @@ Tokenizer.prototype.nextToken = function() {
                           this.tags.VARIABLE_START.charAt(0) +
                           this.tags.COMMENT_START.charAt(0) +
                           this.tags.COMMENT_END.charAt(0));
-        var tok;
 
         if(this.is_finished()) {
             return null;
@@ -232,6 +243,21 @@ Tokenizer.prototype.nextToken = function() {
                     this._matches(this.tags.VARIABLE_START) ||
                     this._matches(this.tags.COMMENT_START)) &&
                   !in_comment) {
+                    if(this.lstripBlocks &&
+                        this._matches(this.tags.BLOCK_START) &&
+                        this.colno > 0 &&
+                        this.colno <= tok.length) {
+                        var lastLine = tok.slice(-this.colno);
+                        if(/^\s+$/.test(lastLine)) {
+                            // Remove block leading whitespace from beginning of the string
+                            tok = tok.slice(0, -this.colno);
+                            if(!tok.length) {
+                                // All data removed, collapse to avoid unnecessary nodes
+                                // by returning next token (block start)
+                                return this.nextToken();
+                            }
+                        }
+                    }
                     // If it is a start tag, stop looping
                     break;
                 }
@@ -412,8 +438,8 @@ Tokenizer.prototype.previous = function() {
 };
 
 module.exports = {
-    lex: function(src, tags) {
-        return new Tokenizer(src, tags);
+    lex: function(src, opts) {
+        return new Tokenizer(src, opts);
     },
 
     TOKEN_STRING: TOKEN_STRING,

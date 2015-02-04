@@ -1189,8 +1189,8 @@ var Parser = Object.extend({
 // nodes.printNodes(n);
 
 module.exports = {
-    parse: function(src, extensions, lexerTags) {
-        var p = new Parser(lexer.lex(src, lexerTags));
+    parse: function(src, extensions, opts) {
+        var p = new Parser(lexer.lex(src, opts));
         if (extensions !== undefined) {
             p.extensions = extensions;
         }

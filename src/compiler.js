@@ -130,7 +130,7 @@ var Compiler = Object.extend({
     _bufferAppend: function(func) {
         this.emit(this.buffer + ' += runtime.suppressValue(');
         func.call(this);
-        this.emit(', env.autoesc);\n');
+        this.emit(', env.opts.autoescape);\n');
     },
 
     _compileChildren: function(node, frame) {
@@ -277,12 +277,12 @@ var Compiler = Object.extend({
         if(async) {
             var res = this.tmpid();
             this.emitLine(', ' + this.makeCallback(res));
-            this.emitLine(this.buffer + ' += runtime.suppressValue(' + res + ', ' + autoescape + ' && env.autoesc);');
+            this.emitLine(this.buffer + ' += runtime.suppressValue(' + res + ', ' + autoescape + ' && env.opts.autoescape);');
             this.addScopeLevel();
         }
         else {
             this.emit(')');
-            this.emit(', ' + autoescape + ' && env.autoesc);\n');
+            this.emit(', ' + autoescape + ' && env.opts.autoescape);\n');
         }
     },
 
@@ -427,7 +427,7 @@ var Compiler = Object.extend({
         this._compileExpression(node.target, frame);
         this.emit('),');
         this._compileExpression(node.val, frame);
-        this.emit(', env.autoesc)');
+        this.emit(', env.opts.autoescape)');
     },
 
     _getNodeName: function(node) {
@@ -1034,7 +1034,7 @@ var Compiler = Object.extend({
             else {
                 this.emit(this.buffer + ' += runtime.suppressValue(');
                 this.compile(children[i], frame);
-                this.emit(', env.autoesc);\n');
+                this.emit(', env.opts.autoescape);\n');
             }
         }
     },
@@ -1103,7 +1103,7 @@ var Compiler = Object.extend({
 // console.log(tmpl);
 
 module.exports = {
-    compile: function(src, asyncFilters, extensions, name, lexerTags) {
+    compile: function(src, asyncFilters, extensions, name, opts) {
         var c = new Compiler();
 
         // Run the extension preprocessors against the source.
@@ -1115,7 +1115,9 @@ module.exports = {
             }
         }
 
-        c.compile(transformer.transform(parser.parse(src, extensions, lexerTags),
+        c.compile(transformer.transform(parser.parse(src,
+                                                     extensions,
+                                                     opts),
                                         asyncFilters,
                                         name));
         return c.getCode();

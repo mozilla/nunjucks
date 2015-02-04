@@ -17,15 +17,18 @@ var Environment = Obj.extend({
         // (the full trace from within nunjucks may confuse developers using
         //  the library)
         // defaults to false
-        opts = opts || {};
-        this.dev = !!opts.dev;
-        this.lexerTags = opts.tags;
+        var opts = this.opts = opts || {};
+        this.opts.dev = !!opts.dev;
 
         // The autoescape flag sets global autoescaping. If true,
         // every string variable will be escaped by default.
         // If false, strings can be manually escaped using the `escape` filter.
         // defaults to false
-        this.autoesc = !!opts.autoescape;
+        this.opts.autoescape = !!opts.autoescape;
+
+        this.opts.trimBlocks = !!opts.trimBlocks;
+
+        this.opts.lstripBlocks = !!opts.lstripBlocks;
 
         if(!loaders) {
             // The filesystem loader is only available client-side
@@ -415,7 +418,7 @@ var Template = Obj.extend({
                                           this.env.asyncFilters,
                                           this.env.extensionsList,
                                           this.path,
-                                          this.env.lexerTags);
+                                          this.env.opts);
 
             var func = new Function(source);
             props = func();
