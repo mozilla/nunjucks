@@ -173,6 +173,9 @@ var filters = {
                          value: val[k] };
             });
         }
+        else if(lib.isArray(val)) {
+          return val;
+        }
         else {
             throw new lib.TemplateError("list filter: type not iterable");
         }
