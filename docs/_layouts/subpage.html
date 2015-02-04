@@ -1,0 +1,29 @@
+---
+layout: page
+---
+
+<div class="content clearfix">
+  <aside class="col-sm-3">
+    <div class="pages">
+      <p><strong>Documentation</strong></p>
+
+      <ul>
+        <li><a href="getting-started.html">Getting Started</a></li>
+        <li><a href="templating.html">Templating</a></li>
+        <li><a href="api.html">API</a></li>
+        <li><a href="faq.html">FAQ</a></li>
+      </ul>
+    </div>
+
+    <div class="toc">
+      <p><strong>{{ page.title }}</strong></p>
+      {% page_toc %}
+    </div>
+  </aside>
+
+  <div class="col-sm-9 main">
+    <div class="locale btn-group">{{ page.url | locale_buttons: site.baseurl }}</div>
+    {{ content }}
+  </div>
+</div>
+
