@@ -210,6 +210,18 @@
             finish(done);
         });
 
+        it('rejectattr', function(done) {
+          var foods = [{tasty: true}, {tasty: false}, {tasty: true}];
+          equal('{{ foods | rejectattr("tasty") | length }}', {foods: foods}, '1');
+          finish(done);
+        });
+
+        it('selectattr', function(done) {
+          var foods = [{tasty: true}, {tasty: false}, {tasty: true}];
+          equal('{{ foods | selectattr("tasty") | length }}', {foods: foods}, '2');
+          finish(done);
+        });
+
         it('replace', function(done) {
             equal('{{ "aaabbbccc" | replace("a", "x") }}', 'xxxbbbccc');
             equal('{{ "aaabbbccc" | replace("a", "x", 2) }}', 'xxabbbccc');

@@ -186,6 +186,18 @@ var filters = {
         return arr[Math.floor(Math.random() * arr.length)];
     },
 
+    rejectattr: function(arr, attr) {
+      return arr.filter(function (item) {
+        return !item[attr];
+      });
+    },
+
+    selectattr: function(arr, attr) {
+      return arr.filter(function (item) {
+        return !!item[attr];
+      });
+    },
+
     replace: function(str, old, new_, maxCount) {
         if (old instanceof RegExp) {
             return str.replace(old, new_);
