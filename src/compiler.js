@@ -1106,7 +1106,7 @@ var Compiler = Object.extend({
 
 module.exports = {
     compile: function(src, asyncFilters, extensions, name, opts) {
-        var c = new Compiler();
+        var c = new Compiler(name);
 
         // Run the extension preprocessors against the source.
         if(extensions && extensions.length) {
