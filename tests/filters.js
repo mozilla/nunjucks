@@ -236,6 +236,15 @@
             equal('{{ "aaabbbbbccc" | replace("d", "y", 4) }}', 'aaabbbbbccc');
             equal('{{ "aaabbcccbbb" | replace("b", "y", 4) }}', 'aaayycccyyb');
 
+
+            // Bad initial inputs
+            equal('{{ undefined | replace("b", "y", 4) }}', "");
+            equal('{{ null | replace("b", "y", 4) }}', "");
+            equal('{{ {} | replace("b", "y", 4) }}', "[object Object]"); // End up with the object passed out of replace, then toString called on it
+            equal('{{ [] | replace("b", "y", 4) }}', "");
+            equal('{{ true | replace("rue", "afafasf", 4) }}', "true");
+            equal('{{ false | replace("rue", "afafasf", 4) }}', "false");
+
             // Will result in an infinite loop if unbounded otherwise test will pass
             equal('{{ "<img src=" | replace("<img", "<img alt=val") }}', '<img alt=val src=');
             equal('{{ "<img src=\\"http://www.example.com\\" />" | replace("<img", "replacement text") }}', 'replacement text src=\"http://www.example.com\" />');
