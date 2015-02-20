@@ -248,6 +248,11 @@ var filters = {
             str = str +"";
         }
 
+        // If by now, we don't have a string, throw it back
+        if(typeof str !== 'string'){
+            return str;
+        }
+
         // ShortCircuits
         if(old === ''){
             // Mimic the python behaviour: empty string is replaced by replacement e.g. "abc"|replace("", ".") -> .a.b.c.
