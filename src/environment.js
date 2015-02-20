@@ -99,10 +99,16 @@ var Environment = Obj.extend({
         return this.filters[name];
     },
 
-    getTemplate: function(name, eagerCompile, cb) {
+    getTemplate: function(name, eagerCompile, parentName, cb) {
         if(name && name.raw) {
             // this fixes autoescape for templates referenced in symbols
             name = name.raw;
+        }
+
+        if(lib.isFunction(parentName)) {
+            cb = parentName;
+            parentName = null;
+            eagerCompile = eagerCompile || false;
         }
 
         if(lib.isFunction(eagerCompile)) {
@@ -138,6 +144,11 @@ var Environment = Obj.extend({
                     else {
                         next();
                     }
+                }
+
+                // Resolve name relative to parentName
+                if (parentName && (name.indexOf("./") == 0 || name.indexOf("../") == 0)) {
+                    name = loader.resolve(parentName, name);
                 }
 
                 if(loader.async) {
@@ -229,8 +240,14 @@ var Environment = Obj.extend({
         return syncResult;
     },
 
-    renderString: function(src, ctx, cb) {
-        var tmpl = new Template(src, this);
+    renderString: function(src, ctx, opts, cb) {
+        if(lib.isFunction(opts)) {
+            cb = opts;
+            opts = {};
+        }
+        opts = opts || {};
+
+        var tmpl = new Template(src, this, opts.path);
         return tmpl.render(ctx, cb);
     }
 });

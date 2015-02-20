@@ -33,7 +33,8 @@ function quotedArray(arr) {
 }
 
 var Compiler = Object.extend({
-    init: function() {
+    init: function(name) {
+        this.name = name;
         this.codebuf = [];
         this.lastId = 0;
         this.buffer = null;
@@ -60,6 +61,7 @@ var Compiler = Object.extend({
     },
 
     emit: function(code) {
+        //console.log("emit", code);
         this.codebuf.push(code);
     },
 
@@ -891,7 +893,7 @@ var Compiler = Object.extend({
 
         this.emit('env.getTemplate(');
         this._compileExpression(node.template, frame);
-        this.emitLine(', ' + this.makeCallback(id));
+        this.emitLine(', false, "'+this.name+'", ' + this.makeCallback(id));
         this.addScopeLevel();
 
         this.emitLine(id + '.getExported(' +
@@ -914,7 +916,7 @@ var Compiler = Object.extend({
 
         this.emit('env.getTemplate(');
         this._compileExpression(node.template, frame);
-        this.emitLine(', ' + this.makeCallback(importedId));
+        this.emitLine(', false, "'+this.name+'", ' + this.makeCallback(importedId));
         this.addScopeLevel();
 
         this.emitLine(importedId + '.getExported(' +
@@ -989,7 +991,7 @@ var Compiler = Object.extend({
 
         this.emit('env.getTemplate(');
         this._compileExpression(node.template, frame);
-        this.emitLine(', true, ' + this.makeCallback('parentTemplate'));
+        this.emitLine(', true, "'+this.name+'", ' + this.makeCallback('parentTemplate'));
 
         this.emitLine('for(var ' + k + ' in parentTemplate.blocks) {');
         this.emitLine('context.addBlock(' + k +
@@ -1006,7 +1008,7 @@ var Compiler = Object.extend({
 
         this.emit('env.getTemplate(');
         this._compileExpression(node.template, frame);
-        this.emitLine(', ' + this.makeCallback(id));
+        this.emitLine(', false, "'+this.name+'", '+ this.makeCallback(id));
         this.addScopeLevel();
 
         this.emitLine(id + '.render(' +
@@ -1104,7 +1106,7 @@ var Compiler = Object.extend({
 
 module.exports = {
     compile: function(src, asyncFilters, extensions, name, opts) {
-        var c = new Compiler();
+        var c = new Compiler(name);
 
         // Run the extension preprocessors against the source.
         if(extensions && extensions.length) {
