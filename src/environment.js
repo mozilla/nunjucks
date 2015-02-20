@@ -147,7 +147,8 @@ var Environment = Obj.extend({
                 }
 
                 // Resolve name relative to parentName
-                if (parentName && (name.indexOf("./") == 0 || name.indexOf("../") == 0)) {
+                if (parentName && (name.indexOf("./") == 0 ||
+                                   name.indexOf("../") == 0)) {
                     name = loader.resolve(parentName, name);
                 }
 

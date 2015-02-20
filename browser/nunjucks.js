@@ -1,4 +1,4 @@
-// Browser bundle of nunjucks 1.1.0 
+// Browser bundle of nunjucks 1.2.0 
 
 (function() {
 var modules = {};
@@ -1038,7 +1038,7 @@ function token(type, value, lineno, colno) {
     };
 }
 
-function Tokenizer(str, tags) {
+function Tokenizer(str, opts) {
     this.str = str;
     this.index = 0;
     this.len = str.length;
@@ -1047,7 +1047,9 @@ function Tokenizer(str, tags) {
 
     this.in_code = false;
 
-    tags = tags || {};
+    opts = opts || {};
+
+    tags = opts.tags || {};
     this.tags = {
         BLOCK_START: tags.blockStart || BLOCK_START,
         BLOCK_END: tags.blockEnd || BLOCK_END,
@@ -1056,16 +1058,19 @@ function Tokenizer(str, tags) {
         COMMENT_START: tags.commentStart || COMMENT_START,
         COMMENT_END: tags.commentEnd || COMMENT_END
     };
+
+    this.trimBlocks = !!opts.trimBlocks;
+    this.lstripBlocks = !!opts.lstripBlocks;
 }
 
 Tokenizer.prototype.nextToken = function() {
     var lineno = this.lineno;
     var colno = this.colno;
+    var tok;
 
     if(this.in_code) {
         // Otherwise, if we are in a block parse it as code
         var cur = this.current();
-        var tok;
 
         if(this.is_finished()) {
             // We have nothing else to parse
@@ -1088,6 +1093,13 @@ Tokenizer.prototype.nextToken = function() {
             // breaks on delimiters so we can assume the token parsing
             // doesn't consume these elsewhere
             this.in_code = false;
+            if(this.trimBlocks) {
+                cur = this.current();
+                if(cur === '\n') {
+                    // Skip newline
+                    this.forward();
+                }
+            }
             return token(TOKEN_BLOCK_END, tok, lineno, colno);
         }
         else if((tok = this._extractString(this.tags.VARIABLE_END))) {
@@ -1188,7 +1200,6 @@ Tokenizer.prototype.nextToken = function() {
                           this.tags.VARIABLE_START.charAt(0) +
                           this.tags.COMMENT_START.charAt(0) +
                           this.tags.COMMENT_END.charAt(0));
-        var tok;
 
         if(this.is_finished()) {
             return null;
@@ -1225,6 +1236,21 @@ Tokenizer.prototype.nextToken = function() {
                     this._matches(this.tags.VARIABLE_START) ||
                     this._matches(this.tags.COMMENT_START)) &&
                   !in_comment) {
+                    if(this.lstripBlocks &&
+                        this._matches(this.tags.BLOCK_START) &&
+                        this.colno > 0 &&
+                        this.colno <= tok.length) {
+                        var lastLine = tok.slice(-this.colno);
+                        if(/^\s+$/.test(lastLine)) {
+                            // Remove block leading whitespace from beginning of the string
+                            tok = tok.slice(0, -this.colno);
+                            if(!tok.length) {
+                                // All data removed, collapse to avoid unnecessary nodes
+                                // by returning next token (block start)
+                                return this.nextToken();
+                            }
+                        }
+                    }
                     // If it is a start tag, stop looping
                     break;
                 }
@@ -1405,8 +1431,8 @@ Tokenizer.prototype.previous = function() {
 };
 
 modules['lexer'] = {
-    lex: function(src, tags) {
-        return new Tokenizer(src, tags);
+    lex: function(src, opts) {
+        return new Tokenizer(src, opts);
     },
 
     TOKEN_STRING: TOKEN_STRING,
@@ -2627,8 +2653,8 @@ var Parser = Object.extend({
 // nodes.printNodes(n);
 
 modules['parser'] = {
-    parse: function(src, extensions, lexerTags) {
-        var p = new Parser(lexer.lex(src, lexerTags));
+    parse: function(src, extensions, opts) {
+        var p = new Parser(lexer.lex(src, opts));
         if (extensions !== undefined) {
             p.extensions = extensions;
         }
@@ -2900,15 +2926,9 @@ function binOpEmitter(str) {
     };
 }
 
-// Generate an array of strings
-function quotedArray(arr) {
-    return '[' +
-        lib.map(arr, function(x) { return '"' + x + '"'; }) +
-        ']';
-}
-
 var Compiler = Object.extend({
-    init: function() {
+    init: function(templateName) {
+        this.templateName = templateName;
         this.codebuf = [];
         this.lastId = 0;
         this.buffer = null;
@@ -3005,7 +3025,7 @@ var Compiler = Object.extend({
     _bufferAppend: function(func) {
         this.emit(this.buffer + ' += runtime.suppressValue(');
         func.call(this);
-        this.emit(', env.autoesc);\n');
+        this.emit(', env.opts.autoescape);\n');
     },
 
     _compileChildren: function(node, frame) {
@@ -3152,12 +3172,12 @@ var Compiler = Object.extend({
         if(async) {
             var res = this.tmpid();
             this.emitLine(', ' + this.makeCallback(res));
-            this.emitLine(this.buffer + ' += runtime.suppressValue(' + res + ', ' + autoescape + ' && env.autoesc);');
+            this.emitLine(this.buffer + ' += runtime.suppressValue(' + res + ', ' + autoescape + ' && env.opts.autoescape);');
             this.addScopeLevel();
         }
         else {
             this.emit(')');
-            this.emit(', ' + autoescape + ' && env.autoesc);\n');
+            this.emit(', ' + autoescape + ' && env.opts.autoescape);\n');
         }
     },
 
@@ -3302,7 +3322,7 @@ var Compiler = Object.extend({
         this._compileExpression(node.target, frame);
         this.emit('),');
         this._compileExpression(node.val, frame);
-        this.emit(', env.autoesc)');
+        this.emit(', env.opts.autoescape)');
     },
 
     _getNodeName: function(node) {
@@ -3766,7 +3786,7 @@ var Compiler = Object.extend({
 
         this.emit('env.getTemplate(');
         this._compileExpression(node.template, frame);
-        this.emitLine(', ' + this.makeCallback(id));
+        this.emitLine(', false, "' + this.templateName + '", ' + this.makeCallback(id));
         this.addScopeLevel();
 
         this.emitLine(id + '.getExported(' +
@@ -3789,7 +3809,7 @@ var Compiler = Object.extend({
 
         this.emit('env.getTemplate(');
         this._compileExpression(node.template, frame);
-        this.emitLine(', ' + this.makeCallback(importedId));
+        this.emitLine(', false, "' + this.templateName + '", ' + this.makeCallback(importedId));
         this.addScopeLevel();
 
         this.emitLine(importedId + '.getExported(' +
@@ -3864,7 +3884,7 @@ var Compiler = Object.extend({
 
         this.emit('env.getTemplate(');
         this._compileExpression(node.template, frame);
-        this.emitLine(', true, ' + this.makeCallback('parentTemplate'));
+        this.emitLine(', true, "' + this.templateName + '", ' + this.makeCallback('parentTemplate'));
 
         this.emitLine('for(var ' + k + ' in parentTemplate.blocks) {');
         this.emitLine('context.addBlock(' + k +
@@ -3881,7 +3901,7 @@ var Compiler = Object.extend({
 
         this.emit('env.getTemplate(');
         this._compileExpression(node.template, frame);
-        this.emitLine(', ' + this.makeCallback(id));
+        this.emitLine(', false, "' + this.templateName + '", '+ this.makeCallback(id));
         this.addScopeLevel();
 
         this.emitLine(id + '.render(' +
@@ -3909,7 +3929,7 @@ var Compiler = Object.extend({
             else {
                 this.emit(this.buffer + ' += runtime.suppressValue(');
                 this.compile(children[i], frame);
-                this.emit(', env.autoesc);\n');
+                this.emit(', env.opts.autoescape);\n');
             }
         }
     },
@@ -3978,8 +3998,8 @@ var Compiler = Object.extend({
 // console.log(tmpl);
 
 modules['compiler'] = {
-    compile: function(src, asyncFilters, extensions, name, lexerTags) {
-        var c = new Compiler();
+    compile: function(src, asyncFilters, extensions, name, opts) {
+        var c = new Compiler(name);
 
         // Run the extension preprocessors against the source.
         if(extensions && extensions.length) {
@@ -3990,7 +4010,9 @@ modules['compiler'] = {
             }
         }
 
-        c.compile(transformer.transform(parser.parse(src, extensions, lexerTags),
+        c.compile(transformer.transform(parser.parse(src,
+                                                     extensions,
+                                                     opts),
                                         asyncFilters,
                                         name));
         return c.getCode();
@@ -4175,6 +4197,9 @@ var filters = {
                          value: val[k] };
             });
         }
+        else if(lib.isArray(val)) {
+          return val;
+        }
         else {
             throw new lib.TemplateError("list filter: type not iterable");
         }
@@ -4186,6 +4211,18 @@ var filters = {
 
     random: function(arr) {
         return arr[Math.floor(Math.random() * arr.length)];
+    },
+
+    rejectattr: function(arr, attr) {
+      return arr.filter(function (item) {
+        return !item[attr];
+      });
+    },
+
+    selectattr: function(arr, attr) {
+      return arr.filter(function (item) {
+        return !!item[attr];
+      });
     },
 
     replace: function(str, old, new_, maxCount) {
@@ -4508,6 +4545,7 @@ var globals = {
 modules['globals'] = globals;
 })();
 (function() {
+var path = modules["path"];
 var Obj = modules["object"];
 var lib = modules["lib"];
 
@@ -4526,6 +4564,10 @@ var Loader = Obj.extend({
                 listener.apply(null, args);
             });
         }
+    },
+
+    resolve: function(from, to) {
+        return path.resolve(path.dirname(from), to);
     }
 });
 
@@ -4629,15 +4671,18 @@ var Environment = Obj.extend({
         // (the full trace from within nunjucks may confuse developers using
         //  the library)
         // defaults to false
-        opts = opts || {};
-        this.dev = !!opts.dev;
-        this.lexerTags = opts.tags;
+        var opts = this.opts = opts || {};
+        this.opts.dev = !!opts.dev;
 
         // The autoescape flag sets global autoescaping. If true,
         // every string variable will be escaped by default.
         // If false, strings can be manually escaped using the `escape` filter.
         // defaults to false
-        this.autoesc = !!opts.autoescape;
+        this.opts.autoescape = !!opts.autoescape;
+
+        this.opts.trimBlocks = !!opts.trimBlocks;
+
+        this.opts.lstripBlocks = !!opts.lstripBlocks;
 
         if(!loaders) {
             // The filesystem loader is only available client-side
@@ -4708,10 +4753,16 @@ var Environment = Obj.extend({
         return this.filters[name];
     },
 
-    getTemplate: function(name, eagerCompile, cb) {
+    getTemplate: function(name, eagerCompile, parentName, cb) {
         if(name && name.raw) {
             // this fixes autoescape for templates referenced in symbols
             name = name.raw;
+        }
+
+        if(lib.isFunction(parentName)) {
+            cb = parentName;
+            parentName = null;
+            eagerCompile = eagerCompile || false;
         }
 
         if(lib.isFunction(eagerCompile)) {
@@ -4747,6 +4798,12 @@ var Environment = Obj.extend({
                     else {
                         next();
                     }
+                }
+
+                // Resolve name relative to parentName
+                if (parentName && (name.indexOf("./") == 0 ||
+                                   name.indexOf("../") == 0)) {
+                    name = loader.resolve(parentName, name);
                 }
 
                 if(loader.async) {
@@ -4838,8 +4895,14 @@ var Environment = Obj.extend({
         return syncResult;
     },
 
-    renderString: function(src, ctx, cb) {
-        var tmpl = new Template(src, this);
+    renderString: function(src, ctx, opts, cb) {
+        if(lib.isFunction(opts)) {
+            cb = opts;
+            opts = {};
+        }
+        opts = opts || {};
+
+        var tmpl = new Template(src, this, opts.path);
         return tmpl.render(ctx, cb);
     }
 });
@@ -5027,7 +5090,7 @@ var Template = Obj.extend({
                                           this.env.asyncFilters,
                                           this.env.extensionsList,
                                           this.path,
-                                          this.env.lexerTags);
+                                          this.env.opts);
 
             var func = new Function(source);
             props = func();

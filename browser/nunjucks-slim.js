@@ -1,4 +1,4 @@
-// Browser bundle of nunjucks 1.1.0 (slim, only works with precompiled templates)
+// Browser bundle of nunjucks 1.2.0 (slim, only works with precompiled templates)
 
 (function() {
 var modules = {};
@@ -685,6 +685,7 @@ modules['runtime'] = {
 };
 })();
 (function() {
+var path = modules["path"];
 var Obj = modules["object"];
 var lib = modules["lib"];
 
@@ -703,6 +704,10 @@ var Loader = Obj.extend({
                 listener.apply(null, args);
             });
         }
+    },
+
+    resolve: function(from, to) {
+        return path.resolve(path.dirname(from), to);
     }
 });
 
@@ -962,6 +967,9 @@ var filters = {
                          value: val[k] };
             });
         }
+        else if(lib.isArray(val)) {
+          return val;
+        }
         else {
             throw new lib.TemplateError("list filter: type not iterable");
         }
@@ -973,6 +981,18 @@ var filters = {
 
     random: function(arr) {
         return arr[Math.floor(Math.random() * arr.length)];
+    },
+
+    rejectattr: function(arr, attr) {
+      return arr.filter(function (item) {
+        return !item[attr];
+      });
+    },
+
+    selectattr: function(arr, attr) {
+      return arr.filter(function (item) {
+        return !!item[attr];
+      });
     },
 
     replace: function(str, old, new_, maxCount) {
@@ -1314,15 +1334,18 @@ var Environment = Obj.extend({
         // (the full trace from within nunjucks may confuse developers using
         //  the library)
         // defaults to false
-        opts = opts || {};
-        this.dev = !!opts.dev;
-        this.lexerTags = opts.tags;
+        var opts = this.opts = opts || {};
+        this.opts.dev = !!opts.dev;
 
         // The autoescape flag sets global autoescaping. If true,
         // every string variable will be escaped by default.
         // If false, strings can be manually escaped using the `escape` filter.
         // defaults to false
-        this.autoesc = !!opts.autoescape;
+        this.opts.autoescape = !!opts.autoescape;
+
+        this.opts.trimBlocks = !!opts.trimBlocks;
+
+        this.opts.lstripBlocks = !!opts.lstripBlocks;
 
         if(!loaders) {
             // The filesystem loader is only available client-side
@@ -1393,10 +1416,16 @@ var Environment = Obj.extend({
         return this.filters[name];
     },
 
-    getTemplate: function(name, eagerCompile, cb) {
+    getTemplate: function(name, eagerCompile, parentName, cb) {
         if(name && name.raw) {
             // this fixes autoescape for templates referenced in symbols
             name = name.raw;
+        }
+
+        if(lib.isFunction(parentName)) {
+            cb = parentName;
+            parentName = null;
+            eagerCompile = eagerCompile || false;
         }
 
         if(lib.isFunction(eagerCompile)) {
@@ -1432,6 +1461,12 @@ var Environment = Obj.extend({
                     else {
                         next();
                     }
+                }
+
+                // Resolve name relative to parentName
+                if (parentName && (name.indexOf("./") == 0 ||
+                                   name.indexOf("../") == 0)) {
+                    name = loader.resolve(parentName, name);
                 }
 
                 if(loader.async) {
@@ -1523,8 +1558,14 @@ var Environment = Obj.extend({
         return syncResult;
     },
 
-    renderString: function(src, ctx, cb) {
-        var tmpl = new Template(src, this);
+    renderString: function(src, ctx, opts, cb) {
+        if(lib.isFunction(opts)) {
+            cb = opts;
+            opts = {};
+        }
+        opts = opts || {};
+
+        var tmpl = new Template(src, this, opts.path);
         return tmpl.render(ctx, cb);
     }
 });
@@ -1712,7 +1753,7 @@ var Template = Obj.extend({
                                           this.env.asyncFilters,
                                           this.env.extensionsList,
                                           this.path,
-                                          this.env.lexerTags);
+                                          this.env.opts);
 
             var func = new Function(source);
             props = func();
