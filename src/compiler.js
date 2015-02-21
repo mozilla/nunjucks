@@ -27,7 +27,7 @@ function binOpEmitter(str) {
 
 var Compiler = Object.extend({
     init: function(templateName) {
-        this.templateName = templateName;
+        this.templateName = templateName || "";
         this.codebuf = [];
         this.lastId = 0;
         this.buffer = null;
@@ -119,6 +119,10 @@ var Compiler = Object.extend({
     tmpid: function() {
         this.lastId++;
         return 't_' + this.lastId;
+    },
+
+    _templateName: function() {
+        return this.templateName == null? "undefined" : '"'+this.templateName.replace(/"/g, '\\"')+'"';
     },
 
     _bufferAppend: function(func) {
@@ -885,7 +889,7 @@ var Compiler = Object.extend({
 
         this.emit('env.getTemplate(');
         this._compileExpression(node.template, frame);
-        this.emitLine(', false, "' + this.templateName + '", ' + this.makeCallback(id));
+        this.emitLine(', false, '+this._templateName()+', ' + this.makeCallback(id));
         this.addScopeLevel();
 
         this.emitLine(id + '.getExported(' +
@@ -908,7 +912,7 @@ var Compiler = Object.extend({
 
         this.emit('env.getTemplate(');
         this._compileExpression(node.template, frame);
-        this.emitLine(', false, "' + this.templateName + '", ' + this.makeCallback(importedId));
+        this.emitLine(', false, '+this._templateName()+', ' + this.makeCallback(importedId));
         this.addScopeLevel();
 
         this.emitLine(importedId + '.getExported(' +
@@ -983,7 +987,7 @@ var Compiler = Object.extend({
 
         this.emit('env.getTemplate(');
         this._compileExpression(node.template, frame);
-        this.emitLine(', true, "' + this.templateName + '", ' + this.makeCallback('parentTemplate'));
+        this.emitLine(', true, '+this._templateName()+', ' + this.makeCallback('parentTemplate'));
 
         this.emitLine('for(var ' + k + ' in parentTemplate.blocks) {');
         this.emitLine('context.addBlock(' + k +
@@ -1000,7 +1004,7 @@ var Compiler = Object.extend({
 
         this.emit('env.getTemplate(');
         this._compileExpression(node.template, frame);
-        this.emitLine(', false, "' + this.templateName + '", '+ this.makeCallback(id));
+        this.emitLine(', false, '+this._templateName()+', '+ this.makeCallback(id));
         this.addScopeLevel();
 
         this.emitLine(id + '.render(' +

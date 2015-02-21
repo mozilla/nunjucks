@@ -100,10 +100,7 @@ var Environment = Obj.extend({
     },
 
     getTemplate: function(name, eagerCompile, parentName, cb) {
-        var isRelative = (parentName && (name.indexOf("./") == 0 ||
-                                   name.indexOf("../") == 0));
         var tmpl = null;
-
         if(name && name.raw) {
             // this fixes autoescape for templates referenced in symbols
             name = name.raw;
@@ -125,7 +122,7 @@ var Environment = Obj.extend({
         }
 
         // Test cache
-        if (isRelative) {
+        if (parentName) {
             for (var i = 0; i < this.loaders.length; i++) {
                 var _name = this.loaders[i].resolve(parentName, name);
                 tmpl = this.cache[_name];
@@ -160,7 +157,7 @@ var Environment = Obj.extend({
                 }
 
                 // Resolve name relative to parentName
-                if (isRelative) {
+                if (parentName) {
                     name = loader.resolve(parentName, name);
                 }
 
