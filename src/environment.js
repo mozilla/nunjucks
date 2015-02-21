@@ -56,8 +56,6 @@ var Environment = Obj.extend({
 
     initCache: function() {
         // Caching and cache busting
-        var that = this;
-
         lib.each(this.loaders, function(loader) {
             loader.cache = {};
 
