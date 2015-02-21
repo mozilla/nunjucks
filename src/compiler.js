@@ -27,7 +27,7 @@ function binOpEmitter(str) {
 
 var Compiler = Object.extend({
     init: function(templateName) {
-        this.templateName = templateName || "";
+        this.templateName = templateName;
         this.codebuf = [];
         this.lastId = 0;
         this.buffer = null;
