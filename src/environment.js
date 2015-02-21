@@ -56,17 +56,17 @@ var Environment = Obj.extend({
 
     initCache: function() {
         // Caching and cache busting
-        var cache = {};
+        var that = this;
 
         lib.each(this.loaders, function(loader) {
-            if(typeof loader.on === 'function'){
+            loader.cache = {};
+
+            if(typeof loader.on === 'function') {
                 loader.on('update', function(template) {
-                    cache[template] = null;
+                    loader.cache[template] = null;
                 });
             }
         });
-
-        this.cache = cache;
     },
 
     addExtension: function(name, extension) {
@@ -121,15 +121,10 @@ var Environment = Obj.extend({
             throw new Error('template names must be a string: ' + name);
         }
 
-        // Test cache
-        if (parentName) {
-            for (var i = 0; i < this.loaders.length; i++) {
-                var _name = this.loaders[i].resolve(parentName, name);
-                tmpl = this.cache[_name];
-                if (tmpl) break;
-            }
-        } else {
-            tmpl = this.cache[name];
+        for (var i = 0; i < this.loaders.length; i++) {
+            var _name = parentName? this.loaders[i].resolve(parentName, name) : name;
+            tmpl = this.loaders[i].cache[_name];
+            if (tmpl) break;
         }
 
         if(tmpl) {
@@ -148,6 +143,8 @@ var Environment = Obj.extend({
 
             lib.asyncIter(this.loaders, function(loader, i, next, done) {
                 function handle(src) {
+                    src.loader = loader;
+
                     if(src) {
                         done(src);
                     }
@@ -185,7 +182,7 @@ var Environment = Obj.extend({
                                             info.path, eagerCompile);
 
                     if(!info.noCache) {
-                        this.cache[name] = tmpl;
+                        info.loader.cache[name] = tmpl;
                     }
 
                     if(cb) {
