@@ -30,6 +30,10 @@
         "type": "git",
         "url": "https://github.com/mozilla/nunjucks.git"
     },
+    "keywords": [
+      "template",
+      "templating"
+    ],
     "license": [{
         "type": "BSD",
         "url": "https://github.com/mozilla/nunjucks/blob/master/LICENSE"
