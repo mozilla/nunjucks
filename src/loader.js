@@ -21,6 +21,10 @@ var Loader = Obj.extend({
 
     resolve: function(from, to) {
         return path.resolve(path.dirname(from), to);
+    },
+
+    isRelative: function(filename) {
+        return (filename.indexOf("./") == 0 || filename.indexOf("../") == 0);
     }
 });
 

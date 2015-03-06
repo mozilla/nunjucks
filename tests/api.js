@@ -34,6 +34,14 @@
             expect(child2.render()).to.be('FooTest2BazFizzle');
         });
 
+        it('should handle correctly cache for relative paths', function() {
+            var env = new Environment(new Loader(templatesPath));
+
+            var test = env.getTemplate('relative/test-cache.html');
+
+            expect(test.render()).to.be('Test1\nTest2');
+        });
+
         it('should handle correctly relative paths in renderString', function() {
             var env = new Environment(new Loader(templatesPath));
             expect(env.renderString('{% extends "./relative/test1.html" %}{% block block1 %}Test3{% endblock %}', {}, {

@@ -56,17 +56,15 @@ var Environment = Obj.extend({
 
     initCache: function() {
         // Caching and cache busting
-        var cache = {};
-
         lib.each(this.loaders, function(loader) {
-            if(typeof loader.on === 'function'){
+            loader.cache = {};
+
+            if(typeof loader.on === 'function') {
                 loader.on('update', function(template) {
-                    cache[template] = null;
+                    loader.cache[template] = null;
                 });
             }
         });
-
-        this.cache = cache;
     },
 
     addExtension: function(name, extension) {
@@ -99,7 +97,14 @@ var Environment = Obj.extend({
         return this.filters[name];
     },
 
+    resolveTemplate: function(loader, parentName, filename) {
+        var isRelative = (loader.isRelative && parentName)? loader.isRelative(filename) : false;
+        return (isRelative && loader.resolve)? loader.resolve(parentName, filename) : filename;
+    },
+
     getTemplate: function(name, eagerCompile, parentName, cb) {
+        var that = this;
+        var tmpl = null;
         if(name && name.raw) {
             // this fixes autoescape for templates referenced in symbols
             name = name.raw;
@@ -120,7 +125,11 @@ var Environment = Obj.extend({
             throw new Error('template names must be a string: ' + name);
         }
 
-        var tmpl = this.cache[name];
+        for (var i = 0; i < this.loaders.length; i++) {
+            var _name = this.resolveTemplate(this.loaders[i], parentName, name);
+            tmpl = this.loaders[i].cache[_name];
+            if (tmpl) break;
+        }
 
         if(tmpl) {
             if(eagerCompile) {
@@ -138,6 +147,8 @@ var Environment = Obj.extend({
 
             lib.asyncIter(this.loaders, function(loader, i, next, done) {
                 function handle(src) {
+                    src.loader = loader;
+
                     if(src) {
                         done(src);
                     }
@@ -147,10 +158,7 @@ var Environment = Obj.extend({
                 }
 
                 // Resolve name relative to parentName
-                if (parentName && (name.indexOf("./") == 0 ||
-                                   name.indexOf("../") == 0)) {
-                    name = loader.resolve(parentName, name);
-                }
+                name = that.resolveTemplate(loader, parentName, name);
 
                 if(loader.async) {
                     loader.getSource(name, function(err, src) {
@@ -176,7 +184,7 @@ var Environment = Obj.extend({
                                             info.path, eagerCompile);
 
                     if(!info.noCache) {
-                        this.cache[name] = tmpl;
+                        info.loader.cache[name] = tmpl;
                     }
 
                     if(cb) {
