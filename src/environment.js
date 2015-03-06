@@ -97,7 +97,13 @@ var Environment = Obj.extend({
         return this.filters[name];
     },
 
+    resolveTemplate: function(loader, parentName, filename) {
+        var isRelative = (loader.isRelative && parentName)? loader.isRelative(filename) : false;
+        return (isRelative && loader.resolve)? loader.resolve(parentName, filename) : filename;
+    },
+
     getTemplate: function(name, eagerCompile, parentName, cb) {
+        var that = this;
         var tmpl = null;
         if(name && name.raw) {
             // this fixes autoescape for templates referenced in symbols
@@ -120,7 +126,7 @@ var Environment = Obj.extend({
         }
 
         for (var i = 0; i < this.loaders.length; i++) {
-            var _name = parentName? this.loaders[i].resolve(parentName, name) : name;
+            var _name = this.resolveTemplate(this.loaders[i], parentName, name);
             tmpl = this.loaders[i].cache[_name];
             if (tmpl) break;
         }
@@ -152,9 +158,7 @@ var Environment = Obj.extend({
                 }
 
                 // Resolve name relative to parentName
-                if (parentName) {
-                    name = loader.resolve(parentName, name);
-                }
+                name = that.resolveTemplate(loader, parentName, name);
 
                 if(loader.async) {
                     loader.getSource(name, function(err, src) {
