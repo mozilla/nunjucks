@@ -1,3 +1,5 @@
+'use strict';
+
 var lib = require('./lib');
 var parser = require('./parser');
 var transformer = require('./transformer');

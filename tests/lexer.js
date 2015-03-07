@@ -1,4 +1,6 @@
 (function() {
+    'use strict';
+
     var expect, lib, lexer;
 
     if(typeof require != 'undefined') {

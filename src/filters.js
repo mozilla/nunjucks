@@ -1,3 +1,5 @@
+'use strict';
+
 var lib = require('./lib');
 var r = require('./runtime');
 

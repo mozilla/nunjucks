@@ -1,3 +1,5 @@
+'use strict';
+
 if(typeof window === 'undefined' || window !== this) {
     module.exports = require('./node-loaders');
 }

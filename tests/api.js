@@ -1,4 +1,6 @@
 (function() {
+    'use strict';
+
     var expect, Environment, Loader, templatesPath;
     var path = require('path');
 

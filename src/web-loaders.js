@@ -1,3 +1,5 @@
+'use strict';
+
 var Loader = require('./loader');
 
 var WebLoader = Loader.extend({

@@ -1,4 +1,6 @@
 (function() {
+    'use strict';
+
     var expect, util;
 
     if(typeof require != 'undefined') {

@@ -1,3 +1,5 @@
+'use strict';
+
 var path = require('path');
 var Obj = require('./object');
 var lib = require('./lib');

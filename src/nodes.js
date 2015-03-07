@@ -1,3 +1,5 @@
+'use strict';
+
 var util = require('util');
 var lib = require('./lib');
 var Object = require('./object');
