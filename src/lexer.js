@@ -1,40 +1,40 @@
 var lib = require('./lib');
 
-var whitespaceChars = " \n\t\r\u00A0";
-var delimChars = "()[]{}%*-+/#,:|.<>=!";
-var intChars = "0123456789";
+var whitespaceChars = ' \n\t\r\u00A0';
+var delimChars = '()[]{}%*-+/#,:|.<>=!';
+var intChars = '0123456789';
 
-var BLOCK_START = "{%";
-var BLOCK_END = "%}";
-var VARIABLE_START = "{{";
-var VARIABLE_END = "}}";
-var COMMENT_START = "{#";
-var COMMENT_END = "#}";
+var BLOCK_START = '{%';
+var BLOCK_END = '%}';
+var VARIABLE_START = '{{';
+var VARIABLE_END = '}}';
+var COMMENT_START = '{#';
+var COMMENT_END = '#}';
 
-var TOKEN_STRING = "string";
-var TOKEN_WHITESPACE = "whitespace";
-var TOKEN_DATA = "data";
-var TOKEN_BLOCK_START = "block-start";
-var TOKEN_BLOCK_END = "block-end";
-var TOKEN_VARIABLE_START = "variable-start";
-var TOKEN_VARIABLE_END = "variable-end";
-var TOKEN_COMMENT = "comment";
-var TOKEN_LEFT_PAREN = "left-paren";
-var TOKEN_RIGHT_PAREN = "right-paren";
-var TOKEN_LEFT_BRACKET = "left-bracket";
-var TOKEN_RIGHT_BRACKET = "right-bracket";
-var TOKEN_LEFT_CURLY = "left-curly";
-var TOKEN_RIGHT_CURLY = "right-curly";
-var TOKEN_OPERATOR = "operator";
-var TOKEN_COMMA = "comma";
-var TOKEN_COLON = "colon";
-var TOKEN_PIPE = "pipe";
-var TOKEN_INT = "int";
-var TOKEN_FLOAT = "float";
-var TOKEN_BOOLEAN = "boolean";
-var TOKEN_SYMBOL = "symbol";
-var TOKEN_SPECIAL = "special";
-var TOKEN_REGEX = "regex";
+var TOKEN_STRING = 'string';
+var TOKEN_WHITESPACE = 'whitespace';
+var TOKEN_DATA = 'data';
+var TOKEN_BLOCK_START = 'block-start';
+var TOKEN_BLOCK_END = 'block-end';
+var TOKEN_VARIABLE_START = 'variable-start';
+var TOKEN_VARIABLE_END = 'variable-end';
+var TOKEN_COMMENT = 'comment';
+var TOKEN_LEFT_PAREN = 'left-paren';
+var TOKEN_RIGHT_PAREN = 'right-paren';
+var TOKEN_LEFT_BRACKET = 'left-bracket';
+var TOKEN_RIGHT_BRACKET = 'right-bracket';
+var TOKEN_LEFT_CURLY = 'left-curly';
+var TOKEN_RIGHT_CURLY = 'right-curly';
+var TOKEN_OPERATOR = 'operator';
+var TOKEN_COMMA = 'comma';
+var TOKEN_COLON = 'colon';
+var TOKEN_PIPE = 'pipe';
+var TOKEN_INT = 'int';
+var TOKEN_FLOAT = 'float';
+var TOKEN_BOOLEAN = 'boolean';
+var TOKEN_SYMBOL = 'symbol';
+var TOKEN_SPECIAL = 'special';
+var TOKEN_REGEX = 'regex';
 
 function token(type, value, lineno, colno) {
     return {
@@ -83,7 +83,7 @@ Tokenizer.prototype.nextToken = function() {
             // We have nothing else to parse
             return null;
         }
-        else if(cur == "\"" || cur == "'") {
+        else if(cur == '"' || cur == '\'') {
             // We've hit a string
             return token(TOKEN_STRING, this.parseString(cur), lineno, colno);
         }
@@ -159,15 +159,15 @@ Tokenizer.prototype.nextToken = function() {
             }
 
             switch(cur) {
-            case "(": type = TOKEN_LEFT_PAREN; break;
-            case ")": type = TOKEN_RIGHT_PAREN; break;
-            case "[": type = TOKEN_LEFT_BRACKET; break;
-            case "]": type = TOKEN_RIGHT_BRACKET; break;
-            case "{": type = TOKEN_LEFT_CURLY; break;
-            case "}": type = TOKEN_RIGHT_CURLY; break;
-            case ",": type = TOKEN_COMMA; break;
-            case ":": type = TOKEN_COLON; break;
-            case "|": type = TOKEN_PIPE; break;
+            case '(': type = TOKEN_LEFT_PAREN; break;
+            case ')': type = TOKEN_RIGHT_PAREN; break;
+            case '[': type = TOKEN_LEFT_BRACKET; break;
+            case ']': type = TOKEN_RIGHT_BRACKET; break;
+            case '{': type = TOKEN_LEFT_CURLY; break;
+            case '}': type = TOKEN_RIGHT_CURLY; break;
+            case ',': type = TOKEN_COMMA; break;
+            case ':': type = TOKEN_COLON; break;
+            case '|': type = TOKEN_PIPE; break;
             default: type = TOKEN_OPERATOR;
             }
 
@@ -195,7 +195,7 @@ Tokenizer.prototype.nextToken = function() {
                 return token(TOKEN_SYMBOL, tok, lineno, colno);
             }
             else {
-                throw new Error("Unexpected value while parsing: " + tok);
+                throw new Error('Unexpected value while parsing: ' + tok);
             }
         }
     }
@@ -263,7 +263,7 @@ Tokenizer.prototype.nextToken = function() {
                 }
                 else if(this._matches(this.tags.COMMENT_END)) {
                     if(!in_comment) {
-                        throw new Error("unexpected end of comment");
+                        throw new Error('unexpected end of comment');
                     }
                     tok += this._extractString(this.tags.COMMENT_END);
                     break;
@@ -277,7 +277,7 @@ Tokenizer.prototype.nextToken = function() {
             }
 
             if(data === null && in_comment) {
-                throw new Error("expected end of comment, got end of file");
+                throw new Error('expected end of comment, got end of file');
             }
 
             return token(in_comment ? TOKEN_COMMENT : TOKEN_DATA,
@@ -287,7 +287,7 @@ Tokenizer.prototype.nextToken = function() {
         }
     }
 
-    throw new Error("Could not parse text");
+    throw new Error('Could not parse text');
 };
 
 Tokenizer.prototype.parseString = function(delimiter) {
@@ -295,17 +295,17 @@ Tokenizer.prototype.parseString = function(delimiter) {
 
     var lineno = this.lineno;
     var colno = this.colno;
-    var str = "";
+    var str = '';
 
     while(!this.is_finished() && this.current() != delimiter) {
         var cur = this.current();
 
-        if(cur == "\\") {
+        if(cur == '\\') {
             this.forward();
             switch(this.current()) {
-            case "n": str += "\n"; break;
-            case "t": str += "\t"; break;
-            case "r": str += "\r"; break;
+            case 'n': str += '\n'; break;
+            case 't': str += '\t'; break;
+            case 'r': str += '\r'; break;
             default:
                 str += this.current();
             }
@@ -341,7 +341,7 @@ Tokenizer.prototype._extractString = function(str) {
 Tokenizer.prototype._extractUntil = function(charString) {
     // Extract all non-matching chars, with the default matching set
     // to everything
-    return this._extractMatching(true, charString || "");
+    return this._extractMatching(true, charString || '');
 };
 
 Tokenizer.prototype._extract = function(charString) {
@@ -382,7 +382,7 @@ Tokenizer.prototype._extractMatching = function (breakOnMatch, charString) {
         return t;
     }
 
-    return "";
+    return '';
 };
 
 Tokenizer.prototype.is_finished = function() {
@@ -398,7 +398,7 @@ Tokenizer.prototype.forwardN = function(n) {
 Tokenizer.prototype.forward = function() {
     this.index++;
 
-    if(this.previous() == "\n") {
+    if(this.previous() == '\n') {
         this.lineno++;
         this.colno = 0;
     }
@@ -410,10 +410,10 @@ Tokenizer.prototype.forward = function() {
 Tokenizer.prototype.back = function() {
     this.index--;
 
-    if(this.current() == "\n") {
+    if(this.current() == '\n') {
         this.lineno--;
 
-        var idx = this.src.lastIndexOf("\n", this.index-1);
+        var idx = this.src.lastIndexOf('\n', this.index-1);
         if(idx == -1) {
             this.colno = this.index;
         }
@@ -430,7 +430,7 @@ Tokenizer.prototype.current = function() {
     if(!this.is_finished()) {
         return this.str.charAt(this.index);
     }
-    return "";
+    return '';
 };
 
 Tokenizer.prototype.previous = function() {

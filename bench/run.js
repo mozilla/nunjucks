@@ -15,51 +15,51 @@ var ctx = {
     items: [
         {
             current: true,
-            name: "James"
+            name: 'James'
         },
-        { 
-            name: "Foo",
-            url: "http://example.com"
+        {
+            name: 'Foo',
+            url: 'http://example.com'
         },
-        { 
-            name: "Foo",
-            url: "http://example.com"
+        {
+            name: 'Foo',
+            url: 'http://example.com'
         },
-        { 
-            name: "Foo",
-            url: "http://example.com"
+        {
+            name: 'Foo',
+            url: 'http://example.com'
         },
-        { 
-            name: "Foo",
-            url: "http://example.com"
+        {
+            name: 'Foo',
+            url: 'http://example.com'
         },
-        { 
-            name: "Foo",
-            url: "http://example.com"
+        {
+            name: 'Foo',
+            url: 'http://example.com'
         },
-        { 
-            name: "Foo",
-            url: "http://example.com"
+        {
+            name: 'Foo',
+            url: 'http://example.com'
         },
-        { 
-            name: "Foo",
-            url: "http://example.com"
+        {
+            name: 'Foo',
+            url: 'http://example.com'
         },
-        { 
-            name: "Foo",
-            url: "http://example.com"
+        {
+            name: 'Foo',
+            url: 'http://example.com'
         },
-        { 
-            name: "Foo",
-            url: "http://example.com"
+        {
+            name: 'Foo',
+            url: 'http://example.com'
         },
-        { 
-            name: "Foo",
-            url: "http://example.com"
+        {
+            name: 'Foo',
+            url: 'http://example.com'
         },
-        { 
-            name: "Foo",
-            url: "http://example.com"
+        {
+            name: 'Foo',
+            url: 'http://example.com'
         }
     ]
 };
@@ -73,7 +73,7 @@ exports.compare = {
     },
 
     'new-nunjucks': function(done) {
-        tmpl.render(ctx, done);        
+        tmpl.render(ctx, done);
     }
 };
 

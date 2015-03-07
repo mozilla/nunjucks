@@ -344,8 +344,8 @@ var Template = Obj.extend({
             this.tmplStr = src;
         }
         else {
-            throw new Error("src must be a string or an object describing " +
-                            "the source");
+            throw new Error('src must be a string or an object describing ' +
+                            'the source');
         }
 
         this.path = path;

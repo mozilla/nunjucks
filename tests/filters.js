@@ -62,7 +62,7 @@
             finish(done);
         });
 
-        it("dictsort", function(done) {
+        it('dictsort', function(done) {
             // no real foolproof way to test that a js obj has been transformed
             // from unsorted -> sorted, as its enumeration ordering is undefined
             // and might fluke being sorted originally .. lets just init with some jumbled
@@ -73,12 +73,12 @@
                    '{{ item[0] }}{% endfor %}',
                    {
                        items: {
-                           "e": 1,
-                           "d": 2,
-                           "c": 3,
-                           "a": 4,
-                           "f": 5,
-                           "b": 6
+                           'e': 1,
+                           'd': 2,
+                           'c': 3,
+                           'a': 4,
+                           'f': 5,
+                           'b': 6
                        }
                    },
                    'abcdef');
@@ -87,22 +87,22 @@
             equal('{% for item in items | dictsort(true) %}' +
                    '{{ item[0] }},{% endfor %}', {
                        items: {
-                           "ABC": 6,
-                           "ABc": 5,
-                           "Abc": 1,
-                           "abc": 2
+                           'ABC': 6,
+                           'ABc': 5,
+                           'Abc': 1,
+                           'abc': 2
                        }
                    },
-                   "ABC,ABc,Abc,abc,");
+                   'ABC,ABc,Abc,abc,');
 
             // use values for sort
             equal('{% for item in items | dictsort(false, "value") %}' +
                    '{{ item[0] }}{% endfor %}', {
                        items: {
-                           "a": 6,
-                           "b": 5,
-                           "c": 1,
-                           "d": 2
+                           'a': 6,
+                           'b': 5,
+                           'c': 1,
+                           'd': 2
                        }
                    },
                    'cdba');
@@ -189,7 +189,7 @@
         });
 
         it('list', function(done) {
-            var person = {name: "Joe", age: 83};
+            var person = {name: 'Joe', age: 83};
             equal('{% for i in "foobar" | list %}{{ i }},{% endfor %}',
                   'f,o,o,b,a,r,');
             equal('{% for pair in person | list %}{{ pair.key }}: {{ pair.value }} - {% endfor %}',
@@ -340,7 +340,7 @@
             // https://github.com/mitsuhiko/jinja2/blob/8db47916de0e888dd8664b2511e220ab5ecf5c15/jinja2/testsuite/filters.py#L236-L239
             equal('{{ "foo http://www.example.com/ bar"|urlize }}',
                     'foo <a href="http://www.example.com/">' +
-                    'http://www.example.com/</a> bar')
+                    'http://www.example.com/</a> bar');
 
             // additional tests
             equal('{{ "" | urlize }}', '');

@@ -14,7 +14,7 @@ var WebLoader = Loader.extend({
     getSource: function(name) {
         if(this.precompiled[name]) {
             return {
-                src: { type: "code",
+                src: { type: 'code',
                        obj: this.precompiled[name] },
                 path: name
             };
@@ -41,7 +41,7 @@ var WebLoader = Loader.extend({
             ajax = new XMLHttpRequest();
         }
         else if(window.ActiveXObject) { // IE 8 and older
-            ajax = new ActiveXObject("Microsoft.XMLHTTP");
+            ajax = new ActiveXObject('Microsoft.XMLHTTP');
         }
 
         ajax.onreadystatechange = function() {

@@ -24,7 +24,7 @@ var Loader = Obj.extend({
     },
 
     isRelative: function(filename) {
-        return (filename.indexOf("./") == 0 || filename.indexOf("../") == 0);
+        return (filename.indexOf('./') == 0 || filename.indexOf('../') == 0);
     }
 });
 

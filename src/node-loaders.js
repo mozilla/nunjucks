@@ -28,8 +28,8 @@ var FileSystemLoader = Loader.extend({
                 if(existsSync(p)) {
                     var watcher = chokidar.watch(p, { ignoreInitial: true });
 
-                    watcher.on("all", function(event, fullname) {
-                        if(event == "change" && fullname in this.pathsToNames) {
+                    watcher.on('all', function(event, fullname) {
+                        if(event == 'change' && fullname in this.pathsToNames) {
                             this.emit('update', this.pathsToNames[fullname]);
                         }
                     }.bind(this));

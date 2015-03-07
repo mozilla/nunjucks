@@ -58,7 +58,7 @@ var Compiler = Object.extend({
     },
 
     emitLine: function(code) {
-        this.emit(code + "\n");
+        this.emit(code + '\n');
     },
 
     emitLines: function() {
@@ -122,7 +122,7 @@ var Compiler = Object.extend({
     },
 
     _templateName: function() {
-        return this.templateName == null? "undefined" : '"'+this.templateName.replace(/"/g, '\\"')+'"';
+        return this.templateName == null? 'undefined' : '"'+this.templateName.replace(/"/g, '\\"')+'"';
     },
 
     _bufferAppend: function(func) {
@@ -202,7 +202,7 @@ var Compiler = Object.extend({
         }
 
         if(!success) {
-            this.fail("assertType: invalid type: " + node.typename,
+            this.fail('assertType: invalid type: ' + node.typename,
                       node.lineno,
                       node.colno);
         }
@@ -293,12 +293,12 @@ var Compiler = Object.extend({
     },
 
     compileLiteral: function(node, frame) {
-        if(typeof node.value == "string") {
+        if(typeof node.value == 'string') {
             var val = node.value.replace(/\\/g, '\\\\');
             val = val.replace(/"/g, '\\"');
-            val = val.replace(/\n/g, "\\n");
-            val = val.replace(/\r/g, "\\r");
-            val = val.replace(/\t/g, "\\t");
+            val = val.replace(/\n/g, '\\n');
+            val = val.replace(/\r/g, '\\r');
+            val = val.replace(/\t/g, '\\t');
             this.emit('"' + val  + '"');
         }
         else {
@@ -339,8 +339,8 @@ var Compiler = Object.extend({
             key = new nodes.Literal(key.lineno, key.colno, key.value);
         }
         else if(!(key instanceof nodes.Literal &&
-                  typeof key.value == "string")) {
-            this.fail("compilePair: Dict keys must be strings or names",
+                  typeof key.value == 'string')) {
+            this.fail('compilePair: Dict keys must be strings or names',
                       key.lineno,
                       key.colno);
         }
@@ -1039,7 +1039,7 @@ var Compiler = Object.extend({
 
     compileRoot: function(node, frame) {
         if(frame) {
-            this.fail("compileRoot: root node can't have frame");
+            this.fail('compileRoot: root node can\'t have frame');
         }
 
         frame = new Frame();
@@ -1076,12 +1076,12 @@ var Compiler = Object.extend({
     },
 
     compile: function (node, frame) {
-        var _compile = this["compile" + node.typename];
+        var _compile = this['compile' + node.typename];
         if(_compile) {
             _compile.call(this, node, frame);
         }
         else {
-            this.fail("compile: Cannot compile node: " + node.typename,
+            this.fail('compile: Cannot compile node: ' + node.typename,
                       node.lineno,
                       node.colno);
         }

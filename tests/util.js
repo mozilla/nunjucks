@@ -68,13 +68,13 @@
         if(opts.filters) {
             for(var name in opts.filters) {
                 e.addFilter(name, opts.filters[name]);
-            }        
+            }
         }
 
         if(opts.asyncFilters) {
             for(var name in opts.asyncFilters) {
                 e.addFilter(name, opts.asyncFilters[name], true);
-            }        
+            }
         }
 
         if(opts.extensions) {

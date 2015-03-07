@@ -45,7 +45,7 @@ var Parser = Object.extend({
 
     pushToken: function(tok) {
         if(this.peeked) {
-            throw new Error("pushToken: can only push one token on between reads");
+            throw new Error('pushToken: can only push one token on between reads');
         }
         this.peeked = tok;
     },
@@ -107,8 +107,8 @@ var Parser = Object.extend({
             }
 
             if(tok.type != lexer.TOKEN_SYMBOL) {
-                this.fail("advanceAfterBlockEnd: expected symbol token or " +
-                          "explicit name to be passed");
+                this.fail('advanceAfterBlockEnd: expected symbol token or ' +
+                          'explicit name to be passed');
             }
 
             name = this.nextToken().value;
@@ -122,13 +122,13 @@ var Parser = Object.extend({
             }
         }
         else {
-            this.fail("expected block end in " + name + " statement");
+            this.fail('expected block end in ' + name + ' statement');
         }
     },
 
     advanceAfterVariableEnd: function() {
         if(!this.skip(lexer.TOKEN_VARIABLE_END)) {
-            this.fail("expected variable end");
+            this.fail('expected variable end');
         }
     },
 
@@ -150,7 +150,7 @@ var Parser = Object.extend({
             endBlock = 'endall';
         }
         else {
-            this.fail("parseFor: expected for{Async}", forTok.lineno, forTok.colno);
+            this.fail('parseFor: expected for{Async}', forTok.lineno, forTok.colno);
         }
 
         node.name = this.parsePrimary();
@@ -196,7 +196,7 @@ var Parser = Object.extend({
     parseMacro: function() {
         var macroTok = this.peekToken();
         if(!this.skipSymbol('macro')) {
-            this.fail("expected macro");
+            this.fail('expected macro');
         }
 
         var name = this.parsePrimary(true);
@@ -218,7 +218,7 @@ var Parser = Object.extend({
         // 'caller' kwarg which is a Caller node.
         var callTok = this.peekToken();
         if(!this.skipSymbol('call')) {
-            this.fail("expected call");
+            this.fail('expected call');
         }
 
         var callerArgs = this.parseSignature(true) || new nodes.NodeList();
@@ -279,7 +279,7 @@ var Parser = Object.extend({
     parseImport: function() {
         var importTok = this.peekToken();
         if(!this.skipSymbol('import')) {
-            this.fail("parseImport: expected import",
+            this.fail('parseImport: expected import',
                       importTok.lineno,
                       importTok.colno);
         }
@@ -310,13 +310,13 @@ var Parser = Object.extend({
     parseFrom: function() {
         var fromTok = this.peekToken();
         if(!this.skipSymbol('from')) {
-            this.fail("parseFrom: expected from");
+            this.fail('parseFrom: expected from');
         }
 
         var template = this.parsePrimary();
 
         if(!this.skipSymbol('import')) {
-            this.fail("parseFrom: expected import",
+            this.fail('parseFrom: expected import',
                             fromTok.lineno,
                             fromTok.colno);
         }
@@ -439,7 +439,7 @@ var Parser = Object.extend({
             node = new nodes.IfAsync(tag.lineno, tag.colno);
         }
         else {
-            this.fail("parseIf: expected if or elif",
+            this.fail('parseIf: expected if or elif',
                       tag.lineno,
                       tag.colno);
         }
@@ -451,15 +451,15 @@ var Parser = Object.extend({
         var tok = this.peekToken();
 
         switch(tok && tok.value) {
-        case "elif":
+        case 'elif':
             node.else_ = this.parseIf();
             break;
-        case "else":
+        case 'else':
             this.advanceAfterBlockEnd();
-            node.else_ = this.parseUntilBlocks("endif");
+            node.else_ = this.parseUntilBlocks('endif');
             this.advanceAfterBlockEnd();
             break;
-        case "endif":
+        case 'endif':
             node.else_ = null;
             this.advanceAfterBlockEnd();
             break;
@@ -556,7 +556,7 @@ var Parser = Object.extend({
             var tok = this.nextToken(true);
 
             if(!tok) {
-                this.fail("expected endraw, got end of file");
+                this.fail('expected endraw, got end of file');
             }
 
             if(tok.type == lexer.TOKEN_BLOCK_START) {
@@ -905,14 +905,14 @@ var Parser = Object.extend({
             val = parseFloat(tok.value);
         }
         else if(tok.type == lexer.TOKEN_BOOLEAN) {
-            if(tok.value == "true") {
+            if(tok.value == 'true') {
                 val = true;
             }
-            else if(tok.value == "false") {
+            else if(tok.value == 'false') {
                 val = false;
             }
             else {
-                this.fail("invalid boolean: " + tok.value,
+                this.fail('invalid boolean: ' + tok.value,
                           tok.lineno,
                           tok.colno);
             }
@@ -1006,7 +1006,7 @@ var Parser = Object.extend({
 
             if(node.children.length > 0) {
                 if(!this.skip(lexer.TOKEN_COMMA)) {
-                    this.fail("parseAggregate: expected comma after expression",
+                    this.fail('parseAggregate: expected comma after expression',
                               tok.lineno,
                               tok.colno);
                 }
@@ -1019,7 +1019,7 @@ var Parser = Object.extend({
                 // We expect a key/value pair for dicts, separated by a
                 // colon
                 if(!this.skip(lexer.TOKEN_COLON)) {
-                    this.fail("parseAggregate: expected colon after dict key",
+                    this.fail('parseAggregate: expected colon after dict key',
                         tok.lineno,
                         tok.colno);
                 }
@@ -1072,7 +1072,7 @@ var Parser = Object.extend({
             }
 
             if(checkComma && !this.skip(lexer.TOKEN_COMMA)) {
-                this.fail("parseSignature: expected comma after expression",
+                this.fail('parseSignature: expected comma after expression',
                           tok.lineno,
                           tok.colno);
             }
@@ -1159,7 +1159,7 @@ var Parser = Object.extend({
             }
             else if(tok.type != lexer.TOKEN_COMMENT) {
                 // Ignore comments, otherwise this should be an error
-                this.fail("Unexpected token at top-level: " +
+                this.fail('Unexpected token at top-level: ' +
                                 tok.type, tok.lineno, tok.colno);
             }
         }
