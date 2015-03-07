@@ -3,7 +3,7 @@
 
     var expect, lib, nodes, parser;
 
-    if(typeof require != 'undefined') {
+    if(typeof require !== 'undefined') {
         expect = require('expect.js');
         lib = require('../src/lib');
         nodes = require('../src/nodes');

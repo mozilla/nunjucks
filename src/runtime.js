@@ -59,7 +59,7 @@ var Frame = Obj.extend({
     resolve: function(name) {
         var p = this.parent;
         var val = this.variables[name];
-        if(val != null) {
+        if(val !== undefined && val !== null) {
             return this;
         }
         return p && p.resolve(name);
@@ -152,7 +152,7 @@ function numArgs(args) {
 // autoescaped. This happens magically because autoescaping only
 // occurs on primitive string objects.
 function SafeString(val) {
-    if(typeof val != 'string') {
+    if(typeof val !== 'string') {
         return val;
     }
 
@@ -276,7 +276,7 @@ function asyncAll(arr, dimen, func, cb) {
         finished++;
         outputArr[i] = output;
 
-        if(finished == len) {
+        if(finished === len) {
             cb(null, outputArr.join(''));
         }
     }
@@ -285,7 +285,7 @@ function asyncAll(arr, dimen, func, cb) {
         len = arr.length;
         outputArr = new Array(len);
 
-        if(len == 0) {
+        if(len === 0) {
             cb(null, '');
         }
         else {
@@ -308,7 +308,7 @@ function asyncAll(arr, dimen, func, cb) {
         len = keys.length;
         outputArr = new Array(len);
 
-        if(len == 0) {
+        if(len === 0) {
             cb(null, '');
         }
         else {

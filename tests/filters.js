@@ -3,7 +3,7 @@
 
     var expect, util, lib;
 
-    if(typeof require != 'undefined') {
+    if(typeof require !== 'undefined') {
         expect = require('expect.js');
         util = require('./util');
         lib = require('../src/lib');

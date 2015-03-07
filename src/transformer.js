@@ -160,7 +160,7 @@ function liftSuper(ast) {
 
         blockNode.body = walk(blockNode.body, function(node) {
             if(node instanceof nodes.FunCall &&
-               node.name.value == 'super') {
+               node.name.value === 'super') {
                 hasSuper = true;
                 return new nodes.Symbol(node.lineno, node.colno, symbol);
             }

@@ -92,19 +92,19 @@ exports.escape = function(val) {
 };
 
 exports.isFunction = function(obj) {
-    return ObjProto.toString.call(obj) == '[object Function]';
+    return ObjProto.toString.call(obj) === '[object Function]';
 };
 
 exports.isArray = Array.isArray || function(obj) {
-    return ObjProto.toString.call(obj) == '[object Array]';
+    return ObjProto.toString.call(obj) === '[object Array]';
 };
 
 exports.isString = function(obj) {
-    return ObjProto.toString.call(obj) == '[object String]';
+    return ObjProto.toString.call(obj) === '[object String]';
 };
 
 exports.isObject = function(obj) {
-    return ObjProto.toString.call(obj) == '[object Object]';
+    return ObjProto.toString.call(obj) === '[object Object]';
 };
 
 exports.groupBy = function(obj, val) {
@@ -159,7 +159,7 @@ exports.each = function(obj, func, context) {
         return;
     }
 
-    if(ArrayProto.each && obj.each == ArrayProto.each) {
+    if(ArrayProto.each && obj.each === ArrayProto.each) {
         obj.forEach(func, context);
     }
     else if(obj.length === +obj.length) {

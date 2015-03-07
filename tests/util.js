@@ -3,7 +3,7 @@
 
     var Environment, Template, loader, templatesPath, expect;
 
-    if(typeof require != 'undefined') {
+    if(typeof require !== 'undefined') {
         Environment = require('../src/environment').Environment;
         Template = require('../src/environment').Template;
         loader = require('../src/node-loaders').FileSystemLoader;
@@ -99,14 +99,14 @@
 
                 doneAsyncs++;
 
-                if(numAsyncs == doneAsyncs && doneHandler) {
+                if(numAsyncs === doneAsyncs && doneHandler) {
                     doneHandler();
                 }
             }, 0);
         });
     }
 
-    if(typeof module != 'undefined') {
+    if(typeof module !== 'undefined') {
         module.exports.render = render;
         module.exports.equal = equal;
         module.exports.finish = finish;

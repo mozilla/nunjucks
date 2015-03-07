@@ -3,7 +3,7 @@
 
     var expect, lib, lexer;
 
-    if(typeof require != 'undefined') {
+    if(typeof require !== 'undefined') {
         expect = require('expect.js');
         lib = require('../src/lib');
         lexer = require('../src/lexer');
@@ -20,7 +20,7 @@
             var tok = tokens.nextToken();
 
             if(!ws) {
-                while(tok && tok.type == lexer.TOKEN_WHITESPACE) {
+                while(tok && tok.type === lexer.TOKEN_WHITESPACE) {
                     tok = tokens.nextToken();
                 }
             }
