@@ -1,4 +1,6 @@
 (function() {
+    'use strict';
+
     var Environment, Template, loader, templatesPath, expect;
 
     if(typeof require != 'undefined') {

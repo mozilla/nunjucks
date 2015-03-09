@@ -1,3 +1,5 @@
+'use strict';
+
 var fs = require('fs');
 var bench = require('bench');
 var oldNunjucks = require('nunjucks');

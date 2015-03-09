@@ -1,3 +1,4 @@
+'use strict';
 
 // A simple class system, more documentation to come
 

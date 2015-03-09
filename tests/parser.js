@@ -1,4 +1,6 @@
 (function() {
+    'use strict';
+
     var expect, lib, nodes, parser;
 
     if(typeof require != 'undefined') {

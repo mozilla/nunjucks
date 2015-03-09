@@ -1,3 +1,5 @@
+'use strict';
+
 var nodes = require('./nodes');
 var lib = require('./lib');
 

@@ -1,3 +1,5 @@
+'use strict';
+
 var lexer = require('./lexer');
 var nodes = require('./nodes');
 var Object = require('./object');

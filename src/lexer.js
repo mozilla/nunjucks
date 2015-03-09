@@ -1,3 +1,5 @@
+'use strict';
+
 var lib = require('./lib');
 
 var whitespaceChars = ' \n\t\r\u00A0';
@@ -56,7 +58,7 @@ function Tokenizer(str, opts) {
 
     opts = opts || {};
 
-    tags = opts.tags || {};
+    var tags = opts.tags || {};
     this.tags = {
         BLOCK_START: tags.blockStart || BLOCK_START,
         BLOCK_END: tags.blockEnd || BLOCK_END,
