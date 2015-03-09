@@ -142,34 +142,34 @@
                    [nodes.Output,
                     [nodes.Literal, 'foo']]]);
 
-            isAST(parser.parse("{{ 'foo' }}"),
+            isAST(parser.parse('{{ \'foo\' }}'),
                   [nodes.Root,
                    [nodes.Output,
                     [nodes.Literal, 'foo']]]);
 
-            isAST(parser.parse("{{ true }}"),
+            isAST(parser.parse('{{ true }}'),
                   [nodes.Root,
                    [nodes.Output,
                     [nodes.Literal, true]]]);
 
-            isAST(parser.parse("{{ false }}"),
+            isAST(parser.parse('{{ false }}'),
                   [nodes.Root,
                    [nodes.Output,
                     [nodes.Literal, false]]]);
 
-            isAST(parser.parse("{{ foo }}"),
+            isAST(parser.parse('{{ foo }}'),
                   [nodes.Root,
                    [nodes.Output,
                     [nodes.Symbol, 'foo']]]);
 
-            isAST(parser.parse("{{ r/23/gi }}"),
+            isAST(parser.parse('{{ r/23/gi }}'),
                   [nodes.Root,
                    [nodes.Output,
                      [nodes.Literal, new RegExp('23', 'gi')]]]);
         });
 
         it('should parse aggregate types', function() {
-            isAST(parser.parse("{{ [1,2,3] }}"),
+            isAST(parser.parse('{{ [1,2,3] }}'),
                   [nodes.Root,
                    [nodes.Output,
                     [nodes.Array,
@@ -177,7 +177,7 @@
                      [nodes.Literal, 2],
                      [nodes.Literal, 3]]]]);
 
-            isAST(parser.parse("{{ (1,2,3) }}"),
+            isAST(parser.parse('{{ (1,2,3) }}'),
                   [nodes.Root,
                    [nodes.Output,
                     [nodes.Group,
@@ -185,7 +185,7 @@
                      [nodes.Literal, 2],
                      [nodes.Literal, 3]]]]);
 
-            isAST(parser.parse("{{ {foo: 1, 'two': 2} }}"),
+            isAST(parser.parse('{{ {foo: 1, \'two\': 2} }}'),
                   [nodes.Root,
                    [nodes.Output,
                     [nodes.Dict,
@@ -439,7 +439,7 @@
                                '   foobar as foobarbaz %}'),
                   [nodes.Root,
                    [nodes.FromImport,
-                    [nodes.Literal, "foo/bar.html"],
+                    [nodes.Literal, 'foo/bar.html'],
                     [nodes.NodeList,
                      [nodes.Symbol, 'baz'],
                      [nodes.Pair,
@@ -627,7 +627,7 @@
                    [nodes.CallExtension, extensions[1], 'bar', null,
                     [1, [nodes.NodeList,
                          [nodes.Output,
-                          [nodes.TemplateData, "sdfd"]]]]]]);
+                          [nodes.TemplateData, 'sdfd']]]]]]);
 
             isAST(parser.parse('{% testblocktag %}{{ 123 }}{% endtestblocktag %}',
                                extensions),
@@ -645,11 +645,11 @@
                     // coming from the template
                     [nodes.NodeList,
                      [nodes.Literal, 123],
-                     [nodes.Literal, "abc"],
+                     [nodes.Literal, 'abc'],
                      [nodes.KeywordArgs,
                       [nodes.Pair,
-                       [nodes.Symbol, "foo"],
-                       [nodes.Literal, "bar"]]]]]]);
+                       [nodes.Symbol, 'foo'],
+                       [nodes.Literal, 'bar']]]]]]);
 
             isAST(parser.parse('{% testargs %}', extensions),
                   [nodes.Root,

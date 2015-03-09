@@ -45,8 +45,8 @@ var filters = {
         }
 
         var spaces = width - str.length;
-        var pre = lib.repeat(" ", spaces/2 - spaces % 2);
-        var post = lib.repeat(" ", spaces/2);
+        var pre = lib.repeat(' ', spaces/2 - spaces % 2);
+        var post = lib.repeat(' ', spaces/2);
         return r.copySafeness(str, pre + str + post);
     },
 
@@ -56,7 +56,7 @@ var filters = {
 
     dictsort: function(val, case_sensitive, by) {
         if (!lib.isObject(val)) {
-            throw new lib.TemplateError("dictsort filter: val must be an object");
+            throw new lib.TemplateError('dictsort filter: val must be an object');
         }
 
         var array = [];
@@ -66,13 +66,13 @@ var filters = {
         }
 
         var si;
-        if (by === undefined || by === "key") {
+        if (by === undefined || by === 'key') {
             si = 0;
-        } else if (by === "value") {
+        } else if (by === 'value') {
             si = 1;
         } else {
             throw new lib.TemplateError(
-                "dictsort filter: You can only sort by either key or value");
+                'dictsort filter: You can only sort by either key or value');
         }
 
         array.sort(function(t1, t2) {
@@ -177,7 +177,7 @@ var filters = {
           return val;
         }
         else {
-            throw new lib.TemplateError("list filter: type not iterable");
+            throw new lib.TemplateError('list filter: type not iterable');
         }
     },
 

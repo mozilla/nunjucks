@@ -490,11 +490,11 @@
         it('should import templates', function(done) {
             equal('{% import "import.html" as imp %}' +
                   '{{ imp.foo() }} {{ imp.bar }}',
-                  "Here's a macro baz");
+                  'Here\'s a macro baz');
 
             equal('{% from "import.html" import foo as baz, bar %}' +
                   '{{ bar }} {{ baz() }}',
-                  "baz Here's a macro");
+                  'baz Here\'s a macro');
 
             // TODO: Should the for loop create a new frame for each
             // iteration? As it is, `num` is set on all iterations after
@@ -514,12 +514,12 @@
             equal('{% set bar = "BAR" %}' +
                   '{% import "import-context.html" as imp with context %}' +
                   '{{ imp.foo() }}',
-                  "Here's BAR");
+                  'Here\'s BAR');
 
             equal('{% set bar = "BAR" %}' +
                   '{% from "import-context.html" import foo with context %}' +
                   '{{ foo() }}',
-                  "Here's BAR");
+                  'Here\'s BAR');
 
             finish(done);
         });
@@ -528,12 +528,12 @@
             equal('{% set bar = "BAR" %}' +
                   '{% import "import-context.html" as imp without context %}' +
                   '{{ imp.foo() }}',
-                  "Here's ");
+                  'Here\'s ');
 
             equal('{% set bar = "BAR" %}' +
                   '{% from "import-context.html" import foo without context %}' +
                   '{{ foo() }}',
-                  "Here's ");
+                  'Here\'s ');
 
             finish(done);
         });
@@ -542,12 +542,12 @@
             equal('{% set bar = "BAR" %}' +
                   '{% import "import-context.html" as imp %}' +
                   '{{ imp.foo() }}',
-                  "Here's ");
+                  'Here\'s ');
 
             equal('{% set bar = "BAR" %}' +
                   '{% from "import-context.html" import foo %}' +
                   '{{ foo() }}',
-                  "Here's ");
+                  'Here\'s ');
 
             finish(done);
         });
@@ -609,11 +609,11 @@
                   'hello world FooInclude james');
 
             equal('hello world {% include tmpl %}',
-                  { name: 'thedude', tmpl: "include.html" },
+                  { name: 'thedude', tmpl: 'include.html' },
                   'hello world FooInclude thedude');
 
             equal('hello world {% include data.tmpl %}',
-                  { name: 'thedude', data: {tmpl: "include.html"} },
+                  { name: 'thedude', data: {tmpl: 'include.html'} },
                   'hello world FooInclude thedude');
 
             finish(done);
@@ -752,7 +752,7 @@
                 this.parse = function(parser, nodes) {
                     parser.advanceAfterBlockEnd();
 
-                    var content = parser.parseUntilBlocks("endtest");
+                    var content = parser.parseUntilBlocks('endtest');
                     var tag = new nodes.CallExtension(this, 'run', null, [content]);
                     parser.advanceAfterBlockEnd();
 
@@ -761,7 +761,7 @@
 
                 this.run = function(context, content) {
                     // Reverse the string
-                    return content().split("").reverse().join("");
+                    return content().split('').reverse().join('');
                 };
             }
 
@@ -787,7 +787,7 @@
 
                 this.run = function(context, arg1) {
                     // Reverse the string
-                    return arg1.split("").reverse().join("");
+                    return arg1.split('').reverse().join('');
                 };
             }
 
@@ -823,10 +823,10 @@
                 };
 
                 this.run = function(context, body, intermediate) {
-                    var output = body().split("").join(",");
+                    var output = body().split('').join(',');
                     if(intermediate) {
                         // Reverse the string.
-                        output += intermediate().split("").reverse().join("");
+                        output += intermediate().split('').reverse().join('');
                     }
                     return output;
                 };

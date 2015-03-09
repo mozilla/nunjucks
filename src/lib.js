@@ -4,9 +4,9 @@ var ObjProto = Object.prototype;
 var escapeMap = {
     '&': '&amp;',
     '"': '&quot;',
-    "'": '&#39;',
-    "<": '&lt;',
-    ">": '&gt;'
+    '\'': '&#39;',
+    '<': '&lt;',
+    '>': '&gt;'
 };
 
 var escapeRegex = /[&"'<>]/g;
@@ -43,7 +43,7 @@ exports.TemplateError = function(message, lineno, colno) {
 
     if (message instanceof Error) { // for casting regular js errors
         err = message;
-        message = message.name + ": " + message.message;
+        message = message.name + ': ' + message.message;
     } else {
         if(Error.captureStackTrace) {
             Error.captureStackTrace(err);
@@ -57,7 +57,7 @@ exports.TemplateError = function(message, lineno, colno) {
     err.firstUpdate = true;
 
     err.Update = function(path) {
-        var message = "(" + (path || "unknown path") + ")";
+        var message = '(' + (path || 'unknown path') + ')';
 
         // only show lineno + colno next to path of template
         // where error occurred
@@ -257,7 +257,7 @@ exports.indexOf = Array.prototype.indexOf ?
 
 if(!Array.prototype.map) {
     Array.prototype.map = function() {
-        throw new Error("map is unimplemented for this js engine");
+        throw new Error('map is unimplemented for this js engine');
     };
 }
 

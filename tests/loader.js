@@ -22,8 +22,8 @@
             }
 
             MyLoader.prototype.getSource = function(name) {
-                return { src: "Hello World",
-                            path: "/tmp/somewhere" };
+                return { src: 'Hello World',
+                            path: '/tmp/somewhere' };
             };
 
             var env = new Environment(new MyLoader(templatesPath));

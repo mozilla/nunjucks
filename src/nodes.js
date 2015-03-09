@@ -12,7 +12,7 @@ function traverseAndCheck(obj, type, results) {
     }
 }
 
-var Node = Object.extend("Node", {
+var Node = Object.extend('Node', {
     init: function(lineno, colno) {
         this.lineno = lineno;
         this.colno = colno;
@@ -63,10 +63,10 @@ var Node = Object.extend("Node", {
 });
 
 // Abstract nodes
-var Value = Node.extend("Value", { fields: ['value'] });
+var Value = Node.extend('Value', { fields: ['value'] });
 
 // Concrete nodes
-var NodeList = Node.extend("NodeList", {
+var NodeList = Node.extend('NodeList', {
     fields: ['children'],
 
     init: function(lineno, colno, nodes) {
@@ -78,24 +78,24 @@ var NodeList = Node.extend("NodeList", {
     }
 });
 
-var Root = NodeList.extend("Root");
-var Literal = Value.extend("Literal");
-var Symbol = Value.extend("Symbol");
-var Group = NodeList.extend("Group");
-var Array = NodeList.extend("Array");
-var Pair = Node.extend("Pair", { fields: ['key', 'value'] });
-var Dict = NodeList.extend("Dict");
-var LookupVal = Node.extend("LookupVal", { fields: ['target', 'val'] });
-var If = Node.extend("If", { fields: ['cond', 'body', 'else_'] });
-var IfAsync = If.extend("IfAsync");
-var InlineIf = Node.extend("InlineIf", { fields: ['cond', 'body', 'else_'] });
-var For = Node.extend("For", { fields: ['arr', 'name', 'body', 'else_'] });
-var AsyncEach = For.extend("AsyncEach");
-var AsyncAll = For.extend("AsyncAll");
-var Macro = Node.extend("Macro", { fields: ['name', 'args', 'body'] });
-var Caller = Macro.extend("Caller");
-var Import = Node.extend("Import", { fields: ['template', 'target', 'withContext'] });
-var FromImport = Node.extend("FromImport", {
+var Root = NodeList.extend('Root');
+var Literal = Value.extend('Literal');
+var Symbol = Value.extend('Symbol');
+var Group = NodeList.extend('Group');
+var Array = NodeList.extend('Array');
+var Pair = Node.extend('Pair', { fields: ['key', 'value'] });
+var Dict = NodeList.extend('Dict');
+var LookupVal = Node.extend('LookupVal', { fields: ['target', 'val'] });
+var If = Node.extend('If', { fields: ['cond', 'body', 'else_'] });
+var IfAsync = If.extend('IfAsync');
+var InlineIf = Node.extend('InlineIf', { fields: ['cond', 'body', 'else_'] });
+var For = Node.extend('For', { fields: ['arr', 'name', 'body', 'else_'] });
+var AsyncEach = For.extend('AsyncEach');
+var AsyncAll = For.extend('AsyncAll');
+var Macro = Node.extend('Macro', { fields: ['name', 'args', 'body'] });
+var Caller = Macro.extend('Caller');
+var Import = Node.extend('Import', { fields: ['template', 'target', 'withContext'] });
+var FromImport = Node.extend('FromImport', {
     fields: ['template', 'names', 'withContext'],
 
     init: function(lineno, colno, template, names, withContext) {
@@ -104,41 +104,41 @@ var FromImport = Node.extend("FromImport", {
                     names || new NodeList(), withContext);
     }
 });
-var FunCall = Node.extend("FunCall", { fields: ['name', 'args'] });
-var Filter = FunCall.extend("Filter");
-var FilterAsync = Filter.extend("FilterAsync", {
+var FunCall = Node.extend('FunCall', { fields: ['name', 'args'] });
+var Filter = FunCall.extend('Filter');
+var FilterAsync = Filter.extend('FilterAsync', {
     fields: ['name', 'args', 'symbol']
 });
-var KeywordArgs = Dict.extend("KeywordArgs");
-var Block = Node.extend("Block", { fields: ['name', 'body'] });
-var Super = Node.extend("Super", { fields: ['blockName', 'symbol'] });
-var TemplateRef = Node.extend("TemplateRef", { fields: ['template'] });
-var Extends = TemplateRef.extend("Extends");
-var Include = TemplateRef.extend("Include");
-var Set = Node.extend("Set", { fields: ['targets', 'value'] });
-var Output = NodeList.extend("Output");
-var TemplateData = Literal.extend("TemplateData");
-var UnaryOp = Node.extend("UnaryOp", { fields: ['target'] });
-var BinOp = Node.extend("BinOp", { fields: ['left', 'right'] });
-var In = BinOp.extend("In");
-var Or = BinOp.extend("Or");
-var And = BinOp.extend("And");
-var Not = UnaryOp.extend("Not");
-var Add = BinOp.extend("Add");
-var Sub = BinOp.extend("Sub");
-var Mul = BinOp.extend("Mul");
-var Div = BinOp.extend("Div");
-var FloorDiv = BinOp.extend("FloorDiv");
-var Mod = BinOp.extend("Mod");
-var Pow = BinOp.extend("Pow");
-var Neg = UnaryOp.extend("Neg");
-var Pos = UnaryOp.extend("Pos");
-var Compare = Node.extend("Compare", { fields: ['expr', 'ops'] });
-var CompareOperand = Node.extend("CompareOperand", {
+var KeywordArgs = Dict.extend('KeywordArgs');
+var Block = Node.extend('Block', { fields: ['name', 'body'] });
+var Super = Node.extend('Super', { fields: ['blockName', 'symbol'] });
+var TemplateRef = Node.extend('TemplateRef', { fields: ['template'] });
+var Extends = TemplateRef.extend('Extends');
+var Include = TemplateRef.extend('Include');
+var Set = Node.extend('Set', { fields: ['targets', 'value'] });
+var Output = NodeList.extend('Output');
+var TemplateData = Literal.extend('TemplateData');
+var UnaryOp = Node.extend('UnaryOp', { fields: ['target'] });
+var BinOp = Node.extend('BinOp', { fields: ['left', 'right'] });
+var In = BinOp.extend('In');
+var Or = BinOp.extend('Or');
+var And = BinOp.extend('And');
+var Not = UnaryOp.extend('Not');
+var Add = BinOp.extend('Add');
+var Sub = BinOp.extend('Sub');
+var Mul = BinOp.extend('Mul');
+var Div = BinOp.extend('Div');
+var FloorDiv = BinOp.extend('FloorDiv');
+var Mod = BinOp.extend('Mod');
+var Pow = BinOp.extend('Pow');
+var Neg = UnaryOp.extend('Neg');
+var Pos = UnaryOp.extend('Pos');
+var Compare = Node.extend('Compare', { fields: ['expr', 'ops'] });
+var CompareOperand = Node.extend('CompareOperand', {
     fields: ['expr', 'type']
 });
 
-var CustomTag = Node.extend("CustomTag", {
+var CustomTag = Node.extend('CustomTag', {
     init: function(lineno, colno, name) {
         this.lineno = lineno;
         this.colno = colno;
@@ -146,7 +146,7 @@ var CustomTag = Node.extend("CustomTag", {
     }
 });
 
-var CallExtension = Node.extend("CallExtension", {
+var CallExtension = Node.extend('CallExtension', {
     fields: ['extName', 'prop', 'args', 'contentArgs'],
 
     init: function(ext, prop, args, contentArgs) {
@@ -158,7 +158,7 @@ var CallExtension = Node.extend("CallExtension", {
     }
 });
 
-var CallExtensionAsync = CallExtension.extend("CallExtensionAsync");
+var CallExtensionAsync = CallExtension.extend('CallExtensionAsync');
 
 // Print the AST in a nicely formatted tree format for debuggin
 function printNodes(node, indent) {
@@ -166,13 +166,13 @@ function printNodes(node, indent) {
 
     // This is hacky, but this is just a debugging function anyway
     function print(str, indent, inline) {
-        var lines = str.split("\n");
+        var lines = str.split('\n');
 
         for(var i=0; i<lines.length; i++) {
             if(lines[i]) {
                 if((inline && i > 0) || !inline) {
                     for(var j=0; j<indent; j++) {
-                        util.print(" ");
+                        util.print(' ');
                     }
                 }
             }
@@ -186,7 +186,7 @@ function printNodes(node, indent) {
         }
     }
 
-    print(node.typename + ": ", indent);
+    print(node.typename + ': ', indent);
 
     if(node instanceof NodeList) {
         print('\n');

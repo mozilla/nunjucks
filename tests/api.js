@@ -45,7 +45,7 @@
         it('should handle correctly relative paths in renderString', function() {
             var env = new Environment(new Loader(templatesPath));
             expect(env.renderString('{% extends "./relative/test1.html" %}{% block block1 %}Test3{% endblock %}', {}, {
-                path: path.resolve(templatesPath, "string.html")
+                path: path.resolve(templatesPath, 'string.html')
             })).to.be('FooTest3BazFizzle');
         });
     });

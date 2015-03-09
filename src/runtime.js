@@ -16,7 +16,7 @@ var Frame = Obj.extend({
         var parts = name.split('.');
         var obj = this.variables;
         var frame = this;
-        
+
         if(resolveUp) {
             if((frame = this.resolve(parts[0]))) {
                 frame.set(name, val);
@@ -195,9 +195,9 @@ function markSafe(val) {
 }
 
 function suppressValue(val, autoescape) {
-    val = (val !== undefined && val !== null) ? val : "";
+    val = (val !== undefined && val !== null) ? val : '';
 
-    if(autoescape && typeof val === "string") {
+    if(autoescape && typeof val === 'string') {
         val = lib.escape(val);
     }
 

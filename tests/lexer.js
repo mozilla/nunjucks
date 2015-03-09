@@ -132,7 +132,7 @@
             tok = tokens.nextToken();
             tok = tokens.nextToken();
             expect(tok.type).to.be(lexer.TOKEN_SYMBOL);
-            expect(tok.value).to.be("foo");
+            expect(tok.value).to.be('foo');
         });
 
         it('should parse block start and end', function() {
