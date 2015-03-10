@@ -37,6 +37,27 @@ function precompile(input, opts) {
 
     var pathStats = fs.existsSync(input) && fs.statSync(input);
     var output = '';
+    var templates = [];
+
+    function addTemplates(dir) {
+        var files = fs.readdirSync(dir);
+
+        for(var i=0; i<files.length; i++) {
+            var filepath = path.join(dir, files[i]);
+            var subpath = filepath.substr(path.join(input, '/').length);
+            var stat = fs.statSync(filepath);
+
+            if(stat && stat.isDirectory()) {
+                subpath += '/';
+                if (!match(subpath, opts.exclude)) {
+                    addTemplates(filepath);
+                }
+            }
+            else if(match(subpath, opts.include)) {
+                templates.push(filepath);
+            }
+        }
+    }
 
     if(opts.isString) {
         if(!opts.name) {
@@ -56,28 +77,6 @@ function precompile(input, opts) {
                            opts.asFunction);
     }
     else if(pathStats.isDirectory()) {
-        var templates = [];
-
-        function addTemplates(dir) {
-            var files = fs.readdirSync(dir);
-
-            for(var i=0; i<files.length; i++) {
-                var filepath = path.join(dir, files[i]);
-                var subpath = filepath.substr(path.join(input, '/').length);
-                var stat = fs.statSync(filepath);
-
-                if(stat && stat.isDirectory()) {
-                    subpath += '/';
-                    if (!match(subpath, opts.exclude)) {
-                        addTemplates(filepath);
-                    }
-                }
-                else if(match(subpath, opts.include)) {
-                    templates.push(filepath);
-                }
-            }
-        }
-
         addTemplates(input);
 
         for(var i=0; i<templates.length; i++) {
