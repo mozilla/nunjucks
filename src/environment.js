@@ -149,9 +149,8 @@ var Environment = Obj.extend({
 
             lib.asyncIter(this.loaders, function(loader, i, next, done) {
                 function handle(src) {
-                    src.loader = loader;
-
                     if(src) {
+                        src.loader = loader;
                         done(src);
                     }
                     else {
