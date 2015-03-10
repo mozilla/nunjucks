@@ -1,11 +1,13 @@
 (function() {
     'use strict';
 
-    var expect, Environment, Loader, templatesPath;
+    var expect, util, Environment, Loader, templatesPath;
     var path = require('path');
+    var os = require('os');
 
     if(typeof require !== 'undefined') {
         expect = require('expect.js');
+        util = require('./util');
         Environment = require('../src/environment').Environment;
         Loader = require('../src/node-loaders').FileSystemLoader;
         templatesPath = 'tests/templates';
@@ -41,7 +43,7 @@
 
             var test = env.getTemplate('relative/test-cache.html');
 
-            expect(test.render()).to.be('Test1\nTest2');
+            expect(util.normEOL(test.render())).to.be('Test1\nTest2');
         });
 
         it('should handle correctly relative paths in renderString', function() {

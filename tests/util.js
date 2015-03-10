@@ -52,6 +52,11 @@
         }
     }
 
+    function normEOL(str) {
+        if (!str) return str;
+        return str.replace("\r\n", "\n");
+    }
+
     function render(str, ctx, opts, cb) {
         if(!opts) {
             cb = ctx;
@@ -95,7 +100,7 @@
                     throw err;
                 }
 
-                cb(err, res);
+                cb(err, normEOL(res));
 
                 doneAsyncs++;
 
@@ -110,12 +115,14 @@
         module.exports.render = render;
         module.exports.equal = equal;
         module.exports.finish = finish;
+        module.exports.normEOL = normEOL;
     }
     else {
         window.util = {
             render: render,
             equal: equal,
-            finish: finish
+            finish: finish,
+            normEOL: normEOL
         };
     }
 })();
