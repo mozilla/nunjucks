@@ -54,7 +54,7 @@
 
     function normEOL(str) {
         if (!str) return str;
-        return str.replace("\r\n", "\n");
+        return str.replace(/\r\n|\r|\n/g, "\n");
     }
 
     function render(str, ctx, opts, cb) {
