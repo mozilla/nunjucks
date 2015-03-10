@@ -15,8 +15,8 @@ function extend(cls, name, props) {
         var src = props[k];
         var parent = prototype[k];
 
-        if(typeof parent == 'function' &&
-           typeof src == 'function' &&
+        if(typeof parent === 'function' &&
+           typeof src === 'function' &&
            fnTest.test(src)) {
             prototype[k] = (function (src, parent) {
                 return function() {
@@ -49,7 +49,7 @@ function extend(cls, name, props) {
     new_cls.prototype.constructor = new_cls;
 
     new_cls.extend = function(name, props) {
-        if(typeof name == 'object') {
+        if(typeof name === 'object') {
             props = name;
             name = 'anonymous';
         }

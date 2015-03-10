@@ -85,7 +85,7 @@ Tokenizer.prototype.nextToken = function() {
             // We have nothing else to parse
             return null;
         }
-        else if(cur == '"' || cur == '\'') {
+        else if(cur === '"' || cur === '\'') {
             // We've hit a string
             return token(TOKEN_STRING, this.parseString(cur), lineno, colno);
         }
@@ -148,7 +148,7 @@ Tokenizer.prototype.nextToken = function() {
 
             return token(TOKEN_REGEX, {body: regexBody, flags: regexFlags}, lineno, colno);
         }
-        else if(delimChars.indexOf(cur) != -1) {
+        else if(delimChars.indexOf(cur) !== -1) {
             // We've hit a delimiter (a special char like a bracket)
             this.forward();
             var complexOps = ['==', '!=', '<=', '>=', '//', '**'];
@@ -181,7 +181,7 @@ Tokenizer.prototype.nextToken = function() {
             tok = this._extractUntil(whitespaceChars + delimChars);
 
             if(tok.match(/^[-+]?[0-9]+$/)) {
-                if(this.current() == '.') {
+                if(this.current() === '.') {
                     this.forward();
                     var dec = this._extract(intChars);
                     return token(TOKEN_FLOAT, tok + '.' + dec, lineno, colno);
@@ -299,10 +299,10 @@ Tokenizer.prototype.parseString = function(delimiter) {
     var colno = this.colno;
     var str = '';
 
-    while(!this.is_finished() && this.current() != delimiter) {
+    while(!this.is_finished() && this.current() !== delimiter) {
         var cur = this.current();
 
-        if(cur == '\\') {
+        if(cur === '\\') {
             this.forward();
             switch(this.current()) {
             case 'n': str += '\n'; break;
@@ -329,7 +329,7 @@ Tokenizer.prototype._matches = function(str) {
     }
 
     var m = this.str.slice(this.index, this.index + str.length);
-    return m == str;
+    return m === str;
 };
 
 Tokenizer.prototype._extractString = function(str) {
@@ -364,8 +364,8 @@ Tokenizer.prototype._extractMatching = function (breakOnMatch, charString) {
     var first = charString.indexOf(this.current());
 
     // Only proceed if the first character doesn't meet our condition
-    if((breakOnMatch && first == -1) ||
-       (!breakOnMatch && first != -1)) {
+    if((breakOnMatch && first === -1) ||
+       (!breakOnMatch && first !== -1)) {
         var t = this.current();
         this.forward();
 
@@ -373,8 +373,8 @@ Tokenizer.prototype._extractMatching = function (breakOnMatch, charString) {
         // breaking char
         var idx = charString.indexOf(this.current());
 
-        while(((breakOnMatch && idx == -1) ||
-               (!breakOnMatch && idx != -1)) && !this.is_finished()) {
+        while(((breakOnMatch && idx === -1) ||
+               (!breakOnMatch && idx !== -1)) && !this.is_finished()) {
             t += this.current();
             this.forward();
 
@@ -400,7 +400,7 @@ Tokenizer.prototype.forwardN = function(n) {
 Tokenizer.prototype.forward = function() {
     this.index++;
 
-    if(this.previous() == '\n') {
+    if(this.previous() === '\n') {
         this.lineno++;
         this.colno = 0;
     }
@@ -412,11 +412,11 @@ Tokenizer.prototype.forward = function() {
 Tokenizer.prototype.back = function() {
     this.index--;
 
-    if(this.current() == '\n') {
+    if(this.current() === '\n') {
         this.lineno--;
 
         var idx = this.src.lastIndexOf('\n', this.index-1);
-        if(idx == -1) {
+        if(idx === -1) {
             this.colno = this.index;
         }
         else {

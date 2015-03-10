@@ -240,7 +240,7 @@ var Compiler = Object.extend({
                 // object as the last argument, if they exist.
                 this._compileExpression(arg, frame);
 
-                if(i != args.children.length - 1 || contentArgs.length) {
+                if(i !== args.children.length - 1 || contentArgs.length) {
                     this.emit(',');
                 }
             }, this);
@@ -295,7 +295,7 @@ var Compiler = Object.extend({
     },
 
     compileLiteral: function(node, frame) {
-        if(typeof node.value == 'string') {
+        if(typeof node.value === 'string') {
             var val = node.value.replace(/\\/g, '\\\\');
             val = val.replace(/"/g, '\\"');
             val = val.replace(/\n/g, '\\n');
@@ -341,7 +341,7 @@ var Compiler = Object.extend({
             key = new nodes.Literal(key.lineno, key.colno, key.value);
         }
         else if(!(key instanceof nodes.Literal &&
-                  typeof key.value == 'string')) {
+                  typeof key.value === 'string')) {
             this.fail('compilePair: Dict keys must be strings or names',
                       key.lineno,
                       key.colno);
@@ -511,7 +511,7 @@ var Compiler = Object.extend({
             var name = target.value;
             var id = frame.lookup(name);
 
-            if (id == null) {
+            if (id === null || id === undefined) {
                 id = this.tmpid();
 
                 // Note: This relies on js allowing scope across
@@ -536,7 +536,7 @@ var Compiler = Object.extend({
             // uncommon to assign to multiple vars anyway
             this.emitLine('if(!frame.parent) {');
             this.emitLine('context.setVariable("' + name + '", ' + id + ');');
-            if(name.charAt(0) != '_') {
+            if(name.charAt(0) !== '_') {
                 this.emitLine('context.addExport("' + name + '");');
             }
             this.emitLine('}');
@@ -871,7 +871,7 @@ var Compiler = Object.extend({
             this.emitLine('frame.set("' + name + '", ' + funcId + ');');
         }
         else {
-            if(node.name.value.charAt(0) != '_') {
+            if(node.name.value.charAt(0) !== '_') {
                 this.emitLine('context.addExport("' + name + '");');
             }
             this.emitLine('context.setVariable("' + name + '", ' + funcId + ');');

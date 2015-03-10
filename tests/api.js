@@ -4,7 +4,7 @@
     var expect, Environment, Loader, templatesPath;
     var path = require('path');
 
-    if(typeof require != 'undefined') {
+    if(typeof require !== 'undefined') {
         expect = require('expect.js');
         Environment = require('../src/environment').Environment;
         Loader = require('../src/node-loaders').FileSystemLoader;

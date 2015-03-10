@@ -90,14 +90,14 @@ var filters = {
                 }
             }
 
-            return a > b ? 1 : (a == b ? 0 : -1);
+            return a > b ? 1 : (a === b ? 0 : -1);
         });
 
         return array;
     },
 
     escape: function(str) {
-        if(typeof str == 'string' ||
+        if(typeof str === 'string' ||
            str instanceof r.SafeString) {
             return lib.escape(str);
         }
@@ -123,7 +123,7 @@ var filters = {
         var sp = lib.repeat(' ', width);
 
         for(var i=0; i<lines.length; i++) {
-            if(i == 0 && !indentfirst) {
+            if(i === 0 && !indentfirst) {
                 res += lines[i] + '\n';
             }
             else {
@@ -213,7 +213,7 @@ var filters = {
         var count = 1;
         res = res.replace(old, new_);
 
-        while(last != res) {
+        while(last !== res) {
             if(count >= maxCount) {
                 break;
             }
@@ -249,10 +249,10 @@ var filters = {
         var factor = Math.pow(10, precision);
         var rounder;
 
-        if(method == 'ceil') {
+        if(method === 'ceil') {
             rounder = Math.ceil;
         }
-        else if(method == 'floor') {
+        else if(method === 'floor') {
             rounder = Math.floor;
         }
         else {

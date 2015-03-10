@@ -3,7 +3,7 @@
 
     var expect, util, Environment, Template, fs;
 
-    if(typeof require != 'undefined') {
+    if(typeof require !== 'undefined') {
         expect = require('expect.js');
         util = require('./util');
         Environment = require('../src/environment').Environment;
@@ -872,12 +872,12 @@
                 };
 
                 this.run = function(context, prefix, kwargs, body) {
-                    if(typeof prefix == 'function') {
+                    if(typeof prefix === 'function') {
                         body = prefix;
                         prefix = '';
                         kwargs = {};
                     }
-                    else if(typeof kwargs == 'function') {
+                    else if(typeof kwargs === 'function') {
                         body = kwargs;
                         kwargs = {};
                     }
