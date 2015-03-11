@@ -124,7 +124,7 @@ var Compiler = Object.extend({
     },
 
     _templateName: function() {
-        return this.templateName == null? 'undefined' : '"'+this.templateName.replace(/"/g, '\\"')+'"';
+        return this.templateName == null? 'undefined' : JSON.stringify(this.templateName);
     },
 
     _bufferAppend: function(func) {
