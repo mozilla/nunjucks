@@ -28,7 +28,7 @@ var FileSystemLoader = Loader.extend({
             // they change
             lib.each(this.searchPaths, function(p) {
                 if(existsSync(p)) {
-                    var watcher = chokidar.watch(p, { ignoreInitial: true });
+                    var watcher = chokidar.watch(p);
 
                     watcher.on('all', function(event, fullname) {
                         fullname = path.resolve(fullname);
