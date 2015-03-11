@@ -26,10 +26,10 @@ var FileSystemLoader = Loader.extend({
             // they change
             lib.each(this.searchPaths, function(p) {
                 if(existsSync(p)) {
-                    var watcher = chokidar.watch(p, { ignoreInitial: true });
+                    var watcher = chokidar.watch(p);
 
                     watcher.on("all", function(event, fullname) {
-                        if((event == "add" || event == "change") && fullname in this.pathsToNames) {
+                        if(event == "change" && fullname in this.pathsToNames) {
                             this.emit('update', this.pathsToNames[fullname]);
                         }
                     }.bind(this));
