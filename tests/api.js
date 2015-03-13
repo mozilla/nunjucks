@@ -3,7 +3,6 @@
 
     var expect, util, Environment, Loader, templatesPath;
     var path = require('path');
-    var os = require('os');
 
     if(typeof require !== 'undefined') {
         expect = require('expect.js');
@@ -23,7 +22,6 @@
         it('should always force compilation of parent template', function() {
             var env = new Environment(new Loader(templatesPath));
 
-            var parent = env.getTemplate('base.html');
             var child = env.getTemplate('base-inherit.html');
             expect(child.render()).to.be('Foo*Bar*BazFizzle');
         });

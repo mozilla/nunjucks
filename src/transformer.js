@@ -222,7 +222,7 @@ function cps(ast, asyncFilters) {
     return convertStatements(liftSuper(liftFilters(ast, asyncFilters)));
 }
 
-function transform(ast, asyncFilters, name) {
+function transform(ast, asyncFilters) {
     return cps(ast, asyncFilters || []);
 }
 

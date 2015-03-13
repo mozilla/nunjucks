@@ -574,7 +574,7 @@
             render('{% extends "base.html" %}' +
                    '{% block notReal %}{{ foo() }}{% endblock %}',
                    { foo: function() { count++; }},
-                   function(err, res) {
+                   function() {
                        expect(count).to.be(0);
                    });
 
@@ -749,6 +749,7 @@
 
         it('should allow custom tag compilation', function(done) {
             function testExtension() {
+                // jshint validthis: true
                 this.tags = ['test'];
 
                 this.parse = function(parser, nodes) {
@@ -777,6 +778,7 @@
 
         it('should allow custom tag compilation without content', function(done) {
             function testExtension() {
+                // jshint validthis: true
                 this.tags = ['test'];
 
                 this.parse = function(parser, nodes) {
@@ -803,6 +805,7 @@
 
         it('should allow complicated custom tag compilation', function(done) {
             function testExtension() {
+                // jshint validthis: true
                 this.tags = ['test'];
 
                 /* normally this is automatically done by Environment */
@@ -852,12 +855,13 @@
 
         it('should allow custom tag with args compilation', function(done) {
             function testExtension() {
+                // jshint validthis: true
                 this.tags = ['test'];
 
                 /* normally this is automatically done by Environment */
                 this._name = 'testExtension';
 
-                this.parse = function(parser, nodes, lexer) {
+                this.parse = function(parser, nodes) {
                     var body, args = null;
                     var tok = parser.nextToken();
 
@@ -977,6 +981,7 @@
 
         it('should not autoescape when extension set false', function(done) {
             function testExtension() {
+                // jshint validthis: true
                 this.tags = ['test'];
 
                 this.autoescape = false;
@@ -988,7 +993,7 @@
                     return new nodes.CallExtension(this, 'run', args, null);
                 };
 
-                this.run = function(context) {
+                this.run = function() {
                     // Reverse the string
                     return '<b>Foo</b>';
                 };

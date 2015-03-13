@@ -12,7 +12,6 @@
         util = window.util;
     }
 
-    var equal = util.equal;
     var finish = util.finish;
     var render = util.render;
 

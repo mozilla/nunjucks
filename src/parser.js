@@ -2,6 +2,7 @@
 
 var lexer = require('./lexer');
 var nodes = require('./nodes');
+// jshint -W079
 var Object = require('./object');
 var lib = require('./lib');
 
@@ -101,8 +102,9 @@ var Parser = Object.extend({
     },
 
     advanceAfterBlockEnd: function(name) {
+        var tok;
         if(!name) {
-            var tok = this.peekToken();
+            tok = this.peekToken();
 
             if(!tok) {
                 this.fail('unexpected end of file');
@@ -116,7 +118,7 @@ var Parser = Object.extend({
             name = this.nextToken().value;
         }
 
-        var tok = this.nextToken();
+        tok = this.nextToken();
 
         if(tok && tok.type === lexer.TOKEN_BLOCK_END) {
             if(tok.value.charAt(0) === '-') {
@@ -409,13 +411,13 @@ var Parser = Object.extend({
         return node;
     },
 
-    parseTemplateRef: function(tagName, nodeType) {
+    parseTemplateRef: function(tagName, NodeType) {
         var tag = this.peekToken();
         if(!this.skipSymbol(tagName)) {
             this.fail('parseTemplateRef: expected '+ tagName);
         }
 
-        var node = new nodeType(tag.lineno, tag.colno);
+        var node = new NodeType(tag.lineno, tag.colno);
         node.template = this.parseExpression();
 
         this.advanceAfterBlockEnd(tag.value);
@@ -605,7 +607,7 @@ var Parser = Object.extend({
     },
 
     parsePostfix: function(node) {
-        var tok = this.peekToken();
+        var lookup, tok = this.peekToken();
 
         while(tok) {
             if(tok.type === lexer.TOKEN_LEFT_PAREN) {
@@ -617,7 +619,7 @@ var Parser = Object.extend({
             }
             else if(tok.type === lexer.TOKEN_LEFT_BRACKET) {
                 // Reference
-                var lookup = this.parseAggregate();
+                lookup = this.parseAggregate();
                 if(lookup.children.length > 1) {
                     this.fail('invalid index');
                 }
@@ -640,7 +642,7 @@ var Parser = Object.extend({
 
                 // Make a literal string because it's not a variable
                 // reference
-                var lookup = new nodes.Literal(val.lineno,
+                lookup = new nodes.Literal(val.lineno,
                                                val.colno,
                                                val.value);
 
@@ -1060,7 +1062,6 @@ var Parser = Object.extend({
 
         var args = new nodes.NodeList(tok.lineno, tok.colno);
         var kwargs = new nodes.KeywordArgs(tok.lineno, tok.colno);
-        var kwnames = [];
         var checkComma = false;
 
         while(1) {

@@ -295,8 +295,6 @@ Tokenizer.prototype.nextToken = function() {
 Tokenizer.prototype.parseString = function(delimiter) {
     this.forward();
 
-    var lineno = this.lineno;
-    var colno = this.colno;
     var str = '';
 
     while(!this.is_finished() && this.current() !== delimiter) {

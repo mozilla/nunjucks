@@ -2,6 +2,7 @@
 
 var util = require('util');
 var lib = require('./lib');
+// jshint -W079
 var Object = require('./object');
 
 function traverseAndCheck(obj, type, results) {
@@ -20,7 +21,7 @@ var Node = Object.extend('Node', {
         this.colno = colno;
 
         var fields = this.fields;
-        for(var i=0, l=fields.length; i<l; i++) {
+        for(var i = 0, l = fields.length; i < l; i++) {
             var field = fields[i];
 
             // The first two args are line/col numbers, so offset by 2
@@ -39,17 +40,18 @@ var Node = Object.extend('Node', {
     findAll: function(type, results) {
         results = results || [];
 
+        var i, l;
         if(this instanceof NodeList) {
             var children = this.children;
 
-            for(var i=0, l=children.length; i<l; i++) {
+            for(i = 0, l = children.length; i < l; i++) {
                 traverseAndCheck(children[i], type, results);
             }
         }
         else {
             var fields = this.fields;
 
-            for(var i=0, l=fields.length; i<l; i++) {
+            for(i = 0, l = fields.length; i < l; i++) {
                 traverseAndCheck(this[fields[i]], type, results);
             }
         }
@@ -138,14 +140,6 @@ var Pos = UnaryOp.extend('Pos');
 var Compare = Node.extend('Compare', { fields: ['expr', 'ops'] });
 var CompareOperand = Node.extend('CompareOperand', {
     fields: ['expr', 'type']
-});
-
-var CustomTag = Node.extend('CustomTag', {
-    init: function(lineno, colno, name) {
-        this.lineno = lineno;
-        this.colno = colno;
-        this.name = name;
-    }
 });
 
 var CallExtension = Node.extend('CallExtension', {

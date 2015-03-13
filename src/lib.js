@@ -23,6 +23,8 @@ exports.withPrettyErrors = function(path, withInternals, func) {
     try {
         return func();
     } catch (e) {
+        // jshint -W022
+        // http://jslinterrors.com/do-not-assign-to-the-exception-parameter
         if (!e.Update) {
             // not one of ours, cast it
             e = new exports.TemplateError(e);
@@ -276,4 +278,4 @@ exports.keys = function(obj) {
         }
         return keys;
     }
-}
+};

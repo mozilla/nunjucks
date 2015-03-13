@@ -3,13 +3,13 @@
 var path = require('path');
 var lib = require('./lib');
 var Obj = require('./object');
-var lexer = require('./lexer');
 var compiler = require('./compiler');
 var builtin_filters = require('./filters');
 var builtin_loaders = require('./loaders');
 var runtime = require('./runtime');
 var globals = require('./globals');
 var Frame = runtime.Frame;
+var Template;
 
 var Environment = Obj.extend({
     init: function(loaders, opts) {
@@ -19,7 +19,7 @@ var Environment = Obj.extend({
         // (the full trace from within nunjucks may confuse developers using
         //  the library)
         // defaults to false
-        var opts = this.opts = opts || {};
+        opts = this.opts = opts || {};
         this.opts.dev = !!opts.dev;
 
         // The autoescape flag sets global autoescaping. If true,
@@ -331,7 +331,7 @@ var Context = Obj.extend({
     }
 });
 
-var Template = Obj.extend({
+Template = Obj.extend({
     init: function (src, env, path, eagerCompile) {
         this.env = env || new Environment();
 
@@ -447,6 +447,7 @@ var Template = Obj.extend({
                                           this.path,
                                           this.env.opts);
 
+            /* jslint evil: true */
             var func = new Function(source);
             props = func();
         }
