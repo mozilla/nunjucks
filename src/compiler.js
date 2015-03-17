@@ -1006,6 +1006,7 @@ var Compiler = Object.extend({
     },
 
     compileInclude: function(node, frame) {
+        // console.log(node.colno);
         var id = this.tmpid();
         var id2 = this.tmpid();
 
@@ -1016,7 +1017,8 @@ var Compiler = Object.extend({
 
         this.emitLine(id + '.render(' +
                       'context.getVariables(), frame.push(), ' + this.makeCallback(id2));
-        this.emitLine(this.buffer + ' += ' + id2);
+        this.emitLine(this.buffer + ' += runtime.formatBlock(' + id2 + ', ' + (node.colno - 1) + ', !env.opts.indentBlocks);');
+
         this.addScopeLevel();
     },
 

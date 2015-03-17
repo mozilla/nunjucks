@@ -663,6 +663,17 @@
             finish(done);
         });
 
+        it('should include templates with auto indentation', function(done) {
+            var opts = { indentBlocks: true };
+
+            render('<div>\n  {% include "include-multiline.html" %}\n</div>',
+                   null, opts, function (err, res) {
+                       expect(res).to.be('<div>\n  foo\n    bar\n  baz\n</div>');
+                   });
+
+            finish(done);
+        });
+
         /**
          * This test checks that this issue is resolved: http://stackoverflow.com/questions/21777058/loop-index-in-included-nunjucks-file
          */
