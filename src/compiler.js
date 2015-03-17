@@ -954,12 +954,17 @@ var Compiler = Object.extend({
     },
 
     compileBlock: function(node, frame) {
-        if(!this.isChild) {
+        if(this.isChild) {
+            this.emitLine('if (!frame.hasOwnProperty("indent_' + node.name.value + '")) { frame["indent_' + node.name.value + '"] = ' + node.colno + '; }');
+        }
+        else {
             var id = this.tmpid();
 
             this.emitLine('context.getBlock("' + node.name.value + '")' +
                           '(env, context, frame, runtime, ' + this.makeCallback(id));
-            this.emitLine(this.buffer + ' += ' + id + ';');
+            this.emitLine('var indent = ' + node.colno + ' - (frame["indent_' + node.name.value + '"] || 1);');
+            this.emitLine('if (!frame.hasOwnProperty("indent_' + node.name.value + '")) { indent = 0; }');
+            this.emitLine(this.buffer + ' += runtime.formatBlock(' + id + ', indent, !env.opts.indentBlocks);');
             this.addScopeLevel();
         }
     },

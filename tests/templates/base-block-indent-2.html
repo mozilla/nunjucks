@@ -1,0 +1,10 @@
+{% extends 'base-block-indent.html' %}
+{% block A %}
+replaced_A
+{% endblock %}
+
+  {% block B %}
+  replaced_B1
+    {% block C %}{% endblock %}
+  replaced_B2
+  {% endblock %}
