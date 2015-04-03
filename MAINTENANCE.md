@@ -16,7 +16,7 @@ Replace `v1.2.3` with whatever the last version was, and you'll see all the chan
 3. Run the command to make sure the ready-made files for the browser are up-to-date.
 
 ```
-$ make browserfiles
+$ npm run browserfiles
 ```
 
 4. Update the version in `package.json`
