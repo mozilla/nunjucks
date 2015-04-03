@@ -2,3 +2,4 @@ node_modules
 coverage
 .#*
 docs/_site
+docs/files
