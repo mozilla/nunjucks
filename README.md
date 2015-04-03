@@ -9,12 +9,7 @@ templating engine for javascript. It is heavily inspired by
 
 `npm install nunjucks`
 
-(View the [CHANGELOG](https://github.com/mozilla/nunjucks/blob/master/CHANGELOG.md))
-
-**Note**: 1.0 was just pushed out, so if you are currently using
-  nunjucks read the CHANGELOG. Especially important: the client-side
-  browser filenames have changed. [Read
-  here](http://mozilla.github.io/nunjucks/getting-started.html).
+(View the [CHANGELOG](https://github.com/mozilla/nunjucks/releases))
 
 ## Documentation
 
