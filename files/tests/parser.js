@@ -1,7 +1,9 @@
 (function() {
+    'use strict';
+
     var expect, lib, nodes, parser;
 
-    if(typeof require != 'undefined') {
+    if(typeof require !== 'undefined') {
         expect = require('expect.js');
         lib = require('../src/lib');
         nodes = require('../src/nodes');
@@ -13,7 +15,7 @@
         nodes = nunjucks.require('nodes');
         parser = nunjucks.require('parser');
     }
-    
+
     function _isAST(node1, node2) {
         // Compare ASTs
         // TODO: Clean this up (seriously, really)
@@ -72,6 +74,10 @@
                     if(!ofield) {
                         expect(value).to.be(ofield);
                     }
+                    else if (ofield !== null && ofield instanceof RegExp) {
+                        // This conditional check for RegExp is needed because /a/ != /a/
+                        expect(String(ofield)).to.be(String(value));
+                    }
                     else {
                         expect(ofield).to.be(value);
                     }
@@ -95,6 +101,10 @@
         }
 
         var type = ast[0];
+        // some nodes have fields (e.g. Compare.ops) which are plain arrays
+        if(type instanceof Array) {
+            return lib.map(ast, toNodes);
+        }
         var F = function() {};
         F.prototype = type.prototype;
 
@@ -134,29 +144,34 @@
                    [nodes.Output,
                     [nodes.Literal, 'foo']]]);
 
-            isAST(parser.parse("{{ 'foo' }}"),
+            isAST(parser.parse('{{ \'foo\' }}'),
                   [nodes.Root,
                    [nodes.Output,
                     [nodes.Literal, 'foo']]]);
 
-            isAST(parser.parse("{{ true }}"),
+            isAST(parser.parse('{{ true }}'),
                   [nodes.Root,
                    [nodes.Output,
                     [nodes.Literal, true]]]);
 
-            isAST(parser.parse("{{ false }}"),
+            isAST(parser.parse('{{ false }}'),
                   [nodes.Root,
                    [nodes.Output,
                     [nodes.Literal, false]]]);
 
-            isAST(parser.parse("{{ foo }}"),
+            isAST(parser.parse('{{ foo }}'),
                   [nodes.Root,
                    [nodes.Output,
                     [nodes.Symbol, 'foo']]]);
+
+            isAST(parser.parse('{{ r/23/gi }}'),
+                  [nodes.Root,
+                   [nodes.Output,
+                     [nodes.Literal, new RegExp('23', 'gi')]]]);
         });
 
         it('should parse aggregate types', function() {
-            isAST(parser.parse("{{ [1,2,3] }}"),
+            isAST(parser.parse('{{ [1,2,3] }}'),
                   [nodes.Root,
                    [nodes.Output,
                     [nodes.Array,
@@ -164,7 +179,7 @@
                      [nodes.Literal, 2],
                      [nodes.Literal, 3]]]]);
 
-            isAST(parser.parse("{{ (1,2,3) }}"),
+            isAST(parser.parse('{{ (1,2,3) }}'),
                   [nodes.Root,
                    [nodes.Output,
                     [nodes.Group,
@@ -172,7 +187,7 @@
                      [nodes.Literal, 2],
                      [nodes.Literal, 3]]]]);
 
-            isAST(parser.parse("{{ {foo: 1, 'two': 2} }}"),
+            isAST(parser.parse('{{ {foo: 1, \'two\': 2} }}'),
                   [nodes.Root,
                    [nodes.Output,
                     [nodes.Dict,
@@ -192,6 +207,67 @@
                    [nodes.Output, [nodes.TemplateData, ', how are you']]]);
         });
 
+        it('should parse operators', function() {
+            isAST(parser.parse('{{ x == y }}'),
+                  [nodes.Root,
+                   [nodes.Output,
+                    [nodes.Compare,
+                     [nodes.Symbol, 'x'],
+                     [[nodes.CompareOperand, [nodes.Symbol, 'y'], '==']]]]]);
+
+            isAST(parser.parse('{{ x or y }}'),
+                  [nodes.Root,
+                   [nodes.Output,
+                    [nodes.Or,
+                     [nodes.Symbol, 'x'],
+                     [nodes.Symbol, 'y']]]]);
+
+            isAST(parser.parse('{{ x in y }}'),
+                  [nodes.Root,
+                   [nodes.Output,
+                    [nodes.In,
+                     [nodes.Symbol, 'x'],
+                     [nodes.Symbol, 'y']]]]);
+
+            isAST(parser.parse('{{ x not in y }}'),
+                  [nodes.Root,
+                   [nodes.Output,
+                    [nodes.Not,
+                     [nodes.In,
+                      [nodes.Symbol, 'x'],
+                      [nodes.Symbol, 'y']]]]]);
+        });
+
+        it('should parse operators with correct precedence', function() {
+            isAST(parser.parse('{{ x in y and z }}'),
+                  [nodes.Root,
+                   [nodes.Output,
+                    [nodes.And,
+                     [nodes.In,
+                      [nodes.Symbol, 'x'],
+                      [nodes.Symbol, 'y']],
+                     [nodes.Symbol, 'z']]]]);
+
+            isAST(parser.parse('{{ x not in y or z }}'),
+                  [nodes.Root,
+                   [nodes.Output,
+                    [nodes.Or,
+                     [nodes.Not,
+                      [nodes.In,
+                      [nodes.Symbol, 'x'],
+                       [nodes.Symbol, 'y']]],
+                     [nodes.Symbol, 'z']]]]);
+
+            isAST(parser.parse('{{ x or y and z }}'),
+                  [nodes.Root,
+                   [nodes.Output,
+                    [nodes.Or,
+                     [nodes.Symbol, 'x'],
+                     [nodes.And,
+                      [nodes.Symbol, 'y'],
+                      [nodes.Symbol, 'z']]]]]);
+        });
+
         it('should parse blocks', function() {
             var n = parser.parse('want some {% if hungry %}pizza{% else %}' +
                                  'water{% endif %}?');
@@ -205,6 +281,35 @@
 
             n = parser.parse('{% include "test.html" %}');
             expect(n.children[0].typename).to.be('Include');
+        });
+
+        it('should parse for loops', function() {
+          isAST(parser.parse('{% for x in [1, 2] %}{{ x }}{% endfor %}'),
+                [nodes.Root,
+                 [nodes.For,
+                  [nodes.Array,
+                   [nodes.Literal, 1],
+                   [nodes.Literal, 2]],
+                  [nodes.Symbol, 'x'],
+                  [nodes.NodeList,
+                   [nodes.Output,
+                    [nodes.Symbol, 'x']]]]]);
+
+        });
+
+        it('should parse for loops with else', function() {
+          isAST(parser.parse('{% for x in [] %}{{ x }}{% else %}empty{% endfor %}'),
+                [nodes.Root,
+                 [nodes.For,
+                  [nodes.Array],
+                  [nodes.Symbol, 'x'],
+                  [nodes.NodeList,
+                   [nodes.Output,
+                    [nodes.Symbol, 'x']]],
+                  [nodes.NodeList,
+                   [nodes.Output,
+                    [nodes.TemplateData, 'empty']]]]]);
+
         });
 
         it('should parse filters', function() {
@@ -255,6 +360,54 @@
                       [nodes.TemplateData, 'This is a macro']]]]]);
         });
 
+        it('should parse call blocks', function() {
+            var ast = parser.parse('{% call foo("bar") %}' +
+                                   'This is the caller' +
+                                   '{% endcall %}');
+            isAST(ast,
+                  [nodes.Root,
+                   [nodes.Output,
+                    [nodes.FunCall,
+                     [nodes.Symbol, 'foo'],
+                     [nodes.NodeList,
+                      [nodes.Literal, 'bar'],
+                      [nodes.KeywordArgs,
+                       [nodes.Pair,
+                        [nodes.Symbol, 'caller'],
+                        [nodes.Caller,
+                         [nodes.Symbol, 'caller'],
+                         [nodes.NodeList],
+                         [nodes.NodeList,
+                          [nodes.Output,
+                           [nodes.TemplateData, 'This is the caller']]]]]]]]]]);
+        });
+
+        it('should parse call blocks with args', function() {
+            var ast = parser.parse('{% call(i) foo("bar", baz="foobar") %}' +
+                                   'This is {{ i }}' +
+                                   '{% endcall %}');
+            isAST(ast,
+                  [nodes.Root,
+                   [nodes.Output,
+                    [nodes.FunCall,
+                     [nodes.Symbol, 'foo'],
+                     [nodes.NodeList,
+                      [nodes.Literal, 'bar'],
+                      [nodes.KeywordArgs,
+                       [nodes.Pair,
+                        [nodes.Symbol, 'baz'], [nodes.Literal, 'foobar']],
+                       [nodes.Pair,
+                        [nodes.Symbol, 'caller'],
+                        [nodes.Caller,
+                         [nodes.Symbol, 'caller'],
+                         [nodes.NodeList, [nodes.Symbol, 'i']],
+                         [nodes.NodeList,
+                          [nodes.Output,
+                           [nodes.TemplateData, 'This is ']],
+                          [nodes.Output,
+                           [nodes.Symbol, 'i']]]]]]]]]]);
+        });
+
         it('should parse raw', function() {
             isAST(parser.parse('{% raw %}hello {{ {% %} }}{% endraw %}'),
                   [nodes.Root,
@@ -288,7 +441,7 @@
                                '   foobar as foobarbaz %}'),
                   [nodes.Root,
                    [nodes.FromImport,
-                    [nodes.Literal, "foo/bar.html"],
+                    [nodes.Literal, 'foo/bar.html'],
                     [nodes.NodeList,
                      [nodes.Symbol, 'baz'],
                      [nodes.Pair,
@@ -412,7 +565,7 @@
                 parser.parse('{% from "foo" import _bar %}');
             }).to.throwException(/names starting with an underscore cannot be imported/);
         });
-        
+
         it('should parse custom tags', function() {
 
             function testtagExtension() {
@@ -453,7 +606,7 @@
                     var args = null;
 
                     // Skip the name
-                    parser.nextToken(); 
+                    parser.nextToken();
 
                     args = parser.parseSignature(true);
                     parser.advanceAfterBlockEnd(begun.value);
@@ -465,7 +618,7 @@
             var extensions = [new testtagExtension(),
                               new testblocktagExtension(),
                               new testargsExtension()];
-            
+
             isAST(parser.parse('{% testtag %}', extensions),
                   [nodes.Root,
                    [nodes.CallExtension, extensions[0], 'foo', undefined, undefined]]);
@@ -476,7 +629,7 @@
                    [nodes.CallExtension, extensions[1], 'bar', null,
                     [1, [nodes.NodeList,
                          [nodes.Output,
-                          [nodes.TemplateData, "sdfd"]]]]]]);
+                          [nodes.TemplateData, 'sdfd']]]]]]);
 
             isAST(parser.parse('{% testblocktag %}{{ 123 }}{% endtestblocktag %}',
                                extensions),
@@ -494,11 +647,11 @@
                     // coming from the template
                     [nodes.NodeList,
                      [nodes.Literal, 123],
-                     [nodes.Literal, "abc"],
-                     [nodes.KeywordArgs, 
+                     [nodes.Literal, 'abc'],
+                     [nodes.KeywordArgs,
                       [nodes.Pair,
-                       [nodes.Symbol, "foo"],
-                       [nodes.Literal, "bar"]]]]]]);
+                       [nodes.Symbol, 'foo'],
+                       [nodes.Literal, 'bar']]]]]]);
 
             isAST(parser.parse('{% testargs %}', extensions),
                   [nodes.Root,

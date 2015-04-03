@@ -1,7 +1,9 @@
 (function() {
+    'use strict';
+
     var expect, util, Environment, Template, fs;
 
-    if(typeof require != 'undefined') {
+    if(typeof require !== 'undefined') {
         expect = require('expect.js');
         util = require('./util');
         Environment = require('../src/environment').Environment;
@@ -144,6 +146,12 @@
             equal('{% ' + block + ' i in arr %}{{ i }}{% ' + end + ' %}',
                   { arr: [1, 2, 3, 4, 5] }, '12345');
 
+            equal('{% ' + block + ' i in arr %}{{ i }}{% else %}empty{% ' + end + ' %}',
+                  { arr: [1, 2, 3, 4, 5] }, '12345');
+
+            equal('{% ' + block + ' i in arr %}{{ i }}{% else %}empty{% ' + end + ' %}',
+                  { arr: [] }, 'empty');
+
             equal('{% ' + block + ' a, b, c in arr %}' +
                        '{{ a }},{{ b }},{{ c }}.{% ' + end + ' %}',
                   { arr: [['x', 'y', 'z'], ['1', '2', '3']] }, 'x,y,z.1,2,3.');
@@ -281,6 +289,13 @@
                            expect(res).to.be('somecontenthere');
                        });
 
+                render('{% if test %}{{ tmpl | getContents }}{% endif %}oof',
+                       { tmpl: 'tests/templates/for-async-content.html' },
+                       opts,
+                       function(err, res) {
+                           expect(res).to.be('oof');
+                       });
+
                 render('{% if tmpl %}' +
                        '{% for i in [0, 1] %}{{ tmpl | getContents }}*{% endfor %}' +
                        '{% endif %}',
@@ -356,6 +371,13 @@
                     bar: 15 },
                   'yes');
 
+            equal('{% if 1 in [1, 2] %}yes{% endif %}', 'yes');
+            equal('{% if 1 in [2, 3] %}yes{% endif %}', '');
+            equal('{% if 1 not in [1, 2] %}yes{% endif %}', '');
+            equal('{% if 1 not in [2, 3] %}yes{% endif %}', 'yes');
+            equal('{% if "a" in vals %}yes{% endif %}',
+                  {'vals': ['a', 'b']}, 'yes');
+
             finish(done);
         });
 
@@ -368,9 +390,9 @@
                   '{{ foo(1) }}',
                   '');
 
-            // equal('{% macro foo(x) %}{{ x|title }}{% endmacro %}' +
-            //       '{{ foo("foo") }}',
-            //       'Foo');
+            equal('{% macro foo(x) %}{{ x|title }}{% endmacro %}' +
+                  '{{ foo("foo") }}',
+                  'Foo');
 
             equal('{% macro foo(x, y) %}{{ y }}{% endmacro %}' +
                   '{{ foo(1, 2) }}',
@@ -430,17 +452,51 @@
                   '{% endblock %}',
                   '125');
 
+            equal('{% macro foo() %}{% include "include.html" %}{% endmacro %}' +
+                  '{{ foo() }}',
+                  { name: 'james' },
+                  'FooInclude james');
+
             finish(done);
+        });
+
+        it('should compile call blocks', function(done) {
+          equal('{% macro wrap(el) %}' +
+                '<{{ el }}>{{ caller() }}</{{ el }}>' +
+                '{% endmacro %}' +
+                '{% call wrap("div") %}Hello{% endcall %}',
+                '<div>Hello</div>');
+
+          finish(done);
+        });
+
+        it('should compile call blocks with args', function(done) {
+          equal('{% macro list(items) %}' +
+                '<ul>{% for i in items %}' +
+                '<li>{{ caller(i) }}</li>' +
+                '{% endfor %}</ul>' +
+                '{% endmacro %}' +
+                '{% call(item) list(["a", "b"]) %}{{ item }}{% endcall %}',
+                '<ul><li>a</li><li>b</li></ul>');
+
+          finish(done);
+        });
+
+        it('should compile call blocks using imported macros', function(done) {
+          equal('{% import "import.html" as imp %}' +
+                '{% call imp.wrap("span") %}Hey{% endcall %}',
+                '<span>Hey</span>');
+          finish(done);
         });
 
         it('should import templates', function(done) {
             equal('{% import "import.html" as imp %}' +
                   '{{ imp.foo() }} {{ imp.bar }}',
-                  "Here's a macro baz");
+                  'Here\'s a macro baz');
 
             equal('{% from "import.html" import foo as baz, bar %}' +
                   '{{ bar }} {{ baz() }}',
-                  "baz Here's a macro");
+                  'baz Here\'s a macro');
 
             // TODO: Should the for loop create a new frame for each
             // iteration? As it is, `num` is set on all iterations after
@@ -452,6 +508,48 @@
                   '{% endfor %}' +
                   'final: {{ num }}',
                   'start: end: bazstart: bazend: bazfinal: ');
+
+            finish(done);
+        });
+
+        it('should import templates with context', function(done) {
+            equal('{% set bar = "BAR" %}' +
+                  '{% import "import-context.html" as imp with context %}' +
+                  '{{ imp.foo() }}',
+                  'Here\'s BAR');
+
+            equal('{% set bar = "BAR" %}' +
+                  '{% from "import-context.html" import foo with context %}' +
+                  '{{ foo() }}',
+                  'Here\'s BAR');
+
+            finish(done);
+        });
+
+        it('should import templates without context', function(done) {
+            equal('{% set bar = "BAR" %}' +
+                  '{% import "import-context.html" as imp without context %}' +
+                  '{{ imp.foo() }}',
+                  'Here\'s ');
+
+            equal('{% set bar = "BAR" %}' +
+                  '{% from "import-context.html" import foo without context %}' +
+                  '{{ foo() }}',
+                  'Here\'s ');
+
+            finish(done);
+        });
+
+        it('should default to importing without context', function(done) {
+            equal('{% set bar = "BAR" %}' +
+                  '{% import "import-context.html" as imp %}' +
+                  '{{ imp.foo() }}',
+                  'Here\'s ');
+
+            equal('{% set bar = "BAR" %}' +
+                  '{% from "import-context.html" import foo %}' +
+                  '{{ foo() }}',
+                  'Here\'s ');
 
             finish(done);
         });
@@ -513,12 +611,26 @@
                   'hello world FooInclude james');
 
             equal('hello world {% include tmpl %}',
-                  { name: 'thedude', tmpl: "include.html" },
+                  { name: 'thedude', tmpl: 'include.html' },
                   'hello world FooInclude thedude');
 
             equal('hello world {% include data.tmpl %}',
-                  { name: 'thedude', data: {tmpl: "include.html"} },
+                  { name: 'thedude', data: {tmpl: 'include.html'} },
                   'hello world FooInclude thedude');
+
+            finish(done);
+        });
+
+        /**
+         * This test checks that this issue is resolved: http://stackoverflow.com/questions/21777058/loop-index-in-included-nunjucks-file
+         */
+        it('should have access to "loop" inside an include', function(done) {
+            equal('{% for item in [1,2,3] %}{% include "include-in-loop.html" %}{% endfor %}',
+                  '1,0,true\n2,1,false\n3,2,false\n');
+
+            equal('{% for k,v in items %}{% include "include-in-loop.html" %}{% endfor %}',
+                {items: {'a': 'A', 'b': 'B'}},
+                '1,0,true\n2,1,false\n');
 
             finish(done);
         });
@@ -572,6 +684,33 @@
                   { username: 'basta' },
                   'bastapasta');
 
+            // `set` should only set within its current scope
+            equal('{% for i in [1] %}{% set val=5 %}{% endfor %}' +
+                  '{{ val }}',
+                  '');
+
+            equal('{% for i in [1,2,3] %}' +
+                  '{% if not val %}{% set val=5 %}{% endif %}' +
+                  '{% set val=val+1 %}{{ val }}' +
+                  '{% endfor %}' +
+                  'afterwards: {{ val }}',
+                  '678afterwards: ');
+
+            // however, like Python, if a variable has been set in an
+            // above scope, any other set should correctly resolve to
+            // that frame
+            equal('{% set val=1 %}' +
+                  '{% for i in [1] %}{% set val=5 %}{% endfor %}' +
+                  '{{ val }}',
+                  '5');
+
+            equal('{% set val=5 %}' +
+                  '{% for i in [1,2,3] %}' +
+                  '{% set val=val+1 %}{{ val }}' +
+                  '{% endfor %}' +
+                  'afterwards: {{ val }}',
+                  '678afterwards: 8');
+
             finish(done);
         });
 
@@ -615,7 +754,7 @@
                 this.parse = function(parser, nodes) {
                     parser.advanceAfterBlockEnd();
 
-                    var content = parser.parseUntilBlocks("endtest");
+                    var content = parser.parseUntilBlocks('endtest');
                     var tag = new nodes.CallExtension(this, 'run', null, [content]);
                     parser.advanceAfterBlockEnd();
 
@@ -624,7 +763,7 @@
 
                 this.run = function(context, content) {
                     // Reverse the string
-                    return content().split("").reverse().join("");
+                    return content().split('').reverse().join('');
                 };
             }
 
@@ -650,7 +789,7 @@
 
                 this.run = function(context, arg1) {
                     // Reverse the string
-                    return arg1.split("").reverse().join("");
+                    return arg1.split('').reverse().join('');
                 };
             }
 
@@ -686,10 +825,10 @@
                 };
 
                 this.run = function(context, body, intermediate) {
-                    var output = body().split("").join(",");
+                    var output = body().split('').join(',');
                     if(intermediate) {
                         // Reverse the string.
-                        output += intermediate().split("").reverse().join("");
+                        output += intermediate().split('').reverse().join('');
                     }
                     return output;
                 };
@@ -733,12 +872,12 @@
                 };
 
                 this.run = function(context, prefix, kwargs, body) {
-                    if(typeof prefix == 'function') {
+                    if(typeof prefix === 'function') {
                         body = prefix;
                         prefix = '';
                         kwargs = {};
                     }
-                    else if(typeof kwargs == 'function') {
+                    else if(typeof kwargs === 'function') {
                         body = kwargs;
                         kwargs = {};
                     }
@@ -836,6 +975,42 @@
             finish(done);
         });
 
+        it('should not autoescape when extension set false', function(done) {
+            function testExtension() {
+                this.tags = ['test'];
+
+                this.autoescape = false;
+
+                this.parse = function(parser, nodes) {
+                    var tok = parser.nextToken();
+                    var args = parser.parseSignature(null, true);
+                    parser.advanceAfterBlockEnd(tok.value);
+                    return new nodes.CallExtension(this, 'run', args, null);
+                };
+
+                this.run = function(context) {
+                    // Reverse the string
+                    return '<b>Foo</b>';
+                };
+            }
+
+            var opts = {
+                extensions: { 'testExtension': new testExtension() },
+                autoescape: true
+            };
+
+            render(
+                '{% test "123456" %}',
+                null,
+                opts,
+                function(err, res) {
+                    expect(res).to.be('<b>Foo</b>');
+                }
+            );
+
+            finish(done);
+        });
+
         it('should pass context as this to filters', function(done) {
             render(
                 '{{ foo | hallo }}',
@@ -847,6 +1022,16 @@
                     expect(res).to.be('3');
                 }
             );
+
+            finish(done);
+        });
+
+        it('should render regexs', function(done) {
+            equal('{{ r/name [0-9] \\// }}',
+                  '/name [0-9] \\//');
+
+            equal('{{ r/x/gi }}',
+                  '/x/gi');
 
             finish(done);
         });

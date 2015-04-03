@@ -1,15 +1,23 @@
 (function() {
-    var expect, util, lib;
+    'use strict';
 
-    if(typeof require != 'undefined') {
+    var expect, util, lib, Environment, Loader, templatesPath;
+
+    if(typeof require !== 'undefined') {
         expect = require('expect.js');
         util = require('./util');
         lib = require('../src/lib');
+        Environment = require('../src/environment').Environment;
+        Loader = require('../src/node-loaders').FileSystemLoader;
+        templatesPath = 'tests/templates';
     }
     else {
         expect = window.expect;
         util = window.util;
         lib = nunjucks.require('lib');
+        Environment = nunjucks.Environment;
+        Loader = nunjucks.WebLoader;
+        templatesPath = '../templates';
     }
 
     var equal = util.equal;
@@ -43,6 +51,12 @@
                   '{{ cls.next() }}',
                   'oddodd');
 
+            equal('{% set cls = cycler("odd", "even") %}' +
+                  '{{ cls.next() }}' +
+                  '{{ cls.next() }}' +
+                  '{{ cls.current }}',
+                  'oddeveneven');
+
             finish(done);
         });
 
@@ -56,6 +70,18 @@
                   'foobar|baz|');
 
             finish(done);
+        });
+
+        it('should allow addition of globals', function(done) {
+          var env = new Environment(new Loader(templatesPath));
+
+          env.addGlobal('hello', function(arg1) {
+            return 'Hello ' + arg1;
+          });
+
+          equal('{{ hello("World!") }}', 'Hello World!');
+
+          finish(done);
         });
     });
 })();

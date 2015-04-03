@@ -1,7 +1,9 @@
 (function() {
+    'use strict';
+
     var expect, lib, lexer;
 
-    if(typeof require != 'undefined') {
+    if(typeof require !== 'undefined') {
         expect = require('expect.js');
         lib = require('../src/lib');
         lexer = require('../src/lexer');
@@ -18,7 +20,7 @@
             var tok = tokens.nextToken();
 
             if(!ws) {
-                while(tok && tok.type == lexer.TOKEN_WHITESPACE) {
+                while(tok && tok.type === lexer.TOKEN_WHITESPACE) {
                     tok = tokens.nextToken();
                 }
             }
@@ -71,6 +73,51 @@
                             lexer.TOKEN_DATA);
         });
 
+        it('should trim blocks', function () {
+            tokens = lexer.lex('  {% if true %}\n    foo\n  {% endif %}\n', {trimBlocks: true});
+            hasTokens(tokens,
+                      [lexer.TOKEN_DATA, '  '],
+                      lexer.TOKEN_BLOCK_START,
+                      lexer.TOKEN_SYMBOL,
+                      lexer.TOKEN_BOOLEAN,
+                      lexer.TOKEN_BLOCK_END,
+                      [lexer.TOKEN_DATA, '    foo\n  '],
+                      lexer.TOKEN_BLOCK_START,
+                      lexer.TOKEN_SYMBOL,
+                      lexer.TOKEN_BLOCK_END);
+        });
+
+        it('should lstrip and trim blocks', function () {
+            tokens = lexer.lex('test\n {% if true %}\n  foo\n {% endif %}\n</div>', {
+                lstripBlocks: true,
+                trimBlocks: true
+            });
+            hasTokens(tokens,
+                      [lexer.TOKEN_DATA, 'test\n'],
+                      lexer.TOKEN_BLOCK_START,
+                      lexer.TOKEN_SYMBOL,
+                      lexer.TOKEN_BOOLEAN,
+                      lexer.TOKEN_BLOCK_END,
+                      [lexer.TOKEN_DATA, '  foo\n'],
+                      lexer.TOKEN_BLOCK_START,
+                      lexer.TOKEN_SYMBOL,
+                      lexer.TOKEN_BLOCK_END,
+                      [lexer.TOKEN_DATA, '</div>']);
+        });
+
+        it('should lstrip and not collapse whitespace between blocks', function () {
+            tokens = lexer.lex('   {% t %} {% t %}', {lstripBlocks: true});
+            hasTokens(tokens,
+                      lexer.TOKEN_BLOCK_START,
+                      lexer.TOKEN_SYMBOL,
+                      lexer.TOKEN_BLOCK_END,
+                      [lexer.TOKEN_DATA, ' '],
+                      lexer.TOKEN_BLOCK_START,
+                      lexer.TOKEN_SYMBOL,
+                      lexer.TOKEN_BLOCK_END);
+        });
+
+
         it('should parse variable start and end', function() {
             tokens = lexer.lex('data {{ foo }} bar bizzle');
             hasTokens(tokens,
@@ -79,6 +126,15 @@
                       lexer.TOKEN_SYMBOL,
                       lexer.TOKEN_VARIABLE_END,
                       lexer.TOKEN_DATA);
+        });
+
+        it('should treat the non-breaking space as valid whitespace', function() {
+            tokens = lexer.lex('{{\u00A0foo }}');
+            tok = tokens.nextToken();
+            tok = tokens.nextToken();
+            tok = tokens.nextToken();
+            expect(tok.type).to.be(lexer.TOKEN_SYMBOL);
+            expect(tok.value).to.be('foo');
         });
 
         it('should parse block start and end', function() {
@@ -92,7 +148,7 @@
         });
 
         it('should parse basic types', function() {
-            tokens = lexer.lex('{{ 3 4.5 true false foo "hello" \'boo\' }}');
+            tokens = lexer.lex('{{ 3 4.5 true false foo "hello" \'boo\' r/regex/ }}');
             hasTokens(tokens,
                       lexer.TOKEN_VARIABLE_START,
                       lexer.TOKEN_INT,
@@ -102,6 +158,7 @@
                       lexer.TOKEN_SYMBOL,
                       lexer.TOKEN_STRING,
                       lexer.TOKEN_STRING,
+                      lexer.TOKEN_REGEX,
                       lexer.TOKEN_VARIABLE_END);
         }),
 
@@ -229,6 +286,84 @@
                       lexer.TOKEN_DATA,
                       lexer.TOKEN_COMMENT,
                       lexer.TOKEN_DATA);
+        }),
+
+        it('should allow changing the variable start and end', function() {
+            tokens = lexer.lex('data {= var =}', {tags: {variableStart: '{=', variableEnd: '=}'}});
+            hasTokens(tokens,
+                      lexer.TOKEN_DATA,
+                      lexer.TOKEN_VARIABLE_START,
+                      lexer.TOKEN_SYMBOL,
+                      lexer.TOKEN_VARIABLE_END);
+        }),
+
+        it('should allow changing the block start and end', function() {
+            tokens = lexer.lex('{= =}', {tags: {blockStart: '{=', blockEnd: '=}'}});
+            hasTokens(tokens,
+                      lexer.TOKEN_BLOCK_START,
+                      lexer.TOKEN_BLOCK_END);
+        }),
+
+        it('should allow changing the variable start and end', function() {
+            tokens = lexer.lex('data {= var =}', {tags: {variableStart: '{=', variableEnd: '=}'}});
+            hasTokens(tokens,
+                      lexer.TOKEN_DATA,
+                      lexer.TOKEN_VARIABLE_START,
+                      lexer.TOKEN_SYMBOL,
+                      lexer.TOKEN_VARIABLE_END);
+        }),
+
+        it('should allow changing the comment start and end', function() {
+            tokens = lexer.lex('<!-- A comment! -->', {tags: {commentStart: '<!--', commentEnd: '-->'}});
+            hasTokens(tokens,
+                      lexer.TOKEN_COMMENT);
+        }),
+
+        /**
+         * Test that this bug is fixed: https://github.com/mozilla/nunjucks/issues/235
+         */
+        it('should have individual lexer tag settings for each environment', function() {
+            tokens = lexer.lex('{=', {tags: {variableStart: '{='}});
+            hasTokens(tokens, lexer.TOKEN_VARIABLE_START);
+
+            tokens = lexer.lex('{{');
+            hasTokens(tokens, lexer.TOKEN_VARIABLE_START);
+
+            tokens = lexer.lex('{{', {tags: {variableStart: '<<<'}});
+            hasTokens(tokens, lexer.TOKEN_DATA);
+
+            tokens = lexer.lex('{{');
+            hasTokens(tokens, lexer.TOKEN_VARIABLE_START);
+        });
+
+        it('should parse regular expressions', function() {
+            tokens = lexer.lex('{{ r/basic regex [a-z]/ }}');
+            hasTokens(tokens,
+                      lexer.TOKEN_VARIABLE_START,
+                      lexer.TOKEN_REGEX,
+                      lexer.TOKEN_VARIABLE_END);
+
+            // A more complex regex with escaped slashes.
+            tokens = lexer.lex('{{ r/{a*b} \\/regex! [0-9]\\// }}');
+            hasTokens(tokens,
+                      lexer.TOKEN_VARIABLE_START,
+                      lexer.TOKEN_REGEX,
+                      lexer.TOKEN_VARIABLE_END);
+
+            // This one has flags.
+            tokens = lexer.lex('{{ r/^x/gim }}');
+            hasTokens(tokens,
+                      lexer.TOKEN_VARIABLE_START,
+                      lexer.TOKEN_REGEX,
+                      lexer.TOKEN_VARIABLE_END);
+
+            // This one has a valid flag then an invalid flag.
+            tokens = lexer.lex('{{ r/x$/iv }}');
+            hasTokens(tokens,
+                      lexer.TOKEN_VARIABLE_START,
+                      lexer.TOKEN_REGEX,
+                      lexer.TOKEN_SYMBOL,
+                      lexer.TOKEN_VARIABLE_END);
         });
     });
 })();

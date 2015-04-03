@@ -313,7 +313,7 @@
 <div class="api-sig"><code>env.renderString(src, [context], [callback])</code></div>
 
 <div class="api-desc"><p>和 <a href="#render1"><code>render</code></a> 相同，只是渲染一个字符串而不是加载的模块。</p>
-<div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="kd">var</span> <span class="nx">res</span> <span class="o">=</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="s1">&#39;Hello {{ username }}&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">username</span><span class="o">:</span> <span class="s1">&#39;James&#39;</span> <span class="p">});</span>
+<div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="kd">var</span> <span class="nx">res</span> <span class="o">=</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">renderString</span><span class="p">(</span><span class="s1">&#39;Hello {{ username }}&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">username</span><span class="o">:</span> <span class="s1">&#39;James&#39;</span> <span class="p">});</span>
 </code></pre></div>
 </div>
 
@@ -785,7 +785,7 @@ mytag foo, bar, baz=10 %}</code>。</p></li>
 
     <footer>
       Found a bug in the
-      documentation? <a href="https://github.com/mozilla/nunjucks-docs">Fix
+      documentation? <a href="https://github.com/mozilla/nunjucks/tree/master/docs">Fix
       it or file an issue</a>!
     </footer>
 

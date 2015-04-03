@@ -159,7 +159,7 @@
 <p>这里包括 nunjuck 所有可用的功能。</p>
 
 <blockquote>
-<p>Nunjucks 是 <a href="http://jinja.pocoo.org/docs/">jinja2</a> 的 javascript 的实现，所以如果此文档有什么缺失，你可以直接查看 <a href="http://jinja.pocoo.org/docs/templates/">jinja2 的文档</a>，不过两者之间还存在一些<a href="http://mozilla.github.io/nunjucks/faq.html#can-i-use-the-same-templates-between-nunjucks-and-jinja2-what-are-the-differences">差异</a>。</p>
+<p>Nunjucks 是 <a href="http://jinja.pocoo.org/docs/">jinja2</a> 的 javascript 的实现，所以如果此文档有什么缺失，你可以直接查看 <a href="http://jinja.pocoo.org/docs/templates/">jinja2 的文档</a>，不过两者之间还存在一些<a href="http://mozilla.github.io/nunjucks/cn/faq.html">差异</a>。</p>
 </blockquote>
 
 <h2 id="1">变量</h2>
@@ -183,7 +183,7 @@ foo.bar }}</code>, <code>{{ foo.bar.baz }}</code> 也不显示)。</p>
 </code></pre></div>
 <p>第三个例子展示了链式过滤器，最终会显示 &quot;Bar&quot;，第一个过滤器将 &quot;foo&quot; 替换成 &quot;bar&quot;，第二个过滤器将首字母大写。</p>
 
-<p>Nunjucks 提供了一些<a href="#builtin-filters">内置的过滤器</a>，你也可以<a href="api#Registering-custom-filters">自定义过滤器</a>。</p>
+<p>Nunjucks 提供了一些<a href="#builtin-filters">内置的过滤器</a>，你也可以<a href="api#custom-filters">自定义过滤器</a>。</p>
 
 <h2 id="3">模板继承</h2>
 
@@ -233,8 +233,7 @@ foo.bar }}</code>, <code>{{ foo.bar.baz }}</code> 也不显示)。</p>
 
 <h2 id="4">标签</h2>
 
-<p>Tags are special blocks that perform operations on sections of the
-template. Nunjucks 包含一些内置的标签，你也可以<a href="api.html#custom-tags">自定义</a>。</p>
+<p>标签是一些特殊的区块，它们可以对模板执行一些操作。Nunjucks 包含一些内置的标签，你也可以<a href="api.html#custom-tags">自定义</a>。</p>
 
 <h3 id="if">if</h3>
 
@@ -409,7 +408,7 @@ template. Nunjucks 包含一些内置的标签，你也可以<a href="api.html#c
 <span class="cp">{%</span> <span class="k">include</span> <span class="s2">&quot;item.html&quot;</span> <span class="cp">%}</span><span class="x"></span>
 <span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span><span class="x"></span>
 </code></pre></div>
-<p>This is especially useful for cutting up templates into pieces so that the browser-side environment can render the small chunks when it needs to change the page.</p>
+<p>这一点可以帮助我们把模板切分成更小的部分，从而使得在浏览器上，当我们需要改变页面时，我们可以渲染这些小部分的模板，而非一整个的大的模板。</p>
 
 <p><code>include</code> 可以接受任何表达式，你可以如下传入: <code>{% include name + &quot;.html&quot; as obj %}</code>.</p>
 
@@ -595,7 +594,7 @@ template. Nunjucks 包含一些内置的标签，你也可以<a href="api.html#c
 
 <h3 id="rangestart-stop-step">range([start], stop, [step])</h3>
 
-<p>如果你需要遍历固定范围的数字可以使用 <code>range</code>，<code>start</code> (默认为 0) 为起始数字，<code>start</code> 为结束数字，<code>step</code> 为间隔 (默认为 1)。</p>
+<p>如果你需要遍历固定范围的数字可以使用 <code>range</code>，<code>start</code> (默认为 0) 为起始数字，<code>stop</code> 为结束数字，<code>step</code> 为间隔 (默认为 1)。</p>
 <div class="highlight"><pre><code class="jinja language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">for</span> <span class="nv">i</span> <span class="k">in</span> <span class="nv">range</span><span class="o">(</span><span class="m">0</span><span class="o">,</span> <span class="m">5</span><span class="o">)</span> -<span class="cp">%}</span><span class="x"></span>
 <span class="x">  </span><span class="cp">{{</span> <span class="nv">i</span> <span class="cp">}}</span><span class="x">,</span>
 <span class="cp">{%</span>- <span class="k">endfor</span> <span class="cp">%}</span><span class="x"></span>
@@ -623,8 +622,6 @@ template. Nunjucks 包含一些内置的标签，你也可以<a href="api.html#c
 <p>如果 <code>tags</code> 为 <code>[&quot;food&quot;, &quot;beer&quot;, &quot;dessert&quot;]</code>, 上面将输出 <code>food, beer, dessert</code>。</p>
 
 <h2 id="builtin-filters">Builtin Filters</h2>
-
-<p>Nunjucks has ported most of jinja&#39;s filters (click through for documentation):</p>
 
 <p>Nunjucks 已经支持了大部分 jinja 的过滤器 (点击查看文档)。</p>
 
@@ -671,7 +668,7 @@ template. Nunjucks 包含一些内置的标签，你也可以<a href="api.html#c
 
     <footer>
       Found a bug in the
-      documentation? <a href="https://github.com/mozilla/nunjucks-docs">Fix
+      documentation? <a href="https://github.com/mozilla/nunjucks/tree/master/docs">Fix
       it or file an issue</a>!
     </footer>
 

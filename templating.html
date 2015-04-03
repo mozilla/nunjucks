@@ -502,17 +502,17 @@ blocks and child templates can override them with new content. See
 <div class="highlight"><pre><code class="jinja language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">import</span> <span class="s2">&quot;forms.html&quot;</span> <span class="k">as</span> <span class="nv">forms</span> <span class="cp">%}</span><span class="x"></span>
 
 <span class="cp">{{</span> <span class="nv">forms.label</span><span class="o">(</span><span class="s1">&#39;Username&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
-<span class="cp">{{</span> <span class="nv">forms.input</span><span class="o">(</span><span class="s1">&#39;user&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
+<span class="cp">{{</span> <span class="nv">forms.field</span><span class="o">(</span><span class="s1">&#39;user&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
 <span class="cp">{{</span> <span class="nv">forms.label</span><span class="o">(</span><span class="s1">&#39;Password&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
-<span class="cp">{{</span> <span class="nv">forms.input</span><span class="o">(</span><span class="s1">&#39;pass&#39;</span><span class="o">,</span> <span class="nv">type</span><span class="o">=</span><span class="s1">&#39;password&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
+<span class="cp">{{</span> <span class="nv">forms.field</span><span class="o">(</span><span class="s1">&#39;pass&#39;</span><span class="o">,</span> <span class="nv">type</span><span class="o">=</span><span class="s1">&#39;password&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
 </code></pre></div>
 <p>You can also import specific values from a template into the current namespace with <code>from import</code>:</p>
-<div class="highlight"><pre><code class="jinja language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">from</span> <span class="s2">&quot;forms.html&quot;</span> <span class="k">import</span> <span class="nv">input</span><span class="o">,</span> <span class="nv">label</span> <span class="k">as</span> <span class="nv">description</span> <span class="cp">%}</span><span class="x"></span>
+<div class="highlight"><pre><code class="jinja language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">from</span> <span class="s2">&quot;forms.html&quot;</span> <span class="k">import</span> <span class="nv">field</span><span class="o">,</span> <span class="nv">label</span> <span class="k">as</span> <span class="nv">description</span> <span class="cp">%}</span><span class="x"></span>
 
 <span class="cp">{{</span> <span class="nv">description</span><span class="o">(</span><span class="s1">&#39;Username&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
-<span class="cp">{{</span> <span class="nv">input</span><span class="o">(</span><span class="s1">&#39;user&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
+<span class="cp">{{</span> <span class="nv">field</span><span class="o">(</span><span class="s1">&#39;user&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
 <span class="cp">{{</span> <span class="nv">description</span><span class="o">(</span><span class="s1">&#39;Password&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
-<span class="cp">{{</span> <span class="nv">input</span><span class="o">(</span><span class="s1">&#39;pass&#39;</span><span class="o">,</span> <span class="nv">type</span><span class="o">=</span><span class="s1">&#39;password&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
+<span class="cp">{{</span> <span class="nv">field</span><span class="o">(</span><span class="s1">&#39;pass&#39;</span><span class="o">,</span> <span class="nv">type</span><span class="o">=</span><span class="s1">&#39;password&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
 </code></pre></div>
 <p><code>import</code> actually accepts any arbitrary expression, so you can pass anything into it: <code>{% import name + &quot;.html&quot; as obj %}</code>.</p>
 
@@ -538,7 +538,7 @@ blocks and child templates can override them with new content. See
 
 <h2 id="keyword-arguments">Keyword Arguments</h2>
 
-<p>jinja2 uses Python&#39;s keyword arguments support to allow keyword arguments in functions, filters, and macros. Nunjucks supports keyword arguments as well by introduction a new calling convention.</p>
+<p>jinja2 uses Python&#39;s keyword arguments support to allow keyword arguments in functions, filters, and macros. Nunjucks supports keyword arguments as well by introducing a new calling convention.</p>
 
 <p>Keyword arguments look like this:</p>
 <div class="highlight"><pre><code class="jinja language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">foo</span><span class="o">(</span><span class="m">1</span><span class="o">,</span> <span class="m">2</span><span class="o">,</span> <span class="nv">bar</span><span class="o">=</span><span class="m">3</span><span class="o">,</span> <span class="nv">baz</span><span class="o">=</span><span class="m">4</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
@@ -738,9 +738,11 @@ blocks and child templates can override them with new content. See
 <li><a href="http://jinja.pocoo.org/docs/templates/#list">list</a></li>
 <li><a href="http://jinja.pocoo.org/docs/templates/#lower">lower</a></li>
 <li><a href="http://jinja.pocoo.org/docs/templates/#random">random</a></li>
-<li><a href="http://jinja.pocoo.org/docs/templates/#replace">replace</a> (the first argument can take a regular expression)</li>
+<li><a href="http://jinja.pocoo.org/docs/templates/#rejectattr">rejectattr</a> (only the single-argument form)</li>
+<li><a href="http://jinja.pocoo.org/docs/templates/#replace">replace</a> (the first argument can take a JS regular expression)</li>
 <li><a href="http://jinja.pocoo.org/docs/templates/#reverse">reverse</a></li>
 <li><a href="http://jinja.pocoo.org/docs/templates/#round">round</a></li>
+<li><a href="http://jinja.pocoo.org/docs/templates/#selectattr">selectattr</a> (only the single-argument form)</li>
 <li><a href="http://jinja.pocoo.org/docs/templates/#slice">slice</a></li>
 <li><a href="http://jinja.pocoo.org/docs/templates/#sort">sort</a></li>
 <li><a href="http://jinja.pocoo.org/docs/templates/#string">string</a></li>
@@ -765,7 +767,7 @@ that implements these filters.</p>
 
     <footer>
       Found a bug in the
-      documentation? <a href="https://github.com/mozilla/nunjucks-docs">Fix
+      documentation? <a href="https://github.com/mozilla/nunjucks/tree/master/docs">Fix
       it or file an issue</a>!
     </footer>
 

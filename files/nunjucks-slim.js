@@ -1,8 +1,9 @@
-// Browser bundle of nunjucks 1.1.0 (slim, only works with precompiled templates)
+// Browser bundle of nunjucks 1.3.0 (slim, only works with precompiled templates)
 
 (function() {
 var modules = {};
 (function() {
+'use strict';
 
 // A simple class system, more documentation to come
 
@@ -19,8 +20,8 @@ function extend(cls, name, props) {
         var src = props[k];
         var parent = prototype[k];
 
-        if(typeof parent == "function" &&
-           typeof src == "function" &&
+        if(typeof parent === 'function' &&
+           typeof src === 'function' &&
            fnTest.test(src)) {
             prototype[k] = (function (src, parent) {
                 return function() {
@@ -53,9 +54,9 @@ function extend(cls, name, props) {
     new_cls.prototype.constructor = new_cls;
 
     new_cls.extend = function(name, props) {
-        if(typeof name == "object") {
+        if(typeof name === 'object') {
             props = name;
-            name = "anonymous";
+            name = 'anonymous';
         }
         return extend(new_cls, name, props);
     };
@@ -63,18 +64,20 @@ function extend(cls, name, props) {
     return new_cls;
 }
 
-modules['object'] = extend(Object, "Object", {});
+modules['object'] = extend(Object, 'Object', {});
 })();
 (function() {
+'use strict';
+
 var ArrayProto = Array.prototype;
 var ObjProto = Object.prototype;
 
 var escapeMap = {
     '&': '&amp;',
     '"': '&quot;',
-    "'": '&#39;',
-    "<": '&lt;',
-    ">": '&gt;'
+    '\'': '&#39;',
+    '<': '&lt;',
+    '>': '&gt;'
 };
 
 var escapeRegex = /[&"'<>]/g;
@@ -111,7 +114,7 @@ exports.TemplateError = function(message, lineno, colno) {
 
     if (message instanceof Error) { // for casting regular js errors
         err = message;
-        message = message.name + ": " + message.message;
+        message = message.name + ': ' + message.message;
     } else {
         if(Error.captureStackTrace) {
             Error.captureStackTrace(err);
@@ -125,7 +128,7 @@ exports.TemplateError = function(message, lineno, colno) {
     err.firstUpdate = true;
 
     err.Update = function(path) {
-        var message = "(" + (path || "unknown path") + ")";
+        var message = '(' + (path || 'unknown path') + ')';
 
         // only show lineno + colno next to path of template
         // where error occurred
@@ -158,19 +161,19 @@ exports.escape = function(val) {
 };
 
 exports.isFunction = function(obj) {
-    return ObjProto.toString.call(obj) == '[object Function]';
+    return ObjProto.toString.call(obj) === '[object Function]';
 };
 
 exports.isArray = Array.isArray || function(obj) {
-    return ObjProto.toString.call(obj) == '[object Array]';
+    return ObjProto.toString.call(obj) === '[object Array]';
 };
 
 exports.isString = function(obj) {
-    return ObjProto.toString.call(obj) == '[object String]';
+    return ObjProto.toString.call(obj) === '[object String]';
 };
 
 exports.isObject = function(obj) {
-    return ObjProto.toString.call(obj) == '[object Object]';
+    return ObjProto.toString.call(obj) === '[object Object]';
 };
 
 exports.groupBy = function(obj, val) {
@@ -225,7 +228,7 @@ exports.each = function(obj, func, context) {
         return;
     }
 
-    if(ArrayProto.each && obj.each == ArrayProto.each) {
+    if(ArrayProto.each && obj.each === ArrayProto.each) {
         obj.forEach(func, context);
     }
     else if(obj.length === +obj.length) {
@@ -325,7 +328,7 @@ exports.indexOf = Array.prototype.indexOf ?
 
 if(!Array.prototype.map) {
     Array.prototype.map = function() {
-        throw new Error("map is unimplemented for this js engine");
+        throw new Error('map is unimplemented for this js engine');
     };
 }
 
@@ -345,6 +348,8 @@ exports.keys = function(obj) {
 }
 })();
 (function() {
+'use strict';
+
 var lib = modules["lib"];
 var Obj = modules["object"];
 
@@ -363,7 +368,7 @@ var Frame = Obj.extend({
         var parts = name.split('.');
         var obj = this.variables;
         var frame = this;
-        
+
         if(resolveUp) {
             if((frame = this.resolve(parts[0]))) {
                 frame.set(name, val);
@@ -404,7 +409,7 @@ var Frame = Obj.extend({
     resolve: function(name) {
         var p = this.parent;
         var val = this.variables[name];
-        if(val != null) {
+        if(val !== undefined && val !== null) {
             return this;
         }
         return p && p.resolve(name);
@@ -497,7 +502,7 @@ function numArgs(args) {
 // autoescaped. This happens magically because autoescaping only
 // occurs on primitive string objects.
 function SafeString(val) {
-    if(typeof val != 'string') {
+    if(typeof val !== 'string') {
         return val;
     }
 
@@ -542,9 +547,9 @@ function markSafe(val) {
 }
 
 function suppressValue(val, autoescape) {
-    val = (val !== undefined && val !== null) ? val : "";
+    val = (val !== undefined && val !== null) ? val : '';
 
-    if(autoescape && typeof val === "string") {
+    if(autoescape && typeof val === 'string') {
         val = lib.escape(val);
     }
 
@@ -621,7 +626,7 @@ function asyncAll(arr, dimen, func, cb) {
         finished++;
         outputArr[i] = output;
 
-        if(finished == len) {
+        if(finished === len) {
             cb(null, outputArr.join(''));
         }
     }
@@ -630,7 +635,7 @@ function asyncAll(arr, dimen, func, cb) {
         len = arr.length;
         outputArr = new Array(len);
 
-        if(len == 0) {
+        if(len === 0) {
             cb(null, '');
         }
         else {
@@ -653,7 +658,7 @@ function asyncAll(arr, dimen, func, cb) {
         len = keys.length;
         outputArr = new Array(len);
 
-        if(len == 0) {
+        if(len === 0) {
             cb(null, '');
         }
         else {
@@ -685,6 +690,9 @@ modules['runtime'] = {
 };
 })();
 (function() {
+'use strict';
+
+var path = modules["path"];
 var Obj = modules["object"];
 var lib = modules["lib"];
 
@@ -703,12 +711,22 @@ var Loader = Obj.extend({
                 listener.apply(null, args);
             });
         }
+    },
+
+    resolve: function(from, to) {
+        return path.resolve(path.dirname(from), to);
+    },
+
+    isRelative: function(filename) {
+        return (filename.indexOf('./') === 0 || filename.indexOf('../') === 0);
     }
 });
 
 modules['loader'] = Loader;
 })();
 (function() {
+'use strict';
+
 var Loader = modules["loader"];
 
 var WebLoader = Loader.extend({
@@ -725,7 +743,7 @@ var WebLoader = Loader.extend({
     getSource: function(name) {
         if(this.precompiled[name]) {
             return {
-                src: { type: "code",
+                src: { type: 'code',
                        obj: this.precompiled[name] },
                 path: name
             };
@@ -752,7 +770,7 @@ var WebLoader = Loader.extend({
             ajax = new XMLHttpRequest();
         }
         else if(window.ActiveXObject) { // IE 8 and older
-            ajax = new ActiveXObject("Microsoft.XMLHTTP");
+            ajax = new ActiveXObject('Microsoft.XMLHTTP');
         }
 
         ajax.onreadystatechange = function() {
@@ -779,6 +797,8 @@ modules['web-loaders'] = {
 };
 })();
 (function() {
+'use strict';
+
 if(typeof window === 'undefined' || window !== this) {
     modules['loaders'] = modules["node-loaders"];
 }
@@ -787,6 +807,8 @@ else {
 }
 })();
 (function() {
+'use strict';
+
 var lib = modules["lib"];
 var r = modules["runtime"];
 
@@ -834,8 +856,8 @@ var filters = {
         }
 
         var spaces = width - str.length;
-        var pre = lib.repeat(" ", spaces/2 - spaces % 2);
-        var post = lib.repeat(" ", spaces/2);
+        var pre = lib.repeat(' ', spaces/2 - spaces % 2);
+        var post = lib.repeat(' ', spaces/2);
         return r.copySafeness(str, pre + str + post);
     },
 
@@ -845,7 +867,7 @@ var filters = {
 
     dictsort: function(val, case_sensitive, by) {
         if (!lib.isObject(val)) {
-            throw new lib.TemplateError("dictsort filter: val must be an object");
+            throw new lib.TemplateError('dictsort filter: val must be an object');
         }
 
         var array = [];
@@ -855,13 +877,13 @@ var filters = {
         }
 
         var si;
-        if (by === undefined || by === "key") {
+        if (by === undefined || by === 'key') {
             si = 0;
-        } else if (by === "value") {
+        } else if (by === 'value') {
             si = 1;
         } else {
             throw new lib.TemplateError(
-                "dictsort filter: You can only sort by either key or value");
+                'dictsort filter: You can only sort by either key or value');
         }
 
         array.sort(function(t1, t2) {
@@ -877,14 +899,14 @@ var filters = {
                 }
             }
 
-            return a > b ? 1 : (a == b ? 0 : -1);
+            return a > b ? 1 : (a === b ? 0 : -1);
         });
 
         return array;
     },
 
     escape: function(str) {
-        if(typeof str == 'string' ||
+        if(typeof str === 'string' ||
            str instanceof r.SafeString) {
             return lib.escape(str);
         }
@@ -910,7 +932,7 @@ var filters = {
         var sp = lib.repeat(' ', width);
 
         for(var i=0; i<lines.length; i++) {
-            if(i == 0 && !indentfirst) {
+            if(i === 0 && !indentfirst) {
                 res += lines[i] + '\n';
             }
             else {
@@ -962,8 +984,11 @@ var filters = {
                          value: val[k] };
             });
         }
+        else if(lib.isArray(val)) {
+          return val;
+        }
         else {
-            throw new lib.TemplateError("list filter: type not iterable");
+            throw new lib.TemplateError('list filter: type not iterable');
         }
     },
 
@@ -973,6 +998,18 @@ var filters = {
 
     random: function(arr) {
         return arr[Math.floor(Math.random() * arr.length)];
+    },
+
+    rejectattr: function(arr, attr) {
+      return arr.filter(function (item) {
+        return !item[attr];
+      });
+    },
+
+    selectattr: function(arr, attr) {
+      return arr.filter(function (item) {
+        return !!item[attr];
+      });
     },
 
     replace: function(str, old, new_, maxCount) {
@@ -985,7 +1022,7 @@ var filters = {
         var count = 1;
         res = res.replace(old, new_);
 
-        while(last != res) {
+        while(last !== res) {
             if(count >= maxCount) {
                 break;
             }
@@ -1021,10 +1058,10 @@ var filters = {
         var factor = Math.pow(10, precision);
         var rounder;
 
-        if(method == 'ceil') {
+        if(method === 'ceil') {
             rounder = Math.ceil;
         }
-        else if(method == 'floor') {
+        else if(method === 'floor') {
             rounder = Math.floor;
         }
         else {
@@ -1227,12 +1264,13 @@ filters.e = filters.escape;
 modules['filters'] = filters;
 })();
 (function() {
+'use strict';
 
 function cycler(items) {
     var index = -1;
-    this.current = null;
 
     return {
+        current: null,
         reset: function() {
             index = -1;
             this.current = null;
@@ -1295,6 +1333,8 @@ var globals = {
 modules['globals'] = globals;
 })();
 (function() {
+'use strict';
+
 var path = modules["path"];
 var lib = modules["lib"];
 var Obj = modules["object"];
@@ -1314,15 +1354,18 @@ var Environment = Obj.extend({
         // (the full trace from within nunjucks may confuse developers using
         //  the library)
         // defaults to false
-        opts = opts || {};
-        this.dev = !!opts.dev;
-        this.lexerTags = opts.tags;
+        var opts = this.opts = opts || {};
+        this.opts.dev = !!opts.dev;
 
         // The autoescape flag sets global autoescaping. If true,
         // every string variable will be escaped by default.
         // If false, strings can be manually escaped using the `escape` filter.
         // defaults to false
-        this.autoesc = !!opts.autoescape;
+        this.opts.autoescape = !!opts.autoescape;
+
+        this.opts.trimBlocks = !!opts.trimBlocks;
+
+        this.opts.lstripBlocks = !!opts.lstripBlocks;
 
         if(!loaders) {
             // The filesystem loader is only available client-side
@@ -1350,17 +1393,15 @@ var Environment = Obj.extend({
 
     initCache: function() {
         // Caching and cache busting
-        var cache = {};
-
         lib.each(this.loaders, function(loader) {
-            if(typeof loader.on === 'function'){
+            loader.cache = {};
+
+            if(typeof loader.on === 'function') {
                 loader.on('update', function(template) {
-                    cache[template] = null;
+                    loader.cache[template] = null;
                 });
             }
         });
-
-        this.cache = cache;
     },
 
     addExtension: function(name, extension) {
@@ -1393,10 +1434,23 @@ var Environment = Obj.extend({
         return this.filters[name];
     },
 
-    getTemplate: function(name, eagerCompile, cb) {
+    resolveTemplate: function(loader, parentName, filename) {
+        var isRelative = (loader.isRelative && parentName)? loader.isRelative(filename) : false;
+        return (isRelative && loader.resolve)? loader.resolve(parentName, filename) : filename;
+    },
+
+    getTemplate: function(name, eagerCompile, parentName, cb) {
+        var that = this;
+        var tmpl = null;
         if(name && name.raw) {
             // this fixes autoescape for templates referenced in symbols
             name = name.raw;
+        }
+
+        if(lib.isFunction(parentName)) {
+            cb = parentName;
+            parentName = null;
+            eagerCompile = eagerCompile || false;
         }
 
         if(lib.isFunction(eagerCompile)) {
@@ -1408,7 +1462,11 @@ var Environment = Obj.extend({
             throw new Error('template names must be a string: ' + name);
         }
 
-        var tmpl = this.cache[name];
+        for (var i = 0; i < this.loaders.length; i++) {
+            var _name = this.resolveTemplate(this.loaders[i], parentName, name);
+            tmpl = this.loaders[i].cache[_name];
+            if (tmpl) break;
+        }
 
         if(tmpl) {
             if(eagerCompile) {
@@ -1427,12 +1485,16 @@ var Environment = Obj.extend({
             lib.asyncIter(this.loaders, function(loader, i, next, done) {
                 function handle(src) {
                     if(src) {
+                        src.loader = loader;
                         done(src);
                     }
                     else {
                         next();
                     }
                 }
+
+                // Resolve name relative to parentName
+                name = that.resolveTemplate(loader, parentName, name);
 
                 if(loader.async) {
                     loader.getSource(name, function(err, src) {
@@ -1458,7 +1520,7 @@ var Environment = Obj.extend({
                                             info.path, eagerCompile);
 
                     if(!info.noCache) {
-                        this.cache[name] = tmpl;
+                        info.loader.cache[name] = tmpl;
                     }
 
                     if(cb) {
@@ -1523,8 +1585,14 @@ var Environment = Obj.extend({
         return syncResult;
     },
 
-    renderString: function(src, ctx, cb) {
-        var tmpl = new Template(src, this);
+    renderString: function(src, ctx, opts, cb) {
+        if(lib.isFunction(opts)) {
+            cb = opts;
+            opts = {};
+        }
+        opts = opts || {};
+
+        var tmpl = new Template(src, this, opts.path);
         return tmpl.render(ctx, cb);
     }
 });
@@ -1577,7 +1645,7 @@ var Context = Obj.extend({
         var blk = this.blocks[name][idx + 1];
         var context = this;
 
-        if(idx == -1 || !blk) {
+        if(idx === -1 || !blk) {
             throw new Error('no super block available for "' + name + '"');
         }
 
@@ -1612,8 +1680,8 @@ var Template = Obj.extend({
             this.tmplStr = src;
         }
         else {
-            throw new Error("src must be a string or an object describing " +
-                            "the source");
+            throw new Error('src must be a string or an object describing ' +
+                            'the source');
         }
 
         this.path = path;
@@ -1639,7 +1707,14 @@ var Template = Obj.extend({
         }
 
         return lib.withPrettyErrors(this.path, this.env.dev, function() {
-            this.compile();
+
+            // Catch compile errors for async rendering
+            try {
+                this.compile();
+            } catch (e) {
+                if (cb) return cb(e);
+                else throw e;
+            }
 
             var context = new Context(ctx || {}, this.blocks);
             var syncResult = null;
@@ -1657,14 +1732,31 @@ var Template = Obj.extend({
         }.bind(this));
     },
 
-    getExported: function(cb) {
-        this.compile();
+
+    getExported: function(ctx, frame, cb) {
+        if (typeof ctx === 'function') {
+            cb = ctx;
+            ctx = {};
+        }
+
+        if (typeof frame === 'function') {
+            cb = frame;
+            frame = null;
+        }
+
+        // Catch compile errors for async rendering
+        try {
+            this.compile();
+        } catch (e) {
+            if (cb) return cb(e);
+            else throw e;
+        }
 
         // Run the rootRenderFunc to populate the context with exported vars
-        var context = new Context({}, this.blocks);
+        var context = new Context(ctx || {}, this.blocks);
         this.rootRenderFunc(this.env,
                             context,
-                            new Frame(),
+                            frame || new Frame(),
                             runtime,
                             function() {
                                 cb(null, context.getExported());
@@ -1688,7 +1780,8 @@ var Template = Obj.extend({
                                           this.env.asyncFilters,
                                           this.env.extensionsList,
                                           this.path,
-                                          this.env.lexerTags);
+                                          this.env.opts);
+
             var func = new Function(source);
             props = func();
         }
@@ -1702,7 +1795,7 @@ var Template = Obj.extend({
         var blocks = {};
 
         for(var k in props) {
-            if(k.slice(0, 2) == 'b_') {
+            if(k.slice(0, 2) === 'b_') {
                 blocks[k.slice(2)] = props[k];
             }
         }

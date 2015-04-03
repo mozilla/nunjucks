@@ -28,7 +28,10 @@
   <script src="expect.js"></script>
   <script src="mocha.js"></script>
   <script>
-    mocha.setup('bdd');
+    mocha.setup({
+      ui: 'bdd',
+      timeout: 10000
+    });
   </script>
 
   <script src="../../nunjucks.js"></script>

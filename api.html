@@ -213,6 +213,13 @@ extensions, customizing template loading, and more.</p>
 <p>If you don&#39;t need deep customization of the system, you can use this simple
 higher-level API for loading and rendering templates.</p>
 
+<p><strong>Warning</strong>: nunjucks does not sandbox execution so it is potentially
+  unsafe to run user-defined templates. On the server, you may expose
+  attack vectors for accessing sensitive data. On the client, you may
+  expose cross-site scripting vulnerabilities (see <a href="https://github.com/mozilla/nunjucks-docs/issues/17">this
+  issue</a> for more
+  information).</p>
+
 <h3 id="render">render</h3>
 
 <div class="api-sig"><code>nunjucks.render(name, [context], [callback])</code></div>
@@ -363,7 +370,7 @@ return the rendered string.</p>
 
 <div class="api-desc"><p>Same as <a href="#render1"><code>render</code></a>, but renders a raw string instead of
 loading a template.</p>
-<div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="kd">var</span> <span class="nx">res</span> <span class="o">=</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="s1">&#39;Hello {{ username }}&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">username</span><span class="o">:</span> <span class="s1">&#39;James&#39;</span> <span class="p">});</span>
+<div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="kd">var</span> <span class="nx">res</span> <span class="o">=</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">renderString</span><span class="p">(</span><span class="s1">&#39;Hello {{ username }}&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">username</span><span class="o">:</span> <span class="s1">&#39;James&#39;</span> <span class="p">});</span>
 </code></pre></div>
 </div>
 
@@ -511,7 +518,7 @@ rendered.</p>
 <p>This loader also recognizes when precompiled templates are available
 and automatically uses them instead of fetching over HTTP. In
 production, this should always be the case. See
-<a href="#precompiling-templates">Precompiling Templates</a>.</p>
+<a href="#precompiling">Precompiling</a>.</p>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="c1">// Load templates from /views</span>
 <span class="kd">var</span> <span class="nx">env</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">Environment</span><span class="p">(</span><span class="k">new</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">WebLoader</span><span class="p">(</span><span class="s1">&#39;/views&#39;</span><span class="p">))</span>
 </code></pre></div>
@@ -943,7 +950,7 @@ content from a URL and injects it into the page:</p>
         <span class="nx">parser</span><span class="p">.</span><span class="nx">advanceAfterBlockEnd</span><span class="p">(</span><span class="nx">tok</span><span class="p">.</span><span class="nx">value</span><span class="p">);</span>
 
         <span class="c1">// parse the body and possibly the error block, which is optional</span>
-        <span class="kd">var</span> <span class="nx">body</span> <span class="o">=</span> <span class="nx">parser</span><span class="p">.</span><span class="nx">parseUntilBlocks</span><span class="p">(</span><span class="s1">&#39;error&#39;</span><span class="p">,</span> <span class="s1">&#39;endtruncate&#39;</span><span class="p">);</span>
+        <span class="kd">var</span> <span class="nx">body</span> <span class="o">=</span> <span class="nx">parser</span><span class="p">.</span><span class="nx">parseUntilBlocks</span><span class="p">(</span><span class="s1">&#39;error&#39;</span><span class="p">,</span> <span class="s1">&#39;endremote&#39;</span><span class="p">);</span>
         <span class="kd">var</span> <span class="nx">errorBody</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
 
         <span class="k">if</span><span class="p">(</span><span class="nx">parser</span><span class="p">.</span><span class="nx">skipSymbol</span><span class="p">(</span><span class="s1">&#39;error&#39;</span><span class="p">))</span> <span class="p">{</span>
@@ -1011,7 +1018,7 @@ Template rendering is paused until you call the callback to resume.</p>
 
     <footer>
       Found a bug in the
-      documentation? <a href="https://github.com/mozilla/nunjucks-docs">Fix
+      documentation? <a href="https://github.com/mozilla/nunjucks/tree/master/docs">Fix
       it or file an issue</a>!
     </footer>
 

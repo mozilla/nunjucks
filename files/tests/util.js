@@ -1,7 +1,9 @@
 (function() {
+    'use strict';
+
     var Environment, Template, loader, templatesPath, expect;
 
-    if(typeof require != 'undefined') {
+    if(typeof require !== 'undefined') {
         Environment = require('../src/environment').Environment;
         Template = require('../src/environment').Template;
         loader = require('../src/node-loaders').FileSystemLoader;
@@ -50,6 +52,11 @@
         }
     }
 
+    function normEOL(str) {
+        if (!str) return str;
+        return str.replace(/\r\n|\r/g, "\n");
+    }
+
     function render(str, ctx, opts, cb) {
         if(!opts) {
             cb = ctx;
@@ -68,13 +75,13 @@
         if(opts.filters) {
             for(var name in opts.filters) {
                 e.addFilter(name, opts.filters[name]);
-            }        
+            }
         }
 
         if(opts.asyncFilters) {
             for(var name in opts.asyncFilters) {
                 e.addFilter(name, opts.asyncFilters[name], true);
-            }        
+            }
         }
 
         if(opts.extensions) {
@@ -93,27 +100,29 @@
                     throw err;
                 }
 
-                cb(err, res);
+                cb(err, normEOL(res));
 
                 doneAsyncs++;
 
-                if(numAsyncs == doneAsyncs && doneHandler) {
+                if(numAsyncs === doneAsyncs && doneHandler) {
                     doneHandler();
                 }
             }, 0);
         });
     }
 
-    if(typeof module != 'undefined') {
+    if(typeof module !== 'undefined') {
         module.exports.render = render;
         module.exports.equal = equal;
         module.exports.finish = finish;
+        module.exports.normEOL = normEOL;
     }
     else {
         window.util = {
             render: render,
             equal: equal,
-            finish: finish
+            finish: finish,
+            normEOL: normEOL
         };
     }
 })();
