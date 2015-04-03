@@ -1,4 +1,4 @@
-// Browser bundle of nunjucks 1.3.0 
+// Browser bundle of nunjucks 1.3.1 
 
 (function() {
 var modules = {};
@@ -4674,8 +4674,6 @@ modules['web-loaders'] = {
 };
 })();
 (function() {
-'use strict';
-
 if(typeof window === 'undefined' || window !== this) {
     modules['loaders'] = modules["node-loaders"];
 }
