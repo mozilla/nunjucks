@@ -8,7 +8,7 @@ title: Templates
 
 这里包括 nunjuck 所有可用的功能。
 
-> Nunjucks 是 [jinja2](http://jinja.pocoo.org/docs/) 的 javascript 的实现，所以如果此文档有什么缺失，你可以直接查看 [jinja2 的文档](http://jinja.pocoo.org/docs/templates/)，不过两者之间还存在一些[差异](http://mozilla.github.io/nunjucks/faq.html#can-i-use-the-same-templates-between-nunjucks-and-jinja2-what-are-the-differences)。
+> Nunjucks 是 [jinja2](http://jinja.pocoo.org/docs/) 的 javascript 的实现，所以如果此文档有什么缺失，你可以直接查看 [jinja2 的文档](http://jinja.pocoo.org/docs/templates/)，不过两者之间还存在一些[差异](http://mozilla.github.io/nunjucks/cn/faq.html)。
 
 ## 变量
 
@@ -40,7 +40,7 @@ foo.bar }}`, `{{ foo.bar.baz }}` 也不显示)。
 
 第三个例子展示了链式过滤器，最终会显示 "Bar"，第一个过滤器将 "foo" 替换成 "bar"，第二个过滤器将首字母大写。
 
-Nunjucks 提供了一些[内置的过滤器](#builtin-filters)，你也可以[自定义过滤器](api#Registering-custom-filters)。
+Nunjucks 提供了一些[内置的过滤器](#builtin-filters)，你也可以[自定义过滤器](api#custom-filters)。
 
 ## 模板继承
 
@@ -102,8 +102,7 @@ This is the default content
 
 ## 标签
 
-Tags are special blocks that perform operations on sections of the
-template. Nunjucks 包含一些内置的标签，你也可以[自定义](api.html#custom-tags)。
+标签是一些特殊的区块，它们可以对模板执行一些操作。Nunjucks 包含一些内置的标签，你也可以[自定义](api.html#custom-tags)。
 
 ### if
 
@@ -333,7 +332,7 @@ The name of the item is: {{ item.name }}
 {% endfor %}
 ```
 
-This is especially useful for cutting up templates into pieces so that the browser-side environment can render the small chunks when it needs to change the page.
+这一点可以帮助我们把模板切分成更小的部分，从而使得在浏览器上，当我们需要改变页面时，我们可以渲染这些小部分的模板，而非一整个的大的模板。
 
 `include` 可以接受任何表达式，你可以如下传入: `{% include name + ".html" as obj %}`.
 
@@ -572,7 +571,7 @@ Examples:
 
 ### range([start], stop, [step])
 
-如果你需要遍历固定范围的数字可以使用 `range`，`start` (默认为 0) 为起始数字，`start` 为结束数字，`step` 为间隔 (默认为 1)。
+如果你需要遍历固定范围的数字可以使用 `range`，`start` (默认为 0) 为起始数字，`stop` 为结束数字，`step` 为间隔 (默认为 1)。
 
 ```jinja
 {% for i in range(0, 5) -%}
@@ -609,8 +608,6 @@ Examples:
 如果 `tags` 为 `["food", "beer", "dessert"]`, 上面将输出 `food, beer, dessert`。
 
 ## Builtin Filters
-
-Nunjucks has ported most of jinja's filters (click through for documentation):
 
 Nunjucks 已经支持了大部分 jinja 的过滤器 (点击查看文档)。
 

@@ -27,7 +27,7 @@ features, it should be easy to make templates compatible. In the
 actually created a compatibility layer that overrides some of nunjucks
 internals to provide better jinja2 compatiblity (allowing the use of
 `True` and more). You can [see it
-here](https://github.com/mozilla/fireplace/blob/master/hearth/media/js/lib/nunjucks.compat.js).
+here](https://github.com/mozilla/fireplace/blob/9fb5f147c136926e406fd725e4062b0866d431c4/src/media/js/lib/nunjucks.compat.js).
 
 Additionally, there are few jinja2 features not implemented in nunjucks:
 

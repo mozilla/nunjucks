@@ -14,6 +14,13 @@ extensions, customizing template loading, and more.
 If you don't need deep customization of the system, you can use this simple
 higher-level API for loading and rendering templates.
 
+**Warning**: nunjucks does not sandbox execution so it is potentially
+  unsafe to run user-defined templates. On the server, you may expose
+  attack vectors for accessing sensitive data. On the client, you may
+  expose cross-site scripting vulnerabilities (see [this
+  issue](https://github.com/mozilla/nunjucks-docs/issues/17) for more
+  information).
+
 {% endraw %}
 {% api %}
 render
@@ -186,7 +193,7 @@ loading a template.
 
 {% raw %}
 ```js
-var res = nunjucks.render('Hello {{ username }}', { username: 'James' });
+var res = nunjucks.renderString('Hello {{ username }}', { username: 'James' });
 ```
 {% endraw %}
 {% endapi %}
@@ -351,7 +358,7 @@ rendered.
 This loader also recognizes when precompiled templates are available
 and automatically uses them instead of fetching over HTTP. In
 production, this should always be the case. See
-[Precompiling Templates](#precompiling-templates).
+[Precompiling](#precompiling).
 
 ```js
 // Load templates from /views
@@ -822,7 +829,7 @@ function RemoteExtension() {
         parser.advanceAfterBlockEnd(tok.value);
 
         // parse the body and possibly the error block, which is optional
-        var body = parser.parseUntilBlocks('error', 'endtruncate');
+        var body = parser.parseUntilBlocks('error', 'endremote');
         var errorBody = null;
 
         if(parser.skipSymbol('error')) {
