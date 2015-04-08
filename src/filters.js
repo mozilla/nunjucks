@@ -150,8 +150,12 @@ var filters = {
         return arr[arr.length-1];
     },
 
-    length: function(arr) {
-        return arr !== undefined ? arr.length : 0;
+    length: function(val) {
+        var value = val;
+        if ( val instanceof r.SafeString )
+            value = val.valueOf();
+
+        return value !== undefined ? value.length : 0;
     },
 
     list: function(val) {
