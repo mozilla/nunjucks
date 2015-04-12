@@ -3,6 +3,21 @@
 var lib = require('./lib');
 var r = require('./runtime');
 
+
+var normalize = function(value, defaultValue) {
+
+    if (value === null || value === undefined) {
+        return defaultValue;
+    }
+
+    if (value instanceof r.SafeString) {
+        return normalize(value.valueOf(), defaultValue);
+    }
+
+    return value;
+};
+
+
 var filters = {
     abs: function(n) {
         return Math.abs(n);
@@ -35,11 +50,13 @@ var filters = {
     },
 
     capitalize: function(str) {
+        str = normalize(str, '');
         var ret = str.toLowerCase();
         return r.copySafeness(str, ret.charAt(0).toUpperCase() + ret.slice(1));
     },
 
     center: function(str, width) {
+        str = normalize(str, '');
         width = width || 80;
 
         if(str.length >= width) {
@@ -117,6 +134,10 @@ var filters = {
     },
 
     indent: function(str, width, indentfirst) {
+        str = normalize(str, '');
+
+        if (str === '') return '';
+
         width = width || 4;
         var res = '';
         var lines = str.split('\n');
@@ -151,9 +172,7 @@ var filters = {
     },
 
     length: function(val) {
-        var value = val;
-        if ( val instanceof r.SafeString )
-            value = val.valueOf();
+        var value = normalize(val, '');
 
         return value !== undefined ? value.length : 0;
     },
@@ -188,6 +207,7 @@ var filters = {
     },
 
     lower: function(str) {
+        str = normalize(str, '');
         return str.toLowerCase();
     },
 
@@ -212,7 +232,7 @@ var filters = {
             return str.replace(old, new_);
         }
 
-        var res = str;
+        var res = normalize(str, '');
         var last = res;
         var count = 1;
         res = res.replace(old, new_);
@@ -329,6 +349,7 @@ var filters = {
     },
 
     title: function(str) {
+        str = normalize(str, '');
         var words = str.split(' ');
         for(var i = 0; i < words.length; i++) {
             words[i] = filters.capitalize(words[i]);
@@ -342,6 +363,7 @@ var filters = {
 
     truncate: function(input, length, killwords, end) {
         var orig = input;
+        input = normalize(input, '');
         length = length || 255;
 
         if (input.length <= length)
@@ -363,6 +385,7 @@ var filters = {
     },
 
     upper: function(str) {
+        str = normalize(str, '');
         return str.toUpperCase();
     },
 
@@ -437,6 +460,7 @@ var filters = {
     },
 
     wordcount: function(str) {
+        str = normalize(str, '');
         var words = (str) ? str.match(/\w+/g) : null;
         return (words) ? words.length : null;
     },

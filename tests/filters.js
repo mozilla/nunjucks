@@ -1,17 +1,19 @@
 (function() {
     'use strict';
 
-    var expect, util, lib;
+    var expect, util, lib, r;
 
     if(typeof require !== 'undefined') {
         expect = require('expect.js');
         util = require('./util');
         lib = require('../src/lib');
+        r = require('../src/runtime');
     }
     else {
         expect = window.expect;
         util = window.util;
         lib = nunjucks.require('lib');
+        r = nunjucks.require('runtime');
     }
 
     var render = util.render;
@@ -39,6 +41,10 @@
 
         it('capitalize', function(done) {
             equal('{{ "foo" | capitalize }}', 'Foo');
+            equal('{{ str | capitalize }}', {str: r.markSafe('foo')}, 'Foo');
+            equal('{{ undefined | capitalize }}', '');
+            equal('{{ null | capitalize }}', '');
+            equal('{{ nothing | capitalize }}', '');
             finish(done);
         });
 
@@ -46,6 +52,23 @@
             equal('{{ "fooo" | center }}',
                   lib.repeat(' ', 38) + 'fooo' +
                   lib.repeat(' ', 38));
+
+            equal('{{ str | center }}', {str: r.markSafe('fooo')},
+                  lib.repeat(' ', 38) + 'fooo' +
+                  lib.repeat(' ', 38));
+
+            equal('{{ undefined | center }}',
+                  lib.repeat(' ', 40)+ '' +
+                  lib.repeat(' ', 40));
+
+            equal('{{ null | center }}',
+                  lib.repeat(' ', 40)+ '' +
+                  lib.repeat(' ', 40));
+
+            equal('{{ nothing | center }}',
+                  lib.repeat(' ', 40)+ '' +
+                  lib.repeat(' ', 40));
+
 
             equal('{{ "foo" | center }}',
                   lib.repeat(' ', 38) + 'foo' +
@@ -155,6 +178,22 @@
                   'one\n  two\n  three\n');
             equal('{{ "one\ntwo\nthree" | indent(2, true) }}',
                   '  one\n  two\n  three\n');
+
+            equal('{{ str | indent }}', {str: r.markSafe('one\ntwo\nthree')},
+                  'one\n    two\n    three\n');
+
+            equal('{{ "" | indent }}', '');
+            equal('{{ undefined | indent }}', '');
+            equal('{{ undefined | indent(2) }}','');
+            equal('{{ undefined | indent(2, true) }}','');
+
+            equal('{{ null | indent }}','');
+            equal('{{ null | indent(2) }}','');
+            equal('{{ null | indent(2, true) }}','');
+
+            equal('{{ nothing | indent }}','');
+            equal('{{ nothing | indent(2) }}','');
+            equal('{{ nothing | indent(2, true) }}','');
             finish(done);
         });
 
@@ -182,12 +221,12 @@
 
         it('length', function(done) {
             equal('{{ [1,2,3] | length }}', '3');
+            equal('{{ blah|length }}', '0');
+            equal('{{ str | length }}', {str:r.markSafe('blah')}, '4');
+            equal('{{ undefined | length }}', '0');
+            equal('{{ null | length }}', '0');
+            equal('{{ nothing | length }}', '0');
             finish(done);
-        });
-
-        it('length handle undefined variables', function(done) {
-          equal('{{ blah|length }}', '0');
-          finish(done);
         });
 
         it('list', function(done) {
@@ -202,6 +241,10 @@
 
         it('lower', function(done) {
             equal('{{ "fOObAr" | lower }}', 'foobar');
+            equal('{{ str | lower }}', {str: r.markSafe('fOObAr')}, 'foobar');
+            equal('{{ null | lower }}', '');
+            equal('{{ undefined | lower }}', '');
+            equal('{{ nothing | lower }}', '');
             finish(done);
         });
 
@@ -236,7 +279,7 @@
             equal('{{ "aaaAAA" | replace(r/a/i, "z") }}', 'zaaAAA');
             equal('{{ "aaaAAA" | replace(r/a/g, "z") }}', 'zzzAAA');
             equal('{{ "aaaAAA" | replace(r/a/gi, "z") }}', 'zzzzzz');
-
+            equal('{{ str | replace("a", "x") }}', {str: r.markSafe('aaabbbccc')}, 'xxxbbbccc');
             finish(done);
         });
 
@@ -307,11 +350,16 @@
 
         it('title', function(done) {
             equal('{{ "foo bar baz" | title }}', 'Foo Bar Baz');
+            equal('{{ str | title }}', {str: r.markSafe('foo bar baz')}, 'Foo Bar Baz');
+            equal('{{ undefined | title }}', '');
+            equal('{{ null | title }}', '');
+            equal('{{ nothing | title }}', '');
             finish(done);
         });
 
         it('trim', function(done) {
             equal('{{ "  foo " | trim }}', 'foo');
+            equal('{{ str | trim }}', {str: r.markSafe('  foo ')}, 'foo');
             finish(done);
         });
 
@@ -321,12 +369,35 @@
             equal('{{ "foo bar baz" | truncate(7) }}', 'foo bar...');
             equal('{{ "foo bar baz" | truncate(5, true) }}', 'foo b...');
             equal('{{ "foo bar baz" | truncate(6, true, "?") }}', 'foo ba?');
+            equal('{{ "foo bar" | truncate(3) }}', {str: r.markSafe('foo bar')}, 'foo...');
+
+            equal('{{ undefined | truncate(3) }}', '');
+            equal('{{ undefined | truncate(6) }}', '');
+            equal('{{ undefined | truncate(7) }}', '');
+            equal('{{ undefined | truncate(5, true) }}', '');
+            equal('{{ undefined | truncate(6, true, "?") }}', '');
+
+            equal('{{ null | truncate(3) }}', '');
+            equal('{{ null | truncate(6) }}', '');
+            equal('{{ null | truncate(7) }}', '');
+            equal('{{ null | truncate(5, true) }}', '');
+            equal('{{ null | truncate(6, true, "?") }}', '');
+
+            equal('{{ nothing | truncate(3) }}', '');
+            equal('{{ nothing | truncate(6) }}', '');
+            equal('{{ nothing | truncate(7) }}', '');
+            equal('{{ nothing | truncate(5, true) }}', '');
+            equal('{{ nothing | truncate(6, true, "?") }}', '');
 
             finish(done);
         });
 
         it('upper', function(done) {
             equal('{{ "foo" | upper }}', 'FOO');
+            equal('{{ str | upper }}', {str: r.markSafe('foo')}, 'FOO');
+            equal('{{ null | upper }}', '');
+            equal('{{ undefined | upper }}', '');
+            equal('{{ nothing | upper }}', '');
             finish(done);
         });
 
@@ -418,6 +489,10 @@
 
         it('wordcount', function(done) {
             equal('{{ "foo bar baz" | wordcount }}', '3');
+            equal('{{ str | wordcount }}', {str: r.markSafe('foo bar baz')},'3');
+            equal('{{ null | wordcount }}', '');
+            equal('{{ undefined | wordcount }}', '');
+            equal('{{ nothing | wordcount }}', '');
             finish(done);
         });
     });
