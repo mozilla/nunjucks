@@ -954,12 +954,17 @@ var Compiler = Object.extend({
     },
 
     compileBlock: function(node, frame) {
-        if(!this.isChild) {
+        if(this.isChild) {
+            this.emitLine('if (!frame.hasOwnProperty("indent_' + node.name.value + '")) { frame["indent_' + node.name.value + '"] = ' + node.colno + '; }');
+        }
+        else {
             var id = this.tmpid();
 
             this.emitLine('context.getBlock("' + node.name.value + '")' +
                           '(env, context, frame, runtime, ' + this.makeCallback(id));
-            this.emitLine(this.buffer + ' += ' + id + ';');
+            this.emitLine('var indent = ' + node.colno + ' - (frame["indent_' + node.name.value + '"] || 1);');
+            this.emitLine('if (!frame.hasOwnProperty("indent_' + node.name.value + '")) { indent = 0; }');
+            this.emitLine(this.buffer + ' += runtime.formatBlock(' + id + ', indent, !env.opts.indentBlocks);');
             this.addScopeLevel();
         }
     },
@@ -1001,6 +1006,7 @@ var Compiler = Object.extend({
     },
 
     compileInclude: function(node, frame) {
+        // console.log(node.colno);
         var id = this.tmpid();
         var id2 = this.tmpid();
 
@@ -1011,7 +1017,8 @@ var Compiler = Object.extend({
 
         this.emitLine(id + '.render(' +
                       'context.getVariables(), frame.push(), ' + this.makeCallback(id2));
-        this.emitLine(this.buffer + ' += ' + id2);
+        this.emitLine(this.buffer + ' += runtime.formatBlock(' + id2 + ', ' + (node.colno - 1) + ', !env.opts.indentBlocks);');
+
         this.addScopeLevel();
     },
 

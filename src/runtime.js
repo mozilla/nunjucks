@@ -323,6 +323,17 @@ function asyncAll(arr, dimen, func, cb) {
     }
 }
 
+function formatBlock(text, indentWidth, doNothing) {
+    if (doNothing) {
+        return text;
+    }
+    function indentLines(line, idx) {
+        return idx == 0 ? line : indent + line;
+    }
+    var indent = lib.repeat(' ', indentWidth);
+    return text.trim().split('\n').map(indentLines).join('\n');
+}
+
 module.exports = {
     Frame: Frame,
     makeMacro: makeMacro,
@@ -339,5 +350,6 @@ module.exports = {
     copySafeness: copySafeness,
     markSafe: markSafe,
     asyncEach: asyncEach,
-    asyncAll: asyncAll
+    asyncAll: asyncAll,
+    formatBlock: formatBlock
 };

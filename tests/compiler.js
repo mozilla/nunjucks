@@ -621,6 +621,59 @@
             finish(done);
         });
 
+        it('should render blocks with auto indentation', function(done) {
+            var opts = { indentBlocks: true };
+
+            render('{% extends "base-block-indent.html" %}\n' +
+                   '{% block A %}new_A{% endblock %}\n{% block B %}new_B{% endblock %}',
+                   null, opts, function (err, res) {
+                       expect(res).to.be('<div>\n  new_A\n\n  <p>\n    new_B\n  </p>\n</div>\n');
+                   });
+
+            render('{% extends "base-block-indent.html" %}\n' +
+                   '{% block A %}new_A1\nnew_A2{% endblock %}\n{% block B %}new_B1\n  new_B1.1\nnew_B2{% endblock %}',
+                   null, opts, function (err, res) {
+                       expect(res).to.be('<div>\n  new_A1\n  new_A2\n\n  <p>\n    new_B1\n      new_B1.1\n    new_B2\n  </p>\n</div>\n');
+                   });
+
+            render('{% extends "base-block-indent.html" %}\n' +
+                   '{% block A %}new_A1\nnew_A2{% endblock %}',
+                   null, opts, function (err, res) {
+                       expect(res).to.be('<div>\n  new_A1\n  new_A2\n\n  <p>\n    default_B\n  </p>\n</div>\n');
+                   });
+
+            render('{% extends "base-block-indent.html" %}\n' +
+                   '{% block B %}new_B1\n  new_B1.1\nnew_B2{% endblock %}',
+                   null, opts, function (err, res) {
+                       expect(res).to.be('<div>\n  default_A\n\n  <p>\n    new_B1\n      new_B1.1\n    new_B2\n  </p>\n</div>\n');
+                   });
+
+            render('{% extends "base-block-indent-2.html" %}\n' +
+                   '{% block B %}new_B1\n  new_B1.1\nnew_B2{% endblock %}',
+                   null, opts, function (err, res) {
+                       expect(res).to.be('<div>\n  replaced_A\n\n  <p>\n    new_B1\n      new_B1.1\n    new_B2\n  </p>\n</div>\n');
+                   });
+
+            render('{% extends "base-block-indent-2.html" %}\n' +
+                   '{% block C %}content_C{% endblock %}',
+                   null, opts, function (err, res) {
+                       expect(res).to.be('<div>\n  replaced_A\n\n  <p>\n    replaced_B1\n      content_C\n    replaced_B2\n  </p>\n</div>\n');
+                   });
+
+            finish(done);
+        });
+
+        it('should include templates with auto indentation', function(done) {
+            var opts = { indentBlocks: true };
+
+            render('<div>\n  {% include "include-multiline.html" %}\n</div>',
+                   null, opts, function (err, res) {
+                       expect(res).to.be('<div>\n  foo\n    bar\n  baz\n</div>');
+                   });
+
+            finish(done);
+        });
+
         /**
          * This test checks that this issue is resolved: http://stackoverflow.com/questions/21777058/loop-index-in-included-nunjucks-file
          */

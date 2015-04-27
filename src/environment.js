@@ -32,6 +32,8 @@ var Environment = Obj.extend({
 
         this.opts.lstripBlocks = !!opts.lstripBlocks;
 
+        this.opts.indentBlocks = !!opts.indentBlocks;
+
         if(!loaders) {
             // The filesystem loader is only available client-side
             if(builtin_loaders.FileSystemLoader) {
