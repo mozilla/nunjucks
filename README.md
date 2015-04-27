@@ -17,7 +17,7 @@ See [here](http://mozilla.github.io/nunjucks/).
 
 ## Tests
 
-Run the tests with `make test`.
+Run the tests with `npm test`.
 
 Watch `master` branch's tests running at http://mozilla.github.io/nunjucks/files/tests/browser/.
 
