@@ -69,7 +69,6 @@
                   lib.repeat(' ', 40)+ '' +
                   lib.repeat(' ', 40));
 
-
             equal('{{ "foo" | center }}',
                   lib.repeat(' ', 38) + 'foo' +
                   lib.repeat(' ', 39));

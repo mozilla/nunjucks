@@ -157,9 +157,12 @@ function SafeString(val) {
     }
 
     this.val = val;
+    this.length = val.length;
 }
 
-SafeString.prototype = Object.create(String.prototype);
+SafeString.prototype = Object.create(String.prototype, {
+    length: { writable: true, configurable: true, value: 0 }
+});
 SafeString.prototype.valueOf = function() {
     return this.val;
 };

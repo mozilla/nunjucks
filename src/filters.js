@@ -3,17 +3,10 @@
 var lib = require('./lib');
 var r = require('./runtime');
 
-
-var normalize = function(value, defaultValue) {
-
-    if (value === null || value === undefined) {
+function normalize(value, defaultValue) {
+    if(value === null || value === undefined || value === false) {
         return defaultValue;
     }
-
-    if (value instanceof r.SafeString) {
-        return normalize(value.valueOf(), defaultValue);
-    }
-
     return value;
 };
 
