@@ -39,6 +39,9 @@
 
         it('capitalize', function(done) {
             equal('{{ "foo" | capitalize }}', 'Foo');
+            equal('{{ undefined | capitalize }}', '');
+            equal('{{ null | capitalize }}', '');
+            equal('{{ nothing | capitalize }}', '');
             finish(done);
         });
 
@@ -50,6 +53,19 @@
             equal('{{ "foo" | center }}',
                   lib.repeat(' ', 38) + 'foo' +
                   lib.repeat(' ', 39));
+
+            equal('{{ undefined | center }}',
+                  lib.repeat(' ', 40)+ '' + 
+                  lib.repeat(' ', 40));
+
+            equal('{{ null | center }}',
+                  lib.repeat(' ', 40)+ '' + 
+                  lib.repeat(' ', 40));
+
+            equal('{{ nothing | center }}',
+                  lib.repeat(' ', 40)+ '' + 
+                  lib.repeat(' ', 40));
+
             finish(done);
         });
 
@@ -154,7 +170,20 @@
             equal('{{ "one\ntwo\nthree" | indent(2) }}',
                   'one\n  two\n  three\n');
             equal('{{ "one\ntwo\nthree" | indent(2, true) }}',
-                  '  one\n  two\n  three\n');
+           '  one\n  two\n  three\n');
+
+            equal('{{ undefined | indent }}','');
+            equal('{{ undefined | indent(2) }}','');
+            equal('{{ undefined | indent(2, true) }}','');
+
+            equal('{{ null | indent }}','');
+            equal('{{ null | indent(2) }}','');
+            equal('{{ null | indent(2, true) }}','');
+
+            equal('{{ nothing | indent }}','');
+            equal('{{ nothing | indent(2) }}','');
+            equal('{{ nothing | indent(2, true) }}','');
+
             finish(done);
         });
 
@@ -321,6 +350,24 @@
             equal('{{ "foo bar baz" | truncate(7) }}', 'foo bar...');
             equal('{{ "foo bar baz" | truncate(5, true) }}', 'foo b...');
             equal('{{ "foo bar baz" | truncate(6, true, "?") }}', 'foo ba?');
+
+            equal('{{ undefined | truncate(3) }}', '');
+            equal('{{ undefined | truncate(6) }}', '');
+            equal('{{ undefined | truncate(7) }}', '');
+            equal('{{ undefined | truncate(5, true) }}', '');
+            equal('{{ undefined | truncate(6, true, "?") }}', '');
+
+            equal('{{ null | truncate(3) }}', '');
+            equal('{{ null | truncate(6) }}', '');
+            equal('{{ null | truncate(7) }}', '');
+            equal('{{ null | truncate(5, true) }}', '');
+            equal('{{ null | truncate(6, true, "?") }}', '');
+
+            equal('{{ nothing | truncate(3) }}', '');
+            equal('{{ nothing | truncate(6) }}', '');
+            equal('{{ nothing | truncate(7) }}', '');
+            equal('{{ nothing | truncate(5, true) }}', '');
+            equal('{{ nothing | truncate(6, true, "?") }}', '');
 
             finish(done);
         });

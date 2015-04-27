@@ -35,12 +35,14 @@ var filters = {
     },
 
     capitalize: function(str) {
+        if ( typeof str !== 'string' ) { return ''; }
         var ret = str.toLowerCase();
         return r.copySafeness(str, ret.charAt(0).toUpperCase() + ret.slice(1));
     },
 
     center: function(str, width) {
-        width = width || 80;
+      width = width || 80;
+      str = str || '';
 
         if(str.length >= width) {
             return str;
@@ -117,7 +119,9 @@ var filters = {
     },
 
     indent: function(str, width, indentfirst) {
-        width = width || 4;
+      if ( typeof str !== 'string' ) { return ''; }
+      width = width || 4;
+
         var res = '';
         var lines = str.split('\n');
         var sp = lib.repeat(' ', width);
@@ -339,6 +343,8 @@ var filters = {
     truncate: function(input, length, killwords, end) {
         var orig = input;
         length = length || 255;
+
+        input = input || '';
 
         if (input.length <= length)
             return input;
