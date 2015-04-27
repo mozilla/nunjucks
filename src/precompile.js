@@ -5,6 +5,7 @@ var path = require('path');
 var lib = require('./lib');
 var compiler = require('./compiler');
 var Environment = require('./environment').Environment;
+var precompileGlobal = require('./precompile-global');
 
 function match(filename, patterns) {
     if (!Array.isArray(patterns)) return false;
@@ -29,11 +30,16 @@ function precompile(input, opts) {
     // * env: the Environment to use (gets extensions and async filters from it)
     // * include: which file/folders to include (folders are auto-included, files are auto-excluded)
     // * exclude: which file/folders to exclude (folders are auto-included, files are auto-excluded)
+    // * wrapper: function(name, template, opts) {...}
+    //       Customize the output format to store the compiled template.
+    //       By default, templates are stored in a global variable used by the runtime.
+    //       A custom loader will be necessary to load your custom wrapper.
 
     opts = opts || {};
     var env = opts.env || new Environment([]);
     var asyncFilters = env.asyncFilters;
     var extensions = env.extensionsList;
+    var wrapper = opts.wrapper || precompileGlobal;
 
     var pathStats = fs.existsSync(input) && fs.statSync(input);
     var output = '';
@@ -65,16 +71,18 @@ function precompile(input, opts) {
                             'compiling a string');
         }
 
-        return _precompile(input,
+        return _precompile(wrapper,
+                           input,
                            opts.name,
                            env,
-                           opts.asFunction);
+                           opts);
     }
     else if(pathStats.isFile()) {
-        return _precompile(fs.readFileSync(input, 'utf-8'),
+        return _precompile(wrapper,
+                           fs.readFileSync(input, 'utf-8'),
                            opts.name || input,
                            env,
-                           opts.asFunction);
+                           opts);
     }
     else if(pathStats.isDirectory()) {
         addTemplates(input);
@@ -83,10 +91,11 @@ function precompile(input, opts) {
             var name = templates[i].replace(path.join(input, '/'), '');
 
             try {
-                output += _precompile(fs.readFileSync(templates[i], 'utf-8'),
+                output += _precompile(wrapper,
+                                      fs.readFileSync(templates[i], 'utf-8'),
                                       name,
                                       env,
-                                      opts.asFunction);
+                                      opts);
             } catch(e) {
                 if(opts.force) {
                     // Don't stop generating the output if we're
@@ -103,17 +112,13 @@ function precompile(input, opts) {
     }
 }
 
-function _precompile(str, name, env, asFunction) {
+function _precompile(wrapper, str, name, env, opts) {
     env = env || new Environment([]);
 
     var asyncFilters = env.asyncFilters;
     var extensions = env.extensionsList;
 
-    var out = '(function() {' +
-        '(window.nunjucksPrecompiled = window.nunjucksPrecompiled || {})' +
-        '["' + name.replace(/\\/g, '/') + '"] = (function() {';
-
-    out += lib.withPrettyErrors(
+    var template = lib.withPrettyErrors(
         name,
         false,
         function() {
@@ -123,14 +128,8 @@ function _precompile(str, name, env, asFunction) {
                                     name);
         }
     );
-    out += '})();\n';
 
-    if(asFunction) {
-        out += 'return function(ctx, cb) { return nunjucks.render("' + name + '", ctx, cb); }';
-    }
-
-    out += '})();\n';
-    return out;
+    return wrapper(name, template, opts);
 }
 
 module.exports = {
