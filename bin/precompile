@@ -36,6 +36,10 @@ var optimist = require('optimist')
         .default('exclude', [])
         .alias('x', 'exclude')
 
+    .describe('wrapper', 'Something something change')
+        .string('wrapper')
+        .alias('w', 'wrapper')
+
     .demand(1);
 
 var argv = optimist.argv;
@@ -51,13 +55,16 @@ lib.each([].concat(argv.filters).join(',').split(','), function(name) {
     env.addFilter(name.trim(), function() {}, true);
 });
 
-console.log(precompile(argv._[0], {
+if(argv.wrapper) {
+    argv.wrapper = require('nunjucks-' + argv.wrapper).wrapper;
+}
 
+console.log(precompile(argv._[0], {
     env : env,
     force : argv.force,
     name : argv.name,
+    wrapper: argv.wrapper,
 
     include : [].concat(argv.include),
     exclude : [].concat(argv.exclude)
-
 }));
