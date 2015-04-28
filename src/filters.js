@@ -225,6 +225,8 @@ var filters = {
     },
 
     replace: function(str, old, new_, maxCount) {
+        var originalStr = str;
+
         if (old instanceof RegExp) {
             return str.replace(old, new_);
         }
@@ -238,14 +240,16 @@ var filters = {
         // Cast Numbers in the search term to string
         if(typeof old === 'number'){
             old = old +"";
-        }else if(typeof old !== "string") {
-            // If it is something other than number or string, return the original string
+        }
+        else if(typeof old !== "string") {
+            // If it is something other than number or string,
+            // return the original string
             return str
         }
 
         // Cast numbers in the replacement to string
         if(typeof str === 'number'){
-            str = str +"";
+            str = str + "";
         }
 
         // If by now, we don't have a string, throw it back
@@ -255,13 +259,15 @@ var filters = {
 
         // ShortCircuits
         if(old === ''){
-            // Mimic the python behaviour: empty string is replaced by replacement e.g. "abc"|replace("", ".") -> .a.b.c.
+            // Mimic the python behaviour: empty string is replaced
+            // by replacement e.g. "abc"|replace("", ".") -> .a.b.c.
             res = new_ + str.split("").join(new_) + new_;
             return r.copySafeness(str, res);
         }
 
         var nextIndex = str.indexOf(old);
-        // if # of replacements to perform is 0, or the string to does not contain the old value, return the string
+        // if # of replacements to perform is 0, or the string to does
+        // not contain the old value, return the string
         if(maxCount === 0 || nextIndex == -1){
             return str;
         }
@@ -270,7 +276,8 @@ var filters = {
         var count = 0; // # of replacements made
 
         while(nextIndex  > -1 && (maxCount === -1 || count < maxCount)){
-            // Grab the next chunk of src string and add it with the replacement, to the result
+            // Grab the next chunk of src string and add it with the
+            // replacement, to the result
             res += str.substring(pos, nextIndex) + new_;
             // Increment our pointer in the src string
             pos = nextIndex + old.length;
@@ -279,12 +286,13 @@ var filters = {
             nextIndex = str.indexOf(old, pos);
         }
 
-        // We've either reached the end, or done the max # of replacements, tack on any remaining string
+        // We've either reached the end, or done the max # of
+        // replacements, tack on any remaining string
         if(pos < str.length) {
             res += str.substring(pos);
         }
 
-        return r.copySafeness(str, res);
+        return r.copySafeness(originalStr, res);
     },
 
     reverse: function(val) {
