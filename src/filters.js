@@ -229,19 +229,59 @@ var filters = {
             return str.replace(old, new_);
         }
 
-        var res = normalize(str, '');
-        var last = res;
-        var count = 1;
-        res = res.replace(old, new_);
+        if(typeof maxCount === "undefined"){
+            maxCount = -1;
+        }
 
-        while(last !== res) {
-            if(count >= maxCount) {
-                break;
-            }
+        var res = '';  // Output
 
-            last = res;
-            res = res.replace(old, new_);
+        // Cast Numbers in the search term to string
+        if(typeof old === 'number'){
+            old = old +"";
+        }else if(typeof old !== "string") {
+            // If it is something other than number or string, return the original string
+            return str;
+        }
+
+        // Cast numbers in the replacement to string
+        if(typeof str === 'number'){
+            str = str +"";
+        }
+
+        // If by now, we don't have a string, throw it back
+        if(typeof str !== 'string' && !(str instanceof r.SafeString)){
+            return str;
+        }
+
+        // ShortCircuits
+        if(old === ''){
+            // Mimic the python behaviour: empty string is replaced by replacement e.g. "abc"|replace("", ".") -> .a.b.c.
+            res = new_ + str.split("").join(new_) + new_;
+            return r.copySafeness(str, res);
+        }
+
+        var nextIndex = str.indexOf(old);
+        // if # of replacements to perform is 0, or the string to does not contain the old value, return the string
+        if(maxCount === 0 || nextIndex == -1){
+            return str;
+        }
+
+        var pos = 0;
+        var count = 0; // # of replacements made
+
+        while(nextIndex  > -1 && (maxCount === -1 || count < maxCount)){
+            // Grab the next chunk of src string and add it with the replacement, to the result
+            res += str.substring(pos, nextIndex) + new_;
+            // Increment our pointer in the src string
+            pos = nextIndex + old.length;
             count++;
+            // See if there are any more replacements to be made
+            nextIndex = str.indexOf(old, pos);
+        }
+
+        // We've either reached the end, or done the max # of replacements, tack on any remaining string
+        if(pos < str.length) {
+            res += str.substring(pos);
         }
 
         return r.copySafeness(str, res);
