@@ -1,9 +1,10 @@
 
 (function (global, module) {
+  'use strict';
 
-  if ('undefined' == typeof module) {
+  if ('undefined' === typeof module) {
     var module = { exports: {} }
-      , exports = module.exports
+      , exports = module.exports;
   }
 
   /**

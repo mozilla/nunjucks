@@ -14,13 +14,15 @@
         "uglify-js": "*",
         "express": "4.x",
         "supertest": "*",
-        "istanbul": "0.3.x"
+        "istanbul": "0.3.x",
+        "jshint": "*"
     },
     "engines": {
         "node": "*"
     },
     "scripts": {
-        "test": "./node_modules/.bin/istanbul cover ./node_modules/mocha/bin/_mocha -- -b -R tap tests",
+        "lint": "jshint .",
+        "test": "jshint . && istanbul cover ./node_modules/mocha/bin/_mocha -- -b -R tap tests",
         "browserfiles": "./bin/bundle browser/nunjucks; SLIM=1 ./bin/bundle browser/nunjucks-slim"
     },
     "bin": {

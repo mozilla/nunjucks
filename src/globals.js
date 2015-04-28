@@ -62,6 +62,6 @@ var globals = {
     joiner: function(sep) {
         return joiner(sep);
     }
-}
+};
 
 module.exports = globals;

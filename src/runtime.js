@@ -79,6 +79,7 @@ function makeMacro(argNames, kwargNames, func) {
         var argCount = numArgs(arguments);
         var args;
         var kwargs = getKeywordArgs(arguments);
+        var i;
 
         if(argCount > argNames.length) {
             args = Array.prototype.slice.call(arguments, 0, argNames.length);
@@ -86,7 +87,7 @@ function makeMacro(argNames, kwargNames, func) {
             // Positional arguments that should be passed in as
             // keyword arguments (essentially default values)
             var vals = Array.prototype.slice.call(arguments, args.length, argCount);
-            for(var i=0; i<vals.length; i++) {
+            for(i = 0; i < vals.length; i++) {
                 if(i < kwargNames.length) {
                     kwargs[kwargNames[i]] = vals[i];
                 }
@@ -97,7 +98,7 @@ function makeMacro(argNames, kwargNames, func) {
         else if(argCount < argNames.length) {
             args = Array.prototype.slice.call(arguments, 0, argCount);
 
-            for(var i=argCount; i<argNames.length; i++) {
+            for(i = argCount; i < argNames.length; i++) {
                 var arg = argNames[i];
 
                 // Keyword arguments that should be passed as
@@ -229,6 +230,7 @@ function callWrap(obj, name, args) {
         throw new Error('Unable to call `' + name + '`, which is not a function');
     }
 
+    // jshint validthis: true
     return obj.apply(this, args);
 }
 
@@ -272,7 +274,7 @@ function asyncEach(arr, dimen, iter, cb) {
 
 function asyncAll(arr, dimen, func, cb) {
     var finished = 0;
-    var len;
+    var len, i;
     var outputArr;
 
     function done(i, output) {
@@ -292,7 +294,7 @@ function asyncAll(arr, dimen, func, cb) {
             cb(null, '');
         }
         else {
-            for(var i=0; i<arr.length; i++) {
+            for(i = 0; i < arr.length; i++) {
                 var item = arr[i];
 
                 switch(dimen) {
@@ -301,6 +303,7 @@ function asyncAll(arr, dimen, func, cb) {
                 case 3: func(item[0], item[1], item[2], i, len, done); break;
                 default:
                     item.push(i, done);
+                    // jshint validthis: true
                     func.apply(this, item);
                 }
             }
@@ -315,7 +318,7 @@ function asyncAll(arr, dimen, func, cb) {
             cb(null, '');
         }
         else {
-            for(var i=0; i<keys.length; i++) {
+            for(i = 0; i < keys.length; i++) {
                 var k = keys[i];
                 func(k, arr[k], i, len, done);
             }

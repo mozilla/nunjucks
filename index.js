@@ -1,3 +1,4 @@
+'use strict';
 
 var lib = require('./src/lib');
 var env = require('./src/environment');
@@ -33,8 +34,8 @@ module.exports.configure = function(templatesPath, opts) {
     }
 
     var noWatch = 'watch' in opts ? !opts.watch : false;
-    var loader = loaders.FileSystemLoader || loaders.WebLoader;
-    e = new env.Environment(new loader(templatesPath, noWatch), opts);
+    var RealLoader = loaders.FileSystemLoader || loaders.WebLoader;
+    e = new env.Environment(new RealLoader(templatesPath, noWatch), opts);
 
     if(opts && opts.express) {
         e.express(opts.express);

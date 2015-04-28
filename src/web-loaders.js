@@ -33,7 +33,7 @@ var WebLoader = Loader.extend({
         }
     },
 
-    fetch: function(url, callback) {
+    fetch: function(url) {
         // Only in the browser please
         var ajax;
         var loading = true;
@@ -43,6 +43,7 @@ var WebLoader = Loader.extend({
             ajax = new XMLHttpRequest();
         }
         else if(window.ActiveXObject) { // IE 8 and older
+            /* global ActiveXObject */
             ajax = new ActiveXObject('Microsoft.XMLHTTP');
         }
 

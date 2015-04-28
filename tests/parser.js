@@ -22,9 +22,6 @@
 
         expect(node1.typename).to.be(node2.typename);
 
-        var children1 = (node1.children && node1.children.length) || 'null';
-        var children2 = (node2.children && node2.children.length) || 'null';
-
         if(node2 instanceof nodes.NodeList) {
             var lit = ': num-children: ';
             var sig2 = (node2.typename + lit + node2.children.length);
@@ -569,24 +566,26 @@
         it('should parse custom tags', function() {
 
             function testtagExtension() {
+                // jshint validthis: true
                 this.tags = ['testtag'];
 
                 /* normally this is automatically done by Environment */
                 this._name = 'testtagExtension';
 
                 this.parse = function(parser, nodes) {
-                    var begun = parser.peekToken();
+                    parser.peekToken();
                     parser.advanceAfterBlockEnd();
                     return new nodes.CallExtension(this, 'foo');
                 };
             }
 
             function testblocktagExtension() {
+                // jshint validthis: true
                 this.tags = ['testblocktag'];
                 this._name = 'testblocktagExtension';
 
                 this.parse = function(parser, nodes) {
-                    var begun = parser.peekToken();
+                    parser.peekToken();
                     parser.advanceAfterBlockEnd();
 
                     var content = parser.parseUntilBlocks('endtestblocktag');
@@ -598,10 +597,11 @@
             }
 
             function testargsExtension() {
+                // jshint validthis: true
                 this.tags = ['testargs'];
                 this._name = 'testargsExtension';
 
-                this.parse = function(parser, nodes, tokens) {
+                this.parse = function(parser, nodes) {
                     var begun = parser.peekToken();
                     var args = null;
 

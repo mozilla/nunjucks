@@ -8,6 +8,7 @@ function extend(cls, name, props) {
     F.prototype = cls.prototype;
     var prototype = new F();
 
+    // jshint undef: false
     var fnTest = /xyz/.test(function(){ xyz; }) ? /\bparent\b/ : /.*/;
     props = props || {};
 
@@ -18,6 +19,7 @@ function extend(cls, name, props) {
         if(typeof parent === 'function' &&
            typeof src === 'function' &&
            fnTest.test(src)) {
+            /*jshint -W083 */
             prototype[k] = (function (src, parent) {
                 return function() {
                     // Save the current parent method

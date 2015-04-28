@@ -11,12 +11,12 @@
     else {
         expect = window.expect;
         precompile = nunjucks.precompile;
-        precompileString = nunjucks.precompileString
+        precompileString = nunjucks.precompileString;
     }
 
     describe('precompile', function() {
         it('should return a string', function() {
-            expect(precompileString("{{ test }}", { name: "test.html" })).to.be.an('string');
+            expect(precompileString('{{ test }}', { name: 'test.html' })).to.be.an('string');
         });
     });
 })();

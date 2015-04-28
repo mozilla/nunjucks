@@ -4,6 +4,7 @@ var lib = require('./lib');
 var parser = require('./parser');
 var transformer = require('./transformer');
 var nodes = require('./nodes');
+// jshint -W079
 var Object = require('./object');
 var Frame = require('./runtime').Frame;
 
@@ -211,11 +212,9 @@ var Compiler = Object.extend({
     },
 
     compileCallExtension: function(node, frame, async) {
-        var name = node.extName;
         var args = node.args;
         var contentArgs = node.contentArgs;
         var autoescape = typeof node.autoescape === 'boolean' ? node.autoescape : true;
-        var transformedArgs = [];
 
         if(!async) {
             this.emit(this.buffer + ' += runtime.suppressValue(');
@@ -294,7 +293,7 @@ var Compiler = Object.extend({
         this._compileChildren(node, frame);
     },
 
-    compileLiteral: function(node, frame) {
+    compileLiteral: function(node) {
         if(typeof node.value === 'string') {
             var val = node.value.replace(/\\/g, '\\\\');
             val = val.replace(/"/g, '\\"');
@@ -602,6 +601,7 @@ var Compiler = Object.extend({
         // as fast as possible. ForAsync also shares some of this, but
         // not much.
 
+        var v;
         var i = this.tmpid();
         var len = this.tmpid();
         var arr = this.tmpid();
@@ -649,7 +649,7 @@ var Compiler = Object.extend({
                 var key = node.name.children[0];
                 var val = node.name.children[1];
                 var k = this.tmpid();
-                var v = this.tmpid();
+                v = this.tmpid();
                 frame.set(key.value, k);
                 frame.set(val.value, v);
 
@@ -672,7 +672,7 @@ var Compiler = Object.extend({
         }
         else {
             // Generate a typical array iteration
-            var v = this.tmpid();
+            v = this.tmpid();
             frame.set(node.name.value, v);
 
             this.emitLine('var ' + len + ' = ' + arr + '.length;');
@@ -953,7 +953,7 @@ var Compiler = Object.extend({
         }, this);
     },
 
-    compileBlock: function(node, frame) {
+    compileBlock: function(node) {
         if(!this.isChild) {
             var id = this.tmpid();
 
@@ -1056,10 +1056,10 @@ var Compiler = Object.extend({
         // When compiling the blocks, they should all act as top-level code
         this.isChild = false;
 
-        var blocks = node.findAll(nodes.Block);
-        for(var i=0; i<blocks.length; i++) {
-            var block = blocks[i];
-            var name = block.name.value;
+        var i, name, block, blocks = node.findAll(nodes.Block);
+        for (i = 0; i < blocks.length; i++) {
+            block = blocks[i];
+            name = block.name.value;
 
             this.emitFuncBegin('b_' + name);
 
@@ -1069,9 +1069,9 @@ var Compiler = Object.extend({
         }
 
         this.emitLine('return {');
-        for(var i=0; i<blocks.length; i++) {
-            var block = blocks[i];
-            var name = 'b_' + block.name.value;
+        for (i = 0; i < blocks.length; i++) {
+            block = blocks[i];
+            name = 'b_' + block.name.value;
             this.emitLine(name + ': ' + name + ',');
         }
         this.emitLine('root: root\n};');
