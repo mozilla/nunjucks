@@ -106,6 +106,10 @@ var filters = {
         return array;
     },
 
+    dump: function(obj) {
+        return JSON.stringify(obj);
+    },
+
     escape: function(str) {
         if(typeof str === 'string' ||
            str instanceof r.SafeString) {
