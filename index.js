@@ -16,6 +16,7 @@ module.exports.Template = env.Template;
 
 module.exports.Loader = Loader;
 module.exports.FileSystemLoader = loaders.FileSystemLoader;
+module.exports.PrecompiledLoader = loaders.PrecompiledLoader;
 module.exports.WebLoader = loaders.WebLoader;
 
 module.exports.compiler = compiler;
