@@ -146,6 +146,7 @@ var Environment = Obj.extend({
             }
         } else {
             var syncResult;
+            var _this = this;
 
             lib.asyncIter(this.loaders, function(loader, i, next, done) {
                 function handle(src) {
@@ -181,7 +182,7 @@ var Environment = Obj.extend({
                     }
                 }
                 else {
-                    var tmpl = new Template(info.src, this,
+                    var tmpl = new Template(info.src, _this,
                                             info.path, eagerCompile);
 
                     if(!info.noCache) {
@@ -195,7 +196,7 @@ var Environment = Obj.extend({
                         syncResult = tmpl;
                     }
                 }
-            }.bind(this));
+            });
 
             return syncResult;
         }
@@ -352,9 +353,12 @@ var Template = Obj.extend({
         this.path = path;
 
         if(eagerCompile) {
+            var _this = this;
             lib.withPrettyErrors(this.path,
                                  this.env.dev,
-                                 this._compile.bind(this));
+                                 function() {
+                                     _this._compile();
+                                 });
         }
         else {
             this.compiled = false;
@@ -371,20 +375,20 @@ var Template = Obj.extend({
             frame = null;
         }
 
+        var _this = this;
         return lib.withPrettyErrors(this.path, this.env.dev, function() {
-
             // Catch compile errors for async rendering
             try {
-                this.compile();
+                _this.compile();
             } catch (e) {
                 if (cb) return cb(e);
                 else throw e;
             }
 
-            var context = new Context(ctx || {}, this.blocks);
+            var context = new Context(ctx || {}, _this.blocks);
             var syncResult = null;
 
-            this.rootRenderFunc(this.env,
+            _this.rootRenderFunc(_this.env,
                                 context,
                                 frame || new Frame(),
                                 runtime,
@@ -394,7 +398,7 @@ var Template = Obj.extend({
                                 });
 
             return syncResult;
-        }.bind(this));
+        });
     },
 
 
