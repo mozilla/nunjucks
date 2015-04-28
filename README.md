@@ -15,6 +15,10 @@ templating engine for javascript. It is heavily inspired by
 
 See [here](http://mozilla.github.io/nunjucks/).
 
+## Browser Support
+
+Supported in all modern browsers. For IE8 support, use [es5-shim](https://github.com/es-shims/es5-shim).
+
 ## Tests
 
 Run the tests with `npm test`.
