@@ -249,7 +249,7 @@ var filters = {
         }
 
         // If by now, we don't have a string, throw it back
-        if(typeof str !== 'string'){
+        if(typeof str !== 'string' && !(str instanceof r.SafeString)){
             return str;
         }
 
