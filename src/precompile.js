@@ -6,6 +6,12 @@ var lib = require('./lib');
 var compiler = require('./compiler');
 var Environment = require('./environment').Environment;
 var precompileGlobal = require('./precompile-global');
+var precompileCjsModule = require('./precompile-cjs-module');
+
+var mapWrappers = {
+        'global': precompileGlobal,
+        'cjs-module': precompileCjsModule
+    };
 
 function match(filename, patterns) {
     if (!Array.isArray(patterns)) return false;
@@ -34,12 +40,20 @@ function precompile(input, opts) {
     //       Customize the output format to store the compiled template.
     //       By default, templates are stored in a global variable used by the runtime.
     //       A custom loader will be necessary to load your custom wrapper.
+    //       Can be a custom function or a string with one of the included wrappers.
 
     opts = opts || {};
     var env = opts.env || new Environment([]);
     var asyncFilters = env.asyncFilters;
     var extensions = env.extensionsList;
     var wrapper = opts.wrapper || precompileGlobal;
+
+    if('string' === typeof wrapper) {
+        if(!mapWrappers[wrapper]) {
+            throw new Error('wrapper not found: "' + wrapper + '"');
+        }
+        wrapper = mapWrappers[wrapper];
+    }
 
     var pathStats = fs.existsSync(input) && fs.statSync(input);
     var output = '';

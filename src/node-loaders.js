@@ -70,7 +70,25 @@ var FileSystemLoader = Loader.extend({
     }
 });
 
+var PrecompiledLoader = Loader.extend({
+    init: function(compiledTemplatesFile) {
+        this.precompiled = compiledTemplatesFile || {};
+    },
+
+    getSource: function(name) {
+        if (this.precompiled[name]) {
+            return {
+                src: { type: "code",
+                       obj: this.precompiled[name] },
+                path: name
+            };
+        }
+        return null;
+    }
+});
+
 
 module.exports = {
-    FileSystemLoader: FileSystemLoader
+    FileSystemLoader: FileSystemLoader,
+    PrecompiledLoader: PrecompiledLoader
 };
