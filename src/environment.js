@@ -1,6 +1,7 @@
 'use strict';
 
 var path = require('path');
+var asap = require('asap');
 var lib = require('./lib');
 var Obj = require('./object');
 var compiler = require('./compiler');
@@ -10,6 +11,12 @@ var runtime = require('./runtime');
 var globals = require('./globals');
 var Frame = runtime.Frame;
 var Template;
+
+// If the user is using the async API, *always* call it
+// asynchronously even if the template was synchronous.
+function callbackAsap(cb, err, res) {
+    asap(function() { cb(err, res); });
+}
 
 var Environment = Obj.extend({
     init: function(loaders, opts) {
@@ -235,7 +242,7 @@ var Environment = Obj.extend({
 
         this.getTemplate(name, function(err, tmpl) {
             if(err && cb) {
-                cb(err);
+                callbackAsap(cb, err);
             }
             else if(err) {
                 throw err;
@@ -375,27 +382,40 @@ Template = Obj.extend({
             frame = null;
         }
 
+        var forceAsync = true;
+        if(frame) {
+            // If there is a frame, we are being called from internal
+            // code of another template, and the internal system
+            // depends on the sync/async nature of the parent template
+            // to be inherited, so force an async callback
+            forceAsync = false;
+        }
+
         var _this = this;
         return lib.withPrettyErrors(this.path, this.env.dev, function() {
             // Catch compile errors for async rendering
             try {
                 _this.compile();
             } catch (e) {
-                if (cb) return cb(e);
+                if (cb) return callbackAsap(cb, e);
                 else throw e;
             }
 
             var context = new Context(ctx || {}, _this.blocks);
             var syncResult = null;
 
-            _this.rootRenderFunc(_this.env,
-                                context,
-                                frame || new Frame(),
-                                runtime,
-                                cb || function(err, res) {
-                                    if(err) { throw err; }
-                                    syncResult = res;
-                                });
+            _this.rootRenderFunc(
+                _this.env,
+                context,
+                frame || new Frame(),
+                runtime,
+                (cb ?
+                 (forceAsync ? callbackAsap.bind(null, cb) : cb) :
+                 function(err, res) {
+                     if(err) { throw err; }
+                     syncResult = res;
+                 })
+            );
 
             return syncResult;
         });

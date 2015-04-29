@@ -19,11 +19,9 @@
     }
 
     var numAsyncs;
-    var doneAsyncs;
     var doneHandler;
 
     beforeEach(function() {
-        doneAsyncs = 0;
         numAsyncs = 0;
         doneHandler = null;
     });
@@ -34,13 +32,8 @@
             ctx = null;
         }
 
-        render(str, ctx, {}, function(err, res) {
-            if(err) {
-                throw err;
-            }
-
-            expect(res).to.be(str2);
-        });
+        var res = render(str, ctx, {});
+        expect(res).to.be(str2);
     }
 
     function finish(done) {
@@ -58,12 +51,12 @@
     }
 
     function render(str, ctx, opts, cb) {
-        if(!opts) {
+        if(typeof ctx === 'function') {
             cb = ctx;
             ctx = null;
             opts = null;
         }
-        else if(!cb) {
+        else if(typeof opts === 'function') {
             cb = opts;
             opts = null;
         }
@@ -92,24 +85,27 @@
         }
 
         ctx = ctx || {};
-        numAsyncs++;
         var t = new Template(str, e);
 
-        return t.render(ctx, function(err, res) {
-            setTimeout(function() {
+        if(!cb) {
+            return t.render(ctx);
+        }
+        else {
+            numAsyncs++;
+            t.render(ctx, function(err, res) {
                 if(err && !opts.noThrow) {
                     throw err;
                 }
 
                 cb(err, normEOL(res));
 
-                doneAsyncs++;
+                numAsyncs--;
 
-                if(numAsyncs === doneAsyncs && doneHandler) {
+                if(numAsyncs === 0 && doneHandler) {
                     doneHandler();
                 }
-            }, 0);
-        });
+            });
+        }
     }
 
     if(typeof module !== 'undefined') {
