@@ -79,10 +79,11 @@ feature on or off with the **opts** hash. You can provide both
 arguments or either of them. **path** defaults to the current working
 directory, and the following options are available in **opts**:
 
-* **watch** *(default: true)* reload templates when they are changed
-* **express** an express app that nunjucks should install to
 * **autoescape** *(default: false)* controls if output with dangerous characters are
     escaped automatically. See [Autoescaping](#autoescaping)
+* **watch** *(default: false)* reload templates when they are changed
+* **noCache** *(default: false)* never use a cache and recompile templates each time
+* **express** an express app that nunjucks should install to
 * **tags:** *(default: see nunjucks syntax)* defines the syntax for
     nunjucks tags. See [Customizing Syntax](#customizing-syntax)
 
@@ -328,14 +329,19 @@ loaders exist, each for different contexts.
 {% endraw %}
 {% api %}
 FileSystemLoader
-new FileSystemLoader([searchPaths], [noWatch])
+new FileSystemLoader([searchPaths], [opts])
 
 This is only available to node. It will load templates from the
 filesystem, using the **searchPaths** array as paths to look for
 templates. **searchPaths** can also be a single path for where
-templates live, and it defaults to the current working directory. If
-**noWatch** is `true`, templates are permanently cached and you won't
-see any changes; otherwise it uses `fs.watch` to watch for changes.
+templates live, and it defaults to the current working directory.
+
+**opts** is an object with the following optional properties:
+
+* **watch** - if `true`, the system will automatically update templates
+  when they are changed on the filesystem
+* **noCache** - if `true`, the system will avoid using a cache and templates
+  will be recompiled every single time
 
 ```js
 // Loads templates from the "views" folder

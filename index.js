@@ -33,9 +33,11 @@ module.exports.configure = function(templatesPath, opts) {
         templatesPath = null;
     }
 
-    var noWatch = 'watch' in opts ? !opts.watch : false;
-    var RealLoader = loaders.FileSystemLoader || loaders.WebLoader;
-    e = new env.Environment(new RealLoader(templatesPath, noWatch), opts);
+    var TemplateLoader = loaders.FileSystemLoader || loaders.WebLoader;
+    e = new env.Environment(new TemplateLoader(templatesPath, {
+        watch: opts.watch,
+        noCache: opts.noCache
+    }), opts);
 
     if(opts && opts.express) {
         e.express(opts.express);

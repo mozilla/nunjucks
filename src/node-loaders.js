@@ -10,9 +10,18 @@ var chokidar = require('chokidar');
 var existsSync = fs.existsSync || path.existsSync;
 
 var FileSystemLoader = Loader.extend({
-    init: function(searchPaths, noWatch, noCache) {
+    init: function(searchPaths, opts) {
+        if(typeof opts === 'boolean') {
+            console.log(
+                '[nunjucks] Warning: you passed a boolean as the second ' +
+                'argument to FileSystemLoader, but it now takes an options ' +
+                'object. See http://mozilla.github.io/nunjucks/api.html#filesystemloader'
+            );
+        }
+
+        opts = opts || {};
         this.pathsToNames = {};
-        this.noCache = !!noCache;
+        this.noCache = !!opts.noCache;
 
         if(searchPaths) {
             searchPaths = lib.isArray(searchPaths) ? searchPaths : [searchPaths];
@@ -23,7 +32,7 @@ var FileSystemLoader = Loader.extend({
             this.searchPaths = ['.'];
         }
 
-        if(!noWatch) {
+        if(opts.watch) {
             var _this = this;
             // Watch all the templates in the paths and fire an event when
             // they change
