@@ -319,6 +319,13 @@
                            expect(res).to.be('hello somecontenthere');
                        });
 
+                render('{% block content %}{% set foo = tmpl | getContents %}{{ foo }}{% endblock %}',
+                       { tmpl: 'tests/templates/for-async-content.html' },
+                       opts,
+                       function(err, res) {
+                           expect(res).to.be('somecontenthere');
+                       });
+
                 render('{% block content %}{% include "async.html" %}{% endblock %}',
                        { tmpl: 'tests/templates/for-async-content.html' },
                        opts,

@@ -168,16 +168,16 @@ function printNodes(node, indent) {
             if(lines[i]) {
                 if((inline && i > 0) || !inline) {
                     for(var j=0; j<indent; j++) {
-                        util.print(' ');
+                        process.stdout.write(' ');
                     }
                 }
             }
 
             if(i === lines.length-1) {
-                util.print(lines[i]);
+                process.stdout.write(lines[i]);
             }
             else {
-                util.puts(lines[i]);
+                process.stdout.write(lines[i] + '\n');
             }
         }
     }

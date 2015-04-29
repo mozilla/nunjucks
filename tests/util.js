@@ -70,7 +70,7 @@
 
         opts = opts || {};
         opts.dev = true;
-        var e = new Environment(new Loader(templatesPath, true), opts);
+        var e = new Environment(new Loader(templatesPath), opts);
 
         var name;
         if(opts.filters) {

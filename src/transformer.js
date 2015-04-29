@@ -137,6 +137,9 @@ function liftFilters(ast, asyncFilters) {
         if(node instanceof nodes.Output) {
             return _liftFilters(node, asyncFilters);
         }
+        else if(node instanceof nodes.Set) {
+            return _liftFilters(node, asyncFilters, 'value');
+        }
         else if(node instanceof nodes.For) {
             return _liftFilters(node, asyncFilters, 'arr');
         }
