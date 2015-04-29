@@ -277,6 +277,18 @@ app.get('/', function(req, res) {
 });
 ```
 {% endapi %}
+
+{% api %}
+opts.autoescape
+env.opts.autoescape
+
+You can use this boolean property to see if autoescaping is turned on
+globally or not. This may be helpful in creating advanced filtering
+that do HTML manipulation. Normally you should simply return a
+SafeString (to be documented) if one was passed in, so the output will
+copy the safeness of the input, but this property is helpful in rare
+circumstances.
+{% endapi %}
 {% raw %}
 
 ## Template
