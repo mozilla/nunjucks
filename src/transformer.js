@@ -187,7 +187,8 @@ function convertStatements(ast) {
                node instanceof nodes.IfAsync ||
                node instanceof nodes.AsyncEach ||
                node instanceof nodes.AsyncAll ||
-               node instanceof nodes.CallExtensionAsync) {
+               node instanceof nodes.CallExtensionAsync ||
+               node instanceof nodes.Include) {
                 async = true;
                 // Stop iterating by returning the node
                 return node;
