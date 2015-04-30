@@ -529,6 +529,26 @@
                   '{{ foo() }}',
                   'Here\'s BAR');
 
+            equal('{% set bar = "BAR" %}' +
+                  '{% import "import-context-set.html" as imp %}' +
+                  '{{ bar }}',
+                  'BAR');
+
+            equal('{% set bar = "BAR" %}' +
+                  '{% import "import-context-set.html" as imp %}' +
+                  '{{ imp.bar }}',
+                  'FOO');
+
+            equal('{% set bar = "BAR" %}' +
+                  '{% import "import-context-set.html" as imp with context %}' +
+                  '{{ bar }}{{ buzz }}',
+                  'FOO');
+
+            equal('{% set bar = "BAR" %}' +
+                  '{% import "import-context-set.html" as imp with context %}' +
+                  '{{ imp.bar }}{{ buzz }}',
+                  'FOO');
+
             finish(done);
         });
 

@@ -528,7 +528,7 @@ var Compiler = Object.extend({
             // uncommon to assign to multiple vars anyway
             this.emitLine('frame.set("' + name + '", ' + id + ', true);');
 
-            this.emitLine('if(!frame.parent) {');
+            this.emitLine('if(frame.topLevel) {');
             this.emitLine('context.setVariable("' + name + '", ' + id + ');');
             this.emitLine('}');
 

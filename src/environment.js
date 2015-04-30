@@ -275,7 +275,14 @@ var Environment = Obj.extend({
 
 var Context = Obj.extend({
     init: function(ctx, blocks) {
-        this.ctx = ctx;
+        // Make a duplicate of ctx
+        this.ctx = {};
+        for(var k in ctx) {
+            if(ctx.hasOwnProperty(k)) {
+                this.ctx[k] = ctx[k];
+            }
+        }
+
         this.blocks = {};
         this.exported = [];
 
