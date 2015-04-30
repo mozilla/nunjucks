@@ -529,13 +529,18 @@ var Compiler = Object.extend({
             var id = ids[i];
             var name = target.value;
 
-            this.emitLine('frame.set("' + name + '", ' + id + ', true);');
-
             // We are running this for every var, but it's very
             // uncommon to assign to multiple vars anyway
+            this.emitLine('frame.set("' + name + '", ' + id + ', true);');
+
+            this.emitLine('if(!frame.parent) {');
             this.emitLine('context.setVariable("' + name + '", ' + id + ');');
+            this.emitLine('}');
+
             if(name.charAt(0) !== '_') {
-                this.emitLine('context.addExport("' + name + '");');
+                this.emitLine('if(frame.topLevel) {');
+                this.emitLine('context.addExport("' + name + '", ' + id + ');');
+                this.emitLine('}');
             }
         }, this);
     },
@@ -893,7 +898,7 @@ var Compiler = Object.extend({
         this.addScopeLevel();
 
         this.emitLine(id + '.getExported(' +
-            (node.withContext ? 'context.getVariables(), frame.push(), ' : '') +
+            (node.withContext ? 'context.getVariables(), frame, ' : '') +
             this.makeCallback(id));
         this.addScopeLevel();
 
@@ -916,7 +921,7 @@ var Compiler = Object.extend({
         this.addScopeLevel();
 
         this.emitLine(importedId + '.getExported(' +
-            (node.withContext ? 'context.getVariables(), frame.push(), ' : '') +
+            (node.withContext ? 'context.getVariables(), frame, ' : '') +
             this.makeCallback(importedId));
         this.addScopeLevel();
 
@@ -1008,7 +1013,7 @@ var Compiler = Object.extend({
         this.addScopeLevel();
 
         this.emitLine(id + '.render(' +
-                      'context.getVariables(), frame.push(), ' + this.makeCallback(id2));
+                      'context.getVariables(), frame, ' + this.makeCallback(id2));
         this.emitLine(this.buffer + ' += ' + id2);
         this.addScopeLevel();
     },

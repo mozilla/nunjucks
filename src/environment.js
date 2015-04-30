@@ -372,18 +372,18 @@ Template = Obj.extend({
         }
     },
 
-    render: function(ctx, frame, cb) {
+    render: function(ctx, parentFrame, cb) {
         if (typeof ctx === 'function') {
             cb = ctx;
             ctx = {};
         }
-        else if (typeof frame === 'function') {
-            cb = frame;
-            frame = null;
+        else if (typeof parentFrame === 'function') {
+            cb = parentFrame;
+            parentFrame = null;
         }
 
         var forceAsync = true;
-        if(frame) {
+        if(parentFrame) {
             // If there is a frame, we are being called from internal
             // code of another template, and the internal system
             // depends on the sync/async nature of the parent template
@@ -402,12 +402,14 @@ Template = Obj.extend({
             }
 
             var context = new Context(ctx || {}, _this.blocks);
+            var frame = parentFrame ? parentFrame.push() : new Frame();
+            frame.topLevel = true;
             var syncResult = null;
 
             _this.rootRenderFunc(
                 _this.env,
                 context,
-                frame || new Frame(),
+                frame,
                 runtime,
                 (cb ?
                  (forceAsync ? callbackAsap.bind(null, cb) : cb) :
@@ -422,15 +424,15 @@ Template = Obj.extend({
     },
 
 
-    getExported: function(ctx, frame, cb) {
+    getExported: function(ctx, parentFrame, cb) {
         if (typeof ctx === 'function') {
             cb = ctx;
             ctx = {};
         }
 
-        if (typeof frame === 'function') {
-            cb = frame;
-            frame = null;
+        if (typeof parentFrame === 'function') {
+            cb = parentFrame;
+            parentFrame = null;
         }
 
         // Catch compile errors for async rendering
@@ -441,11 +443,14 @@ Template = Obj.extend({
             else throw e;
         }
 
+        var frame = parentFrame ? parentFrame.push() : new Frame();
+        frame.topLevel = true;
+
         // Run the rootRenderFunc to populate the context with exported vars
         var context = new Context(ctx || {}, this.blocks);
         this.rootRenderFunc(this.env,
                             context,
-                            frame || new Frame(),
+                            frame,
                             runtime,
                             function() {
                                 cb(null, context.getExported());
@@ -496,8 +501,9 @@ Template = Obj.extend({
 
 // test code
 // var src = '{% macro foo() %}{% include "include.html" %}{% endmacro %}{{ foo() }}';
-// var env = new Environment(new builtin_loaders.FileSystemLoader('../tests/templates', true), { dev: true });
-// console.log(env.renderString(src, { name: 'poop' }));
+// var env = new Environment(new builtin_loaders.FileSystemLoader('tests/templates', true), { dev: true });
+// var test = env.getTemplate('relative/test-cache.html');
+// console.log(test.render());
 
 module.exports = {
     Environment: Environment,
