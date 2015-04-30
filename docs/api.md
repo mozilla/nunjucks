@@ -81,8 +81,11 @@ directory, and the following options are available in **opts**:
 
 * **autoescape** *(default: false)* controls if output with dangerous characters are
     escaped automatically. See [Autoescaping](#autoescaping)
-* **watch** *(default: false)* reload templates when they are changed
-* **noCache** *(default: false)* never use a cache and recompile templates each time
+* **watch** *(default: false)* reload templates when they are changed (server-side)
+* **noCache** *(default: false)* never use a cache and recompile templates each time (server-side)
+* **web** an object for configuring loading templates in the browser:
+  * **useCache** *(default: false)* will enable cache and templates will never see updates.
+  * **async** *(default: false)* will load templates asynchronously instead of synchronously.
 * **express** an express app that nunjucks should install to
 * **tags:** *(default: see nunjucks syntax)* defines the syntax for
     nunjucks tags. See [Customizing Syntax](#customizing-syntax)
@@ -364,14 +367,21 @@ var env = new nunjucks.Environment(new nunjucks.FileSystemLoader('views'));
 
 {% api %}
 WebLoader
-new WebLoader([baseURL], [neverUpdate])
+new WebLoader([baseURL], [opts])
 
 This is only available in the browser. **baseURL** is the URL to load
 templates from (must be the same domain), and it defaults to the
-current relative directory. If **neverUpdate** is `true` templates
-will only ever be fetched once, so you won't see any updates to
-templates; the default is to load the template every time it is
-rendered.
+current relative directory.
+
+**opts** is an object with the following optional properties:
+
+* **useCache** if `true`, templates will be forever cached and you
+    won't see updates to them. The cache is disabled by default
+    because there is no way to watch for changes and dirty the cache.
+    Remember, you should be precompiling your templates for production.
+* **async** if `true`, templates will be loaded asynchronously instead
+    synchronously. You must use the asynchronous render API when using
+    this (pass a callback to `render`).
 
 This loader also recognizes when precompiled templates are available
 and automatically uses them instead of fetching over HTTP. In

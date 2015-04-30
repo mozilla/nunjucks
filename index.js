@@ -33,11 +33,21 @@ module.exports.configure = function(templatesPath, opts) {
         templatesPath = null;
     }
 
-    var TemplateLoader = loaders.FileSystemLoader || loaders.WebLoader;
-    e = new env.Environment(new TemplateLoader(templatesPath, {
-        watch: opts.watch,
-        noCache: opts.noCache
-    }), opts);
+    var TemplateLoader;
+    if(loaders.FileSystemLoader) {
+        TemplateLoader = new loaders.FileSystemLoader(templatesPath, {
+            watch: opts.watch,
+            noCache: opts.noCache
+        });
+    }
+    else {
+        TemplateLoader = new loaders.WebLoader(templatesPath, {
+            useCache: opts.web && opts.web.useCache,
+            async: opts.web && opts.web.async
+        });
+    }
+
+    e = new env.Environment(TemplateLoader, opts);
 
     if(opts && opts.express) {
         e.express(opts.express);

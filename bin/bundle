@@ -8,12 +8,12 @@ output="$1.js"
 minoutput="$1.min.js"
 if [ -z "$SLIM" ]; then
     # Listed in order of dependency
-    files="object.js lib.js nodes.js runtime.js lexer.js parser.js transformer.js
+    files="object.js asap.js lib.js nodes.js runtime.js lexer.js parser.js transformer.js
        compiler.js filters.js globals.js loader.js web-loaders.js loaders.js
        environment.js"
 else
     # Listed in order of dependency
-    files="object.js lib.js runtime.js loader.js web-loaders.js loaders.js filters.js 
+    files="object.js asap.js lib.js runtime.js loader.js web-loaders.js loaders.js filters.js
        globals.js environment.js"
     TYPE="(slim, only works with precompiled templates)"
 fi
