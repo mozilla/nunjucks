@@ -519,12 +519,6 @@ Template = Obj.extend({
     }
 });
 
-// test code
-// var src = '{% macro foo() %}{% include "include.html" %}{% endmacro %}{{ foo() }}';
-// var env = new Environment(new builtin_loaders.FileSystemLoader('tests/templates', true), { dev: true });
-// var test = env.getTemplate('relative/test-cache.html');
-// console.log(test.render());
-
 module.exports = {
     Environment: Environment,
     Template: Template

@@ -1,6 +1,5 @@
 'use strict';
 
-var util = require('util');
 var lib = require('./lib');
 // jshint -W079
 var Object = require('./object');
@@ -220,7 +219,7 @@ function printNodes(node, indent) {
         });
 
         if(props) {
-            print(util.inspect(props, true, null) + '\n', null, true);
+            print(JSON.stringify(props, null, 2) + '\n', null, true);
         }
         else {
             print('\n');

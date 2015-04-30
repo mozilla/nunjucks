@@ -1,59 +1,8 @@
 #!/bin/sh
 
-ROOT=`dirname "$0"`
-VERSION=`node -e "var fs = require('fs'); var p = JSON.parse(fs.readFileSync('./package.json')); console.log(p.version)"`
-TYPE=""
+ROOT=`dirname $0`
 
-output="$1.js"
-minoutput="$1.min.js"
-if [ -z "$SLIM" ]; then
-    # Listed in order of dependency
-    files="object.js asap.js lib.js nodes.js runtime.js lexer.js parser.js transformer.js
-       compiler.js filters.js globals.js loader.js web-loaders.js loaders.js
-       environment.js"
-else
-    # Listed in order of dependency
-    files="object.js asap.js lib.js runtime.js loader.js web-loaders.js loaders.js filters.js
-       globals.js environment.js"
-    TYPE="(slim, only works with precompiled templates)"
-fi
-
-rm -f "$output"
-
-echo "// Browser bundle of nunjucks $VERSION $TYPE\n" >> "$output"
-echo "(function() {" >> "$output"
-echo "var modules = {};" >> "$output"
-
-for file in $files; do
-    name=${file%%.*}
-    echo "(function() {" >> "$output"
-    cat "src/$file" | \
-        perl -ne 's/^(.*)require\(\W*([\w-]*)\W*\)(.*)$/$1modules["$2"]$3/; print' | \
-        sed -e "s/module.exports/modules['$name']/" \
-        >> "$output"
-    echo "})();" >> "$output"
-done
-
-echo "var nunjucks;" >> $output
-
-cat index.js | \
-    perl -ne 's/require\(\W*\.\/src\/([\w-]*)\W*\)/modules["$1"]/; print' | \
-    sed -e 's/module.exports/nunjucks/' \
-    >> "$output"
-
-echo "
-nunjucks.require = function(name) { return modules[name]; };
-
-if(typeof define === 'function' && define.amd) {
-    define(function() { return nunjucks; });
-}
-else {
-    window.nunjucks = nunjucks;
-    if(typeof module !== 'undefined') module.exports = nunjucks;
-}
-" >> "$output"
-
-echo "})();" >> "$output"
-
-echo "// Browser bundle of nunjucks $VERSION $TYPE\n" > "$minoutput"
-./node_modules/.bin/uglifyjs "$output" >> "$minoutput"
+$ROOT/bundle.js nunjucks.js
+$ROOT/bundle.js -m nunjucks.min.js
+$ROOT/bundle.js -s nunjucks-slim.js
+$ROOT/bundle.js -m -s nunjucks-slim.min.js
