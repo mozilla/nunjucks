@@ -10,6 +10,7 @@ var Frame = Obj.extend({
     init: function(parent) {
         this.variables = {};
         this.parent = parent;
+        this.topLevel = false;
     },
 
     set: function(name, val, resolveUp) {
