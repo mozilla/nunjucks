@@ -35,8 +35,11 @@ var Environment = Obj.extend({
         // defaults to false
         this.opts.autoescape = !!opts.autoescape;
 
-        this.opts.trimBlocks = !!opts.trimBlocks;
+        // If true, this will make the system throw errors if trying
+        // to output a null or undefined value
+        this.opts.throwOnUndefined = !!opts.throwOnUndefined;
 
+        this.opts.trimBlocks = !!opts.trimBlocks;
         this.opts.lstripBlocks = !!opts.lstripBlocks;
 
         if(!loaders) {
@@ -361,11 +364,12 @@ Template = Obj.extend({
 
         if(eagerCompile) {
             var _this = this;
-            lib.withPrettyErrors(this.path,
-                                 this.env.dev,
-                                 function() {
-                                     _this._compile();
-                                 });
+            try {
+                _this._compile();
+            }
+            catch(err) {
+                throw lib.prettifyError(this.path, this.env.dev, err);
+            }
         }
         else {
             this.compiled = false;
@@ -392,33 +396,44 @@ Template = Obj.extend({
         }
 
         var _this = this;
-        return lib.withPrettyErrors(this.path, this.env.dev, function() {
-            // Catch compile errors for async rendering
-            try {
-                _this.compile();
-            } catch (e) {
-                if (cb) return callbackAsap(cb, e);
-                else throw e;
+        // Catch compile errors for async rendering
+        try {
+            _this.compile();
+        } catch (_err) {
+            var err = lib.prettifyError(this.path, this.env.dev, _err);
+            if (cb) return callbackAsap(cb, err);
+            else throw err;
+        }
+
+        var context = new Context(ctx || {}, _this.blocks);
+        var syncResult = null;
+
+        _this.rootRenderFunc(
+            _this.env,
+            context,
+            frame || new Frame(),
+            runtime,
+            function(err, res) {
+                if(err) {
+                    err = lib.prettifyError(_this.path, _this.env.dev, err);
+                }
+
+                if(cb) {
+                    if(forceAsync) {
+                        callbackAsap(cb, err, res);
+                    }
+                    else {
+                        cb(err, res);
+                    }
+                }
+                else {
+                    if(err) { throw err; }
+                    syncResult = res;
+                }
             }
+        );
 
-            var context = new Context(ctx || {}, _this.blocks);
-            var syncResult = null;
-
-            _this.rootRenderFunc(
-                _this.env,
-                context,
-                frame || new Frame(),
-                runtime,
-                (cb ?
-                 (forceAsync ? callbackAsap.bind(null, cb) : cb) :
-                 function(err, res) {
-                     if(err) { throw err; }
-                     syncResult = res;
-                 })
-            );
-
-            return syncResult;
-        });
+        return syncResult;
     },
 
 
@@ -468,6 +483,7 @@ Template = Obj.extend({
             var source = compiler.compile(this.tmplStr,
                                           this.env.asyncFilters,
                                           this.env.extensionsList,
+                                          this.env.opts.throwOnUndefined,
                                           this.path,
                                           this.env.opts);
 

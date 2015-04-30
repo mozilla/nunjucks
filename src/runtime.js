@@ -210,6 +210,17 @@ function suppressValue(val, autoescape) {
     return val;
 }
 
+function ensureDefined(val, lineno, colno) {
+    if(val === null || val === undefined) {
+        throw new lib.TemplateError(
+            'attempted to output null or undefined value',
+            lineno + 1,
+            colno + 1
+        );
+    }
+    return val;
+}
+
 function memberLookup(obj, val) {
     obj = obj || {};
 
@@ -332,6 +343,7 @@ module.exports = {
     makeKeywordArgs: makeKeywordArgs,
     numArgs: numArgs,
     suppressValue: suppressValue,
+    ensureDefined: ensureDefined,
     memberLookup: memberLookup,
     contextOrFrameLookup: contextOrFrameLookup,
     callWrap: callWrap,

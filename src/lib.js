@@ -19,27 +19,23 @@ var lookupEscape = function(ch) {
 
 var exports = module.exports = {};
 
-exports.withPrettyErrors = function(path, withInternals, func) {
-    try {
-        return func();
-    } catch (e) {
-        // jshint -W022
-        // http://jslinterrors.com/do-not-assign-to-the-exception-parameter
-        if (!e.Update) {
-            // not one of ours, cast it
-            e = new exports.TemplateError(e);
-        }
-        e.Update(path);
-
-        // Unless they marked the dev flag, show them a trace from here
-        if (!withInternals) {
-            var old = e;
-            e = new Error(old.message);
-            e.name = old.name;
-        }
-
-        throw e;
+exports.prettifyError = function(path, withInternals, err) {
+    // jshint -W022
+    // http://jslinterrors.com/do-not-assign-to-the-exception-parameter
+    if (!err.Update) {
+        // not one of ours, cast it
+        err = new exports.TemplateError(err);
     }
+    err.Update(path);
+
+    // Unless they marked the dev flag, show them a trace from here
+    if (!withInternals) {
+        var old = err;
+        err = new Error(old.message);
+        err.name = old.name;
+    }
+
+    return err;
 };
 
 exports.TemplateError = function(message, lineno, colno) {

@@ -29,7 +29,7 @@ function binOpEmitter(str) {
 }
 
 var Compiler = Object.extend({
-    init: function(templateName) {
+    init: function(templateName, throwOnUndefined) {
         this.templateName = templateName;
         this.codebuf = [];
         this.lastId = 0;
@@ -37,6 +37,7 @@ var Compiler = Object.extend({
         this.bufferStack = [];
         this.isChild = false;
         this.scopeClosers = '';
+        this.throwOnUndefined = throwOnUndefined;
     },
 
     fail: function (msg, lineno, colno) {
@@ -126,12 +127,6 @@ var Compiler = Object.extend({
 
     _templateName: function() {
         return this.templateName == null? 'undefined' : JSON.stringify(this.templateName);
-    },
-
-    _bufferAppend: function(func) {
-        this.emit(this.buffer + ' += runtime.suppressValue(');
-        func.call(this);
-        this.emit(', env.opts.autoescape);\n');
     },
 
     _compileChildren: function(node, frame) {
@@ -426,7 +421,7 @@ var Compiler = Object.extend({
         this._compileExpression(node.target, frame);
         this.emit('),');
         this._compileExpression(node.val, frame);
-        this.emit(', env.opts.autoescape)');
+        this.emit(')');
     },
 
     _getNodeName: function(node) {
@@ -1033,7 +1028,13 @@ var Compiler = Object.extend({
             }
             else {
                 this.emit(this.buffer + ' += runtime.suppressValue(');
+                if(this.throwOnUndefined) {
+                    this.emit('runtime.ensureDefined(');
+                }
                 this.compile(children[i], frame);
+                if(this.throwOnUndefined) {
+                    this.emit(',' + node.lineno + ',' + node.colno + ')');
+                }
                 this.emit(', env.opts.autoescape);\n');
             }
         }
@@ -1103,8 +1104,8 @@ var Compiler = Object.extend({
 // console.log(tmpl);
 
 module.exports = {
-    compile: function(src, asyncFilters, extensions, name, opts) {
-        var c = new Compiler(name);
+    compile: function(src, asyncFilters, extensions, throwOnUndefined, name, opts) {
+        var c = new Compiler(name, throwOnUndefined);
 
         // Run the extension preprocessors against the source.
         if(extensions && extensions.length) {
@@ -1115,11 +1116,13 @@ module.exports = {
             }
         }
 
-        c.compile(transformer.transform(parser.parse(src,
-                                                     extensions,
-                                                     opts),
-                                        asyncFilters,
-                                        name));
+        c.compile(transformer.transform(
+            parser.parse(src,
+                         extensions,
+                         opts),
+            asyncFilters,
+            name
+        ));
         return c.getCode();
     },
 

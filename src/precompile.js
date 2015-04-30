@@ -115,17 +115,17 @@ function _precompile(wrapper, str, name, env, opts) {
 
     var asyncFilters = env.asyncFilters;
     var extensions = env.extensionsList;
+    var template;
 
-    var template = lib.withPrettyErrors(
-        name,
-        false,
-        function() {
-            return compiler.compile(str,
+    try {
+        template = compiler.compile(str,
                                     asyncFilters,
                                     extensions,
                                     name);
-        }
-    );
+    }
+    catch(err) {
+        throw lib.prettifyError(name, false, err);
+    }
 
     return wrapper(name, template, opts);
 }

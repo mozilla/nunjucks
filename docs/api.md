@@ -81,6 +81,9 @@ directory, and the following options are available in **opts**:
 
 * **autoescape** *(default: false)* controls if output with dangerous characters are
     escaped automatically. See [Autoescaping](#autoescaping)
+* **throwOnUndefined** *(default: false)* throw errors when outputting a null/undefined value
+* **trimBlocks** *(default: false)* automatically remove trailing newlines from a block/tag
+* **lstripBlocks** *(default: false)* automatically remove leading whitespace from a block/tag
 * **watch** *(default: false)* reload templates when they are changed (server-side)
 * **noCache** *(default: false)* never use a cache and recompile templates each time (server-side)
 * **web** an object for configuring loading templates in the browser:
@@ -142,9 +145,11 @@ single loader or an array of loaders. If you pass an array of loaders,
 nunjucks will walk through them in order until one of them finds a
 template. See [`Loader`](#loader) for more info about loaders.
 
-The available flags in **opts** is **autoescape** and **tags**. Read
-more about those options in [`configure`](#configure) (the express and
-watch options are not applicable here and configured elsewhere like [`env.express`](#express)).
+The available flags in **opts** is **autoescape**,
+**throwOnUndefined**, **trimBlocks**, and **lstripBlocks**.
+Read more about those options in [`configure`](#configure) (the
+express and watch options are not applicable here and configured
+elsewhere like [`env.express`](#express)).
 
 In node, the [`FileSystemLoader`](#filesystemloader) is available to
 load templates off the filesystem, and in the browser the [`WebLoader`](#webloader)
