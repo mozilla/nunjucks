@@ -25,6 +25,10 @@ var WebLoader = Loader.extend({
         this.async = opts.async;
     },
 
+    resolve: function(from, to) {
+        throw new Error('relative templates not support in the browser yet');
+    },
+
     getSource: function(name, cb) {
         if(this.precompiled[name]) {
             return {

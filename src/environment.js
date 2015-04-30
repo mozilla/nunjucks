@@ -251,10 +251,7 @@ var Environment = Obj.extend({
                 throw err;
             }
             else {
-                tmpl.render(ctx, cb || function(err, res) {
-                    if(err) { throw err; }
-                    syncResult = res;
-                });
+                syncResult = tmpl.render(ctx, cb);
             }
         });
 
