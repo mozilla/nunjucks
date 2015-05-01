@@ -12,6 +12,10 @@ var globals = require('./globals');
 var Frame = runtime.Frame;
 var Template;
 
+// Unconditionally load in this loader, even if no other ones are
+// included (possible in the slim browser build)
+builtin_loaders.PrecompiledLoader = require('./precompiled-loader');
+
 // If the user is using the async API, *always* call it
 // asynchronously even if the template was synchronous.
 function callbackAsap(cb, err, res) {
@@ -38,16 +42,17 @@ var Environment = Obj.extend({
         // If true, this will make the system throw errors if trying
         // to output a null or undefined value
         this.opts.throwOnUndefined = !!opts.throwOnUndefined;
-
         this.opts.trimBlocks = !!opts.trimBlocks;
         this.opts.lstripBlocks = !!opts.lstripBlocks;
+
+        this.loaders = [];
 
         if(!loaders) {
             // The filesystem loader is only available server-side
             if(builtin_loaders.FileSystemLoader) {
                 this.loaders = [new builtin_loaders.FileSystemLoader('views')];
             }
-            else {
+            else if(builtin_loaders.WebLoader) {
                 this.loaders = [new builtin_loaders.WebLoader('/views')];
             }
         }

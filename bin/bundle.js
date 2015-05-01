@@ -41,8 +41,6 @@ var config = {
         process: 'empty'
     },
     plugins: [
-        new webpack.NormalModuleReplacementPlugin(/loaders\.js$/,
-                                                  './web-loaders.js'),
         new webpack.NormalModuleReplacementPlugin(/(path|precompile)$/,
                                                   'node-libs-browser/mock/empty'),
         new webpack.BannerPlugin(
@@ -59,9 +57,15 @@ var config = {
 if(SLIM) {
     config.plugins.push(
         new webpack.NormalModuleReplacementPlugin(
-            /(nodes|lexer|parser|transformer|compiler)$/,
+            /(nodes|lexer|parser|transformer|compiler|loaders)$/,
             'node-libs-browser/mock/empty'
         )
+    );
+}
+else {
+    config.plugins.push(
+        new webpack.NormalModuleReplacementPlugin(/loaders\.js$/,
+                                                  './web-loaders.js')
     );
 }
 
