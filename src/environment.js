@@ -43,7 +43,7 @@ var Environment = Obj.extend({
         this.opts.lstripBlocks = !!opts.lstripBlocks;
 
         if(!loaders) {
-            // The filesystem loader is only available client-side
+            // The filesystem loader is only available server-side
             if(builtin_loaders.FileSystemLoader) {
                 this.loaders = [new builtin_loaders.FileSystemLoader('views')];
             }
@@ -53,6 +53,15 @@ var Environment = Obj.extend({
         }
         else {
             this.loaders = lib.isArray(loaders) ? loaders : [loaders];
+        }
+
+        // It's easy to use precompiled templates: just include them
+        // before you configure nunjucks and this will automatically
+        // pick it up and use it
+        if(process.env.IS_BROWSER && window.nunjucksPrecompiled) {
+            this.loaders.unshift(
+                new builtin_loaders.PrecompiledLoader(window.nunjucksPrecompiled)
+            );
         }
 
         this.initCache();
@@ -158,30 +167,7 @@ var Environment = Obj.extend({
             var syncResult;
             var _this = this;
 
-            lib.asyncIter(this.loaders, function(loader, i, next, done) {
-                function handle(src) {
-                    if(src) {
-                        src.loader = loader;
-                        done(src);
-                    }
-                    else {
-                        next();
-                    }
-                }
-
-                // Resolve name relative to parentName
-                name = that.resolveTemplate(loader, parentName, name);
-
-                if(loader.async) {
-                    loader.getSource(name, function(err, src) {
-                        if(err) { throw err; }
-                        handle(src);
-                    });
-                }
-                else {
-                    handle(loader.getSource(name));
-                }
-            }, function(info) {
+            var createTemplate = function(info) {
                 if(!info) {
                     var err = new Error('template not found: ' + name);
                     if(cb) {
@@ -206,7 +192,32 @@ var Environment = Obj.extend({
                         syncResult = tmpl;
                     }
                 }
-            });
+            };
+
+            lib.asyncIter(this.loaders, function(loader, i, next, done) {
+                function handle(src) {
+                    if(src) {
+                        src.loader = loader;
+                        done(src);
+                    }
+                    else {
+                        next();
+                    }
+                }
+
+                // Resolve name relative to parentName
+                name = that.resolveTemplate(loader, parentName, name);
+
+                if(loader.async) {
+                    loader.getSource(name, function(err, src) {
+                        if(err) { throw err; }
+                        handle(src);
+                    });
+                }
+                else {
+                    handle(loader.getSource(name));
+                }
+            }, createTemplate);
 
             return syncResult;
         }
@@ -492,7 +503,6 @@ Template = Obj.extend({
             var source = compiler.compile(this.tmplStr,
                                           this.env.asyncFilters,
                                           this.env.extensionsList,
-                                          this.env.opts.throwOnUndefined,
                                           this.path,
                                           this.env.opts);
 

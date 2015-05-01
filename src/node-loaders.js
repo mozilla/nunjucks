@@ -5,6 +5,7 @@ var path = require('path');
 var lib = require('./lib');
 var Loader = require('./loader');
 var chokidar = require('chokidar');
+var PrecompiledLoader = require('./precompiled-loader.js');
 
 // Node <0.7.1 compatibility
 var existsSync = fs.existsSync || path.existsSync;
@@ -76,23 +77,6 @@ var FileSystemLoader = Loader.extend({
         return { src: fs.readFileSync(fullpath, 'utf-8'),
                  path: fullpath,
                  noCache: this.noCache };
-    }
-});
-
-var PrecompiledLoader = Loader.extend({
-    init: function(compiledTemplates) {
-        this.precompiled = compiledTemplates || {};
-    },
-
-    getSource: function(name) {
-        if (this.precompiled[name]) {
-            return {
-                src: { type: "code",
-                       obj: this.precompiled[name] },
-                path: name
-            };
-        }
-        return null;
     }
 });
 

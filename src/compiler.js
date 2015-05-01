@@ -1107,8 +1107,8 @@ var Compiler = Object.extend({
 // console.log(tmpl);
 
 module.exports = {
-    compile: function(src, asyncFilters, extensions, throwOnUndefined, name, opts) {
-        var c = new Compiler(name, throwOnUndefined);
+    compile: function(src, asyncFilters, extensions, name, opts) {
+        var c = new Compiler(name, opts.throwOnUndefined);
 
         // Run the extension preprocessors against the source.
         if(extensions && extensions.length) {

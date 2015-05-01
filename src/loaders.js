@@ -1,6 +1,3 @@
-if(typeof window === 'undefined' || window !== this) {
-    module.exports = require('./node-loaders');
-}
-else {
-    module.exports = require('./web-loaders');
-}
+// This file will automatically be rewired to web-loader.js when
+// building for the browser
+module.exports = require('./node-loaders');

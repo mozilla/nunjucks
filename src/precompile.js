@@ -121,7 +121,8 @@ function _precompile(wrapper, str, name, env, opts) {
         template = compiler.compile(str,
                                     asyncFilters,
                                     extensions,
-                                    name);
+                                    name,
+                                    env.opts);
     }
     catch(err) {
         throw lib.prettifyError(name, false, err);

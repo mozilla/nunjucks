@@ -47,7 +47,12 @@ var config = {
                                                   'node-libs-browser/mock/empty'),
         new webpack.BannerPlugin(
             'Browser bundle of nunjucks ' + VERSION + ' ' + TYPE
-        )
+        ),
+        new webpack.DefinePlugin({
+            'process.env': {
+                IS_BROWSER: true
+            }
+        })
     ]
 };
 
