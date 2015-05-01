@@ -10,6 +10,7 @@ function normalize(value, defaultValue) {
     return value;
 }
 
+var hasWarnedDefault = false;
 
 var filters = {
     abs: function(n) {
@@ -63,8 +64,24 @@ var filters = {
         return r.copySafeness(str, pre + str + post);
     },
 
-    'default': function(val, def) {
-        return val ? val : def;
+    'default': function(val, def, loose) {
+        if(loose !== true || loose !== false && !hasWarnedDefault) {
+            hasWarnedDefault = true;
+            console.log(
+                '[nunjucks] Warning: the "default" filter was used without ' +
+                'specifying the loose/strict behavior. This is required for this '+
+                'version because "default" used to be loose (val ? val : def) ' +
+                'but is now strict (only checks for null/undefined). ' +
+                'See http://mozilla.github.io/nunjucks/templating.html#defaultvalue-default-loose'
+            );
+        }
+
+        if(loose) {
+            return val ? val : def;
+        }
+        else {
+            return (val !== null && val !== undefined) ? val : def;
+        }
     },
 
     dictsort: function(val, case_sensitive, by) {

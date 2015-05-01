@@ -702,13 +702,37 @@ If `tags` was `["food", "beer", "dessert"]`, the above example would output `foo
 
 ## Builtin Filters
 
-Nunjucks has ported most of jinja's filters (click through for documentation):
+Nunjucks has ported most of jinja's filters, and has a few of its own.
+We need to work on our own documentation for filters. Some of them are
+documented below, for the rest you can click through to jinja's site.
+
+### default(value, default, [loose])
+
+(aliased as `d`)
+
+If `value` is `null` or `undefined`, return `default`, otherwise
+`value`. If `loose` is true, any JavaScript falsy value will return
+`default` (false, "", etc)
+
+**In version 2.0, `loose` is required because this filter changed from
+  loose by default to strict by default. A warning will be display if
+  you don't specify loose, and once we've warned everyone of the
+  change we will remove the warning. If you are sure this change won't 
+  affect you, ignore this warning.**
+
+### sort(arr, reverse, caseSens, attr)
+
+Sort `arr` with JavaScript's `arr.sort` function. If `reverse` is
+true, result will be reversed. Sort is case-insensitive by default,
+but setting `caseSense` to true makes it case-sensitive. If `attr` is
+passed, will compare `attr` from each item.
+
+### More Filters
 
 * [abs](http://jinja.pocoo.org/docs/templates/#abs)
 * [batch](http://jinja.pocoo.org/docs/templates/#batch)
 * [capitalize](http://jinja.pocoo.org/docs/templates/#capitalize)
 * [center](http://jinja.pocoo.org/docs/templates/#center)
-* [default](http://jinja.pocoo.org/docs/templates/#default) (aliased as `d`)
 * [dictsort](http://jinja.pocoo.org/docs/templates/#dictsort)
 * [escape](http://jinja.pocoo.org/docs/templates/#escape) (aliased as `e`)
 * [safe](http://jinja.pocoo.org/docs/templates/#safe)
@@ -727,7 +751,6 @@ Nunjucks has ported most of jinja's filters (click through for documentation):
 * [round](http://jinja.pocoo.org/docs/templates/#round)
 * [selectattr](http://jinja.pocoo.org/docs/templates/#selectattr) (only the single-argument form)
 * [slice](http://jinja.pocoo.org/docs/templates/#slice)
-* [sort](http://jinja.pocoo.org/docs/templates/#sort)
 * [string](http://jinja.pocoo.org/docs/templates/#string)
 * [title](http://jinja.pocoo.org/docs/templates/#title)
 * [trim](http://jinja.pocoo.org/docs/templates/#trim)
