@@ -34,4 +34,13 @@ describe('express', function() {
             .expect(/This is just the about page/)
             .end(done);
     });
+
+    it('should render an index view', function(done) {
+        app.get('/', function(req, res) { res.render('indexview'); });
+        app.set('view engine', 'html');
+        request(app)
+            .get('/')
+            .expect(/This is just the index page/)
+            .end(done);
+    });
 });

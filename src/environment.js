@@ -9,6 +9,7 @@ var builtin_filters = require('./filters');
 var builtin_loaders = require('./loaders');
 var runtime = require('./runtime');
 var globals = require('./globals');
+var express = require('./express');
 var Frame = runtime.Frame;
 var Template;
 
@@ -213,22 +214,7 @@ var Environment = Obj.extend({
     },
 
     express: function(app) {
-        var env = this;
-
-        function NunjucksView(name, opts) {
-            this.name          = name;
-            this.path          = name;
-            this.defaultEngine = opts.defaultEngine;
-            this.ext           = path.extname(name);
-            if (!this.ext && !this.defaultEngine) throw new Error('No default engine was specified and no extension was provided.');
-            if (!this.ext) this.name += (this.ext = ('.' !== this.defaultEngine[0] ? '.' : '') + this.defaultEngine);
-        }
-
-        NunjucksView.prototype.render = function(opts, cb) {
-          env.render(this.name, opts, cb);
-        };
-
-        app.set('view', NunjucksView);
+        express.configure(app, this);
     },
 
     render: function(name, ctx, cb) {
