@@ -25,7 +25,7 @@ var WebLoader = Loader.extend({
         this.async = opts.async;
     },
 
-    resolve: function(from, to) {
+    resolve: function(from, to) { // jshint ignore:line
         throw new Error('relative templates not support in the browser yet');
     },
 

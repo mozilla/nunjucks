@@ -1,13 +1,15 @@
 #!/usr/bin/env node
+'use strict';
+
 var path = require('path');
 var webpack = require('webpack');
 var fs = require('fs');
 
 var VERSION = JSON.parse(fs.readFileSync('./package.json')).version;
-var TYPE = "";
+var TYPE = '';
 var SLIM = false;
 var MINIFIED = false;
-var TARGET = "";
+var TARGET = '';
 
 var args = process.argv.slice(2);
 while(args.length > 0) {
@@ -18,7 +20,7 @@ while(args.length > 0) {
         switch(args[0]) {
         case '-s':
             SLIM = true;
-            TYPE = "(slim, only works with precompiled templates)"
+            TYPE = '(slim, only works with precompiled templates)';
             break;
         case '-m':
             MINIFIED = true;
@@ -36,7 +38,7 @@ var config = {
         library: 'nunjucks'
     },
     node: {
-        process: "empty"
+        process: 'empty'
     },
     plugins: [
         new webpack.NormalModuleReplacementPlugin(/loaders\.js$/,
@@ -47,7 +49,7 @@ var config = {
             'Browser bundle of nunjucks ' + VERSION + ' ' + TYPE
         )
     ]
-}
+};
 
 if(SLIM) {
     config.plugins.push(
@@ -55,7 +57,7 @@ if(SLIM) {
             /(nodes|lexer|parser|transformer|compiler)$/,
             'node-libs-browser/mock/empty'
         )
-    )
+    );
 }
 
 if(MINIFIED) {
