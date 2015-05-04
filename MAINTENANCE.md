@@ -31,10 +31,10 @@ $ npm run browserfiles
 npm publish
 ```
 
-8. Make sure docs are up-to-date. You need to at least copy all the nunjucks*.js files in `browser/` to the [nunjucks-docs repo](https://github.com/mozilla/nunjucks-docs) in the `files` directory. This is where the "download" link points to in the docs. In `nunjucks-docs`, build the docs:
+8. Make sure docs are up-to-date. You need to copy all the nunjucks*.js files in `browser/` to the docs. This is where the "download" link points to in the docs. Push (force push if necessary) the build out _site folder onto the `gh-pages` branch of the `nunjucks` repo to get it live.
 
 ```
-cd path/to/nunjucks-docs && make prod
+cp browser/* docs/files
+cd docs && make prod
+cd _site && git push origin gh-pages (assumes you have setup a git repo in _site pointing to nunjucks)
 ```
-
-And push (force push if necessary) the build out _site folder onto the `gh-pages` branch of the `nunjucks` repo to get it live.
