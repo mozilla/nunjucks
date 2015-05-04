@@ -107,8 +107,8 @@ function precompile(input, opts) {
         }
     }
 
-    if (wrapper.hasOwnProperty('bundle')) {
-        output = wrapper.bundle(output);
+    if (wrapper.hasOwnProperty('postProcess')) {
+        output = wrapper.postProcess(output);
     }
 
     return output;
