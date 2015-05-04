@@ -69,14 +69,14 @@ function precompile(input, opts) {
                             'compiling a string');
         }
 
-        return _precompile(wrapper,
+        output = _precompile(wrapper,
                            input,
                            opts.name,
                            env,
                            opts);
     }
     else if(pathStats.isFile()) {
-        return _precompile(wrapper,
+        output = _precompile(wrapper,
                            fs.readFileSync(input, 'utf-8'),
                            opts.name || input,
                            env,
@@ -105,9 +105,13 @@ function precompile(input, opts) {
                 }
             }
         }
-
-        return output;
     }
+
+    if (wrapper.hasOwnProperty('bundle')) {
+        output = wrapper.bundle(output);
+    }
+
+    return output;
 }
 
 function _precompile(wrapper, str, name, env, opts) {
