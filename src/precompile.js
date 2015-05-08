@@ -40,7 +40,7 @@ function precompile(input, opts) {
     var wrapper = opts.wrapper || precompileGlobal;
 
     var pathStats = fs.existsSync(input) && fs.statSync(input);
-    var output = '';
+    var precompiled = [];
     var templates = [];
 
     function addTemplates(dir) {
@@ -69,18 +69,18 @@ function precompile(input, opts) {
                             'compiling a string');
         }
 
-        return _precompile(wrapper,
-                           input,
-                           opts.name,
-                           env,
-                           opts);
+        precompiled.push( _precompile(
+            input,
+            opts.name,
+            env
+        ) );
     }
     else if(pathStats.isFile()) {
-        return _precompile(wrapper,
-                           fs.readFileSync(input, 'utf-8'),
-                           opts.name || input,
-                           env,
-                           opts);
+        precompiled.push( _precompile(
+            fs.readFileSync(input, 'utf-8'),
+            opts.name || input,
+            env
+        ) );
     }
     else if(pathStats.isDirectory()) {
         addTemplates(input);
@@ -89,11 +89,11 @@ function precompile(input, opts) {
             var name = templates[i].replace(path.join(input, '/'), '');
 
             try {
-                output += _precompile(wrapper,
-                                      fs.readFileSync(templates[i], 'utf-8'),
-                                      name,
-                                      env,
-                                      opts);
+                precompiled.push( _precompile(
+                    fs.readFileSync(templates[i], 'utf-8'),
+                    name,
+                    env
+                ) );
             } catch(e) {
                 if(opts.force) {
                     // Don't stop generating the output if we're
@@ -105,12 +105,12 @@ function precompile(input, opts) {
                 }
             }
         }
-
-        return output;
     }
+
+    return wrapper(precompiled, opts);
 }
 
-function _precompile(wrapper, str, name, env, opts) {
+function _precompile(str, name, env) {
     env = env || new Environment([]);
 
     var asyncFilters = env.asyncFilters;
@@ -128,7 +128,7 @@ function _precompile(wrapper, str, name, env, opts) {
         throw lib.prettifyError(name, false, err);
     }
 
-    return wrapper(name, template, opts);
+    return { name: name, template: template };
 }
 
 module.exports = {
