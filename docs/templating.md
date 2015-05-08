@@ -122,6 +122,25 @@ You leverage inheritance with the [`extends`](#extends) and
 be found in the [jinja2
 docs](http://jinja.pocoo.org/docs/templates/#template-inheritance).
 
+### super
+
+You can render the contents of the parent block inside a child block
+by calling `super`. If in the child template from above you had:
+
+```jinja
+{% block right %}
+{{ super() }}
+Right side!
+{% endblock %}
+```
+
+The output of the block would be:
+
+```
+This is more content
+Right side!
+```
+
 ## Tags
 
 Tags are special blocks that perform operations on sections of the
@@ -376,6 +395,9 @@ Child templates can override the `item` block and change how it is displayed:
 The name of the item is: {{ item.name }}
 {% endblock %}
 ```
+
+A special function `super` is available within blocks which will
+render the parent block's content. See [super](#super).
 
 ### include
 
