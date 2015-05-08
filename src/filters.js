@@ -64,23 +64,24 @@ var filters = {
         return r.copySafeness(str, pre + str + post);
     },
 
-    'default': function(val, def, loose) {
-        if(loose !== true || loose !== false && !hasWarnedDefault) {
+    'default': function(val, def, bool) {
+        if(bool !== true && bool !== false && !hasWarnedDefault) {
             hasWarnedDefault = true;
             console.log(
                 '[nunjucks] Warning: the "default" filter was used without ' +
-                'specifying the loose/strict behavior. This is required for this '+
-                'version because "default" used to be loose (val ? val : def) ' +
-                'but is now strict (only checks for null/undefined). ' +
+                'specifying the type of comparison. 2.0 changed the default ' +
+                'behavior from boolean (val ? val : def) to strictly undefined, ' +
+                'so you should make sure that doesn\'t break anything. ' +
+                'Be explicit about this to make this warning go away, or wait until 2.1. ' +
                 'See http://mozilla.github.io/nunjucks/templating.html#defaultvalue-default-loose'
             );
         }
 
-        if(loose) {
+        if(bool) {
             return val ? val : def;
         }
         else {
-            return (val !== null && val !== undefined) ? val : def;
+            return (val !== undefined) ? val : def;
         }
     },
 

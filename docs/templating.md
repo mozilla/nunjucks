@@ -706,12 +706,12 @@ Nunjucks has ported most of jinja's filters, and has a few of its own.
 We need to work on our own documentation for filters. Some of them are
 documented below, for the rest you can click through to jinja's site.
 
-### default(value, default, [loose])
+### default(value, default, [boolean])
 
 (aliased as `d`)
 
-If `value` is `null` or `undefined`, return `default`, otherwise
-`value`. If `loose` is true, any JavaScript falsy value will return
+If `value` is strictly `undefined`, return `default`, otherwise
+`value`. If `boolean` is true, any JavaScript falsy value will return
 `default` (false, "", etc)
 
 **In version 2.0, `loose` is required because this filter changed from
