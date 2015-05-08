@@ -79,7 +79,7 @@ feature on or off with the **opts** hash. You can provide both
 arguments or either of them. **path** defaults to the current working
 directory, and the following options are available in **opts**:
 
-* **autoescape** *(default: false)* controls if output with dangerous characters are
+* **autoescape** *(default: true)* controls if output with dangerous characters are
     escaped automatically. See [Autoescaping](#autoescaping)
 * **throwOnUndefined** *(default: false)* throw errors when outputting a null/undefined value
 * **trimBlocks** *(default: false)* automatically remove trailing newlines from a block/tag

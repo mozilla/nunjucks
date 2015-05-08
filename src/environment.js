@@ -37,7 +37,7 @@ var Environment = Obj.extend({
         // every string variable will be escaped by default.
         // If false, strings can be manually escaped using the `escape` filter.
         // defaults to false
-        this.opts.autoescape = !!opts.autoescape;
+        this.opts.autoescape = opts.autoescape != null ? opts.autoescape : true;
 
         // If true, this will make the system throw errors if trying
         // to output a null or undefined value
