@@ -76,7 +76,11 @@
         });
 
         it('default', function(done) {
-            equal('{{ false | default("foo") }}', 'foo');
+            equal('{{ undefined | default("foo") }}', 'foo');
+            equal('{{ bar | default("foo") }}', { bar: null }, '');
+            equal('{{ false | default("foo") }}', 'false');
+            equal('{{ false | default("foo", true) }}', 'foo');
+            equal('{{ bar | default("foo") }}', 'foo');
             equal('{{ "bar" | default("foo") }}', 'bar');
             finish(done);
         });

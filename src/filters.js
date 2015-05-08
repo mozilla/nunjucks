@@ -10,6 +10,7 @@ function normalize(value, defaultValue) {
     return value;
 }
 
+var hasWarnedDefault = false;
 
 var filters = {
     abs: function(n) {
@@ -63,8 +64,25 @@ var filters = {
         return r.copySafeness(str, pre + str + post);
     },
 
-    'default': function(val, def) {
-        return val ? val : def;
+    'default': function(val, def, bool) {
+        if(bool !== true && bool !== false && !hasWarnedDefault) {
+            hasWarnedDefault = true;
+            console.log(
+                '[nunjucks] Warning: the "default" filter was used without ' +
+                'specifying the type of comparison. 2.0 changed the default ' +
+                'behavior from boolean (val ? val : def) to strictly undefined, ' +
+                'so you should make sure that doesn\'t break anything. ' +
+                'Be explicit about this to make this warning go away, or wait until 2.1. ' +
+                'See http://mozilla.github.io/nunjucks/templating.html#defaultvalue-default-loose'
+            );
+        }
+
+        if(bool) {
+            return val ? val : def;
+        }
+        else {
+            return (val !== undefined) ? val : def;
+        }
     },
 
     dictsort: function(val, case_sensitive, by) {
