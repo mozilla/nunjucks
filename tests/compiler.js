@@ -607,6 +607,34 @@
             finish(done);
         });
 
+        it('should conditionally inherit templates', function(done) {
+            equal('{% if false %}{% extends "base.html" %}{% endif %}' +
+                  '{% block block1 %}BAR{% endblock %}',
+                  'BAR');
+
+            equal('{% if true %}{% extends "base.html" %}{% endif %}' +
+                  '{% block block1 %}BAR{% endblock %}',
+                  'FooBARBazFizzle');
+
+            equal('{% if true %}' +
+                  '{% extends "base.html" %}' +
+                  '{% else %}' +
+                  '{% extends "base2.html" %}' +
+                  '{% endif %}' +
+                  '{% block block1 %}HELLO{% endblock %}',
+                  'FooHELLOBazFizzle');
+
+            equal('{% if false %}' +
+                  '{% extends "base.html" %}' +
+                  '{% else %}' +
+                  '{% extends "base2.html" %}' +
+                  '{% endif %}' +
+                  '{% block item %}hello{{ item }}{% endblock %}',
+                  'hello1hello2');
+
+            finish(done);
+        });
+
         it('should render nested blocks in child template', function(done) {
             equal('{% extends "base.html" %}' +
                   '{% block block1 %}{% block nested %}BAR{% endblock %}{% endblock %}',

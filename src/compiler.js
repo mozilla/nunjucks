@@ -35,8 +35,8 @@ var Compiler = Object.extend({
         this.lastId = 0;
         this.buffer = null;
         this.bufferStack = [];
-        this.isChild = false;
         this.scopeClosers = '';
+        this.inBlock = false;
         this.throwOnUndefined = throwOnUndefined;
     },
 
@@ -952,14 +952,28 @@ var Compiler = Object.extend({
     },
 
     compileBlock: function(node) {
-        if(!this.isChild) {
-            var id = this.tmpid();
+        var id = this.tmpid();
 
-            this.emitLine('context.getBlock("' + node.name.value + '")' +
-                          '(env, context, frame, runtime, ' + this.makeCallback(id));
-            this.emitLine(this.buffer + ' += ' + id + ';');
-            this.addScopeLevel();
+        // If we are executing outside a block (creating a top-level
+        // block), we really don't want to execute its code because it
+        // will execute twice: once when the child template runs and
+        // again when the parent template runs. Note that blocks
+        // within blocks will *always* execute immediately *and*
+        // wherever else they are invoked (like used in a parent
+        // template). This may have behavioral differences from jinja
+        // because blocks can have side effects, but it seems like a
+        // waste of performance to always execute huge top-level
+        // blocks twice
+        if(!this.inBlock) {
+            this.emit('(parentTemplate ? function(e, c, f, r, cb) { cb(""); } : ');
         }
+        this.emit('context.getBlock("' + node.name.value + '")');
+        if(!this.inBlock) {
+            this.emit(')');
+        }
+        this.emitLine('(env, context, frame, runtime, ' + this.makeCallback(id));
+        this.emitLine(this.buffer + ' += ' + id + ';');
+        this.addScopeLevel();
     },
 
     compileSuper: function(node, frame) {
@@ -977,17 +991,16 @@ var Compiler = Object.extend({
     },
 
     compileExtends: function(node, frame) {
-        if(this.isChild) {
-            this.fail('compileExtends: cannot extend multiple times',
-                      node.template.lineno,
-                      node.template.colno);
-        }
-
         var k = this.tmpid();
 
         this.emit('env.getTemplate(');
         this._compileExpression(node.template, frame);
-        this.emitLine(', true, '+this._templateName()+', ' + this.makeCallback('parentTemplate'));
+        this.emitLine(', true, '+this._templateName()+', ' + this.makeCallback('_parentTemplate'));
+
+        // extends is a dynamic tag and can occur within a block like
+        // `if`, so if this happens we need to capture the parent
+        // template in the top-level scope
+        this.emitLine('parentTemplate = _parentTemplate');
 
         this.emitLine('for(var ' + k + ' in parentTemplate.blocks) {');
         this.emitLine('context.addBlock(' + k +
@@ -995,7 +1008,6 @@ var Compiler = Object.extend({
         this.emitLine('}');
 
         this.addScopeLevel();
-        this.isChild = true;
     },
 
     compileInclude: function(node, frame) {
@@ -1051,14 +1063,16 @@ var Compiler = Object.extend({
         frame = new Frame();
 
         this.emitFuncBegin('root');
+        this.emitLine('var parentTemplate = null;');
         this._compileChildren(node, frame);
-        if(this.isChild) {
-            this.emitLine('parentTemplate.rootRenderFunc(env, context, frame, runtime, cb);');
-        }
-        this.emitFuncEnd(this.isChild);
+        this.emitLine('if(parentTemplate) {');
+        this.emitLine('parentTemplate.rootRenderFunc(env, context, frame, runtime, cb);');
+        this.emitLine('} else {');
+        this.emitLine('cb(null, ' + this.buffer +');');
+        this.emitLine('}');
+        this.emitFuncEnd(true);
 
-        // When compiling the blocks, they should all act as top-level code
-        this.isChild = false;
+        this.inBlock = true;
 
         var i, name, block, blocks = node.findAll(nodes.Block);
         for (i = 0; i < blocks.length; i++) {
