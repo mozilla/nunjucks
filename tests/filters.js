@@ -86,7 +86,8 @@
         });
 
         it('escape', function(done) {
-            equal('{{ "<html>" | escape }}', '&lt;html&gt;');
+            var res = render('{{ "<html>" | escape }}', {}, { autoescape: false });
+            expect(res).to.be('&lt;html&gt;');
             finish(done);
         });
 
@@ -311,8 +312,10 @@
             equal('{{ false | replace("rue", "afafasf", 4) }}', 'false');
 
             // Will result in an infinite loop if unbounded otherwise test will pass
-            equal('{{ "<img src=" | replace("<img", "<img alt=val") }}', '<img alt=val src=');
-            equal('{{ "<img src=\\"http://www.example.com\\" />" | replace("<img", "replacement text") }}', 'replacement text src=\"http://www.example.com\" />');
+            equal('{{ "<img src=" | replace("<img", "<img alt=val") | safe }}',
+                  '<img alt=val src=');
+            equal('{{ "<img src=\\"http://www.example.com\\" />" | replace("<img", "replacement text") | safe }}',
+                  'replacement text src=\"http://www.example.com\" />');
 
             // Regex
             equal('{{ "aabbbb" | replace(r/ab{2}/, "z") }}', 'azbb');
@@ -443,15 +446,15 @@
 
         it('urlencode', function(done) {
             equal('{{ "&" | urlencode }}', '%26');
-            equal('{{ arr | urlencode }}', { arr: [[1,2],['&1','&2']] }, '1=2&%261=%262');
-            equal('{{ obj | urlencode }}', { obj: {'1': 2, '&1': '&2'}}, '1=2&%261=%262');
+            equal('{{ arr | urlencode | safe }}', { arr: [[1,2],['&1','&2']] }, '1=2&%261=%262');
+            equal('{{ obj | urlencode | safe }}', { obj: {'1': 2, '&1': '&2'}}, '1=2&%261=%262');
             finish(done);
         });
 
         it('urlize', function(done) {
             // from jinja test suite:
             // https://github.com/mitsuhiko/jinja2/blob/8db47916de0e888dd8664b2511e220ab5ecf5c15/jinja2/testsuite/filters.py#L236-L239
-            equal('{{ "foo http://www.example.com/ bar"|urlize }}',
+            equal('{{ "foo http://www.example.com/ bar" | urlize | safe }}',
                     'foo <a href="http://www.example.com/">' +
                     'http://www.example.com/</a> bar');
 
@@ -460,61 +463,61 @@
             equal('{{ "foo" | urlize }}', 'foo');
 
             // http
-            equal('{{ "http://jinja.pocoo.org/docs/templates/" | urlize }}',
-                '<a href="http://jinja.pocoo.org/docs/templates/">http://jinja.pocoo.org/docs/templates/</a>');
+            equal('{{ "http://jinja.pocoo.org/docs/templates/" | urlize | safe }}',
+                  '<a href="http://jinja.pocoo.org/docs/templates/">http://jinja.pocoo.org/docs/templates/</a>');
 
             // https
-            equal('{{ "https://jinja.pocoo.org/docs/templates/" | urlize }}',
+            equal('{{ "https://jinja.pocoo.org/docs/templates/" | urlize | safe }}',
                 '<a href="https://jinja.pocoo.org/docs/templates/">https://jinja.pocoo.org/docs/templates/</a>');
 
             // www without protocol
-            equal('{{ "www.pocoo.org/docs/templates/" | urlize }}',
+            equal('{{ "www.pocoo.org/docs/templates/" | urlize | safe }}',
                 '<a href="http://www.pocoo.org/docs/templates/">www.pocoo.org/docs/templates/</a>');
 
             // .org, .net, .com without protocol or www
-            equal('{{ "pocoo.org/docs/templates/" | urlize }}',
+            equal('{{ "pocoo.org/docs/templates/" | urlize | safe }}',
                 '<a href="http://pocoo.org/docs/templates/">pocoo.org/docs/templates/</a>');
-            equal('{{ "pocoo.net/docs/templates/" | urlize }}',
+            equal('{{ "pocoo.net/docs/templates/" | urlize | safe }}',
                 '<a href="http://pocoo.net/docs/templates/">pocoo.net/docs/templates/</a>');
-            equal('{{ "pocoo.com/docs/templates/" | urlize }}',
+            equal('{{ "pocoo.com/docs/templates/" | urlize | safe }}',
                 '<a href="http://pocoo.com/docs/templates/">pocoo.com/docs/templates/</a>');
-            equal('{{ "pocoo.com:80" | urlize }}',
+            equal('{{ "pocoo.com:80" | urlize | safe }}',
                 '<a href="http://pocoo.com:80">pocoo.com:80</a>');
-            equal('{{ "pocoo.com" | urlize }}',
+            equal('{{ "pocoo.com" | urlize | safe }}',
                 '<a href="http://pocoo.com">pocoo.com</a>');
-            equal('{{ "pocoo.commune" | urlize }}',
+            equal('{{ "pocoo.commune" | urlize | safe }}',
                 'pocoo.commune');
 
             // truncate the printed URL
-            equal('{{ "http://jinja.pocoo.org/docs/templates/" | urlize(12, true) }}',
-                '<a href="http://jinja.pocoo.org/docs/templates/" rel="nofollow">http://jinja</a>');
+            equal('{{ "http://jinja.pocoo.org/docs/templates/" | urlize(12, true) | safe }}',
+                  '<a href="http://jinja.pocoo.org/docs/templates/" rel="nofollow">http://jinja</a>');
 
             // punctuation on the beginning of line.
-            equal('{{ "(http://jinja.pocoo.org/docs/templates/" | urlize }}',
+            equal('{{ "(http://jinja.pocoo.org/docs/templates/" | urlize | safe }}',
                 '<a href="http://jinja.pocoo.org/docs/templates/">http://jinja.pocoo.org/docs/templates/</a>');
-            equal('{{ "<http://jinja.pocoo.org/docs/templates/" | urlize }}',
+            equal('{{ "<http://jinja.pocoo.org/docs/templates/" | urlize | safe }}',
                 '<a href="http://jinja.pocoo.org/docs/templates/">http://jinja.pocoo.org/docs/templates/</a>');
-            equal('{{ "&lt;http://jinja.pocoo.org/docs/templates/" | urlize }}',
+            equal('{{ "&lt;http://jinja.pocoo.org/docs/templates/" | urlize | safe }}',
                 '<a href="http://jinja.pocoo.org/docs/templates/">http://jinja.pocoo.org/docs/templates/</a>');
 
             // punctuation on the end of line
-            equal('{{ "http://jinja.pocoo.org/docs/templates/," | urlize }}',
+            equal('{{ "http://jinja.pocoo.org/docs/templates/," | urlize | safe }}',
                 '<a href="http://jinja.pocoo.org/docs/templates/">http://jinja.pocoo.org/docs/templates/</a>');
-            equal('{{ "http://jinja.pocoo.org/docs/templates/." | urlize }}',
+            equal('{{ "http://jinja.pocoo.org/docs/templates/." | urlize | safe }}',
                 '<a href="http://jinja.pocoo.org/docs/templates/">http://jinja.pocoo.org/docs/templates/</a>');
-            equal('{{ "http://jinja.pocoo.org/docs/templates/)" | urlize }}',
+            equal('{{ "http://jinja.pocoo.org/docs/templates/)" | urlize | safe }}',
                 '<a href="http://jinja.pocoo.org/docs/templates/">http://jinja.pocoo.org/docs/templates/</a>');
-            equal('{{ "http://jinja.pocoo.org/docs/templates/\n" | urlize }}',
+            equal('{{ "http://jinja.pocoo.org/docs/templates/\n" | urlize | safe }}',
                 '<a href="http://jinja.pocoo.org/docs/templates/">http://jinja.pocoo.org/docs/templates/</a>');
-            equal('{{ "http://jinja.pocoo.org/docs/templates/&gt;" | urlize }}',
+            equal('{{ "http://jinja.pocoo.org/docs/templates/&gt;" | urlize | safe }}',
                 '<a href="http://jinja.pocoo.org/docs/templates/">http://jinja.pocoo.org/docs/templates/</a>');
 
             // http url with username
-            equal('{{ "http://testuser@testuser.com" | urlize }}',
+            equal('{{ "http://testuser@testuser.com" | urlize | safe }}',
                 '<a href="http://testuser@testuser.com">http://testuser@testuser.com</a>');
 
             // email addresses
-            equal('{{ "testuser@testuser.com" | urlize }}',
+            equal('{{ "testuser@testuser.com" | urlize | safe }}',
                 '<a href="mailto:testuser@testuser.com">testuser@testuser.com</a>');
 
             //periods in the text
@@ -522,7 +525,7 @@
             equal('{{ "foo.foo" | urlize }}', 'foo.foo');
 
             //markup in the text
-            equal('{{ "<b>what up</b>" | urlize }}', '<b>what up</b>');
+            equal('{{ "<b>what up</b>" | urlize | safe }}', '<b>what up</b>');
 
             finish(done);
         });

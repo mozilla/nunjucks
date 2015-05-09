@@ -938,8 +938,8 @@
             finish(done);
         });
 
-        it('should not autoescape by default', function(done) {
-            equal('{{ foo }}', { foo: '"\'<>&'}, '"\'<>&');
+        it('should autoescape by default', function(done) {
+            equal('{{ foo }}', { foo: '"\'<>&'}, '&quot;&#39;&lt;&gt;&amp;');
             finish(done);
         });
 
