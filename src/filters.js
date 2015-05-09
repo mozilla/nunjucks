@@ -73,7 +73,7 @@ var filters = {
                 'behavior from boolean (val ? val : def) to strictly undefined, ' +
                 'so you should make sure that doesn\'t break anything. ' +
                 'Be explicit about this to make this warning go away, or wait until 2.1. ' +
-                'See http://mozilla.github.io/nunjucks/templating.html#defaultvalue-default-loose'
+                'See http://mozilla.github.io/nunjucks/templating.html#defaultvalue-default-boolean'
             );
         }
 

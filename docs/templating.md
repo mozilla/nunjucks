@@ -736,11 +736,13 @@ If `value` is strictly `undefined`, return `default`, otherwise
 `value`. If `boolean` is true, any JavaScript falsy value will return
 `default` (false, "", etc)
 
-**In version 2.0, `loose` is required because this filter changed from
-  loose by default to strict by default. A warning will be display if
-  you don't specify loose, and once we've warned everyone of the
-  change we will remove the warning. If you are sure this change won't 
-  affect you, ignore this warning.**
+**In version 2.0, this filter changed the default behavior of this
+  filter. Previously, it acted as if `boolean` was true by default,
+  and any falsy value would return `default`. In 2.0 the default is
+  only an `undefined` value returns `default`. You can get the old
+  behavior by passing `true` to `boolean`, or just use `value or default`.
+  2.0 will show a warning if `boolean` is not passed, but we will remove 
+  this warning in the next version.**
 
 ### sort(arr, reverse, caseSens, attr)
 
