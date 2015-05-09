@@ -1113,7 +1113,9 @@ var Compiler = Object.extend({
 });
 
 // var c = new Compiler();
-// var src = '{% asyncEach i in arr %}{{ i }}{% else %}empty{% endeach %}';
+// var src = 'hello {% filter title %}' +
+//     'Hello madam how are you' +
+//     '{% endfilter %}'
 // var ast = transformer.transform(parser.parse(src));
 // nodes.printNodes(ast);
 // c.compile(ast);

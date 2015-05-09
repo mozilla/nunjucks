@@ -476,6 +476,22 @@ If you want to output any of the special nunjucks tags like `{{`, you can use `r
 {％ endraw %}
 ```
 
+### filter
+
+A `filter` block allows you to call a filter with the contents of the
+block. Instead passing a value with the `|` syntax, the render
+contents from the block will be passed.
+
+```jinja
+{% filter title %}
+may the force be with you
+{% endfilter %}
+
+{% filter replace("force", "forth") %}
+may the force be with you
+{% endfilter %}
+```
+
 ### call
 
 A `call` block enables you to call a macro with all the text inside the tag. This is helpful if you want to pass a lot of content into a macro. The content is available inside the macro as `caller()`.

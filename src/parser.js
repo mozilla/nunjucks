@@ -93,10 +93,6 @@ var Parser = Object.extend({
         return true;
     },
 
-    skipWhitespace: function () {
-        return this.skip(lexer.TOKEN_WHITESPACE);
-    },
-
     skipSymbol: function(val) {
         return this.skipValue(lexer.TOKEN_SYMBOL, val);
     },
@@ -534,6 +530,7 @@ var Parser = Object.extend({
         case 'call': return this.parseCall();
         case 'import': return this.parseImport();
         case 'from': return this.parseFrom();
+        case 'filter': return this.parseFilterStatement();
         default:
             if (this.extensions.length) {
                 for (var i = 0; i < this.extensions.length; i++) {
@@ -952,36 +949,77 @@ var Parser = Object.extend({
         }
     },
 
+    parseFilterName: function() {
+        var tok = this.expect(lexer.TOKEN_SYMBOL);
+        var name = tok.value;
+
+        while(this.skipValue(lexer.TOKEN_OPERATOR, '.')) {
+            name += '.' + this.expect(lexer.TOKEN_SYMBOL).value;
+        }
+
+        return new nodes.Symbol(tok.lineno, tok.colno, name);
+    },
+
+    parseFilterArgs: function(node) {
+        if(this.peekToken().type === lexer.TOKEN_LEFT_PAREN) {
+            // Get a FunCall node and add the parameters to the
+            // filter
+            var call = this.parsePostfix(node);
+            return call.args.children;
+        }
+        return [];
+    },
+
     parseFilter: function(node) {
         while(this.skip(lexer.TOKEN_PIPE)) {
-            var tok = this.expect(lexer.TOKEN_SYMBOL);
-            var name = tok.value;
-
-            while(this.skipValue(lexer.TOKEN_OPERATOR, '.')) {
-                name += '.' + this.expect(lexer.TOKEN_SYMBOL).value;
-            }
+            var name = this.parseFilterName();
 
             node = new nodes.Filter(
-                tok.lineno,
-                tok.colno,
-                new nodes.Symbol(tok.lineno,
-                                 tok.colno,
-                                 name),
+                name.lineno,
+                name.colno,
+                name,
                 new nodes.NodeList(
-                    tok.lineno,
-                    tok.colno,
-                    [node])
+                    name.lineno,
+                    name.colno,
+                    [node].concat(this.parseFilterArgs(node))
+                )
             );
-
-            if(this.peekToken().type === lexer.TOKEN_LEFT_PAREN) {
-                // Get a FunCall node and add the parameters to the
-                // filter
-                var call = this.parsePostfix(node);
-                node.args.children = node.args.children.concat(call.args.children);
-            }
         }
 
         return node;
+    },
+
+    parseFilterStatement: function() {
+        var filterTok = this.peekToken();
+        if(!this.skipSymbol('filter')) {
+            this.fail('parseFilterStatement: expected filter');
+        }
+
+        var name = this.parseFilterName();
+        var args = this.parseFilterArgs(name);
+
+        this.advanceAfterBlockEnd(filterTok.value);
+        var body = this.parseUntilBlocks('endfilter');
+        this.advanceAfterBlockEnd();
+
+        var node = new nodes.Filter(
+            name.lineno,
+            name.colno,
+            name,
+            new nodes.NodeList(
+                name.lineno,
+                name.colno,
+                // Body is a NodeList with an Output node as a child,
+                // need to strip those
+                body.children[0].children.concat(args)
+            )
+        );
+
+        return new nodes.Output(
+            name.lineno,
+            name.colno,
+            [node]
+        );
     },
 
     parseAggregate: function() {
@@ -1187,7 +1225,9 @@ var Parser = Object.extend({
 //     console.log(util.inspect(t));
 // }
 
-// var p = new Parser(lexer.lex('{% if not x %}foo{% endif %}'));
+// var p = new Parser(lexer.lex('hello {% filter title %}' +
+//                              'Hello madam how are you' +
+//                              '{% endfilter %}'));
 // var n = p.parseAsRoot();
 // nodes.printNodes(n);
 

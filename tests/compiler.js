@@ -1094,5 +1094,14 @@
 
             finish(done);
         });
+
+        it('should handle filter blocks', function(done) {
+            equal('{% filter title %}may the force be with you{% endfilter %}',
+                  'May The Force Be With You');
+
+            equal('{% filter replace("force", "forth") %}may the force be with you{% endfilter %}',
+                  'may the forth be with you');
+            finish(done);
+        });
     });
 })();
