@@ -36,7 +36,7 @@ var Environment = Obj.extend({
         // The autoescape flag sets global autoescaping. If true,
         // every string variable will be escaped by default.
         // If false, strings can be manually escaped using the `escape` filter.
-        // defaults to false
+        // defaults to true
         this.opts.autoescape = opts.autoescape != null ? opts.autoescape : true;
 
         // If true, this will make the system throw errors if trying
