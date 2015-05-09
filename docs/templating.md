@@ -492,6 +492,8 @@ may the force be with you
 {% endfilter %}
 ```
 
+NOTE: You cannot do anything asynchronous inside these blocks.
+
 ### call
 
 A `call` block enables you to call a macro with all the text inside the tag. This is helpful if you want to pass a lot of content into a macro. The content is available inside the macro as `caller()`.
