@@ -495,10 +495,7 @@ var filters = {
           return word && word.length;
         }).map(function(word) {
           var matches = word.match(puncRE);
-
-
           var possibleUrl = matches && matches[1] || word;
-
 
           // url that starts with http or https
           if (httpHttpsRE.test(possibleUrl))
