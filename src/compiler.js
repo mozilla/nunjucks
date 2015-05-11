@@ -175,6 +175,7 @@ var Compiler = Object.extend({
             nodes.Or,
             nodes.Not,
             nodes.Add,
+            nodes.Concat,
             nodes.Sub,
             nodes.Mul,
             nodes.Div,
@@ -370,6 +371,9 @@ var Compiler = Object.extend({
     compileOr: binOpEmitter(' || '),
     compileAnd: binOpEmitter(' && '),
     compileAdd: binOpEmitter(' + '),
+    // ensure concatenation instead of addition
+    // by adding empty string in between
+    compileConcat: binOpEmitter(' + "" + '),
     compileSub: binOpEmitter(' - '),
     compileMul: binOpEmitter(' * '),
     compileDiv: binOpEmitter(' / '),

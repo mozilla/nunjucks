@@ -128,6 +128,7 @@ var Or = BinOp.extend('Or');
 var And = BinOp.extend('And');
 var Not = UnaryOp.extend('Not');
 var Add = BinOp.extend('Add');
+var Concat = BinOp.extend('Concat');
 var Sub = BinOp.extend('Sub');
 var Mul = BinOp.extend('Mul');
 var Div = BinOp.extend('Div');
@@ -281,6 +282,7 @@ module.exports = {
     And: And,
     Not: Not,
     Add: Add,
+    Concat: Concat,
     Sub: Sub,
     Mul: Mul,
     Div: Div,

@@ -387,6 +387,13 @@
             finish(done);
         });
 
+        it('should compile string concatenations with tilde', function(done){
+            equal('{{ 4 ~ \'hello\' }}', '4hello');
+            equal('{{ 4 ~ 5 }}', '45');
+            equal('{{ \'a\' ~ \'b\' ~ 5 }}', 'ab5');
+            finish(done);
+        });
+
         it('should compile macros', function(done) {
             equal('{% macro foo() %}This is a macro{% endmacro %}' +
                   '{{ foo() }}',
