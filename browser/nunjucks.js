@@ -56,7 +56,7 @@ var nunjucks =
 	var runtime = __webpack_require__(6);
 	var Loader = __webpack_require__(7);
 	var loaders = __webpack_require__(8);
-	var precompile = __webpack_require__(14);
+	var precompile = __webpack_require__(15);
 
 	module.exports = {};
 	module.exports.Environment = env.Environment;
@@ -64,12 +64,14 @@ var nunjucks =
 
 	module.exports.Loader = Loader;
 	module.exports.FileSystemLoader = loaders.FileSystemLoader;
+	module.exports.PrecompiledLoader = loaders.PrecompiledLoader;
 	module.exports.WebLoader = loaders.WebLoader;
 
 	module.exports.compiler = compiler;
 	module.exports.parser = parser;
 	module.exports.lexer = lexer;
 	module.exports.runtime = runtime;
+	module.exports.lib = lib;
 
 	// A single instance of an environment, since this is so commonly used
 
@@ -88,7 +90,7 @@ var nunjucks =
 	            noCache: opts.noCache
 	        });
 	    }
-	    else {
+	    else if(loaders.WebLoader) {
 	        TemplateLoader = new loaders.WebLoader(templatesPath, {
 	            useCache: opts.web && opts.web.useCache,
 	            async: opts.web && opts.web.async
@@ -422,8 +424,8 @@ var nunjucks =
 
 	'use strict';
 
-	var path = __webpack_require__(14);
-	var asap = __webpack_require__(15);
+	var path = __webpack_require__(15);
+	var asap = __webpack_require__(16);
 	var lib = __webpack_require__(1);
 	var Obj = __webpack_require__(11);
 	var compiler = __webpack_require__(3);
@@ -433,6 +435,10 @@ var nunjucks =
 	var globals = __webpack_require__(13);
 	var Frame = runtime.Frame;
 	var Template;
+
+	// Unconditionally load in this loader, even if no other ones are
+	// included (possible in the slim browser build)
+	builtin_loaders.PrecompiledLoader = __webpack_require__(14);
 
 	// If the user is using the async API, *always* call it
 	// asynchronously even if the template was synchronous.
@@ -454,27 +460,37 @@ var nunjucks =
 	        // The autoescape flag sets global autoescaping. If true,
 	        // every string variable will be escaped by default.
 	        // If false, strings can be manually escaped using the `escape` filter.
-	        // defaults to false
-	        this.opts.autoescape = !!opts.autoescape;
+	        // defaults to true
+	        this.opts.autoescape = opts.autoescape != null ? opts.autoescape : true;
 
 	        // If true, this will make the system throw errors if trying
 	        // to output a null or undefined value
 	        this.opts.throwOnUndefined = !!opts.throwOnUndefined;
-
 	        this.opts.trimBlocks = !!opts.trimBlocks;
 	        this.opts.lstripBlocks = !!opts.lstripBlocks;
 
+	        this.loaders = [];
+
 	        if(!loaders) {
-	            // The filesystem loader is only available client-side
+	            // The filesystem loader is only available server-side
 	            if(builtin_loaders.FileSystemLoader) {
 	                this.loaders = [new builtin_loaders.FileSystemLoader('views')];
 	            }
-	            else {
+	            else if(builtin_loaders.WebLoader) {
 	                this.loaders = [new builtin_loaders.WebLoader('/views')];
 	            }
 	        }
 	        else {
 	            this.loaders = lib.isArray(loaders) ? loaders : [loaders];
+	        }
+
+	        // It's easy to use precompiled templates: just include them
+	        // before you configure nunjucks and this will automatically
+	        // pick it up and use it
+	        if((true) && window.nunjucksPrecompiled) {
+	            this.loaders.unshift(
+	                new builtin_loaders.PrecompiledLoader(window.nunjucksPrecompiled)
+	            );
 	        }
 
 	        this.initCache();
@@ -580,30 +596,7 @@ var nunjucks =
 	            var syncResult;
 	            var _this = this;
 
-	            lib.asyncIter(this.loaders, function(loader, i, next, done) {
-	                function handle(src) {
-	                    if(src) {
-	                        src.loader = loader;
-	                        done(src);
-	                    }
-	                    else {
-	                        next();
-	                    }
-	                }
-
-	                // Resolve name relative to parentName
-	                name = that.resolveTemplate(loader, parentName, name);
-
-	                if(loader.async) {
-	                    loader.getSource(name, function(err, src) {
-	                        if(err) { throw err; }
-	                        handle(src);
-	                    });
-	                }
-	                else {
-	                    handle(loader.getSource(name));
-	                }
-	            }, function(info) {
+	            var createTemplate = function(info) {
 	                if(!info) {
 	                    var err = new Error('template not found: ' + name);
 	                    if(cb) {
@@ -628,7 +621,32 @@ var nunjucks =
 	                        syncResult = tmpl;
 	                    }
 	                }
-	            });
+	            };
+
+	            lib.asyncIter(this.loaders, function(loader, i, next, done) {
+	                function handle(src) {
+	                    if(src) {
+	                        src.loader = loader;
+	                        done(src);
+	                    }
+	                    else {
+	                        next();
+	                    }
+	                }
+
+	                // Resolve name relative to parentName
+	                name = that.resolveTemplate(loader, parentName, name);
+
+	                if(loader.async) {
+	                    loader.getSource(name, function(err, src) {
+	                        if(err) { throw err; }
+	                        handle(src);
+	                    });
+	                }
+	                else {
+	                    handle(loader.getSource(name));
+	                }
+	            }, createTemplate);
 
 	            return syncResult;
 	        }
@@ -914,7 +932,6 @@ var nunjucks =
 	            var source = compiler.compile(this.tmplStr,
 	                                          this.env.asyncFilters,
 	                                          this.env.extensionsList,
-	                                          this.env.opts.throwOnUndefined,
 	                                          this.path,
 	                                          this.env.opts);
 
@@ -988,8 +1005,8 @@ var nunjucks =
 	        this.lastId = 0;
 	        this.buffer = null;
 	        this.bufferStack = [];
-	        this.isChild = false;
 	        this.scopeClosers = '';
+	        this.inBlock = false;
 	        this.throwOnUndefined = throwOnUndefined;
 	    },
 
@@ -1905,14 +1922,28 @@ var nunjucks =
 	    },
 
 	    compileBlock: function(node) {
-	        if(!this.isChild) {
-	            var id = this.tmpid();
+	        var id = this.tmpid();
 
-	            this.emitLine('context.getBlock("' + node.name.value + '")' +
-	                          '(env, context, frame, runtime, ' + this.makeCallback(id));
-	            this.emitLine(this.buffer + ' += ' + id + ';');
-	            this.addScopeLevel();
+	        // If we are executing outside a block (creating a top-level
+	        // block), we really don't want to execute its code because it
+	        // will execute twice: once when the child template runs and
+	        // again when the parent template runs. Note that blocks
+	        // within blocks will *always* execute immediately *and*
+	        // wherever else they are invoked (like used in a parent
+	        // template). This may have behavioral differences from jinja
+	        // because blocks can have side effects, but it seems like a
+	        // waste of performance to always execute huge top-level
+	        // blocks twice
+	        if(!this.inBlock) {
+	            this.emit('(parentTemplate ? function(e, c, f, r, cb) { cb(""); } : ');
 	        }
+	        this.emit('context.getBlock("' + node.name.value + '")');
+	        if(!this.inBlock) {
+	            this.emit(')');
+	        }
+	        this.emitLine('(env, context, frame, runtime, ' + this.makeCallback(id));
+	        this.emitLine(this.buffer + ' += ' + id + ';');
+	        this.addScopeLevel();
 	    },
 
 	    compileSuper: function(node, frame) {
@@ -1930,17 +1961,16 @@ var nunjucks =
 	    },
 
 	    compileExtends: function(node, frame) {
-	        if(this.isChild) {
-	            this.fail('compileExtends: cannot extend multiple times',
-	                      node.template.lineno,
-	                      node.template.colno);
-	        }
-
 	        var k = this.tmpid();
 
 	        this.emit('env.getTemplate(');
 	        this._compileExpression(node.template, frame);
-	        this.emitLine(', true, '+this._templateName()+', ' + this.makeCallback('parentTemplate'));
+	        this.emitLine(', true, '+this._templateName()+', ' + this.makeCallback('_parentTemplate'));
+
+	        // extends is a dynamic tag and can occur within a block like
+	        // `if`, so if this happens we need to capture the parent
+	        // template in the top-level scope
+	        this.emitLine('parentTemplate = _parentTemplate');
 
 	        this.emitLine('for(var ' + k + ' in parentTemplate.blocks) {');
 	        this.emitLine('context.addBlock(' + k +
@@ -1948,7 +1978,6 @@ var nunjucks =
 	        this.emitLine('}');
 
 	        this.addScopeLevel();
-	        this.isChild = true;
 	    },
 
 	    compileInclude: function(node, frame) {
@@ -2004,14 +2033,16 @@ var nunjucks =
 	        frame = new Frame();
 
 	        this.emitFuncBegin('root');
+	        this.emitLine('var parentTemplate = null;');
 	        this._compileChildren(node, frame);
-	        if(this.isChild) {
-	            this.emitLine('parentTemplate.rootRenderFunc(env, context, frame, runtime, cb);');
-	        }
-	        this.emitFuncEnd(this.isChild);
+	        this.emitLine('if(parentTemplate) {');
+	        this.emitLine('parentTemplate.rootRenderFunc(env, context, frame, runtime, cb);');
+	        this.emitLine('} else {');
+	        this.emitLine('cb(null, ' + this.buffer +');');
+	        this.emitLine('}');
+	        this.emitFuncEnd(true);
 
-	        // When compiling the blocks, they should all act as top-level code
-	        this.isChild = false;
+	        this.inBlock = true;
 
 	        var i, name, block, blocks = node.findAll(nodes.Block);
 	        for (i = 0; i < blocks.length; i++) {
@@ -2052,7 +2083,9 @@ var nunjucks =
 	});
 
 	// var c = new Compiler();
-	// var src = '{% asyncEach i in arr %}{{ i }}{% else %}empty{% endeach %}';
+	// var src = 'hello {% filter title %}' +
+	//     'Hello madam how are you' +
+	//     '{% endfilter %}'
 	// var ast = transformer.transform(parser.parse(src));
 	// nodes.printNodes(ast);
 	// c.compile(ast);
@@ -2060,8 +2093,8 @@ var nunjucks =
 	// console.log(tmpl);
 
 	module.exports = {
-	    compile: function(src, asyncFilters, extensions, throwOnUndefined, name, opts) {
-	        var c = new Compiler(name, throwOnUndefined);
+	    compile: function(src, asyncFilters, extensions, name, opts) {
+	        var c = new Compiler(name, opts.throwOnUndefined);
 
 	        // Run the extension preprocessors against the source.
 	        if(extensions && extensions.length) {
@@ -2183,10 +2216,6 @@ var nunjucks =
 	            return false;
 	        }
 	        return true;
-	    },
-
-	    skipWhitespace: function () {
-	        return this.skip(lexer.TOKEN_WHITESPACE);
 	    },
 
 	    skipSymbol: function(val) {
@@ -2626,6 +2655,7 @@ var nunjucks =
 	        case 'call': return this.parseCall();
 	        case 'import': return this.parseImport();
 	        case 'from': return this.parseFrom();
+	        case 'filter': return this.parseFilterStatement();
 	        default:
 	            if (this.extensions.length) {
 	                for (var i = 0; i < this.extensions.length; i++) {
@@ -3044,36 +3074,77 @@ var nunjucks =
 	        }
 	    },
 
+	    parseFilterName: function() {
+	        var tok = this.expect(lexer.TOKEN_SYMBOL);
+	        var name = tok.value;
+
+	        while(this.skipValue(lexer.TOKEN_OPERATOR, '.')) {
+	            name += '.' + this.expect(lexer.TOKEN_SYMBOL).value;
+	        }
+
+	        return new nodes.Symbol(tok.lineno, tok.colno, name);
+	    },
+
+	    parseFilterArgs: function(node) {
+	        if(this.peekToken().type === lexer.TOKEN_LEFT_PAREN) {
+	            // Get a FunCall node and add the parameters to the
+	            // filter
+	            var call = this.parsePostfix(node);
+	            return call.args.children;
+	        }
+	        return [];
+	    },
+
 	    parseFilter: function(node) {
 	        while(this.skip(lexer.TOKEN_PIPE)) {
-	            var tok = this.expect(lexer.TOKEN_SYMBOL);
-	            var name = tok.value;
-
-	            while(this.skipValue(lexer.TOKEN_OPERATOR, '.')) {
-	                name += '.' + this.expect(lexer.TOKEN_SYMBOL).value;
-	            }
+	            var name = this.parseFilterName();
 
 	            node = new nodes.Filter(
-	                tok.lineno,
-	                tok.colno,
-	                new nodes.Symbol(tok.lineno,
-	                                 tok.colno,
-	                                 name),
+	                name.lineno,
+	                name.colno,
+	                name,
 	                new nodes.NodeList(
-	                    tok.lineno,
-	                    tok.colno,
-	                    [node])
+	                    name.lineno,
+	                    name.colno,
+	                    [node].concat(this.parseFilterArgs(node))
+	                )
 	            );
-
-	            if(this.peekToken().type === lexer.TOKEN_LEFT_PAREN) {
-	                // Get a FunCall node and add the parameters to the
-	                // filter
-	                var call = this.parsePostfix(node);
-	                node.args.children = node.args.children.concat(call.args.children);
-	            }
 	        }
 
 	        return node;
+	    },
+
+	    parseFilterStatement: function() {
+	        var filterTok = this.peekToken();
+	        if(!this.skipSymbol('filter')) {
+	            this.fail('parseFilterStatement: expected filter');
+	        }
+
+	        var name = this.parseFilterName();
+	        var args = this.parseFilterArgs(name);
+
+	        this.advanceAfterBlockEnd(filterTok.value);
+	        var body = this.parseUntilBlocks('endfilter');
+	        this.advanceAfterBlockEnd();
+
+	        var node = new nodes.Filter(
+	            name.lineno,
+	            name.colno,
+	            name,
+	            new nodes.NodeList(
+	                name.lineno,
+	                name.colno,
+	                // Body is a NodeList with an Output node as a child,
+	                // need to strip those
+	                body.children[0].children.concat(args)
+	            )
+	        );
+
+	        return new nodes.Output(
+	            name.lineno,
+	            name.colno,
+	            [node]
+	        );
 	    },
 
 	    parseAggregate: function() {
@@ -3279,7 +3350,9 @@ var nunjucks =
 	//     console.log(util.inspect(t));
 	// }
 
-	// var p = new Parser(lexer.lex('{% if not x %}foo{% endif %}'));
+	// var p = new Parser(lexer.lex('hello {% filter title %}' +
+	//                              'Hello madam how are you' +
+	//                              '{% endfilter %}'));
 	// var n = p.parseAsRoot();
 	// nodes.printNodes(n);
 
@@ -4140,7 +4213,7 @@ var nunjucks =
 
 	'use strict';
 
-	var path = __webpack_require__(14);
+	var path = __webpack_require__(15);
 	var Obj = __webpack_require__(11);
 	var lib = __webpack_require__(1);
 
@@ -4180,14 +4253,10 @@ var nunjucks =
 	'use strict';
 
 	var Loader = __webpack_require__(7);
+	var PrecompiledLoader = __webpack_require__(14);
 
 	var WebLoader = Loader.extend({
 	    init: function(baseURL, opts) {
-	        // It's easy to use precompiled templates: just include them
-	        // before you configure nunjucks and this will automatically
-	        // pick it up and use it
-	        this.precompiled = window.nunjucksPrecompiled || {};
-
 	        this.baseURL = baseURL || '';
 
 	        // By default, the cache is turned off because there's no way
@@ -4204,43 +4273,34 @@ var nunjucks =
 	        this.async = opts.async;
 	    },
 
-	    resolve: function(from, to) {
+	    resolve: function(from, to) { // jshint ignore:line
 	        throw new Error('relative templates not support in the browser yet');
 	    },
 
 	    getSource: function(name, cb) {
-	        if(this.precompiled[name]) {
-	            return {
-	                src: { type: 'code',
-	                       obj: this.precompiled[name] },
-	                path: name
-	            };
-	        }
-	        else {
-	            var useCache = this.useCache;
-	            var result;
-	            this.fetch(this.baseURL + '/' + name, function(err, src) {
-	                if(err) {
-	                    if(!cb) {
-	                        throw err;
-	                    }
-	                    cb(err);
+	        var useCache = this.useCache;
+	        var result;
+	        this.fetch(this.baseURL + '/' + name, function(err, src) {
+	            if(err) {
+	                if(!cb) {
+	                    throw err;
 	                }
-	                else {
-	                    result = { src: src,
-	                               path: name,
-	                               noCache: !useCache };
-	                    if(cb) {
-	                        cb(null, result);
-	                    }
+	                cb(err);
+	            }
+	            else {
+	                result = { src: src,
+	                           path: name,
+	                           noCache: !useCache };
+	                if(cb) {
+	                    cb(null, result);
 	                }
-	            });
+	            }
+	        });
 
-	            // if this WebLoader isn't running asynchronously, the
-	            // fetch above would actually run sync and we'll have a
-	            // result here
-	            return result;
-	        }
+	        // if this WebLoader isn't running asynchronously, the
+	        // fetch above would actually run sync and we'll have a
+	        // result here
+	        return result;
 	    },
 
 	    fetch: function(url, cb) {
@@ -4277,7 +4337,8 @@ var nunjucks =
 	});
 
 	module.exports = {
-	    WebLoader: WebLoader
+	    WebLoader: WebLoader,
+	    PrecompiledLoader: PrecompiledLoader
 	};
 
 
@@ -4831,7 +4892,7 @@ var nunjucks =
 	    printNodes: printNodes
 	};
 
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(14)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(15)))
 
 /***/ },
 /* 11 */
@@ -4919,6 +4980,7 @@ var nunjucks =
 	    return value;
 	}
 
+	var hasWarnedDefault = false;
 
 	var filters = {
 	    abs: function(n) {
@@ -4972,8 +5034,25 @@ var nunjucks =
 	        return r.copySafeness(str, pre + str + post);
 	    },
 
-	    'default': function(val, def) {
-	        return val ? val : def;
+	    'default': function(val, def, bool) {
+	        if(bool !== true && bool !== false && !hasWarnedDefault) {
+	            hasWarnedDefault = true;
+	            console.log(
+	                '[nunjucks] Warning: the "default" filter was used without ' +
+	                'specifying the type of comparison. 2.0 changed the default ' +
+	                'behavior from boolean (val ? val : def) to strictly undefined, ' +
+	                'so you should make sure that doesn\'t break anything. ' +
+	                'Be explicit about this to make this warning go away, or wait until 2.1. ' +
+	                'See http://mozilla.github.io/nunjucks/templating.html#defaultvalue-default-boolean'
+	            );
+	        }
+
+	        if(bool) {
+	            return val ? val : def;
+	        }
+	        else {
+	            return (val !== undefined) ? val : def;
+	        }
 	    },
 
 	    dictsort: function(val, case_sensitive, by) {
@@ -5386,10 +5465,7 @@ var nunjucks =
 	          return word && word.length;
 	        }).map(function(word) {
 	          var matches = word.match(puncRE);
-
-
 	          var possibleUrl = matches && matches[1] || word;
-
 
 	          // url that starts with http or https
 	          if (httpHttpsRE.test(possibleUrl))
@@ -5515,16 +5591,44 @@ var nunjucks =
 /* 14 */
 /***/ function(module, exports, __webpack_require__) {
 
-	
+	'use strict';
+
+	var Loader = __webpack_require__(7);
+
+	var PrecompiledLoader = Loader.extend({
+	    init: function(compiledTemplates) {
+	        this.precompiled = compiledTemplates || {};
+	    },
+
+	    getSource: function(name) {
+	        if (this.precompiled[name]) {
+	            return {
+	                src: { type: 'code',
+	                       obj: this.precompiled[name] },
+	                path: name
+	            };
+	        }
+	        return null;
+	    }
+	});
+
+	module.exports = PrecompiledLoader;
+
 
 /***/ },
 /* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
+	
+
+/***/ },
+/* 16 */
+/***/ function(module, exports, __webpack_require__) {
+
 	"use strict";
 
 	// rawAsap provides everything we need except exception management.
-	var rawAsap = __webpack_require__(16);
+	var rawAsap = __webpack_require__(17);
 	// RawTasks are recycled to reduce GC churn.
 	var freeTasks = [];
 	// We queue errors to ensure they are thrown in right order (FIFO).
@@ -5590,7 +5694,7 @@ var nunjucks =
 
 
 /***/ },
-/* 16 */
+/* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {"use strict";

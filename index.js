@@ -23,6 +23,7 @@ module.exports.compiler = compiler;
 module.exports.parser = parser;
 module.exports.lexer = lexer;
 module.exports.runtime = runtime;
+module.exports.lib = lib;
 
 // A single instance of an environment, since this is so commonly used
 
