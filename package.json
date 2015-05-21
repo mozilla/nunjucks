@@ -40,12 +40,7 @@
     "template",
     "templating"
   ],
-  "license": [
-    {
-      "type": "BSD",
-      "url": "https://github.com/mozilla/nunjucks/blob/master/LICENSE"
-    }
-  ],
+  "license": "BSD-2-Clause",
   "bugs": {
     "url": "https://github.com/mozilla/nunjucks/issues"
   }
