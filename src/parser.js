@@ -550,6 +550,7 @@ var Parser = Object.extend({
         this.advanceAfterBlockEnd();
         var str = '';
         var begun = this.peekToken();
+        var rawLevel = 0;
 
         while(1) {
             // Passing true gives us all the whitespace tokens as
@@ -590,21 +591,33 @@ var Parser = Object.extend({
                     name = this.nextToken();
                 }
 
-                if(name.type === lexer.TOKEN_SYMBOL &&
-                   name.value === 'endraw') {
-                    this.advanceAfterBlockEnd(name.value);
-                    break;
-                }
-                else {
-                    str += tok.value;
-                    if(isBrokenBlockStart) {
-                        str += peeked.value;
+
+                // Symbol
+                if(name.type === lexer.TOKEN_SYMBOL) {
+                    // End
+                    if(name.value === 'endraw') {
+                        // Exit loop
+                        if(rawLevel === 0) {
+                            this.advanceAfterBlockEnd(name.value);
+                            break;
+                        }
+                        // Decrement
+                        rawLevel -= 1;
+                    } else if(name.value === 'raw') {
+                        // Increment
+                        rawLevel += 1;
                     }
-                    if(ws) {
-                        str += ws.value;
-                    }
-                    str += name.value;
                 }
+
+                // Add token contents back to body
+                str += tok.value;
+                if(isBrokenBlockStart) {
+                    str += peeked.value;
+                }
+                if(ws) {
+                    str += ws.value;
+                }
+                str += name.value;
             }
             else if(tok.type === lexer.TOKEN_STRING) {
                 str += '"' + tok.value + '"';
