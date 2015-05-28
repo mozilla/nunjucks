@@ -560,7 +560,25 @@ var Parser = Object.extend({
                 this.fail('expected endraw, got end of file');
             }
 
-            if(tok.type === lexer.TOKEN_BLOCK_START) {
+            // Handle "broken" blocks that are incorrectly tokenized
+            // TODO: probably fix this in the tokenizer itself
+            var peeked;
+            var isBrokenBlockStart = false;
+            // Check if we have a broken BLOCK_START
+            if(tok.type === lexer.TOKEN_LEFT_CURLY) {
+                peeked = this.peekToken();
+                isBrokenBlockStart = (
+                    tok.type === lexer.TOKEN_LEFT_CURLY &&
+                    peeked && peeked.type === lexer.TOKEN_OPERATOR && peeked.value === '%'
+                );
+            }
+
+            if(tok.type === lexer.TOKEN_BLOCK_START || isBrokenBlockStart) {
+                // Skip operator if we are in a broken block start
+                if(isBrokenBlockStart) {
+                    this.nextToken();
+                }
+
                 // We need to look for the `endraw` block statement,
                 // which involves a lookahead so carefully keep track
                 // of whitespace
@@ -579,6 +597,9 @@ var Parser = Object.extend({
                 }
                 else {
                     str += tok.value;
+                    if(isBrokenBlockStart) {
+                        str += peeked.value;
+                    }
                     if(ws) {
                         str += ws.value;
                     }
