@@ -426,6 +426,13 @@
                     [nodes.TemplateData, '{% if i_am_stupid }Still do your job well']]]);
         });
 
+        it('should parse raw with pure text', function() {
+            isAST(parser.parse('{% raw %}abc{% endraw %}'),
+                  [nodes.Root,
+                   [nodes.Output,
+                    [nodes.TemplateData, 'abc']]]);
+        });
+
         it('should parse keyword and non-keyword arguments', function() {
             isAST(parser.parse('{{ foo("bar", falalalala, baz="foobar") }}'),
                   [nodes.Root,
