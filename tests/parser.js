@@ -412,6 +412,13 @@
                     [nodes.TemplateData, 'hello {{ {% %} }}']]]);
         });
 
+        it('should parse raw with broken variables', function() {
+            isAST(parser.parse('{% raw %}{{ x }{% endraw %}'),
+                  [nodes.Root,
+                   [nodes.Output,
+                    [nodes.TemplateData, '{{ x }']]]);
+        });
+
         it('should parse keyword and non-keyword arguments', function() {
             isAST(parser.parse('{{ foo("bar", falalalala, baz="foobar") }}'),
                   [nodes.Root,
