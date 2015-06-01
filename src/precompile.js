@@ -37,6 +37,7 @@ function precompile(input, opts) {
 
     opts = opts || {};
     var env = opts.env || new Environment([]);
+    env.opts = env.opts || opts;
     var wrapper = opts.wrapper || precompileGlobal;
 
     var pathStats = fs.existsSync(input) && fs.statSync(input);
