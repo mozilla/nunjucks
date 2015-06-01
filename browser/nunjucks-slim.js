@@ -50,13 +50,13 @@ var nunjucks =
 
 	var lib = __webpack_require__(1);
 	var env = __webpack_require__(2);
-	var compiler = __webpack_require__(9);
-	var parser = __webpack_require__(9);
-	var lexer = __webpack_require__(9);
-	var runtime = __webpack_require__(3);
-	var Loader = __webpack_require__(4);
-	var loaders = __webpack_require__(5);
-	var precompile = __webpack_require__(9);
+	var compiler = __webpack_require__(6);
+	var parser = __webpack_require__(6);
+	var lexer = __webpack_require__(6);
+	var runtime = __webpack_require__(4);
+	var Loader = __webpack_require__(11);
+	var loaders = __webpack_require__(6);
+	var precompile = __webpack_require__(6);
 
 	module.exports = {};
 	module.exports.Environment = env.Environment;
@@ -64,6 +64,7 @@ var nunjucks =
 
 	module.exports.Loader = Loader;
 	module.exports.FileSystemLoader = loaders.FileSystemLoader;
+	module.exports.PrecompiledLoader = loaders.PrecompiledLoader;
 	module.exports.WebLoader = loaders.WebLoader;
 
 	module.exports.compiler = compiler;
@@ -88,7 +89,7 @@ var nunjucks =
 	            noCache: opts.noCache
 	        });
 	    }
-	    else {
+	    else if(loaders.WebLoader) {
 	        TemplateLoader = new loaders.WebLoader(templatesPath, {
 	            useCache: opts.web && opts.web.useCache,
 	            async: opts.web && opts.web.async
@@ -422,17 +423,21 @@ var nunjucks =
 
 	'use strict';
 
-	var path = __webpack_require__(9);
-	var asap = __webpack_require__(10);
+	var path = __webpack_require__(6);
+	var asap = __webpack_require__(7);
 	var lib = __webpack_require__(1);
-	var Obj = __webpack_require__(6);
-	var compiler = __webpack_require__(9);
-	var builtin_filters = __webpack_require__(7);
-	var builtin_loaders = __webpack_require__(5);
-	var runtime = __webpack_require__(3);
-	var globals = __webpack_require__(8);
+	var Obj = __webpack_require__(5);
+	var compiler = __webpack_require__(6);
+	var builtin_filters = __webpack_require__(3);
+	var builtin_loaders = __webpack_require__(6);
+	var runtime = __webpack_require__(4);
+	var globals = __webpack_require__(9);
 	var Frame = runtime.Frame;
 	var Template;
+
+	// Unconditionally load in this loader, even if no other ones are
+	// included (possible in the slim browser build)
+	builtin_loaders.PrecompiledLoader = __webpack_require__(10);
 
 	// If the user is using the async API, *always* call it
 	// asynchronously even if the template was synchronous.
@@ -454,27 +459,37 @@ var nunjucks =
 	        // The autoescape flag sets global autoescaping. If true,
 	        // every string variable will be escaped by default.
 	        // If false, strings can be manually escaped using the `escape` filter.
-	        // defaults to false
-	        this.opts.autoescape = !!opts.autoescape;
+	        // defaults to true
+	        this.opts.autoescape = opts.autoescape != null ? opts.autoescape : true;
 
 	        // If true, this will make the system throw errors if trying
 	        // to output a null or undefined value
 	        this.opts.throwOnUndefined = !!opts.throwOnUndefined;
-
 	        this.opts.trimBlocks = !!opts.trimBlocks;
 	        this.opts.lstripBlocks = !!opts.lstripBlocks;
 
+	        this.loaders = [];
+
 	        if(!loaders) {
-	            // The filesystem loader is only available client-side
+	            // The filesystem loader is only available server-side
 	            if(builtin_loaders.FileSystemLoader) {
 	                this.loaders = [new builtin_loaders.FileSystemLoader('views')];
 	            }
-	            else {
+	            else if(builtin_loaders.WebLoader) {
 	                this.loaders = [new builtin_loaders.WebLoader('/views')];
 	            }
 	        }
 	        else {
 	            this.loaders = lib.isArray(loaders) ? loaders : [loaders];
+	        }
+
+	        // It's easy to use precompiled templates: just include them
+	        // before you configure nunjucks and this will automatically
+	        // pick it up and use it
+	        if((true) && window.nunjucksPrecompiled) {
+	            this.loaders.unshift(
+	                new builtin_loaders.PrecompiledLoader(window.nunjucksPrecompiled)
+	            );
 	        }
 
 	        this.initCache();
@@ -580,30 +595,7 @@ var nunjucks =
 	            var syncResult;
 	            var _this = this;
 
-	            lib.asyncIter(this.loaders, function(loader, i, next, done) {
-	                function handle(src) {
-	                    if(src) {
-	                        src.loader = loader;
-	                        done(src);
-	                    }
-	                    else {
-	                        next();
-	                    }
-	                }
-
-	                // Resolve name relative to parentName
-	                name = that.resolveTemplate(loader, parentName, name);
-
-	                if(loader.async) {
-	                    loader.getSource(name, function(err, src) {
-	                        if(err) { throw err; }
-	                        handle(src);
-	                    });
-	                }
-	                else {
-	                    handle(loader.getSource(name));
-	                }
-	            }, function(info) {
+	            var createTemplate = function(info) {
 	                if(!info) {
 	                    var err = new Error('template not found: ' + name);
 	                    if(cb) {
@@ -628,7 +620,32 @@ var nunjucks =
 	                        syncResult = tmpl;
 	                    }
 	                }
-	            });
+	            };
+
+	            lib.asyncIter(this.loaders, function(loader, i, next, done) {
+	                function handle(src) {
+	                    if(src) {
+	                        src.loader = loader;
+	                        done(src);
+	                    }
+	                    else {
+	                        next();
+	                    }
+	                }
+
+	                // Resolve name relative to parentName
+	                name = that.resolveTemplate(loader, parentName, name);
+
+	                if(loader.async) {
+	                    loader.getSource(name, function(err, src) {
+	                        if(err) { throw err; }
+	                        handle(src);
+	                    });
+	                }
+	                else {
+	                    handle(loader.getSource(name));
+	                }
+	            }, createTemplate);
 
 	            return syncResult;
 	        }
@@ -914,7 +931,6 @@ var nunjucks =
 	            var source = compiler.compile(this.tmplStr,
 	                                          this.env.asyncFilters,
 	                                          this.env.extensionsList,
-	                                          this.env.opts.throwOnUndefined,
 	                                          this.path,
 	                                          this.env.opts);
 
@@ -954,589 +970,7 @@ var nunjucks =
 	'use strict';
 
 	var lib = __webpack_require__(1);
-	var Obj = __webpack_require__(6);
-
-	// Frames keep track of scoping both at compile-time and run-time so
-	// we know how to access variables. Block tags can introduce special
-	// variables, for example.
-	var Frame = Obj.extend({
-	    init: function(parent) {
-	        this.variables = {};
-	        this.parent = parent;
-	        this.topLevel = false;
-	    },
-
-	    set: function(name, val, resolveUp) {
-	        // Allow variables with dots by automatically creating the
-	        // nested structure
-	        var parts = name.split('.');
-	        var obj = this.variables;
-	        var frame = this;
-
-	        if(resolveUp) {
-	            if((frame = this.resolve(parts[0]))) {
-	                frame.set(name, val);
-	                return;
-	            }
-	            frame = this;
-	        }
-
-	        for(var i=0; i<parts.length - 1; i++) {
-	            var id = parts[i];
-
-	            if(!obj[id]) {
-	                obj[id] = {};
-	            }
-	            obj = obj[id];
-	        }
-
-	        obj[parts[parts.length - 1]] = val;
-	    },
-
-	    get: function(name) {
-	        var val = this.variables[name];
-	        if(val !== undefined && val !== null) {
-	            return val;
-	        }
-	        return null;
-	    },
-
-	    lookup: function(name) {
-	        var p = this.parent;
-	        var val = this.variables[name];
-	        if(val !== undefined && val !== null) {
-	            return val;
-	        }
-	        return p && p.lookup(name);
-	    },
-
-	    resolve: function(name) {
-	        var p = this.parent;
-	        var val = this.variables[name];
-	        if(val !== undefined && val !== null) {
-	            return this;
-	        }
-	        return p && p.resolve(name);
-	    },
-
-	    push: function() {
-	        return new Frame(this);
-	    },
-
-	    pop: function() {
-	        return this.parent;
-	    }
-	});
-
-	function makeMacro(argNames, kwargNames, func) {
-	    return function() {
-	        var argCount = numArgs(arguments);
-	        var args;
-	        var kwargs = getKeywordArgs(arguments);
-	        var i;
-
-	        if(argCount > argNames.length) {
-	            args = Array.prototype.slice.call(arguments, 0, argNames.length);
-
-	            // Positional arguments that should be passed in as
-	            // keyword arguments (essentially default values)
-	            var vals = Array.prototype.slice.call(arguments, args.length, argCount);
-	            for(i = 0; i < vals.length; i++) {
-	                if(i < kwargNames.length) {
-	                    kwargs[kwargNames[i]] = vals[i];
-	                }
-	            }
-
-	            args.push(kwargs);
-	        }
-	        else if(argCount < argNames.length) {
-	            args = Array.prototype.slice.call(arguments, 0, argCount);
-
-	            for(i = argCount; i < argNames.length; i++) {
-	                var arg = argNames[i];
-
-	                // Keyword arguments that should be passed as
-	                // positional arguments, i.e. the caller explicitly
-	                // used the name of a positional arg
-	                args.push(kwargs[arg]);
-	                delete kwargs[arg];
-	            }
-
-	            args.push(kwargs);
-	        }
-	        else {
-	            args = arguments;
-	        }
-
-	        return func.apply(this, args);
-	    };
-	}
-
-	function makeKeywordArgs(obj) {
-	    obj.__keywords = true;
-	    return obj;
-	}
-
-	function getKeywordArgs(args) {
-	    var len = args.length;
-	    if(len) {
-	        var lastArg = args[len - 1];
-	        if(lastArg && lastArg.hasOwnProperty('__keywords')) {
-	            return lastArg;
-	        }
-	    }
-	    return {};
-	}
-
-	function numArgs(args) {
-	    var len = args.length;
-	    if(len === 0) {
-	        return 0;
-	    }
-
-	    var lastArg = args[len - 1];
-	    if(lastArg && lastArg.hasOwnProperty('__keywords')) {
-	        return len - 1;
-	    }
-	    else {
-	        return len;
-	    }
-	}
-
-	// A SafeString object indicates that the string should not be
-	// autoescaped. This happens magically because autoescaping only
-	// occurs on primitive string objects.
-	function SafeString(val) {
-	    if(typeof val !== 'string') {
-	        return val;
-	    }
-
-	    this.val = val;
-	    this.length = val.length;
-	}
-
-	SafeString.prototype = Object.create(String.prototype, {
-	    length: { writable: true, configurable: true, value: 0 }
-	});
-	SafeString.prototype.valueOf = function() {
-	    return this.val;
-	};
-	SafeString.prototype.toString = function() {
-	    return this.val;
-	};
-
-	function copySafeness(dest, target) {
-	    if(dest instanceof SafeString) {
-	        return new SafeString(target);
-	    }
-	    return target.toString();
-	}
-
-	function markSafe(val) {
-	    var type = typeof val;
-
-	    if(type === 'string') {
-	        return new SafeString(val);
-	    }
-	    else if(type !== 'function') {
-	        return val;
-	    }
-	    else {
-	        return function() {
-	            var ret = val.apply(this, arguments);
-
-	            if(typeof ret === 'string') {
-	                return new SafeString(ret);
-	            }
-
-	            return ret;
-	        };
-	    }
-	}
-
-	function suppressValue(val, autoescape) {
-	    val = (val !== undefined && val !== null) ? val : '';
-
-	    if(autoescape && typeof val === 'string') {
-	        val = lib.escape(val);
-	    }
-
-	    return val;
-	}
-
-	function ensureDefined(val, lineno, colno) {
-	    if(val === null || val === undefined) {
-	        throw new lib.TemplateError(
-	            'attempted to output null or undefined value',
-	            lineno + 1,
-	            colno + 1
-	        );
-	    }
-	    return val;
-	}
-
-	function memberLookup(obj, val) {
-	    obj = obj || {};
-
-	    if(typeof obj[val] === 'function') {
-	        return function() {
-	            return obj[val].apply(obj, arguments);
-	        };
-	    }
-
-	    return obj[val];
-	}
-
-	function callWrap(obj, name, args) {
-	    if(!obj) {
-	        throw new Error('Unable to call `' + name + '`, which is undefined or falsey');
-	    }
-	    else if(typeof obj !== 'function') {
-	        throw new Error('Unable to call `' + name + '`, which is not a function');
-	    }
-
-	    // jshint validthis: true
-	    return obj.apply(this, args);
-	}
-
-	function contextOrFrameLookup(context, frame, name) {
-	    var val = frame.lookup(name);
-	    return (val !== undefined && val !== null) ?
-	        val :
-	        context.lookup(name);
-	}
-
-	function handleError(error, lineno, colno) {
-	    if(error.lineno) {
-	        return error;
-	    }
-	    else {
-	        return new lib.TemplateError(error, lineno, colno);
-	    }
-	}
-
-	function asyncEach(arr, dimen, iter, cb) {
-	    if(lib.isArray(arr)) {
-	        var len = arr.length;
-
-	        lib.asyncIter(arr, function(item, i, next) {
-	            switch(dimen) {
-	            case 1: iter(item, i, len, next); break;
-	            case 2: iter(item[0], item[1], i, len, next); break;
-	            case 3: iter(item[0], item[1], item[2], i, len, next); break;
-	            default:
-	                item.push(i, next);
-	                iter.apply(this, item);
-	            }
-	        }, cb);
-	    }
-	    else {
-	        lib.asyncFor(arr, function(key, val, i, len, next) {
-	            iter(key, val, i, len, next);
-	        }, cb);
-	    }
-	}
-
-	function asyncAll(arr, dimen, func, cb) {
-	    var finished = 0;
-	    var len, i;
-	    var outputArr;
-
-	    function done(i, output) {
-	        finished++;
-	        outputArr[i] = output;
-
-	        if(finished === len) {
-	            cb(null, outputArr.join(''));
-	        }
-	    }
-
-	    if(lib.isArray(arr)) {
-	        len = arr.length;
-	        outputArr = new Array(len);
-
-	        if(len === 0) {
-	            cb(null, '');
-	        }
-	        else {
-	            for(i = 0; i < arr.length; i++) {
-	                var item = arr[i];
-
-	                switch(dimen) {
-	                case 1: func(item, i, len, done); break;
-	                case 2: func(item[0], item[1], i, len, done); break;
-	                case 3: func(item[0], item[1], item[2], i, len, done); break;
-	                default:
-	                    item.push(i, done);
-	                    // jshint validthis: true
-	                    func.apply(this, item);
-	                }
-	            }
-	        }
-	    }
-	    else {
-	        var keys = lib.keys(arr);
-	        len = keys.length;
-	        outputArr = new Array(len);
-
-	        if(len === 0) {
-	            cb(null, '');
-	        }
-	        else {
-	            for(i = 0; i < keys.length; i++) {
-	                var k = keys[i];
-	                func(k, arr[k], i, len, done);
-	            }
-	        }
-	    }
-	}
-
-	module.exports = {
-	    Frame: Frame,
-	    makeMacro: makeMacro,
-	    makeKeywordArgs: makeKeywordArgs,
-	    numArgs: numArgs,
-	    suppressValue: suppressValue,
-	    ensureDefined: ensureDefined,
-	    memberLookup: memberLookup,
-	    contextOrFrameLookup: contextOrFrameLookup,
-	    callWrap: callWrap,
-	    handleError: handleError,
-	    isArray: lib.isArray,
-	    keys: lib.keys,
-	    SafeString: SafeString,
-	    copySafeness: copySafeness,
-	    markSafe: markSafe,
-	    asyncEach: asyncEach,
-	    asyncAll: asyncAll
-	};
-
-
-/***/ },
-/* 4 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var path = __webpack_require__(9);
-	var Obj = __webpack_require__(6);
-	var lib = __webpack_require__(1);
-
-	var Loader = Obj.extend({
-	    on: function(name, func) {
-	        this.listeners = this.listeners || {};
-	        this.listeners[name] = this.listeners[name] || [];
-	        this.listeners[name].push(func);
-	    },
-
-	    emit: function(name /*, arg1, arg2, ...*/) {
-	        var args = Array.prototype.slice.call(arguments, 1);
-
-	        if(this.listeners && this.listeners[name]) {
-	            lib.each(this.listeners[name], function(listener) {
-	                listener.apply(null, args);
-	            });
-	        }
-	    },
-
-	    resolve: function(from, to) {
-	        return path.resolve(path.dirname(from), to);
-	    },
-
-	    isRelative: function(filename) {
-	        return (filename.indexOf('./') === 0 || filename.indexOf('../') === 0);
-	    }
-	});
-
-	module.exports = Loader;
-
-
-/***/ },
-/* 5 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var Loader = __webpack_require__(4);
-
-	var WebLoader = Loader.extend({
-	    init: function(baseURL, opts) {
-	        // It's easy to use precompiled templates: just include them
-	        // before you configure nunjucks and this will automatically
-	        // pick it up and use it
-	        this.precompiled = window.nunjucksPrecompiled || {};
-
-	        this.baseURL = baseURL || '';
-
-	        // By default, the cache is turned off because there's no way
-	        // to "watch" templates over HTTP, so they are re-downloaded
-	        // and compiled each time. (Remember, PRECOMPILE YOUR
-	        // TEMPLATES in production!)
-	        this.useCache = opts.useCache;
-
-	        // We default `async` to false so that the simple synchronous
-	        // API can be used when you aren't doing anything async in
-	        // your templates (which is most of the time). This performs a
-	        // sync ajax request, but that's ok because it should *only*
-	        // happen in development. PRECOMPILE YOUR TEMPLATES.
-	        this.async = opts.async;
-	    },
-
-	    resolve: function(from, to) {
-	        throw new Error('relative templates not support in the browser yet');
-	    },
-
-	    getSource: function(name, cb) {
-	        if(this.precompiled[name]) {
-	            return {
-	                src: { type: 'code',
-	                       obj: this.precompiled[name] },
-	                path: name
-	            };
-	        }
-	        else {
-	            var useCache = this.useCache;
-	            var result;
-	            this.fetch(this.baseURL + '/' + name, function(err, src) {
-	                if(err) {
-	                    if(!cb) {
-	                        throw err;
-	                    }
-	                    cb(err);
-	                }
-	                else {
-	                    result = { src: src,
-	                               path: name,
-	                               noCache: !useCache };
-	                    if(cb) {
-	                        cb(null, result);
-	                    }
-	                }
-	            });
-
-	            // if this WebLoader isn't running asynchronously, the
-	            // fetch above would actually run sync and we'll have a
-	            // result here
-	            return result;
-	        }
-	    },
-
-	    fetch: function(url, cb) {
-	        // Only in the browser please
-	        var ajax;
-	        var loading = true;
-
-	        if(window.XMLHttpRequest) { // Mozilla, Safari, ...
-	            ajax = new XMLHttpRequest();
-	        }
-	        else if(window.ActiveXObject) { // IE 8 and older
-	            /* global ActiveXObject */
-	            ajax = new ActiveXObject('Microsoft.XMLHTTP');
-	        }
-
-	        ajax.onreadystatechange = function() {
-	            if(ajax.readyState === 4 && loading) {
-	                loading = false;
-	                if(ajax.status === 0 || ajax.status === 200) {
-	                    cb(null, ajax.responseText);
-	                }
-	                else {
-	                    cb(ajax.responseText);
-	                }
-	            }
-	        };
-
-	        url += (url.indexOf('?') === -1 ? '?' : '&') + 's=' +
-	               (new Date().getTime());
-
-	        ajax.open('GET', url, this.async);
-	        ajax.send();
-	    }
-	});
-
-	module.exports = {
-	    WebLoader: WebLoader
-	};
-
-
-/***/ },
-/* 6 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	// A simple class system, more documentation to come
-
-	function extend(cls, name, props) {
-	    // This does that same thing as Object.create, but with support for IE8
-	    var F = function() {};
-	    F.prototype = cls.prototype;
-	    var prototype = new F();
-
-	    // jshint undef: false
-	    var fnTest = /xyz/.test(function(){ xyz; }) ? /\bparent\b/ : /.*/;
-	    props = props || {};
-
-	    for(var k in props) {
-	        var src = props[k];
-	        var parent = prototype[k];
-
-	        if(typeof parent === 'function' &&
-	           typeof src === 'function' &&
-	           fnTest.test(src)) {
-	            /*jshint -W083 */
-	            prototype[k] = (function (src, parent) {
-	                return function() {
-	                    // Save the current parent method
-	                    var tmp = this.parent;
-
-	                    // Set parent to the previous method, call, and restore
-	                    this.parent = parent;
-	                    var res = src.apply(this, arguments);
-	                    this.parent = tmp;
-
-	                    return res;
-	                };
-	            })(src, parent);
-	        }
-	        else {
-	            prototype[k] = src;
-	        }
-	    }
-
-	    prototype.typename = name;
-
-	    var new_cls = function() {
-	        if(prototype.init) {
-	            prototype.init.apply(this, arguments);
-	        }
-	    };
-
-	    new_cls.prototype = prototype;
-	    new_cls.prototype.constructor = new_cls;
-
-	    new_cls.extend = function(name, props) {
-	        if(typeof name === 'object') {
-	            props = name;
-	            name = 'anonymous';
-	        }
-	        return extend(new_cls, name, props);
-	    };
-
-	    return new_cls;
-	}
-
-	module.exports = extend(Object, 'Object', {});
-
-
-/***/ },
-/* 7 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var lib = __webpack_require__(1);
-	var r = __webpack_require__(3);
+	var r = __webpack_require__(4);
 
 	function normalize(value, defaultValue) {
 	    if(value === null || value === undefined || value === false) {
@@ -1545,6 +979,7 @@ var nunjucks =
 	    return value;
 	}
 
+	var hasWarnedDefault = false;
 
 	var filters = {
 	    abs: function(n) {
@@ -1598,8 +1033,25 @@ var nunjucks =
 	        return r.copySafeness(str, pre + str + post);
 	    },
 
-	    'default': function(val, def) {
-	        return val ? val : def;
+	    'default': function(val, def, bool) {
+	        if(bool !== true && bool !== false && !hasWarnedDefault) {
+	            hasWarnedDefault = true;
+	            console.log(
+	                '[nunjucks] Warning: the "default" filter was used without ' +
+	                'specifying the type of comparison. 2.0 changed the default ' +
+	                'behavior from boolean (val ? val : def) to strictly undefined, ' +
+	                'so you should make sure that doesn\'t break anything. ' +
+	                'Be explicit about this to make this warning go away, or wait until 2.1. ' +
+	                'See http://mozilla.github.io/nunjucks/templating.html#defaultvalue-default-boolean'
+	            );
+	        }
+
+	        if(bool) {
+	            return val ? val : def;
+	        }
+	        else {
+	            return (val !== undefined) ? val : def;
+	        }
 	    },
 
 	    dictsort: function(val, case_sensitive, by) {
@@ -2012,10 +1464,7 @@ var nunjucks =
 	          return word && word.length;
 	        }).map(function(word) {
 	          var matches = word.match(puncRE);
-
-
 	          var possibleUrl = matches && matches[1] || word;
-
 
 	          // url that starts with http or https
 	          if (httpHttpsRE.test(possibleUrl))
@@ -2065,92 +1514,454 @@ var nunjucks =
 
 
 /***/ },
-/* 8 */
+/* 4 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	function cycler(items) {
-	    var index = -1;
+	var lib = __webpack_require__(1);
+	var Obj = __webpack_require__(5);
 
-	    return {
-	        current: null,
-	        reset: function() {
-	            index = -1;
-	            this.current = null;
-	        },
+	// Frames keep track of scoping both at compile-time and run-time so
+	// we know how to access variables. Block tags can introduce special
+	// variables, for example.
+	var Frame = Obj.extend({
+	    init: function(parent) {
+	        this.variables = {};
+	        this.parent = parent;
+	        this.topLevel = false;
+	    },
 
-	        next: function() {
-	            index++;
-	            if(index >= items.length) {
-	                index = 0;
+	    set: function(name, val, resolveUp) {
+	        // Allow variables with dots by automatically creating the
+	        // nested structure
+	        var parts = name.split('.');
+	        var obj = this.variables;
+	        var frame = this;
+
+	        if(resolveUp) {
+	            if((frame = this.resolve(parts[0]))) {
+	                frame.set(name, val);
+	                return;
+	            }
+	            frame = this;
+	        }
+
+	        for(var i=0; i<parts.length - 1; i++) {
+	            var id = parts[i];
+
+	            if(!obj[id]) {
+	                obj[id] = {};
+	            }
+	            obj = obj[id];
+	        }
+
+	        obj[parts[parts.length - 1]] = val;
+	    },
+
+	    get: function(name) {
+	        var val = this.variables[name];
+	        if(val !== undefined && val !== null) {
+	            return val;
+	        }
+	        return null;
+	    },
+
+	    lookup: function(name) {
+	        var p = this.parent;
+	        var val = this.variables[name];
+	        if(val !== undefined && val !== null) {
+	            return val;
+	        }
+	        return p && p.lookup(name);
+	    },
+
+	    resolve: function(name) {
+	        var p = this.parent;
+	        var val = this.variables[name];
+	        if(val !== undefined && val !== null) {
+	            return this;
+	        }
+	        return p && p.resolve(name);
+	    },
+
+	    push: function() {
+	        return new Frame(this);
+	    },
+
+	    pop: function() {
+	        return this.parent;
+	    }
+	});
+
+	function makeMacro(argNames, kwargNames, func) {
+	    return function() {
+	        var argCount = numArgs(arguments);
+	        var args;
+	        var kwargs = getKeywordArgs(arguments);
+	        var i;
+
+	        if(argCount > argNames.length) {
+	            args = Array.prototype.slice.call(arguments, 0, argNames.length);
+
+	            // Positional arguments that should be passed in as
+	            // keyword arguments (essentially default values)
+	            var vals = Array.prototype.slice.call(arguments, args.length, argCount);
+	            for(i = 0; i < vals.length; i++) {
+	                if(i < kwargNames.length) {
+	                    kwargs[kwargNames[i]] = vals[i];
+	                }
 	            }
 
-	            this.current = items[index];
-	            return this.current;
-	        },
-	    };
+	            args.push(kwargs);
+	        }
+	        else if(argCount < argNames.length) {
+	            args = Array.prototype.slice.call(arguments, 0, argCount);
 
+	            for(i = argCount; i < argNames.length; i++) {
+	                var arg = argNames[i];
+
+	                // Keyword arguments that should be passed as
+	                // positional arguments, i.e. the caller explicitly
+	                // used the name of a positional arg
+	                args.push(kwargs[arg]);
+	                delete kwargs[arg];
+	            }
+
+	            args.push(kwargs);
+	        }
+	        else {
+	            args = arguments;
+	        }
+
+	        return func.apply(this, args);
+	    };
 	}
 
-	function joiner(sep) {
-	    sep = sep || ',';
-	    var first = true;
-
-	    return function() {
-	        var val = first ? '' : sep;
-	        first = false;
-	        return val;
-	    };
+	function makeKeywordArgs(obj) {
+	    obj.__keywords = true;
+	    return obj;
 	}
 
-	var globals = {
-	    range: function(start, stop, step) {
-	        if(!stop) {
-	            stop = start;
-	            start = 0;
-	            step = 1;
+	function getKeywordArgs(args) {
+	    var len = args.length;
+	    if(len) {
+	        var lastArg = args[len - 1];
+	        if(lastArg && lastArg.hasOwnProperty('__keywords')) {
+	            return lastArg;
 	        }
-	        else if(!step) {
-	            step = 1;
-	        }
-
-	        var arr = [];
-	        for(var i=start; i<stop; i+=step) {
-	            arr.push(i);
-	        }
-	        return arr;
-	    },
-
-	    // lipsum: function(n, html, min, max) {
-	    // },
-
-	    cycler: function() {
-	        return cycler(Array.prototype.slice.call(arguments));
-	    },
-
-	    joiner: function(sep) {
-	        return joiner(sep);
 	    }
+	    return {};
+	}
+
+	function numArgs(args) {
+	    var len = args.length;
+	    if(len === 0) {
+	        return 0;
+	    }
+
+	    var lastArg = args[len - 1];
+	    if(lastArg && lastArg.hasOwnProperty('__keywords')) {
+	        return len - 1;
+	    }
+	    else {
+	        return len;
+	    }
+	}
+
+	// A SafeString object indicates that the string should not be
+	// autoescaped. This happens magically because autoescaping only
+	// occurs on primitive string objects.
+	function SafeString(val) {
+	    if(typeof val !== 'string') {
+	        return val;
+	    }
+
+	    this.val = val;
+	    this.length = val.length;
+	}
+
+	SafeString.prototype = Object.create(String.prototype, {
+	    length: { writable: true, configurable: true, value: 0 }
+	});
+	SafeString.prototype.valueOf = function() {
+	    return this.val;
+	};
+	SafeString.prototype.toString = function() {
+	    return this.val;
 	};
 
-	module.exports = globals;
+	function copySafeness(dest, target) {
+	    if(dest instanceof SafeString) {
+	        return new SafeString(target);
+	    }
+	    return target.toString();
+	}
+
+	function markSafe(val) {
+	    var type = typeof val;
+
+	    if(type === 'string') {
+	        return new SafeString(val);
+	    }
+	    else if(type !== 'function') {
+	        return val;
+	    }
+	    else {
+	        return function() {
+	            var ret = val.apply(this, arguments);
+
+	            if(typeof ret === 'string') {
+	                return new SafeString(ret);
+	            }
+
+	            return ret;
+	        };
+	    }
+	}
+
+	function suppressValue(val, autoescape) {
+	    val = (val !== undefined && val !== null) ? val : '';
+
+	    if(autoescape && typeof val === 'string') {
+	        val = lib.escape(val);
+	    }
+
+	    return val;
+	}
+
+	function ensureDefined(val, lineno, colno) {
+	    if(val === null || val === undefined) {
+	        throw new lib.TemplateError(
+	            'attempted to output null or undefined value',
+	            lineno + 1,
+	            colno + 1
+	        );
+	    }
+	    return val;
+	}
+
+	function memberLookup(obj, val) {
+	    obj = obj || {};
+
+	    if(typeof obj[val] === 'function') {
+	        return function() {
+	            return obj[val].apply(obj, arguments);
+	        };
+	    }
+
+	    return obj[val];
+	}
+
+	function callWrap(obj, name, args) {
+	    if(!obj) {
+	        throw new Error('Unable to call `' + name + '`, which is undefined or falsey');
+	    }
+	    else if(typeof obj !== 'function') {
+	        throw new Error('Unable to call `' + name + '`, which is not a function');
+	    }
+
+	    // jshint validthis: true
+	    return obj.apply(this, args);
+	}
+
+	function contextOrFrameLookup(context, frame, name) {
+	    var val = frame.lookup(name);
+	    return (val !== undefined && val !== null) ?
+	        val :
+	        context.lookup(name);
+	}
+
+	function handleError(error, lineno, colno) {
+	    if(error.lineno) {
+	        return error;
+	    }
+	    else {
+	        return new lib.TemplateError(error, lineno, colno);
+	    }
+	}
+
+	function asyncEach(arr, dimen, iter, cb) {
+	    if(lib.isArray(arr)) {
+	        var len = arr.length;
+
+	        lib.asyncIter(arr, function(item, i, next) {
+	            switch(dimen) {
+	            case 1: iter(item, i, len, next); break;
+	            case 2: iter(item[0], item[1], i, len, next); break;
+	            case 3: iter(item[0], item[1], item[2], i, len, next); break;
+	            default:
+	                item.push(i, next);
+	                iter.apply(this, item);
+	            }
+	        }, cb);
+	    }
+	    else {
+	        lib.asyncFor(arr, function(key, val, i, len, next) {
+	            iter(key, val, i, len, next);
+	        }, cb);
+	    }
+	}
+
+	function asyncAll(arr, dimen, func, cb) {
+	    var finished = 0;
+	    var len, i;
+	    var outputArr;
+
+	    function done(i, output) {
+	        finished++;
+	        outputArr[i] = output;
+
+	        if(finished === len) {
+	            cb(null, outputArr.join(''));
+	        }
+	    }
+
+	    if(lib.isArray(arr)) {
+	        len = arr.length;
+	        outputArr = new Array(len);
+
+	        if(len === 0) {
+	            cb(null, '');
+	        }
+	        else {
+	            for(i = 0; i < arr.length; i++) {
+	                var item = arr[i];
+
+	                switch(dimen) {
+	                case 1: func(item, i, len, done); break;
+	                case 2: func(item[0], item[1], i, len, done); break;
+	                case 3: func(item[0], item[1], item[2], i, len, done); break;
+	                default:
+	                    item.push(i, done);
+	                    // jshint validthis: true
+	                    func.apply(this, item);
+	                }
+	            }
+	        }
+	    }
+	    else {
+	        var keys = lib.keys(arr);
+	        len = keys.length;
+	        outputArr = new Array(len);
+
+	        if(len === 0) {
+	            cb(null, '');
+	        }
+	        else {
+	            for(i = 0; i < keys.length; i++) {
+	                var k = keys[i];
+	                func(k, arr[k], i, len, done);
+	            }
+	        }
+	    }
+	}
+
+	module.exports = {
+	    Frame: Frame,
+	    makeMacro: makeMacro,
+	    makeKeywordArgs: makeKeywordArgs,
+	    numArgs: numArgs,
+	    suppressValue: suppressValue,
+	    ensureDefined: ensureDefined,
+	    memberLookup: memberLookup,
+	    contextOrFrameLookup: contextOrFrameLookup,
+	    callWrap: callWrap,
+	    handleError: handleError,
+	    isArray: lib.isArray,
+	    keys: lib.keys,
+	    SafeString: SafeString,
+	    copySafeness: copySafeness,
+	    markSafe: markSafe,
+	    asyncEach: asyncEach,
+	    asyncAll: asyncAll
+	};
 
 
 /***/ },
-/* 9 */
+/* 5 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	// A simple class system, more documentation to come
+
+	function extend(cls, name, props) {
+	    // This does that same thing as Object.create, but with support for IE8
+	    var F = function() {};
+	    F.prototype = cls.prototype;
+	    var prototype = new F();
+
+	    // jshint undef: false
+	    var fnTest = /xyz/.test(function(){ xyz; }) ? /\bparent\b/ : /.*/;
+	    props = props || {};
+
+	    for(var k in props) {
+	        var src = props[k];
+	        var parent = prototype[k];
+
+	        if(typeof parent === 'function' &&
+	           typeof src === 'function' &&
+	           fnTest.test(src)) {
+	            /*jshint -W083 */
+	            prototype[k] = (function (src, parent) {
+	                return function() {
+	                    // Save the current parent method
+	                    var tmp = this.parent;
+
+	                    // Set parent to the previous method, call, and restore
+	                    this.parent = parent;
+	                    var res = src.apply(this, arguments);
+	                    this.parent = tmp;
+
+	                    return res;
+	                };
+	            })(src, parent);
+	        }
+	        else {
+	            prototype[k] = src;
+	        }
+	    }
+
+	    prototype.typename = name;
+
+	    var new_cls = function() {
+	        if(prototype.init) {
+	            prototype.init.apply(this, arguments);
+	        }
+	    };
+
+	    new_cls.prototype = prototype;
+	    new_cls.prototype.constructor = new_cls;
+
+	    new_cls.extend = function(name, props) {
+	        if(typeof name === 'object') {
+	            props = name;
+	            name = 'anonymous';
+	        }
+	        return extend(new_cls, name, props);
+	    };
+
+	    return new_cls;
+	}
+
+	module.exports = extend(Object, 'Object', {});
+
+
+/***/ },
+/* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
 
 /***/ },
-/* 10 */
+/* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
 
 	// rawAsap provides everything we need except exception management.
-	var rawAsap = __webpack_require__(11);
+	var rawAsap = __webpack_require__(8);
 	// RawTasks are recycled to reduce GC churn.
 	var freeTasks = [];
 	// We queue errors to ensure they are thrown in right order (FIFO).
@@ -2216,7 +2027,7 @@ var nunjucks =
 
 
 /***/ },
-/* 11 */
+/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {"use strict";
@@ -2441,6 +2252,146 @@ var nunjucks =
 	// https://github.com/tildeio/rsvp.js/blob/cddf7232546a9cf858524b75cde6f9edf72620a7/lib/rsvp/asap.js
 
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
+
+/***/ },
+/* 9 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	function cycler(items) {
+	    var index = -1;
+
+	    return {
+	        current: null,
+	        reset: function() {
+	            index = -1;
+	            this.current = null;
+	        },
+
+	        next: function() {
+	            index++;
+	            if(index >= items.length) {
+	                index = 0;
+	            }
+
+	            this.current = items[index];
+	            return this.current;
+	        },
+	    };
+
+	}
+
+	function joiner(sep) {
+	    sep = sep || ',';
+	    var first = true;
+
+	    return function() {
+	        var val = first ? '' : sep;
+	        first = false;
+	        return val;
+	    };
+	}
+
+	var globals = {
+	    range: function(start, stop, step) {
+	        if(!stop) {
+	            stop = start;
+	            start = 0;
+	            step = 1;
+	        }
+	        else if(!step) {
+	            step = 1;
+	        }
+
+	        var arr = [];
+	        for(var i=start; i<stop; i+=step) {
+	            arr.push(i);
+	        }
+	        return arr;
+	    },
+
+	    // lipsum: function(n, html, min, max) {
+	    // },
+
+	    cycler: function() {
+	        return cycler(Array.prototype.slice.call(arguments));
+	    },
+
+	    joiner: function(sep) {
+	        return joiner(sep);
+	    }
+	};
+
+	module.exports = globals;
+
+
+/***/ },
+/* 10 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var Loader = __webpack_require__(11);
+
+	var PrecompiledLoader = Loader.extend({
+	    init: function(compiledTemplates) {
+	        this.precompiled = compiledTemplates || {};
+	    },
+
+	    getSource: function(name) {
+	        if (this.precompiled[name]) {
+	            return {
+	                src: { type: 'code',
+	                       obj: this.precompiled[name] },
+	                path: name
+	            };
+	        }
+	        return null;
+	    }
+	});
+
+	module.exports = PrecompiledLoader;
+
+
+/***/ },
+/* 11 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var path = __webpack_require__(6);
+	var Obj = __webpack_require__(5);
+	var lib = __webpack_require__(1);
+
+	var Loader = Obj.extend({
+	    on: function(name, func) {
+	        this.listeners = this.listeners || {};
+	        this.listeners[name] = this.listeners[name] || [];
+	        this.listeners[name].push(func);
+	    },
+
+	    emit: function(name /*, arg1, arg2, ...*/) {
+	        var args = Array.prototype.slice.call(arguments, 1);
+
+	        if(this.listeners && this.listeners[name]) {
+	            lib.each(this.listeners[name], function(listener) {
+	                listener.apply(null, args);
+	            });
+	        }
+	    },
+
+	    resolve: function(from, to) {
+	        return path.resolve(path.dirname(from), to);
+	    },
+
+	    isRelative: function(filename) {
+	        return (filename.indexOf('./') === 0 || filename.indexOf('../') === 0);
+	    }
+	});
+
+	module.exports = Loader;
+
 
 /***/ }
 /******/ ]);
