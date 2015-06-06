@@ -19,6 +19,13 @@ var WebLoader = Loader.extend({
         // sync ajax request, but that's ok because it should *only*
         // happen in development. PRECOMPILE YOUR TEMPLATES.
         this.async = opts.async;
+
+        // By default we append "s=<timestamp>" to template URLs to 
+        // force loading of them on every render.  If you want to allow
+        // the browser to cache the templates set this to true.  If you
+        // want to append a string of your choosing then set it to that
+        // value.
+        this.browserCache = opts.browserCache || false;
     },
 
     resolve: function(from, to) { // jshint ignore:line
@@ -76,8 +83,16 @@ var WebLoader = Loader.extend({
             }
         };
 
-        url += (url.indexOf('?') === -1 ? '?' : '&') + 's=' +
-               (new Date().getTime());
+        // if browser caching is disabled (the default) append
+        // "s=<timestamp>"
+        var update_url = function(param) {
+            url += (url.indexOf('?') === -1 ? '?' : '&') + 's=' + param;
+        };
+        if (this.browserCache === false) {
+            update_url((new Date()).getTime());
+        } else if (this.browserCache !== true) {
+            update_url(this.browserCache);
+        }
 
         ajax.open('GET', url, this.async);
         ajax.send();

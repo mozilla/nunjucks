@@ -45,7 +45,8 @@ module.exports.configure = function(templatesPath, opts) {
     else if(loaders.WebLoader) {
         TemplateLoader = new loaders.WebLoader(templatesPath, {
             useCache: opts.web && opts.web.useCache,
-            async: opts.web && opts.web.async
+            async: opts.web && opts.web.async,
+            browserCache: opts.web && opts.web.browserCache
         });
     }
 
