@@ -549,94 +549,46 @@ var Parser = Object.extend({
     },
 
     parseRaw: function() {
-        this.advanceAfterBlockEnd();
+        var blockRegex = /([\s\S]*){%\s*(.*?)\s*(?=%})%}/;
+        var rawLevel = 1;
         var str = '';
-        var begun = this.peekToken();
-        var rawLevel = 0;
+        var matches = null;
 
-        while(1) {
-            // Passing true gives us all the whitespace tokens as
-            // well, which are usually ignored.
-            var tok = this.nextToken(true);
+        // Skip opening raw token
+        // Keep this token to track line and column numbers
+        var begun = this.advanceAfterBlockEnd();
 
-            if(!tok) {
-                this.fail('expected endraw, got end of file');
+        // Exit when there's nothing to match
+        // or when we've found the matching "endraw" block
+        while((matches = this.tokens._extractRegex(blockRegex)) && rawLevel > 0) {
+            var all = matches[0];
+            var pre = matches[1];
+            var blockName = matches[2];
+
+            // Adjust rawlevel
+            if(blockName === 'raw') {
+
+                rawLevel += 1;
+            } else if(blockName === 'endraw') {
+                rawLevel -= 1;
             }
 
-            // Handle "broken" blocks that are incorrectly tokenized
-            // TODO: probably fix this in the tokenizer itself
-            var peeked;
-            var isBrokenBlockStart = false;
-            // Check if we have a broken BLOCK_START
-            if(tok.type === lexer.TOKEN_LEFT_CURLY) {
-                peeked = this.peekToken();
-                isBrokenBlockStart = (
-                    tok.type === lexer.TOKEN_LEFT_CURLY &&
-                    peeked && peeked.type === lexer.TOKEN_OPERATOR && peeked.value === '%'
-                );
-            }
-
-            if(tok.type === lexer.TOKEN_BLOCK_START || isBrokenBlockStart) {
-                // Skip operator if we are in a broken block start
-                if(isBrokenBlockStart) {
-                    this.nextToken();
-                }
-
-                // We need to look for the `endraw` block statement,
-                // which involves a lookahead so carefully keep track
-                // of whitespace
-                var ws = null;
-                var name = this.nextToken(true);
-
-                if(name.type === lexer.TOKEN_WHITESPACE) {
-                    ws = name;
-                    name = this.nextToken();
-                }
-
-
-                // Symbol
-                if(name.type === lexer.TOKEN_SYMBOL) {
-                    // End
-                    if(name.value === 'endraw') {
-                        // Exit loop
-                        if(rawLevel === 0) {
-                            this.advanceAfterBlockEnd(name.value);
-                            break;
-                        }
-                        // Decrement
-                        rawLevel -= 1;
-                    } else if(name.value === 'raw') {
-                        // Increment
-                        rawLevel += 1;
-                    }
-                }
-
-                // Add token contents back to body
-                str += tok.value;
-                if(isBrokenBlockStart) {
-                    str += peeked.value;
-                }
-                if(ws) {
-                    str += ws.value;
-                }
-                str += name.value;
-            }
-            else if(tok.type === lexer.TOKEN_STRING) {
-                str += '"' + tok.value + '"';
-            }
-            else {
-                str += tok.value;
+            // Add to str
+            if(rawLevel === 0) {
+                // We want to exclude the last "endraw"
+                str += pre;
+                // Move tokenizer to beginning of endraw block
+                this.tokens.backN(all.length - pre.length);
+            } else {
+                str += all;
             }
         }
 
-
-        var output = new nodes.Output(
+        return new nodes.Output(
             begun.lineno,
             begun.colno,
             [new nodes.TemplateData(begun.lineno, begun.colno, str)]
         );
-
-        return output;
     },
 
     parsePostfix: function(node) {
