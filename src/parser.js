@@ -124,6 +124,8 @@ var Parser = Object.extend({
         else {
             this.fail('expected block end in ' + name + ' statement');
         }
+
+        return tok;
     },
 
     advanceAfterVariableEnd: function() {
