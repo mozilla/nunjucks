@@ -441,6 +441,13 @@
                     [nodes.TemplateData, '{% raw %}{{ x }{% endraw %}']]]);
         });
 
+        it('should parse raw with comment blocks', function() {
+          isAST(parser.parse('{% raw %}{# test {% endraw %}'),
+                  [nodes.Root,
+                   [nodes.Output,
+                    [nodes.TemplateData, '{# test ']]]);
+        });
+
         it('should parse keyword and non-keyword arguments', function() {
             isAST(parser.parse('{{ foo("bar", falalalala, baz="foobar") }}'),
                   [nodes.Root,
