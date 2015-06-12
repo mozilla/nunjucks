@@ -83,5 +83,16 @@
 
           finish(done);
         });
+
+        it('should pass context as this to global functions', function(done) {
+            var env = new Environment(new Loader(templatesPath));
+
+            env.addGlobal('hello', function() {
+                return 'Hello ' + this.lookup('user');
+            });
+
+            equal('{{ hello() }}', { user: 'James' }, 'Hello James');
+            finish(done);
+        });
     });
 })();

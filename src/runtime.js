@@ -234,7 +234,7 @@ function memberLookup(obj, val) {
     return obj[val];
 }
 
-function callWrap(obj, name, args) {
+function callWrap(obj, name, context, args) {
     if(!obj) {
         throw new Error('Unable to call `' + name + '`, which is undefined or falsey');
     }
@@ -243,7 +243,7 @@ function callWrap(obj, name, args) {
     }
 
     // jshint validthis: true
-    return obj.apply(this, args);
+    return obj.apply(context, args);
 }
 
 function contextOrFrameLookup(context, frame, name) {

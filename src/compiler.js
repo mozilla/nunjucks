@@ -454,7 +454,7 @@ var Compiler = Object.extend({
 
         // Output the name of what we're calling so we can get friendly errors
         // if the lookup fails.
-        this.emit(', "' + this._getNodeName(node.name).replace(/"/g, '\\"') + '", ');
+        this.emit(', "' + this._getNodeName(node.name).replace(/"/g, '\\"') + '", context, ');
 
         this._compileAggregate(node.args, frame, '[', '])');
 
