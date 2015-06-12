@@ -50,13 +50,9 @@ var nunjucks =
 
 	var lib = __webpack_require__(1);
 	var env = __webpack_require__(2);
-	var compiler = __webpack_require__(9);
-	var parser = __webpack_require__(9);
-	var lexer = __webpack_require__(9);
-	var runtime = __webpack_require__(3);
-	var Loader = __webpack_require__(4);
-	var loaders = __webpack_require__(9);
-	var precompile = __webpack_require__(9);
+	var Loader = __webpack_require__(3);
+	var loaders = __webpack_require__(10);
+	var precompile = __webpack_require__(10);
 
 	module.exports = {};
 	module.exports.Environment = env.Environment;
@@ -67,11 +63,13 @@ var nunjucks =
 	module.exports.PrecompiledLoader = loaders.PrecompiledLoader;
 	module.exports.WebLoader = loaders.WebLoader;
 
-	module.exports.compiler = compiler;
-	module.exports.parser = parser;
-	module.exports.lexer = lexer;
-	module.exports.runtime = runtime;
+	module.exports.compiler = __webpack_require__(10);
+	module.exports.parser = __webpack_require__(10);
+	module.exports.lexer = __webpack_require__(10);
+	module.exports.runtime = __webpack_require__(4);
 	module.exports.lib = lib;
+
+	module.exports.installJinjaCompat = __webpack_require__(5);
 
 	// A single instance of an environment, since this is so commonly used
 
@@ -424,21 +422,21 @@ var nunjucks =
 
 	'use strict';
 
-	var path = __webpack_require__(9);
-	var asap = __webpack_require__(10);
+	var path = __webpack_require__(10);
+	var asap = __webpack_require__(11);
 	var lib = __webpack_require__(1);
-	var Obj = __webpack_require__(5);
-	var compiler = __webpack_require__(9);
-	var builtin_filters = __webpack_require__(6);
-	var builtin_loaders = __webpack_require__(9);
-	var runtime = __webpack_require__(3);
-	var globals = __webpack_require__(7);
+	var Obj = __webpack_require__(6);
+	var compiler = __webpack_require__(10);
+	var builtin_filters = __webpack_require__(7);
+	var builtin_loaders = __webpack_require__(10);
+	var runtime = __webpack_require__(4);
+	var globals = __webpack_require__(8);
 	var Frame = runtime.Frame;
 	var Template;
 
 	// Unconditionally load in this loader, even if no other ones are
 	// included (possible in the slim browser build)
-	builtin_loaders.PrecompiledLoader = __webpack_require__(8);
+	builtin_loaders.PrecompiledLoader = __webpack_require__(9);
 
 	// If the user is using the async API, *always* call it
 	// asynchronously even if the template was synchronous.
@@ -970,8 +968,47 @@ var nunjucks =
 
 	'use strict';
 
+	var path = __webpack_require__(10);
+	var Obj = __webpack_require__(6);
 	var lib = __webpack_require__(1);
-	var Obj = __webpack_require__(5);
+
+	var Loader = Obj.extend({
+	    on: function(name, func) {
+	        this.listeners = this.listeners || {};
+	        this.listeners[name] = this.listeners[name] || [];
+	        this.listeners[name].push(func);
+	    },
+
+	    emit: function(name /*, arg1, arg2, ...*/) {
+	        var args = Array.prototype.slice.call(arguments, 1);
+
+	        if(this.listeners && this.listeners[name]) {
+	            lib.each(this.listeners[name], function(listener) {
+	                listener.apply(null, args);
+	            });
+	        }
+	    },
+
+	    resolve: function(from, to) {
+	        return path.resolve(path.dirname(from), to);
+	    },
+
+	    isRelative: function(filename) {
+	        return (filename.indexOf('./') === 0 || filename.indexOf('../') === 0);
+	    }
+	});
+
+	module.exports = Loader;
+
+
+/***/ },
+/* 4 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var lib = __webpack_require__(1);
+	var Obj = __webpack_require__(6);
 
 	// Frames keep track of scoping both at compile-time and run-time so
 	// we know how to access variables. Block tags can introduce special
@@ -1330,46 +1367,167 @@ var nunjucks =
 
 
 /***/ },
-/* 4 */
+/* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
-	'use strict';
+	function installCompat() {
+	  // This must be called like `nunjucks.installCompat` so that `this`
+	  // references the nunjucks instance
+	  var runtime = this.runtime;
+	  var lib = this.lib;
 
-	var path = __webpack_require__(9);
-	var Obj = __webpack_require__(5);
-	var lib = __webpack_require__(1);
-
-	var Loader = Obj.extend({
-	    on: function(name, func) {
-	        this.listeners = this.listeners || {};
-	        this.listeners[name] = this.listeners[name] || [];
-	        this.listeners[name].push(func);
-	    },
-
-	    emit: function(name /*, arg1, arg2, ...*/) {
-	        var args = Array.prototype.slice.call(arguments, 1);
-
-	        if(this.listeners && this.listeners[name]) {
-	            lib.each(this.listeners[name], function(listener) {
-	                listener.apply(null, args);
-	            });
-	        }
-	    },
-
-	    resolve: function(from, to) {
-	        return path.resolve(path.dirname(from), to);
-	    },
-
-	    isRelative: function(filename) {
-	        return (filename.indexOf('./') === 0 || filename.indexOf('../') === 0);
+	  var orig_contextOrFrameLookup = runtime.contextOrFrameLookup;
+	  runtime.contextOrFrameLookup = function(context, frame, key) {
+	    var val = orig_contextOrFrameLookup.apply(this, arguments);
+	    if (val === undefined) {
+	      switch (key) {
+	      case 'True':
+	        return true;
+	      case 'False':
+	        return false;
+	      case 'None':
+	        return null;
+	      }
 	    }
-	});
 
-	module.exports = Loader;
+	    return val;
+	  };
+
+	  var orig_memberLookup = runtime.memberLookup;
+	  var ARRAY_MEMBERS = {
+	    pop: function(index) {
+	      if (index === undefined) {
+	        return this.pop();
+	      }
+	      if (index >= this.length || index < 0) {
+	        throw new Error('KeyError');
+	      }
+	      return this.splice(index, 1);
+	    },
+	    remove: function(element) {
+	      for (var i = 0; i < this.length; i++) {
+	        if (this[i] == element) {
+	          return this.splice(i, 1);
+	        }
+	      }
+	      throw new Error('ValueError');
+	    },
+	    count: function(element) {
+	      var count = 0;
+	      for (var i = 0; i < this.length; i++) {
+	        if (this[i] == element) {
+	          count++;
+	        }
+	      }
+	      return count;
+	    },
+	    index: function(element) {
+	      var i;
+	      if ((i = this.indexOf(element)) == -1) {
+	        throw new Error('ValueError');
+	      }
+	      return i;
+	    },
+	    find: function(element) {
+	      return this.indexOf(element);
+	    },
+	    insert: function(index, elem) {
+	      return this.splice(index, 0, elem);
+	    }
+	  };
+	  var OBJECT_MEMBERS = {
+	    items: function() {
+	      var ret = [];
+	      for(var k in this) {
+	        ret.push([k, this[k]]);
+	      }
+	      return ret;
+	    },
+	    values: function() {
+	      var ret = [];
+	      for(var k in this) {
+	        ret.push(this[k]);
+	      }
+	      return ret;
+	    },
+	    keys: function() {
+	      var ret = [];
+	      for(var k in this) {
+	        ret.push(k);
+	      }
+	      return ret;
+	    },
+	    get: function(key, def) {
+	      var output = this[key];
+	      if (output === undefined) {
+	        output = def;
+	      }
+	      return output;
+	    },
+	    has_key: function(key) {
+	      return this.hasOwnProperty(key);
+	    },
+	    pop: function(key, def) {
+	      var output = this[key];
+	      if (output === undefined && def !== undefined) {
+	        output = def;
+	      } else if (output === undefined) {
+	        throw new Error('KeyError');
+	      } else {
+	        delete this[key];
+	      }
+	      return output;
+	    },
+	    popitem: function() {
+	      for (var k in this) {
+	        // Return the first object pair.
+	        var val = this[k];
+	        delete this[k];
+	        return [k, val];
+	      }
+	      throw new Error('KeyError');
+	    },
+	    setdefault: function(key, def) {
+	      if (key in this) {
+	        return this[key];
+	      }
+	      if (def === undefined) {
+	        def = null;
+	      }
+	      return this[key] = def;
+	    },
+	    update: function(kwargs) {
+	      for (var k in kwargs) {
+	        this[k] = kwargs[k];
+	      }
+	      return null;  // Always returns None
+	    }
+	  };
+	  OBJECT_MEMBERS.iteritems = OBJECT_MEMBERS.items;
+	  OBJECT_MEMBERS.itervalues = OBJECT_MEMBERS.values;
+	  OBJECT_MEMBERS.iterkeys = OBJECT_MEMBERS.keys;
+	  runtime.memberLookup = function(obj, val, autoescape) {
+	    obj = obj || {};
+
+	    // If the object is an object, return any of the methods that Python would
+	    // otherwise provide.
+	    if (lib.isArray(obj) && ARRAY_MEMBERS.hasOwnProperty(val)) {
+	      return function() {return ARRAY_MEMBERS[val].apply(obj, arguments);};
+	    }
+
+	    if (lib.isObject(obj) && OBJECT_MEMBERS.hasOwnProperty(val)) {
+	      return function() {return OBJECT_MEMBERS[val].apply(obj, arguments);};
+	    }
+
+	    return orig_memberLookup.apply(this, arguments);
+	  };
+	}
+
+	module.exports = installCompat;
 
 
 /***/ },
-/* 5 */
+/* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1439,13 +1597,13 @@ var nunjucks =
 
 
 /***/ },
-/* 6 */
+/* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	var lib = __webpack_require__(1);
-	var r = __webpack_require__(3);
+	var r = __webpack_require__(4);
 
 	function normalize(value, defaultValue) {
 	    if(value === null || value === undefined || value === false) {
@@ -1989,7 +2147,7 @@ var nunjucks =
 
 
 /***/ },
-/* 7 */
+/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2062,12 +2220,12 @@ var nunjucks =
 
 
 /***/ },
-/* 8 */
+/* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var Loader = __webpack_require__(4);
+	var Loader = __webpack_require__(3);
 
 	var PrecompiledLoader = Loader.extend({
 	    init: function(compiledTemplates) {
@@ -2090,19 +2248,19 @@ var nunjucks =
 
 
 /***/ },
-/* 9 */
+/* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
 
 /***/ },
-/* 10 */
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
 
 	// rawAsap provides everything we need except exception management.
-	var rawAsap = __webpack_require__(11);
+	var rawAsap = __webpack_require__(12);
 	// RawTasks are recycled to reduce GC churn.
 	var freeTasks = [];
 	// We queue errors to ensure they are thrown in right order (FIFO).
@@ -2168,7 +2326,7 @@ var nunjucks =
 
 
 /***/ },
-/* 11 */
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {"use strict";

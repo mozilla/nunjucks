@@ -2,10 +2,6 @@
 
 var lib = require('./src/lib');
 var env = require('./src/environment');
-var compiler = require('./src/compiler');
-var parser = require('./src/parser');
-var lexer = require('./src/lexer');
-var runtime = require('./src/runtime');
 var Loader = require('./src/loader');
 var loaders = require('./src/loaders');
 var precompile = require('./src/precompile');
@@ -19,11 +15,13 @@ module.exports.FileSystemLoader = loaders.FileSystemLoader;
 module.exports.PrecompiledLoader = loaders.PrecompiledLoader;
 module.exports.WebLoader = loaders.WebLoader;
 
-module.exports.compiler = compiler;
-module.exports.parser = parser;
-module.exports.lexer = lexer;
-module.exports.runtime = runtime;
+module.exports.compiler = require('./src/compiler');
+module.exports.parser = require('./src/parser');
+module.exports.lexer = require('./src/lexer');
+module.exports.runtime = require('./src/runtime');
 module.exports.lib = lib;
+
+module.exports.installJinjaCompat = require('./src/jinja-compat.js');
 
 // A single instance of an environment, since this is so commonly used
 

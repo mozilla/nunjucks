@@ -116,11 +116,26 @@ var env = nunjucks.configure('views');
 ```
 
 {% endapi %}
+
+{% api %}
+installJinjaCompat
+nunjucks.installJinjaCompat()
+
+This installs experimental support for more consistent Jinja
+compatibility by adding Pythonic APIs to the environment. While
+nunjucks does not aim for complete Jinja/Python compatiblity, this
+might help users seeking just that.
+
+This adds `True` and `False` which map to the JS `true` and `false`
+values, as well as augmenting arrays and objects with Python-style
+methods. [Check out the source](https://github.com/mozilla/nunjucks/blob/master/src/jinja-compat.js)
+to see everything it adds.
+{% endapi %}
 {% raw %}
 
-That's it for the simple API! If you want total control over how
+*That's it for the simple API! If you want total control over how
 templates are loaded, and more customization, you need to manually
-set up the system as seen below.
+set up the system as seen below.*
 
 ## Environment
 

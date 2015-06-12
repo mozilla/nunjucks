@@ -50,13 +50,9 @@ var nunjucks =
 
 	var lib = __webpack_require__(1);
 	var env = __webpack_require__(2);
-	var compiler = __webpack_require__(3);
-	var parser = __webpack_require__(4);
-	var lexer = __webpack_require__(5);
-	var runtime = __webpack_require__(6);
-	var Loader = __webpack_require__(7);
-	var loaders = __webpack_require__(8);
-	var precompile = __webpack_require__(15);
+	var Loader = __webpack_require__(3);
+	var loaders = __webpack_require__(4);
+	var precompile = __webpack_require__(10);
 
 	module.exports = {};
 	module.exports.Environment = env.Environment;
@@ -67,11 +63,13 @@ var nunjucks =
 	module.exports.PrecompiledLoader = loaders.PrecompiledLoader;
 	module.exports.WebLoader = loaders.WebLoader;
 
-	module.exports.compiler = compiler;
-	module.exports.parser = parser;
-	module.exports.lexer = lexer;
-	module.exports.runtime = runtime;
+	module.exports.compiler = __webpack_require__(5);
+	module.exports.parser = __webpack_require__(6);
+	module.exports.lexer = __webpack_require__(7);
+	module.exports.runtime = __webpack_require__(8);
 	module.exports.lib = lib;
+
+	module.exports.installJinjaCompat = __webpack_require__(9);
 
 	// A single instance of an environment, since this is so commonly used
 
@@ -424,14 +422,14 @@ var nunjucks =
 
 	'use strict';
 
-	var path = __webpack_require__(15);
-	var asap = __webpack_require__(16);
+	var path = __webpack_require__(10);
+	var asap = __webpack_require__(17);
 	var lib = __webpack_require__(1);
 	var Obj = __webpack_require__(11);
-	var compiler = __webpack_require__(3);
+	var compiler = __webpack_require__(5);
 	var builtin_filters = __webpack_require__(12);
-	var builtin_loaders = __webpack_require__(8);
-	var runtime = __webpack_require__(6);
+	var builtin_loaders = __webpack_require__(4);
+	var runtime = __webpack_require__(8);
 	var globals = __webpack_require__(13);
 	var Frame = runtime.Frame;
 	var Template;
@@ -970,13 +968,148 @@ var nunjucks =
 
 	'use strict';
 
+	var path = __webpack_require__(10);
+	var Obj = __webpack_require__(11);
 	var lib = __webpack_require__(1);
-	var parser = __webpack_require__(4);
-	var transformer = __webpack_require__(9);
-	var nodes = __webpack_require__(10);
+
+	var Loader = Obj.extend({
+	    on: function(name, func) {
+	        this.listeners = this.listeners || {};
+	        this.listeners[name] = this.listeners[name] || [];
+	        this.listeners[name].push(func);
+	    },
+
+	    emit: function(name /*, arg1, arg2, ...*/) {
+	        var args = Array.prototype.slice.call(arguments, 1);
+
+	        if(this.listeners && this.listeners[name]) {
+	            lib.each(this.listeners[name], function(listener) {
+	                listener.apply(null, args);
+	            });
+	        }
+	    },
+
+	    resolve: function(from, to) {
+	        return path.resolve(path.dirname(from), to);
+	    },
+
+	    isRelative: function(filename) {
+	        return (filename.indexOf('./') === 0 || filename.indexOf('../') === 0);
+	    }
+	});
+
+	module.exports = Loader;
+
+
+/***/ },
+/* 4 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var Loader = __webpack_require__(3);
+	var PrecompiledLoader = __webpack_require__(14);
+
+	var WebLoader = Loader.extend({
+	    init: function(baseURL, opts) {
+	        this.baseURL = baseURL || '';
+
+	        // By default, the cache is turned off because there's no way
+	        // to "watch" templates over HTTP, so they are re-downloaded
+	        // and compiled each time. (Remember, PRECOMPILE YOUR
+	        // TEMPLATES in production!)
+	        this.useCache = opts.useCache;
+
+	        // We default `async` to false so that the simple synchronous
+	        // API can be used when you aren't doing anything async in
+	        // your templates (which is most of the time). This performs a
+	        // sync ajax request, but that's ok because it should *only*
+	        // happen in development. PRECOMPILE YOUR TEMPLATES.
+	        this.async = opts.async;
+	    },
+
+	    resolve: function(from, to) { // jshint ignore:line
+	        throw new Error('relative templates not support in the browser yet');
+	    },
+
+	    getSource: function(name, cb) {
+	        var useCache = this.useCache;
+	        var result;
+	        this.fetch(this.baseURL + '/' + name, function(err, src) {
+	            if(err) {
+	                if(!cb) {
+	                    throw err;
+	                }
+	                cb(err);
+	            }
+	            else {
+	                result = { src: src,
+	                           path: name,
+	                           noCache: !useCache };
+	                if(cb) {
+	                    cb(null, result);
+	                }
+	            }
+	        });
+
+	        // if this WebLoader isn't running asynchronously, the
+	        // fetch above would actually run sync and we'll have a
+	        // result here
+	        return result;
+	    },
+
+	    fetch: function(url, cb) {
+	        // Only in the browser please
+	        var ajax;
+	        var loading = true;
+
+	        if(window.XMLHttpRequest) { // Mozilla, Safari, ...
+	            ajax = new XMLHttpRequest();
+	        }
+	        else if(window.ActiveXObject) { // IE 8 and older
+	            /* global ActiveXObject */
+	            ajax = new ActiveXObject('Microsoft.XMLHTTP');
+	        }
+
+	        ajax.onreadystatechange = function() {
+	            if(ajax.readyState === 4 && loading) {
+	                loading = false;
+	                if(ajax.status === 0 || ajax.status === 200) {
+	                    cb(null, ajax.responseText);
+	                }
+	                else {
+	                    cb(ajax.responseText);
+	                }
+	            }
+	        };
+
+	        url += (url.indexOf('?') === -1 ? '?' : '&') + 's=' +
+	               (new Date().getTime());
+
+	        ajax.open('GET', url, this.async);
+	        ajax.send();
+	    }
+	});
+
+	module.exports = {
+	    WebLoader: WebLoader,
+	    PrecompiledLoader: PrecompiledLoader
+	};
+
+
+/***/ },
+/* 5 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var lib = __webpack_require__(1);
+	var parser = __webpack_require__(6);
+	var transformer = __webpack_require__(15);
+	var nodes = __webpack_require__(16);
 	// jshint -W079
 	var Object = __webpack_require__(11);
-	var Frame = __webpack_require__(6).Frame;
+	var Frame = __webpack_require__(8).Frame;
 
 	// These are all the same for now, but shouldn't be passed straight
 	// through
@@ -2120,13 +2253,13 @@ var nunjucks =
 
 
 /***/ },
-/* 4 */
+/* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var lexer = __webpack_require__(5);
-	var nodes = __webpack_require__(10);
+	var lexer = __webpack_require__(7);
+	var nodes = __webpack_require__(16);
 	// jshint -W079
 	var Object = __webpack_require__(11);
 	var lib = __webpack_require__(1);
@@ -3368,7 +3501,7 @@ var nunjucks =
 
 
 /***/ },
-/* 5 */
+/* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -3843,7 +3976,7 @@ var nunjucks =
 
 
 /***/ },
-/* 6 */
+/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -4208,691 +4341,170 @@ var nunjucks =
 
 
 /***/ },
-/* 7 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var path = __webpack_require__(15);
-	var Obj = __webpack_require__(11);
-	var lib = __webpack_require__(1);
-
-	var Loader = Obj.extend({
-	    on: function(name, func) {
-	        this.listeners = this.listeners || {};
-	        this.listeners[name] = this.listeners[name] || [];
-	        this.listeners[name].push(func);
-	    },
-
-	    emit: function(name /*, arg1, arg2, ...*/) {
-	        var args = Array.prototype.slice.call(arguments, 1);
-
-	        if(this.listeners && this.listeners[name]) {
-	            lib.each(this.listeners[name], function(listener) {
-	                listener.apply(null, args);
-	            });
-	        }
-	    },
-
-	    resolve: function(from, to) {
-	        return path.resolve(path.dirname(from), to);
-	    },
-
-	    isRelative: function(filename) {
-	        return (filename.indexOf('./') === 0 || filename.indexOf('../') === 0);
-	    }
-	});
-
-	module.exports = Loader;
-
-
-/***/ },
-/* 8 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var Loader = __webpack_require__(7);
-	var PrecompiledLoader = __webpack_require__(14);
-
-	var WebLoader = Loader.extend({
-	    init: function(baseURL, opts) {
-	        this.baseURL = baseURL || '';
-
-	        // By default, the cache is turned off because there's no way
-	        // to "watch" templates over HTTP, so they are re-downloaded
-	        // and compiled each time. (Remember, PRECOMPILE YOUR
-	        // TEMPLATES in production!)
-	        this.useCache = opts.useCache;
-
-	        // We default `async` to false so that the simple synchronous
-	        // API can be used when you aren't doing anything async in
-	        // your templates (which is most of the time). This performs a
-	        // sync ajax request, but that's ok because it should *only*
-	        // happen in development. PRECOMPILE YOUR TEMPLATES.
-	        this.async = opts.async;
-	    },
-
-	    resolve: function(from, to) { // jshint ignore:line
-	        throw new Error('relative templates not support in the browser yet');
-	    },
-
-	    getSource: function(name, cb) {
-	        var useCache = this.useCache;
-	        var result;
-	        this.fetch(this.baseURL + '/' + name, function(err, src) {
-	            if(err) {
-	                if(!cb) {
-	                    throw err;
-	                }
-	                cb(err);
-	            }
-	            else {
-	                result = { src: src,
-	                           path: name,
-	                           noCache: !useCache };
-	                if(cb) {
-	                    cb(null, result);
-	                }
-	            }
-	        });
-
-	        // if this WebLoader isn't running asynchronously, the
-	        // fetch above would actually run sync and we'll have a
-	        // result here
-	        return result;
-	    },
-
-	    fetch: function(url, cb) {
-	        // Only in the browser please
-	        var ajax;
-	        var loading = true;
-
-	        if(window.XMLHttpRequest) { // Mozilla, Safari, ...
-	            ajax = new XMLHttpRequest();
-	        }
-	        else if(window.ActiveXObject) { // IE 8 and older
-	            /* global ActiveXObject */
-	            ajax = new ActiveXObject('Microsoft.XMLHTTP');
-	        }
-
-	        ajax.onreadystatechange = function() {
-	            if(ajax.readyState === 4 && loading) {
-	                loading = false;
-	                if(ajax.status === 0 || ajax.status === 200) {
-	                    cb(null, ajax.responseText);
-	                }
-	                else {
-	                    cb(ajax.responseText);
-	                }
-	            }
-	        };
-
-	        url += (url.indexOf('?') === -1 ? '?' : '&') + 's=' +
-	               (new Date().getTime());
-
-	        ajax.open('GET', url, this.async);
-	        ajax.send();
-	    }
-	});
-
-	module.exports = {
-	    WebLoader: WebLoader,
-	    PrecompiledLoader: PrecompiledLoader
-	};
-
-
-/***/ },
 /* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
-	'use strict';
+	function installCompat() {
+	  // This must be called like `nunjucks.installCompat` so that `this`
+	  // references the nunjucks instance
+	  var runtime = this.runtime;
+	  var lib = this.lib;
 
-	var nodes = __webpack_require__(10);
-	var lib = __webpack_require__(1);
-
-	var sym = 0;
-	function gensym() {
-	    return 'hole_' + sym++;
-	}
-
-	// copy-on-write version of map
-	function mapCOW(arr, func) {
-	    var res = null;
-
-	    for(var i=0; i<arr.length; i++) {
-	        var item = func(arr[i]);
-
-	        if(item !== arr[i]) {
-	            if(!res) {
-	                res = arr.slice();
-	            }
-
-	            res[i] = item;
-	        }
+	  var orig_contextOrFrameLookup = runtime.contextOrFrameLookup;
+	  runtime.contextOrFrameLookup = function(context, frame, key) {
+	    var val = orig_contextOrFrameLookup.apply(this, arguments);
+	    if (val === undefined) {
+	      switch (key) {
+	      case 'True':
+	        return true;
+	      case 'False':
+	        return false;
+	      case 'None':
+	        return null;
+	      }
 	    }
 
-	    return res || arr;
-	}
+	    return val;
+	  };
 
-	function walk(ast, func, depthFirst) {
-	    if(!(ast instanceof nodes.Node)) {
-	        return ast;
+	  var orig_memberLookup = runtime.memberLookup;
+	  var ARRAY_MEMBERS = {
+	    pop: function(index) {
+	      if (index === undefined) {
+	        return this.pop();
+	      }
+	      if (index >= this.length || index < 0) {
+	        throw new Error('KeyError');
+	      }
+	      return this.splice(index, 1);
+	    },
+	    remove: function(element) {
+	      for (var i = 0; i < this.length; i++) {
+	        if (this[i] == element) {
+	          return this.splice(i, 1);
+	        }
+	      }
+	      throw new Error('ValueError');
+	    },
+	    count: function(element) {
+	      var count = 0;
+	      for (var i = 0; i < this.length; i++) {
+	        if (this[i] == element) {
+	          count++;
+	        }
+	      }
+	      return count;
+	    },
+	    index: function(element) {
+	      var i;
+	      if ((i = this.indexOf(element)) == -1) {
+	        throw new Error('ValueError');
+	      }
+	      return i;
+	    },
+	    find: function(element) {
+	      return this.indexOf(element);
+	    },
+	    insert: function(index, elem) {
+	      return this.splice(index, 0, elem);
+	    }
+	  };
+	  var OBJECT_MEMBERS = {
+	    items: function() {
+	      var ret = [];
+	      for(var k in this) {
+	        ret.push([k, this[k]]);
+	      }
+	      return ret;
+	    },
+	    values: function() {
+	      var ret = [];
+	      for(var k in this) {
+	        ret.push(this[k]);
+	      }
+	      return ret;
+	    },
+	    keys: function() {
+	      var ret = [];
+	      for(var k in this) {
+	        ret.push(k);
+	      }
+	      return ret;
+	    },
+	    get: function(key, def) {
+	      var output = this[key];
+	      if (output === undefined) {
+	        output = def;
+	      }
+	      return output;
+	    },
+	    has_key: function(key) {
+	      return this.hasOwnProperty(key);
+	    },
+	    pop: function(key, def) {
+	      var output = this[key];
+	      if (output === undefined && def !== undefined) {
+	        output = def;
+	      } else if (output === undefined) {
+	        throw new Error('KeyError');
+	      } else {
+	        delete this[key];
+	      }
+	      return output;
+	    },
+	    popitem: function() {
+	      for (var k in this) {
+	        // Return the first object pair.
+	        var val = this[k];
+	        delete this[k];
+	        return [k, val];
+	      }
+	      throw new Error('KeyError');
+	    },
+	    setdefault: function(key, def) {
+	      if (key in this) {
+	        return this[key];
+	      }
+	      if (def === undefined) {
+	        def = null;
+	      }
+	      return this[key] = def;
+	    },
+	    update: function(kwargs) {
+	      for (var k in kwargs) {
+	        this[k] = kwargs[k];
+	      }
+	      return null;  // Always returns None
+	    }
+	  };
+	  OBJECT_MEMBERS.iteritems = OBJECT_MEMBERS.items;
+	  OBJECT_MEMBERS.itervalues = OBJECT_MEMBERS.values;
+	  OBJECT_MEMBERS.iterkeys = OBJECT_MEMBERS.keys;
+	  runtime.memberLookup = function(obj, val, autoescape) {
+	    obj = obj || {};
+
+	    // If the object is an object, return any of the methods that Python would
+	    // otherwise provide.
+	    if (lib.isArray(obj) && ARRAY_MEMBERS.hasOwnProperty(val)) {
+	      return function() {return ARRAY_MEMBERS[val].apply(obj, arguments);};
 	    }
 
-	    if(!depthFirst) {
-	        var astT = func(ast);
-
-	        if(astT && astT !== ast) {
-	            return astT;
-	        }
+	    if (lib.isObject(obj) && OBJECT_MEMBERS.hasOwnProperty(val)) {
+	      return function() {return OBJECT_MEMBERS[val].apply(obj, arguments);};
 	    }
 
-	    if(ast instanceof nodes.NodeList) {
-	        var children = mapCOW(ast.children, function(node) {
-	            return walk(node, func, depthFirst);
-	        });
-
-	        if(children !== ast.children) {
-	            ast = new nodes[ast.typename](ast.lineno, ast.colno, children);
-	        }
-	    }
-	    else if(ast instanceof nodes.CallExtension) {
-	        var args = walk(ast.args, func, depthFirst);
-
-	        var contentArgs = mapCOW(ast.contentArgs, function(node) {
-	            return walk(node, func, depthFirst);
-	        });
-
-	        if(args !== ast.args || contentArgs !== ast.contentArgs) {
-	            ast = new nodes[ast.typename](ast.extName,
-	                                          ast.prop,
-	                                          args,
-	                                          contentArgs);
-	        }
-	    }
-	    else {
-	        var props = ast.fields.map(function(field) {
-	            return ast[field];
-	        });
-
-	        var propsT = mapCOW(props, function(prop) {
-	            return walk(prop, func, depthFirst);
-	        });
-
-	        if(propsT !== props) {
-	            ast = new nodes[ast.typename](ast.lineno, ast.colno);
-
-	            propsT.forEach(function(prop, i) {
-	                ast[ast.fields[i]] = prop;
-	            });
-	        }
-	    }
-
-	    return depthFirst ? (func(ast) || ast) : ast;
+	    return orig_memberLookup.apply(this, arguments);
+	  };
 	}
 
-	function depthWalk(ast, func) {
-	    return walk(ast, func, true);
-	}
-
-	function _liftFilters(node, asyncFilters, prop) {
-	    var children = [];
-
-	    var walked = depthWalk(prop ? node[prop] : node, function(node) {
-	        if(node instanceof nodes.Block) {
-	            return node;
-	        }
-	        else if((node instanceof nodes.Filter &&
-	                 lib.indexOf(asyncFilters, node.name.value) !== -1) ||
-	                node instanceof nodes.CallExtensionAsync) {
-	            var symbol = new nodes.Symbol(node.lineno,
-	                                          node.colno,
-	                                          gensym());
-
-	            children.push(new nodes.FilterAsync(node.lineno,
-	                                                node.colno,
-	                                                node.name,
-	                                                node.args,
-	                                                symbol));
-	            return symbol;
-	        }
-	    });
-
-	    if(prop) {
-	        node[prop] = walked;
-	    }
-	    else {
-	        node = walked;
-	    }
-
-	    if(children.length) {
-	        children.push(node);
-
-	        return new nodes.NodeList(
-	            node.lineno,
-	            node.colno,
-	            children
-	        );
-	    }
-	    else {
-	        return node;
-	    }
-	}
-
-	function liftFilters(ast, asyncFilters) {
-	    return depthWalk(ast, function(node) {
-	        if(node instanceof nodes.Output) {
-	            return _liftFilters(node, asyncFilters);
-	        }
-	        else if(node instanceof nodes.Set) {
-	            return _liftFilters(node, asyncFilters, 'value');
-	        }
-	        else if(node instanceof nodes.For) {
-	            return _liftFilters(node, asyncFilters, 'arr');
-	        }
-	        else if(node instanceof nodes.If) {
-	            return _liftFilters(node, asyncFilters, 'cond');
-	        }
-	        else if(node instanceof nodes.CallExtension) {
-	            return _liftFilters(node, asyncFilters, 'args');
-	        }
-	    });
-	}
-
-	function liftSuper(ast) {
-	    return walk(ast, function(blockNode) {
-	        if(!(blockNode instanceof nodes.Block)) {
-	            return;
-	        }
-
-	        var hasSuper = false;
-	        var symbol = gensym();
-
-	        blockNode.body = walk(blockNode.body, function(node) {
-	            if(node instanceof nodes.FunCall &&
-	               node.name.value === 'super') {
-	                hasSuper = true;
-	                return new nodes.Symbol(node.lineno, node.colno, symbol);
-	            }
-	        });
-
-	        if(hasSuper) {
-	            blockNode.body.children.unshift(new nodes.Super(
-	                0, 0, blockNode.name, new nodes.Symbol(0, 0, symbol)
-	            ));
-	        }
-	    });
-	}
-
-	function convertStatements(ast) {
-	    return depthWalk(ast, function(node) {
-	        if(!(node instanceof nodes.If) &&
-	           !(node instanceof nodes.For)) {
-	            return;
-	        }
-
-	        var async = false;
-	        walk(node, function(node) {
-	            if(node instanceof nodes.FilterAsync ||
-	               node instanceof nodes.IfAsync ||
-	               node instanceof nodes.AsyncEach ||
-	               node instanceof nodes.AsyncAll ||
-	               node instanceof nodes.CallExtensionAsync ||
-	               node instanceof nodes.Include) {
-	                async = true;
-	                // Stop iterating by returning the node
-	                return node;
-	            }
-	        });
-
-	        if(async) {
-		        if(node instanceof nodes.If) {
-	                return new nodes.IfAsync(
-	                    node.lineno,
-	                    node.colno,
-	                    node.cond,
-	                    node.body,
-	                    node.else_
-	                );
-	            }
-	            else if(node instanceof nodes.For) {
-	                return new nodes.AsyncEach(
-	                    node.lineno,
-	                    node.colno,
-	                    node.arr,
-	                    node.name,
-	                    node.body,
-	                    node.else_
-	                );
-	            }
-	        }
-	    });
-	}
-
-	function cps(ast, asyncFilters) {
-	    return convertStatements(liftSuper(liftFilters(ast, asyncFilters)));
-	}
-
-	function transform(ast, asyncFilters) {
-	    return cps(ast, asyncFilters || []);
-	}
-
-	// var parser = require('./parser');
-	// var src = 'hello {% foo %}{% endfoo %} end';
-	// var ast = transform(parser.parse(src, [new FooExtension()]), ['bar']);
-	// nodes.printNodes(ast);
-
-	module.exports = {
-	    transform: transform
-	};
+	module.exports = installCompat;
 
 
 /***/ },
 /* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
-
-	var lib = __webpack_require__(1);
-	// jshint -W079
-	var Object = __webpack_require__(11);
-
-	function traverseAndCheck(obj, type, results) {
-	    if(obj instanceof type) {
-	        results.push(obj);
-	    }
-
-	    if(obj instanceof Node) {
-	        obj.findAll(type, results);
-	    }
-	}
-
-	var Node = Object.extend('Node', {
-	    init: function(lineno, colno) {
-	        this.lineno = lineno;
-	        this.colno = colno;
-
-	        var fields = this.fields;
-	        for(var i = 0, l = fields.length; i < l; i++) {
-	            var field = fields[i];
-
-	            // The first two args are line/col numbers, so offset by 2
-	            var val = arguments[i + 2];
-
-	            // Fields should never be undefined, but null. It makes
-	            // testing easier to normalize values.
-	            if(val === undefined) {
-	                val = null;
-	            }
-
-	            this[field] = val;
-	        }
-	    },
-
-	    findAll: function(type, results) {
-	        results = results || [];
-
-	        var i, l;
-	        if(this instanceof NodeList) {
-	            var children = this.children;
-
-	            for(i = 0, l = children.length; i < l; i++) {
-	                traverseAndCheck(children[i], type, results);
-	            }
-	        }
-	        else {
-	            var fields = this.fields;
-
-	            for(i = 0, l = fields.length; i < l; i++) {
-	                traverseAndCheck(this[fields[i]], type, results);
-	            }
-	        }
-
-	        return results;
-	    },
-
-	    iterFields: function(func) {
-	        lib.each(this.fields, function(field) {
-	            func(this[field], field);
-	        }, this);
-	    }
-	});
-
-	// Abstract nodes
-	var Value = Node.extend('Value', { fields: ['value'] });
-
-	// Concrete nodes
-	var NodeList = Node.extend('NodeList', {
-	    fields: ['children'],
-
-	    init: function(lineno, colno, nodes) {
-	        this.parent(lineno, colno, nodes || []);
-	    },
-
-	    addChild: function(node) {
-	        this.children.push(node);
-	    }
-	});
-
-	var Root = NodeList.extend('Root');
-	var Literal = Value.extend('Literal');
-	var Symbol = Value.extend('Symbol');
-	var Group = NodeList.extend('Group');
-	var Array = NodeList.extend('Array');
-	var Pair = Node.extend('Pair', { fields: ['key', 'value'] });
-	var Dict = NodeList.extend('Dict');
-	var LookupVal = Node.extend('LookupVal', { fields: ['target', 'val'] });
-	var If = Node.extend('If', { fields: ['cond', 'body', 'else_'] });
-	var IfAsync = If.extend('IfAsync');
-	var InlineIf = Node.extend('InlineIf', { fields: ['cond', 'body', 'else_'] });
-	var For = Node.extend('For', { fields: ['arr', 'name', 'body', 'else_'] });
-	var AsyncEach = For.extend('AsyncEach');
-	var AsyncAll = For.extend('AsyncAll');
-	var Macro = Node.extend('Macro', { fields: ['name', 'args', 'body'] });
-	var Caller = Macro.extend('Caller');
-	var Import = Node.extend('Import', { fields: ['template', 'target', 'withContext'] });
-	var FromImport = Node.extend('FromImport', {
-	    fields: ['template', 'names', 'withContext'],
-
-	    init: function(lineno, colno, template, names, withContext) {
-	        this.parent(lineno, colno,
-	                    template,
-	                    names || new NodeList(), withContext);
-	    }
-	});
-	var FunCall = Node.extend('FunCall', { fields: ['name', 'args'] });
-	var Filter = FunCall.extend('Filter');
-	var FilterAsync = Filter.extend('FilterAsync', {
-	    fields: ['name', 'args', 'symbol']
-	});
-	var KeywordArgs = Dict.extend('KeywordArgs');
-	var Block = Node.extend('Block', { fields: ['name', 'body'] });
-	var Super = Node.extend('Super', { fields: ['blockName', 'symbol'] });
-	var TemplateRef = Node.extend('TemplateRef', { fields: ['template'] });
-	var Extends = TemplateRef.extend('Extends');
-	var Include = TemplateRef.extend('Include');
-	var Set = Node.extend('Set', { fields: ['targets', 'value'] });
-	var Output = NodeList.extend('Output');
-	var TemplateData = Literal.extend('TemplateData');
-	var UnaryOp = Node.extend('UnaryOp', { fields: ['target'] });
-	var BinOp = Node.extend('BinOp', { fields: ['left', 'right'] });
-	var In = BinOp.extend('In');
-	var Or = BinOp.extend('Or');
-	var And = BinOp.extend('And');
-	var Not = UnaryOp.extend('Not');
-	var Add = BinOp.extend('Add');
-	var Sub = BinOp.extend('Sub');
-	var Mul = BinOp.extend('Mul');
-	var Div = BinOp.extend('Div');
-	var FloorDiv = BinOp.extend('FloorDiv');
-	var Mod = BinOp.extend('Mod');
-	var Pow = BinOp.extend('Pow');
-	var Neg = UnaryOp.extend('Neg');
-	var Pos = UnaryOp.extend('Pos');
-	var Compare = Node.extend('Compare', { fields: ['expr', 'ops'] });
-	var CompareOperand = Node.extend('CompareOperand', {
-	    fields: ['expr', 'type']
-	});
-
-	var CallExtension = Node.extend('CallExtension', {
-	    fields: ['extName', 'prop', 'args', 'contentArgs'],
-
-	    init: function(ext, prop, args, contentArgs) {
-	        this.extName = ext._name || ext;
-	        this.prop = prop;
-	        this.args = args || new NodeList();
-	        this.contentArgs = contentArgs || [];
-	        this.autoescape = ext.autoescape;
-	    }
-	});
-
-	var CallExtensionAsync = CallExtension.extend('CallExtensionAsync');
-
-	// Print the AST in a nicely formatted tree format for debuggin
-	function printNodes(node, indent) {
-	    indent = indent || 0;
-
-	    // This is hacky, but this is just a debugging function anyway
-	    function print(str, indent, inline) {
-	        var lines = str.split('\n');
-
-	        for(var i=0; i<lines.length; i++) {
-	            if(lines[i]) {
-	                if((inline && i > 0) || !inline) {
-	                    for(var j=0; j<indent; j++) {
-	                        process.stdout.write(' ');
-	                    }
-	                }
-	            }
-
-	            if(i === lines.length-1) {
-	                process.stdout.write(lines[i]);
-	            }
-	            else {
-	                process.stdout.write(lines[i] + '\n');
-	            }
-	        }
-	    }
-
-	    print(node.typename + ': ', indent);
-
-	    if(node instanceof NodeList) {
-	        print('\n');
-	        lib.each(node.children, function(n) {
-	            printNodes(n, indent + 2);
-	        });
-	    }
-	    else if(node instanceof CallExtension) {
-	        print(node.extName + '.' + node.prop);
-	        print('\n');
-
-	        if(node.args) {
-	            printNodes(node.args, indent + 2);
-	        }
-
-	        if(node.contentArgs) {
-	            lib.each(node.contentArgs, function(n) {
-	                printNodes(n, indent + 2);
-	            });
-	        }
-	    }
-	    else {
-	        var nodes = null;
-	        var props = null;
-
-	        node.iterFields(function(val, field) {
-	            if(val instanceof Node) {
-	                nodes = nodes || {};
-	                nodes[field] = val;
-	            }
-	            else {
-	                props = props || {};
-	                props[field] = val;
-	            }
-	        });
-
-	        if(props) {
-	            print(JSON.stringify(props, null, 2) + '\n', null, true);
-	        }
-	        else {
-	            print('\n');
-	        }
-
-	        if(nodes) {
-	            for(var k in nodes) {
-	                printNodes(nodes[k], indent + 2);
-	            }
-	        }
-
-	    }
-	}
-
-	// var t = new NodeList(0, 0,
-	//                      [new Value(0, 0, 3),
-	//                       new Value(0, 0, 10),
-	//                       new Pair(0, 0,
-	//                                new Value(0, 0, 'key'),
-	//                                new Value(0, 0, 'value'))]);
-	// printNodes(t);
-
-	module.exports = {
-	    Node: Node,
-	    Root: Root,
-	    NodeList: NodeList,
-	    Value: Value,
-	    Literal: Literal,
-	    Symbol: Symbol,
-	    Group: Group,
-	    Array: Array,
-	    Pair: Pair,
-	    Dict: Dict,
-	    Output: Output,
-	    TemplateData: TemplateData,
-	    If: If,
-	    IfAsync: IfAsync,
-	    InlineIf: InlineIf,
-	    For: For,
-	    AsyncEach: AsyncEach,
-	    AsyncAll: AsyncAll,
-	    Macro: Macro,
-	    Caller: Caller,
-	    Import: Import,
-	    FromImport: FromImport,
-	    FunCall: FunCall,
-	    Filter: Filter,
-	    FilterAsync: FilterAsync,
-	    KeywordArgs: KeywordArgs,
-	    Block: Block,
-	    Super: Super,
-	    Extends: Extends,
-	    Include: Include,
-	    Set: Set,
-	    LookupVal: LookupVal,
-	    BinOp: BinOp,
-	    In: In,
-	    Or: Or,
-	    And: And,
-	    Not: Not,
-	    Add: Add,
-	    Sub: Sub,
-	    Mul: Mul,
-	    Div: Div,
-	    FloorDiv: FloorDiv,
-	    Mod: Mod,
-	    Pow: Pow,
-	    Neg: Neg,
-	    Pos: Pos,
-	    Compare: Compare,
-	    CompareOperand: CompareOperand,
-
-	    CallExtension: CallExtension,
-	    CallExtensionAsync: CallExtensionAsync,
-
-	    printNodes: printNodes
-	};
-
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(15)))
+	
 
 /***/ },
 /* 11 */
@@ -4971,7 +4583,7 @@ var nunjucks =
 	'use strict';
 
 	var lib = __webpack_require__(1);
-	var r = __webpack_require__(6);
+	var r = __webpack_require__(8);
 
 	function normalize(value, defaultValue) {
 	    if(value === null || value === undefined || value === false) {
@@ -5593,7 +5205,7 @@ var nunjucks =
 
 	'use strict';
 
-	var Loader = __webpack_require__(7);
+	var Loader = __webpack_require__(3);
 
 	var PrecompiledLoader = Loader.extend({
 	    init: function(compiledTemplates) {
@@ -5619,16 +5231,562 @@ var nunjucks =
 /* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
-	
+	'use strict';
+
+	var nodes = __webpack_require__(16);
+	var lib = __webpack_require__(1);
+
+	var sym = 0;
+	function gensym() {
+	    return 'hole_' + sym++;
+	}
+
+	// copy-on-write version of map
+	function mapCOW(arr, func) {
+	    var res = null;
+
+	    for(var i=0; i<arr.length; i++) {
+	        var item = func(arr[i]);
+
+	        if(item !== arr[i]) {
+	            if(!res) {
+	                res = arr.slice();
+	            }
+
+	            res[i] = item;
+	        }
+	    }
+
+	    return res || arr;
+	}
+
+	function walk(ast, func, depthFirst) {
+	    if(!(ast instanceof nodes.Node)) {
+	        return ast;
+	    }
+
+	    if(!depthFirst) {
+	        var astT = func(ast);
+
+	        if(astT && astT !== ast) {
+	            return astT;
+	        }
+	    }
+
+	    if(ast instanceof nodes.NodeList) {
+	        var children = mapCOW(ast.children, function(node) {
+	            return walk(node, func, depthFirst);
+	        });
+
+	        if(children !== ast.children) {
+	            ast = new nodes[ast.typename](ast.lineno, ast.colno, children);
+	        }
+	    }
+	    else if(ast instanceof nodes.CallExtension) {
+	        var args = walk(ast.args, func, depthFirst);
+
+	        var contentArgs = mapCOW(ast.contentArgs, function(node) {
+	            return walk(node, func, depthFirst);
+	        });
+
+	        if(args !== ast.args || contentArgs !== ast.contentArgs) {
+	            ast = new nodes[ast.typename](ast.extName,
+	                                          ast.prop,
+	                                          args,
+	                                          contentArgs);
+	        }
+	    }
+	    else {
+	        var props = ast.fields.map(function(field) {
+	            return ast[field];
+	        });
+
+	        var propsT = mapCOW(props, function(prop) {
+	            return walk(prop, func, depthFirst);
+	        });
+
+	        if(propsT !== props) {
+	            ast = new nodes[ast.typename](ast.lineno, ast.colno);
+
+	            propsT.forEach(function(prop, i) {
+	                ast[ast.fields[i]] = prop;
+	            });
+	        }
+	    }
+
+	    return depthFirst ? (func(ast) || ast) : ast;
+	}
+
+	function depthWalk(ast, func) {
+	    return walk(ast, func, true);
+	}
+
+	function _liftFilters(node, asyncFilters, prop) {
+	    var children = [];
+
+	    var walked = depthWalk(prop ? node[prop] : node, function(node) {
+	        if(node instanceof nodes.Block) {
+	            return node;
+	        }
+	        else if((node instanceof nodes.Filter &&
+	                 lib.indexOf(asyncFilters, node.name.value) !== -1) ||
+	                node instanceof nodes.CallExtensionAsync) {
+	            var symbol = new nodes.Symbol(node.lineno,
+	                                          node.colno,
+	                                          gensym());
+
+	            children.push(new nodes.FilterAsync(node.lineno,
+	                                                node.colno,
+	                                                node.name,
+	                                                node.args,
+	                                                symbol));
+	            return symbol;
+	        }
+	    });
+
+	    if(prop) {
+	        node[prop] = walked;
+	    }
+	    else {
+	        node = walked;
+	    }
+
+	    if(children.length) {
+	        children.push(node);
+
+	        return new nodes.NodeList(
+	            node.lineno,
+	            node.colno,
+	            children
+	        );
+	    }
+	    else {
+	        return node;
+	    }
+	}
+
+	function liftFilters(ast, asyncFilters) {
+	    return depthWalk(ast, function(node) {
+	        if(node instanceof nodes.Output) {
+	            return _liftFilters(node, asyncFilters);
+	        }
+	        else if(node instanceof nodes.Set) {
+	            return _liftFilters(node, asyncFilters, 'value');
+	        }
+	        else if(node instanceof nodes.For) {
+	            return _liftFilters(node, asyncFilters, 'arr');
+	        }
+	        else if(node instanceof nodes.If) {
+	            return _liftFilters(node, asyncFilters, 'cond');
+	        }
+	        else if(node instanceof nodes.CallExtension) {
+	            return _liftFilters(node, asyncFilters, 'args');
+	        }
+	    });
+	}
+
+	function liftSuper(ast) {
+	    return walk(ast, function(blockNode) {
+	        if(!(blockNode instanceof nodes.Block)) {
+	            return;
+	        }
+
+	        var hasSuper = false;
+	        var symbol = gensym();
+
+	        blockNode.body = walk(blockNode.body, function(node) {
+	            if(node instanceof nodes.FunCall &&
+	               node.name.value === 'super') {
+	                hasSuper = true;
+	                return new nodes.Symbol(node.lineno, node.colno, symbol);
+	            }
+	        });
+
+	        if(hasSuper) {
+	            blockNode.body.children.unshift(new nodes.Super(
+	                0, 0, blockNode.name, new nodes.Symbol(0, 0, symbol)
+	            ));
+	        }
+	    });
+	}
+
+	function convertStatements(ast) {
+	    return depthWalk(ast, function(node) {
+	        if(!(node instanceof nodes.If) &&
+	           !(node instanceof nodes.For)) {
+	            return;
+	        }
+
+	        var async = false;
+	        walk(node, function(node) {
+	            if(node instanceof nodes.FilterAsync ||
+	               node instanceof nodes.IfAsync ||
+	               node instanceof nodes.AsyncEach ||
+	               node instanceof nodes.AsyncAll ||
+	               node instanceof nodes.CallExtensionAsync ||
+	               node instanceof nodes.Include) {
+	                async = true;
+	                // Stop iterating by returning the node
+	                return node;
+	            }
+	        });
+
+	        if(async) {
+		        if(node instanceof nodes.If) {
+	                return new nodes.IfAsync(
+	                    node.lineno,
+	                    node.colno,
+	                    node.cond,
+	                    node.body,
+	                    node.else_
+	                );
+	            }
+	            else if(node instanceof nodes.For) {
+	                return new nodes.AsyncEach(
+	                    node.lineno,
+	                    node.colno,
+	                    node.arr,
+	                    node.name,
+	                    node.body,
+	                    node.else_
+	                );
+	            }
+	        }
+	    });
+	}
+
+	function cps(ast, asyncFilters) {
+	    return convertStatements(liftSuper(liftFilters(ast, asyncFilters)));
+	}
+
+	function transform(ast, asyncFilters) {
+	    return cps(ast, asyncFilters || []);
+	}
+
+	// var parser = require('./parser');
+	// var src = 'hello {% foo %}{% endfoo %} end';
+	// var ast = transform(parser.parse(src, [new FooExtension()]), ['bar']);
+	// nodes.printNodes(ast);
+
+	module.exports = {
+	    transform: transform
+	};
+
 
 /***/ },
 /* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
+	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
+
+	var lib = __webpack_require__(1);
+	// jshint -W079
+	var Object = __webpack_require__(11);
+
+	function traverseAndCheck(obj, type, results) {
+	    if(obj instanceof type) {
+	        results.push(obj);
+	    }
+
+	    if(obj instanceof Node) {
+	        obj.findAll(type, results);
+	    }
+	}
+
+	var Node = Object.extend('Node', {
+	    init: function(lineno, colno) {
+	        this.lineno = lineno;
+	        this.colno = colno;
+
+	        var fields = this.fields;
+	        for(var i = 0, l = fields.length; i < l; i++) {
+	            var field = fields[i];
+
+	            // The first two args are line/col numbers, so offset by 2
+	            var val = arguments[i + 2];
+
+	            // Fields should never be undefined, but null. It makes
+	            // testing easier to normalize values.
+	            if(val === undefined) {
+	                val = null;
+	            }
+
+	            this[field] = val;
+	        }
+	    },
+
+	    findAll: function(type, results) {
+	        results = results || [];
+
+	        var i, l;
+	        if(this instanceof NodeList) {
+	            var children = this.children;
+
+	            for(i = 0, l = children.length; i < l; i++) {
+	                traverseAndCheck(children[i], type, results);
+	            }
+	        }
+	        else {
+	            var fields = this.fields;
+
+	            for(i = 0, l = fields.length; i < l; i++) {
+	                traverseAndCheck(this[fields[i]], type, results);
+	            }
+	        }
+
+	        return results;
+	    },
+
+	    iterFields: function(func) {
+	        lib.each(this.fields, function(field) {
+	            func(this[field], field);
+	        }, this);
+	    }
+	});
+
+	// Abstract nodes
+	var Value = Node.extend('Value', { fields: ['value'] });
+
+	// Concrete nodes
+	var NodeList = Node.extend('NodeList', {
+	    fields: ['children'],
+
+	    init: function(lineno, colno, nodes) {
+	        this.parent(lineno, colno, nodes || []);
+	    },
+
+	    addChild: function(node) {
+	        this.children.push(node);
+	    }
+	});
+
+	var Root = NodeList.extend('Root');
+	var Literal = Value.extend('Literal');
+	var Symbol = Value.extend('Symbol');
+	var Group = NodeList.extend('Group');
+	var Array = NodeList.extend('Array');
+	var Pair = Node.extend('Pair', { fields: ['key', 'value'] });
+	var Dict = NodeList.extend('Dict');
+	var LookupVal = Node.extend('LookupVal', { fields: ['target', 'val'] });
+	var If = Node.extend('If', { fields: ['cond', 'body', 'else_'] });
+	var IfAsync = If.extend('IfAsync');
+	var InlineIf = Node.extend('InlineIf', { fields: ['cond', 'body', 'else_'] });
+	var For = Node.extend('For', { fields: ['arr', 'name', 'body', 'else_'] });
+	var AsyncEach = For.extend('AsyncEach');
+	var AsyncAll = For.extend('AsyncAll');
+	var Macro = Node.extend('Macro', { fields: ['name', 'args', 'body'] });
+	var Caller = Macro.extend('Caller');
+	var Import = Node.extend('Import', { fields: ['template', 'target', 'withContext'] });
+	var FromImport = Node.extend('FromImport', {
+	    fields: ['template', 'names', 'withContext'],
+
+	    init: function(lineno, colno, template, names, withContext) {
+	        this.parent(lineno, colno,
+	                    template,
+	                    names || new NodeList(), withContext);
+	    }
+	});
+	var FunCall = Node.extend('FunCall', { fields: ['name', 'args'] });
+	var Filter = FunCall.extend('Filter');
+	var FilterAsync = Filter.extend('FilterAsync', {
+	    fields: ['name', 'args', 'symbol']
+	});
+	var KeywordArgs = Dict.extend('KeywordArgs');
+	var Block = Node.extend('Block', { fields: ['name', 'body'] });
+	var Super = Node.extend('Super', { fields: ['blockName', 'symbol'] });
+	var TemplateRef = Node.extend('TemplateRef', { fields: ['template'] });
+	var Extends = TemplateRef.extend('Extends');
+	var Include = TemplateRef.extend('Include');
+	var Set = Node.extend('Set', { fields: ['targets', 'value'] });
+	var Output = NodeList.extend('Output');
+	var TemplateData = Literal.extend('TemplateData');
+	var UnaryOp = Node.extend('UnaryOp', { fields: ['target'] });
+	var BinOp = Node.extend('BinOp', { fields: ['left', 'right'] });
+	var In = BinOp.extend('In');
+	var Or = BinOp.extend('Or');
+	var And = BinOp.extend('And');
+	var Not = UnaryOp.extend('Not');
+	var Add = BinOp.extend('Add');
+	var Sub = BinOp.extend('Sub');
+	var Mul = BinOp.extend('Mul');
+	var Div = BinOp.extend('Div');
+	var FloorDiv = BinOp.extend('FloorDiv');
+	var Mod = BinOp.extend('Mod');
+	var Pow = BinOp.extend('Pow');
+	var Neg = UnaryOp.extend('Neg');
+	var Pos = UnaryOp.extend('Pos');
+	var Compare = Node.extend('Compare', { fields: ['expr', 'ops'] });
+	var CompareOperand = Node.extend('CompareOperand', {
+	    fields: ['expr', 'type']
+	});
+
+	var CallExtension = Node.extend('CallExtension', {
+	    fields: ['extName', 'prop', 'args', 'contentArgs'],
+
+	    init: function(ext, prop, args, contentArgs) {
+	        this.extName = ext._name || ext;
+	        this.prop = prop;
+	        this.args = args || new NodeList();
+	        this.contentArgs = contentArgs || [];
+	        this.autoescape = ext.autoescape;
+	    }
+	});
+
+	var CallExtensionAsync = CallExtension.extend('CallExtensionAsync');
+
+	// Print the AST in a nicely formatted tree format for debuggin
+	function printNodes(node, indent) {
+	    indent = indent || 0;
+
+	    // This is hacky, but this is just a debugging function anyway
+	    function print(str, indent, inline) {
+	        var lines = str.split('\n');
+
+	        for(var i=0; i<lines.length; i++) {
+	            if(lines[i]) {
+	                if((inline && i > 0) || !inline) {
+	                    for(var j=0; j<indent; j++) {
+	                        process.stdout.write(' ');
+	                    }
+	                }
+	            }
+
+	            if(i === lines.length-1) {
+	                process.stdout.write(lines[i]);
+	            }
+	            else {
+	                process.stdout.write(lines[i] + '\n');
+	            }
+	        }
+	    }
+
+	    print(node.typename + ': ', indent);
+
+	    if(node instanceof NodeList) {
+	        print('\n');
+	        lib.each(node.children, function(n) {
+	            printNodes(n, indent + 2);
+	        });
+	    }
+	    else if(node instanceof CallExtension) {
+	        print(node.extName + '.' + node.prop);
+	        print('\n');
+
+	        if(node.args) {
+	            printNodes(node.args, indent + 2);
+	        }
+
+	        if(node.contentArgs) {
+	            lib.each(node.contentArgs, function(n) {
+	                printNodes(n, indent + 2);
+	            });
+	        }
+	    }
+	    else {
+	        var nodes = null;
+	        var props = null;
+
+	        node.iterFields(function(val, field) {
+	            if(val instanceof Node) {
+	                nodes = nodes || {};
+	                nodes[field] = val;
+	            }
+	            else {
+	                props = props || {};
+	                props[field] = val;
+	            }
+	        });
+
+	        if(props) {
+	            print(JSON.stringify(props, null, 2) + '\n', null, true);
+	        }
+	        else {
+	            print('\n');
+	        }
+
+	        if(nodes) {
+	            for(var k in nodes) {
+	                printNodes(nodes[k], indent + 2);
+	            }
+	        }
+
+	    }
+	}
+
+	// var t = new NodeList(0, 0,
+	//                      [new Value(0, 0, 3),
+	//                       new Value(0, 0, 10),
+	//                       new Pair(0, 0,
+	//                                new Value(0, 0, 'key'),
+	//                                new Value(0, 0, 'value'))]);
+	// printNodes(t);
+
+	module.exports = {
+	    Node: Node,
+	    Root: Root,
+	    NodeList: NodeList,
+	    Value: Value,
+	    Literal: Literal,
+	    Symbol: Symbol,
+	    Group: Group,
+	    Array: Array,
+	    Pair: Pair,
+	    Dict: Dict,
+	    Output: Output,
+	    TemplateData: TemplateData,
+	    If: If,
+	    IfAsync: IfAsync,
+	    InlineIf: InlineIf,
+	    For: For,
+	    AsyncEach: AsyncEach,
+	    AsyncAll: AsyncAll,
+	    Macro: Macro,
+	    Caller: Caller,
+	    Import: Import,
+	    FromImport: FromImport,
+	    FunCall: FunCall,
+	    Filter: Filter,
+	    FilterAsync: FilterAsync,
+	    KeywordArgs: KeywordArgs,
+	    Block: Block,
+	    Super: Super,
+	    Extends: Extends,
+	    Include: Include,
+	    Set: Set,
+	    LookupVal: LookupVal,
+	    BinOp: BinOp,
+	    In: In,
+	    Or: Or,
+	    And: And,
+	    Not: Not,
+	    Add: Add,
+	    Sub: Sub,
+	    Mul: Mul,
+	    Div: Div,
+	    FloorDiv: FloorDiv,
+	    Mod: Mod,
+	    Pow: Pow,
+	    Neg: Neg,
+	    Pos: Pos,
+	    Compare: Compare,
+	    CompareOperand: CompareOperand,
+
+	    CallExtension: CallExtension,
+	    CallExtensionAsync: CallExtensionAsync,
+
+	    printNodes: printNodes
+	};
+
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(10)))
+
+/***/ },
+/* 17 */
+/***/ function(module, exports, __webpack_require__) {
+
 	"use strict";
 
 	// rawAsap provides everything we need except exception management.
-	var rawAsap = __webpack_require__(17);
+	var rawAsap = __webpack_require__(18);
 	// RawTasks are recycled to reduce GC churn.
 	var freeTasks = [];
 	// We queue errors to ensure they are thrown in right order (FIFO).
@@ -5694,7 +5852,7 @@ var nunjucks =
 
 
 /***/ },
-/* 17 */
+/* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {"use strict";
