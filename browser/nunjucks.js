@@ -52,7 +52,7 @@ var nunjucks =
 	var env = __webpack_require__(2);
 	var Loader = __webpack_require__(3);
 	var loaders = __webpack_require__(4);
-	var precompile = __webpack_require__(10);
+	var precompile = __webpack_require__(14);
 
 	module.exports = {};
 	module.exports.Environment = env.Environment;
@@ -422,21 +422,21 @@ var nunjucks =
 
 	'use strict';
 
-	var path = __webpack_require__(10);
+	var path = __webpack_require__(14);
 	var asap = __webpack_require__(17);
 	var lib = __webpack_require__(1);
-	var Obj = __webpack_require__(11);
+	var Obj = __webpack_require__(10);
 	var compiler = __webpack_require__(5);
-	var builtin_filters = __webpack_require__(12);
+	var builtin_filters = __webpack_require__(11);
 	var builtin_loaders = __webpack_require__(4);
 	var runtime = __webpack_require__(8);
-	var globals = __webpack_require__(13);
+	var globals = __webpack_require__(12);
 	var Frame = runtime.Frame;
 	var Template;
 
 	// Unconditionally load in this loader, even if no other ones are
 	// included (possible in the slim browser build)
-	builtin_loaders.PrecompiledLoader = __webpack_require__(14);
+	builtin_loaders.PrecompiledLoader = __webpack_require__(13);
 
 	// If the user is using the async API, *always* call it
 	// asynchronously even if the template was synchronous.
@@ -968,8 +968,8 @@ var nunjucks =
 
 	'use strict';
 
-	var path = __webpack_require__(10);
-	var Obj = __webpack_require__(11);
+	var path = __webpack_require__(14);
+	var Obj = __webpack_require__(10);
 	var lib = __webpack_require__(1);
 
 	var Loader = Obj.extend({
@@ -1008,7 +1008,7 @@ var nunjucks =
 	'use strict';
 
 	var Loader = __webpack_require__(3);
-	var PrecompiledLoader = __webpack_require__(14);
+	var PrecompiledLoader = __webpack_require__(13);
 
 	var WebLoader = Loader.extend({
 	    init: function(baseURL, opts) {
@@ -1108,7 +1108,7 @@ var nunjucks =
 	var transformer = __webpack_require__(15);
 	var nodes = __webpack_require__(16);
 	// jshint -W079
-	var Object = __webpack_require__(11);
+	var Object = __webpack_require__(10);
 	var Frame = __webpack_require__(8).Frame;
 
 	// These are all the same for now, but shouldn't be passed straight
@@ -1557,7 +1557,7 @@ var nunjucks =
 
 	        // Output the name of what we're calling so we can get friendly errors
 	        // if the lookup fails.
-	        this.emit(', "' + this._getNodeName(node.name).replace(/"/g, '\\"') + '", ');
+	        this.emit(', "' + this._getNodeName(node.name).replace(/"/g, '\\"') + '", context, ');
 
 	        this._compileAggregate(node.args, frame, '[', '])');
 
@@ -2261,7 +2261,7 @@ var nunjucks =
 	var lexer = __webpack_require__(7);
 	var nodes = __webpack_require__(16);
 	// jshint -W079
-	var Object = __webpack_require__(11);
+	var Object = __webpack_require__(10);
 	var lib = __webpack_require__(1);
 
 	var Parser = Object.extend({
@@ -3982,7 +3982,7 @@ var nunjucks =
 	'use strict';
 
 	var lib = __webpack_require__(1);
-	var Obj = __webpack_require__(11);
+	var Obj = __webpack_require__(10);
 
 	// Frames keep track of scoping both at compile-time and run-time so
 	// we know how to access variables. Block tags can introduce special
@@ -4215,7 +4215,7 @@ var nunjucks =
 	    return obj[val];
 	}
 
-	function callWrap(obj, name, args) {
+	function callWrap(obj, name, context, args) {
 	    if(!obj) {
 	        throw new Error('Unable to call `' + name + '`, which is undefined or falsey');
 	    }
@@ -4224,7 +4224,7 @@ var nunjucks =
 	    }
 
 	    // jshint validthis: true
-	    return obj.apply(this, args);
+	    return obj.apply(context, args);
 	}
 
 	function contextOrFrameLookup(context, frame, name) {
@@ -4345,10 +4345,12 @@ var nunjucks =
 /***/ function(module, exports, __webpack_require__) {
 
 	function installCompat() {
+	  'use strict';
+
 	  // This must be called like `nunjucks.installCompat` so that `this`
 	  // references the nunjucks instance
-	  var runtime = this.runtime;
-	  var lib = this.lib;
+	  var runtime = this.runtime; // jshint ignore:line
+	  var lib = this.lib; // jshint ignore:line
 
 	  var orig_contextOrFrameLookup = runtime.contextOrFrameLookup;
 	  runtime.contextOrFrameLookup = function(context, frame, key) {
@@ -4380,7 +4382,7 @@ var nunjucks =
 	    },
 	    remove: function(element) {
 	      for (var i = 0; i < this.length; i++) {
-	        if (this[i] == element) {
+	        if (this[i] === element) {
 	          return this.splice(i, 1);
 	        }
 	      }
@@ -4389,7 +4391,7 @@ var nunjucks =
 	    count: function(element) {
 	      var count = 0;
 	      for (var i = 0; i < this.length; i++) {
-	        if (this[i] == element) {
+	        if (this[i] === element) {
 	          count++;
 	        }
 	      }
@@ -4397,7 +4399,7 @@ var nunjucks =
 	    },
 	    index: function(element) {
 	      var i;
-	      if ((i = this.indexOf(element)) == -1) {
+	      if ((i = this.indexOf(element)) === -1) {
 	        throw new Error('ValueError');
 	      }
 	      return i;
@@ -4480,7 +4482,7 @@ var nunjucks =
 	  OBJECT_MEMBERS.iteritems = OBJECT_MEMBERS.items;
 	  OBJECT_MEMBERS.itervalues = OBJECT_MEMBERS.values;
 	  OBJECT_MEMBERS.iterkeys = OBJECT_MEMBERS.keys;
-	  runtime.memberLookup = function(obj, val, autoescape) {
+	  runtime.memberLookup = function(obj, val, autoescape) { // jshint ignore:line
 	    obj = obj || {};
 
 	    // If the object is an object, return any of the methods that Python would
@@ -4502,12 +4504,6 @@ var nunjucks =
 
 /***/ },
 /* 10 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-
-/***/ },
-/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -4577,7 +4573,7 @@ var nunjucks =
 
 
 /***/ },
-/* 12 */
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -5127,7 +5123,7 @@ var nunjucks =
 
 
 /***/ },
-/* 13 */
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -5200,7 +5196,7 @@ var nunjucks =
 
 
 /***/ },
-/* 14 */
+/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -5226,6 +5222,12 @@ var nunjucks =
 
 	module.exports = PrecompiledLoader;
 
+
+/***/ },
+/* 14 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
 
 /***/ },
 /* 15 */
@@ -5481,7 +5483,7 @@ var nunjucks =
 
 	var lib = __webpack_require__(1);
 	// jshint -W079
-	var Object = __webpack_require__(11);
+	var Object = __webpack_require__(10);
 
 	function traverseAndCheck(obj, type, results) {
 	    if(obj instanceof type) {
@@ -5777,7 +5779,7 @@ var nunjucks =
 	    printNodes: printNodes
 	};
 
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(10)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(14)))
 
 /***/ },
 /* 17 */
