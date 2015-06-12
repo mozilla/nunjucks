@@ -1,8 +1,10 @@
 function installCompat() {
+  'use strict';
+
   // This must be called like `nunjucks.installCompat` so that `this`
   // references the nunjucks instance
-  var runtime = this.runtime;
-  var lib = this.lib;
+  var runtime = this.runtime; // jshint ignore:line
+  var lib = this.lib; // jshint ignore:line
 
   var orig_contextOrFrameLookup = runtime.contextOrFrameLookup;
   runtime.contextOrFrameLookup = function(context, frame, key) {
@@ -34,7 +36,7 @@ function installCompat() {
     },
     remove: function(element) {
       for (var i = 0; i < this.length; i++) {
-        if (this[i] == element) {
+        if (this[i] === element) {
           return this.splice(i, 1);
         }
       }
@@ -43,7 +45,7 @@ function installCompat() {
     count: function(element) {
       var count = 0;
       for (var i = 0; i < this.length; i++) {
-        if (this[i] == element) {
+        if (this[i] === element) {
           count++;
         }
       }
@@ -51,7 +53,7 @@ function installCompat() {
     },
     index: function(element) {
       var i;
-      if ((i = this.indexOf(element)) == -1) {
+      if ((i = this.indexOf(element)) === -1) {
         throw new Error('ValueError');
       }
       return i;
@@ -134,7 +136,7 @@ function installCompat() {
   OBJECT_MEMBERS.iteritems = OBJECT_MEMBERS.items;
   OBJECT_MEMBERS.itervalues = OBJECT_MEMBERS.values;
   OBJECT_MEMBERS.iterkeys = OBJECT_MEMBERS.keys;
-  runtime.memberLookup = function(obj, val, autoescape) {
+  runtime.memberLookup = function(obj, val, autoescape) { // jshint ignore:line
     obj = obj || {};
 
     // If the object is an object, return any of the methods that Python would
