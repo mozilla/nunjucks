@@ -538,5 +538,17 @@
             equal('{{ nothing | wordcount }}', '');
             finish(done);
         });
+
+        it('contains', function(done) {
+            equal('{{ ["foo", "bar"] | contains("foo") }}', 'true');
+            equal('{{ ["foo"] | contains("bar") }}', 'false');
+            equal('{{ [undefined] | contains(undefined) }}', 'true');
+            equal('{{ [null] | contains(null) }}', 'true');
+            equal('{{ { foo: "bar" } | contains("foo") }}', 'true');
+            equal('{{ { foo: null } | contains("bar") }}', 'false');
+            equal('{{ "foo bar" | contains("bar") }}', 'true');
+            equal('{{ "foo bar" | contains("baz") }}', 'false');
+            finish(done);
+        });
     });
 })();
