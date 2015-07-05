@@ -170,7 +170,7 @@ In node, the [`FileSystemLoader`](#filesystemloader) is available to
 load templates off the filesystem, and in the browser the [`WebLoader`](#webloader)
 is available to load over HTTP (or use precompiled templates). If you
 use the simple [`configure`](#configure) API, nunjucks automatically
-creates the appropriate loader for you, depending if your in node or
+creates the appropriate loader for you, depending if you're in node or
 the browser. See [`Loader`](#loader) for more information.
 
 ```js
@@ -639,7 +639,7 @@ Exactly the same as [`precompile`](#precompile), but compiles a raw string.
 
 You only need to read this section if you are interested in
 asynchronous rendering. There is no performance benefit to this, it is
-soley to allow custom filters and extensions to make async calls. If
+solely to allow custom filters and extensions to make async calls. If
 you don't care about this, you should simply use the normal API like
 `var res = env.render('foo.html');`. There's no need to force the
 `callback` on you, and it's why it's optional in all the rendering
@@ -687,7 +687,7 @@ follow a few rules when writing asynchronous templates:
 
 ## Autoescaping
 
-By default, nunjucks will render all output as it is. If turn on
+By default, nunjucks will render all output as it is. If you turn on
 autoescaping, nunjucks will escape all output by default. It's
 recommended that you do this for security reasons.
 
@@ -837,8 +837,8 @@ you'll want to use:
 
 * `parseSignature([throwErrors], [noParens])` - Parse a list of
   arguments. By default it requires the parser to be pointing at the
-  left opening paranthesis, and parses up the right one. However, for
-  custom tags you shouldn't use parantheses, so passing `true` to the
+  left opening parenthesis, and parses up the right one. However, for
+  custom tags you shouldn't use parentheses, so passing `true` to the
   second argument tells it to parse a list of arguments up until the
   block end tag. A comma is required between arguments. Example: `{%
   mytag foo, bar, baz=10 %}`

@@ -110,7 +110,7 @@ This is the default content
 ```
 
 You can store the template to inherit in a variable and use it by
-emitting quotes. That way you can dynamically change which template is
+omitting quotes. That way you can dynamically change which template is
 inherited when rendering by setting it in the context.
 
 ```jinja
@@ -355,7 +355,7 @@ Inheritance](#template-inheritance).
 ```
 
 You can store the template to inherit in a variable and use it by
-emitting quotes. That way you can dynamically change which template is
+omitting quotes. That way you can dynamically change which template is
 inherited when rendering by setting it in the context.
 
 ```jinja
@@ -703,7 +703,7 @@ There are a few builtin global functions that cover some common cases.
 
 ### range([start], stop, [step])
 
-If you need to iterate over a fixed set of numbers, `range` generates the set for you. The numbers begin at `start` (default 0) and incremeny by `step` (default 1) until it reaches `stop`, not including it.
+If you need to iterate over a fixed set of numbers, `range` generates the set for you. The numbers begin at `start` (default 0) and increment by `step` (default 1) until it reaches `stop`, not including it.
 
 ```jinja
 {% for i in range(0, 5) -%}
@@ -724,7 +724,7 @@ An easy way to rotate through several values is to use `cycler`, which takes any
 {% endfor %}
 ```
 
-In the above example, odd rows have the class "odd" and even rows have the class "even". You can access the current item on the `current` property s
+In the above example, odd rows have the class "odd" and even rows have the class "even". You can access the current item on the `current` property
 (in the above example, `cls.current`).
 
 ### joiner([separator])
