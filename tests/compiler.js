@@ -466,6 +466,14 @@
             finish(done);
         });
 
+        it('should allow definition of global macros in an included file', function(done) {
+          equal('{% include "include-macro.html" %}' +
+            '{{ foo("test") }}',
+            'testtest'
+          );
+          finish(done);
+        });
+
         it('should compile call blocks', function(done) {
           equal('{% macro wrap(el) %}' +
                 '<{{ el }}>{{ caller() }}</{{ el }}>' +
