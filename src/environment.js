@@ -107,6 +107,13 @@ var Environment = Obj.extend({
         globals[name] = value;
     },
 
+    getGlobal: function(name) {
+        if(!globals[name]) {
+            throw new Error('global not found: ' + name);
+        }
+        return globals[name];
+    },
+
     addFilter: function(name, func, async) {
         var wrapped = func;
 
