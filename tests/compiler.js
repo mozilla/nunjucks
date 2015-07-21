@@ -466,6 +466,24 @@
             finish(done);
         });
 
+        it('should respect macro arg default value of none, not fallback to context', function(done) {
+            equal('{% macro foo(arg=none) %}{{ arg or "none" }}{% endmacro %}' +
+                  '{{ foo() }}',
+                  {arg: 'hey'},
+                  'none');
+
+            finish(done);
+        });
+
+        it('should respect macro arg default value of none, not fallback to frame', function(done) {
+            equal('{% macro inner(class=none) %}Class {{ class }}{% endmacro %}' +
+                  '{% macro outer(class=none) %}Class {{ class }}: {{ caller() }}{% endmacro %}' +
+                  '{% call outer(class="outer") %}{{ inner() }}{% endcall %}',
+                  'Class outer: Class ');
+
+            finish(done);
+        });
+
         it('should compile call blocks', function(done) {
           equal('{% macro wrap(el) %}' +
                 '<{{ el }}>{{ caller() }}</{{ el }}>' +

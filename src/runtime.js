@@ -2,6 +2,7 @@
 
 var lib = require('./lib');
 var Obj = require('./object');
+var NotFound = {};
 
 // Frames keep track of scoping both at compile-time and run-time so
 // we know how to access variables. Block tags can introduce special
@@ -49,18 +50,23 @@ var Frame = Obj.extend({
     },
 
     lookup: function(name) {
+        var val = this.strictLookup(name);
+        return (val === NotFound) ? undefined : val;
+    },
+
+    strictLookup: function(name) {
         var p = this.parent;
-        var val = this.variables[name];
-        if(val !== undefined && val !== null) {
-            return val;
+        if(this.variables.hasOwnProperty(name)) {
+            return this.variables[name];
+        } else if (p) {
+            return p.strictLookup(name);
         }
-        return p && p.lookup(name);
+        return NotFound;
     },
 
     resolve: function(name) {
         var p = this.parent;
-        var val = this.variables[name];
-        if(val !== undefined && val !== null) {
+        if (this.variables.hasOwnProperty(name)) {
             return this;
         }
         return p && p.resolve(name);
@@ -247,10 +253,8 @@ function callWrap(obj, name, context, args) {
 }
 
 function contextOrFrameLookup(context, frame, name) {
-    var val = frame.lookup(name);
-    return (val !== undefined && val !== null) ?
-        val :
-        context.lookup(name);
+    var val = frame.strictLookup(name);
+    return (val !== NotFound) ? val : context.lookup(name);
 }
 
 function handleError(error, lineno, colno) {
