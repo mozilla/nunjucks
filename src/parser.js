@@ -890,7 +890,7 @@ var Parser = Object.extend({
 
     parsePrimary: function (noPostfix) {
         var tok = this.nextToken();
-        var val = null;
+        var val;
         var node = null;
 
         if(!tok) {
@@ -918,11 +918,14 @@ var Parser = Object.extend({
                           tok.colno);
             }
         }
+        else if(tok.type === lexer.TOKEN_NONE) {
+            val = null;
+        }
         else if (tok.type === lexer.TOKEN_REGEX) {
             val = new RegExp(tok.value.body, tok.value.flags);
         }
 
-        if(val !== null) {
+        if(val !== undefined) {
             node = new nodes.Literal(tok.lineno, tok.colno, val);
         }
         else if(tok.type === lexer.TOKEN_SYMBOL) {
