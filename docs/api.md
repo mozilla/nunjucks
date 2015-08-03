@@ -766,7 +766,7 @@ A message for you: {{ message|shorten(20) }}
 ### Keyword/Default Arguments
 
 As described in the
-[templating section](templating#Keyword-Arguments), nunjucks supports
+[templating section](templating#keyword-arguments), nunjucks supports
 keyword/default arguments. You can write a normal javascript filter
 that leverages them.
 
