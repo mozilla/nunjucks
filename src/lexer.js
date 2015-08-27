@@ -385,6 +385,18 @@ Tokenizer.prototype._extractMatching = function (breakOnMatch, charString) {
     return '';
 };
 
+Tokenizer.prototype._extractRegex = function(regex) {
+    var matches = this.currentStr().match(regex);
+    if(!matches) {
+        return null;
+    }
+
+    // Move forward whatever was matched
+    this.forwardN(matches[0].length);
+
+    return matches;
+};
+
 Tokenizer.prototype.is_finished = function() {
     return this.index >= this.len;
 };
@@ -407,6 +419,12 @@ Tokenizer.prototype.forward = function() {
     }
 };
 
+Tokenizer.prototype.backN = function(n) {
+    for(var i=0; i<n; i++) {
+        this.back();
+    }
+};
+
 Tokenizer.prototype.back = function() {
     this.index--;
 
@@ -426,9 +444,18 @@ Tokenizer.prototype.back = function() {
     }
 };
 
+// current returns current character
 Tokenizer.prototype.current = function() {
     if(!this.is_finished()) {
         return this.str.charAt(this.index);
+    }
+    return '';
+};
+
+// currentStr returns what's left of the unparsed string
+Tokenizer.prototype.currentStr = function() {
+    if(!this.is_finished()) {
+        return this.str.substr(this.index);
     }
     return '';
 };
