@@ -735,7 +735,7 @@ var Parser = Object.extend({
 
     parseCompare: function() {
         var compareOps = ['==', '!=', '<', '>', '<=', '>='];
-        var expr = this.parseAdd();
+        var expr = this.parseConcat();
         var ops = [];
 
         while(1) {
@@ -747,7 +747,7 @@ var Parser = Object.extend({
             else if(lib.indexOf(compareOps, tok.value) !== -1) {
                 ops.push(new nodes.CompareOperand(tok.lineno,
                                                   tok.colno,
-                                                  this.parseAdd(),
+                                                  this.parseConcat(),
                                                   tok.value));
             }
             else {
@@ -765,6 +765,19 @@ var Parser = Object.extend({
         else {
             return expr;
         }
+    },
+
+    // finds the '~' for string concatenation
+    parseConcat: function(){
+        var node = this.parseAdd();
+        while(this.skipValue(lexer.TOKEN_TILDE, '~')) {
+            var node2 = this.parseAdd();
+            node = new nodes.Concat(node.lineno,
+                                 node.colno,
+                                 node,
+                                 node2);
+        }
+        return node;
     },
 
     parseAdd: function() {

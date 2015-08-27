@@ -3,7 +3,7 @@
 var lib = require('./lib');
 
 var whitespaceChars = ' \n\t\r\u00A0';
-var delimChars = '()[]{}%*-+/#,:|.<>=!';
+var delimChars = '()[]{}%*-+~/#,:|.<>=!';
 var intChars = '0123456789';
 
 var BLOCK_START = '{%';
@@ -30,6 +30,7 @@ var TOKEN_RIGHT_CURLY = 'right-curly';
 var TOKEN_OPERATOR = 'operator';
 var TOKEN_COMMA = 'comma';
 var TOKEN_COLON = 'colon';
+var TOKEN_TILDE = 'tilde';
 var TOKEN_PIPE = 'pipe';
 var TOKEN_INT = 'int';
 var TOKEN_FLOAT = 'float';
@@ -169,6 +170,7 @@ Tokenizer.prototype.nextToken = function() {
             case '}': type = TOKEN_RIGHT_CURLY; break;
             case ',': type = TOKEN_COMMA; break;
             case ':': type = TOKEN_COLON; break;
+            case '~': type = TOKEN_TILDE; break;
             case '|': type = TOKEN_PIPE; break;
             default: type = TOKEN_OPERATOR;
             }
@@ -486,6 +488,7 @@ module.exports = {
     TOKEN_OPERATOR: TOKEN_OPERATOR,
     TOKEN_COMMA: TOKEN_COMMA,
     TOKEN_COLON: TOKEN_COLON,
+    TOKEN_TILDE: TOKEN_TILDE,
     TOKEN_PIPE: TOKEN_PIPE,
     TOKEN_INT: TOKEN_INT,
     TOKEN_FLOAT: TOKEN_FLOAT,

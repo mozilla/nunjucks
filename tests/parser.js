@@ -235,6 +235,17 @@
                       [nodes.Symbol, 'y']]]]]);
         });
 
+        it('should parse tilde', function(){
+            isAST(parser.parse('{{ 2 ~ 3 }}'),
+              [nodes.Root,
+               [nodes.Output,
+                [nodes.Concat,
+                  [nodes.Literal, 2],
+                  [nodes.Literal, 3]
+                ]]]
+              );
+        });
+
         it('should parse operators with correct precedence', function() {
             isAST(parser.parse('{{ x in y and z }}'),
                   [nodes.Root,
