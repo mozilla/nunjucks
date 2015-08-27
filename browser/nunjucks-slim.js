@@ -50,9 +50,9 @@ var nunjucks =
 
 	var lib = __webpack_require__(1);
 	var env = __webpack_require__(2);
-	var Loader = __webpack_require__(3);
-	var loaders = __webpack_require__(10);
-	var precompile = __webpack_require__(10);
+	var Loader = __webpack_require__(11);
+	var loaders = __webpack_require__(3);
+	var precompile = __webpack_require__(3);
 
 	module.exports = {};
 	module.exports.Environment = env.Environment;
@@ -63,13 +63,13 @@ var nunjucks =
 	module.exports.PrecompiledLoader = loaders.PrecompiledLoader;
 	module.exports.WebLoader = loaders.WebLoader;
 
-	module.exports.compiler = __webpack_require__(10);
-	module.exports.parser = __webpack_require__(10);
-	module.exports.lexer = __webpack_require__(10);
-	module.exports.runtime = __webpack_require__(4);
+	module.exports.compiler = __webpack_require__(3);
+	module.exports.parser = __webpack_require__(3);
+	module.exports.lexer = __webpack_require__(3);
+	module.exports.runtime = __webpack_require__(8);
 	module.exports.lib = lib;
 
-	module.exports.installJinjaCompat = __webpack_require__(5);
+	module.exports.installJinjaCompat = __webpack_require__(12);
 
 	// A single instance of an environment, since this is so commonly used
 
@@ -135,7 +135,7 @@ var nunjucks =
 
 /***/ },
 /* 1 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ function(module, exports) {
 
 	'use strict';
 
@@ -422,21 +422,21 @@ var nunjucks =
 
 	'use strict';
 
-	var path = __webpack_require__(10);
-	var asap = __webpack_require__(11);
+	var path = __webpack_require__(3);
+	var asap = __webpack_require__(4);
 	var lib = __webpack_require__(1);
 	var Obj = __webpack_require__(6);
-	var compiler = __webpack_require__(10);
+	var compiler = __webpack_require__(3);
 	var builtin_filters = __webpack_require__(7);
-	var builtin_loaders = __webpack_require__(10);
-	var runtime = __webpack_require__(4);
-	var globals = __webpack_require__(8);
+	var builtin_loaders = __webpack_require__(3);
+	var runtime = __webpack_require__(8);
+	var globals = __webpack_require__(9);
 	var Frame = runtime.Frame;
 	var Template;
 
 	// Unconditionally load in this loader, even if no other ones are
 	// included (possible in the slim browser build)
-	builtin_loaders.PrecompiledLoader = __webpack_require__(9);
+	builtin_loaders.PrecompiledLoader = __webpack_require__(10);
 
 	// If the user is using the async API, *always* call it
 	// asynchronously even if the template was synchronous.
@@ -527,6 +527,13 @@ var nunjucks =
 
 	    addGlobal: function(name, value) {
 	        globals[name] = value;
+	    },
+
+	    getGlobal: function(name) {
+	        if(!globals[name]) {
+	            throw new Error('global not found: ' + name);
+	        }
+	        return globals[name];
 	    },
 
 	    addFilter: function(name, func, async) {
@@ -964,573 +971,312 @@ var nunjucks =
 
 /***/ },
 /* 3 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ function(module, exports) {
 
-	'use strict';
-
-	var path = __webpack_require__(10);
-	var Obj = __webpack_require__(6);
-	var lib = __webpack_require__(1);
-
-	var Loader = Obj.extend({
-	    on: function(name, func) {
-	        this.listeners = this.listeners || {};
-	        this.listeners[name] = this.listeners[name] || [];
-	        this.listeners[name].push(func);
-	    },
-
-	    emit: function(name /*, arg1, arg2, ...*/) {
-	        var args = Array.prototype.slice.call(arguments, 1);
-
-	        if(this.listeners && this.listeners[name]) {
-	            lib.each(this.listeners[name], function(listener) {
-	                listener.apply(null, args);
-	            });
-	        }
-	    },
-
-	    resolve: function(from, to) {
-	        return path.resolve(path.dirname(from), to);
-	    },
-
-	    isRelative: function(filename) {
-	        return (filename.indexOf('./') === 0 || filename.indexOf('../') === 0);
-	    }
-	});
-
-	module.exports = Loader;
-
+	
 
 /***/ },
 /* 4 */
 /***/ function(module, exports, __webpack_require__) {
 
-	'use strict';
+	"use strict";
 
-	var lib = __webpack_require__(1);
-	var Obj = __webpack_require__(6);
+	// rawAsap provides everything we need except exception management.
+	var rawAsap = __webpack_require__(5);
+	// RawTasks are recycled to reduce GC churn.
+	var freeTasks = [];
+	// We queue errors to ensure they are thrown in right order (FIFO).
+	// Array-as-queue is good enough here, since we are just dealing with exceptions.
+	var pendingErrors = [];
+	var requestErrorThrow = rawAsap.makeRequestCallFromTimer(throwFirstError);
 
-	// Frames keep track of scoping both at compile-time and run-time so
-	// we know how to access variables. Block tags can introduce special
-	// variables, for example.
-	var Frame = Obj.extend({
-	    init: function(parent) {
-	        this.variables = {};
-	        this.parent = parent;
-	        this.topLevel = false;
-	    },
+	function throwFirstError() {
+	    if (pendingErrors.length) {
+	        throw pendingErrors.shift();
+	    }
+	}
 
-	    set: function(name, val, resolveUp) {
-	        // Allow variables with dots by automatically creating the
-	        // nested structure
-	        var parts = name.split('.');
-	        var obj = this.variables;
-	        var frame = this;
+	/**
+	 * Calls a task as soon as possible after returning, in its own event, with priority
+	 * over other events like animation, reflow, and repaint. An error thrown from an
+	 * event will not interrupt, nor even substantially slow down the processing of
+	 * other events, but will be rather postponed to a lower priority event.
+	 * @param {{call}} task A callable object, typically a function that takes no
+	 * arguments.
+	 */
+	module.exports = asap;
+	function asap(task) {
+	    var rawTask;
+	    if (freeTasks.length) {
+	        rawTask = freeTasks.pop();
+	    } else {
+	        rawTask = new RawTask();
+	    }
+	    rawTask.task = task;
+	    rawAsap(rawTask);
+	}
 
-	        if(resolveUp) {
-	            if((frame = this.resolve(parts[0]))) {
-	                frame.set(name, val);
-	                return;
-	            }
-	            frame = this;
+	// We wrap tasks with recyclable task objects.  A task object implements
+	// `call`, just like a function.
+	function RawTask() {
+	    this.task = null;
+	}
+
+	// The sole purpose of wrapping the task is to catch the exception and recycle
+	// the task object after its single use.
+	RawTask.prototype.call = function () {
+	    try {
+	        this.task.call();
+	    } catch (error) {
+	        if (asap.onerror) {
+	            // This hook exists purely for testing purposes.
+	            // Its name will be periodically randomized to break any code that
+	            // depends on its existence.
+	            asap.onerror(error);
+	        } else {
+	            // In a web browser, exceptions are not fatal. However, to avoid
+	            // slowing down the queue of pending tasks, we rethrow the error in a
+	            // lower priority turn.
+	            pendingErrors.push(error);
+	            requestErrorThrow();
 	        }
-
-	        for(var i=0; i<parts.length - 1; i++) {
-	            var id = parts[i];
-
-	            if(!obj[id]) {
-	                obj[id] = {};
-	            }
-	            obj = obj[id];
-	        }
-
-	        obj[parts[parts.length - 1]] = val;
-	    },
-
-	    get: function(name) {
-	        var val = this.variables[name];
-	        if(val !== undefined && val !== null) {
-	            return val;
-	        }
-	        return null;
-	    },
-
-	    lookup: function(name) {
-	        var p = this.parent;
-	        var val = this.variables[name];
-	        if(val !== undefined && val !== null) {
-	            return val;
-	        }
-	        return p && p.lookup(name);
-	    },
-
-	    resolve: function(name) {
-	        var p = this.parent;
-	        var val = this.variables[name];
-	        if(val !== undefined && val !== null) {
-	            return this;
-	        }
-	        return p && p.resolve(name);
-	    },
-
-	    push: function() {
-	        return new Frame(this);
-	    },
-
-	    pop: function() {
-	        return this.parent;
+	    } finally {
+	        this.task = null;
+	        freeTasks[freeTasks.length] = this;
 	    }
-	});
-
-	function makeMacro(argNames, kwargNames, func) {
-	    return function() {
-	        var argCount = numArgs(arguments);
-	        var args;
-	        var kwargs = getKeywordArgs(arguments);
-	        var i;
-
-	        if(argCount > argNames.length) {
-	            args = Array.prototype.slice.call(arguments, 0, argNames.length);
-
-	            // Positional arguments that should be passed in as
-	            // keyword arguments (essentially default values)
-	            var vals = Array.prototype.slice.call(arguments, args.length, argCount);
-	            for(i = 0; i < vals.length; i++) {
-	                if(i < kwargNames.length) {
-	                    kwargs[kwargNames[i]] = vals[i];
-	                }
-	            }
-
-	            args.push(kwargs);
-	        }
-	        else if(argCount < argNames.length) {
-	            args = Array.prototype.slice.call(arguments, 0, argCount);
-
-	            for(i = argCount; i < argNames.length; i++) {
-	                var arg = argNames[i];
-
-	                // Keyword arguments that should be passed as
-	                // positional arguments, i.e. the caller explicitly
-	                // used the name of a positional arg
-	                args.push(kwargs[arg]);
-	                delete kwargs[arg];
-	            }
-
-	            args.push(kwargs);
-	        }
-	        else {
-	            args = arguments;
-	        }
-
-	        return func.apply(this, args);
-	    };
-	}
-
-	function makeKeywordArgs(obj) {
-	    obj.__keywords = true;
-	    return obj;
-	}
-
-	function getKeywordArgs(args) {
-	    var len = args.length;
-	    if(len) {
-	        var lastArg = args[len - 1];
-	        if(lastArg && lastArg.hasOwnProperty('__keywords')) {
-	            return lastArg;
-	        }
-	    }
-	    return {};
-	}
-
-	function numArgs(args) {
-	    var len = args.length;
-	    if(len === 0) {
-	        return 0;
-	    }
-
-	    var lastArg = args[len - 1];
-	    if(lastArg && lastArg.hasOwnProperty('__keywords')) {
-	        return len - 1;
-	    }
-	    else {
-	        return len;
-	    }
-	}
-
-	// A SafeString object indicates that the string should not be
-	// autoescaped. This happens magically because autoescaping only
-	// occurs on primitive string objects.
-	function SafeString(val) {
-	    if(typeof val !== 'string') {
-	        return val;
-	    }
-
-	    this.val = val;
-	    this.length = val.length;
-	}
-
-	SafeString.prototype = Object.create(String.prototype, {
-	    length: { writable: true, configurable: true, value: 0 }
-	});
-	SafeString.prototype.valueOf = function() {
-	    return this.val;
-	};
-	SafeString.prototype.toString = function() {
-	    return this.val;
-	};
-
-	function copySafeness(dest, target) {
-	    if(dest instanceof SafeString) {
-	        return new SafeString(target);
-	    }
-	    return target.toString();
-	}
-
-	function markSafe(val) {
-	    var type = typeof val;
-
-	    if(type === 'string') {
-	        return new SafeString(val);
-	    }
-	    else if(type !== 'function') {
-	        return val;
-	    }
-	    else {
-	        return function() {
-	            var ret = val.apply(this, arguments);
-
-	            if(typeof ret === 'string') {
-	                return new SafeString(ret);
-	            }
-
-	            return ret;
-	        };
-	    }
-	}
-
-	function suppressValue(val, autoescape) {
-	    val = (val !== undefined && val !== null) ? val : '';
-
-	    if(autoescape && typeof val === 'string') {
-	        val = lib.escape(val);
-	    }
-
-	    return val;
-	}
-
-	function ensureDefined(val, lineno, colno) {
-	    if(val === null || val === undefined) {
-	        throw new lib.TemplateError(
-	            'attempted to output null or undefined value',
-	            lineno + 1,
-	            colno + 1
-	        );
-	    }
-	    return val;
-	}
-
-	function memberLookup(obj, val) {
-	    obj = obj || {};
-
-	    if(typeof obj[val] === 'function') {
-	        return function() {
-	            return obj[val].apply(obj, arguments);
-	        };
-	    }
-
-	    return obj[val];
-	}
-
-	function callWrap(obj, name, context, args) {
-	    if(!obj) {
-	        throw new Error('Unable to call `' + name + '`, which is undefined or falsey');
-	    }
-	    else if(typeof obj !== 'function') {
-	        throw new Error('Unable to call `' + name + '`, which is not a function');
-	    }
-
-	    // jshint validthis: true
-	    return obj.apply(context, args);
-	}
-
-	function contextOrFrameLookup(context, frame, name) {
-	    var val = frame.lookup(name);
-	    return (val !== undefined && val !== null) ?
-	        val :
-	        context.lookup(name);
-	}
-
-	function handleError(error, lineno, colno) {
-	    if(error.lineno) {
-	        return error;
-	    }
-	    else {
-	        return new lib.TemplateError(error, lineno, colno);
-	    }
-	}
-
-	function asyncEach(arr, dimen, iter, cb) {
-	    if(lib.isArray(arr)) {
-	        var len = arr.length;
-
-	        lib.asyncIter(arr, function(item, i, next) {
-	            switch(dimen) {
-	            case 1: iter(item, i, len, next); break;
-	            case 2: iter(item[0], item[1], i, len, next); break;
-	            case 3: iter(item[0], item[1], item[2], i, len, next); break;
-	            default:
-	                item.push(i, next);
-	                iter.apply(this, item);
-	            }
-	        }, cb);
-	    }
-	    else {
-	        lib.asyncFor(arr, function(key, val, i, len, next) {
-	            iter(key, val, i, len, next);
-	        }, cb);
-	    }
-	}
-
-	function asyncAll(arr, dimen, func, cb) {
-	    var finished = 0;
-	    var len, i;
-	    var outputArr;
-
-	    function done(i, output) {
-	        finished++;
-	        outputArr[i] = output;
-
-	        if(finished === len) {
-	            cb(null, outputArr.join(''));
-	        }
-	    }
-
-	    if(lib.isArray(arr)) {
-	        len = arr.length;
-	        outputArr = new Array(len);
-
-	        if(len === 0) {
-	            cb(null, '');
-	        }
-	        else {
-	            for(i = 0; i < arr.length; i++) {
-	                var item = arr[i];
-
-	                switch(dimen) {
-	                case 1: func(item, i, len, done); break;
-	                case 2: func(item[0], item[1], i, len, done); break;
-	                case 3: func(item[0], item[1], item[2], i, len, done); break;
-	                default:
-	                    item.push(i, done);
-	                    // jshint validthis: true
-	                    func.apply(this, item);
-	                }
-	            }
-	        }
-	    }
-	    else {
-	        var keys = lib.keys(arr);
-	        len = keys.length;
-	        outputArr = new Array(len);
-
-	        if(len === 0) {
-	            cb(null, '');
-	        }
-	        else {
-	            for(i = 0; i < keys.length; i++) {
-	                var k = keys[i];
-	                func(k, arr[k], i, len, done);
-	            }
-	        }
-	    }
-	}
-
-	module.exports = {
-	    Frame: Frame,
-	    makeMacro: makeMacro,
-	    makeKeywordArgs: makeKeywordArgs,
-	    numArgs: numArgs,
-	    suppressValue: suppressValue,
-	    ensureDefined: ensureDefined,
-	    memberLookup: memberLookup,
-	    contextOrFrameLookup: contextOrFrameLookup,
-	    callWrap: callWrap,
-	    handleError: handleError,
-	    isArray: lib.isArray,
-	    keys: lib.keys,
-	    SafeString: SafeString,
-	    copySafeness: copySafeness,
-	    markSafe: markSafe,
-	    asyncEach: asyncEach,
-	    asyncAll: asyncAll
 	};
 
 
 /***/ },
 /* 5 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ function(module, exports) {
 
-	function installCompat() {
-	  'use strict';
+	/* WEBPACK VAR INJECTION */(function(global) {"use strict";
 
-	  // This must be called like `nunjucks.installCompat` so that `this`
-	  // references the nunjucks instance
-	  var runtime = this.runtime; // jshint ignore:line
-	  var lib = this.lib; // jshint ignore:line
-
-	  var orig_contextOrFrameLookup = runtime.contextOrFrameLookup;
-	  runtime.contextOrFrameLookup = function(context, frame, key) {
-	    var val = orig_contextOrFrameLookup.apply(this, arguments);
-	    if (val === undefined) {
-	      switch (key) {
-	      case 'True':
-	        return true;
-	      case 'False':
-	        return false;
-	      case 'None':
-	        return null;
-	      }
+	// Use the fastest means possible to execute a task in its own turn, with
+	// priority over other events including IO, animation, reflow, and redraw
+	// events in browsers.
+	//
+	// An exception thrown by a task will permanently interrupt the processing of
+	// subsequent tasks. The higher level `asap` function ensures that if an
+	// exception is thrown by a task, that the task queue will continue flushing as
+	// soon as possible, but if you use `rawAsap` directly, you are responsible to
+	// either ensure that no exceptions are thrown from your task, or to manually
+	// call `rawAsap.requestFlush` if an exception is thrown.
+	module.exports = rawAsap;
+	function rawAsap(task) {
+	    if (!queue.length) {
+	        requestFlush();
+	        flushing = true;
 	    }
-
-	    return val;
-	  };
-
-	  var orig_memberLookup = runtime.memberLookup;
-	  var ARRAY_MEMBERS = {
-	    pop: function(index) {
-	      if (index === undefined) {
-	        return this.pop();
-	      }
-	      if (index >= this.length || index < 0) {
-	        throw new Error('KeyError');
-	      }
-	      return this.splice(index, 1);
-	    },
-	    remove: function(element) {
-	      for (var i = 0; i < this.length; i++) {
-	        if (this[i] === element) {
-	          return this.splice(i, 1);
-	        }
-	      }
-	      throw new Error('ValueError');
-	    },
-	    count: function(element) {
-	      var count = 0;
-	      for (var i = 0; i < this.length; i++) {
-	        if (this[i] === element) {
-	          count++;
-	        }
-	      }
-	      return count;
-	    },
-	    index: function(element) {
-	      var i;
-	      if ((i = this.indexOf(element)) === -1) {
-	        throw new Error('ValueError');
-	      }
-	      return i;
-	    },
-	    find: function(element) {
-	      return this.indexOf(element);
-	    },
-	    insert: function(index, elem) {
-	      return this.splice(index, 0, elem);
-	    }
-	  };
-	  var OBJECT_MEMBERS = {
-	    items: function() {
-	      var ret = [];
-	      for(var k in this) {
-	        ret.push([k, this[k]]);
-	      }
-	      return ret;
-	    },
-	    values: function() {
-	      var ret = [];
-	      for(var k in this) {
-	        ret.push(this[k]);
-	      }
-	      return ret;
-	    },
-	    keys: function() {
-	      var ret = [];
-	      for(var k in this) {
-	        ret.push(k);
-	      }
-	      return ret;
-	    },
-	    get: function(key, def) {
-	      var output = this[key];
-	      if (output === undefined) {
-	        output = def;
-	      }
-	      return output;
-	    },
-	    has_key: function(key) {
-	      return this.hasOwnProperty(key);
-	    },
-	    pop: function(key, def) {
-	      var output = this[key];
-	      if (output === undefined && def !== undefined) {
-	        output = def;
-	      } else if (output === undefined) {
-	        throw new Error('KeyError');
-	      } else {
-	        delete this[key];
-	      }
-	      return output;
-	    },
-	    popitem: function() {
-	      for (var k in this) {
-	        // Return the first object pair.
-	        var val = this[k];
-	        delete this[k];
-	        return [k, val];
-	      }
-	      throw new Error('KeyError');
-	    },
-	    setdefault: function(key, def) {
-	      if (key in this) {
-	        return this[key];
-	      }
-	      if (def === undefined) {
-	        def = null;
-	      }
-	      return this[key] = def;
-	    },
-	    update: function(kwargs) {
-	      for (var k in kwargs) {
-	        this[k] = kwargs[k];
-	      }
-	      return null;  // Always returns None
-	    }
-	  };
-	  OBJECT_MEMBERS.iteritems = OBJECT_MEMBERS.items;
-	  OBJECT_MEMBERS.itervalues = OBJECT_MEMBERS.values;
-	  OBJECT_MEMBERS.iterkeys = OBJECT_MEMBERS.keys;
-	  runtime.memberLookup = function(obj, val, autoescape) { // jshint ignore:line
-	    obj = obj || {};
-
-	    // If the object is an object, return any of the methods that Python would
-	    // otherwise provide.
-	    if (lib.isArray(obj) && ARRAY_MEMBERS.hasOwnProperty(val)) {
-	      return function() {return ARRAY_MEMBERS[val].apply(obj, arguments);};
-	    }
-
-	    if (lib.isObject(obj) && OBJECT_MEMBERS.hasOwnProperty(val)) {
-	      return function() {return OBJECT_MEMBERS[val].apply(obj, arguments);};
-	    }
-
-	    return orig_memberLookup.apply(this, arguments);
-	  };
+	    // Equivalent to push, but avoids a function call.
+	    queue[queue.length] = task;
 	}
 
-	module.exports = installCompat;
+	var queue = [];
+	// Once a flush has been requested, no further calls to `requestFlush` are
+	// necessary until the next `flush` completes.
+	var flushing = false;
+	// `requestFlush` is an implementation-specific method that attempts to kick
+	// off a `flush` event as quickly as possible. `flush` will attempt to exhaust
+	// the event queue before yielding to the browser's own event loop.
+	var requestFlush;
+	// The position of the next task to execute in the task queue. This is
+	// preserved between calls to `flush` so that it can be resumed if
+	// a task throws an exception.
+	var index = 0;
+	// If a task schedules additional tasks recursively, the task queue can grow
+	// unbounded. To prevent memory exhaustion, the task queue will periodically
+	// truncate already-completed tasks.
+	var capacity = 1024;
 
+	// The flush function processes all tasks that have been scheduled with
+	// `rawAsap` unless and until one of those tasks throws an exception.
+	// If a task throws an exception, `flush` ensures that its state will remain
+	// consistent and will resume where it left off when called again.
+	// However, `flush` does not make any arrangements to be called again if an
+	// exception is thrown.
+	function flush() {
+	    while (index < queue.length) {
+	        var currentIndex = index;
+	        // Advance the index before calling the task. This ensures that we will
+	        // begin flushing on the next task the task throws an error.
+	        index = index + 1;
+	        queue[currentIndex].call();
+	        // Prevent leaking memory for long chains of recursive calls to `asap`.
+	        // If we call `asap` within tasks scheduled by `asap`, the queue will
+	        // grow, but to avoid an O(n) walk for every task we execute, we don't
+	        // shift tasks off the queue after they have been executed.
+	        // Instead, we periodically shift 1024 tasks off the queue.
+	        if (index > capacity) {
+	            // Manually shift all values starting at the index back to the
+	            // beginning of the queue.
+	            for (var scan = 0, newLength = queue.length - index; scan < newLength; scan++) {
+	                queue[scan] = queue[scan + index];
+	            }
+	            queue.length -= index;
+	            index = 0;
+	        }
+	    }
+	    queue.length = 0;
+	    index = 0;
+	    flushing = false;
+	}
+
+	// `requestFlush` is implemented using a strategy based on data collected from
+	// every available SauceLabs Selenium web driver worker at time of writing.
+	// https://docs.google.com/spreadsheets/d/1mG-5UYGup5qxGdEMWkhP6BWCz053NUb2E1QoUTU16uA/edit#gid=783724593
+
+	// Safari 6 and 6.1 for desktop, iPad, and iPhone are the only browsers that
+	// have WebKitMutationObserver but not un-prefixed MutationObserver.
+	// Must use `global` instead of `window` to work in both frames and web
+	// workers. `global` is a provision of Browserify, Mr, Mrs, or Mop.
+	var BrowserMutationObserver = global.MutationObserver || global.WebKitMutationObserver;
+
+	// MutationObservers are desirable because they have high priority and work
+	// reliably everywhere they are implemented.
+	// They are implemented in all modern browsers.
+	//
+	// - Android 4-4.3
+	// - Chrome 26-34
+	// - Firefox 14-29
+	// - Internet Explorer 11
+	// - iPad Safari 6-7.1
+	// - iPhone Safari 7-7.1
+	// - Safari 6-7
+	if (typeof BrowserMutationObserver === "function") {
+	    requestFlush = makeRequestCallFromMutationObserver(flush);
+
+	// MessageChannels are desirable because they give direct access to the HTML
+	// task queue, are implemented in Internet Explorer 10, Safari 5.0-1, and Opera
+	// 11-12, and in web workers in many engines.
+	// Although message channels yield to any queued rendering and IO tasks, they
+	// would be better than imposing the 4ms delay of timers.
+	// However, they do not work reliably in Internet Explorer or Safari.
+
+	// Internet Explorer 10 is the only browser that has setImmediate but does
+	// not have MutationObservers.
+	// Although setImmediate yields to the browser's renderer, it would be
+	// preferrable to falling back to setTimeout since it does not have
+	// the minimum 4ms penalty.
+	// Unfortunately there appears to be a bug in Internet Explorer 10 Mobile (and
+	// Desktop to a lesser extent) that renders both setImmediate and
+	// MessageChannel useless for the purposes of ASAP.
+	// https://github.com/kriskowal/q/issues/396
+
+	// Timers are implemented universally.
+	// We fall back to timers in workers in most engines, and in foreground
+	// contexts in the following browsers.
+	// However, note that even this simple case requires nuances to operate in a
+	// broad spectrum of browsers.
+	//
+	// - Firefox 3-13
+	// - Internet Explorer 6-9
+	// - iPad Safari 4.3
+	// - Lynx 2.8.7
+	} else {
+	    requestFlush = makeRequestCallFromTimer(flush);
+	}
+
+	// `requestFlush` requests that the high priority event queue be flushed as
+	// soon as possible.
+	// This is useful to prevent an error thrown in a task from stalling the event
+	// queue if the exception handled by Node.js’s
+	// `process.on("uncaughtException")` or by a domain.
+	rawAsap.requestFlush = requestFlush;
+
+	// To request a high priority event, we induce a mutation observer by toggling
+	// the text of a text node between "1" and "-1".
+	function makeRequestCallFromMutationObserver(callback) {
+	    var toggle = 1;
+	    var observer = new BrowserMutationObserver(callback);
+	    var node = document.createTextNode("");
+	    observer.observe(node, {characterData: true});
+	    return function requestCall() {
+	        toggle = -toggle;
+	        node.data = toggle;
+	    };
+	}
+
+	// The message channel technique was discovered by Malte Ubl and was the
+	// original foundation for this library.
+	// http://www.nonblocking.io/2011/06/windownexttick.html
+
+	// Safari 6.0.5 (at least) intermittently fails to create message ports on a
+	// page's first load. Thankfully, this version of Safari supports
+	// MutationObservers, so we don't need to fall back in that case.
+
+	// function makeRequestCallFromMessageChannel(callback) {
+	//     var channel = new MessageChannel();
+	//     channel.port1.onmessage = callback;
+	//     return function requestCall() {
+	//         channel.port2.postMessage(0);
+	//     };
+	// }
+
+	// For reasons explained above, we are also unable to use `setImmediate`
+	// under any circumstances.
+	// Even if we were, there is another bug in Internet Explorer 10.
+	// It is not sufficient to assign `setImmediate` to `requestFlush` because
+	// `setImmediate` must be called *by name* and therefore must be wrapped in a
+	// closure.
+	// Never forget.
+
+	// function makeRequestCallFromSetImmediate(callback) {
+	//     return function requestCall() {
+	//         setImmediate(callback);
+	//     };
+	// }
+
+	// Safari 6.0 has a problem where timers will get lost while the user is
+	// scrolling. This problem does not impact ASAP because Safari 6.0 supports
+	// mutation observers, so that implementation is used instead.
+	// However, if we ever elect to use timers in Safari, the prevalent work-around
+	// is to add a scroll event listener that calls for a flush.
+
+	// `setTimeout` does not call the passed callback if the delay is less than
+	// approximately 7 in web workers in Firefox 8 through 18, and sometimes not
+	// even then.
+
+	function makeRequestCallFromTimer(callback) {
+	    return function requestCall() {
+	        // We dispatch a timeout with a specified delay of 0 for engines that
+	        // can reliably accommodate that request. This will usually be snapped
+	        // to a 4 milisecond delay, but once we're flushing, there's no delay
+	        // between events.
+	        var timeoutHandle = setTimeout(handleTimer, 0);
+	        // However, since this timer gets frequently dropped in Firefox
+	        // workers, we enlist an interval handle that will try to fire
+	        // an event 20 times per second until it succeeds.
+	        var intervalHandle = setInterval(handleTimer, 50);
+
+	        function handleTimer() {
+	            // Whichever timer succeeds will cancel both timers and
+	            // execute the callback.
+	            clearTimeout(timeoutHandle);
+	            clearInterval(intervalHandle);
+	            callback();
+	        }
+	    };
+	}
+
+	// This is for `asap.js` only.
+	// Its name will be periodically randomized to break any code that depends on
+	// its existence.
+	rawAsap.makeRequestCallFromTimer = makeRequestCallFromTimer;
+
+	// ASAP was originally a nextTick shim included in Q. This was factored out
+	// into this ASAP package. It was later adapted to RSVP which made further
+	// amendments. These decisions, particularly to marginalize MessageChannel and
+	// to capture the MutationObserver implementation in a closure, were integrated
+	// back into ASAP proper.
+	// https://github.com/tildeio/rsvp.js/blob/cddf7232546a9cf858524b75cde6f9edf72620a7/lib/rsvp/asap.js
+
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
 /* 6 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ function(module, exports) {
 
 	'use strict';
 
@@ -1605,7 +1351,7 @@ var nunjucks =
 	'use strict';
 
 	var lib = __webpack_require__(1);
-	var r = __webpack_require__(4);
+	var r = __webpack_require__(8);
 
 	function normalize(value, defaultValue) {
 	    if(value === null || value === undefined || value === false) {
@@ -2154,6 +1900,371 @@ var nunjucks =
 
 	'use strict';
 
+	var lib = __webpack_require__(1);
+	var Obj = __webpack_require__(6);
+
+	// Frames keep track of scoping both at compile-time and run-time so
+	// we know how to access variables. Block tags can introduce special
+	// variables, for example.
+	var Frame = Obj.extend({
+	    init: function(parent) {
+	        this.variables = {};
+	        this.parent = parent;
+	        this.topLevel = false;
+	    },
+
+	    set: function(name, val, resolveUp) {
+	        // Allow variables with dots by automatically creating the
+	        // nested structure
+	        var parts = name.split('.');
+	        var obj = this.variables;
+	        var frame = this;
+
+	        if(resolveUp) {
+	            if((frame = this.resolve(parts[0]))) {
+	                frame.set(name, val);
+	                return;
+	            }
+	            frame = this;
+	        }
+
+	        for(var i=0; i<parts.length - 1; i++) {
+	            var id = parts[i];
+
+	            if(!obj[id]) {
+	                obj[id] = {};
+	            }
+	            obj = obj[id];
+	        }
+
+	        obj[parts[parts.length - 1]] = val;
+	    },
+
+	    get: function(name) {
+	        var val = this.variables[name];
+	        if(val !== undefined && val !== null) {
+	            return val;
+	        }
+	        return null;
+	    },
+
+	    lookup: function(name) {
+	        var p = this.parent;
+	        var val = this.variables[name];
+	        if(val !== undefined && val !== null) {
+	            return val;
+	        }
+	        return p && p.lookup(name);
+	    },
+
+	    resolve: function(name) {
+	        var p = this.parent;
+	        var val = this.variables[name];
+	        if(val !== undefined && val !== null) {
+	            return this;
+	        }
+	        return p && p.resolve(name);
+	    },
+
+	    push: function() {
+	        return new Frame(this);
+	    },
+
+	    pop: function() {
+	        return this.parent;
+	    }
+	});
+
+	function makeMacro(argNames, kwargNames, func) {
+	    return function() {
+	        var argCount = numArgs(arguments);
+	        var args;
+	        var kwargs = getKeywordArgs(arguments);
+	        var i;
+
+	        if(argCount > argNames.length) {
+	            args = Array.prototype.slice.call(arguments, 0, argNames.length);
+
+	            // Positional arguments that should be passed in as
+	            // keyword arguments (essentially default values)
+	            var vals = Array.prototype.slice.call(arguments, args.length, argCount);
+	            for(i = 0; i < vals.length; i++) {
+	                if(i < kwargNames.length) {
+	                    kwargs[kwargNames[i]] = vals[i];
+	                }
+	            }
+
+	            args.push(kwargs);
+	        }
+	        else if(argCount < argNames.length) {
+	            args = Array.prototype.slice.call(arguments, 0, argCount);
+
+	            for(i = argCount; i < argNames.length; i++) {
+	                var arg = argNames[i];
+
+	                // Keyword arguments that should be passed as
+	                // positional arguments, i.e. the caller explicitly
+	                // used the name of a positional arg
+	                args.push(kwargs[arg]);
+	                delete kwargs[arg];
+	            }
+
+	            args.push(kwargs);
+	        }
+	        else {
+	            args = arguments;
+	        }
+
+	        return func.apply(this, args);
+	    };
+	}
+
+	function makeKeywordArgs(obj) {
+	    obj.__keywords = true;
+	    return obj;
+	}
+
+	function getKeywordArgs(args) {
+	    var len = args.length;
+	    if(len) {
+	        var lastArg = args[len - 1];
+	        if(lastArg && lastArg.hasOwnProperty('__keywords')) {
+	            return lastArg;
+	        }
+	    }
+	    return {};
+	}
+
+	function numArgs(args) {
+	    var len = args.length;
+	    if(len === 0) {
+	        return 0;
+	    }
+
+	    var lastArg = args[len - 1];
+	    if(lastArg && lastArg.hasOwnProperty('__keywords')) {
+	        return len - 1;
+	    }
+	    else {
+	        return len;
+	    }
+	}
+
+	// A SafeString object indicates that the string should not be
+	// autoescaped. This happens magically because autoescaping only
+	// occurs on primitive string objects.
+	function SafeString(val) {
+	    if(typeof val !== 'string') {
+	        return val;
+	    }
+
+	    this.val = val;
+	    this.length = val.length;
+	}
+
+	SafeString.prototype = Object.create(String.prototype, {
+	    length: { writable: true, configurable: true, value: 0 }
+	});
+	SafeString.prototype.valueOf = function() {
+	    return this.val;
+	};
+	SafeString.prototype.toString = function() {
+	    return this.val;
+	};
+
+	function copySafeness(dest, target) {
+	    if(dest instanceof SafeString) {
+	        return new SafeString(target);
+	    }
+	    return target.toString();
+	}
+
+	function markSafe(val) {
+	    var type = typeof val;
+
+	    if(type === 'string') {
+	        return new SafeString(val);
+	    }
+	    else if(type !== 'function') {
+	        return val;
+	    }
+	    else {
+	        return function() {
+	            var ret = val.apply(this, arguments);
+
+	            if(typeof ret === 'string') {
+	                return new SafeString(ret);
+	            }
+
+	            return ret;
+	        };
+	    }
+	}
+
+	function suppressValue(val, autoescape) {
+	    val = (val !== undefined && val !== null) ? val : '';
+
+	    if(autoescape && typeof val === 'string') {
+	        val = lib.escape(val);
+	    }
+
+	    return val;
+	}
+
+	function ensureDefined(val, lineno, colno) {
+	    if(val === null || val === undefined) {
+	        throw new lib.TemplateError(
+	            'attempted to output null or undefined value',
+	            lineno + 1,
+	            colno + 1
+	        );
+	    }
+	    return val;
+	}
+
+	function memberLookup(obj, val) {
+	    obj = obj || {};
+
+	    if(typeof obj[val] === 'function') {
+	        return function() {
+	            return obj[val].apply(obj, arguments);
+	        };
+	    }
+
+	    return obj[val];
+	}
+
+	function callWrap(obj, name, context, args) {
+	    if(!obj) {
+	        throw new Error('Unable to call `' + name + '`, which is undefined or falsey');
+	    }
+	    else if(typeof obj !== 'function') {
+	        throw new Error('Unable to call `' + name + '`, which is not a function');
+	    }
+
+	    // jshint validthis: true
+	    return obj.apply(context, args);
+	}
+
+	function contextOrFrameLookup(context, frame, name) {
+	    var val = frame.lookup(name);
+	    return (val !== undefined && val !== null) ?
+	        val :
+	        context.lookup(name);
+	}
+
+	function handleError(error, lineno, colno) {
+	    if(error.lineno) {
+	        return error;
+	    }
+	    else {
+	        return new lib.TemplateError(error, lineno, colno);
+	    }
+	}
+
+	function asyncEach(arr, dimen, iter, cb) {
+	    if(lib.isArray(arr)) {
+	        var len = arr.length;
+
+	        lib.asyncIter(arr, function(item, i, next) {
+	            switch(dimen) {
+	            case 1: iter(item, i, len, next); break;
+	            case 2: iter(item[0], item[1], i, len, next); break;
+	            case 3: iter(item[0], item[1], item[2], i, len, next); break;
+	            default:
+	                item.push(i, next);
+	                iter.apply(this, item);
+	            }
+	        }, cb);
+	    }
+	    else {
+	        lib.asyncFor(arr, function(key, val, i, len, next) {
+	            iter(key, val, i, len, next);
+	        }, cb);
+	    }
+	}
+
+	function asyncAll(arr, dimen, func, cb) {
+	    var finished = 0;
+	    var len, i;
+	    var outputArr;
+
+	    function done(i, output) {
+	        finished++;
+	        outputArr[i] = output;
+
+	        if(finished === len) {
+	            cb(null, outputArr.join(''));
+	        }
+	    }
+
+	    if(lib.isArray(arr)) {
+	        len = arr.length;
+	        outputArr = new Array(len);
+
+	        if(len === 0) {
+	            cb(null, '');
+	        }
+	        else {
+	            for(i = 0; i < arr.length; i++) {
+	                var item = arr[i];
+
+	                switch(dimen) {
+	                case 1: func(item, i, len, done); break;
+	                case 2: func(item[0], item[1], i, len, done); break;
+	                case 3: func(item[0], item[1], item[2], i, len, done); break;
+	                default:
+	                    item.push(i, done);
+	                    // jshint validthis: true
+	                    func.apply(this, item);
+	                }
+	            }
+	        }
+	    }
+	    else {
+	        var keys = lib.keys(arr);
+	        len = keys.length;
+	        outputArr = new Array(len);
+
+	        if(len === 0) {
+	            cb(null, '');
+	        }
+	        else {
+	            for(i = 0; i < keys.length; i++) {
+	                var k = keys[i];
+	                func(k, arr[k], i, len, done);
+	            }
+	        }
+	    }
+	}
+
+	module.exports = {
+	    Frame: Frame,
+	    makeMacro: makeMacro,
+	    makeKeywordArgs: makeKeywordArgs,
+	    numArgs: numArgs,
+	    suppressValue: suppressValue,
+	    ensureDefined: ensureDefined,
+	    memberLookup: memberLookup,
+	    contextOrFrameLookup: contextOrFrameLookup,
+	    callWrap: callWrap,
+	    handleError: handleError,
+	    isArray: lib.isArray,
+	    keys: lib.keys,
+	    SafeString: SafeString,
+	    copySafeness: copySafeness,
+	    markSafe: markSafe,
+	    asyncEach: asyncEach,
+	    asyncAll: asyncAll
+	};
+
+
+/***/ },
+/* 9 */
+/***/ function(module, exports) {
+
+	'use strict';
+
 	function cycler(items) {
 	    var index = -1;
 
@@ -2222,12 +2333,12 @@ var nunjucks =
 
 
 /***/ },
-/* 9 */
+/* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var Loader = __webpack_require__(3);
+	var Loader = __webpack_require__(11);
 
 	var PrecompiledLoader = Loader.extend({
 	    init: function(compiledTemplates) {
@@ -2250,309 +2361,205 @@ var nunjucks =
 
 
 /***/ },
-/* 10 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-
-/***/ },
 /* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
-	"use strict";
+	'use strict';
 
-	// rawAsap provides everything we need except exception management.
-	var rawAsap = __webpack_require__(12);
-	// RawTasks are recycled to reduce GC churn.
-	var freeTasks = [];
-	// We queue errors to ensure they are thrown in right order (FIFO).
-	// Array-as-queue is good enough here, since we are just dealing with exceptions.
-	var pendingErrors = [];
-	var requestErrorThrow = rawAsap.makeRequestCallFromTimer(throwFirstError);
+	var path = __webpack_require__(3);
+	var Obj = __webpack_require__(6);
+	var lib = __webpack_require__(1);
 
-	function throwFirstError() {
-	    if (pendingErrors.length) {
-	        throw pendingErrors.shift();
-	    }
-	}
+	var Loader = Obj.extend({
+	    on: function(name, func) {
+	        this.listeners = this.listeners || {};
+	        this.listeners[name] = this.listeners[name] || [];
+	        this.listeners[name].push(func);
+	    },
 
-	/**
-	 * Calls a task as soon as possible after returning, in its own event, with priority
-	 * over other events like animation, reflow, and repaint. An error thrown from an
-	 * event will not interrupt, nor even substantially slow down the processing of
-	 * other events, but will be rather postponed to a lower priority event.
-	 * @param {{call}} task A callable object, typically a function that takes no
-	 * arguments.
-	 */
-	module.exports = asap;
-	function asap(task) {
-	    var rawTask;
-	    if (freeTasks.length) {
-	        rawTask = freeTasks.pop();
-	    } else {
-	        rawTask = new RawTask();
-	    }
-	    rawTask.task = task;
-	    rawAsap(rawTask);
-	}
+	    emit: function(name /*, arg1, arg2, ...*/) {
+	        var args = Array.prototype.slice.call(arguments, 1);
 
-	// We wrap tasks with recyclable task objects.  A task object implements
-	// `call`, just like a function.
-	function RawTask() {
-	    this.task = null;
-	}
-
-	// The sole purpose of wrapping the task is to catch the exception and recycle
-	// the task object after its single use.
-	RawTask.prototype.call = function () {
-	    try {
-	        this.task.call();
-	    } catch (error) {
-	        if (asap.onerror) {
-	            // This hook exists purely for testing purposes.
-	            // Its name will be periodically randomized to break any code that
-	            // depends on its existence.
-	            asap.onerror(error);
-	        } else {
-	            // In a web browser, exceptions are not fatal. However, to avoid
-	            // slowing down the queue of pending tasks, we rethrow the error in a
-	            // lower priority turn.
-	            pendingErrors.push(error);
-	            requestErrorThrow();
+	        if(this.listeners && this.listeners[name]) {
+	            lib.each(this.listeners[name], function(listener) {
+	                listener.apply(null, args);
+	            });
 	        }
-	    } finally {
-	        this.task = null;
-	        freeTasks[freeTasks.length] = this;
+	    },
+
+	    resolve: function(from, to) {
+	        return path.resolve(path.dirname(from), to);
+	    },
+
+	    isRelative: function(filename) {
+	        return (filename.indexOf('./') === 0 || filename.indexOf('../') === 0);
 	    }
-	};
+	});
+
+	module.exports = Loader;
 
 
 /***/ },
 /* 12 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ function(module, exports) {
 
-	/* WEBPACK VAR INJECTION */(function(global) {"use strict";
+	function installCompat() {
+	  'use strict';
 
-	// Use the fastest means possible to execute a task in its own turn, with
-	// priority over other events including IO, animation, reflow, and redraw
-	// events in browsers.
-	//
-	// An exception thrown by a task will permanently interrupt the processing of
-	// subsequent tasks. The higher level `asap` function ensures that if an
-	// exception is thrown by a task, that the task queue will continue flushing as
-	// soon as possible, but if you use `rawAsap` directly, you are responsible to
-	// either ensure that no exceptions are thrown from your task, or to manually
-	// call `rawAsap.requestFlush` if an exception is thrown.
-	module.exports = rawAsap;
-	function rawAsap(task) {
-	    if (!queue.length) {
-	        requestFlush();
-	        flushing = true;
+	  // This must be called like `nunjucks.installCompat` so that `this`
+	  // references the nunjucks instance
+	  var runtime = this.runtime; // jshint ignore:line
+	  var lib = this.lib; // jshint ignore:line
+
+	  var orig_contextOrFrameLookup = runtime.contextOrFrameLookup;
+	  runtime.contextOrFrameLookup = function(context, frame, key) {
+	    var val = orig_contextOrFrameLookup.apply(this, arguments);
+	    if (val === undefined) {
+	      switch (key) {
+	      case 'True':
+	        return true;
+	      case 'False':
+	        return false;
+	      case 'None':
+	        return null;
+	      }
 	    }
-	    // Equivalent to push, but avoids a function call.
-	    queue[queue.length] = task;
-	}
 
-	var queue = [];
-	// Once a flush has been requested, no further calls to `requestFlush` are
-	// necessary until the next `flush` completes.
-	var flushing = false;
-	// `requestFlush` is an implementation-specific method that attempts to kick
-	// off a `flush` event as quickly as possible. `flush` will attempt to exhaust
-	// the event queue before yielding to the browser's own event loop.
-	var requestFlush;
-	// The position of the next task to execute in the task queue. This is
-	// preserved between calls to `flush` so that it can be resumed if
-	// a task throws an exception.
-	var index = 0;
-	// If a task schedules additional tasks recursively, the task queue can grow
-	// unbounded. To prevent memory exhaustion, the task queue will periodically
-	// truncate already-completed tasks.
-	var capacity = 1024;
+	    return val;
+	  };
 
-	// The flush function processes all tasks that have been scheduled with
-	// `rawAsap` unless and until one of those tasks throws an exception.
-	// If a task throws an exception, `flush` ensures that its state will remain
-	// consistent and will resume where it left off when called again.
-	// However, `flush` does not make any arrangements to be called again if an
-	// exception is thrown.
-	function flush() {
-	    while (index < queue.length) {
-	        var currentIndex = index;
-	        // Advance the index before calling the task. This ensures that we will
-	        // begin flushing on the next task the task throws an error.
-	        index = index + 1;
-	        queue[currentIndex].call();
-	        // Prevent leaking memory for long chains of recursive calls to `asap`.
-	        // If we call `asap` within tasks scheduled by `asap`, the queue will
-	        // grow, but to avoid an O(n) walk for every task we execute, we don't
-	        // shift tasks off the queue after they have been executed.
-	        // Instead, we periodically shift 1024 tasks off the queue.
-	        if (index > capacity) {
-	            // Manually shift all values starting at the index back to the
-	            // beginning of the queue.
-	            for (var scan = 0, newLength = queue.length - index; scan < newLength; scan++) {
-	                queue[scan] = queue[scan + index];
-	            }
-	            queue.length -= index;
-	            index = 0;
+	  var orig_memberLookup = runtime.memberLookup;
+	  var ARRAY_MEMBERS = {
+	    pop: function(index) {
+	      if (index === undefined) {
+	        return this.pop();
+	      }
+	      if (index >= this.length || index < 0) {
+	        throw new Error('KeyError');
+	      }
+	      return this.splice(index, 1);
+	    },
+	    remove: function(element) {
+	      for (var i = 0; i < this.length; i++) {
+	        if (this[i] === element) {
+	          return this.splice(i, 1);
 	        }
+	      }
+	      throw new Error('ValueError');
+	    },
+	    count: function(element) {
+	      var count = 0;
+	      for (var i = 0; i < this.length; i++) {
+	        if (this[i] === element) {
+	          count++;
+	        }
+	      }
+	      return count;
+	    },
+	    index: function(element) {
+	      var i;
+	      if ((i = this.indexOf(element)) === -1) {
+	        throw new Error('ValueError');
+	      }
+	      return i;
+	    },
+	    find: function(element) {
+	      return this.indexOf(element);
+	    },
+	    insert: function(index, elem) {
+	      return this.splice(index, 0, elem);
 	    }
-	    queue.length = 0;
-	    index = 0;
-	    flushing = false;
+	  };
+	  var OBJECT_MEMBERS = {
+	    items: function() {
+	      var ret = [];
+	      for(var k in this) {
+	        ret.push([k, this[k]]);
+	      }
+	      return ret;
+	    },
+	    values: function() {
+	      var ret = [];
+	      for(var k in this) {
+	        ret.push(this[k]);
+	      }
+	      return ret;
+	    },
+	    keys: function() {
+	      var ret = [];
+	      for(var k in this) {
+	        ret.push(k);
+	      }
+	      return ret;
+	    },
+	    get: function(key, def) {
+	      var output = this[key];
+	      if (output === undefined) {
+	        output = def;
+	      }
+	      return output;
+	    },
+	    has_key: function(key) {
+	      return this.hasOwnProperty(key);
+	    },
+	    pop: function(key, def) {
+	      var output = this[key];
+	      if (output === undefined && def !== undefined) {
+	        output = def;
+	      } else if (output === undefined) {
+	        throw new Error('KeyError');
+	      } else {
+	        delete this[key];
+	      }
+	      return output;
+	    },
+	    popitem: function() {
+	      for (var k in this) {
+	        // Return the first object pair.
+	        var val = this[k];
+	        delete this[k];
+	        return [k, val];
+	      }
+	      throw new Error('KeyError');
+	    },
+	    setdefault: function(key, def) {
+	      if (key in this) {
+	        return this[key];
+	      }
+	      if (def === undefined) {
+	        def = null;
+	      }
+	      return this[key] = def;
+	    },
+	    update: function(kwargs) {
+	      for (var k in kwargs) {
+	        this[k] = kwargs[k];
+	      }
+	      return null;  // Always returns None
+	    }
+	  };
+	  OBJECT_MEMBERS.iteritems = OBJECT_MEMBERS.items;
+	  OBJECT_MEMBERS.itervalues = OBJECT_MEMBERS.values;
+	  OBJECT_MEMBERS.iterkeys = OBJECT_MEMBERS.keys;
+	  runtime.memberLookup = function(obj, val, autoescape) { // jshint ignore:line
+	    obj = obj || {};
+
+	    // If the object is an object, return any of the methods that Python would
+	    // otherwise provide.
+	    if (lib.isArray(obj) && ARRAY_MEMBERS.hasOwnProperty(val)) {
+	      return function() {return ARRAY_MEMBERS[val].apply(obj, arguments);};
+	    }
+
+	    if (lib.isObject(obj) && OBJECT_MEMBERS.hasOwnProperty(val)) {
+	      return function() {return OBJECT_MEMBERS[val].apply(obj, arguments);};
+	    }
+
+	    return orig_memberLookup.apply(this, arguments);
+	  };
 	}
 
-	// `requestFlush` is implemented using a strategy based on data collected from
-	// every available SauceLabs Selenium web driver worker at time of writing.
-	// https://docs.google.com/spreadsheets/d/1mG-5UYGup5qxGdEMWkhP6BWCz053NUb2E1QoUTU16uA/edit#gid=783724593
+	module.exports = installCompat;
 
-	// Safari 6 and 6.1 for desktop, iPad, and iPhone are the only browsers that
-	// have WebKitMutationObserver but not un-prefixed MutationObserver.
-	// Must use `global` instead of `window` to work in both frames and web
-	// workers. `global` is a provision of Browserify, Mr, Mrs, or Mop.
-	var BrowserMutationObserver = global.MutationObserver || global.WebKitMutationObserver;
-
-	// MutationObservers are desirable because they have high priority and work
-	// reliably everywhere they are implemented.
-	// They are implemented in all modern browsers.
-	//
-	// - Android 4-4.3
-	// - Chrome 26-34
-	// - Firefox 14-29
-	// - Internet Explorer 11
-	// - iPad Safari 6-7.1
-	// - iPhone Safari 7-7.1
-	// - Safari 6-7
-	if (typeof BrowserMutationObserver === "function") {
-	    requestFlush = makeRequestCallFromMutationObserver(flush);
-
-	// MessageChannels are desirable because they give direct access to the HTML
-	// task queue, are implemented in Internet Explorer 10, Safari 5.0-1, and Opera
-	// 11-12, and in web workers in many engines.
-	// Although message channels yield to any queued rendering and IO tasks, they
-	// would be better than imposing the 4ms delay of timers.
-	// However, they do not work reliably in Internet Explorer or Safari.
-
-	// Internet Explorer 10 is the only browser that has setImmediate but does
-	// not have MutationObservers.
-	// Although setImmediate yields to the browser's renderer, it would be
-	// preferrable to falling back to setTimeout since it does not have
-	// the minimum 4ms penalty.
-	// Unfortunately there appears to be a bug in Internet Explorer 10 Mobile (and
-	// Desktop to a lesser extent) that renders both setImmediate and
-	// MessageChannel useless for the purposes of ASAP.
-	// https://github.com/kriskowal/q/issues/396
-
-	// Timers are implemented universally.
-	// We fall back to timers in workers in most engines, and in foreground
-	// contexts in the following browsers.
-	// However, note that even this simple case requires nuances to operate in a
-	// broad spectrum of browsers.
-	//
-	// - Firefox 3-13
-	// - Internet Explorer 6-9
-	// - iPad Safari 4.3
-	// - Lynx 2.8.7
-	} else {
-	    requestFlush = makeRequestCallFromTimer(flush);
-	}
-
-	// `requestFlush` requests that the high priority event queue be flushed as
-	// soon as possible.
-	// This is useful to prevent an error thrown in a task from stalling the event
-	// queue if the exception handled by Node.js’s
-	// `process.on("uncaughtException")` or by a domain.
-	rawAsap.requestFlush = requestFlush;
-
-	// To request a high priority event, we induce a mutation observer by toggling
-	// the text of a text node between "1" and "-1".
-	function makeRequestCallFromMutationObserver(callback) {
-	    var toggle = 1;
-	    var observer = new BrowserMutationObserver(callback);
-	    var node = document.createTextNode("");
-	    observer.observe(node, {characterData: true});
-	    return function requestCall() {
-	        toggle = -toggle;
-	        node.data = toggle;
-	    };
-	}
-
-	// The message channel technique was discovered by Malte Ubl and was the
-	// original foundation for this library.
-	// http://www.nonblocking.io/2011/06/windownexttick.html
-
-	// Safari 6.0.5 (at least) intermittently fails to create message ports on a
-	// page's first load. Thankfully, this version of Safari supports
-	// MutationObservers, so we don't need to fall back in that case.
-
-	// function makeRequestCallFromMessageChannel(callback) {
-	//     var channel = new MessageChannel();
-	//     channel.port1.onmessage = callback;
-	//     return function requestCall() {
-	//         channel.port2.postMessage(0);
-	//     };
-	// }
-
-	// For reasons explained above, we are also unable to use `setImmediate`
-	// under any circumstances.
-	// Even if we were, there is another bug in Internet Explorer 10.
-	// It is not sufficient to assign `setImmediate` to `requestFlush` because
-	// `setImmediate` must be called *by name* and therefore must be wrapped in a
-	// closure.
-	// Never forget.
-
-	// function makeRequestCallFromSetImmediate(callback) {
-	//     return function requestCall() {
-	//         setImmediate(callback);
-	//     };
-	// }
-
-	// Safari 6.0 has a problem where timers will get lost while the user is
-	// scrolling. This problem does not impact ASAP because Safari 6.0 supports
-	// mutation observers, so that implementation is used instead.
-	// However, if we ever elect to use timers in Safari, the prevalent work-around
-	// is to add a scroll event listener that calls for a flush.
-
-	// `setTimeout` does not call the passed callback if the delay is less than
-	// approximately 7 in web workers in Firefox 8 through 18, and sometimes not
-	// even then.
-
-	function makeRequestCallFromTimer(callback) {
-	    return function requestCall() {
-	        // We dispatch a timeout with a specified delay of 0 for engines that
-	        // can reliably accommodate that request. This will usually be snapped
-	        // to a 4 milisecond delay, but once we're flushing, there's no delay
-	        // between events.
-	        var timeoutHandle = setTimeout(handleTimer, 0);
-	        // However, since this timer gets frequently dropped in Firefox
-	        // workers, we enlist an interval handle that will try to fire
-	        // an event 20 times per second until it succeeds.
-	        var intervalHandle = setInterval(handleTimer, 50);
-
-	        function handleTimer() {
-	            // Whichever timer succeeds will cancel both timers and
-	            // execute the callback.
-	            clearTimeout(timeoutHandle);
-	            clearInterval(intervalHandle);
-	            callback();
-	        }
-	    };
-	}
-
-	// This is for `asap.js` only.
-	// Its name will be periodically randomized to break any code that depends on
-	// its existence.
-	rawAsap.makeRequestCallFromTimer = makeRequestCallFromTimer;
-
-	// ASAP was originally a nextTick shim included in Q. This was factored out
-	// into this ASAP package. It was later adapted to RSVP which made further
-	// amendments. These decisions, particularly to marginalize MessageChannel and
-	// to capture the MutationObserver implementation in a closure, were integrated
-	// back into ASAP proper.
-	// https://github.com/tildeio/rsvp.js/blob/cddf7232546a9cf858524b75cde6f9edf72620a7/lib/rsvp/asap.js
-
-	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ }
 /******/ ]);
