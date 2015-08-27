@@ -766,7 +766,7 @@ If `value` is strictly `undefined`, return `default`, otherwise
 
 Sort `arr` with JavaScript's `arr.sort` function. If `reverse` is
 true, result will be reversed. Sort is case-insensitive by default,
-but setting `caseSense` to true makes it case-sensitive. If `attr` is
+but setting `caseSens` to true makes it case-sensitive. If `attr` is
 passed, will compare `attr` from each item.
 
 ### More Filters
