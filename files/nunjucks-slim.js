@@ -1,4 +1,4 @@
-/*! Browser bundle of nunjucks 1.3.5-unreleased (slim, only works with precompiled templates) */
+/*! Browser bundle of nunjucks 2.0.0 (slim, only works with precompiled templates) */
 var nunjucks =
 /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache

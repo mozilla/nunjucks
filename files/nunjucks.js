@@ -1,4 +1,4 @@
-/*! Browser bundle of nunjucks 1.3.5-unreleased  */
+/*! Browser bundle of nunjucks 2.0.0  */
 var nunjucks =
 /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
