@@ -5,9 +5,7 @@
     "Makefile",
     "package.json",
     "tests",
-    "src",
     "docs",
-    "bin",
     "index.js"
   ],
   "keywords": [
