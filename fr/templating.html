@@ -462,7 +462,7 @@ Le rendu du template reprend une fois que tous les éléments sont traités.</p>
 <h3 id="extends">extends</h3>
 
 <p><code>extends</code> est utilisé pour définir l&#39;héritage de template. Le template
-spécifié est utilisé comme template de base. Regardez <a href="#l-hritage-de-template">l&#39;héritage
+spécifié est utilisé comme template de base. Regardez <a href="#l39hritage-de-template">l&#39;héritage
 de template</a>.</p>
 <div class="highlight"><pre><code class="jinja language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">extends</span> <span class="s2">&quot;base.html&quot;</span> <span class="cp">%}</span><span class="x"></span>
 </code></pre></div>
@@ -479,7 +479,7 @@ pouvez y passer n&#39;importe quoi : <code>{% extends name + &quot;.html&quot; %
 <p><code>block</code> définit une section dans le template et l&#39;identifie par un
 nom. C&#39;est utilisé par l&#39;héritage de template. Les templates de base peuvent définir
 des blocs, ainsi des templates enfants peuvent les remplacer avec du nouveau contenu. Regardez
-<a href="#l-hritage-de-template">l&#39;héritage de template</a>.</p>
+<a href="#l39hritage-de-template">l&#39;héritage de template</a>.</p>
 <div class="highlight"><pre><code class="jinja language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">block</span> <span class="nv">css</span> <span class="cp">%}</span><span class="x"></span>
 <span class="x">&lt;link rel=&quot;stylesheet&quot; href=&quot;app.css&quot; /&gt;</span>
 <span class="cp">{%</span> <span class="k">endblock</span> <span class="o">}</span>
@@ -596,7 +596,7 @@ du bloc sera passé.</p>
 <p><code>bar</code> et <code>baz</code> sont les arguments avec mots clefs. Nunjucks les convertit dans un hash et le passe comme dernier argument. C&#39;est équivalent à cet appel en javascript :</p>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="nx">foo</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="p">{</span> <span class="nx">bar</span><span class="o">:</span> <span class="mi">3</span><span class="p">,</span> <span class="nx">baz</span><span class="o">:</span> <span class="mi">4</span><span class="p">})</span>
 </code></pre></div>
-<p>Puisqu&#39;il s&#39;agit d&#39;une convention d&#39;appel standard, ça marche pour toutes les fonctions et les filtres, s&#39;ils sont écrits pour les gérer. <a href="api.html#arguments-avec-mots-clefs-par-dfaut">Lisez-en plus</a> dans la section de l&#39;API.</p>
+<p>Puisqu&#39;il s&#39;agit d&#39;une convention d&#39;appel standard, ça marche pour toutes les fonctions et les filtres, s&#39;ils sont écrits pour les gérer. <a href="api.html#arguments-avec-mots-clefspar-dfaut">Lisez-en plus</a> dans la section de l&#39;API.</p>
 
 <p>Les macros vous permettent d&#39;utiliser également des arguments avec mots clefs dans la définition, cela vous permet de définir des valeurs par défaut. Nunjucks fait correspondre automatiquement les arguments avec mots clefs à ceux définis dans la macro.</p>
 <div class="highlight"><pre><code class="text language-text" data-lang="text">{% macro foo(x, y, z=5, w=6) %}
