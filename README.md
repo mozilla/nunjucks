@@ -5,6 +5,8 @@ templating engine for javascript. It is heavily inspired by
 [jinja2](http://jinja.pocoo.org/). View the docs
 [here](http://mozilla.github.io/nunjucks/).
 
+**Nunjucks is looking for another maintainer**. [See here](https://github.com/mozilla/nunjucks/issues/500).
+
 ## Installation
 
 `npm install nunjucks`
