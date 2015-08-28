@@ -47,13 +47,13 @@
       <p><strong>FAQ</strong></p>
       <ul>
 <li>
-<a href="#questions-asked-frequently-enough">Questions Asked Frequently Enough</a>
+<a href="#questions-poses-frquemment">Questions posées fréquemment</a>
 <ul>
 <li>
-<a href="#can-i-use-nunjucks-in-node-and-the-browserclient-side">Can I use nunjucks in node and the browser/client-side?</a>
+<a href="#puis-je-utiliser-nunjucks-dans-node-et-dans-le-navigateurct-client-">Puis-je utiliser nunjucks dans node et dans le navigateur/côté client ?</a>
 </li>
 <li>
-<a href="#can-i-use-the-same-templates-between-nunjucks-and-jinja2-what-are-the-differences">Can I use the same templates between nunjucks and jinja2? What are the differences?</a>
+<a href="#puis-je-utiliser-les-mmes-modles-entre-nunjucks-et-jinja2-quelles-sont-les-diffrences-">Puis-je utiliser les mêmes modèles entre nunjucks et Jinja2? Quelles sont les différences ?</a>
 </li>
 </ul>
 </li>
@@ -63,42 +63,42 @@
   </aside>
 
   <div class="col-sm-9 main">
-    <div class="locale btn-group"><a href="/nunjucks/faq.html" class="btn btn-success">English</a><a href="/nunjucks/cn/faq.html" class="btn btn-default">中文</a><a href="/nunjucks/fr/faq.html" class="btn btn-default">Français</a></div>
-    <h1 id="questions-asked-frequently-enough">Questions Asked Frequently Enough</h1>
+    <div class="locale btn-group"><a href="/nunjucks/faq.html" class="btn btn-default">English</a><a href="/nunjucks/cn/faq.html" class="btn btn-default">中文</a><a href="/nunjucks/fr/faq.html" class="btn btn-success">Français</a></div>
+    <h1 id="questions-poses-frquemment">Questions posées fréquemment</h1>
 
-<h2 id="can-i-use-nunjucks-in-node-and-the-browserclient-side">Can I use nunjucks in node and the browser/client-side?</h2>
+<h2 id="puis-je-utiliser-nunjucks-dans-node-et-dans-le-navigateurct-client-">Puis-je utiliser nunjucks dans node et dans le navigateur/côté client ?</h2>
 
-<p>Yes.</p>
+<p>Oui.</p>
 
-<h2 id="can-i-use-the-same-templates-between-nunjucks-and-jinja2-what-are-the-differences">Can I use the same templates between nunjucks and jinja2? What are the differences?</h2>
+<h2 id="puis-je-utiliser-les-mmes-modles-entre-nunjucks-et-jinja2-quelles-sont-les-diffrences-">Puis-je utiliser les mêmes modèles entre nunjucks et Jinja2? Quelles sont les différences ?</h2>
 
-<p>Kind of. There are enough differences that it might take some work.
-The first problem is that nunjucks lets you access native JavaScript
-constructs, while <a href="http://jinja.pocoo.org/">jinja2</a> lets you access
-Python. This means that there are minor gotchas like the boolean
-literal being <code>true</code> in nunjucks but <code>True</code> in jinja2, and if you call
-native methods on arrays the API will be different.</p>
+<p>Il y a suffisamment de différences pour que cela puisse prendre du temps.
+Le premier problème est que nunjucks vous permet d&#39;accéder aux constructions natifs de
+JavaScript, tandis que <a href="http://jinja.pocoo.org/">jinja2</a> vous permet d&#39;accéder à celle de
+Python. Cela signifie qu&#39;il y a des pièges mineurs comme le booléen littéral
+qui est <code>true</code> dans nunjucks mais <code>True</code> dans jinja2, et si vous appelez des
+méthodes natives sur les tableaux, l&#39;API sera différent.</p>
 
-<p>However, if you avoid accessing the native language features (like <code>{{ str.trim() }}</code>)
-and rely solely on filters and pure templating
-features, it should be easy to make templates compatible.</p>
+<p>Toutefois, si vous n&#39;accédez pas aux fonctionnalités natives de language (comme <code>{{ str.trim() }}</code>)
+et utilisez uniquement les filtres et les caractéristiques de templates
+pures, il devrait être facile de faire des templates compatibles.</p>
 
-<p>Nunjucks has experimental support for installing APIs into the
-templating environment to help with Jinja compatibility. See
+<p>Nunjucks a un support expérimental pour l&#39;installation d&#39;API dans l&#39;environnement
+de templates pour aider la compatibilité Jinja. Voir
 <a href="/api.html#installjinjacompat">installJinjaCompat</a>.</p>
 
-<p>Additionally, there are few jinja2 features not implemented in nunjucks:</p>
+<p>En plus, il y a quelques fonctionnalités de jinja2 qui ne sont pas implémentées dans nunjucks:</p>
 
 <ul>
-<li>The special <code>self</code> variable</li>
-<li><code>for</code> does not support <code>if not</code> and <code>else</code></li>
-<li><code>if i is divisibleby(3)</code>-style conditionals</li>
-<li>Named block end tags: <code>{% endblock content %}</code></li>
-<li>Sandboxed mode</li>
-<li>Line statements: <code># for item in seq</code></li>
+<li>La variable spéciale <code>self</code></li>
+<li><code>for</code> ne supporte pas <code>if not</code> et <code>else</code></li>
+<li>Le style conditionnelle de <code>if i is divisibleby(3)</code></li>
+<li>Le nommage des blocs de fin : <code>{% endblock content %}</code></li>
+<li>Le mode bac à sable (sandbox)</li>
+<li>Les commentaires de lignes : <code># for item in seq</code></li>
 </ul>
 
-<p>Lastly, any custom Python filters and extensions will have to be written in JavaScript.</p>
+<p>Enfin, tous les filtres et les extensions de Python personnalisés devront être écrits en JavaScript.</p>
 
   </div>
 </div>

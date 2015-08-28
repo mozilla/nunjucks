@@ -207,20 +207,19 @@
                   { items: { foo: 1, bar: 2 }},
                   'showing fooshowing bar');
 
-            render('{% set item = passed_var %}' +
-                   '{% include "item.html" %}\n' +
-                   '{% ' + block + ' i in passed_iter %}' +
-                     '{% set item = i %}' +
-                     '{% include "item.html" %}\n' +
-                   '{% ' + end + ' %}',
-                   {
-                     passed_var: 'test',
-                     passed_iter: ['1', '2', '3']
-                   },
-                   {},
-                   function(err, res) {
-                       expect(res).to.be('showing test\nshowing 1\nshowing 2\nshowing 3\n');
-                   });
+            var res = render(
+                '{% set item = passed_var %}' +
+                '{% include "item.html" %}\n' +
+                '{% ' + block + ' i in passed_iter %}' +
+                '{% set item = i %}' +
+                '{% include "item.html" %}\n' +
+                '{% ' + end + ' %}',
+                {
+                    passed_var: 'test',
+                    passed_iter: ['1', '2', '3']
+                }
+            );
+            expect(res).to.be('showing test\nshowing 1\nshowing 2\nshowing 3\n');
         }
 
         it('should compile for blocks', function(done) {
@@ -319,6 +318,13 @@
                            expect(res).to.be('hello somecontenthere');
                        });
 
+                render('{% block content %}{% set foo = tmpl | getContents %}{{ foo }}{% endblock %}',
+                       { tmpl: 'tests/templates/for-async-content.html' },
+                       opts,
+                       function(err, res) {
+                           expect(res).to.be('somecontenthere');
+                       });
+
                 render('{% block content %}{% include "async.html" %}{% endblock %}',
                        { tmpl: 'tests/templates/for-async-content.html' },
                        opts,
@@ -378,6 +384,13 @@
             equal('{% if "a" in vals %}yes{% endif %}',
                   {'vals': ['a', 'b']}, 'yes');
 
+            finish(done);
+        });
+
+        it('should compile string concatenations with tilde', function(done){
+            equal('{{ 4 ~ \'hello\' }}', '4hello');
+            equal('{{ 4 ~ 5 }}', '45');
+            equal('{{ \'a\' ~ \'b\' ~ 5 }}', 'ab5');
             finish(done);
         });
 
@@ -523,6 +536,26 @@
                   '{{ foo() }}',
                   'Here\'s BAR');
 
+            equal('{% set bar = "BAR" %}' +
+                  '{% import "import-context-set.html" as imp %}' +
+                  '{{ bar }}',
+                  'BAR');
+
+            equal('{% set bar = "BAR" %}' +
+                  '{% import "import-context-set.html" as imp %}' +
+                  '{{ imp.bar }}',
+                  'FOO');
+
+            equal('{% set bar = "BAR" %}' +
+                  '{% import "import-context-set.html" as imp with context %}' +
+                  '{{ bar }}{{ buzz }}',
+                  'FOO');
+
+            equal('{% set bar = "BAR" %}' +
+                  '{% import "import-context-set.html" as imp with context %}' +
+                  '{{ imp.bar }}{{ buzz }}',
+                  'FOO');
+
             finish(done);
         });
 
@@ -574,9 +607,37 @@
             render('{% extends "base.html" %}' +
                    '{% block notReal %}{{ foo() }}{% endblock %}',
                    { foo: function() { count++; }},
-                   function(err, res) {
+                   function() {
                        expect(count).to.be(0);
                    });
+
+            finish(done);
+        });
+
+        it('should conditionally inherit templates', function(done) {
+            equal('{% if false %}{% extends "base.html" %}{% endif %}' +
+                  '{% block block1 %}BAR{% endblock %}',
+                  'BAR');
+
+            equal('{% if true %}{% extends "base.html" %}{% endif %}' +
+                  '{% block block1 %}BAR{% endblock %}',
+                  'FooBARBazFizzle');
+
+            equal('{% if true %}' +
+                  '{% extends "base.html" %}' +
+                  '{% else %}' +
+                  '{% extends "base2.html" %}' +
+                  '{% endif %}' +
+                  '{% block block1 %}HELLO{% endblock %}',
+                  'FooHELLOBazFizzle');
+
+            equal('{% if false %}' +
+                  '{% extends "base.html" %}' +
+                  '{% else %}' +
+                  '{% extends "base2.html" %}' +
+                  '{% endif %}' +
+                  '{% block item %}hello{{ item }}{% endblock %}',
+                  'hello1hello2');
 
             finish(done);
         });
@@ -749,6 +810,7 @@
 
         it('should allow custom tag compilation', function(done) {
             function testExtension() {
+                // jshint validthis: true
                 this.tags = ['test'];
 
                 this.parse = function(parser, nodes) {
@@ -777,6 +839,7 @@
 
         it('should allow custom tag compilation without content', function(done) {
             function testExtension() {
+                // jshint validthis: true
                 this.tags = ['test'];
 
                 this.parse = function(parser, nodes) {
@@ -803,6 +866,7 @@
 
         it('should allow complicated custom tag compilation', function(done) {
             function testExtension() {
+                // jshint validthis: true
                 this.tags = ['test'];
 
                 /* normally this is automatically done by Environment */
@@ -852,12 +916,13 @@
 
         it('should allow custom tag with args compilation', function(done) {
             function testExtension() {
+                // jshint validthis: true
                 this.tags = ['test'];
 
                 /* normally this is automatically done by Environment */
                 this._name = 'testExtension';
 
-                this.parse = function(parser, nodes, lexer) {
+                this.parse = function(parser, nodes) {
                     var body, args = null;
                     var tok = parser.nextToken();
 
@@ -908,8 +973,8 @@
             finish(done);
         });
 
-        it('should not autoescape by default', function(done) {
-            equal('{{ foo }}', { foo: '"\'<>&'}, '"\'<>&');
+        it('should autoescape by default', function(done) {
+            equal('{{ foo }}', { foo: '"\'<>&'}, '&quot;&#39;&lt;&gt;&amp;');
             finish(done);
         });
 
@@ -977,6 +1042,7 @@
 
         it('should not autoescape when extension set false', function(done) {
             function testExtension() {
+                // jshint validthis: true
                 this.tags = ['test'];
 
                 this.autoescape = false;
@@ -988,7 +1054,7 @@
                     return new nodes.CallExtension(this, 'run', args, null);
                 };
 
-                this.run = function(context) {
+                this.run = function() {
                     // Reverse the string
                     return '<b>Foo</b>';
                 };
@@ -1033,6 +1099,15 @@
             equal('{{ r/x/gi }}',
                   '/x/gi');
 
+            finish(done);
+        });
+
+        it('should handle filter blocks', function(done) {
+            equal('{% filter title %}may the force be with you{% endfilter %}',
+                  'May The Force Be With You');
+
+            equal('{% filter replace("force", "forth") %}may the force be with you{% endfilter %}',
+                  'may the forth be with you');
             finish(done);
         });
     });

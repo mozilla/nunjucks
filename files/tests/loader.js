@@ -19,11 +19,11 @@
         it('should allow a simple loader to be created', function() {
             // From Docs: http://mozilla.github.io/nunjucks/api.html#writing-a-loader
             // We should be able to create a loader that only exposes getSource
-            function MyLoader(opts) {
+            function MyLoader() {
                 // configuration
             }
 
-            MyLoader.prototype.getSource = function(name) {
+            MyLoader.prototype.getSource = function() {
                 return { src: 'Hello World',
                             path: '/tmp/somewhere' };
             };

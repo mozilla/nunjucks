@@ -50,7 +50,7 @@
 <a href="#api">API</a>
 <ul>
 <li>
-<a href="#simple-api">Simple API</a>
+<a href="#api-simplifie">API simplifiée</a>
 <ul>
 <li>
 <a href="#render">render</a>
@@ -97,9 +97,6 @@
 <a href="#addglobal">addGlobal</a>
 </li>
 <li>
-<a href="#getglobal">getGlobal</a>
-</li>
-<li>
 <a href="#gettemplate">getTemplate</a>
 </li>
 <li>
@@ -122,7 +119,7 @@
 </ul>
 </li>
 <li>
-<a href="#loader">Loader</a>
+<a href="#chargeur">Chargeur</a>
 <ul>
 <li>
 <a href="#filesystemloader">FileSystemLoader</a>
@@ -131,33 +128,33 @@
 <a href="#webloader">WebLoader</a>
 </li>
 <li>
-<a href="#writing-a-loader">Writing a Loader</a>
+<a href="#criture-d39un-chargeur">Écriture d&#39;un chargeur</a>
 <ul>
 <li>
-<a href="#asynchronous">Asynchronous</a>
+<a href="#asynchrone">Asynchrone</a>
 </li>
 </ul>
 </li>
 </ul>
 </li>
 <li>
-<a href="#browser-usage">Browser Usage</a>
+<a href="#utilisation-dans-un-navigateur">Utilisation dans un navigateur</a>
 <ul>
 <li>
-<a href="#recommended-setups">Recommended Setups</a>
+<a href="#configurations-recommandes">Configurations recommandées</a>
 <ul>
 <li>
-<a href="#setup-1-only-precompile-in-production">Setup #1: only precompile in production</a>
+<a href="#configuration-n1--prcompil-uniquement-en-production">Configuration n°1 : précompilé uniquement en production</a>
 </li>
 <li>
-<a href="#setup-2-always-precompile">Setup #2: always precompile</a>
+<a href="#configuration-n2--toujours-prcompil">Configuration n°2 : toujours précompilé</a>
 </li>
 </ul>
 </li>
 </ul>
 </li>
 <li>
-<a href="#precompiling">Precompiling</a>
+<a href="#prcompilation">Précompilation</a>
 <ul>
 <li>
 <a href="#api1">API</a>
@@ -171,10 +168,10 @@
 </ul>
 </li>
 <li>
-<a href="#asynchronous-support">Asynchronous Support</a>
+<a href="#support-asynchrone">Support Asynchrone</a>
 <ul>
 <li>
-<a href="#be-careful">Be Careful!</a>
+<a href="#soyez-prudent-">Soyez prudent !</a>
 </li>
 </ul>
 </li>
@@ -182,24 +179,24 @@
 <a href="#autoescaping">Autoescaping</a>
 </li>
 <li>
-<a href="#customizing-syntax">Customizing Syntax</a>
+<a href="#personnalisation-de-la-syntaxe">Personnalisation de la syntaxe</a>
 </li>
 <li>
-<a href="#custom-filters">Custom Filters</a>
+<a href="#filtres-personnaliss">Filtres personnalisés</a>
 <ul>
 <li>
-<a href="#keyworddefault-arguments">Keyword/Default Arguments</a>
+<a href="#arguments-avec-mots-clefspar-dfaut">Arguments avec Mots clefs/Par défaut</a>
 </li>
 <li>
-<a href="#asynchronous1">Asynchronous</a>
+<a href="#asynchrone1">Asynchrone</a>
 </li>
 </ul>
 </li>
 <li>
-<a href="#custom-tags">Custom Tags</a>
+<a href="#tags-personnaliss">Tags personnalisés</a>
 <ul>
 <li>
-<a href="#asynchronous2">Asynchronous</a>
+<a href="#asynchrone2">Asynchrone</a>
 </li>
 </ul>
 </li>
@@ -211,33 +208,33 @@
   </aside>
 
   <div class="col-sm-9 main">
-    <div class="locale btn-group"><a href="/nunjucks/api.html" class="btn btn-success">English</a><a href="/nunjucks/cn/api.html" class="btn btn-default">中文</a><a href="/nunjucks/fr/api.html" class="btn btn-default">Français</a></div>
+    <div class="locale btn-group"><a href="/nunjucks/api.html" class="btn btn-default">English</a><a href="/nunjucks/cn/api.html" class="btn btn-default">中文</a><a href="/nunjucks/fr/api.html" class="btn btn-success">Français</a></div>
     <h1 id="api">API</h1>
 
-<p>The API for nunjucks covers rendering templates, adding filters and
-extensions, customizing template loading, and more.</p>
+<p>L&#39;API pour nunjucks couvre le rendu des templates, l&#39;ajout des filtres et
+des extensions, la personnalisation du chargement des templates et plus encore.</p>
 
-<h2 id="simple-api">Simple API</h2>
+<h2 id="api-simplifie">API simplifiée</h2>
 
-<p>If you don&#39;t need deep customization of the system, you can use this simple
-higher-level API for loading and rendering templates.</p>
+<p>Si vous n&#39;avez pas besoin d&#39;une personnalisation en profondeur du système, vous pouvez utiliser
+l&#39;API simplifiée de haut niveau pour le chargement et le rendu des templates.</p>
 
-<p><strong>Warning</strong>: nunjucks does not sandbox execution so it is potentially
-  unsafe to run user-defined templates. On the server, you may expose
-  attack vectors for accessing sensitive data. On the client, you may
-  expose cross-site scripting vulnerabilities (see <a href="https://github.com/mozilla/nunjucks-docs/issues/17">this
-  issue</a> for more
-  information).</p>
+<p><strong>Avertissement</strong> : nunjucks n&#39;a pas d&#39;exécution de <a href="https://fr.wikipedia.org/wiki/Sandbox_%28s%C3%A9curit%C3%A9_informatique%29">sandbox</a> donc il est potentiellement
+  dangereux d&#39;exécuter des templates définis par l&#39;utilisateur. Sur le serveur, vous risquez
+  des <a href="https://fr.wiktionary.org/wiki/vecteur_d%E2%80%99attaque">vecteurs d&#39;attaque</a> pour accéder aux données sensibles. Sur le client, vous risquez
+  des vulnérabilités de <a href="https://fr.wikipedia.org/wiki/Cross-site_scripting">cross-site scripting</a> (voir <a href="https://github.com/mozilla/nunjucks-docs/issues/17">cette
+  question</a> pour
+  plus d&#39;informations).</p>
 
 <h3 id="render">render</h3>
 
 <div class="api-sig"><code>nunjucks.render(name, [context], [callback])</code></div>
 
-<div class="api-desc"><p>Renders the template named <strong>name</strong> with the <strong>context</strong> hash. If
-<strong>callback</strong> is provided, it will be called when done with any
-possible error as the first argument and the result as the second.
-Otherwise, the result is returned from <code>render</code> and errors are thrown.
-See <a href="#asynchronous-support">asynchronous support</a> for more info.</p>
+<div class="api-desc"><p>Rend le template nommé <strong>name</strong> avec le hash du <strong>context</strong>. Si
+<strong>callback</strong> est fourni, il sera appelé quand cela sera terminé avec une
+erreur possible en premier argument et le résultat en second.
+Sinon (si callback n&#39;est pas fourni), le résultat est retourné depuis <code>render</code> et des erreurs sont levées.
+Voir le <a href="#support-asynchrone">support asynchrone</a> pour plus d&#39;informations.</p>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="kd">var</span> <span class="nx">res</span> <span class="o">=</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="s1">&#39;foo.html&#39;</span><span class="p">);</span>
 
 <span class="kd">var</span> <span class="nx">res</span> <span class="o">=</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="s1">&#39;foo.html&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">username</span><span class="o">:</span> <span class="s1">&#39;James&#39;</span> <span class="p">});</span>
@@ -251,8 +248,8 @@ See <a href="#asynchronous-support">asynchronous support</a> for more info.</p>
 
 <div class="api-sig"><code>nunjucks.renderString(str, context, [callback])</code></div>
 
-<div class="api-desc"><p>Same as <a href="#render"><code>render</code></a>, but renders a raw string instead of
-loading a template.</p>
+<div class="api-desc"><p>Identique à <a href="#render"><code>render</code></a>, mais rend une chaîne de caractère brute au lieu
+de charger un template.</p>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="kd">var</span> <span class="nx">res</span> <span class="o">=</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">renderString</span><span class="p">(</span><span class="s1">&#39;Hello {{ username }}&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">username</span><span class="o">:</span> <span class="s1">&#39;James&#39;</span> <span class="p">});</span>
 </code></pre></div>
 </div>
@@ -261,7 +258,7 @@ loading a template.</p>
 
 <div class="api-sig"><code>nunjucks.compile(str, [env], [path])</code></div>
 
-<div class="api-desc"><p>Compile the given string into a reusable nunjucks Template object.</p>
+<div class="api-desc"><p>Compile la chaîne donnée dans un objet Template de nunjucks qui est réutilisable.</p>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="kd">var</span> <span class="nx">template</span> <span class="o">=</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">compile</span><span class="p">(</span><span class="s1">&#39;Hello {{ username }}&#39;</span><span class="p">);</span>
 <span class="nx">template</span><span class="p">.</span><span class="nx">render</span><span class="p">({</span> <span class="nx">username</span><span class="o">:</span> <span class="s1">&#39;James&#39;</span> <span class="p">});</span>
 </code></pre></div>
@@ -271,36 +268,36 @@ loading a template.</p>
 
 <div class="api-sig"><code>nunjucks.configure([path], [opts]);</code></div>
 
-<div class="api-desc"><p>Tell nunjucks that your templates live at <strong>path</strong> and flip any
-feature on or off with the <strong>opts</strong> hash. You can provide both
-arguments or either of them. <strong>path</strong> defaults to the current working
-directory, and the following options are available in <strong>opts</strong>:</p>
+<div class="api-desc"><p>Dites à nunjucks que vos templates sont dans le <strong>path</strong> (chemin) et activez ou désactivez une
+fonctionnalité avec le hash <strong>opts</strong>. Vous pouvez fournir les deux arguments ou l&#39;un
+des deux. Le <strong>path</strong> par défaut est le répertoire de travail courant
+et les options suivantes sont disponibles dans <strong>opts</strong> :</p>
 
 <ul>
-<li><strong>autoescape</strong> <em>(default: true)</em> controls if output with dangerous characters are
-escaped automatically. See <a href="#autoescaping">Autoescaping</a></li>
-<li><strong>throwOnUndefined</strong> <em>(default: false)</em> throw errors when outputting a null/undefined value</li>
-<li><strong>trimBlocks</strong> <em>(default: false)</em> automatically remove trailing newlines from a block/tag</li>
-<li><strong>lstripBlocks</strong> <em>(default: false)</em> automatically remove leading whitespace from a block/tag</li>
-<li><strong>watch</strong> <em>(default: false)</em> reload templates when they are changed (server-side)</li>
-<li><strong>noCache</strong> <em>(default: false)</em> never use a cache and recompile templates each time (server-side)</li>
-<li><strong>web</strong> an object for configuring loading templates in the browser:
+<li><strong>autoescape</strong> <em>(par défaut : true)</em> contrôle si l&#39;affichage avec des caractères dangereux sont
+échappés automatiquement. Voir <a href="#autoescaping">Autoescaping</a></li>
+<li><strong>throwOnUndefined</strong> <em>(par défaut : false)</em> lève des erreurs quand le résultat a une valeur null/undefined</li>
+<li><strong>trimBlocks</strong> <em>(par défaut : false)</em> supprime automatiquement les sauts de lignes de fin de block/tag</li>
+<li><strong>lstripBlocks</strong> <em>(par défaut : false)</em> supprime automatiquement les espaces de début de block/tag</li>
+<li><strong>watch</strong> <em>(par défaut : false)</em> recharge les templates quand ils ont été changés (côté serveur)</li>
+<li><strong>noCache</strong> <em>(par défaut : false)</em> ne jamais utiliser le cache et recompiler les templates à chaque fois (côté serveur)</li>
+<li><strong>web</strong> un objet pour la configuration du chargement des templates dans le navigateur :
 
 <ul>
-<li><strong>useCache</strong> <em>(default: false)</em> will enable cache and templates will never see updates.</li>
-<li><strong>async</strong> <em>(default: false)</em> will load templates asynchronously instead of synchronously.</li>
+<li><strong>useCache</strong> <em>(par défaut : false)</em> activera le cache et les templates ne verront jamais les mises à jour.</li>
+<li><strong>async</strong> <em>(par défaut : false)</em> chargera les templates de manière asynchrone au lieu de façon synchrone.</li>
 </ul></li>
-<li><strong>express</strong> an express app that nunjucks should install to</li>
-<li><strong>tags:</strong> <em>(default: see nunjucks syntax)</em> defines the syntax for
-nunjucks tags. See <a href="#customizing-syntax">Customizing Syntax</a></li>
+<li><strong>express</strong> une app express que nunjucks doit installer</li>
+<li><strong>tags:</strong> <em>(par défaut : voir la syntaxe nunjucks)</em> définit la syntaxe pour
+les tags de nunjucks. Voir <a href="#personnalisation-de-la-syntaxe">Personnalisation de la Syntaxe</a></li>
 </ul>
 
-<p><code>configure</code> returns an <code>Environment</code> instance, which lets you add
-filters and extensions while still using the simple API. See below for
-more information on <code>Environment</code>.</p>
+<p><code>configure</code> retourne une instance <code>Environment</code>, qui vous permet d&#39;ajouter des
+filtres et des extensions tout en utilisant l&#39;API simplifiée. Voir ci-dessous pour
+plus d&#39;informations sur <code>Environment</code>.</p>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="nx">nunjucks</span><span class="p">.</span><span class="nx">configure</span><span class="p">(</span><span class="s1">&#39;views&#39;</span><span class="p">);</span>
 
-<span class="c1">// if in the browser, you probably want to use an absolute URL</span>
+<span class="c1">// dans le navigateur, vous voudrez probablement utiliser une URL absolue</span>
 <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">configure</span><span class="p">(</span><span class="s1">&#39;/views&#39;</span><span class="p">);</span>
 
 <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">configure</span><span class="p">({</span> <span class="nx">autoescape</span><span class="o">:</span> <span class="kc">true</span> <span class="p">});</span>
@@ -312,7 +309,7 @@ more information on <code>Environment</code>.</p>
 <span class="p">});</span>
 
 <span class="kd">var</span> <span class="nx">env</span> <span class="o">=</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">configure</span><span class="p">(</span><span class="s1">&#39;views&#39;</span><span class="p">);</span>
-<span class="c1">// do stuff with env</span>
+<span class="c1">// faire quelque chose avec env</span>
 </code></pre></div>
 </div>
 
@@ -320,56 +317,56 @@ more information on <code>Environment</code>.</p>
 
 <div class="api-sig"><code>nunjucks.installJinjaCompat()</code></div>
 
-<div class="api-desc"><p>This installs experimental support for more consistent Jinja
-compatibility by adding Pythonic APIs to the environment. While
-nunjucks does not aim for complete Jinja/Python compatiblity, this
-might help users seeking just that.</p>
+<div class="api-desc"><p>Cela installe un support expérimental pour une compatibilité plus cohérente avec
+Jinja en ajoutant les APIs Pythonic à l&#39;environnement. Bien que nunjucks
+ne visent pas une compatibilité complète de Jinja/Python, cela pourra
+aider les utilisateurs qui le recherchent au plus juste.</p>
 
-<p>This adds <code>True</code> and <code>False</code> which map to the JS <code>true</code> and <code>false</code>
-values, as well as augmenting arrays and objects with Python-style
-methods. <a href="https://github.com/mozilla/nunjucks/blob/master/src/jinja-compat.js">Check out the source</a>
-to see everything it adds.</p>
+<p>Cela ajoute <code>True</code> et <code>False</code> qui correspond aux valeurs <code>true</code> et <code>false</code>
+de JS, ainsi cela se rapproche des tableaux et des objets pour les méthodes avec un style
+Python. <a href="https://github.com/mozilla/nunjucks/blob/master/src/jinja-compat.js">Vérifiez la source</a>
+pour voir tout ce qu&#39;il ajoute.</p>
 </div>
 
-<p><em>That&#39;s it for the simple API! If you want total control over how
-templates are loaded, and more customization, you need to manually
-set up the system as seen below.</em></p>
+<p><em>Voilà pour l&#39;API simplifiée ! Si vous voulez un contrôle total sur la façon dont
+les templates sont chargés, et plus de personnalisation, vous devez configurer manuellement
+le système comme on l&#39;explique ci-dessous.</em></p>
 
 <h2 id="environment">Environment</h2>
 
-<p>The <code>Environment</code> class is the central object which handles templates.
-It knows how to load your templates, and internally templates depend
-on it for inheritance and including templates. The simple API above
-dispatches everything to an <code>Environment</code> instance that it keeps for
-you.</p>
+<p>La classe <code>Environment</code> est l&#39;objet central qui gère les templates.
+Elle sait comment charger vos templates, ainsi que les templates internes
+qui leur dépendent soit par l&#39;héritage ou par une inclusion. L&#39;API simplifiée
+ci-dessus fournit tout à une instance <code>Environment</code> qu&#39;elle conserve
+pour vous.</p>
 
-<p>You can manually handle it if you want, which allows you to specify
-custom template loaders.</p>
+<p>Si vous voulez, vous pouvez le gérer manuellement, cela vous permet de spécifier
+des chargeurs de templates personnalisés.</p>
 
 <h3 id="constructor">constructor</h3>
 
 <div class="api-sig"><code>new Environment([loaders], [opts])</code></div>
 
-<div class="api-desc"><p>The constructor takes a list of <strong>loaders</strong> and a hash of
-configuration parameters as <strong>opts</strong>. If <strong>loaders</strong> is null, it
-defaults to loading from the current directory or URL. You can pass a
-single loader or an array of loaders. If you pass an array of loaders,
-nunjucks will walk through them in order until one of them finds a
-template. See <a href="#loader"><code>Loader</code></a> for more info about loaders.</p>
+<div class="api-desc"><p>Le constructeur prend une liste de <strong>loaders</strong> (chargeurs) et un hash de 
+paramètres de configuration <strong>opts</strong>. Si <strong>loaders</strong> est null, sa valeur par
+défaut pour le chargement est le répertoire ou l&#39;URL courant. Vous pouvez passer
+un seul chargeur ou un tableau de chargeurs. Si vous passez un tableau de chargeurs,
+nunjucks le parcourra dans l&#39;ordre jusqu&#39;à ce que l&#39;un d&#39;eux trouve un
+template. Voir <a href="#chargeur"><code>Chargeur</code></a> pour plus d&#39;informations sur les chargeurs.</p>
 
-<p>The available flags in <strong>opts</strong> is <strong>autoescape</strong>,
-<strong>throwOnUndefined</strong>, <strong>trimBlocks</strong>, and <strong>lstripBlocks</strong>.
-Read more about those options in <a href="#configure"><code>configure</code></a> (the
-express and watch options are not applicable here and configured
-elsewhere like <a href="#express"><code>env.express</code></a>).</p>
+<p>Les paramètres disponibles dans <strong>opts</strong> sont <strong>autoescape</strong>,
+<strong>throwOnUndefined</strong>, <strong>trimBlocks</strong> et <strong>lstripBlocks</strong>. Pour en
+savoir plus sur ces options, regardez dans <a href="#configure"><code>configure</code></a> (les
+options express et watch ne sont pas applicables ici et sont configurées
+ailleurs comme <a href="#express"><code>env.express</code></a>).</p>
 
-<p>In node, the <a href="#filesystemloader"><code>FileSystemLoader</code></a> is available to
-load templates off the filesystem, and in the browser the <a href="#webloader"><code>WebLoader</code></a>
-is available to load over HTTP (or use precompiled templates). If you
-use the simple <a href="#configure"><code>configure</code></a> API, nunjucks automatically
-creates the appropriate loader for you, depending if you&#39;re in node or
-the browser. See <a href="#loader"><code>Loader</code></a> for more information.</p>
-<div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="c1">// the FileSystemLoader is available if in node</span>
+<p>Dans node, le <a href="#filesystemloader"><code>FileSystemLoader</code></a> est disponible pour
+charger les templates via le système de fichiers et dans le navigateur le <a href="#webloader"><code>WebLoader</code></a>
+est disponible pour charger via HTTP (ou utilise des templates précompilés). Si vous
+utilisez l&#39;API de configuration simplifiée, nunjucks crée  pour vous
+automatiquement le chargeur approprié, selon si vous êtes dans node ou dans
+le navigateur. Voir <a href="#chargeur"><code>Chargeur</code></a> pour plus d&#39;informations.</p>
+<div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="c1">// Le FileSystemLoader est disponible si on est dans node</span>
 <span class="kd">var</span> <span class="nx">env</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Environment</span><span class="p">(</span><span class="k">new</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">FileSystemLoader</span><span class="p">(</span><span class="s1">&#39;views&#39;</span><span class="p">));</span>
 
 <span class="kd">var</span> <span class="nx">env</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Environment</span><span class="p">(</span><span class="k">new</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">FileSystemLoader</span><span class="p">(</span><span class="s1">&#39;views&#39;</span><span class="p">),</span>
@@ -378,7 +375,7 @@ the browser. See <a href="#loader"><code>Loader</code></a> for more information.
 <span class="kd">var</span> <span class="nx">env</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Environment</span><span class="p">([</span><span class="k">new</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">FileSystemLoader</span><span class="p">(</span><span class="s1">&#39;views&#39;</span><span class="p">),</span>
                            <span class="k">new</span> <span class="nx">MyCustomLoader</span><span class="p">()]);</span>
 
-<span class="c1">// the WebLoader is available if in the browser</span>
+<span class="c1">// Le WebLoader est disponible si on est dans le navigateur</span>
 <span class="kd">var</span> <span class="nx">env</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Environment</span><span class="p">(</span><span class="k">new</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">WebLoader</span><span class="p">(</span><span class="s1">&#39;/views&#39;</span><span class="p">));</span>
 </code></pre></div>
 </div>
@@ -387,10 +384,10 @@ the browser. See <a href="#loader"><code>Loader</code></a> for more information.
 
 <div class="api-sig"><code>env.render(name, [context], [callback])</code></div>
 
-<div class="api-desc"><p>Render the template named <strong>name</strong> with the optional <strong>context</strong> hash.
-If <strong>callback</strong> is supplied, call it when done with any errors and the
-result (see <a href="#asynchronous-support">asynchronous support</a>), otherwise
-return the rendered string.</p>
+<div class="api-desc"><p>Rend le template nommé <strong>name</strong> avec le hash facultatif <strong>context</strong>. Si
+<strong>callback</strong> est fourni, il est appelé lorsque c&#39;est terminé avec toutes
+les erreurs et le résultat (voir le <a href="#support-asynchrone">support asynchrone</a>),
+sinon cela retourne la chaîne rendue.</p>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="kd">var</span> <span class="nx">res</span> <span class="o">=</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="s1">&#39;foo.html&#39;</span><span class="p">);</span>
 
 <span class="kd">var</span> <span class="nx">res</span> <span class="o">=</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="s1">&#39;foo.html&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">username</span><span class="o">:</span> <span class="s1">&#39;James&#39;</span> <span class="p">});</span>
@@ -404,8 +401,8 @@ return the rendered string.</p>
 
 <div class="api-sig"><code>env.renderString(src, [context], [callback])</code></div>
 
-<div class="api-desc"><p>Same as <a href="#render1"><code>render</code></a>, but renders a raw string instead of
-loading a template.</p>
+<div class="api-desc"><p>Identique à <a href="#render1"><code>render</code></a>, mais rend une chaîne de caractère brute au lieu
+de charger un template.</p>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="kd">var</span> <span class="nx">res</span> <span class="o">=</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">renderString</span><span class="p">(</span><span class="s1">&#39;Hello {{ username }}&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">username</span><span class="o">:</span> <span class="s1">&#39;James&#39;</span> <span class="p">});</span>
 </code></pre></div>
 </div>
@@ -414,59 +411,52 @@ loading a template.</p>
 
 <div class="api-sig"><code>env.addFilter(name, func, [async])</code></div>
 
-<div class="api-desc"><p>Add a custom filter named <strong>name</strong> which calls <strong>func</strong> whenever
-invoked. If the filter needs to be async, <strong>async</strong> must be <code>true</code>
-(see <a href="#asynchronous-support">asynchronous support</a>). See 
-<a href="#custom-filters">Custom Filters</a>.</p>
+<div class="api-desc"><p>Ajoute un filtre personnalisé nommé <strong>name</strong> qui appelle <strong>func</strong> à chaque fois
+qu&#39;il est appelé. Si le filtre doit être asynchrone, <strong>async</strong> doit être à <code>true</code>
+(voir le <a href="#support-asynchrone">support asynchrone</a>). Voir
+<a href="#filtres-personnaliss">Filtres personnalisés</a>.</p>
 </div>
 
 <h3 id="getfilter">getFilter</h3>
 
 <div class="api-sig"><code>env.getFilter(name)</code></div>
 
-<div class="api-desc"><p>Get the filter, which is just a function, named <strong>name</strong>.</p>
+<div class="api-desc"><p>Récupère le filtre, qui est juste une fonction, nommé <strong>name</strong>.</p>
 </div>
 
 <h3 id="addextension">addExtension</h3>
 
 <div class="api-sig"><code>env.addExtension(name, ext)</code></div>
 
-<div class="api-desc"><p>Add the custom extension <strong>ext</strong> named <strong>name</strong>. <strong>ext</strong> is an object
-with a few specific methods that are called by the extension system.
-See <a href="#custom-tags">Custom Tags</a>.</p>
+<div class="api-desc"><p>Ajoute l&#39;extension personnalisée <strong>ext</strong> nommée <strong>name</strong>. <strong>ext</strong> est un objet
+avec quelques méthodes spécifiques qui sont appelés par le système d&#39;extension.
+Voir les <a href="#tags-personnaliss">Tags personnalisés</a>.</p>
 </div>
 
 <h3 id="getextension">getExtension</h3>
 
 <div class="api-sig"><code>env.getExtension(name)</code></div>
 
-<div class="api-desc"><p>Get an extension named <strong>name</strong>.</p>
+<div class="api-desc"><p>Récupère une extension nommée <strong>name</strong>.</p>
 </div>
 
 <h3 id="addglobal">addGlobal</h3>
 
 <div class="api-sig"><code>env.addGlobal(name, value)</code></div>
 
-<div class="api-desc"><p>Add a global value that will be available to all templates. Note: this will overwrite any existing global called <code>name</code>.</p>
-</div>
-
-<h3 id="getglobal">getGlobal</h3>
-
-<div class="api-sig"><code>env.getGlobal(name)</code></div>
-
-<div class="api-desc"><p>Get a global named <strong>name</strong>.</p>
+<div class="api-desc"><p>Ajoute une valeur globale qui sera disponible pour tous les templates. Remarque : ceci écrasera toute valeur globale nommée <code>name</code>.</p>
 </div>
 
 <h3 id="gettemplate">getTemplate</h3>
 
 <div class="api-sig"><code>env.getTemplate(name, [eagerCompile], [callback])</code></div>
 
-<div class="api-desc"><p>Retrieve the template named <strong>name</strong>. If <strong>eagerCompile</strong> is <code>true</code>,
-compile it now instead of on render. If <strong>callback</strong> is supplied, call
-it with any errors and a template (if found), otherwise return
-synchronously. If using any async loaders, you must use the async API.
-The builtin loaders do not require this. See
-<a href="#asynchronous-support">asynchronous support</a> and <a href="#loader">loaders</a>.</p>
+<div class="api-desc"><p>Récupère le template nommé <strong>name</strong>. Si <strong>eagerCompile</strong> est à <code>true</code>,
+ça le compile maintenant au lieu de le rendre. Si <strong>callback</strong> est fourni, il
+est appelé avec les erreurs et un template (si trouvé), sinon il le retourne de
+façon synchrone. Si vous utilisez des chargeurs asynchrones, vous devez utiliser
+l&#39;API asynchrone. Les chargeurs intégrés ne nécessitent pas cela. Voir le
+<a href="#support-asynchrone">support asynchrone</a> et les <a href="#chargeur">chargeurs</a>.</p>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="kd">var</span> <span class="nx">tmpl</span> <span class="o">=</span> <span class="nx">env</span><span class="p">.</span><span class="nx">getTemplate</span><span class="p">(</span><span class="s1">&#39;page.html&#39;</span><span class="p">);</span>
 
 <span class="kd">var</span> <span class="nx">tmpl</span> <span class="o">=</span> <span class="nx">env</span><span class="p">.</span><span class="nx">getTemplate</span><span class="p">(</span><span class="s1">&#39;page.html&#39;</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
@@ -480,10 +470,10 @@ The builtin loaders do not require this. See
 
 <div class="api-sig"><code>env.express(app)</code></div>
 
-<div class="api-desc"><p>Install nunjucks as the rendering engine for the express <strong>app</strong>.
-After doing this, you can use express normally. Note that you can do
-this automatically with the simple API call <a href="#configure"><code>configure</code></a>
-by passing in the app as the <strong>express</strong> option.</p>
+<div class="api-desc"><p>Installe nunjucks comme moteur de rendu pour l&#39;<strong>app</strong> express. Après
+avoir fait cela, vous pouvez utiliser express normalement. Remarquez que vous pouvez le
+faire automatiquement avec l&#39;API simplifiée par l&#39;appel de <a href="#configure"><code>configure</code></a>
+en passant dans l&#39;app l&#39;option <strong>express</strong>.</p>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="kd">var</span> <span class="nx">app</span> <span class="o">=</span> <span class="nx">express</span><span class="p">();</span>
 <span class="nx">env</span><span class="p">.</span><span class="nx">express</span><span class="p">(</span><span class="nx">app</span><span class="p">);</span>
 
@@ -497,31 +487,31 @@ by passing in the app as the <strong>express</strong> option.</p>
 
 <div class="api-sig"><code>env.opts.autoescape</code></div>
 
-<div class="api-desc"><p>You can use this boolean property to see if autoescaping is turned on
-globally or not. This may be helpful in creating advanced filtering
-that do HTML manipulation. Normally you should simply return a
-SafeString (to be documented) if one was passed in, so the output will
-copy the safeness of the input, but this property is helpful in rare
-circumstances.</p>
+<div class="api-desc"><p>Vous pouvez utiliser cette propriété booléenne pour voir si autoescaping est activé
+ou non globalement. Cela peut être utile lors de la création de filtres avancés qui
+manipule du HTML. Normalement, vous devriez tout simplement retournez une
+chaîne sécurisée (pour être documenté) si l&#39;on passe dedans, afin que la sortie soit
+une  copie sécurisée de l&#39;entrée, mais cette propriété est utile dans
+de rares circonstances.</p>
 </div>
 
 <h2 id="template">Template</h2>
 
-<p>A <code>Template</code> is an object that handles the compiling of template
-strings and rendering them. Usually the <code>Environment</code> handles them for
-you, but you can easily use it yourself. If you don&#39;t connect a
-template with an environment, you can&#39;t include or inherit any other
-templates.</p>
+<p>Un <code>Template</code> est un objet qui gère la compilation des chaînes de template
+et les rend. Habituellement <code>Environment</code> les gère pour vous,
+mais vous pouvez facilement l&#39;utiliser vous-même. Si vous ne connectez pas un
+template avec un environnement, vous ne pouvez pas l&#39;inclure ou l&#39;hériter
+à d&#39;autres templates.</p>
 
 <h3 id="constructor1">constructor</h3>
 
 <div class="api-sig"><code>new Template(src, [env], [path], [eagerCompile])</code></div>
 
-<div class="api-desc"><p>The constructor takes a template string <strong>src</strong>, an optional
-<code>Environment</code> instance <strong>env</strong> to use for loading other templates, a
-string <strong>path</strong> describing the location/path for debugging purposes,
-and a boolean <strong>eagerCompile</strong> which, if <code>true</code>, kicks off compilation
-immediately instead of waiting until the template is rendered.</p>
+<div class="api-desc"><p>Le constructeur prend une chaîne de template <strong>src</strong>, une instance
+facultative <code>Environment</code> <strong>env</strong> à utiliser pour le chargement des autres templates, une
+chaîne <strong>path</strong> décrivant l&#39;emplacement/chemin afin de déboguer et
+un booléen <strong>eagerCompile</strong> qui, s&#39;il est à <code>true</code>, débutera la compilation
+immédiatement au lieu d&#39;attendre que le modèle soit rendu.</p>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="kd">var</span> <span class="nx">tmpl</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">Template</span><span class="p">(</span><span class="s1">&#39;Hello {{ username }}&#39;</span><span class="p">);</span>
 
 <span class="nx">tmpl</span><span class="p">.</span><span class="nx">render</span><span class="p">({</span> <span class="nx">username</span><span class="o">:</span> <span class="s2">&quot;James&quot;</span> <span class="p">});</span> <span class="c1">// -&gt; &quot;Hello James&quot;</span>
@@ -532,36 +522,36 @@ immediately instead of waiting until the template is rendered.</p>
 
 <div class="api-sig"><code>tmpl.render(context, [callback])</code></div>
 
-<div class="api-desc"><p>Renders the template with the optional <strong>context</strong> hash. If
-<strong>callback</strong> is supplied, call it when done with any errors and the
-result (see <a href="#asynchronous-support">asynchronous support</a>), otherwise
-return the rendered string.</p>
+<div class="api-desc"><p>Rend le template avec le hash facultatif <strong>context</strong>. Si
+<strong>callback</strong> est fourni, il l&#39;appelle quand cela sera terminé avec les erreurs et le
+résultat (Voir le <a href="#support-asynchrone">support asynchrone</a>), sinon il
+retourne la chaîne rendu.</p>
 </div>
 
-<h2 id="loader">Loader</h2>
+<h2 id="chargeur">Chargeur</h2>
 
-<p>A loader is an object that takes a template name and loads it from a
-source, such as the filesystem or network. The following two builtin
-loaders exist, each for different contexts.</p>
+<p>Un chargeur est un objet qui prend un nom de template et le charge à partir d&#39;une
+source, comme le système de fichiers ou le réseau. Les deux chargeurs intégrés
+suivants existent, chacun pour des contextes différents.</p>
 
 <h3 id="filesystemloader">FileSystemLoader</h3>
 
 <div class="api-sig"><code>new FileSystemLoader([searchPaths], [opts])</code></div>
 
-<div class="api-desc"><p>This is only available to node. It will load templates from the
-filesystem, using the <strong>searchPaths</strong> array as paths to look for
-templates. <strong>searchPaths</strong> can also be a single path for where
-templates live, and it defaults to the current working directory.</p>
+<div class="api-desc"><p>Ceci est uniquement disponible sur node. Il chargera les templates depuis
+le système de fichiers, en utilisant le tableau <strong>searchPaths</strong> comme chemins
+pour chercher des templates. <strong>searchPaths</strong> peut aussi avoir un chemin unique pour
+tous les templates et il est par défaut dans le répertoire de travail courant.</p>
 
-<p><strong>opts</strong> is an object with the following optional properties:</p>
+<p><strong>opts</strong> est un objet avec les propriétés optionnelles suivantes :</p>
 
 <ul>
-<li><strong>watch</strong> - if <code>true</code>, the system will automatically update templates
-when they are changed on the filesystem</li>
-<li><strong>noCache</strong> - if <code>true</code>, the system will avoid using a cache and templates
-will be recompiled every single time</li>
+<li><strong>watch</strong> - si <code>true</code>, le système mettra à jour automatiquement les templates
+quand ils sont modifiés sur le système de fichiers</li>
+<li><strong>noCache</strong> - si <code>true</code>, le système évitera l&#39;utilisation d&#39;un cache et les
+templates seront recompilés à chaque fois</li>
 </ul>
-<div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="c1">// Loads templates from the &quot;views&quot; folder</span>
+<div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="c1">// Charge les templates depuis le répertoire &quot;views&quot;</span>
 <span class="kd">var</span> <span class="nx">env</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">Environment</span><span class="p">(</span><span class="k">new</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">FileSystemLoader</span><span class="p">(</span><span class="s1">&#39;views&#39;</span><span class="p">));</span>
 </code></pre></div>
 </div>
@@ -570,228 +560,228 @@ will be recompiled every single time</li>
 
 <div class="api-sig"><code>new WebLoader([baseURL], [opts])</code></div>
 
-<div class="api-desc"><p>This is only available in the browser. <strong>baseURL</strong> is the URL to load
-templates from (must be the same domain), and it defaults to the
-current relative directory.</p>
+<div class="api-desc"><p>Ceci est uniquement disponible dans le navigateur. <strong>baseURL</strong> est l&#39;URL pour charger
+les templates (cela doit être sur le même domaine) et il est par défaut le
+répertoire relatif courant.</p>
 
-<p><strong>opts</strong> is an object with the following optional properties:</p>
+<p><strong>opts</strong> est un objet avec les propriétés optionnelles suivantes :</p>
 
 <ul>
-<li><strong>useCache</strong> if <code>true</code>, templates will be forever cached and you
-won&#39;t see updates to them. The cache is disabled by default
-because there is no way to watch for changes and dirty the cache.
-Remember, you should be precompiling your templates for production.</li>
-<li><strong>async</strong> if <code>true</code>, templates will be loaded asynchronously instead
-synchronously. You must use the asynchronous render API when using
-this (pass a callback to <code>render</code>).</li>
+<li><strong>useCache</strong> si <code>true</code>, les templates seront toujours mis en cache et vous
+ne leur verrez pas se mettre à jour. Le cache est désactivé par défaut car
+il n&#39;y a aucun moyen de voir les changements et le &quot;dirty&quot; cache.
+Souvenez-vous que vous devez précompiler vos templates pour la production.</li>
+<li><strong>async</strong> si <code>true</code>, les templates seront chargés de manière asynchrone au lieu
+de synchrone. Vous devez utiliser l&#39;API render de manière asynchrone lors de
+l&#39;utilisation de ceci (passez un callback à <code>render</code>).</li>
 </ul>
 
-<p>This loader also recognizes when precompiled templates are available
-and automatically uses them instead of fetching over HTTP. In
-production, this should always be the case. See
-<a href="#precompiling">Precompiling</a>.</p>
-<div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="c1">// Load templates from /views</span>
+<p>Ce chargeur reconnaît également lorsque les templates précompilés sont disponibles
+et les utilise automatiquement au lieu d&#39;aller les chercher sur HTTP. En
+production, cela devrait toujours être le cas. Voir
+<a href="#prcompilation">Précompilation</a>.</p>
+<div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="c1">// Charge les templates depuis /views</span>
 <span class="kd">var</span> <span class="nx">env</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">Environment</span><span class="p">(</span><span class="k">new</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">WebLoader</span><span class="p">(</span><span class="s1">&#39;/views&#39;</span><span class="p">))</span>
 </code></pre></div>
 </div>
 
-<h3 id="writing-a-loader">Writing a Loader</h3>
+<h3 id="criture-d39un-chargeur">Écriture d&#39;un chargeur</h3>
 
-<p>You can write loaders for more complex loading, like from a database.
-If you want to do this, just create an object that has a method
-<code>getSource(name)</code>, where <strong>name</strong> is the name of the template. That&#39;s it.</p>
+<p>Vous pouvez écrire des chargeurs pour des utilisations plus complexes comme la récupération à partir d&#39;une base de données.
+Si vous voulez faire cela, il suffit de créer un objet qui a une méthode
+<code>getSource(name)</code>, où <strong>name</strong> est le nom du template. C&#39;est tout.</p>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="kd">function</span> <span class="nx">MyLoader</span><span class="p">(</span><span class="nx">opts</span><span class="p">)</span> <span class="p">{</span>
     <span class="c1">// configuration</span>
 <span class="p">}</span>
 
 <span class="nx">MyLoader</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">getSource</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
-    <span class="c1">// load the template</span>
-    <span class="c1">// return an object with:</span>
-    <span class="c1">//   - src:     String. The template source.</span>
-    <span class="c1">//   - path:    String. Path to template.</span>
-    <span class="c1">//   - noCache: Bool. Don&#39;t cache the template (optional).</span>
+    <span class="c1">// charge le template</span>
+    <span class="c1">// retourne un objet avec :</span>
+    <span class="c1">//   - src :     String. La source du template.</span>
+    <span class="c1">//   - path :    String. Le chemin vers le template.</span>
+    <span class="c1">//   - noCache : Bool.   Ne met pas en cache le template (facultatif).</span>
 <span class="p">}</span>
 </code></pre></div>
-<p>It can get a little more complex. If you want to track updates to
-templates and bust the internal cache so that you can see updates, you
-need to extend the <code>Loader</code> class. This gives you <code>emit</code> method that
-can fire events. You need to call it </p>
+<p>Cela peut devenir un peu plus complexe, si vous souhaitez suivre les mises à jour des
+templates et détruire le cache interne de sorte que vous puissiez voir les mises à jour : vous
+devez étendre la classe <code>Loader</code>. Ceci vous permet d&#39;émettre une méthode qui peut
+déclencher des événements. Vous avez besoin de l&#39;appeler ainsi</p>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="kd">var</span> <span class="nx">MyLoader</span> <span class="o">=</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">Loader</span><span class="p">.</span><span class="nx">extend</span><span class="p">({</span>
     <span class="nx">init</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-        <span class="c1">// setup a process which watches templates here</span>
-        <span class="c1">// and call `this.emit(&#39;update&#39;, name)` when a template</span>
-        <span class="c1">// is changed</span>
+        <span class="c1">// configure un processus qui regarde ici les templates</span>
+        <span class="c1">// et appelle `this.emit(&#39;update&#39;, name)` lorsqu&#39;un template</span>
+        <span class="c1">// est modifié</span>
     <span class="p">}</span>
 
     <span class="nx">getSource</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
-        <span class="c1">// load the template</span>
+        <span class="c1">// charge le template</span>
     <span class="p">}</span>
 <span class="p">});</span>
 </code></pre></div>
-<h4 id="asynchronous">Asynchronous</h4>
+<h4 id="asynchrone">Asynchrone</h4>
 
-<p>There&#39;s one last piece: asynchronous loaders. So far, all of the
-loaders have been synchronous; <code>getSource</code> returns the source
-immediately. The benefit of this is that the user isn&#39;t forced to use
-the asynchronous API and be aware of edge cases about async templates.
-You might want to load from a database, however.</p>
+<p>Il y a un dernier point : les chargeurs asynchrones. Jusqu&#39;à présent, tous les
+chargeurs étaient synchrones, <code>getSource</code> retourne la source immédiatement.
+L&#39;avantage de ceci est que l&#39;utilisateur n&#39;est pas obligé d&#39;utiliser l&#39;API
+asynchrone et il n&#39;a pas à se soucier des effets de bords des templates asynchrones.
+Cependant, vous pouvez en avoir besoin pour charger à partir d&#39;une base de données.</p>
 
-<p>Just add an <code>async: true</code> property to your loader and it will be used
-asynchronously.</p>
+<p>Il suffit d&#39;ajouter une propriété <code>async: true</code> à votre chargeur et il sera
+utilisé de façon asynchrone.</p>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="kd">var</span> <span class="nx">MyLoader</span> <span class="o">=</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">Loader</span><span class="p">.</span><span class="nx">extend</span><span class="p">({</span>
     <span class="nx">async</span><span class="o">:</span> <span class="kc">true</span><span class="p">,</span>
 
     <span class="nx">getSource</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">name</span><span class="p">,</span> <span class="nx">callback</span><span class="p">)</span> <span class="p">{</span>
-        <span class="c1">// load the template</span>
+        <span class="c1">// charge le template</span>
         <span class="c1">// ...</span>
         <span class="nx">callback</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">res</span><span class="p">);</span>
     <span class="p">}</span>
 <span class="p">});</span>
 </code></pre></div>
-<p>Remember that you now have to use the asynchronous API. See
-<a href="#asynchronous-support">asynchronous support</a>.</p>
+<p>N&#39;oubliez pas que vous devez maintenant utiliser l&#39;API asynchrone. Voir
+le <a href="#support-asynchrone">support asynchrone</a>.</p>
 
-<p><strong>Warning</strong>: if you are using an asynchronous loader, you can&#39;t load
-  templates inside <code>for</code> loops. You need to explicitly use the
-  <code>asyncEach</code> tag if you need to load templates, which is exactly the
-  same as <code>for</code> but asynchronous. More info can be found at
-  <a href="#be-careful">Be Careful!</a>.</p>
+<p><strong>Attention</strong> : Si vous utilisez un chargeur asynchrone, vous ne pouvez pas charger
+  des templates à l&#39;intérieur des boucles <code>for</code>. Vous devez explicitement utiliser le
+  tag <code>asyncEach</code> si vous avez besoin de charger des templates, c&#39;est exactement le
+  même que <code>for</code> mais asynchrone. Plus d&#39;informations se trouvent dans
+  <a href="#soyez-prudent">Soyez prudent !</a>.</p>
 
-<h2 id="browser-usage">Browser Usage</h2>
+<h2 id="utilisation-dans-un-navigateur">Utilisation dans un navigateur</h2>
 
-<p>Using nunjucks in the browser takes a little more thought because you
-care about load and compile time. On the server-side, templates are
-compiled once and cached in memory and you never have to worry about
-it. On the client-side however, you don&#39;t want to compile templates
-even once, as it would result in slow page render time.</p>
+<p>L&#39;utilisation de nunjucks dans le navigateur demande une réflexion plus approfondie, car vous
+devez vous souciez du chargement et du temps de compilation. Du côté du serveur, les templates sont
+compilés une fois et mis en mémoire cache, donc vous n&#39;aurez jamais à vous inquiéter de ce sujet.
+Cependant du côté du client, vous ne voulez pas compiler les templates, même une fois,
+car le rendu de la page serait très lent.</p>
 
-<p>The solution is to precompile your templates into JavaScript, and load
-them as a simple <code>.js</code> file on page load.</p>
+<p>La solution est de précompiler vos templates en JavaScript et de les charger
+dans un simple fichier <code>.js</code> lors du chargement de la page.</p>
 
-<p>Maybe you do want to dynamically load templates while developing,
-however, so that you can see changes immediately without recompiling.
-Nunjucks tries to adapt to whatever workflow you want.</p>
+<p>Peut-être que vous voulez charger dynamiquement des templates lors du développement,
+afin que vous puissiez voir immédiatement les modifications sans recompilation.
+Nunjucks essaye de s&#39;adapter à ce flux de travail voulu.</p>
 
-<p>The only rule you must follow: <strong>always precompile your templates in
-production</strong>. Why? Not only is it slow to compile all your templates
-on page load, they are loaded <em>synchronously</em> over HTTP, blocking the
-whole page. It is slow. It does this because nunjucks isn&#39;t async by
-default.</p>
+<p>La seule règle que vous devez suivre : <strong>toujours précompiler vos templates en
+production</strong>. Pourquoi ? Non seulement c&#39;est lent de compiler tous vos templates
+sur la page de chargement, mais ils sont chargés de <em>manière synchrone</em> sur HTTP,
+ce qui bloque toute la page. C&#39;est lent. C&#39;est parce nunjucks n&#39;est pas asynchrone
+par défaut.</p>
 
-<h3 id="recommended-setups">Recommended Setups</h3>
+<h3 id="configurations-recommandes">Configurations recommandées</h3>
 
-<p>These are two of the most popular ways to set up nunjucks on the
-client-side. Note that there are two different js files: one with the
-compiler, nunjucks.js, and one without the compiler, nunjucks-slim.js.
-Read <a href="getting-started.html">Getting Started</a> for a brief overview of
-the differences.</p>
+<p>Ce sont les deux moyens les plus populaires pour mettre en place nunjucks
+côté client. Notez qu&#39;il y a deux fichiers js différents : l&#39;un avec le
+compilateur nunjucks.js, et l&#39;autre sans le compilateur nunjucks-slim.js.
+Lisez <a href="getting-started.html">Prise en main</a> pour un bref aperçu des
+différences.</p>
 
-<p>See <a href="#precompiling">Precompiling</a> for information on precompiling
-templates.</p>
+<p>Voir <a href="#prcompilation">Précompilation</a> pour des informations sur la
+précompilation des templates.</p>
 
-<h4 id="setup-1-only-precompile-in-production">Setup #1: only precompile in production</h4>
+<h4 id="configuration-n1--prcompil-uniquement-en-production">Configuration n°1 : précompilé uniquement en production</h4>
 
-<p>This method will give you a setup that dynamically loads templates
-while developing (you can see changes immediately), but uses
-precompiled templates in production.</p>
+<p>Cette méthode vous donnera une configuration qui charge dynamiquement les templates
+lors du développement (vous pouvez voir immédiatement les changements), mais utilise
+des templates précompilés en production.</p>
 
 <ol>
-<li>Load <a href="files/nunjucks.js">nunjucks.js</a> with either a script tag or a module loader.</li>
-<li>Render templates (<a href="#simple-api">example</a>)!</li>
-<li>When pushing to production, <a href="#precompiling">precompile</a> the templates into a js file
-and load it on the page</li>
+<li>Chargez <a href="../files/nunjucks.js">nunjucks.js</a> soit avec une balise script ou un chargeur de module.</li>
+<li>Rendez les templates (<a href="#api-simplifie">par exemple</a>)!</li>
+<li>Lorsque vous mettez en production, <a href="#prcompilation">précompilez</a> les templates dans un fichier js
+et chargez les dans la page</li>
 </ol>
 
 <blockquote>
-<p>An optimization is to use <code>nunjucks-slim.js</code> instead of
-<code>nunjucks.js</code> in production since you are using precompiled
-templates there. It&#39;s 8K instead of 20K because it doesn&#39;t contain
-the compiler. This complicates the setup though because you are
-using different js files between dev and prod, so it may or may not
-be worth it.</p>
+<p>Une optimisation est d&#39;utiliser <code>nunjucks-slim.js</code> au lieu de
+<code>nunjucks.js</code> en production puisque vous utilisez ici des templates
+précompilés. Il fait 8K au lieu de 20K parce qu&#39;il ne contient pas
+le compilateur. Cela complique la configuration car vous utilisez
+des fichiers js différents entre la dev et la prod, ça vaut peut-être
+le coup ou pas.</p>
 </blockquote>
 
-<h4 id="setup-2-always-precompile">Setup #2: always precompile</h4>
+<h4 id="configuration-n2--toujours-prcompil">Configuration n°2 : toujours précompilé</h4>
 
-<p>This method always uses precompiled templates while developing and in
-production, which simplifies the setup. However, you&#39;re going to want
-something that automatically recompiles templates while developing
-unless you want to manually recompile them after every change.</p>
+<p>Cette méthode utilise toujours des templates précompilés lors du développement et en
+production, ce qui simplifie la configuration. Cependant, vous allez vouloir quelque
+chose qui recompile automatiquement les templates lors du développement sauf si
+vous voulez les recompiler manuellement après chaque changement.</p>
 
 <ol>
-<li>For development, use the <a href="https://github.com/jlongster/grunt-nunjucks">grunt task</a> to watch
-your template directory for changes and automatically <a href="#precompiling">precompile</a> them
-into a js file</li>
-<li>Load <a href="files/nunjucks-slim.js">nunjucks-slim.js</a> and <code>templates.js</code>, or whatever you named
-the precompiled js file, with either a script tag or a module loader.</li>
-<li>Render templates (<a href="#simple-api">example</a>)!</li>
+<li>Pour le développement, utilisez la <a href="https://github.com/jlongster/grunt-nunjucks">tâche grunt</a> qui surveillera
+les modifications de votre répertoire de template et automatiquement les <a href="#prcompilation">précompilera</a>
+dans un fichier js</li>
+<li>Chargez <a href="../files/nunjucks-slim.js">nunjucks-slim.js</a> et <code>templates.js</code>, ou tout ce que vous avez
+nommé comme fichier js précompilé, avec soit une balise script ou un chargeur de module.</li>
+<li>Rendez les templates (<a href="#api-simplifie">par exemple</a>)!</li>
 </ol>
 
-<p>With this method, there are no differences between development and
-production code. Simply commit the templates.js file and deploy the
-same code to production.</p>
+<p>Avec cette méthode, il n&#39;y a pas de différences entre le développement et
+le code de la production. Il suffit de valider le fichier de templates.js et
+déployer le même code pour la production.</p>
 
-<h2 id="precompiling">Precompiling</h2>
+<h2 id="prcompilation">Précompilation</h2>
 
-<p>To precompile your templates, use the <code>nunjucks-precompile</code> script
-that comes with nunjucks. You can pass it a directory or a file and it
-will generate all the JavaScript for your templates.</p>
-<div class="highlight"><pre><code class="text language-text" data-lang="text">// Precompiling a whole directory
+<p>Pour précompiler vos templates, utilisez le script <code>nunjucks-precompile</code>
+fourni avec nunjucks. Vous pouvez passer un répertoire ou un fichier et il
+générera tout le JavaScript pour vos templates.</p>
+<div class="highlight"><pre><code class="text language-text" data-lang="text">// Précompilation d&#39;un répertoire entier
 $ nunjucks-precompile views &gt; templates.js
 
-// Precompiling individual templates
+// Précompilation des templates individuellement
 $ nunjucks-precompile views/base.html &gt;&gt; templates.js
 $ nunjucks-precompile views/index.html &gt;&gt; templates.js
 $ nunjucks-precompile views/about.html &gt;&gt; templates.js
 </code></pre></div>
-<p>All you have to do is simply load <code>templates.js</code> on the page, and the
-system will automatically use the precompiled templates. There are
-zero changes necessary.</p>
+<p>Tout ce que vous avez à faire, c&#39;est simplement de charger templates.js
+sur la page, et le système utilisera automatiquement les modèles
+précompilés. Aucun changement n&#39;est nécessaire.</p>
 
-<p>There are various options available to the script. Simply invoke
-<code>nunjucks-precompile</code> to see more info about them. Note that <strong>names
-of all asynchronous filters need to passed to the script</strong> since they
-need to be known at compile-time. You can pass a comma-delimited list
-of async filters with <code>-a</code>, like <code>-a foo,bar,baz</code>. If you only use
-normal synchronous filters, you don&#39;t need to do anything.</p>
+<p>Il existe diverses options disponibles pour le script. Appelez simplement
+<code>nunjucks-precompile</code> pour voir plus d&#39;informations sur eux. Notez que les <strong>noms
+de tous les filtres asynchrones doivent être passés au script</strong>, car ils doivent
+être connus au moment de la compilation. Vous pouvez passer une liste de filtres
+asynchrones séparés par des virgules avec <code>-a</code>, tel que <code>-a foo,bar,baz</code>. Si vous
+utilisez uniquement des filtres synchrones normaux, vous ne devez rien faire.</p>
 
-<p>Extensions cannot be specified with this script. You must use the
-precompile API below if you use them.</p>
+<p>Les extensions ne peuvent pas être spécifiées avec ce script. Vous devez utiliser
+l&#39;API precompile ci-dessous si vous les utilisez.</p>
 
 <h3 id="api1">API</h3>
 
-<p>There is also an API if you want to programmatically precompile
-templates. You&#39;ll want to do this if you use extensions or you use
-asynchronous filters, both of which need to be known at compile-time.
-You can pass an <code>Environment</code> object straight into the precompiler and
-it will get the extensions and filters from it. You should share the
-same <code>Environment</code> object between the client and server to keep
-everything in sync.</p>
+<p>Il existe également une API, si vous voulez des templates précompilés par
+programmation. Vous aurez envie de faire cela si vous utilisez des extensions ou si
+vous utilisez des filtres asynchrones, car dans les deux cas, ils ont besoin d&#39;être
+connus au moment de la compilation. Vous pouvez passer un objet <code>Environment</code> directement
+dans le précompilateur et cela récupérera les extensions et les filtres. Vous devez
+partager le même objet <code>Environment</code> entre le client et le serveur pour
+que tout reste synchronisé.</p>
 
 <h3 id="precompile">precompile</h3>
 
 <div class="api-sig"><code>nunjucks.precompile(path, [opts])</code></div>
 
-<div class="api-desc"><p>Precompile a file or directory at <strong>path</strong>. <strong>opts</strong> is a hash with any of the following options:</p>
+<div class="api-desc"><p>Précompile un fichier ou un répertoire depuis <strong>path</strong>. <strong>opts</strong> est un hash avec les options suivantes :</p>
 
 <ul>
-<li><strong>name</strong>: name of the template, when compiling a string (required)
-or a file (optional, defaults to <strong>path</strong>). names are
-auto-generated when compiling a directory.</li>
-<li><strong>asFunction</strong>: generate a callable function</li>
-<li><strong>force</strong>: keep compiling on error</li>
-<li><strong>env</strong>: the Environment to use (gets extensions and async filters from it)</li>
-<li><strong>include</strong>: array of file/folders to include (folders are auto-included, files are auto-excluded)</li>
-<li><strong>exclude</strong>: array of file/folders to exclude (folders are auto-included, files are auto-excluded)</li>
+<li><strong>name</strong>: nom du template, lors de la compilation d&#39;une chaîne (obligatoire)
+ou un fichier (optionnel, par défaut <strong>path</strong>). Les noms sont
+générés automatiquement lors de la compilation d&#39;un répertoire.</li>
+<li><strong>asFunction</strong>: génère une fonction appelable</li>
+<li><strong>force</strong>: continuer la compilation en cas d&#39;erreur</li>
+<li><strong>env</strong>: un environnement à utiliser (on récupère via ce dernier les extensions et les filtres asynchrone)</li>
+<li><strong>include</strong>: un tableau de fichiers/dossiers à inclure (les dossiers sont automatiquement inclus, les fichiers sont automatiquement exclus)</li>
+<li><strong>exclude</strong>: un tableau de fichiers/dossiers à exclure (les dossiers sont automatiquement inclus, les fichiers sont automatiquement exclus)</li>
 </ul>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="kd">var</span> <span class="nx">env</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">Environment</span><span class="p">();</span>
 
-<span class="c1">// extensions must be known at compile-time</span>
+<span class="c1">// les extensions doivent être connues au moment de la compilation</span>
 <span class="nx">env</span><span class="p">.</span><span class="nx">addExtension</span><span class="p">(</span><span class="s1">&#39;MyExtension&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">MyExtension</span><span class="p">());</span>
 
-<span class="c1">// async filters must be known at compile-time</span>
+<span class="c1">// les filtres asynchrones doivent être connus au moment de la compilation</span>
 <span class="nx">env</span><span class="p">.</span><span class="nx">addFilter</span><span class="p">(</span><span class="s1">&#39;asyncFilter&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">val</span><span class="p">,</span> <span class="nx">cb</span><span class="p">)</span> <span class="p">{</span>
-  <span class="c1">// do something</span>
+  <span class="c1">// faire quelque chose</span>
 <span class="p">},</span> <span class="kc">true</span><span class="p">);</span>
 
 <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">precompile</span><span class="p">(</span><span class="s1">&#39;/dir/to/views&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">env</span><span class="o">:</span> <span class="nx">env</span> <span class="p">});</span>
@@ -802,75 +792,75 @@ auto-generated when compiling a directory.</li>
 
 <div class="api-sig"><code>nunjucks.precompileString(str, [opts])</code></div>
 
-<div class="api-desc"><p>Exactly the same as <a href="#precompile"><code>precompile</code></a>, but compiles a raw string.</p>
+<div class="api-desc"><p>Exactement le même que <a href="#precompile"><code>precompile</code></a>, mais il compile une chaîne brute.</p>
 </div>
 
-<h2 id="asynchronous-support">Asynchronous Support</h2>
+<h2 id="support-asynchrone">Support Asynchrone</h2>
 
-<p>You only need to read this section if you are interested in
-asynchronous rendering. There is no performance benefit to this, it is
-solely to allow custom filters and extensions to make async calls. If
-you don&#39;t care about this, you should simply use the normal API like
-<code>var res = env.render(&#39;foo.html&#39;);</code>. There&#39;s no need to force the
-<code>callback</code> on you, and it&#39;s why it&#39;s optional in all the rendering
-functions.</p>
+<p>Vous avez besoin de lire cette section seulement si vous êtes intéressé par le
+rendu asynchrone. Il n&#39;y a aucun avantage en termes de performance, il doit uniquement
+permettre aux filtres et aux extensions personnalisées de faire des appels asynchrones. Si
+vous ne vous souciez pas de cela, vous devez simplement utiliser l&#39;API normal tel que
+<code>var res = env.render(&#39;foo.html&#39;);</code>. Il n&#39;y a pas besoin de forcer le 
+<code>callback</code>, et c&#39;est pourquoi il est facultatif dans toutes les fonctions
+de rendu. </p>
 
-<p>As of version 1.0, nunjucks provides a way to render templates
-asynchronously. This means that custom filters and extensions can do
-stuff like fetch things from the database, and template rendering is
-&quot;paused&quot; until the callback is called.</p>
+<p>Depuis la version 1.0, nunjucks fournit un moyen de rendre les templates de
+manière asynchrone. Cela signifie que les filtres et extensions personnalisées peuvent faire
+des choses comme aller chercher des données à partir d&#39;une base de données et le rendu
+du template est &quot;suspendu&quot; jusqu&#39;à ce que le callback soit appelé.</p>
 
-<p>Template loaders can be async as well, allowing you to load templates
-from a database or somewhere else. See
-<a href="#writing-a-loader">Writing a Loader</a>. If you are using an async
-template loader, you must use the async API. The builtin loaders that
-load from the filesystem and over HTTP are synchronous, which is not a
-performance problem because they are cached from the filesystem and
-you should precompile your templates and never use HTTP in production.</p>
+<p>Les chargeurs de template peuvent ainsi être asynchrones, vous permettant de charger des
+templates à partir d&#39;une base de données ou autres. Voir
+<a href="#ecriture-d-un-chargeur">Écriture d&#39;un chargeur</a>. Si vous utilisez un chargeur de template
+asynchrone, vous devez utiliser l&#39;API asynchrone. Les chargeurs intégrés qui chargent depuis le
+système de fichiers et sur HTTP sont synchrones, ils n&#39;ont pas de problème de performance, car
+ils sont mis en cache depuis le système de fichiers et vous devez précompiler vos templates et
+ne jamais utiliser le protocole HTTP en production.</p>
 
-<p>If you are using anything async, you need to use the async API like this:</p>
+<p>Si vous utilisez quelque chose d&#39;asynchrone, vous devez utiliser l&#39;API asynchrone comme ceci :</p>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="nx">nunjucks</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="s1">&#39;foo.html&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">res</span><span class="p">)</span> <span class="p">{</span>
-   <span class="c1">// check err and handle result</span>
+   <span class="c1">// vérifie err et gère le résultat</span>
 <span class="p">});</span>
 </code></pre></div>
-<p>Read more about async <a href="#asynchronous1"><code>filters</code></a>, <a href="#asynchronous2"><code>extensions</code></a>, and
-<a href="#asynchronous"><code>loaders</code></a>.</p>
+<p>En savoir plus sur les <a href="#asynchrone1"><code>filtres</code></a>, les <a href="#asynchrone2"><code>extensions</code></a> et les
+<a href="#asynchrone"><code>chargeurs</code></a> asynchrones.</p>
 
-<h3 id="be-careful">Be Careful!</h3>
+<h3 id="soyez-prudent-">Soyez prudent !</h3>
 
-<p>Nunjucks is synchronous by default. Because of this, you need to
-follow a few rules when writing asynchronous templates:</p>
+<p>Nunjucks est synchrone par défaut. Pour cette raison, vous devez suivre
+quelques règles lors de l&#39;écriture des templates asynchrones :</p>
 
 <ul>
-<li>Always use the async API. <code>render</code> should take a function that takes
-a callback.</li>
-<li>Async filters and extensions need to be known at compile-time, so
-you need to specify them explicitly when precompiling (see
-<a href="#precompiling">Precompiling</a>).</li>
-<li>If you are using a custom template loader that is asynchronous, you
-can&#39;t include templates inside a <code>for</code> loop. This is because <code>for</code>
-will compile to an imperative JavaScript <code>for</code> loop. You need to
-explicitly use the async <code>asyncEach</code> tag to iterate, which is
-exactly the same as <code>for</code> except asynchronous.</li>
+<li>Toujours utiliser l&#39;API asynchrone. <code>render</code> doit prendre une fonction qui prend
+un callback.</li>
+<li>Les filtres et les extensions asynchrones doivent être connus au moment de la compilation, si
+vous devez les spécifier explicitement lors de la précompilation (voir
+<a href="#prcompilation">Précompilation</a>).</li>
+<li>Si vous utilisez un chargeur de template personnalisé qui est asynchrone, vous
+ne pouvez pas inclure des templates à l&#39;intérieur d&#39;une boucle <code>for</code>. C&#39;est parce
+que <code>for</code> se compilera en une boucle <code>for</code> de JavaScript impératif. Vous devez
+utiliser explicitement le tag asynchrone <code>asyncEach</code> pour itérer, qui est
+exactement le même que le <code>for</code> synchrone.</li>
 </ul>
 
 <h2 id="autoescaping">Autoescaping</h2>
 
-<p>By default, nunjucks will render all output as it is. If you turn on
-autoescaping, nunjucks will escape all output by default. It&#39;s
-recommended that you do this for security reasons.</p>
+<p>Par défaut, nunjucks rendra toutes les sorties telles quelles. Si autoescaping
+est activé, nunjucks échappera par défaut toutes les sorties. Il est
+recommandé de le faire pour des raisons de sécurité.</p>
 
-<p>Autoescaping is rather simplistic in nunjucks right now. All you have
-to do is pass the <code>autoescape</code> option as <code>true</code> to the <code>Environment</code>
-object. In the future, you will have more control over which files
-this kicks in.</p>
+<p>L&#39;Autoescaping est plutôt simpliste dans nunjucks. Tout ce que vous avez
+à faire, c&#39;est de passer l&#39;option <code>autoescape</code> à <code>true</code> sur l&#39;objet
+<code>Environment</code>. A l&#39;avenir, vous aurez plus de contrôle sur les fichiers
+utilisés.</p>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="kd">var</span> <span class="nx">env</span> <span class="o">=</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">configure</span><span class="p">(</span><span class="s1">&#39;/path/to/templates&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">autoescape</span><span class="o">:</span> <span class="kc">true</span> <span class="p">});</span>
 </code></pre></div>
-<h2 id="customizing-syntax">Customizing Syntax</h2>
+<h2 id="personnalisation-de-la-syntaxe">Personnalisation de la syntaxe</h2>
 
-<p>If you want different tokens than <code>{{</code> and the rest for variables,
-blocks, and comments, you can specify different tokens as the <code>tags</code>
-option:</p>
+<p>Si vous souhaitez des marqueurs (tokens) différent de <code>{{</code> ainsi que pour les variables,
+les blocs et les commentaires, vous pouvez spécifier des marqueurs différents avec l&#39;option
+<code>tags</code> :</p>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="kd">var</span> <span class="nx">env</span> <span class="o">=</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">configure</span><span class="p">(</span><span class="s1">&#39;/path/to/templates&#39;</span><span class="p">,</span> <span class="p">{</span>
   <span class="nx">tags</span><span class="o">:</span> <span class="p">{</span>
     <span class="nx">blockStart</span><span class="o">:</span> <span class="s1">&#39;&lt;%&#39;</span><span class="p">,</span>
@@ -882,19 +872,19 @@ option:</p>
   <span class="p">}</span>
 <span class="p">});</span>
 </code></pre></div>
-<p>Using this environment, templates will look like this:</p>
+<p>En utilisant cet environnement, les templates ressembleront à ça :</p>
 <div class="highlight"><pre><code class="text language-text" data-lang="text">&lt;ul&gt;
 &lt;% for item in items %&gt;
   &lt;li&gt;&lt;$ item $&gt;&lt;/li&gt;
 &lt;% endfor %&gt;
 &lt;/ul&gt;
 </code></pre></div>
-<h2 id="custom-filters">Custom Filters</h2>
+<h2 id="filtres-personnaliss">Filtres personnalisés</h2>
 
-<p>To install a custom filter, use the <code>Environment</code> method <code>addFilter</code>.
-A filter is simply a function that takes the target object as the
-first argument and any arguments passed to the filter as the other
-arguments, in order.</p>
+<p>Pour installer un filtre personnalisé, utilisez la méthode <code>addFilter</code> de <code>Environment</code>.
+Un filtre est tout simplement une fonction qui prend l&#39;objet visé comme premier
+argument et n&#39;importe quels arguments qui seront transmis dans l&#39;ordre au filtre
+comme d&#39;autres arguments.</p>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="kd">var</span> <span class="nx">nunjucks</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;nunjucks&#39;</span><span class="p">);</span>
 <span class="kd">var</span> <span class="nx">env</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">Environment</span><span class="p">();</span>
 
@@ -902,41 +892,41 @@ arguments, in order.</p>
     <span class="k">return</span> <span class="nx">str</span><span class="p">.</span><span class="nx">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nx">count</span> <span class="o">||</span> <span class="mi">5</span><span class="p">);</span>
 <span class="p">});</span>
 </code></pre></div>
-<p>This adds a filter <code>shorten</code> which returns the first <code>count</code>
-characters in a string, with <code>count</code> defaulting to 5. Here is how it
-is used:</p>
-<div class="highlight"><pre><code class="jinja language-jinja" data-lang="jinja"><span class="c">{# Show the first 5 characters #}</span><span class="x"></span>
-<span class="x">A message for you: </span><span class="cp">{{</span> <span class="nv">message</span><span class="o">|</span><span class="nf">shorten</span> <span class="cp">}}</span><span class="x"></span>
+<p>Cela ajoute un filtre <code>shorten</code> qui renvoie les <code>count</code> premiers
+caractères dans une chaîne, où <code>count</code> est par défaut à 5. Voici comment
+il est utilisé :</p>
+<div class="highlight"><pre><code class="jinja language-jinja" data-lang="jinja"><span class="c">{# Affiche les 5 premiers caractères #}</span><span class="x"></span>
+<span class="x">Un message pour vous : </span><span class="cp">{{</span> <span class="nv">message</span><span class="o">|</span><span class="nf">shorten</span> <span class="cp">}}</span><span class="x"></span>
 
-<span class="c">{# Show the first 20 characters #}</span><span class="x"></span>
-<span class="x">A message for you: </span><span class="cp">{{</span> <span class="nv">message</span><span class="o">|</span><span class="nf">shorten</span><span class="o">(</span><span class="m">20</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
+<span class="c">{# Affiche les 20 premiers caractères #}</span><span class="x"></span>
+<span class="x">Un message pour vous : </span><span class="cp">{{</span> <span class="nv">message</span><span class="o">|</span><span class="nf">shorten</span><span class="o">(</span><span class="m">20</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
 </code></pre></div>
-<h3 id="keyworddefault-arguments">Keyword/Default Arguments</h3>
+<h3 id="arguments-avec-mots-clefspar-dfaut">Arguments avec Mots clefs/Par défaut</h3>
 
-<p>As described in the
-<a href="templating#keyword-arguments">templating section</a>, nunjucks supports
-keyword/default arguments. You can write a normal javascript filter
-that leverages them.</p>
+<p>Comme décrit dans la section
+<a href="templating.html#arguments-avec-mots-clefs">templating</a>, nunjucks supporte
+les arguments avec Mots clefs/Par défaut. Vous pouvez écrire un filtre javascript
+qui les exploite.</p>
 
-<p>All keyword arguments are passed in as a hash as the last argument.
-This is a filter <code>foo</code> that uses keyword arguments:</p>
+<p>Tous les arguments avec mots clefs sont transmis en tant que hash comme dernier argument.
+Voici le filtre <code>foo</code> qui utilise des arguments avec mots clefs :</p>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="nx">env</span><span class="p">.</span><span class="nx">addFilter</span><span class="p">(</span><span class="s1">&#39;foo&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">num</span><span class="p">,</span> <span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">,</span> <span class="nx">kwargs</span><span class="p">)</span> <span class="p">{</span>
    <span class="k">return</span> <span class="nx">num</span> <span class="o">+</span> <span class="p">(</span><span class="nx">kwargs</span><span class="p">.</span><span class="nx">bar</span> <span class="o">||</span> <span class="mi">10</span><span class="p">);</span>
 <span class="p">})</span>
 </code></pre></div>
-<p>The template can use it like this:</p>
+<p>Le template peut l&#39;utiliser ainsi :</p>
 <div class="highlight"><pre><code class="jinja language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="m">5</span> <span class="o">|</span> <span class="nf">foo</span><span class="o">(</span><span class="m">1</span><span class="o">,</span> <span class="m">2</span><span class="o">)</span> <span class="cp">}}</span><span class="x">          -&gt; 15</span>
 <span class="cp">{{</span> <span class="m">5</span> <span class="o">|</span> <span class="nf">foo</span><span class="o">(</span><span class="m">1</span><span class="o">,</span> <span class="m">2</span><span class="o">,</span> <span class="nv">bar</span><span class="o">=</span><span class="m">3</span><span class="o">)</span> <span class="cp">}}</span><span class="x">   -&gt; 8</span>
 </code></pre></div>
-<p>You <em>must</em> pass all of the positional arguments before keyword
-arguments (<code>foo(1)</code> is valid but <code>foo(1, bar=10)</code> is not). Also, you
-cannot set a positional argument with a keyword argument like you can
-in Python (such as <code>foo(1, y=1)</code>)</p>
+<p>Vous <em>devez</em> passer tous les arguments de position avant les arguments avec mots
+clefs (<code>foo(1)</code> est valide, mais <code>foo(1, bar=10)</code> ne l&#39;est pas). Donc, vous ne
+pouvez pas définir un argument de position avec un argument avec mots clefs, bien 
+que cela soit possible en Python (comme <code>foo(1, y=1)</code>).</p>
 
-<h3 id="asynchronous1">Asynchronous</h3>
+<h3 id="asynchrone1">Asynchrone</h3>
 
-<p>Asynchronous filters receive a callback to resume rendering, and are
-created by passing <code>true</code> as the third argument to <code>addFilter</code>.</p>
+<p>Les filtres asynchrones reçoivent un callback pour s&#39;occuper du rendu et ils sont
+créés en passant <code>true</code> au troisième argument de <code>addFilter</code>.</p>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="kd">var</span> <span class="nx">env</span> <span class="o">=</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">configure</span><span class="p">(</span><span class="s1">&#39;views&#39;</span><span class="p">);</span>
 
 <span class="nx">env</span><span class="p">.</span><span class="nx">addFilter</span><span class="p">(</span><span class="s1">&#39;lookup&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">name</span><span class="p">,</span> <span class="nx">callback</span><span class="p">)</span> <span class="p">{</span>
@@ -944,83 +934,83 @@ created by passing <code>true</code> as the third argument to <code>addFilter</c
 <span class="p">},</span> <span class="kc">true</span><span class="p">);</span>
 
 <span class="nx">env</span><span class="p">.</span><span class="nx">renderString</span><span class="p">(</span><span class="s1">&#39;{{ item|lookup }}&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">res</span><span class="p">)</span> <span class="p">{</span>
-    <span class="c1">// do something with res</span>
+    <span class="c1">// faire quelque chose avec res</span>
 <span class="p">});</span>
 </code></pre></div>
-<p>Make sure to call the callback with two arguments: <code>callback(err, res)</code>. <code>err</code> can be null, of course.</p>
+<p>Assurez-vous d&#39;appeler la fonction callback avec deux arguments : <code>callback(err, res)</code>. <code>err</code> peut être évidemment null.</p>
 
-<p>Note: When precompiling, <strong>you must tell the precompiler the names of
-all asynchronous filters</strong>. See
-<a href="#precompiling">Precompiling</a>.</p>
+<p>Remarque: Lors de la précompilation, <strong>vous devez indiquer au précompilateur les noms de
+tous les filtres asynchrones</strong>. Voir
+<a href="#prcompilation">Précompilation</a>.</p>
 
-<h2 id="custom-tags">Custom Tags</h2>
+<h2 id="tags-personnaliss">Tags personnalisés</h2>
 
-<p>You can create more complicated extensions by creating custom tags.
-This exposes the parser API and allows you to do anything you want
-with the template.</p>
+<p>Vous pouvez créer des extensions plus complexes en créant des tags personnalisés.
+Cela vous permet d&#39;utiliser l&#39;API du parser (analyseur) et vous permet de faire tout
+ce que vous voulez avec le template.</p>
 
-<p>Note: When precompiling, <strong>you must install the extensions at
-compile-time</strong>. You have to use the <a href="#api1">precompiling API</a> (or the
-<a href="https://github.com/jlongster/grunt-nunjucks">grunt task</a>) instead of
-the script. You&#39;ll want to create a <a href="#environment"><code>Environment</code></a>
-object, install your extensions, and pass it to the precompiler.</p>
+<p>Remarque: Lors de la précompilation, <strong>vous devez installer les extensions pour
+la compilation</strong>. Vous devez utiliser l&#39;API de <a href="#api1">précompilation</a> (ou la 
+<a href="https://github.com/jlongster/grunt-nunjucks">tâche de grunt</a>) à la place du
+script. Vous devrez créer un objet <a href="#environment"><code>Environment</code></a>,
+installez vos extensions et les transmettre au précompilateur.</p>
 
-<p>An extension is a javascript object with at least two fields: <code>tags</code>
-and <code>parse</code>. Extensions basically register new tag names and take
-control of the parser when they are hit.</p>
+<p>Une extension est un objet javaScript avec au moins deux champs : <code>tags</code>
+et <code>parse</code>. Les extensions enregistrent de nouveaux noms de tags et prennent
+le contrôle de l&#39;analyseur quand ils sont utilisés.</p>
 
-<p><code>tags</code> is an array of tag names that the extension should handle.
-<code>parse</code> is the method that actually parses them when the template is
-compiled. Additionally, there is a special node type <code>CallExtension</code>
-that you can use to call any method on your extension at runtime. This
-is explained more below.</p>
+<p><code>tags</code> est un tableau de noms de tag gérés par l&#39;extension.
+<code>parse</code> est la méthode qui les analyse lorsque le template est
+compilé. De plus, il y a un type de nœud spécial : <code>CallExtension</code>
+qui vous permet d&#39;appeler n&#39;importe quelle méthode sur votre extension
+lors de l&#39;exécution. Ceci est expliqué plus bas.</p>
 
-<p>Because you have to interact directly with the parse API and construct
-ASTs manually, this is a bit cumbersome. It&#39;s necessary if you want to
-do really complex stuff, however. Here are a few key parser methods
-you&#39;ll want to use:</p>
+<p>Comme vous vous devez interagir directement avec la fonction parse de l&#39;API et construire
+les ASTs manuellement, c&#39;est un peu fastidieux. Malheureusement, c&#39;est nécessaire si vous voulez
+faire des choses vraiment complexe. Voici quelques méthodes de l&#39;analyseur
+que vous aurez besoin d&#39;utiliser :</p>
 
 <ul>
-<li><p><code>parseSignature([throwErrors], [noParens])</code> - Parse a list of
-arguments. By default it requires the parser to be pointing at the
-left opening parenthesis, and parses up the right one. However, for
-custom tags you shouldn&#39;t use parentheses, so passing <code>true</code> to the
-second argument tells it to parse a list of arguments up until the
-block end tag. A comma is required between arguments. Example: <code>{%
+<li><p><code>parseSignature([throwErrors], [noParens])</code> - Analyse une liste d&#39;arguments.
+Par défaut, cela oblige l&#39;analyseur à se positionner sur la gauche de la
+parenthèse ouvrante et d&#39;analyser jusqu&#39;à celle fermante. Toutefois, pour
+les tags personnalisées, vous ne devriez pas utiliser des parenthèses, donc en passant
+<code>true</code> au deuxième argument, cela indique qu&#39;il faut analyser une liste d&#39;arguments
+jusqu&#39;à la fin du bloc du tag. Une virgule est nécessaire entre les arguments. Exemple : <code>{%
 mytag foo, bar, baz=10 %}</code></p></li>
-<li><p><code>parseUntilBlocks(names)</code> - Parse content up until it hits a block
-with a name in the <code>names</code> array. This is useful for parsing content
-between tags.</p></li>
+<li><p><code>parseUntilBlocks(names)</code> - Analyse le contenu jusqu&#39;à ce qu&#39;il arrive à un bloc
+avec un nom dans le tableau <code>names</code>. Ceci est utile pour l&#39;analyse de contenu entre
+les tags.</p></li>
 </ul>
 
-<p>The parser API needs to be more documented, but for now read the above
-and check out the example below. You can also look at the
+<p>L&#39;API de l&#39;analyseur doit être plus documenté, mais pour l&#39;instant lisez ce qui précède
+et vérifiez l&#39;exemple ci-dessous. Vous pouvez également regarder le code
 <a href="https://github.com/mozilla/nunjucks/blob/master/src/parser.js">source</a>.</p>
 
-<p>The most common usage is to process the content within some tags at
-runtime. It&#39;s like filters, but on steroids because you aren&#39;t
-confined to a single expression. You basically want to lightly parse
-the template and then get a callback into your extension with the
-content. This is done with the <code>CallExtension</code> node, which takes an
-extension instance, the method to call, list of arguments parsed from
-the tag, and a list of content blocks (parsed with
+<p>L&#39;utilisation la plus courante consiste à traiter à l&#39;exécution le contenu
+de certains tags. C&#39;est comme les filtres, mais sous stéroïdes car vous ne vous
+limitez pas à une seule expression. La plupart du temps, vous souhaitez analyser
+légèrement le template, puis d&#39;obtenir un callback dans votre extension avec le
+contenu. Cela se fait avec le nœud <code>CallExtension</code>, qui prend une instance
+d&#39;extension, une méthode à appeler, une liste d&#39;arguments analysés
+dans le tag et une liste des blocs de contenu (analysée avec
 <code>parseUntilBlocks</code>).</p>
 
-<p>For example, here&#39;s how you would implement an extension that fetches
-content from a URL and injects it into the page:</p>
+<p>Par exemple, voici comment vous pourriez mettre en œuvre une extension qui récupère
+le contenu à partir d&#39;une URL et l&#39;injecte dans la page :</p>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="kd">function</span> <span class="nx">RemoteExtension</span><span class="p">()</span> <span class="p">{</span>
     <span class="k">this</span><span class="p">.</span><span class="nx">tags</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;remote&#39;</span><span class="p">];</span>
 
     <span class="k">this</span><span class="p">.</span><span class="nx">parse</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">parser</span><span class="p">,</span> <span class="nx">nodes</span><span class="p">,</span> <span class="nx">lexer</span><span class="p">)</span> <span class="p">{</span>
-        <span class="c1">// get the tag token</span>
+        <span class="c1">// récupère le marqueur du tag</span>
         <span class="kd">var</span> <span class="nx">tok</span> <span class="o">=</span> <span class="nx">parser</span><span class="p">.</span><span class="nx">nextToken</span><span class="p">();</span>
 
-        <span class="c1">// parse the args and move after the block end. passing true</span>
-        <span class="c1">// as the second arg is required if there are no parentheses</span>
+        <span class="c1">// analyse les arguments et se déplace après le bloc de fin. Passer à true</span>
+        <span class="c1">// le second argument est obligatoire s&#39;il n&#39;y a pas de parenthèses</span>
         <span class="kd">var</span> <span class="nx">args</span> <span class="o">=</span> <span class="nx">parser</span><span class="p">.</span><span class="nx">parseSignature</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
         <span class="nx">parser</span><span class="p">.</span><span class="nx">advanceAfterBlockEnd</span><span class="p">(</span><span class="nx">tok</span><span class="p">.</span><span class="nx">value</span><span class="p">);</span>
 
-        <span class="c1">// parse the body and possibly the error block, which is optional</span>
+        <span class="c1">// analyser le corps et éventuellement, le bloc error, qui est facultatif</span>
         <span class="kd">var</span> <span class="nx">body</span> <span class="o">=</span> <span class="nx">parser</span><span class="p">.</span><span class="nx">parseUntilBlocks</span><span class="p">(</span><span class="s1">&#39;error&#39;</span><span class="p">,</span> <span class="s1">&#39;endremote&#39;</span><span class="p">);</span>
         <span class="kd">var</span> <span class="nx">errorBody</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
 
@@ -1031,7 +1021,7 @@ content from a URL and injects it into the page:</p>
 
         <span class="nx">parser</span><span class="p">.</span><span class="nx">advanceAfterBlockEnd</span><span class="p">();</span>
 
-        <span class="c1">// See above for notes about CallExtension</span>
+        <span class="c1">// Voir ci-dessus pour des notes sur CallExtension</span>
         <span class="k">return</span> <span class="k">new</span> <span class="nx">nodes</span><span class="p">.</span><span class="nx">CallExtension</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="s1">&#39;run&#39;</span><span class="p">,</span> <span class="nx">args</span><span class="p">,</span> <span class="p">[</span><span class="nx">body</span><span class="p">,</span> <span class="nx">errorBody</span><span class="p">]);</span>
     <span class="p">};</span>
 
@@ -1060,27 +1050,27 @@ content from a URL and injects it into the page:</p>
 
 <span class="nx">env</span><span class="p">.</span><span class="nx">addExtension</span><span class="p">(</span><span class="s1">&#39;RemoteExtension&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">RemoteExtension</span><span class="p">());</span>
 </code></pre></div>
-<p>Use it like this:</p>
+<p>Utilisez-le ainsi :</p>
 <div class="highlight"><pre><code class="jinja language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">remote</span> <span class="s2">&quot;/stuff&quot;</span> <span class="cp">%}</span><span class="x"></span>
-<span class="x">  This content will be replaced with the content from /stuff</span>
+<span class="x">  Ce contenu sera remplacé par le contenu de /stuff</span>
 <span class="cp">{%</span> <span class="k">error</span> <span class="cp">%}</span><span class="x"></span>
-<span class="x">  There was an error fetching /stuff</span>
+<span class="x">  Il y avait une erreur récupération pour /stuff</span>
 <span class="cp">{%</span> <span class="k">endremote</span> <span class="cp">%}</span><span class="x"></span>
 </code></pre></div>
-<h3 id="asynchronous2">Asynchronous</h3>
+<h3 id="asynchrone2">Asynchrone</h3>
 
-<p>Another available node is <code>CallExtensionAsync</code> which is an
-asynchronous version of <code>CallExtension</code>. It calls back into your
-extension at runtime, with an additional parameter: a callback.
-Template rendering is paused until you call the callback to resume.</p>
+<p>Un autre nœud est disponible : <code>CallExtensionAsync</code> qui est une
+version asynchrone de <code>CallExtension</code>.  A l&#39;exécution, il appelle votre
+extension, avec un paramètre supplémentaire: un callback. Le rendu
+du template est &quot;suspendu&quot; jusqu&#39;à ce que le callback soit appelé.</p>
 
-<p>The <code>run</code> function from the above example would now look like:</p>
+<p>La fonction <code>run</code> de l&#39;exemple précédent ressemblerait à cela :</p>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="k">this</span><span class="p">.</span><span class="nx">run</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">context</span><span class="p">,</span> <span class="nx">url</span><span class="p">,</span> <span class="nx">body</span><span class="p">,</span> <span class="nx">errorBody</span><span class="p">,</span> <span class="nx">callback</span><span class="p">)</span> <span class="p">{</span>
-   <span class="c1">// do async stuff and then call callback(err, res)</span>
+   <span class="c1">// faire quelque chose d&#39;asynchrone et appeler callback(err, res)</span>
 <span class="p">};</span>
 </code></pre></div>
-<p>If you create anything interesting, make sure to
-<a href="https://github.com/mozilla/nunjucks/wiki/Custom-Tags">add it to the wiki!</a></p>
+<p>Si vous créez quelque chose d&#39;intéressant, veuillez l&#39;
+<a href="https://github.com/mozilla/nunjucks/wiki/Custom-Tags">ajouter au wiki !</a></p>
 
   </div>
 </div>

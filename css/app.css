@@ -153,6 +153,10 @@ nav a.logo, nav a.logo:visited, nav a.logo:active, nav a.logo:hover {
     margin-bottom: 1.5em;
 }
 
+.main ul ul {
+    margin: .5em 0;
+}
+
 .main {
     /* float: right; */
     /* width: 75%; */

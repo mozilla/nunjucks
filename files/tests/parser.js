@@ -22,9 +22,6 @@
 
         expect(node1.typename).to.be(node2.typename);
 
-        var children1 = (node1.children && node1.children.length) || 'null';
-        var children2 = (node2.children && node2.children.length) || 'null';
-
         if(node2 instanceof nodes.NodeList) {
             var lit = ': num-children: ';
             var sig2 = (node2.typename + lit + node2.children.length);
@@ -238,6 +235,17 @@
                       [nodes.Symbol, 'y']]]]]);
         });
 
+        it('should parse tilde', function(){
+            isAST(parser.parse('{{ 2 ~ 3 }}'),
+              [nodes.Root,
+               [nodes.Output,
+                [nodes.Concat,
+                  [nodes.Literal, 2],
+                  [nodes.Literal, 3]
+                ]]]
+              );
+        });
+
         it('should parse operators with correct precedence', function() {
             isAST(parser.parse('{{ x in y and z }}'),
                   [nodes.Root,
@@ -415,6 +423,42 @@
                     [nodes.TemplateData, 'hello {{ {% %} }}']]]);
         });
 
+        it('should parse raw with broken variables', function() {
+            isAST(parser.parse('{% raw %}{{ x }{% endraw %}'),
+                  [nodes.Root,
+                   [nodes.Output,
+                    [nodes.TemplateData, '{{ x }']]]);
+        });
+
+        it('should parse raw with broken blocks', function() {
+            isAST(parser.parse('{% raw %}{% if i_am_stupid }Still do your job well{% endraw %}'),
+                  [nodes.Root,
+                   [nodes.Output,
+                    [nodes.TemplateData, '{% if i_am_stupid }Still do your job well']]]);
+        });
+
+        it('should parse raw with pure text', function() {
+            isAST(parser.parse('{% raw %}abc{% endraw %}'),
+                  [nodes.Root,
+                   [nodes.Output,
+                    [nodes.TemplateData, 'abc']]]);
+        });
+
+
+        it('should parse raw with raw blocks', function() {
+            isAST(parser.parse('{% raw %}{% raw %}{{ x }{% endraw %}{% endraw %}'),
+                  [nodes.Root,
+                   [nodes.Output,
+                    [nodes.TemplateData, '{% raw %}{{ x }{% endraw %}']]]);
+        });
+
+        it('should parse raw with comment blocks', function() {
+          isAST(parser.parse('{% raw %}{# test {% endraw %}'),
+                  [nodes.Root,
+                   [nodes.Output,
+                    [nodes.TemplateData, '{# test ']]]);
+        });
+
         it('should parse keyword and non-keyword arguments', function() {
             isAST(parser.parse('{{ foo("bar", falalalala, baz="foobar") }}'),
                   [nodes.Root,
@@ -569,24 +613,26 @@
         it('should parse custom tags', function() {
 
             function testtagExtension() {
+                // jshint validthis: true
                 this.tags = ['testtag'];
 
                 /* normally this is automatically done by Environment */
                 this._name = 'testtagExtension';
 
                 this.parse = function(parser, nodes) {
-                    var begun = parser.peekToken();
+                    parser.peekToken();
                     parser.advanceAfterBlockEnd();
                     return new nodes.CallExtension(this, 'foo');
                 };
             }
 
             function testblocktagExtension() {
+                // jshint validthis: true
                 this.tags = ['testblocktag'];
                 this._name = 'testblocktagExtension';
 
                 this.parse = function(parser, nodes) {
-                    var begun = parser.peekToken();
+                    parser.peekToken();
                     parser.advanceAfterBlockEnd();
 
                     var content = parser.parseUntilBlocks('endtestblocktag');
@@ -598,10 +644,11 @@
             }
 
             function testargsExtension() {
+                // jshint validthis: true
                 this.tags = ['testargs'];
                 this._name = 'testargsExtension';
 
-                this.parse = function(parser, nodes, tokens) {
+                this.parse = function(parser, nodes) {
                     var begun = parser.peekToken();
                     var args = null;
 
