@@ -45,6 +45,9 @@ var FileSystemLoader = Loader.extend({
                     _this.emit('update', _this.pathsToNames[fullname]);
                 }
             });
+            watcher.on('error', function(error) {
+                console.log('Watcher error: ' + error);
+            });
         }
     },
 
