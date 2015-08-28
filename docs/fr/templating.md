@@ -348,7 +348,7 @@ Si `set` est utilisé au plus haut niveau, il modifie la valeur du contexte du t
 
 `extends` est utilisé pour définir l'héritage de template. Le template
 spécifié est utilisé comme template de base. Regardez [l'héritage
-de template](#l-hritage-de-template).
+de template](#l39hritage-de-template).
 
 ```jinja
 {% extends "base.html" %}
@@ -370,7 +370,7 @@ pouvez y passer n'importe quoi : `{% extends name + ".html" %}`.
 `block` définit une section dans le template et l'identifie par un
 nom. C'est utilisé par l'héritage de template. Les templates de base peuvent définir
 des blocs, ainsi des templates enfants peuvent les remplacer avec du nouveau contenu. Regardez
-[l'héritage de template](#l-hritage-de-template).
+[l'héritage de template](#l39hritage-de-template).
 
 ```jinja
 {% block css %}
@@ -526,7 +526,7 @@ Les arguments avec mots clefs ressemblent à ceci :
 foo(1, 2, { bar: 3, baz: 4})
 ```
 
-Puisqu'il s'agit d'une convention d'appel standard, ça marche pour toutes les fonctions et les filtres, s'ils sont écrits pour les gérer. [Lisez-en plus](api.html#arguments-avec-mots-clefs-par-dfaut) dans la section de l'API.
+Puisqu'il s'agit d'une convention d'appel standard, ça marche pour toutes les fonctions et les filtres, s'ils sont écrits pour les gérer. [Lisez-en plus](api.html#arguments-avec-mots-clefspar-dfaut) dans la section de l'API.
 
 Les macros vous permettent d'utiliser également des arguments avec mots clefs dans la définition, cela vous permet de définir des valeurs par défaut. Nunjucks fait correspondre automatiquement les arguments avec mots clefs à ceux définis dans la macro.
 

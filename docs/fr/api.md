@@ -484,7 +484,7 @@ le [support asynchrone](#support-asynchrone).
   des templates à l'intérieur des boucles `for`. Vous devez explicitement utiliser le
   tag `asyncEach` si vous avez besoin de charger des templates, c'est exactement le
   même que `for` mais asynchrone. Plus d'informations se trouvent dans
-  [Soyez prudent !](#soyez-prudent).
+  [Soyez prudent !](#soyez-prudent-).
 
 
 
@@ -655,7 +655,7 @@ du template est "suspendu" jusqu'à ce que le callback soit appelé.
 
 Les chargeurs de template peuvent ainsi être asynchrones, vous permettant de charger des
 templates à partir d'une base de données ou autres. Voir
-[Écriture d'un chargeur](#ecriture-d-un-chargeur). Si vous utilisez un chargeur de template
+[Écriture d'un chargeur](#criture-d39un-chargeur). Si vous utilisez un chargeur de template
 asynchrone, vous devez utiliser l'API asynchrone. Les chargeurs intégrés qui chargent depuis le
 système de fichiers et sur HTTP sont synchrones, ils n'ont pas de problème de performance, car
 ils sont mis en cache depuis le système de fichiers et vous devez précompiler vos templates et
