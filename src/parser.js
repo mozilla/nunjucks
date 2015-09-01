@@ -549,7 +549,8 @@ var Parser = Object.extend({
     },
 
     parseRaw: function() {
-        var blockRegex = /([\s\S]*){%\s*(.*?)\s*(?=%})%}/;
+        // Look for upcoming raw blocks (ignore all other kinds of blocks)
+        var rawBlockRegex = /([\s\S]*?){%\s*(raw|endraw)\s*(?=%})%}/;
         var rawLevel = 1;
         var str = '';
         var matches = null;
@@ -560,14 +561,13 @@ var Parser = Object.extend({
 
         // Exit when there's nothing to match
         // or when we've found the matching "endraw" block
-        while((matches = this.tokens._extractRegex(blockRegex)) && rawLevel > 0) {
+        while((matches = this.tokens._extractRegex(rawBlockRegex)) && rawLevel > 0) {
             var all = matches[0];
             var pre = matches[1];
             var blockName = matches[2];
 
             // Adjust rawlevel
             if(blockName === 'raw') {
-
                 rawLevel += 1;
             } else if(blockName === 'endraw') {
                 rawLevel -= 1;
