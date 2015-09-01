@@ -467,6 +467,18 @@
                    [nodes.Output, [nodes.TemplateData, '{{ var }}']]]);
         });
 
+        it('should parse multiline multiple raw blocks', function() {
+            isAST(parser.parse('\n{% raw %}{{ var }}{% endraw %}\n{{ var }}\n{% raw %}{{ var }}{% endraw %}\n'),
+                  [nodes.Root,
+                   [nodes.Output, [nodes.TemplateData, '\n']],
+                   [nodes.Output, [nodes.TemplateData, '{{ var }}']],
+                   [nodes.Output, [nodes.TemplateData, '\n']],
+                   [nodes.Output, [nodes.Symbol, 'var']],
+                   [nodes.Output, [nodes.TemplateData, '\n']],
+                   [nodes.Output, [nodes.TemplateData, '{{ var }}']],
+                   [nodes.Output, [nodes.TemplateData, '\n']]]);
+        });
+
         it('should parse keyword and non-keyword arguments', function() {
             isAST(parser.parse('{{ foo("bar", falalalala, baz="foobar") }}'),
                   [nodes.Root,
