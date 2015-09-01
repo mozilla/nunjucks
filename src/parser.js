@@ -549,7 +549,7 @@ var Parser = Object.extend({
     },
 
     parseRaw: function() {
-        var blockRegex = /([\s\S]*){%\s*(.*?)\s*(?=%})%}/;
+        var blockRegex = /([\s\S]*?){%\s*(.*?)\s*(?=%})%}/;
         var rawLevel = 1;
         var str = '';
         var matches = null;
@@ -567,7 +567,6 @@ var Parser = Object.extend({
 
             // Adjust rawlevel
             if(blockName === 'raw') {
-
                 rawLevel += 1;
             } else if(blockName === 'endraw') {
                 rawLevel -= 1;
