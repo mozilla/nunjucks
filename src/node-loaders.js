@@ -34,20 +34,19 @@ var FileSystemLoader = Loader.extend({
         }
 
         if(opts.watch) {
-            var _this = this;
             // Watch all the templates in the paths and fire an event when
             // they change
-            lib.each(_this.searchPaths, function(p) {
-                if(existsSync(p)) {
-                    var watcher = chokidar.watch(p);
-
-                    watcher.on('all', function(event, fullname) {
-                        fullname = path.resolve(fullname);
-                        if(event === 'change' && fullname in _this.pathsToNames) {
-                            _this.emit('update', _this.pathsToNames[fullname]);
-                        }
-                    });
+            var paths = this.searchPaths.filter(function(p) { return existsSync(p); });
+            var watcher = chokidar.watch(paths);
+            var _this = this;
+            watcher.on('all', function(event, fullname) {
+                fullname = path.resolve(fullname);
+                if(event === 'change' && fullname in _this.pathsToNames) {
+                    _this.emit('update', _this.pathsToNames[fullname]);
                 }
+            });
+            watcher.on('error', function(error) {
+                console.log('Watcher error: ' + error);
             });
         }
     },

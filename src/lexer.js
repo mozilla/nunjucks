@@ -3,7 +3,7 @@
 var lib = require('./lib');
 
 var whitespaceChars = ' \n\t\r\u00A0';
-var delimChars = '()[]{}%*-+/#,:|.<>=!';
+var delimChars = '()[]{}%*-+~/#,:|.<>=!';
 var intChars = '0123456789';
 
 var BLOCK_START = '{%';
@@ -30,6 +30,7 @@ var TOKEN_RIGHT_CURLY = 'right-curly';
 var TOKEN_OPERATOR = 'operator';
 var TOKEN_COMMA = 'comma';
 var TOKEN_COLON = 'colon';
+var TOKEN_TILDE = 'tilde';
 var TOKEN_PIPE = 'pipe';
 var TOKEN_INT = 'int';
 var TOKEN_FLOAT = 'float';
@@ -170,6 +171,7 @@ Tokenizer.prototype.nextToken = function() {
             case '}': type = TOKEN_RIGHT_CURLY; break;
             case ',': type = TOKEN_COMMA; break;
             case ':': type = TOKEN_COLON; break;
+            case '~': type = TOKEN_TILDE; break;
             case '|': type = TOKEN_PIPE; break;
             default: type = TOKEN_OPERATOR;
             }
@@ -389,6 +391,18 @@ Tokenizer.prototype._extractMatching = function (breakOnMatch, charString) {
     return '';
 };
 
+Tokenizer.prototype._extractRegex = function(regex) {
+    var matches = this.currentStr().match(regex);
+    if(!matches) {
+        return null;
+    }
+
+    // Move forward whatever was matched
+    this.forwardN(matches[0].length);
+
+    return matches;
+};
+
 Tokenizer.prototype.is_finished = function() {
     return this.index >= this.len;
 };
@@ -411,6 +425,12 @@ Tokenizer.prototype.forward = function() {
     }
 };
 
+Tokenizer.prototype.backN = function(n) {
+    for(var i=0; i<n; i++) {
+        this.back();
+    }
+};
+
 Tokenizer.prototype.back = function() {
     this.index--;
 
@@ -430,9 +450,18 @@ Tokenizer.prototype.back = function() {
     }
 };
 
+// current returns current character
 Tokenizer.prototype.current = function() {
     if(!this.is_finished()) {
         return this.str.charAt(this.index);
+    }
+    return '';
+};
+
+// currentStr returns what's left of the unparsed string
+Tokenizer.prototype.currentStr = function() {
+    if(!this.is_finished()) {
+        return this.str.substr(this.index);
     }
     return '';
 };
@@ -463,6 +492,7 @@ module.exports = {
     TOKEN_OPERATOR: TOKEN_OPERATOR,
     TOKEN_COMMA: TOKEN_COMMA,
     TOKEN_COLON: TOKEN_COLON,
+    TOKEN_TILDE: TOKEN_TILDE,
     TOKEN_PIPE: TOKEN_PIPE,
     TOKEN_INT: TOKEN_INT,
     TOKEN_FLOAT: TOKEN_FLOAT,

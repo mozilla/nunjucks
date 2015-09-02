@@ -44,6 +44,15 @@ exports.TemplateError = function(message, lineno, colno) {
     if (message instanceof Error) { // for casting regular js errors
         err = message;
         message = message.name + ': ' + message.message;
+
+        try {
+            if(err.name = '') {}
+        }
+        catch(e) {
+            // If we can't set the name of the error object in this
+            // environment, don't use it
+            err = this;
+        }
     } else {
         if(Error.captureStackTrace) {
             Error.captureStackTrace(err);

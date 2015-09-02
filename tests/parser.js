@@ -240,6 +240,17 @@
                       [nodes.Symbol, 'y']]]]]);
         });
 
+        it('should parse tilde', function(){
+            isAST(parser.parse('{{ 2 ~ 3 }}'),
+              [nodes.Root,
+               [nodes.Output,
+                [nodes.Concat,
+                  [nodes.Literal, 2],
+                  [nodes.Literal, 3]
+                ]]]
+              );
+        });
+
         it('should parse operators with correct precedence', function() {
             isAST(parser.parse('{{ x in y and z }}'),
                   [nodes.Root,
@@ -415,6 +426,62 @@
                   [nodes.Root,
                    [nodes.Output,
                     [nodes.TemplateData, 'hello {{ {% %} }}']]]);
+        });
+
+        it('should parse raw with broken variables', function() {
+            isAST(parser.parse('{% raw %}{{ x }{% endraw %}'),
+                  [nodes.Root,
+                   [nodes.Output,
+                    [nodes.TemplateData, '{{ x }']]]);
+        });
+
+        it('should parse raw with broken blocks', function() {
+            isAST(parser.parse('{% raw %}{% if i_am_stupid }Still do your job well{% endraw %}'),
+                  [nodes.Root,
+                   [nodes.Output,
+                    [nodes.TemplateData, '{% if i_am_stupid }Still do your job well']]]);
+        });
+
+        it('should parse raw with pure text', function() {
+            isAST(parser.parse('{% raw %}abc{% endraw %}'),
+                  [nodes.Root,
+                   [nodes.Output,
+                    [nodes.TemplateData, 'abc']]]);
+        });
+
+
+        it('should parse raw with raw blocks', function() {
+            isAST(parser.parse('{% raw %}{% raw %}{{ x }{% endraw %}{% endraw %}'),
+                  [nodes.Root,
+                   [nodes.Output,
+                    [nodes.TemplateData, '{% raw %}{{ x }{% endraw %}']]]);
+        });
+
+        it('should parse raw with comment blocks', function() {
+          isAST(parser.parse('{% raw %}{# test {% endraw %}'),
+                  [nodes.Root,
+                   [nodes.Output,
+                    [nodes.TemplateData, '{# test ']]]);
+        });
+
+        it('should parse multiple raw blocks', function() {
+            isAST(parser.parse('{% raw %}{{ var }}{% endraw %}{{ var }}{% raw %}{{ var }}{% endraw %}'),
+                  [nodes.Root,
+                   [nodes.Output, [nodes.TemplateData, '{{ var }}']],
+                   [nodes.Output, [nodes.Symbol, 'var']],
+                   [nodes.Output, [nodes.TemplateData, '{{ var }}']]]);
+        });
+
+        it('should parse multiline multiple raw blocks', function() {
+            isAST(parser.parse('\n{% raw %}{{ var }}{% endraw %}\n{{ var }}\n{% raw %}{{ var }}{% endraw %}\n'),
+                  [nodes.Root,
+                   [nodes.Output, [nodes.TemplateData, '\n']],
+                   [nodes.Output, [nodes.TemplateData, '{{ var }}']],
+                   [nodes.Output, [nodes.TemplateData, '\n']],
+                   [nodes.Output, [nodes.Symbol, 'var']],
+                   [nodes.Output, [nodes.TemplateData, '\n']],
+                   [nodes.Output, [nodes.TemplateData, '{{ var }}']],
+                   [nodes.Output, [nodes.TemplateData, '\n']]]);
         });
 
         it('should parse keyword and non-keyword arguments', function() {

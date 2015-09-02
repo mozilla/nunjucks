@@ -32,5 +32,29 @@
             var parent = env.getTemplate('fake.html');
             expect(parent.render()).to.be('Hello World');
         });
+
+        it('should catch loader error', function(done) {
+            // From Docs: http://mozilla.github.io/nunjucks/api.html#writing-a-loader
+            // We should be able to create a loader that only exposes getSource
+            function MyLoader() {
+                // configuration
+                this.async = true;
+            }
+
+            MyLoader.prototype.getSource = function(s, cb) {
+                setTimeout(function() {
+                    cb(new Error('test'));
+                }, 1);
+            };
+
+            var env = new Environment(new MyLoader(templatesPath));
+            env.getTemplate('fake.html', function(err, parent) {
+                expect(err).to.be.a(Error);
+                expect(parent).to.be(undefined);
+
+                done();
+            });
+
+        });
     });
 })();

@@ -179,9 +179,12 @@ var Environment = Obj.extend({
             var syncResult;
             var _this = this;
 
-            var createTemplate = function(info) {
-                if(!info) {
-                    var err = new Error('template not found: ' + name);
+            var createTemplate = function(err, info) {
+                if(!info && !err) {
+                    err = new Error('template not found: ' + name);
+                }
+
+                if (err) {
                     if(cb) {
                         cb(err);
                     }
@@ -207,10 +210,13 @@ var Environment = Obj.extend({
             };
 
             lib.asyncIter(this.loaders, function(loader, i, next, done) {
-                function handle(src) {
-                    if(src) {
+                function handle(err, src) {
+                    if(err) {
+                        done(err);
+                    }
+                    else if(src) {
                         src.loader = loader;
-                        done(src);
+                        done(null, src);
                     }
                     else {
                         next();
@@ -221,13 +227,10 @@ var Environment = Obj.extend({
                 name = that.resolveTemplate(loader, parentName, name);
 
                 if(loader.async) {
-                    loader.getSource(name, function(err, src) {
-                        if(err) { throw err; }
-                        handle(src);
-                    });
+                    loader.getSource(name, handle);
                 }
                 else {
-                    handle(loader.getSource(name));
+                    handle(null, loader.getSource(name));
                 }
             }, createTemplate);
 

@@ -124,6 +124,8 @@ var Parser = Object.extend({
         else {
             this.fail('expected block end in ' + name + ' statement');
         }
+
+        return tok;
     },
 
     advanceAfterVariableEnd: function() {
@@ -547,60 +549,46 @@ var Parser = Object.extend({
     },
 
     parseRaw: function() {
-        this.advanceAfterBlockEnd();
+        // Look for upcoming raw blocks (ignore all other kinds of blocks)
+        var rawBlockRegex = /([\s\S]*?){%\s*(raw|endraw)\s*(?=%})%}/;
+        var rawLevel = 1;
         var str = '';
-        var begun = this.peekToken();
+        var matches = null;
 
-        while(1) {
-            // Passing true gives us all the whitespace tokens as
-            // well, which are usually ignored.
-            var tok = this.nextToken(true);
+        // Skip opening raw token
+        // Keep this token to track line and column numbers
+        var begun = this.advanceAfterBlockEnd();
 
-            if(!tok) {
-                this.fail('expected endraw, got end of file');
+        // Exit when there's nothing to match
+        // or when we've found the matching "endraw" block
+        while((matches = this.tokens._extractRegex(rawBlockRegex)) && rawLevel > 0) {
+            var all = matches[0];
+            var pre = matches[1];
+            var blockName = matches[2];
+
+            // Adjust rawlevel
+            if(blockName === 'raw') {
+                rawLevel += 1;
+            } else if(blockName === 'endraw') {
+                rawLevel -= 1;
             }
 
-            if(tok.type === lexer.TOKEN_BLOCK_START) {
-                // We need to look for the `endraw` block statement,
-                // which involves a lookahead so carefully keep track
-                // of whitespace
-                var ws = null;
-                var name = this.nextToken(true);
-
-                if(name.type === lexer.TOKEN_WHITESPACE) {
-                    ws = name;
-                    name = this.nextToken();
-                }
-
-                if(name.type === lexer.TOKEN_SYMBOL &&
-                   name.value === 'endraw') {
-                    this.advanceAfterBlockEnd(name.value);
-                    break;
-                }
-                else {
-                    str += tok.value;
-                    if(ws) {
-                        str += ws.value;
-                    }
-                    str += name.value;
-                }
-            }
-            else if(tok.type === lexer.TOKEN_STRING) {
-                str += '"' + tok.value + '"';
-            }
-            else {
-                str += tok.value;
+            // Add to str
+            if(rawLevel === 0) {
+                // We want to exclude the last "endraw"
+                str += pre;
+                // Move tokenizer to beginning of endraw block
+                this.tokens.backN(all.length - pre.length);
+            } else {
+                str += all;
             }
         }
 
-
-        var output = new nodes.Output(
+        return new nodes.Output(
             begun.lineno,
             begun.colno,
             [new nodes.TemplateData(begun.lineno, begun.colno, str)]
         );
-
-        return output;
     },
 
     parsePostfix: function(node) {
@@ -747,7 +735,7 @@ var Parser = Object.extend({
 
     parseCompare: function() {
         var compareOps = ['==', '!=', '<', '>', '<=', '>='];
-        var expr = this.parseAdd();
+        var expr = this.parseConcat();
         var ops = [];
 
         while(1) {
@@ -759,7 +747,7 @@ var Parser = Object.extend({
             else if(lib.indexOf(compareOps, tok.value) !== -1) {
                 ops.push(new nodes.CompareOperand(tok.lineno,
                                                   tok.colno,
-                                                  this.parseAdd(),
+                                                  this.parseConcat(),
                                                   tok.value));
             }
             else {
@@ -777,6 +765,19 @@ var Parser = Object.extend({
         else {
             return expr;
         }
+    },
+
+    // finds the '~' for string concatenation
+    parseConcat: function(){
+        var node = this.parseAdd();
+        while(this.skipValue(lexer.TOKEN_TILDE, '~')) {
+            var node2 = this.parseAdd();
+            node = new nodes.Concat(node.lineno,
+                                 node.colno,
+                                 node,
+                                 node2);
+        }
+        return node;
     },
 
     parseAdd: function() {

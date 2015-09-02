@@ -1,4 +1,4 @@
-/*! Browser bundle of nunjucks 1.3.5-unreleased  */
+/*! Browser bundle of nunjucks 2.0.0  */
 var nunjucks =
 /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
@@ -50,9 +50,9 @@ var nunjucks =
 
 	var lib = __webpack_require__(1);
 	var env = __webpack_require__(2);
-	var Loader = __webpack_require__(3);
-	var loaders = __webpack_require__(4);
-	var precompile = __webpack_require__(14);
+	var Loader = __webpack_require__(15);
+	var loaders = __webpack_require__(14);
+	var precompile = __webpack_require__(3);
 
 	module.exports = {};
 	module.exports.Environment = env.Environment;
@@ -63,13 +63,13 @@ var nunjucks =
 	module.exports.PrecompiledLoader = loaders.PrecompiledLoader;
 	module.exports.WebLoader = loaders.WebLoader;
 
-	module.exports.compiler = __webpack_require__(5);
-	module.exports.parser = __webpack_require__(6);
-	module.exports.lexer = __webpack_require__(7);
-	module.exports.runtime = __webpack_require__(8);
+	module.exports.compiler = __webpack_require__(7);
+	module.exports.parser = __webpack_require__(8);
+	module.exports.lexer = __webpack_require__(9);
+	module.exports.runtime = __webpack_require__(12);
 	module.exports.lib = lib;
 
-	module.exports.installJinjaCompat = __webpack_require__(9);
+	module.exports.installJinjaCompat = __webpack_require__(18);
 
 	// A single instance of an environment, since this is so commonly used
 
@@ -135,7 +135,7 @@ var nunjucks =
 
 /***/ },
 /* 1 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ function(module, exports) {
 
 	'use strict';
 
@@ -422,21 +422,21 @@ var nunjucks =
 
 	'use strict';
 
-	var path = __webpack_require__(14);
-	var asap = __webpack_require__(17);
+	var path = __webpack_require__(3);
+	var asap = __webpack_require__(4);
 	var lib = __webpack_require__(1);
-	var Obj = __webpack_require__(10);
-	var compiler = __webpack_require__(5);
-	var builtin_filters = __webpack_require__(11);
-	var builtin_loaders = __webpack_require__(4);
-	var runtime = __webpack_require__(8);
-	var globals = __webpack_require__(12);
+	var Obj = __webpack_require__(6);
+	var compiler = __webpack_require__(7);
+	var builtin_filters = __webpack_require__(13);
+	var builtin_loaders = __webpack_require__(14);
+	var runtime = __webpack_require__(12);
+	var globals = __webpack_require__(17);
 	var Frame = runtime.Frame;
 	var Template;
 
 	// Unconditionally load in this loader, even if no other ones are
 	// included (possible in the slim browser build)
-	builtin_loaders.PrecompiledLoader = __webpack_require__(13);
+	builtin_loaders.PrecompiledLoader = __webpack_require__(16);
 
 	// If the user is using the async API, *always* call it
 	// asynchronously even if the template was synchronous.
@@ -527,6 +527,13 @@ var nunjucks =
 
 	    addGlobal: function(name, value) {
 	        globals[name] = value;
+	    },
+
+	    getGlobal: function(name) {
+	        if(!globals[name]) {
+	            throw new Error('global not found: ' + name);
+	        }
+	        return globals[name];
 	    },
 
 	    addFilter: function(name, func, async) {
@@ -964,152 +971,392 @@ var nunjucks =
 
 /***/ },
 /* 3 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ function(module, exports) {
 
-	'use strict';
-
-	var path = __webpack_require__(14);
-	var Obj = __webpack_require__(10);
-	var lib = __webpack_require__(1);
-
-	var Loader = Obj.extend({
-	    on: function(name, func) {
-	        this.listeners = this.listeners || {};
-	        this.listeners[name] = this.listeners[name] || [];
-	        this.listeners[name].push(func);
-	    },
-
-	    emit: function(name /*, arg1, arg2, ...*/) {
-	        var args = Array.prototype.slice.call(arguments, 1);
-
-	        if(this.listeners && this.listeners[name]) {
-	            lib.each(this.listeners[name], function(listener) {
-	                listener.apply(null, args);
-	            });
-	        }
-	    },
-
-	    resolve: function(from, to) {
-	        return path.resolve(path.dirname(from), to);
-	    },
-
-	    isRelative: function(filename) {
-	        return (filename.indexOf('./') === 0 || filename.indexOf('../') === 0);
-	    }
-	});
-
-	module.exports = Loader;
-
+	
 
 /***/ },
 /* 4 */
 /***/ function(module, exports, __webpack_require__) {
 
-	'use strict';
+	"use strict";
 
-	var Loader = __webpack_require__(3);
-	var PrecompiledLoader = __webpack_require__(13);
+	// rawAsap provides everything we need except exception management.
+	var rawAsap = __webpack_require__(5);
+	// RawTasks are recycled to reduce GC churn.
+	var freeTasks = [];
+	// We queue errors to ensure they are thrown in right order (FIFO).
+	// Array-as-queue is good enough here, since we are just dealing with exceptions.
+	var pendingErrors = [];
+	var requestErrorThrow = rawAsap.makeRequestCallFromTimer(throwFirstError);
 
-	var WebLoader = Loader.extend({
-	    init: function(baseURL, opts) {
-	        this.baseURL = baseURL || '';
-
-	        // By default, the cache is turned off because there's no way
-	        // to "watch" templates over HTTP, so they are re-downloaded
-	        // and compiled each time. (Remember, PRECOMPILE YOUR
-	        // TEMPLATES in production!)
-	        this.useCache = opts.useCache;
-
-	        // We default `async` to false so that the simple synchronous
-	        // API can be used when you aren't doing anything async in
-	        // your templates (which is most of the time). This performs a
-	        // sync ajax request, but that's ok because it should *only*
-	        // happen in development. PRECOMPILE YOUR TEMPLATES.
-	        this.async = opts.async;
-	    },
-
-	    resolve: function(from, to) { // jshint ignore:line
-	        throw new Error('relative templates not support in the browser yet');
-	    },
-
-	    getSource: function(name, cb) {
-	        var useCache = this.useCache;
-	        var result;
-	        this.fetch(this.baseURL + '/' + name, function(err, src) {
-	            if(err) {
-	                if(!cb) {
-	                    throw err;
-	                }
-	                cb(err);
-	            }
-	            else {
-	                result = { src: src,
-	                           path: name,
-	                           noCache: !useCache };
-	                if(cb) {
-	                    cb(null, result);
-	                }
-	            }
-	        });
-
-	        // if this WebLoader isn't running asynchronously, the
-	        // fetch above would actually run sync and we'll have a
-	        // result here
-	        return result;
-	    },
-
-	    fetch: function(url, cb) {
-	        // Only in the browser please
-	        var ajax;
-	        var loading = true;
-
-	        if(window.XMLHttpRequest) { // Mozilla, Safari, ...
-	            ajax = new XMLHttpRequest();
-	        }
-	        else if(window.ActiveXObject) { // IE 8 and older
-	            /* global ActiveXObject */
-	            ajax = new ActiveXObject('Microsoft.XMLHTTP');
-	        }
-
-	        ajax.onreadystatechange = function() {
-	            if(ajax.readyState === 4 && loading) {
-	                loading = false;
-	                if(ajax.status === 0 || ajax.status === 200) {
-	                    cb(null, ajax.responseText);
-	                }
-	                else {
-	                    cb(ajax.responseText);
-	                }
-	            }
-	        };
-
-	        url += (url.indexOf('?') === -1 ? '?' : '&') + 's=' +
-	               (new Date().getTime());
-
-	        ajax.open('GET', url, this.async);
-	        ajax.send();
+	function throwFirstError() {
+	    if (pendingErrors.length) {
+	        throw pendingErrors.shift();
 	    }
-	});
+	}
 
-	module.exports = {
-	    WebLoader: WebLoader,
-	    PrecompiledLoader: PrecompiledLoader
+	/**
+	 * Calls a task as soon as possible after returning, in its own event, with priority
+	 * over other events like animation, reflow, and repaint. An error thrown from an
+	 * event will not interrupt, nor even substantially slow down the processing of
+	 * other events, but will be rather postponed to a lower priority event.
+	 * @param {{call}} task A callable object, typically a function that takes no
+	 * arguments.
+	 */
+	module.exports = asap;
+	function asap(task) {
+	    var rawTask;
+	    if (freeTasks.length) {
+	        rawTask = freeTasks.pop();
+	    } else {
+	        rawTask = new RawTask();
+	    }
+	    rawTask.task = task;
+	    rawAsap(rawTask);
+	}
+
+	// We wrap tasks with recyclable task objects.  A task object implements
+	// `call`, just like a function.
+	function RawTask() {
+	    this.task = null;
+	}
+
+	// The sole purpose of wrapping the task is to catch the exception and recycle
+	// the task object after its single use.
+	RawTask.prototype.call = function () {
+	    try {
+	        this.task.call();
+	    } catch (error) {
+	        if (asap.onerror) {
+	            // This hook exists purely for testing purposes.
+	            // Its name will be periodically randomized to break any code that
+	            // depends on its existence.
+	            asap.onerror(error);
+	        } else {
+	            // In a web browser, exceptions are not fatal. However, to avoid
+	            // slowing down the queue of pending tasks, we rethrow the error in a
+	            // lower priority turn.
+	            pendingErrors.push(error);
+	            requestErrorThrow();
+	        }
+	    } finally {
+	        this.task = null;
+	        freeTasks[freeTasks.length] = this;
+	    }
 	};
 
 
 /***/ },
 /* 5 */
+/***/ function(module, exports) {
+
+	/* WEBPACK VAR INJECTION */(function(global) {"use strict";
+
+	// Use the fastest means possible to execute a task in its own turn, with
+	// priority over other events including IO, animation, reflow, and redraw
+	// events in browsers.
+	//
+	// An exception thrown by a task will permanently interrupt the processing of
+	// subsequent tasks. The higher level `asap` function ensures that if an
+	// exception is thrown by a task, that the task queue will continue flushing as
+	// soon as possible, but if you use `rawAsap` directly, you are responsible to
+	// either ensure that no exceptions are thrown from your task, or to manually
+	// call `rawAsap.requestFlush` if an exception is thrown.
+	module.exports = rawAsap;
+	function rawAsap(task) {
+	    if (!queue.length) {
+	        requestFlush();
+	        flushing = true;
+	    }
+	    // Equivalent to push, but avoids a function call.
+	    queue[queue.length] = task;
+	}
+
+	var queue = [];
+	// Once a flush has been requested, no further calls to `requestFlush` are
+	// necessary until the next `flush` completes.
+	var flushing = false;
+	// `requestFlush` is an implementation-specific method that attempts to kick
+	// off a `flush` event as quickly as possible. `flush` will attempt to exhaust
+	// the event queue before yielding to the browser's own event loop.
+	var requestFlush;
+	// The position of the next task to execute in the task queue. This is
+	// preserved between calls to `flush` so that it can be resumed if
+	// a task throws an exception.
+	var index = 0;
+	// If a task schedules additional tasks recursively, the task queue can grow
+	// unbounded. To prevent memory exhaustion, the task queue will periodically
+	// truncate already-completed tasks.
+	var capacity = 1024;
+
+	// The flush function processes all tasks that have been scheduled with
+	// `rawAsap` unless and until one of those tasks throws an exception.
+	// If a task throws an exception, `flush` ensures that its state will remain
+	// consistent and will resume where it left off when called again.
+	// However, `flush` does not make any arrangements to be called again if an
+	// exception is thrown.
+	function flush() {
+	    while (index < queue.length) {
+	        var currentIndex = index;
+	        // Advance the index before calling the task. This ensures that we will
+	        // begin flushing on the next task the task throws an error.
+	        index = index + 1;
+	        queue[currentIndex].call();
+	        // Prevent leaking memory for long chains of recursive calls to `asap`.
+	        // If we call `asap` within tasks scheduled by `asap`, the queue will
+	        // grow, but to avoid an O(n) walk for every task we execute, we don't
+	        // shift tasks off the queue after they have been executed.
+	        // Instead, we periodically shift 1024 tasks off the queue.
+	        if (index > capacity) {
+	            // Manually shift all values starting at the index back to the
+	            // beginning of the queue.
+	            for (var scan = 0, newLength = queue.length - index; scan < newLength; scan++) {
+	                queue[scan] = queue[scan + index];
+	            }
+	            queue.length -= index;
+	            index = 0;
+	        }
+	    }
+	    queue.length = 0;
+	    index = 0;
+	    flushing = false;
+	}
+
+	// `requestFlush` is implemented using a strategy based on data collected from
+	// every available SauceLabs Selenium web driver worker at time of writing.
+	// https://docs.google.com/spreadsheets/d/1mG-5UYGup5qxGdEMWkhP6BWCz053NUb2E1QoUTU16uA/edit#gid=783724593
+
+	// Safari 6 and 6.1 for desktop, iPad, and iPhone are the only browsers that
+	// have WebKitMutationObserver but not un-prefixed MutationObserver.
+	// Must use `global` instead of `window` to work in both frames and web
+	// workers. `global` is a provision of Browserify, Mr, Mrs, or Mop.
+	var BrowserMutationObserver = global.MutationObserver || global.WebKitMutationObserver;
+
+	// MutationObservers are desirable because they have high priority and work
+	// reliably everywhere they are implemented.
+	// They are implemented in all modern browsers.
+	//
+	// - Android 4-4.3
+	// - Chrome 26-34
+	// - Firefox 14-29
+	// - Internet Explorer 11
+	// - iPad Safari 6-7.1
+	// - iPhone Safari 7-7.1
+	// - Safari 6-7
+	if (typeof BrowserMutationObserver === "function") {
+	    requestFlush = makeRequestCallFromMutationObserver(flush);
+
+	// MessageChannels are desirable because they give direct access to the HTML
+	// task queue, are implemented in Internet Explorer 10, Safari 5.0-1, and Opera
+	// 11-12, and in web workers in many engines.
+	// Although message channels yield to any queued rendering and IO tasks, they
+	// would be better than imposing the 4ms delay of timers.
+	// However, they do not work reliably in Internet Explorer or Safari.
+
+	// Internet Explorer 10 is the only browser that has setImmediate but does
+	// not have MutationObservers.
+	// Although setImmediate yields to the browser's renderer, it would be
+	// preferrable to falling back to setTimeout since it does not have
+	// the minimum 4ms penalty.
+	// Unfortunately there appears to be a bug in Internet Explorer 10 Mobile (and
+	// Desktop to a lesser extent) that renders both setImmediate and
+	// MessageChannel useless for the purposes of ASAP.
+	// https://github.com/kriskowal/q/issues/396
+
+	// Timers are implemented universally.
+	// We fall back to timers in workers in most engines, and in foreground
+	// contexts in the following browsers.
+	// However, note that even this simple case requires nuances to operate in a
+	// broad spectrum of browsers.
+	//
+	// - Firefox 3-13
+	// - Internet Explorer 6-9
+	// - iPad Safari 4.3
+	// - Lynx 2.8.7
+	} else {
+	    requestFlush = makeRequestCallFromTimer(flush);
+	}
+
+	// `requestFlush` requests that the high priority event queue be flushed as
+	// soon as possible.
+	// This is useful to prevent an error thrown in a task from stalling the event
+	// queue if the exception handled by Node.js’s
+	// `process.on("uncaughtException")` or by a domain.
+	rawAsap.requestFlush = requestFlush;
+
+	// To request a high priority event, we induce a mutation observer by toggling
+	// the text of a text node between "1" and "-1".
+	function makeRequestCallFromMutationObserver(callback) {
+	    var toggle = 1;
+	    var observer = new BrowserMutationObserver(callback);
+	    var node = document.createTextNode("");
+	    observer.observe(node, {characterData: true});
+	    return function requestCall() {
+	        toggle = -toggle;
+	        node.data = toggle;
+	    };
+	}
+
+	// The message channel technique was discovered by Malte Ubl and was the
+	// original foundation for this library.
+	// http://www.nonblocking.io/2011/06/windownexttick.html
+
+	// Safari 6.0.5 (at least) intermittently fails to create message ports on a
+	// page's first load. Thankfully, this version of Safari supports
+	// MutationObservers, so we don't need to fall back in that case.
+
+	// function makeRequestCallFromMessageChannel(callback) {
+	//     var channel = new MessageChannel();
+	//     channel.port1.onmessage = callback;
+	//     return function requestCall() {
+	//         channel.port2.postMessage(0);
+	//     };
+	// }
+
+	// For reasons explained above, we are also unable to use `setImmediate`
+	// under any circumstances.
+	// Even if we were, there is another bug in Internet Explorer 10.
+	// It is not sufficient to assign `setImmediate` to `requestFlush` because
+	// `setImmediate` must be called *by name* and therefore must be wrapped in a
+	// closure.
+	// Never forget.
+
+	// function makeRequestCallFromSetImmediate(callback) {
+	//     return function requestCall() {
+	//         setImmediate(callback);
+	//     };
+	// }
+
+	// Safari 6.0 has a problem where timers will get lost while the user is
+	// scrolling. This problem does not impact ASAP because Safari 6.0 supports
+	// mutation observers, so that implementation is used instead.
+	// However, if we ever elect to use timers in Safari, the prevalent work-around
+	// is to add a scroll event listener that calls for a flush.
+
+	// `setTimeout` does not call the passed callback if the delay is less than
+	// approximately 7 in web workers in Firefox 8 through 18, and sometimes not
+	// even then.
+
+	function makeRequestCallFromTimer(callback) {
+	    return function requestCall() {
+	        // We dispatch a timeout with a specified delay of 0 for engines that
+	        // can reliably accommodate that request. This will usually be snapped
+	        // to a 4 milisecond delay, but once we're flushing, there's no delay
+	        // between events.
+	        var timeoutHandle = setTimeout(handleTimer, 0);
+	        // However, since this timer gets frequently dropped in Firefox
+	        // workers, we enlist an interval handle that will try to fire
+	        // an event 20 times per second until it succeeds.
+	        var intervalHandle = setInterval(handleTimer, 50);
+
+	        function handleTimer() {
+	            // Whichever timer succeeds will cancel both timers and
+	            // execute the callback.
+	            clearTimeout(timeoutHandle);
+	            clearInterval(intervalHandle);
+	            callback();
+	        }
+	    };
+	}
+
+	// This is for `asap.js` only.
+	// Its name will be periodically randomized to break any code that depends on
+	// its existence.
+	rawAsap.makeRequestCallFromTimer = makeRequestCallFromTimer;
+
+	// ASAP was originally a nextTick shim included in Q. This was factored out
+	// into this ASAP package. It was later adapted to RSVP which made further
+	// amendments. These decisions, particularly to marginalize MessageChannel and
+	// to capture the MutationObserver implementation in a closure, were integrated
+	// back into ASAP proper.
+	// https://github.com/tildeio/rsvp.js/blob/cddf7232546a9cf858524b75cde6f9edf72620a7/lib/rsvp/asap.js
+
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
+
+/***/ },
+/* 6 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	// A simple class system, more documentation to come
+
+	function extend(cls, name, props) {
+	    // This does that same thing as Object.create, but with support for IE8
+	    var F = function() {};
+	    F.prototype = cls.prototype;
+	    var prototype = new F();
+
+	    // jshint undef: false
+	    var fnTest = /xyz/.test(function(){ xyz; }) ? /\bparent\b/ : /.*/;
+	    props = props || {};
+
+	    for(var k in props) {
+	        var src = props[k];
+	        var parent = prototype[k];
+
+	        if(typeof parent === 'function' &&
+	           typeof src === 'function' &&
+	           fnTest.test(src)) {
+	            /*jshint -W083 */
+	            prototype[k] = (function (src, parent) {
+	                return function() {
+	                    // Save the current parent method
+	                    var tmp = this.parent;
+
+	                    // Set parent to the previous method, call, and restore
+	                    this.parent = parent;
+	                    var res = src.apply(this, arguments);
+	                    this.parent = tmp;
+
+	                    return res;
+	                };
+	            })(src, parent);
+	        }
+	        else {
+	            prototype[k] = src;
+	        }
+	    }
+
+	    prototype.typename = name;
+
+	    var new_cls = function() {
+	        if(prototype.init) {
+	            prototype.init.apply(this, arguments);
+	        }
+	    };
+
+	    new_cls.prototype = prototype;
+	    new_cls.prototype.constructor = new_cls;
+
+	    new_cls.extend = function(name, props) {
+	        if(typeof name === 'object') {
+	            props = name;
+	            name = 'anonymous';
+	        }
+	        return extend(new_cls, name, props);
+	    };
+
+	    return new_cls;
+	}
+
+	module.exports = extend(Object, 'Object', {});
+
+
+/***/ },
+/* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	var lib = __webpack_require__(1);
-	var parser = __webpack_require__(6);
-	var transformer = __webpack_require__(15);
-	var nodes = __webpack_require__(16);
+	var parser = __webpack_require__(8);
+	var transformer = __webpack_require__(11);
+	var nodes = __webpack_require__(10);
 	// jshint -W079
-	var Object = __webpack_require__(10);
-	var Frame = __webpack_require__(8).Frame;
+	var Object = __webpack_require__(6);
+	var Frame = __webpack_require__(12).Frame;
 
 	// These are all the same for now, but shouldn't be passed straight
 	// through
@@ -1278,6 +1525,7 @@ var nunjucks =
 	            nodes.Or,
 	            nodes.Not,
 	            nodes.Add,
+	            nodes.Concat,
 	            nodes.Sub,
 	            nodes.Mul,
 	            nodes.Div,
@@ -1473,6 +1721,9 @@ var nunjucks =
 	    compileOr: binOpEmitter(' || '),
 	    compileAnd: binOpEmitter(' && '),
 	    compileAdd: binOpEmitter(' + '),
+	    // ensure concatenation instead of addition
+	    // by adding empty string in between
+	    compileConcat: binOpEmitter(' + "" + '),
 	    compileSub: binOpEmitter(' - '),
 	    compileMul: binOpEmitter(' * '),
 	    compileDiv: binOpEmitter(' / '),
@@ -2253,15 +2504,15 @@ var nunjucks =
 
 
 /***/ },
-/* 6 */
+/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var lexer = __webpack_require__(7);
-	var nodes = __webpack_require__(16);
+	var lexer = __webpack_require__(9);
+	var nodes = __webpack_require__(10);
 	// jshint -W079
-	var Object = __webpack_require__(10);
+	var Object = __webpack_require__(6);
 	var lib = __webpack_require__(1);
 
 	var Parser = Object.extend({
@@ -2382,6 +2633,8 @@ var nunjucks =
 	        else {
 	            this.fail('expected block end in ' + name + ' statement');
 	        }
+
+	        return tok;
 	    },
 
 	    advanceAfterVariableEnd: function() {
@@ -2805,60 +3058,46 @@ var nunjucks =
 	    },
 
 	    parseRaw: function() {
-	        this.advanceAfterBlockEnd();
+	        var blockRegex = /([\s\S]*){%\s*(.*?)\s*(?=%})%}/;
+	        var rawLevel = 1;
 	        var str = '';
-	        var begun = this.peekToken();
+	        var matches = null;
 
-	        while(1) {
-	            // Passing true gives us all the whitespace tokens as
-	            // well, which are usually ignored.
-	            var tok = this.nextToken(true);
+	        // Skip opening raw token
+	        // Keep this token to track line and column numbers
+	        var begun = this.advanceAfterBlockEnd();
 
-	            if(!tok) {
-	                this.fail('expected endraw, got end of file');
+	        // Exit when there's nothing to match
+	        // or when we've found the matching "endraw" block
+	        while((matches = this.tokens._extractRegex(blockRegex)) && rawLevel > 0) {
+	            var all = matches[0];
+	            var pre = matches[1];
+	            var blockName = matches[2];
+
+	            // Adjust rawlevel
+	            if(blockName === 'raw') {
+
+	                rawLevel += 1;
+	            } else if(blockName === 'endraw') {
+	                rawLevel -= 1;
 	            }
 
-	            if(tok.type === lexer.TOKEN_BLOCK_START) {
-	                // We need to look for the `endraw` block statement,
-	                // which involves a lookahead so carefully keep track
-	                // of whitespace
-	                var ws = null;
-	                var name = this.nextToken(true);
-
-	                if(name.type === lexer.TOKEN_WHITESPACE) {
-	                    ws = name;
-	                    name = this.nextToken();
-	                }
-
-	                if(name.type === lexer.TOKEN_SYMBOL &&
-	                   name.value === 'endraw') {
-	                    this.advanceAfterBlockEnd(name.value);
-	                    break;
-	                }
-	                else {
-	                    str += tok.value;
-	                    if(ws) {
-	                        str += ws.value;
-	                    }
-	                    str += name.value;
-	                }
-	            }
-	            else if(tok.type === lexer.TOKEN_STRING) {
-	                str += '"' + tok.value + '"';
-	            }
-	            else {
-	                str += tok.value;
+	            // Add to str
+	            if(rawLevel === 0) {
+	                // We want to exclude the last "endraw"
+	                str += pre;
+	                // Move tokenizer to beginning of endraw block
+	                this.tokens.backN(all.length - pre.length);
+	            } else {
+	                str += all;
 	            }
 	        }
 
-
-	        var output = new nodes.Output(
+	        return new nodes.Output(
 	            begun.lineno,
 	            begun.colno,
 	            [new nodes.TemplateData(begun.lineno, begun.colno, str)]
 	        );
-
-	        return output;
 	    },
 
 	    parsePostfix: function(node) {
@@ -3005,7 +3244,7 @@ var nunjucks =
 
 	    parseCompare: function() {
 	        var compareOps = ['==', '!=', '<', '>', '<=', '>='];
-	        var expr = this.parseAdd();
+	        var expr = this.parseConcat();
 	        var ops = [];
 
 	        while(1) {
@@ -3017,7 +3256,7 @@ var nunjucks =
 	            else if(lib.indexOf(compareOps, tok.value) !== -1) {
 	                ops.push(new nodes.CompareOperand(tok.lineno,
 	                                                  tok.colno,
-	                                                  this.parseAdd(),
+	                                                  this.parseConcat(),
 	                                                  tok.value));
 	            }
 	            else {
@@ -3035,6 +3274,19 @@ var nunjucks =
 	        else {
 	            return expr;
 	        }
+	    },
+
+	    // finds the '~' for string concatenation
+	    parseConcat: function(){
+	        var node = this.parseAdd();
+	        while(this.skipValue(lexer.TOKEN_TILDE, '~')) {
+	            var node2 = this.parseAdd();
+	            node = new nodes.Concat(node.lineno,
+	                                 node.colno,
+	                                 node,
+	                                 node2);
+	        }
+	        return node;
 	    },
 
 	    parseAdd: function() {
@@ -3501,7 +3753,7 @@ var nunjucks =
 
 
 /***/ },
-/* 7 */
+/* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -3509,7 +3761,7 @@ var nunjucks =
 	var lib = __webpack_require__(1);
 
 	var whitespaceChars = ' \n\t\r\u00A0';
-	var delimChars = '()[]{}%*-+/#,:|.<>=!';
+	var delimChars = '()[]{}%*-+~/#,:|.<>=!';
 	var intChars = '0123456789';
 
 	var BLOCK_START = '{%';
@@ -3536,6 +3788,7 @@ var nunjucks =
 	var TOKEN_OPERATOR = 'operator';
 	var TOKEN_COMMA = 'comma';
 	var TOKEN_COLON = 'colon';
+	var TOKEN_TILDE = 'tilde';
 	var TOKEN_PIPE = 'pipe';
 	var TOKEN_INT = 'int';
 	var TOKEN_FLOAT = 'float';
@@ -3675,6 +3928,7 @@ var nunjucks =
 	            case '}': type = TOKEN_RIGHT_CURLY; break;
 	            case ',': type = TOKEN_COMMA; break;
 	            case ':': type = TOKEN_COLON; break;
+	            case '~': type = TOKEN_TILDE; break;
 	            case '|': type = TOKEN_PIPE; break;
 	            default: type = TOKEN_OPERATOR;
 	            }
@@ -3891,6 +4145,18 @@ var nunjucks =
 	    return '';
 	};
 
+	Tokenizer.prototype._extractRegex = function(regex) {
+	    var matches = this.currentStr().match(regex);
+	    if(!matches) {
+	        return null;
+	    }
+
+	    // Move forward whatever was matched
+	    this.forwardN(matches[0].length);
+
+	    return matches;
+	};
+
 	Tokenizer.prototype.is_finished = function() {
 	    return this.index >= this.len;
 	};
@@ -3913,6 +4179,12 @@ var nunjucks =
 	    }
 	};
 
+	Tokenizer.prototype.backN = function(n) {
+	    for(var i=0; i<n; i++) {
+	        this.back();
+	    }
+	};
+
 	Tokenizer.prototype.back = function() {
 	    this.index--;
 
@@ -3932,9 +4204,18 @@ var nunjucks =
 	    }
 	};
 
+	// current returns current character
 	Tokenizer.prototype.current = function() {
 	    if(!this.is_finished()) {
 	        return this.str.charAt(this.index);
+	    }
+	    return '';
+	};
+
+	// currentStr returns what's left of the unparsed string
+	Tokenizer.prototype.currentStr = function() {
+	    if(!this.is_finished()) {
+	        return this.str.substr(this.index);
 	    }
 	    return '';
 	};
@@ -3965,6 +4246,7 @@ var nunjucks =
 	    TOKEN_OPERATOR: TOKEN_OPERATOR,
 	    TOKEN_COMMA: TOKEN_COMMA,
 	    TOKEN_COLON: TOKEN_COLON,
+	    TOKEN_TILDE: TOKEN_TILDE,
 	    TOKEN_PIPE: TOKEN_PIPE,
 	    TOKEN_INT: TOKEN_INT,
 	    TOKEN_FLOAT: TOKEN_FLOAT,
@@ -3976,13 +4258,567 @@ var nunjucks =
 
 
 /***/ },
-/* 8 */
+/* 10 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
+
+	var lib = __webpack_require__(1);
+	// jshint -W079
+	var Object = __webpack_require__(6);
+
+	function traverseAndCheck(obj, type, results) {
+	    if(obj instanceof type) {
+	        results.push(obj);
+	    }
+
+	    if(obj instanceof Node) {
+	        obj.findAll(type, results);
+	    }
+	}
+
+	var Node = Object.extend('Node', {
+	    init: function(lineno, colno) {
+	        this.lineno = lineno;
+	        this.colno = colno;
+
+	        var fields = this.fields;
+	        for(var i = 0, l = fields.length; i < l; i++) {
+	            var field = fields[i];
+
+	            // The first two args are line/col numbers, so offset by 2
+	            var val = arguments[i + 2];
+
+	            // Fields should never be undefined, but null. It makes
+	            // testing easier to normalize values.
+	            if(val === undefined) {
+	                val = null;
+	            }
+
+	            this[field] = val;
+	        }
+	    },
+
+	    findAll: function(type, results) {
+	        results = results || [];
+
+	        var i, l;
+	        if(this instanceof NodeList) {
+	            var children = this.children;
+
+	            for(i = 0, l = children.length; i < l; i++) {
+	                traverseAndCheck(children[i], type, results);
+	            }
+	        }
+	        else {
+	            var fields = this.fields;
+
+	            for(i = 0, l = fields.length; i < l; i++) {
+	                traverseAndCheck(this[fields[i]], type, results);
+	            }
+	        }
+
+	        return results;
+	    },
+
+	    iterFields: function(func) {
+	        lib.each(this.fields, function(field) {
+	            func(this[field], field);
+	        }, this);
+	    }
+	});
+
+	// Abstract nodes
+	var Value = Node.extend('Value', { fields: ['value'] });
+
+	// Concrete nodes
+	var NodeList = Node.extend('NodeList', {
+	    fields: ['children'],
+
+	    init: function(lineno, colno, nodes) {
+	        this.parent(lineno, colno, nodes || []);
+	    },
+
+	    addChild: function(node) {
+	        this.children.push(node);
+	    }
+	});
+
+	var Root = NodeList.extend('Root');
+	var Literal = Value.extend('Literal');
+	var Symbol = Value.extend('Symbol');
+	var Group = NodeList.extend('Group');
+	var Array = NodeList.extend('Array');
+	var Pair = Node.extend('Pair', { fields: ['key', 'value'] });
+	var Dict = NodeList.extend('Dict');
+	var LookupVal = Node.extend('LookupVal', { fields: ['target', 'val'] });
+	var If = Node.extend('If', { fields: ['cond', 'body', 'else_'] });
+	var IfAsync = If.extend('IfAsync');
+	var InlineIf = Node.extend('InlineIf', { fields: ['cond', 'body', 'else_'] });
+	var For = Node.extend('For', { fields: ['arr', 'name', 'body', 'else_'] });
+	var AsyncEach = For.extend('AsyncEach');
+	var AsyncAll = For.extend('AsyncAll');
+	var Macro = Node.extend('Macro', { fields: ['name', 'args', 'body'] });
+	var Caller = Macro.extend('Caller');
+	var Import = Node.extend('Import', { fields: ['template', 'target', 'withContext'] });
+	var FromImport = Node.extend('FromImport', {
+	    fields: ['template', 'names', 'withContext'],
+
+	    init: function(lineno, colno, template, names, withContext) {
+	        this.parent(lineno, colno,
+	                    template,
+	                    names || new NodeList(), withContext);
+	    }
+	});
+	var FunCall = Node.extend('FunCall', { fields: ['name', 'args'] });
+	var Filter = FunCall.extend('Filter');
+	var FilterAsync = Filter.extend('FilterAsync', {
+	    fields: ['name', 'args', 'symbol']
+	});
+	var KeywordArgs = Dict.extend('KeywordArgs');
+	var Block = Node.extend('Block', { fields: ['name', 'body'] });
+	var Super = Node.extend('Super', { fields: ['blockName', 'symbol'] });
+	var TemplateRef = Node.extend('TemplateRef', { fields: ['template'] });
+	var Extends = TemplateRef.extend('Extends');
+	var Include = TemplateRef.extend('Include');
+	var Set = Node.extend('Set', { fields: ['targets', 'value'] });
+	var Output = NodeList.extend('Output');
+	var TemplateData = Literal.extend('TemplateData');
+	var UnaryOp = Node.extend('UnaryOp', { fields: ['target'] });
+	var BinOp = Node.extend('BinOp', { fields: ['left', 'right'] });
+	var In = BinOp.extend('In');
+	var Or = BinOp.extend('Or');
+	var And = BinOp.extend('And');
+	var Not = UnaryOp.extend('Not');
+	var Add = BinOp.extend('Add');
+	var Concat = BinOp.extend('Concat');
+	var Sub = BinOp.extend('Sub');
+	var Mul = BinOp.extend('Mul');
+	var Div = BinOp.extend('Div');
+	var FloorDiv = BinOp.extend('FloorDiv');
+	var Mod = BinOp.extend('Mod');
+	var Pow = BinOp.extend('Pow');
+	var Neg = UnaryOp.extend('Neg');
+	var Pos = UnaryOp.extend('Pos');
+	var Compare = Node.extend('Compare', { fields: ['expr', 'ops'] });
+	var CompareOperand = Node.extend('CompareOperand', {
+	    fields: ['expr', 'type']
+	});
+
+	var CallExtension = Node.extend('CallExtension', {
+	    fields: ['extName', 'prop', 'args', 'contentArgs'],
+
+	    init: function(ext, prop, args, contentArgs) {
+	        this.extName = ext._name || ext;
+	        this.prop = prop;
+	        this.args = args || new NodeList();
+	        this.contentArgs = contentArgs || [];
+	        this.autoescape = ext.autoescape;
+	    }
+	});
+
+	var CallExtensionAsync = CallExtension.extend('CallExtensionAsync');
+
+	// Print the AST in a nicely formatted tree format for debuggin
+	function printNodes(node, indent) {
+	    indent = indent || 0;
+
+	    // This is hacky, but this is just a debugging function anyway
+	    function print(str, indent, inline) {
+	        var lines = str.split('\n');
+
+	        for(var i=0; i<lines.length; i++) {
+	            if(lines[i]) {
+	                if((inline && i > 0) || !inline) {
+	                    for(var j=0; j<indent; j++) {
+	                        process.stdout.write(' ');
+	                    }
+	                }
+	            }
+
+	            if(i === lines.length-1) {
+	                process.stdout.write(lines[i]);
+	            }
+	            else {
+	                process.stdout.write(lines[i] + '\n');
+	            }
+	        }
+	    }
+
+	    print(node.typename + ': ', indent);
+
+	    if(node instanceof NodeList) {
+	        print('\n');
+	        lib.each(node.children, function(n) {
+	            printNodes(n, indent + 2);
+	        });
+	    }
+	    else if(node instanceof CallExtension) {
+	        print(node.extName + '.' + node.prop);
+	        print('\n');
+
+	        if(node.args) {
+	            printNodes(node.args, indent + 2);
+	        }
+
+	        if(node.contentArgs) {
+	            lib.each(node.contentArgs, function(n) {
+	                printNodes(n, indent + 2);
+	            });
+	        }
+	    }
+	    else {
+	        var nodes = null;
+	        var props = null;
+
+	        node.iterFields(function(val, field) {
+	            if(val instanceof Node) {
+	                nodes = nodes || {};
+	                nodes[field] = val;
+	            }
+	            else {
+	                props = props || {};
+	                props[field] = val;
+	            }
+	        });
+
+	        if(props) {
+	            print(JSON.stringify(props, null, 2) + '\n', null, true);
+	        }
+	        else {
+	            print('\n');
+	        }
+
+	        if(nodes) {
+	            for(var k in nodes) {
+	                printNodes(nodes[k], indent + 2);
+	            }
+	        }
+
+	    }
+	}
+
+	// var t = new NodeList(0, 0,
+	//                      [new Value(0, 0, 3),
+	//                       new Value(0, 0, 10),
+	//                       new Pair(0, 0,
+	//                                new Value(0, 0, 'key'),
+	//                                new Value(0, 0, 'value'))]);
+	// printNodes(t);
+
+	module.exports = {
+	    Node: Node,
+	    Root: Root,
+	    NodeList: NodeList,
+	    Value: Value,
+	    Literal: Literal,
+	    Symbol: Symbol,
+	    Group: Group,
+	    Array: Array,
+	    Pair: Pair,
+	    Dict: Dict,
+	    Output: Output,
+	    TemplateData: TemplateData,
+	    If: If,
+	    IfAsync: IfAsync,
+	    InlineIf: InlineIf,
+	    For: For,
+	    AsyncEach: AsyncEach,
+	    AsyncAll: AsyncAll,
+	    Macro: Macro,
+	    Caller: Caller,
+	    Import: Import,
+	    FromImport: FromImport,
+	    FunCall: FunCall,
+	    Filter: Filter,
+	    FilterAsync: FilterAsync,
+	    KeywordArgs: KeywordArgs,
+	    Block: Block,
+	    Super: Super,
+	    Extends: Extends,
+	    Include: Include,
+	    Set: Set,
+	    LookupVal: LookupVal,
+	    BinOp: BinOp,
+	    In: In,
+	    Or: Or,
+	    And: And,
+	    Not: Not,
+	    Add: Add,
+	    Concat: Concat,
+	    Sub: Sub,
+	    Mul: Mul,
+	    Div: Div,
+	    FloorDiv: FloorDiv,
+	    Mod: Mod,
+	    Pow: Pow,
+	    Neg: Neg,
+	    Pos: Pos,
+	    Compare: Compare,
+	    CompareOperand: CompareOperand,
+
+	    CallExtension: CallExtension,
+	    CallExtensionAsync: CallExtensionAsync,
+
+	    printNodes: printNodes
+	};
+
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(3)))
+
+/***/ },
+/* 11 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var nodes = __webpack_require__(10);
+	var lib = __webpack_require__(1);
+
+	var sym = 0;
+	function gensym() {
+	    return 'hole_' + sym++;
+	}
+
+	// copy-on-write version of map
+	function mapCOW(arr, func) {
+	    var res = null;
+
+	    for(var i=0; i<arr.length; i++) {
+	        var item = func(arr[i]);
+
+	        if(item !== arr[i]) {
+	            if(!res) {
+	                res = arr.slice();
+	            }
+
+	            res[i] = item;
+	        }
+	    }
+
+	    return res || arr;
+	}
+
+	function walk(ast, func, depthFirst) {
+	    if(!(ast instanceof nodes.Node)) {
+	        return ast;
+	    }
+
+	    if(!depthFirst) {
+	        var astT = func(ast);
+
+	        if(astT && astT !== ast) {
+	            return astT;
+	        }
+	    }
+
+	    if(ast instanceof nodes.NodeList) {
+	        var children = mapCOW(ast.children, function(node) {
+	            return walk(node, func, depthFirst);
+	        });
+
+	        if(children !== ast.children) {
+	            ast = new nodes[ast.typename](ast.lineno, ast.colno, children);
+	        }
+	    }
+	    else if(ast instanceof nodes.CallExtension) {
+	        var args = walk(ast.args, func, depthFirst);
+
+	        var contentArgs = mapCOW(ast.contentArgs, function(node) {
+	            return walk(node, func, depthFirst);
+	        });
+
+	        if(args !== ast.args || contentArgs !== ast.contentArgs) {
+	            ast = new nodes[ast.typename](ast.extName,
+	                                          ast.prop,
+	                                          args,
+	                                          contentArgs);
+	        }
+	    }
+	    else {
+	        var props = ast.fields.map(function(field) {
+	            return ast[field];
+	        });
+
+	        var propsT = mapCOW(props, function(prop) {
+	            return walk(prop, func, depthFirst);
+	        });
+
+	        if(propsT !== props) {
+	            ast = new nodes[ast.typename](ast.lineno, ast.colno);
+
+	            propsT.forEach(function(prop, i) {
+	                ast[ast.fields[i]] = prop;
+	            });
+	        }
+	    }
+
+	    return depthFirst ? (func(ast) || ast) : ast;
+	}
+
+	function depthWalk(ast, func) {
+	    return walk(ast, func, true);
+	}
+
+	function _liftFilters(node, asyncFilters, prop) {
+	    var children = [];
+
+	    var walked = depthWalk(prop ? node[prop] : node, function(node) {
+	        if(node instanceof nodes.Block) {
+	            return node;
+	        }
+	        else if((node instanceof nodes.Filter &&
+	                 lib.indexOf(asyncFilters, node.name.value) !== -1) ||
+	                node instanceof nodes.CallExtensionAsync) {
+	            var symbol = new nodes.Symbol(node.lineno,
+	                                          node.colno,
+	                                          gensym());
+
+	            children.push(new nodes.FilterAsync(node.lineno,
+	                                                node.colno,
+	                                                node.name,
+	                                                node.args,
+	                                                symbol));
+	            return symbol;
+	        }
+	    });
+
+	    if(prop) {
+	        node[prop] = walked;
+	    }
+	    else {
+	        node = walked;
+	    }
+
+	    if(children.length) {
+	        children.push(node);
+
+	        return new nodes.NodeList(
+	            node.lineno,
+	            node.colno,
+	            children
+	        );
+	    }
+	    else {
+	        return node;
+	    }
+	}
+
+	function liftFilters(ast, asyncFilters) {
+	    return depthWalk(ast, function(node) {
+	        if(node instanceof nodes.Output) {
+	            return _liftFilters(node, asyncFilters);
+	        }
+	        else if(node instanceof nodes.Set) {
+	            return _liftFilters(node, asyncFilters, 'value');
+	        }
+	        else if(node instanceof nodes.For) {
+	            return _liftFilters(node, asyncFilters, 'arr');
+	        }
+	        else if(node instanceof nodes.If) {
+	            return _liftFilters(node, asyncFilters, 'cond');
+	        }
+	        else if(node instanceof nodes.CallExtension) {
+	            return _liftFilters(node, asyncFilters, 'args');
+	        }
+	    });
+	}
+
+	function liftSuper(ast) {
+	    return walk(ast, function(blockNode) {
+	        if(!(blockNode instanceof nodes.Block)) {
+	            return;
+	        }
+
+	        var hasSuper = false;
+	        var symbol = gensym();
+
+	        blockNode.body = walk(blockNode.body, function(node) {
+	            if(node instanceof nodes.FunCall &&
+	               node.name.value === 'super') {
+	                hasSuper = true;
+	                return new nodes.Symbol(node.lineno, node.colno, symbol);
+	            }
+	        });
+
+	        if(hasSuper) {
+	            blockNode.body.children.unshift(new nodes.Super(
+	                0, 0, blockNode.name, new nodes.Symbol(0, 0, symbol)
+	            ));
+	        }
+	    });
+	}
+
+	function convertStatements(ast) {
+	    return depthWalk(ast, function(node) {
+	        if(!(node instanceof nodes.If) &&
+	           !(node instanceof nodes.For)) {
+	            return;
+	        }
+
+	        var async = false;
+	        walk(node, function(node) {
+	            if(node instanceof nodes.FilterAsync ||
+	               node instanceof nodes.IfAsync ||
+	               node instanceof nodes.AsyncEach ||
+	               node instanceof nodes.AsyncAll ||
+	               node instanceof nodes.CallExtensionAsync ||
+	               node instanceof nodes.Include) {
+	                async = true;
+	                // Stop iterating by returning the node
+	                return node;
+	            }
+	        });
+
+	        if(async) {
+		        if(node instanceof nodes.If) {
+	                return new nodes.IfAsync(
+	                    node.lineno,
+	                    node.colno,
+	                    node.cond,
+	                    node.body,
+	                    node.else_
+	                );
+	            }
+	            else if(node instanceof nodes.For) {
+	                return new nodes.AsyncEach(
+	                    node.lineno,
+	                    node.colno,
+	                    node.arr,
+	                    node.name,
+	                    node.body,
+	                    node.else_
+	                );
+	            }
+	        }
+	    });
+	}
+
+	function cps(ast, asyncFilters) {
+	    return convertStatements(liftSuper(liftFilters(ast, asyncFilters)));
+	}
+
+	function transform(ast, asyncFilters) {
+	    return cps(ast, asyncFilters || []);
+	}
+
+	// var parser = require('./parser');
+	// var src = 'hello {% foo %}{% endfoo %} end';
+	// var ast = transform(parser.parse(src, [new FooExtension()]), ['bar']);
+	// nodes.printNodes(ast);
+
+	module.exports = {
+	    transform: transform
+	};
+
+
+/***/ },
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	var lib = __webpack_require__(1);
-	var Obj = __webpack_require__(10);
+	var Obj = __webpack_require__(6);
 
 	// Frames keep track of scoping both at compile-time and run-time so
 	// we know how to access variables. Block tags can introduce special
@@ -4341,245 +5177,13 @@ var nunjucks =
 
 
 /***/ },
-/* 9 */
-/***/ function(module, exports, __webpack_require__) {
-
-	function installCompat() {
-	  'use strict';
-
-	  // This must be called like `nunjucks.installCompat` so that `this`
-	  // references the nunjucks instance
-	  var runtime = this.runtime; // jshint ignore:line
-	  var lib = this.lib; // jshint ignore:line
-
-	  var orig_contextOrFrameLookup = runtime.contextOrFrameLookup;
-	  runtime.contextOrFrameLookup = function(context, frame, key) {
-	    var val = orig_contextOrFrameLookup.apply(this, arguments);
-	    if (val === undefined) {
-	      switch (key) {
-	      case 'True':
-	        return true;
-	      case 'False':
-	        return false;
-	      case 'None':
-	        return null;
-	      }
-	    }
-
-	    return val;
-	  };
-
-	  var orig_memberLookup = runtime.memberLookup;
-	  var ARRAY_MEMBERS = {
-	    pop: function(index) {
-	      if (index === undefined) {
-	        return this.pop();
-	      }
-	      if (index >= this.length || index < 0) {
-	        throw new Error('KeyError');
-	      }
-	      return this.splice(index, 1);
-	    },
-	    remove: function(element) {
-	      for (var i = 0; i < this.length; i++) {
-	        if (this[i] === element) {
-	          return this.splice(i, 1);
-	        }
-	      }
-	      throw new Error('ValueError');
-	    },
-	    count: function(element) {
-	      var count = 0;
-	      for (var i = 0; i < this.length; i++) {
-	        if (this[i] === element) {
-	          count++;
-	        }
-	      }
-	      return count;
-	    },
-	    index: function(element) {
-	      var i;
-	      if ((i = this.indexOf(element)) === -1) {
-	        throw new Error('ValueError');
-	      }
-	      return i;
-	    },
-	    find: function(element) {
-	      return this.indexOf(element);
-	    },
-	    insert: function(index, elem) {
-	      return this.splice(index, 0, elem);
-	    }
-	  };
-	  var OBJECT_MEMBERS = {
-	    items: function() {
-	      var ret = [];
-	      for(var k in this) {
-	        ret.push([k, this[k]]);
-	      }
-	      return ret;
-	    },
-	    values: function() {
-	      var ret = [];
-	      for(var k in this) {
-	        ret.push(this[k]);
-	      }
-	      return ret;
-	    },
-	    keys: function() {
-	      var ret = [];
-	      for(var k in this) {
-	        ret.push(k);
-	      }
-	      return ret;
-	    },
-	    get: function(key, def) {
-	      var output = this[key];
-	      if (output === undefined) {
-	        output = def;
-	      }
-	      return output;
-	    },
-	    has_key: function(key) {
-	      return this.hasOwnProperty(key);
-	    },
-	    pop: function(key, def) {
-	      var output = this[key];
-	      if (output === undefined && def !== undefined) {
-	        output = def;
-	      } else if (output === undefined) {
-	        throw new Error('KeyError');
-	      } else {
-	        delete this[key];
-	      }
-	      return output;
-	    },
-	    popitem: function() {
-	      for (var k in this) {
-	        // Return the first object pair.
-	        var val = this[k];
-	        delete this[k];
-	        return [k, val];
-	      }
-	      throw new Error('KeyError');
-	    },
-	    setdefault: function(key, def) {
-	      if (key in this) {
-	        return this[key];
-	      }
-	      if (def === undefined) {
-	        def = null;
-	      }
-	      return this[key] = def;
-	    },
-	    update: function(kwargs) {
-	      for (var k in kwargs) {
-	        this[k] = kwargs[k];
-	      }
-	      return null;  // Always returns None
-	    }
-	  };
-	  OBJECT_MEMBERS.iteritems = OBJECT_MEMBERS.items;
-	  OBJECT_MEMBERS.itervalues = OBJECT_MEMBERS.values;
-	  OBJECT_MEMBERS.iterkeys = OBJECT_MEMBERS.keys;
-	  runtime.memberLookup = function(obj, val, autoescape) { // jshint ignore:line
-	    obj = obj || {};
-
-	    // If the object is an object, return any of the methods that Python would
-	    // otherwise provide.
-	    if (lib.isArray(obj) && ARRAY_MEMBERS.hasOwnProperty(val)) {
-	      return function() {return ARRAY_MEMBERS[val].apply(obj, arguments);};
-	    }
-
-	    if (lib.isObject(obj) && OBJECT_MEMBERS.hasOwnProperty(val)) {
-	      return function() {return OBJECT_MEMBERS[val].apply(obj, arguments);};
-	    }
-
-	    return orig_memberLookup.apply(this, arguments);
-	  };
-	}
-
-	module.exports = installCompat;
-
-
-/***/ },
-/* 10 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	// A simple class system, more documentation to come
-
-	function extend(cls, name, props) {
-	    // This does that same thing as Object.create, but with support for IE8
-	    var F = function() {};
-	    F.prototype = cls.prototype;
-	    var prototype = new F();
-
-	    // jshint undef: false
-	    var fnTest = /xyz/.test(function(){ xyz; }) ? /\bparent\b/ : /.*/;
-	    props = props || {};
-
-	    for(var k in props) {
-	        var src = props[k];
-	        var parent = prototype[k];
-
-	        if(typeof parent === 'function' &&
-	           typeof src === 'function' &&
-	           fnTest.test(src)) {
-	            /*jshint -W083 */
-	            prototype[k] = (function (src, parent) {
-	                return function() {
-	                    // Save the current parent method
-	                    var tmp = this.parent;
-
-	                    // Set parent to the previous method, call, and restore
-	                    this.parent = parent;
-	                    var res = src.apply(this, arguments);
-	                    this.parent = tmp;
-
-	                    return res;
-	                };
-	            })(src, parent);
-	        }
-	        else {
-	            prototype[k] = src;
-	        }
-	    }
-
-	    prototype.typename = name;
-
-	    var new_cls = function() {
-	        if(prototype.init) {
-	            prototype.init.apply(this, arguments);
-	        }
-	    };
-
-	    new_cls.prototype = prototype;
-	    new_cls.prototype.constructor = new_cls;
-
-	    new_cls.extend = function(name, props) {
-	        if(typeof name === 'object') {
-	            props = name;
-	            name = 'anonymous';
-	        }
-	        return extend(new_cls, name, props);
-	    };
-
-	    return new_cls;
-	}
-
-	module.exports = extend(Object, 'Object', {});
-
-
-/***/ },
-/* 11 */
+/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	var lib = __webpack_require__(1);
-	var r = __webpack_require__(8);
+	var r = __webpack_require__(12);
 
 	function normalize(value, defaultValue) {
 	    if(value === null || value === undefined || value === false) {
@@ -5123,8 +5727,171 @@ var nunjucks =
 
 
 /***/ },
-/* 12 */
+/* 14 */
 /***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var Loader = __webpack_require__(15);
+	var PrecompiledLoader = __webpack_require__(16);
+
+	var WebLoader = Loader.extend({
+	    init: function(baseURL, opts) {
+	        this.baseURL = baseURL || '.';
+
+	        // By default, the cache is turned off because there's no way
+	        // to "watch" templates over HTTP, so they are re-downloaded
+	        // and compiled each time. (Remember, PRECOMPILE YOUR
+	        // TEMPLATES in production!)
+	        this.useCache = opts.useCache;
+
+	        // We default `async` to false so that the simple synchronous
+	        // API can be used when you aren't doing anything async in
+	        // your templates (which is most of the time). This performs a
+	        // sync ajax request, but that's ok because it should *only*
+	        // happen in development. PRECOMPILE YOUR TEMPLATES.
+	        this.async = opts.async;
+	    },
+
+	    resolve: function(from, to) { // jshint ignore:line
+	        throw new Error('relative templates not support in the browser yet');
+	    },
+
+	    getSource: function(name, cb) {
+	        var useCache = this.useCache;
+	        var result;
+	        this.fetch(this.baseURL + '/' + name, function(err, src) {
+	            if(err) {
+	                if(!cb) {
+	                    throw err;
+	                }
+	                cb(err);
+	            }
+	            else {
+	                result = { src: src,
+	                           path: name,
+	                           noCache: !useCache };
+	                if(cb) {
+	                    cb(null, result);
+	                }
+	            }
+	        });
+
+	        // if this WebLoader isn't running asynchronously, the
+	        // fetch above would actually run sync and we'll have a
+	        // result here
+	        return result;
+	    },
+
+	    fetch: function(url, cb) {
+	        // Only in the browser please
+	        var ajax;
+	        var loading = true;
+
+	        if(window.XMLHttpRequest) { // Mozilla, Safari, ...
+	            ajax = new XMLHttpRequest();
+	        }
+	        else if(window.ActiveXObject) { // IE 8 and older
+	            /* global ActiveXObject */
+	            ajax = new ActiveXObject('Microsoft.XMLHTTP');
+	        }
+
+	        ajax.onreadystatechange = function() {
+	            if(ajax.readyState === 4 && loading) {
+	                loading = false;
+	                if(ajax.status === 0 || ajax.status === 200) {
+	                    cb(null, ajax.responseText);
+	                }
+	                else {
+	                    cb(ajax.responseText);
+	                }
+	            }
+	        };
+
+	        url += (url.indexOf('?') === -1 ? '?' : '&') + 's=' +
+	               (new Date().getTime());
+
+	        ajax.open('GET', url, this.async);
+	        ajax.send();
+	    }
+	});
+
+	module.exports = {
+	    WebLoader: WebLoader,
+	    PrecompiledLoader: PrecompiledLoader
+	};
+
+
+/***/ },
+/* 15 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var path = __webpack_require__(3);
+	var Obj = __webpack_require__(6);
+	var lib = __webpack_require__(1);
+
+	var Loader = Obj.extend({
+	    on: function(name, func) {
+	        this.listeners = this.listeners || {};
+	        this.listeners[name] = this.listeners[name] || [];
+	        this.listeners[name].push(func);
+	    },
+
+	    emit: function(name /*, arg1, arg2, ...*/) {
+	        var args = Array.prototype.slice.call(arguments, 1);
+
+	        if(this.listeners && this.listeners[name]) {
+	            lib.each(this.listeners[name], function(listener) {
+	                listener.apply(null, args);
+	            });
+	        }
+	    },
+
+	    resolve: function(from, to) {
+	        return path.resolve(path.dirname(from), to);
+	    },
+
+	    isRelative: function(filename) {
+	        return (filename.indexOf('./') === 0 || filename.indexOf('../') === 0);
+	    }
+	});
+
+	module.exports = Loader;
+
+
+/***/ },
+/* 16 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var Loader = __webpack_require__(15);
+
+	var PrecompiledLoader = Loader.extend({
+	    init: function(compiledTemplates) {
+	        this.precompiled = compiledTemplates || {};
+	    },
+
+	    getSource: function(name) {
+	        if (this.precompiled[name]) {
+	            return {
+	                src: { type: 'code',
+	                       obj: this.precompiled[name] },
+	                path: name
+	            };
+	        }
+	        return null;
+	    }
+	});
+
+	module.exports = PrecompiledLoader;
+
+
+/***/ },
+/* 17 */
+/***/ function(module, exports) {
 
 	'use strict';
 
@@ -5196,889 +5963,166 @@ var nunjucks =
 
 
 /***/ },
-/* 13 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var Loader = __webpack_require__(3);
-
-	var PrecompiledLoader = Loader.extend({
-	    init: function(compiledTemplates) {
-	        this.precompiled = compiledTemplates || {};
-	    },
-
-	    getSource: function(name) {
-	        if (this.precompiled[name]) {
-	            return {
-	                src: { type: 'code',
-	                       obj: this.precompiled[name] },
-	                path: name
-	            };
-	        }
-	        return null;
-	    }
-	});
-
-	module.exports = PrecompiledLoader;
-
-
-/***/ },
-/* 14 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-
-/***/ },
-/* 15 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var nodes = __webpack_require__(16);
-	var lib = __webpack_require__(1);
-
-	var sym = 0;
-	function gensym() {
-	    return 'hole_' + sym++;
-	}
-
-	// copy-on-write version of map
-	function mapCOW(arr, func) {
-	    var res = null;
-
-	    for(var i=0; i<arr.length; i++) {
-	        var item = func(arr[i]);
-
-	        if(item !== arr[i]) {
-	            if(!res) {
-	                res = arr.slice();
-	            }
-
-	            res[i] = item;
-	        }
-	    }
-
-	    return res || arr;
-	}
-
-	function walk(ast, func, depthFirst) {
-	    if(!(ast instanceof nodes.Node)) {
-	        return ast;
-	    }
-
-	    if(!depthFirst) {
-	        var astT = func(ast);
-
-	        if(astT && astT !== ast) {
-	            return astT;
-	        }
-	    }
-
-	    if(ast instanceof nodes.NodeList) {
-	        var children = mapCOW(ast.children, function(node) {
-	            return walk(node, func, depthFirst);
-	        });
-
-	        if(children !== ast.children) {
-	            ast = new nodes[ast.typename](ast.lineno, ast.colno, children);
-	        }
-	    }
-	    else if(ast instanceof nodes.CallExtension) {
-	        var args = walk(ast.args, func, depthFirst);
-
-	        var contentArgs = mapCOW(ast.contentArgs, function(node) {
-	            return walk(node, func, depthFirst);
-	        });
-
-	        if(args !== ast.args || contentArgs !== ast.contentArgs) {
-	            ast = new nodes[ast.typename](ast.extName,
-	                                          ast.prop,
-	                                          args,
-	                                          contentArgs);
-	        }
-	    }
-	    else {
-	        var props = ast.fields.map(function(field) {
-	            return ast[field];
-	        });
-
-	        var propsT = mapCOW(props, function(prop) {
-	            return walk(prop, func, depthFirst);
-	        });
-
-	        if(propsT !== props) {
-	            ast = new nodes[ast.typename](ast.lineno, ast.colno);
-
-	            propsT.forEach(function(prop, i) {
-	                ast[ast.fields[i]] = prop;
-	            });
-	        }
-	    }
-
-	    return depthFirst ? (func(ast) || ast) : ast;
-	}
-
-	function depthWalk(ast, func) {
-	    return walk(ast, func, true);
-	}
-
-	function _liftFilters(node, asyncFilters, prop) {
-	    var children = [];
-
-	    var walked = depthWalk(prop ? node[prop] : node, function(node) {
-	        if(node instanceof nodes.Block) {
-	            return node;
-	        }
-	        else if((node instanceof nodes.Filter &&
-	                 lib.indexOf(asyncFilters, node.name.value) !== -1) ||
-	                node instanceof nodes.CallExtensionAsync) {
-	            var symbol = new nodes.Symbol(node.lineno,
-	                                          node.colno,
-	                                          gensym());
-
-	            children.push(new nodes.FilterAsync(node.lineno,
-	                                                node.colno,
-	                                                node.name,
-	                                                node.args,
-	                                                symbol));
-	            return symbol;
-	        }
-	    });
-
-	    if(prop) {
-	        node[prop] = walked;
-	    }
-	    else {
-	        node = walked;
-	    }
-
-	    if(children.length) {
-	        children.push(node);
-
-	        return new nodes.NodeList(
-	            node.lineno,
-	            node.colno,
-	            children
-	        );
-	    }
-	    else {
-	        return node;
-	    }
-	}
-
-	function liftFilters(ast, asyncFilters) {
-	    return depthWalk(ast, function(node) {
-	        if(node instanceof nodes.Output) {
-	            return _liftFilters(node, asyncFilters);
-	        }
-	        else if(node instanceof nodes.Set) {
-	            return _liftFilters(node, asyncFilters, 'value');
-	        }
-	        else if(node instanceof nodes.For) {
-	            return _liftFilters(node, asyncFilters, 'arr');
-	        }
-	        else if(node instanceof nodes.If) {
-	            return _liftFilters(node, asyncFilters, 'cond');
-	        }
-	        else if(node instanceof nodes.CallExtension) {
-	            return _liftFilters(node, asyncFilters, 'args');
-	        }
-	    });
-	}
-
-	function liftSuper(ast) {
-	    return walk(ast, function(blockNode) {
-	        if(!(blockNode instanceof nodes.Block)) {
-	            return;
-	        }
-
-	        var hasSuper = false;
-	        var symbol = gensym();
-
-	        blockNode.body = walk(blockNode.body, function(node) {
-	            if(node instanceof nodes.FunCall &&
-	               node.name.value === 'super') {
-	                hasSuper = true;
-	                return new nodes.Symbol(node.lineno, node.colno, symbol);
-	            }
-	        });
-
-	        if(hasSuper) {
-	            blockNode.body.children.unshift(new nodes.Super(
-	                0, 0, blockNode.name, new nodes.Symbol(0, 0, symbol)
-	            ));
-	        }
-	    });
-	}
-
-	function convertStatements(ast) {
-	    return depthWalk(ast, function(node) {
-	        if(!(node instanceof nodes.If) &&
-	           !(node instanceof nodes.For)) {
-	            return;
-	        }
-
-	        var async = false;
-	        walk(node, function(node) {
-	            if(node instanceof nodes.FilterAsync ||
-	               node instanceof nodes.IfAsync ||
-	               node instanceof nodes.AsyncEach ||
-	               node instanceof nodes.AsyncAll ||
-	               node instanceof nodes.CallExtensionAsync ||
-	               node instanceof nodes.Include) {
-	                async = true;
-	                // Stop iterating by returning the node
-	                return node;
-	            }
-	        });
-
-	        if(async) {
-		        if(node instanceof nodes.If) {
-	                return new nodes.IfAsync(
-	                    node.lineno,
-	                    node.colno,
-	                    node.cond,
-	                    node.body,
-	                    node.else_
-	                );
-	            }
-	            else if(node instanceof nodes.For) {
-	                return new nodes.AsyncEach(
-	                    node.lineno,
-	                    node.colno,
-	                    node.arr,
-	                    node.name,
-	                    node.body,
-	                    node.else_
-	                );
-	            }
-	        }
-	    });
-	}
-
-	function cps(ast, asyncFilters) {
-	    return convertStatements(liftSuper(liftFilters(ast, asyncFilters)));
-	}
-
-	function transform(ast, asyncFilters) {
-	    return cps(ast, asyncFilters || []);
-	}
-
-	// var parser = require('./parser');
-	// var src = 'hello {% foo %}{% endfoo %} end';
-	// var ast = transform(parser.parse(src, [new FooExtension()]), ['bar']);
-	// nodes.printNodes(ast);
-
-	module.exports = {
-	    transform: transform
-	};
-
-
-/***/ },
-/* 16 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
-
-	var lib = __webpack_require__(1);
-	// jshint -W079
-	var Object = __webpack_require__(10);
-
-	function traverseAndCheck(obj, type, results) {
-	    if(obj instanceof type) {
-	        results.push(obj);
-	    }
-
-	    if(obj instanceof Node) {
-	        obj.findAll(type, results);
-	    }
-	}
-
-	var Node = Object.extend('Node', {
-	    init: function(lineno, colno) {
-	        this.lineno = lineno;
-	        this.colno = colno;
-
-	        var fields = this.fields;
-	        for(var i = 0, l = fields.length; i < l; i++) {
-	            var field = fields[i];
-
-	            // The first two args are line/col numbers, so offset by 2
-	            var val = arguments[i + 2];
-
-	            // Fields should never be undefined, but null. It makes
-	            // testing easier to normalize values.
-	            if(val === undefined) {
-	                val = null;
-	            }
-
-	            this[field] = val;
-	        }
-	    },
-
-	    findAll: function(type, results) {
-	        results = results || [];
-
-	        var i, l;
-	        if(this instanceof NodeList) {
-	            var children = this.children;
-
-	            for(i = 0, l = children.length; i < l; i++) {
-	                traverseAndCheck(children[i], type, results);
-	            }
-	        }
-	        else {
-	            var fields = this.fields;
-
-	            for(i = 0, l = fields.length; i < l; i++) {
-	                traverseAndCheck(this[fields[i]], type, results);
-	            }
-	        }
-
-	        return results;
-	    },
-
-	    iterFields: function(func) {
-	        lib.each(this.fields, function(field) {
-	            func(this[field], field);
-	        }, this);
-	    }
-	});
-
-	// Abstract nodes
-	var Value = Node.extend('Value', { fields: ['value'] });
-
-	// Concrete nodes
-	var NodeList = Node.extend('NodeList', {
-	    fields: ['children'],
-
-	    init: function(lineno, colno, nodes) {
-	        this.parent(lineno, colno, nodes || []);
-	    },
-
-	    addChild: function(node) {
-	        this.children.push(node);
-	    }
-	});
-
-	var Root = NodeList.extend('Root');
-	var Literal = Value.extend('Literal');
-	var Symbol = Value.extend('Symbol');
-	var Group = NodeList.extend('Group');
-	var Array = NodeList.extend('Array');
-	var Pair = Node.extend('Pair', { fields: ['key', 'value'] });
-	var Dict = NodeList.extend('Dict');
-	var LookupVal = Node.extend('LookupVal', { fields: ['target', 'val'] });
-	var If = Node.extend('If', { fields: ['cond', 'body', 'else_'] });
-	var IfAsync = If.extend('IfAsync');
-	var InlineIf = Node.extend('InlineIf', { fields: ['cond', 'body', 'else_'] });
-	var For = Node.extend('For', { fields: ['arr', 'name', 'body', 'else_'] });
-	var AsyncEach = For.extend('AsyncEach');
-	var AsyncAll = For.extend('AsyncAll');
-	var Macro = Node.extend('Macro', { fields: ['name', 'args', 'body'] });
-	var Caller = Macro.extend('Caller');
-	var Import = Node.extend('Import', { fields: ['template', 'target', 'withContext'] });
-	var FromImport = Node.extend('FromImport', {
-	    fields: ['template', 'names', 'withContext'],
-
-	    init: function(lineno, colno, template, names, withContext) {
-	        this.parent(lineno, colno,
-	                    template,
-	                    names || new NodeList(), withContext);
-	    }
-	});
-	var FunCall = Node.extend('FunCall', { fields: ['name', 'args'] });
-	var Filter = FunCall.extend('Filter');
-	var FilterAsync = Filter.extend('FilterAsync', {
-	    fields: ['name', 'args', 'symbol']
-	});
-	var KeywordArgs = Dict.extend('KeywordArgs');
-	var Block = Node.extend('Block', { fields: ['name', 'body'] });
-	var Super = Node.extend('Super', { fields: ['blockName', 'symbol'] });
-	var TemplateRef = Node.extend('TemplateRef', { fields: ['template'] });
-	var Extends = TemplateRef.extend('Extends');
-	var Include = TemplateRef.extend('Include');
-	var Set = Node.extend('Set', { fields: ['targets', 'value'] });
-	var Output = NodeList.extend('Output');
-	var TemplateData = Literal.extend('TemplateData');
-	var UnaryOp = Node.extend('UnaryOp', { fields: ['target'] });
-	var BinOp = Node.extend('BinOp', { fields: ['left', 'right'] });
-	var In = BinOp.extend('In');
-	var Or = BinOp.extend('Or');
-	var And = BinOp.extend('And');
-	var Not = UnaryOp.extend('Not');
-	var Add = BinOp.extend('Add');
-	var Sub = BinOp.extend('Sub');
-	var Mul = BinOp.extend('Mul');
-	var Div = BinOp.extend('Div');
-	var FloorDiv = BinOp.extend('FloorDiv');
-	var Mod = BinOp.extend('Mod');
-	var Pow = BinOp.extend('Pow');
-	var Neg = UnaryOp.extend('Neg');
-	var Pos = UnaryOp.extend('Pos');
-	var Compare = Node.extend('Compare', { fields: ['expr', 'ops'] });
-	var CompareOperand = Node.extend('CompareOperand', {
-	    fields: ['expr', 'type']
-	});
-
-	var CallExtension = Node.extend('CallExtension', {
-	    fields: ['extName', 'prop', 'args', 'contentArgs'],
-
-	    init: function(ext, prop, args, contentArgs) {
-	        this.extName = ext._name || ext;
-	        this.prop = prop;
-	        this.args = args || new NodeList();
-	        this.contentArgs = contentArgs || [];
-	        this.autoescape = ext.autoescape;
-	    }
-	});
-
-	var CallExtensionAsync = CallExtension.extend('CallExtensionAsync');
-
-	// Print the AST in a nicely formatted tree format for debuggin
-	function printNodes(node, indent) {
-	    indent = indent || 0;
-
-	    // This is hacky, but this is just a debugging function anyway
-	    function print(str, indent, inline) {
-	        var lines = str.split('\n');
-
-	        for(var i=0; i<lines.length; i++) {
-	            if(lines[i]) {
-	                if((inline && i > 0) || !inline) {
-	                    for(var j=0; j<indent; j++) {
-	                        process.stdout.write(' ');
-	                    }
-	                }
-	            }
-
-	            if(i === lines.length-1) {
-	                process.stdout.write(lines[i]);
-	            }
-	            else {
-	                process.stdout.write(lines[i] + '\n');
-	            }
-	        }
-	    }
-
-	    print(node.typename + ': ', indent);
-
-	    if(node instanceof NodeList) {
-	        print('\n');
-	        lib.each(node.children, function(n) {
-	            printNodes(n, indent + 2);
-	        });
-	    }
-	    else if(node instanceof CallExtension) {
-	        print(node.extName + '.' + node.prop);
-	        print('\n');
-
-	        if(node.args) {
-	            printNodes(node.args, indent + 2);
-	        }
-
-	        if(node.contentArgs) {
-	            lib.each(node.contentArgs, function(n) {
-	                printNodes(n, indent + 2);
-	            });
-	        }
-	    }
-	    else {
-	        var nodes = null;
-	        var props = null;
-
-	        node.iterFields(function(val, field) {
-	            if(val instanceof Node) {
-	                nodes = nodes || {};
-	                nodes[field] = val;
-	            }
-	            else {
-	                props = props || {};
-	                props[field] = val;
-	            }
-	        });
-
-	        if(props) {
-	            print(JSON.stringify(props, null, 2) + '\n', null, true);
-	        }
-	        else {
-	            print('\n');
-	        }
-
-	        if(nodes) {
-	            for(var k in nodes) {
-	                printNodes(nodes[k], indent + 2);
-	            }
-	        }
-
-	    }
-	}
-
-	// var t = new NodeList(0, 0,
-	//                      [new Value(0, 0, 3),
-	//                       new Value(0, 0, 10),
-	//                       new Pair(0, 0,
-	//                                new Value(0, 0, 'key'),
-	//                                new Value(0, 0, 'value'))]);
-	// printNodes(t);
-
-	module.exports = {
-	    Node: Node,
-	    Root: Root,
-	    NodeList: NodeList,
-	    Value: Value,
-	    Literal: Literal,
-	    Symbol: Symbol,
-	    Group: Group,
-	    Array: Array,
-	    Pair: Pair,
-	    Dict: Dict,
-	    Output: Output,
-	    TemplateData: TemplateData,
-	    If: If,
-	    IfAsync: IfAsync,
-	    InlineIf: InlineIf,
-	    For: For,
-	    AsyncEach: AsyncEach,
-	    AsyncAll: AsyncAll,
-	    Macro: Macro,
-	    Caller: Caller,
-	    Import: Import,
-	    FromImport: FromImport,
-	    FunCall: FunCall,
-	    Filter: Filter,
-	    FilterAsync: FilterAsync,
-	    KeywordArgs: KeywordArgs,
-	    Block: Block,
-	    Super: Super,
-	    Extends: Extends,
-	    Include: Include,
-	    Set: Set,
-	    LookupVal: LookupVal,
-	    BinOp: BinOp,
-	    In: In,
-	    Or: Or,
-	    And: And,
-	    Not: Not,
-	    Add: Add,
-	    Sub: Sub,
-	    Mul: Mul,
-	    Div: Div,
-	    FloorDiv: FloorDiv,
-	    Mod: Mod,
-	    Pow: Pow,
-	    Neg: Neg,
-	    Pos: Pos,
-	    Compare: Compare,
-	    CompareOperand: CompareOperand,
-
-	    CallExtension: CallExtension,
-	    CallExtensionAsync: CallExtensionAsync,
-
-	    printNodes: printNodes
-	};
-
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(14)))
-
-/***/ },
-/* 17 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-
-	// rawAsap provides everything we need except exception management.
-	var rawAsap = __webpack_require__(18);
-	// RawTasks are recycled to reduce GC churn.
-	var freeTasks = [];
-	// We queue errors to ensure they are thrown in right order (FIFO).
-	// Array-as-queue is good enough here, since we are just dealing with exceptions.
-	var pendingErrors = [];
-	var requestErrorThrow = rawAsap.makeRequestCallFromTimer(throwFirstError);
-
-	function throwFirstError() {
-	    if (pendingErrors.length) {
-	        throw pendingErrors.shift();
-	    }
-	}
-
-	/**
-	 * Calls a task as soon as possible after returning, in its own event, with priority
-	 * over other events like animation, reflow, and repaint. An error thrown from an
-	 * event will not interrupt, nor even substantially slow down the processing of
-	 * other events, but will be rather postponed to a lower priority event.
-	 * @param {{call}} task A callable object, typically a function that takes no
-	 * arguments.
-	 */
-	module.exports = asap;
-	function asap(task) {
-	    var rawTask;
-	    if (freeTasks.length) {
-	        rawTask = freeTasks.pop();
-	    } else {
-	        rawTask = new RawTask();
-	    }
-	    rawTask.task = task;
-	    rawAsap(rawTask);
-	}
-
-	// We wrap tasks with recyclable task objects.  A task object implements
-	// `call`, just like a function.
-	function RawTask() {
-	    this.task = null;
-	}
-
-	// The sole purpose of wrapping the task is to catch the exception and recycle
-	// the task object after its single use.
-	RawTask.prototype.call = function () {
-	    try {
-	        this.task.call();
-	    } catch (error) {
-	        if (asap.onerror) {
-	            // This hook exists purely for testing purposes.
-	            // Its name will be periodically randomized to break any code that
-	            // depends on its existence.
-	            asap.onerror(error);
-	        } else {
-	            // In a web browser, exceptions are not fatal. However, to avoid
-	            // slowing down the queue of pending tasks, we rethrow the error in a
-	            // lower priority turn.
-	            pendingErrors.push(error);
-	            requestErrorThrow();
-	        }
-	    } finally {
-	        this.task = null;
-	        freeTasks[freeTasks.length] = this;
-	    }
-	};
-
-
-/***/ },
 /* 18 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ function(module, exports) {
 
-	/* WEBPACK VAR INJECTION */(function(global) {"use strict";
+	function installCompat() {
+	  'use strict';
 
-	// Use the fastest means possible to execute a task in its own turn, with
-	// priority over other events including IO, animation, reflow, and redraw
-	// events in browsers.
-	//
-	// An exception thrown by a task will permanently interrupt the processing of
-	// subsequent tasks. The higher level `asap` function ensures that if an
-	// exception is thrown by a task, that the task queue will continue flushing as
-	// soon as possible, but if you use `rawAsap` directly, you are responsible to
-	// either ensure that no exceptions are thrown from your task, or to manually
-	// call `rawAsap.requestFlush` if an exception is thrown.
-	module.exports = rawAsap;
-	function rawAsap(task) {
-	    if (!queue.length) {
-	        requestFlush();
-	        flushing = true;
+	  // This must be called like `nunjucks.installCompat` so that `this`
+	  // references the nunjucks instance
+	  var runtime = this.runtime; // jshint ignore:line
+	  var lib = this.lib; // jshint ignore:line
+
+	  var orig_contextOrFrameLookup = runtime.contextOrFrameLookup;
+	  runtime.contextOrFrameLookup = function(context, frame, key) {
+	    var val = orig_contextOrFrameLookup.apply(this, arguments);
+	    if (val === undefined) {
+	      switch (key) {
+	      case 'True':
+	        return true;
+	      case 'False':
+	        return false;
+	      case 'None':
+	        return null;
+	      }
 	    }
-	    // Equivalent to push, but avoids a function call.
-	    queue[queue.length] = task;
-	}
 
-	var queue = [];
-	// Once a flush has been requested, no further calls to `requestFlush` are
-	// necessary until the next `flush` completes.
-	var flushing = false;
-	// `requestFlush` is an implementation-specific method that attempts to kick
-	// off a `flush` event as quickly as possible. `flush` will attempt to exhaust
-	// the event queue before yielding to the browser's own event loop.
-	var requestFlush;
-	// The position of the next task to execute in the task queue. This is
-	// preserved between calls to `flush` so that it can be resumed if
-	// a task throws an exception.
-	var index = 0;
-	// If a task schedules additional tasks recursively, the task queue can grow
-	// unbounded. To prevent memory exhaustion, the task queue will periodically
-	// truncate already-completed tasks.
-	var capacity = 1024;
+	    return val;
+	  };
 
-	// The flush function processes all tasks that have been scheduled with
-	// `rawAsap` unless and until one of those tasks throws an exception.
-	// If a task throws an exception, `flush` ensures that its state will remain
-	// consistent and will resume where it left off when called again.
-	// However, `flush` does not make any arrangements to be called again if an
-	// exception is thrown.
-	function flush() {
-	    while (index < queue.length) {
-	        var currentIndex = index;
-	        // Advance the index before calling the task. This ensures that we will
-	        // begin flushing on the next task the task throws an error.
-	        index = index + 1;
-	        queue[currentIndex].call();
-	        // Prevent leaking memory for long chains of recursive calls to `asap`.
-	        // If we call `asap` within tasks scheduled by `asap`, the queue will
-	        // grow, but to avoid an O(n) walk for every task we execute, we don't
-	        // shift tasks off the queue after they have been executed.
-	        // Instead, we periodically shift 1024 tasks off the queue.
-	        if (index > capacity) {
-	            // Manually shift all values starting at the index back to the
-	            // beginning of the queue.
-	            for (var scan = 0, newLength = queue.length - index; scan < newLength; scan++) {
-	                queue[scan] = queue[scan + index];
-	            }
-	            queue.length -= index;
-	            index = 0;
+	  var orig_memberLookup = runtime.memberLookup;
+	  var ARRAY_MEMBERS = {
+	    pop: function(index) {
+	      if (index === undefined) {
+	        return this.pop();
+	      }
+	      if (index >= this.length || index < 0) {
+	        throw new Error('KeyError');
+	      }
+	      return this.splice(index, 1);
+	    },
+	    remove: function(element) {
+	      for (var i = 0; i < this.length; i++) {
+	        if (this[i] === element) {
+	          return this.splice(i, 1);
 	        }
+	      }
+	      throw new Error('ValueError');
+	    },
+	    count: function(element) {
+	      var count = 0;
+	      for (var i = 0; i < this.length; i++) {
+	        if (this[i] === element) {
+	          count++;
+	        }
+	      }
+	      return count;
+	    },
+	    index: function(element) {
+	      var i;
+	      if ((i = this.indexOf(element)) === -1) {
+	        throw new Error('ValueError');
+	      }
+	      return i;
+	    },
+	    find: function(element) {
+	      return this.indexOf(element);
+	    },
+	    insert: function(index, elem) {
+	      return this.splice(index, 0, elem);
 	    }
-	    queue.length = 0;
-	    index = 0;
-	    flushing = false;
+	  };
+	  var OBJECT_MEMBERS = {
+	    items: function() {
+	      var ret = [];
+	      for(var k in this) {
+	        ret.push([k, this[k]]);
+	      }
+	      return ret;
+	    },
+	    values: function() {
+	      var ret = [];
+	      for(var k in this) {
+	        ret.push(this[k]);
+	      }
+	      return ret;
+	    },
+	    keys: function() {
+	      var ret = [];
+	      for(var k in this) {
+	        ret.push(k);
+	      }
+	      return ret;
+	    },
+	    get: function(key, def) {
+	      var output = this[key];
+	      if (output === undefined) {
+	        output = def;
+	      }
+	      return output;
+	    },
+	    has_key: function(key) {
+	      return this.hasOwnProperty(key);
+	    },
+	    pop: function(key, def) {
+	      var output = this[key];
+	      if (output === undefined && def !== undefined) {
+	        output = def;
+	      } else if (output === undefined) {
+	        throw new Error('KeyError');
+	      } else {
+	        delete this[key];
+	      }
+	      return output;
+	    },
+	    popitem: function() {
+	      for (var k in this) {
+	        // Return the first object pair.
+	        var val = this[k];
+	        delete this[k];
+	        return [k, val];
+	      }
+	      throw new Error('KeyError');
+	    },
+	    setdefault: function(key, def) {
+	      if (key in this) {
+	        return this[key];
+	      }
+	      if (def === undefined) {
+	        def = null;
+	      }
+	      return this[key] = def;
+	    },
+	    update: function(kwargs) {
+	      for (var k in kwargs) {
+	        this[k] = kwargs[k];
+	      }
+	      return null;  // Always returns None
+	    }
+	  };
+	  OBJECT_MEMBERS.iteritems = OBJECT_MEMBERS.items;
+	  OBJECT_MEMBERS.itervalues = OBJECT_MEMBERS.values;
+	  OBJECT_MEMBERS.iterkeys = OBJECT_MEMBERS.keys;
+	  runtime.memberLookup = function(obj, val, autoescape) { // jshint ignore:line
+	    obj = obj || {};
+
+	    // If the object is an object, return any of the methods that Python would
+	    // otherwise provide.
+	    if (lib.isArray(obj) && ARRAY_MEMBERS.hasOwnProperty(val)) {
+	      return function() {return ARRAY_MEMBERS[val].apply(obj, arguments);};
+	    }
+
+	    if (lib.isObject(obj) && OBJECT_MEMBERS.hasOwnProperty(val)) {
+	      return function() {return OBJECT_MEMBERS[val].apply(obj, arguments);};
+	    }
+
+	    return orig_memberLookup.apply(this, arguments);
+	  };
 	}
 
-	// `requestFlush` is implemented using a strategy based on data collected from
-	// every available SauceLabs Selenium web driver worker at time of writing.
-	// https://docs.google.com/spreadsheets/d/1mG-5UYGup5qxGdEMWkhP6BWCz053NUb2E1QoUTU16uA/edit#gid=783724593
+	module.exports = installCompat;
 
-	// Safari 6 and 6.1 for desktop, iPad, and iPhone are the only browsers that
-	// have WebKitMutationObserver but not un-prefixed MutationObserver.
-	// Must use `global` instead of `window` to work in both frames and web
-	// workers. `global` is a provision of Browserify, Mr, Mrs, or Mop.
-	var BrowserMutationObserver = global.MutationObserver || global.WebKitMutationObserver;
-
-	// MutationObservers are desirable because they have high priority and work
-	// reliably everywhere they are implemented.
-	// They are implemented in all modern browsers.
-	//
-	// - Android 4-4.3
-	// - Chrome 26-34
-	// - Firefox 14-29
-	// - Internet Explorer 11
-	// - iPad Safari 6-7.1
-	// - iPhone Safari 7-7.1
-	// - Safari 6-7
-	if (typeof BrowserMutationObserver === "function") {
-	    requestFlush = makeRequestCallFromMutationObserver(flush);
-
-	// MessageChannels are desirable because they give direct access to the HTML
-	// task queue, are implemented in Internet Explorer 10, Safari 5.0-1, and Opera
-	// 11-12, and in web workers in many engines.
-	// Although message channels yield to any queued rendering and IO tasks, they
-	// would be better than imposing the 4ms delay of timers.
-	// However, they do not work reliably in Internet Explorer or Safari.
-
-	// Internet Explorer 10 is the only browser that has setImmediate but does
-	// not have MutationObservers.
-	// Although setImmediate yields to the browser's renderer, it would be
-	// preferrable to falling back to setTimeout since it does not have
-	// the minimum 4ms penalty.
-	// Unfortunately there appears to be a bug in Internet Explorer 10 Mobile (and
-	// Desktop to a lesser extent) that renders both setImmediate and
-	// MessageChannel useless for the purposes of ASAP.
-	// https://github.com/kriskowal/q/issues/396
-
-	// Timers are implemented universally.
-	// We fall back to timers in workers in most engines, and in foreground
-	// contexts in the following browsers.
-	// However, note that even this simple case requires nuances to operate in a
-	// broad spectrum of browsers.
-	//
-	// - Firefox 3-13
-	// - Internet Explorer 6-9
-	// - iPad Safari 4.3
-	// - Lynx 2.8.7
-	} else {
-	    requestFlush = makeRequestCallFromTimer(flush);
-	}
-
-	// `requestFlush` requests that the high priority event queue be flushed as
-	// soon as possible.
-	// This is useful to prevent an error thrown in a task from stalling the event
-	// queue if the exception handled by Node.js’s
-	// `process.on("uncaughtException")` or by a domain.
-	rawAsap.requestFlush = requestFlush;
-
-	// To request a high priority event, we induce a mutation observer by toggling
-	// the text of a text node between "1" and "-1".
-	function makeRequestCallFromMutationObserver(callback) {
-	    var toggle = 1;
-	    var observer = new BrowserMutationObserver(callback);
-	    var node = document.createTextNode("");
-	    observer.observe(node, {characterData: true});
-	    return function requestCall() {
-	        toggle = -toggle;
-	        node.data = toggle;
-	    };
-	}
-
-	// The message channel technique was discovered by Malte Ubl and was the
-	// original foundation for this library.
-	// http://www.nonblocking.io/2011/06/windownexttick.html
-
-	// Safari 6.0.5 (at least) intermittently fails to create message ports on a
-	// page's first load. Thankfully, this version of Safari supports
-	// MutationObservers, so we don't need to fall back in that case.
-
-	// function makeRequestCallFromMessageChannel(callback) {
-	//     var channel = new MessageChannel();
-	//     channel.port1.onmessage = callback;
-	//     return function requestCall() {
-	//         channel.port2.postMessage(0);
-	//     };
-	// }
-
-	// For reasons explained above, we are also unable to use `setImmediate`
-	// under any circumstances.
-	// Even if we were, there is another bug in Internet Explorer 10.
-	// It is not sufficient to assign `setImmediate` to `requestFlush` because
-	// `setImmediate` must be called *by name* and therefore must be wrapped in a
-	// closure.
-	// Never forget.
-
-	// function makeRequestCallFromSetImmediate(callback) {
-	//     return function requestCall() {
-	//         setImmediate(callback);
-	//     };
-	// }
-
-	// Safari 6.0 has a problem where timers will get lost while the user is
-	// scrolling. This problem does not impact ASAP because Safari 6.0 supports
-	// mutation observers, so that implementation is used instead.
-	// However, if we ever elect to use timers in Safari, the prevalent work-around
-	// is to add a scroll event listener that calls for a flush.
-
-	// `setTimeout` does not call the passed callback if the delay is less than
-	// approximately 7 in web workers in Firefox 8 through 18, and sometimes not
-	// even then.
-
-	function makeRequestCallFromTimer(callback) {
-	    return function requestCall() {
-	        // We dispatch a timeout with a specified delay of 0 for engines that
-	        // can reliably accommodate that request. This will usually be snapped
-	        // to a 4 milisecond delay, but once we're flushing, there's no delay
-	        // between events.
-	        var timeoutHandle = setTimeout(handleTimer, 0);
-	        // However, since this timer gets frequently dropped in Firefox
-	        // workers, we enlist an interval handle that will try to fire
-	        // an event 20 times per second until it succeeds.
-	        var intervalHandle = setInterval(handleTimer, 50);
-
-	        function handleTimer() {
-	            // Whichever timer succeeds will cancel both timers and
-	            // execute the callback.
-	            clearTimeout(timeoutHandle);
-	            clearInterval(intervalHandle);
-	            callback();
-	        }
-	    };
-	}
-
-	// This is for `asap.js` only.
-	// Its name will be periodically randomized to break any code that depends on
-	// its existence.
-	rawAsap.makeRequestCallFromTimer = makeRequestCallFromTimer;
-
-	// ASAP was originally a nextTick shim included in Q. This was factored out
-	// into this ASAP package. It was later adapted to RSVP which made further
-	// amendments. These decisions, particularly to marginalize MessageChannel and
-	// to capture the MutationObserver implementation in a closure, were integrated
-	// back into ASAP proper.
-	// https://github.com/tildeio/rsvp.js/blob/cddf7232546a9cf858524b75cde6f9edf72620a7/lib/rsvp/asap.js
-
-	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ }
 /******/ ]);

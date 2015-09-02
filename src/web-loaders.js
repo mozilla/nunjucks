@@ -5,7 +5,7 @@ var PrecompiledLoader = require('./precompiled-loader.js');
 
 var WebLoader = Loader.extend({
     init: function(baseURL, opts) {
-        this.baseURL = baseURL || '';
+        this.baseURL = baseURL || '.';
 
         // By default, the cache is turned off because there's no way
         // to "watch" templates over HTTP, so they are re-downloaded
