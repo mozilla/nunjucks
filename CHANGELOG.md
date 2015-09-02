@@ -4,6 +4,8 @@ Changelog
 master (unreleased)
 -------------------
 
+* Add `none` as a lexed constant evaluating to `null`. Merge of
+  [#480](https://github.com/mozilla/nunjucks/pull/480).
 * Fix rendering of multiple `raw` blocks. Thanks Aaron O'Mullan. Merge of
   [#503](https://github.com/mozilla/nunjucks/pull/503).
 * Avoid crashing on async loader error. Thanks Samy Pessé. Merge of
