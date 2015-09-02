@@ -67,6 +67,21 @@
             finish(done);
         });
 
+        it('should display none as empty string', function(done) {
+            equal('{{ none }}', '');
+            finish(done);
+        });
+
+        it('should compile none as falsy', function(done) {
+            equal('{% if not none %}yes{% endif %}', 'yes');
+            finish(done);
+        });
+
+        it('should compile none as null, not undefined', function(done) {
+            equal('{{ none|default("d", false) }}', '');
+            finish(done);
+        });
+
         it('should compile function calls', function(done) {
             equal('{{ foo("msg") }}',
                   { foo: function(str) { return str + 'hi'; }},

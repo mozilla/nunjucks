@@ -35,6 +35,7 @@ var TOKEN_PIPE = 'pipe';
 var TOKEN_INT = 'int';
 var TOKEN_FLOAT = 'float';
 var TOKEN_BOOLEAN = 'boolean';
+var TOKEN_NONE = 'none';
 var TOKEN_SYMBOL = 'symbol';
 var TOKEN_SPECIAL = 'special';
 var TOKEN_REGEX = 'regex';
@@ -194,6 +195,9 @@ Tokenizer.prototype.nextToken = function() {
             }
             else if(tok.match(/^(true|false)$/)) {
                 return token(TOKEN_BOOLEAN, tok, lineno, colno);
+            }
+            else if(tok === 'none') {
+                return token(TOKEN_NONE, tok, lineno, colno);
             }
             else if(tok) {
                 return token(TOKEN_SYMBOL, tok, lineno, colno);
@@ -493,6 +497,7 @@ module.exports = {
     TOKEN_INT: TOKEN_INT,
     TOKEN_FLOAT: TOKEN_FLOAT,
     TOKEN_BOOLEAN: TOKEN_BOOLEAN,
+    TOKEN_NONE: TOKEN_NONE,
     TOKEN_SYMBOL: TOKEN_SYMBOL,
     TOKEN_SPECIAL: TOKEN_SPECIAL,
     TOKEN_REGEX: TOKEN_REGEX

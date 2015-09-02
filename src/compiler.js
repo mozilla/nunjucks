@@ -298,6 +298,9 @@ var Compiler = Object.extend({
             val = val.replace(/\t/g, '\\t');
             this.emit('"' + val  + '"');
         }
+        else if (node.value === null) {
+            this.emit('null');
+        }
         else {
             this.emit(node.value.toString());
         }

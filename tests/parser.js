@@ -156,6 +156,11 @@
                    [nodes.Output,
                     [nodes.Literal, false]]]);
 
+            isAST(parser.parse('{{ none }}'),
+                  [nodes.Root,
+                   [nodes.Output,
+                    [nodes.Literal, null]]]);
+
             isAST(parser.parse('{{ foo }}'),
                   [nodes.Root,
                    [nodes.Output,

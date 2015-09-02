@@ -148,13 +148,14 @@
         });
 
         it('should parse basic types', function() {
-            tokens = lexer.lex('{{ 3 4.5 true false foo "hello" \'boo\' r/regex/ }}');
+            tokens = lexer.lex('{{ 3 4.5 true false none foo "hello" \'boo\' r/regex/ }}');
             hasTokens(tokens,
                       lexer.TOKEN_VARIABLE_START,
                       lexer.TOKEN_INT,
                       lexer.TOKEN_FLOAT,
                       lexer.TOKEN_BOOLEAN,
                       lexer.TOKEN_BOOLEAN,
+                      lexer.TOKEN_NONE,
                       lexer.TOKEN_SYMBOL,
                       lexer.TOKEN_STRING,
                       lexer.TOKEN_STRING,
