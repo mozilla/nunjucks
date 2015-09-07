@@ -373,8 +373,8 @@ var filters = {
         return res;
     },
 
-    sort: function(arr, reverse, caseSens, attr) {
-        // Copy it
+    sort: r.makeMacro(['value', 'reverse', 'case_sensitive', 'attribute'], [], function(arr, reverse, caseSens, attr) {
+         // Copy it
         arr = lib.map(arr, function(v) { return v; });
 
         arr.sort(function(a, b) {
@@ -406,7 +406,7 @@ var filters = {
         });
 
         return arr;
-    },
+    }),
 
     string: function(obj) {
         return r.copySafeness(obj, obj);
