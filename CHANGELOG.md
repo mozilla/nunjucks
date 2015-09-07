@@ -10,6 +10,8 @@ master (unreleased)
   [#503](https://github.com/mozilla/nunjucks/pull/503).
 * Avoid crashing on async loader error. Thanks Samy Pessé. Merge of
   [#504](https://github.com/mozilla/nunjucks/pull/504).
+* Add support for keyword arguments for sort filter. Thanks Andres Pardini. Merge of
+  [#510](https://github.com/mozilla/nunjucks/pull/510)
 
 
 v2.0.0 (Aug 30 2015)
