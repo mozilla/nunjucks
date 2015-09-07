@@ -382,6 +382,9 @@
                                  { name: 'john' }]},
                   'fredjamesjohn');
 
+            equal('{% for i in [ {n:3},{n:5},{n:2},{n:1},{n:4},{n:6}] | sort(attribute="n") %}{{ i.n }}{% endfor %}',
+                  '123456');
+
             finish(done);
         });
 
