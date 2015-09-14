@@ -253,7 +253,7 @@ See [Custom Tags](#custom-tags).
 removeExtension
 env.removeExtension(name)
 
-Remove a previously added custom extension named **name**
+Remove a previously added custom extension named **name**.
 
 {% endapi %}
 
@@ -266,7 +266,7 @@ Get an extension named **name**.
 {% api %}
 hasExtension
 env.hasExtension(name)
-Return true if a custom extension named **name** as been added.
+Return true if a custom extension named **name** has been added.
 {% endapi %}
 
 {% api %}
