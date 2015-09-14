@@ -103,7 +103,7 @@ var Environment = Obj.extend({
         var extension = this.getExtension(name);
         if (!extension) return;
 
-        this.extensionsList.remove(extension);
+        this.extensionsList = lib.without(this.extensionsList, extension);
         delete this.extensions[name];
     },
 
