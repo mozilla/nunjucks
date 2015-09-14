@@ -111,6 +111,10 @@ var Environment = Obj.extend({
         return this.extensions[name];
     },
 
+    hasExtension: function(name) {
+        return !!this.extensions[name];
+    },
+
     addGlobal: function(name, value) {
         globals[name] = value;
     },
