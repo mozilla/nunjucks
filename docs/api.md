@@ -228,7 +228,7 @@ env.addFilter(name, func, [async])
 
 Add a custom filter named **name** which calls **func** whenever
 invoked. If the filter needs to be async, **async** must be `true`
-(see [asynchronous support](#asynchronous-support)). See 
+(see [asynchronous support](#asynchronous-support)). See
 [Custom Filters](#custom-filters).
 
 {% endapi %}
@@ -250,9 +250,23 @@ See [Custom Tags](#custom-tags).
 {% endapi %}
 
 {% api %}
+removeExtension
+env.removeExtension(name)
+
+Remove a previously added custom extension named **name**.
+
+{% endapi %}
+
+{% api %}
 getExtension
 env.getExtension(name)
 Get an extension named **name**.
+{% endapi %}
+
+{% api %}
+hasExtension
+env.hasExtension(name)
+Return true if a custom extension named **name** has been added.
 {% endapi %}
 
 {% api %}
@@ -444,7 +458,7 @@ MyLoader.prototype.getSource = function(name) {
 It can get a little more complex. If you want to track updates to
 templates and bust the internal cache so that you can see updates, you
 need to extend the `Loader` class. This gives you `emit` method that
-can fire events. You need to call it 
+can fire events. You need to call it
 
 ```js
 var MyLoader = nunjucks.Loader.extend({
@@ -453,7 +467,7 @@ var MyLoader = nunjucks.Loader.extend({
         // and call `this.emit('update', name)` when a template
         // is changed
     }
-    
+
     getSource: function(name) {
         // load the template
     }
@@ -474,7 +488,7 @@ asynchronously.
 ```js
 var MyLoader = nunjucks.Loader.extend({
     async: true,
-    
+
     getSource: function(name, callback) {
         // load the template
         // ...

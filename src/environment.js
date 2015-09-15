@@ -99,8 +99,20 @@ var Environment = Obj.extend({
         this.extensionsList.push(extension);
     },
 
+    removeExtension: function(name) {
+        var extension = this.getExtension(name);
+        if (!extension) return;
+
+        this.extensionsList = lib.without(this.extensionsList, extension);
+        delete this.extensions[name];
+    },
+
     getExtension: function(name) {
         return this.extensions[name];
+    },
+
+    hasExtension: function(name) {
+        return !!this.extensions[name];
     },
 
     addGlobal: function(name, value) {
