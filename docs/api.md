@@ -697,10 +697,7 @@ By default, nunjucks will escape all output. It's recommended
 that you do this for security reasons. If you turn off autoescaping,
 nunjucks will render all output as it is by default.
 
-Autoescaping is rather simplistic in nunjucks right now. In the future,
-you will have more control over which files this kicks in.
-
-To desactivate it, all you have to do is pass the `autoescape` option as
+To deactivate it, all you have to do is pass the `autoescape` option as
 `false` to the `Environment` object.
 
 ```js

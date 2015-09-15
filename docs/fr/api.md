@@ -692,9 +692,6 @@ Par défaut, nunjucks échappera toutes les sorties. Il est recommandé
 de le faire pour des raisons de sécurité. Si autoescaping est désactivé,
 nunjucks rendra par défaut toutes les sorties telles quelles.
 
-L'Autoescaping est plutôt simpliste dans nunjucks. A l'avenir, vous aurez
-plus de contrôle sur les fichiers utilisés.
-
 Pour le désactiver, tout ce que vous avez à faire, c'est de passer
 l'option `autoescape` à `false` sur l'objet `Environment`.
 
