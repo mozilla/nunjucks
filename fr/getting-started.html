@@ -50,13 +50,13 @@
 <a href="#prise-en-main">Prise en main</a>
 <ul>
 <li>
-<a href="#lorsque-nous-utilisons-node-">Lorsque nous utilisons Node ...</a>
+<a href="#lorsque-nous-utilisons-node">Lorsque nous utilisons Node ...</a>
 </li>
 <li>
-<a href="#lorsque-nous-sommes-dans-un-navigateur-">Lorsque nous sommes dans un navigateur ...</a>
+<a href="#lorsque-nous-sommes-dans-un-navigateur">Lorsque nous sommes dans un navigateur ...</a>
 <ul>
 <li>
-<a href="#quel-fichier-devez-vous-utiliser-">Quel fichier devez-vous utiliser ?</a>
+<a href="#quel-fichier-devez-vous-utiliser">Quel fichier devez-vous utiliser ?</a>
 </li>
 </ul>
 </li>
@@ -64,7 +64,7 @@
 <a href="#utilisation">Utilisation</a>
 </li>
 <li>
-<a href="#plus-d39informations">Plus d&#39;informations</a>
+<a href="#plus-d-informations">Plus d'informations</a>
 </li>
 </ul>
 </li>
@@ -77,18 +77,18 @@
     <div class="locale btn-group"><a href="/nunjucks/getting-started.html" class="btn btn-default">English</a><a href="/nunjucks/cn/getting-started.html" class="btn btn-default">中文</a><a href="/nunjucks/fr/getting-started.html" class="btn btn-success">Français</a></div>
     <h1 id="prise-en-main">Prise en main</h1>
 
-<h2 id="lorsque-nous-utilisons-node-">Lorsque nous utilisons Node ...</h2>
-<div class="highlight"><pre><code class="text language-text" data-lang="text">$ npm install nunjucks
+<h2 id="lorsque-nous-utilisons-node">Lorsque nous utilisons Node ...</h2>
+<div class="highlight"><pre><code class="language-text" data-lang="text">$ npm install nunjucks
 </code></pre></div>
 <p>Une fois installé, utilisez simplement <code>require(&#39;nunjucks&#39;)</code> pour le charger.</p>
 
-<h2 id="lorsque-nous-sommes-dans-un-navigateur-">Lorsque nous sommes dans un navigateur ...</h2>
+<h2 id="lorsque-nous-sommes-dans-un-navigateur">Lorsque nous sommes dans un navigateur ...</h2>
 
 <p>Utilisez <a href="../files/nunjucks.js">nunjucks.js</a> (<a href="../files/nunjucks.min.js">min</a>) pour avoir l&#39;intégralité de la bibliothèque ou
 <a href="../files/nunjucks-slim.js">nunjucks-slim.js</a> (<a href="../files/nunjucks-slim.min.js">min</a>) pour avoir une version allégée
 qui fonctionne uniquement avec les templates précompilés.</p>
 
-<h3 id="quel-fichier-devez-vous-utiliser-">Quel fichier devez-vous utiliser ?</h3>
+<h3 id="quel-fichier-devez-vous-utiliser">Quel fichier devez-vous utiliser ?</h3>
 
 <ul>
 <li><p>Utilisez <strong>nunjucks.js</strong> pour charger dynamiquement les templates, pour auto-recharger
@@ -104,10 +104,10 @@ pour recompiler automatiquement les templates.</p></li>
 </ul>
 
 <p>Il suffit d&#39;inclure nunjucks avec une balise <code>script</code> dans la page :</p>
-<div class="highlight"><pre><code class="html language-html" data-lang="html"><span class="nt">&lt;script </span><span class="na">src=</span><span class="s">&quot;nunjucks.js&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
+<div class="highlight"><pre><code class="language-html" data-lang="html"><span class="nt">&lt;script </span><span class="na">src=</span><span class="s">&quot;nunjucks.js&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
 </code></pre></div>
 <p>ou le charger comme un module AMD :</p>
-<div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="nx">define</span><span class="p">([</span><span class="s1">&#39;nunjucks&#39;</span><span class="p">],</span> <span class="kd">function</span><span class="p">(</span><span class="nx">nunjucks</span><span class="p">)</span> <span class="p">{</span>
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">define</span><span class="p">([</span><span class="s1">&#39;nunjucks&#39;</span><span class="p">],</span> <span class="kd">function</span><span class="p">(</span><span class="nx">nunjucks</span><span class="p">)</span> <span class="p">{</span>
 <span class="p">});</span>
 </code></pre></div>
 <blockquote>
@@ -122,14 +122,14 @@ pour en savoir plus sur les configurations optimales côté client.</p>
 
 <p>Ceci est la façon la plus simple pour utiliser nunjucks. Tout d&#39;abord, définissez les indicateurs
 de configuration comme par exemple l&#39;auto-échappement puis faites le rendu d&#39;une chaîne :</p>
-<div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="nx">nunjucks</span><span class="p">.</span><span class="nx">configure</span><span class="p">({</span> <span class="nx">autoescape</span><span class="o">:</span> <span class="kc">true</span> <span class="p">});</span>
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">nunjucks</span><span class="p">.</span><span class="nx">configure</span><span class="p">({</span> <span class="nx">autoescape</span><span class="o">:</span> <span class="kc">true</span> <span class="p">});</span>
 <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">renderString</span><span class="p">(</span><span class="s1">&#39;Hello {{ username }}&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">username</span><span class="o">:</span> <span class="s1">&#39;James&#39;</span> <span class="p">});</span>
 </code></pre></div>
 <p>Généralement, vous n&#39;utiliserez pas <code>renderString</code>, au lieu de cela, vous devez écrire
 des templates dans des fichiers individuels et utiliser <code>render</code>. De cette façon, vous pouvez
 hériter et inclure des templates. Dans ce cas, vous devez dire à nunjucks
 où se trouvent ces fichiers templates avec le premier argument de <code>configure</code> :</p>
-<div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="nx">nunjucks</span><span class="p">.</span><span class="nx">configure</span><span class="p">(</span><span class="s1">&#39;views&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">autoescape</span><span class="o">:</span> <span class="kc">true</span> <span class="p">});</span>
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">nunjucks</span><span class="p">.</span><span class="nx">configure</span><span class="p">(</span><span class="s1">&#39;views&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">autoescape</span><span class="o">:</span> <span class="kc">true</span> <span class="p">});</span>
 <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="s1">&#39;index.html&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">foo</span><span class="o">:</span> <span class="s1">&#39;bar&#39;</span> <span class="p">});</span>
 </code></pre></div>
 <p>Dans node, <code>&#39;views&#39;</code> serait un chemin relatif par rapport au répertoire de travail
@@ -137,7 +137,7 @@ actuel. Dans le navigateur, ce serait une URL relative et vous
 voulez probablement qu&#39;elle soit absolue, telle que <code>&#39;/views&#39;</code>.</p>
 
 <p>En utilisant express ? Il suffit simplement de passer votre app express dans <code>configure</code> :</p>
-<div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="kd">var</span> <span class="nx">app</span> <span class="o">=</span> <span class="nx">express</span><span class="p">();</span>
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">app</span> <span class="o">=</span> <span class="nx">express</span><span class="p">();</span>
 
 <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">configure</span><span class="p">(</span><span class="s1">&#39;views&#39;</span><span class="p">,</span> <span class="p">{</span>
     <span class="nx">autoescape</span><span class="o">:</span> <span class="kc">true</span><span class="p">,</span>
@@ -158,7 +158,7 @@ plus. Cela facilite l&#39;utilisation du même code dans les environnements de
 développement et de production, en utilisant des templates précompilés en
 production.</p>
 
-<h2 id="plus-d39informations">Plus d&#39;informations</h2>
+<h2 id="plus-d-39-informations">Plus d&#39;informations</h2>
 
 <p>C&#39;est seulement la partie visible de l&#39;iceberg. Regardez <a href="api.html">API</a> pour les docs de l&#39;API
 et <a href="templating.html">Templating</a> pour le langage des templates.</p>

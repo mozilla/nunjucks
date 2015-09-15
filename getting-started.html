@@ -78,7 +78,7 @@
     <h1 id="getting-started">Getting Started</h1>
 
 <h2 id="when-using-node">When Using Node...</h2>
-<div class="highlight"><pre><code class="text language-text" data-lang="text">$ npm install nunjucks
+<div class="highlight"><pre><code class="language-text" data-lang="text">$ npm install nunjucks
 </code></pre></div>
 <p>Once installed, simply use <code>require(&#39;nunjucks&#39;)</code> to load it.</p>
 
@@ -104,10 +104,10 @@ automatically recompile templates.</p></li>
 </ul>
 
 <p>Simply include nunjucks with a <code>script</code> tag on the page:</p>
-<div class="highlight"><pre><code class="html language-html" data-lang="html"><span class="nt">&lt;script </span><span class="na">src=</span><span class="s">&quot;nunjucks.js&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
+<div class="highlight"><pre><code class="language-html" data-lang="html"><span class="nt">&lt;script </span><span class="na">src=</span><span class="s">&quot;nunjucks.js&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
 </code></pre></div>
 <p>or load it as an AMD module:</p>
-<div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="nx">define</span><span class="p">([</span><span class="s1">&#39;nunjucks&#39;</span><span class="p">],</span> <span class="kd">function</span><span class="p">(</span><span class="nx">nunjucks</span><span class="p">)</span> <span class="p">{</span>
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">define</span><span class="p">([</span><span class="s1">&#39;nunjucks&#39;</span><span class="p">],</span> <span class="kd">function</span><span class="p">(</span><span class="nx">nunjucks</span><span class="p">)</span> <span class="p">{</span>
 <span class="p">});</span>
 </code></pre></div>
 <blockquote>
@@ -122,14 +122,14 @@ Usage</a>.</p>
 
 <p>This is the simplest way to use nunjucks. First, set any configuration
 flags like autoescaping and then render a string:</p>
-<div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="nx">nunjucks</span><span class="p">.</span><span class="nx">configure</span><span class="p">({</span> <span class="nx">autoescape</span><span class="o">:</span> <span class="kc">true</span> <span class="p">});</span>
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">nunjucks</span><span class="p">.</span><span class="nx">configure</span><span class="p">({</span> <span class="nx">autoescape</span><span class="o">:</span> <span class="kc">true</span> <span class="p">});</span>
 <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">renderString</span><span class="p">(</span><span class="s1">&#39;Hello {{ username }}&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">username</span><span class="o">:</span> <span class="s1">&#39;James&#39;</span> <span class="p">});</span>
 </code></pre></div>
 <p>You usually won&#39;t use <code>renderString</code>, instead you should write
 templates in individual files and use <code>render</code>. That way you can
 inherit and include templates. In this case, you need to tell nunjucks
 where these files live with the first argument of <code>configure</code>:</p>
-<div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="nx">nunjucks</span><span class="p">.</span><span class="nx">configure</span><span class="p">(</span><span class="s1">&#39;views&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">autoescape</span><span class="o">:</span> <span class="kc">true</span> <span class="p">});</span>
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">nunjucks</span><span class="p">.</span><span class="nx">configure</span><span class="p">(</span><span class="s1">&#39;views&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">autoescape</span><span class="o">:</span> <span class="kc">true</span> <span class="p">});</span>
 <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="s1">&#39;index.html&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">foo</span><span class="o">:</span> <span class="s1">&#39;bar&#39;</span> <span class="p">});</span>
 </code></pre></div>
 <p>In node, <code>&#39;views&#39;</code> would be a path relative to the current working
@@ -137,7 +137,7 @@ directory. In the browser, it would be a relative URL, and you
 probably want it to be absolute, like <code>&#39;/views&#39;</code>.</p>
 
 <p>Using express? Simply pass your express app into <code>configure</code>:</p>
-<div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="kd">var</span> <span class="nx">app</span> <span class="o">=</span> <span class="nx">express</span><span class="p">();</span>
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">app</span> <span class="o">=</span> <span class="nx">express</span><span class="p">();</span>
 
 <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">configure</span><span class="p">(</span><span class="s1">&#39;views&#39;</span><span class="p">,</span> <span class="p">{</span>
     <span class="nx">autoescape</span><span class="o">:</span> <span class="kc">true</span><span class="p">,</span>

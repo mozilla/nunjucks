@@ -47,24 +47,24 @@
       <p><strong></strong></p>
       <ul>
 <li>
-<a href="#">快速上手</a>
+<a href="#快速上手">快速上手</a>
 <ul>
 <li>
-<a href="#node-">Node 端使用</a>
+<a href="#node-端使用">Node 端使用</a>
 </li>
 <li>
-<a href="#1">浏览器端使用</a>
+<a href="#浏览器端使用">浏览器端使用</a>
 <ul>
 <li>
-<a href="#2">你应该使用哪个文件</a>
+<a href="#你应该使用哪个文件">你应该使用哪个文件</a>
 </li>
 </ul>
 </li>
 <li>
-<a href="#3">使用说明</a>
+<a href="#使用说明">使用说明</a>
 </li>
 <li>
-<a href="#4">更多信息</a>
+<a href="#更多信息">更多信息</a>
 </li>
 </ul>
 </li>
@@ -75,18 +75,18 @@
 
   <div class="col-sm-9 main">
     <div class="locale btn-group"><a href="/nunjucks/getting-started.html" class="btn btn-default">English</a><a href="/nunjucks/cn/getting-started.html" class="btn btn-success">中文</a><a href="/nunjucks/fr/getting-started.html" class="btn btn-default">Français</a></div>
-    <h1 id="">快速上手</h1>
+    <h1 id="快速上手">快速上手</h1>
 
-<h2 id="node-">Node 端使用</h2>
-<div class="highlight"><pre><code class="text language-text" data-lang="text">$ npm install nunjucks
+<h2 id="node-端使用">Node 端使用</h2>
+<div class="highlight"><pre><code class="language-text" data-lang="text">$ npm install nunjucks
 </code></pre></div>
 <p>下载后可直接 <code>require(&#39;nunjucks&#39;)</code> 使用</p>
 
-<h2 id="1">浏览器端使用</h2>
+<h2 id="浏览器端使用">浏览器端使用</h2>
 
 <p>可直接使用 <a href="files/nunjucks.js">nunjucks.js</a> (<a href="files/nunjucks.min.js">min</a>)，如果针对编译后的模板可使用 <a href="files/nunjucks-slim.js">nunjucks-slim.js</a> (<a href="files/nunjucks-slim.min.js">min</a>)。</p>
 
-<h3 id="2">你应该使用哪个文件</h3>
+<h3 id="你应该使用哪个文件">你应该使用哪个文件</h3>
 
 <ul>
 <li><p><strong>nunjucks.js</strong> 可用于动态加载模板，当模板变化时重新加载，也可以用于预编译后的模板。包含编译器，所以会比较大 (20K min/gzipped)。如果你刚接触 nunjucks 可使用这个文件，如果你不在意大小也可以在生产环境使用。</p></li>
@@ -94,10 +94,10 @@
 </ul>
 
 <p>直接用 <code>script</code> 引入文件：</p>
-<div class="highlight"><pre><code class="html language-html" data-lang="html"><span class="nt">&lt;script </span><span class="na">src=</span><span class="s">&quot;nunjucks.js&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
+<div class="highlight"><pre><code class="language-html" data-lang="html"><span class="nt">&lt;script </span><span class="na">src=</span><span class="s">&quot;nunjucks.js&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
 </code></pre></div>
 <p>或者可以作为一个 AMD 模块加载：</p>
-<div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="nx">define</span><span class="p">([</span><span class="s1">&#39;nunjucks&#39;</span><span class="p">],</span> <span class="kd">function</span><span class="p">(</span><span class="nx">nunjucks</span><span class="p">)</span> <span class="p">{</span>
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">define</span><span class="p">([</span><span class="s1">&#39;nunjucks&#39;</span><span class="p">],</span> <span class="kd">function</span><span class="p">(</span><span class="nx">nunjucks</span><span class="p">)</span> <span class="p">{</span>
 <span class="p">});</span>
 </code></pre></div>
 <blockquote>
@@ -105,21 +105,21 @@
 task</a>，可在 <a href="api.html#browser-usage">浏览器使用</a> 查看客户端优化的配置。</p>
 </blockquote>
 
-<h2 id="3">使用说明</h2>
+<h2 id="使用说明">使用说明</h2>
 
 <p>这是最简单使用 nunjucks 的方式，首先设置配置项(如 autoescaping)，然后渲染一个字符串：</p>
-<div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="nx">nunjucks</span><span class="p">.</span><span class="nx">configure</span><span class="p">({</span> <span class="nx">autoescape</span><span class="o">:</span> <span class="kc">true</span> <span class="p">});</span>
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">nunjucks</span><span class="p">.</span><span class="nx">configure</span><span class="p">({</span> <span class="nx">autoescape</span><span class="o">:</span> <span class="kc">true</span> <span class="p">});</span>
 <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">renderString</span><span class="p">(</span><span class="s1">&#39;Hello {{ username }}&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">username</span><span class="o">:</span> <span class="s1">&#39;James&#39;</span> <span class="p">});</span>
 </code></pre></div>
 <p><code>renderString</code> 并不常用，而是使用 <code>render</code> 来直接渲染文件，这种方式支持继承(extends)和包含(include)模板。使用之前需要配置文件的路径：</p>
-<div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="nx">nunjucks</span><span class="p">.</span><span class="nx">configure</span><span class="p">(</span><span class="s1">&#39;views&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">autoescape</span><span class="o">:</span> <span class="kc">true</span> <span class="p">});</span>
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">nunjucks</span><span class="p">.</span><span class="nx">configure</span><span class="p">(</span><span class="s1">&#39;views&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">autoescape</span><span class="o">:</span> <span class="kc">true</span> <span class="p">});</span>
 <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="s1">&#39;index.html&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">foo</span><span class="o">:</span> <span class="s1">&#39;bar&#39;</span> <span class="p">});</span>
 </code></pre></div>
 <p>在 node 端，<code>&#39;views&#39;</code> 为相对于当前工作目录 (working
 directory) 的路径。在浏览器端则为一个相对的 url，最好指定为绝对路径 (如 <code>&#39;/views&#39;</code>)。</p>
 
 <p>如果使用 express 可直接传入 <code>configure</code>：</p>
-<div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="kd">var</span> <span class="nx">app</span> <span class="o">=</span> <span class="nx">express</span><span class="p">();</span>
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">app</span> <span class="o">=</span> <span class="nx">express</span><span class="p">();</span>
 
 <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">configure</span><span class="p">(</span><span class="s1">&#39;views&#39;</span><span class="p">,</span> <span class="p">{</span>
     <span class="nx">autoescape</span><span class="o">:</span> <span class="kc">true</span><span class="p">,</span>
@@ -138,7 +138,7 @@ anything different. This makes it easy to use the same code in
 development and production, while only using precompiled templates in
 production.</p>
 
-<h2 id="4">更多信息</h2>
+<h2 id="更多信息">更多信息</h2>
 
 <p>这只是冰山一角，可继续查看 <a href="api.html">API</a> 文档和<a href="templating.html">模板语言</a>。</p>
 

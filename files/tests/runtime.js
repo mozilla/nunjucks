@@ -58,7 +58,7 @@
         it('should allow for undefined macro arguments in the last position', function(done) {
             render('{% macro foo(bar, baz) %}' +
                    '{{ bar }} {{ baz }}{% endmacro %}' +
-                   '{{ foo("hello", none) }}',
+                   '{{ foo("hello", nosuchvar) }}',
                    {},
                    { noThrow: true },
                    function(err, res) {

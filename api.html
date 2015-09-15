@@ -76,10 +76,10 @@
 <a href="#constructor">constructor</a>
 </li>
 <li>
-<a href="#render1">render</a>
+<a href="#render">render</a>
 </li>
 <li>
-<a href="#renderstring1">renderString</a>
+<a href="#renderstring">renderString</a>
 </li>
 <li>
 <a href="#addfilter">addFilter</a>
@@ -91,7 +91,13 @@
 <a href="#addextension">addExtension</a>
 </li>
 <li>
+<a href="#removeextension">removeExtension</a>
+</li>
+<li>
 <a href="#getextension">getExtension</a>
+</li>
+<li>
+<a href="#hasextension">hasExtension</a>
 </li>
 <li>
 <a href="#addglobal">addGlobal</a>
@@ -106,7 +112,7 @@
 <a href="#express">express</a>
 </li>
 <li>
-<a href="#optsautoescape">opts.autoescape</a>
+<a href="#opts-autoescape">opts.autoescape</a>
 </li>
 </ul>
 </li>
@@ -114,10 +120,10 @@
 <a href="#template">Template</a>
 <ul>
 <li>
-<a href="#constructor1">constructor</a>
+<a href="#constructor">constructor</a>
 </li>
 <li>
-<a href="#render2">render</a>
+<a href="#render">render</a>
 </li>
 </ul>
 </li>
@@ -160,7 +166,7 @@
 <a href="#precompiling">Precompiling</a>
 <ul>
 <li>
-<a href="#api1">API</a>
+<a href="#api">API</a>
 </li>
 <li>
 <a href="#precompile">precompile</a>
@@ -188,10 +194,10 @@
 <a href="#custom-filters">Custom Filters</a>
 <ul>
 <li>
-<a href="#keyworddefault-arguments">Keyword/Default Arguments</a>
+<a href="#keyword-default-arguments">Keyword/Default Arguments</a>
 </li>
 <li>
-<a href="#asynchronous1">Asynchronous</a>
+<a href="#asynchronous">Asynchronous</a>
 </li>
 </ul>
 </li>
@@ -199,7 +205,7 @@
 <a href="#custom-tags">Custom Tags</a>
 <ul>
 <li>
-<a href="#asynchronous2">Asynchronous</a>
+<a href="#asynchronous">Asynchronous</a>
 </li>
 </ul>
 </li>
@@ -383,7 +389,7 @@ the browser. See <a href="#loader"><code>Loader</code></a> for more information.
 </code></pre></div>
 </div>
 
-<h3 id="render1">render</h3>
+<h3 id="render">render</h3>
 
 <div class="api-sig"><code>env.render(name, [context], [callback])</code></div>
 
@@ -400,7 +406,7 @@ return the rendered string.</p>
 </code></pre></div>
 </div>
 
-<h3 id="renderstring1">renderString</h3>
+<h3 id="renderstring">renderString</h3>
 
 <div class="api-sig"><code>env.renderString(src, [context], [callback])</code></div>
 
@@ -416,7 +422,7 @@ loading a template.</p>
 
 <div class="api-desc"><p>Add a custom filter named <strong>name</strong> which calls <strong>func</strong> whenever
 invoked. If the filter needs to be async, <strong>async</strong> must be <code>true</code>
-(see <a href="#asynchronous-support">asynchronous support</a>). See 
+(see <a href="#asynchronous-support">asynchronous support</a>). See
 <a href="#custom-filters">Custom Filters</a>.</p>
 </div>
 
@@ -436,11 +442,25 @@ with a few specific methods that are called by the extension system.
 See <a href="#custom-tags">Custom Tags</a>.</p>
 </div>
 
+<h3 id="removeextension">removeExtension</h3>
+
+<div class="api-sig"><code>env.removeExtension(name)</code></div>
+
+<div class="api-desc"><p>Remove a previously added custom extension named <strong>name</strong>.</p>
+</div>
+
 <h3 id="getextension">getExtension</h3>
 
 <div class="api-sig"><code>env.getExtension(name)</code></div>
 
 <div class="api-desc"><p>Get an extension named <strong>name</strong>.</p>
+</div>
+
+<h3 id="hasextension">hasExtension</h3>
+
+<div class="api-sig"><code>env.hasExtension(name)</code></div>
+
+<div class="api-desc"><p>Return true if a custom extension named <strong>name</strong> has been added.</p>
 </div>
 
 <h3 id="addglobal">addGlobal</h3>
@@ -493,7 +513,7 @@ by passing in the app as the <strong>express</strong> option.</p>
 </code></pre></div>
 </div>
 
-<h3 id="optsautoescape">opts.autoescape</h3>
+<h3 id="opts-autoescape">opts.autoescape</h3>
 
 <div class="api-sig"><code>env.opts.autoescape</code></div>
 
@@ -513,7 +533,7 @@ you, but you can easily use it yourself. If you don&#39;t connect a
 template with an environment, you can&#39;t include or inherit any other
 templates.</p>
 
-<h3 id="constructor1">constructor</h3>
+<h3 id="constructor">constructor</h3>
 
 <div class="api-sig"><code>new Template(src, [env], [path], [eagerCompile])</code></div>
 
@@ -528,7 +548,7 @@ immediately instead of waiting until the template is rendered.</p>
 </code></pre></div>
 </div>
 
-<h3 id="render2">render</h3>
+<h3 id="render">render</h3>
 
 <div class="api-sig"><code>tmpl.render(context, [callback])</code></div>
 
@@ -600,7 +620,7 @@ production, this should always be the case. See
 <p>You can write loaders for more complex loading, like from a database.
 If you want to do this, just create an object that has a method
 <code>getSource(name)</code>, where <strong>name</strong> is the name of the template. That&#39;s it.</p>
-<div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="kd">function</span> <span class="nx">MyLoader</span><span class="p">(</span><span class="nx">opts</span><span class="p">)</span> <span class="p">{</span>
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">function</span> <span class="nx">MyLoader</span><span class="p">(</span><span class="nx">opts</span><span class="p">)</span> <span class="p">{</span>
     <span class="c1">// configuration</span>
 <span class="p">}</span>
 
@@ -615,8 +635,8 @@ If you want to do this, just create an object that has a method
 <p>It can get a little more complex. If you want to track updates to
 templates and bust the internal cache so that you can see updates, you
 need to extend the <code>Loader</code> class. This gives you <code>emit</code> method that
-can fire events. You need to call it </p>
-<div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="kd">var</span> <span class="nx">MyLoader</span> <span class="o">=</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">Loader</span><span class="p">.</span><span class="nx">extend</span><span class="p">({</span>
+can fire events. You need to call it</p>
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">MyLoader</span> <span class="o">=</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">Loader</span><span class="p">.</span><span class="nx">extend</span><span class="p">({</span>
     <span class="nx">init</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
         <span class="c1">// setup a process which watches templates here</span>
         <span class="c1">// and call `this.emit(&#39;update&#39;, name)` when a template</span>
@@ -638,7 +658,7 @@ You might want to load from a database, however.</p>
 
 <p>Just add an <code>async: true</code> property to your loader and it will be used
 asynchronously.</p>
-<div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="kd">var</span> <span class="nx">MyLoader</span> <span class="o">=</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">Loader</span><span class="p">.</span><span class="nx">extend</span><span class="p">({</span>
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">MyLoader</span> <span class="o">=</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">Loader</span><span class="p">.</span><span class="nx">extend</span><span class="p">({</span>
     <span class="nx">async</span><span class="o">:</span> <span class="kc">true</span><span class="p">,</span>
 
     <span class="nx">getSource</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">name</span><span class="p">,</span> <span class="nx">callback</span><span class="p">)</span> <span class="p">{</span>
@@ -736,7 +756,7 @@ same code to production.</p>
 <p>To precompile your templates, use the <code>nunjucks-precompile</code> script
 that comes with nunjucks. You can pass it a directory or a file and it
 will generate all the JavaScript for your templates.</p>
-<div class="highlight"><pre><code class="text language-text" data-lang="text">// Precompiling a whole directory
+<div class="highlight"><pre><code class="language-text" data-lang="text">// Precompiling a whole directory
 $ nunjucks-precompile views &gt; templates.js
 
 // Precompiling individual templates
@@ -758,7 +778,7 @@ normal synchronous filters, you don&#39;t need to do anything.</p>
 <p>Extensions cannot be specified with this script. You must use the
 precompile API below if you use them.</p>
 
-<h3 id="api1">API</h3>
+<h3 id="api">API</h3>
 
 <p>There is also an API if you want to programmatically precompile
 templates. You&#39;ll want to do this if you use extensions or you use
@@ -829,7 +849,7 @@ performance problem because they are cached from the filesystem and
 you should precompile your templates and never use HTTP in production.</p>
 
 <p>If you are using anything async, you need to use the async API like this:</p>
-<div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="nx">nunjucks</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="s1">&#39;foo.html&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">res</span><span class="p">)</span> <span class="p">{</span>
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">nunjucks</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="s1">&#39;foo.html&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">res</span><span class="p">)</span> <span class="p">{</span>
    <span class="c1">// check err and handle result</span>
 <span class="p">});</span>
 </code></pre></div>
@@ -856,22 +876,20 @@ exactly the same as <code>for</code> except asynchronous.</li>
 
 <h2 id="autoescaping">Autoescaping</h2>
 
-<p>By default, nunjucks will render all output as it is. If you turn on
-autoescaping, nunjucks will escape all output by default. It&#39;s
-recommended that you do this for security reasons.</p>
+<p>By default, nunjucks will escape all output. It&#39;s recommended
+that you do this for security reasons. If you turn off autoescaping,
+nunjucks will render all output as it is by default.</p>
 
-<p>Autoescaping is rather simplistic in nunjucks right now. All you have
-to do is pass the <code>autoescape</code> option as <code>true</code> to the <code>Environment</code>
-object. In the future, you will have more control over which files
-this kicks in.</p>
-<div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="kd">var</span> <span class="nx">env</span> <span class="o">=</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">configure</span><span class="p">(</span><span class="s1">&#39;/path/to/templates&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">autoescape</span><span class="o">:</span> <span class="kc">true</span> <span class="p">});</span>
+<p>To deactivate it, all you have to do is pass the <code>autoescape</code> option as
+<code>false</code> to the <code>Environment</code> object.</p>
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">env</span> <span class="o">=</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">configure</span><span class="p">(</span><span class="s1">&#39;/path/to/templates&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">autoescape</span><span class="o">:</span> <span class="kc">false</span> <span class="p">});</span>
 </code></pre></div>
 <h2 id="customizing-syntax">Customizing Syntax</h2>
 
 <p>If you want different tokens than <code>{{</code> and the rest for variables,
 blocks, and comments, you can specify different tokens as the <code>tags</code>
 option:</p>
-<div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="kd">var</span> <span class="nx">env</span> <span class="o">=</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">configure</span><span class="p">(</span><span class="s1">&#39;/path/to/templates&#39;</span><span class="p">,</span> <span class="p">{</span>
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">env</span> <span class="o">=</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">configure</span><span class="p">(</span><span class="s1">&#39;/path/to/templates&#39;</span><span class="p">,</span> <span class="p">{</span>
   <span class="nx">tags</span><span class="o">:</span> <span class="p">{</span>
     <span class="nx">blockStart</span><span class="o">:</span> <span class="s1">&#39;&lt;%&#39;</span><span class="p">,</span>
     <span class="nx">blockEnd</span><span class="o">:</span> <span class="s1">&#39;%&gt;&#39;</span><span class="p">,</span>
@@ -883,7 +901,7 @@ option:</p>
 <span class="p">});</span>
 </code></pre></div>
 <p>Using this environment, templates will look like this:</p>
-<div class="highlight"><pre><code class="text language-text" data-lang="text">&lt;ul&gt;
+<div class="highlight"><pre><code class="language-text" data-lang="text">&lt;ul&gt;
 &lt;% for item in items %&gt;
   &lt;li&gt;&lt;$ item $&gt;&lt;/li&gt;
 &lt;% endfor %&gt;
@@ -895,7 +913,7 @@ option:</p>
 A filter is simply a function that takes the target object as the
 first argument and any arguments passed to the filter as the other
 arguments, in order.</p>
-<div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="kd">var</span> <span class="nx">nunjucks</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;nunjucks&#39;</span><span class="p">);</span>
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">nunjucks</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;nunjucks&#39;</span><span class="p">);</span>
 <span class="kd">var</span> <span class="nx">env</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">Environment</span><span class="p">();</span>
 
 <span class="nx">env</span><span class="p">.</span><span class="nx">addFilter</span><span class="p">(</span><span class="s1">&#39;shorten&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">str</span><span class="p">,</span> <span class="nx">count</span><span class="p">)</span> <span class="p">{</span>
@@ -905,13 +923,13 @@ arguments, in order.</p>
 <p>This adds a filter <code>shorten</code> which returns the first <code>count</code>
 characters in a string, with <code>count</code> defaulting to 5. Here is how it
 is used:</p>
-<div class="highlight"><pre><code class="jinja language-jinja" data-lang="jinja"><span class="c">{# Show the first 5 characters #}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="c">{# Show the first 5 characters #}</span><span class="x"></span>
 <span class="x">A message for you: </span><span class="cp">{{</span> <span class="nv">message</span><span class="o">|</span><span class="nf">shorten</span> <span class="cp">}}</span><span class="x"></span>
 
 <span class="c">{# Show the first 20 characters #}</span><span class="x"></span>
 <span class="x">A message for you: </span><span class="cp">{{</span> <span class="nv">message</span><span class="o">|</span><span class="nf">shorten</span><span class="o">(</span><span class="m">20</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
 </code></pre></div>
-<h3 id="keyworddefault-arguments">Keyword/Default Arguments</h3>
+<h3 id="keyword-default-arguments">Keyword/Default Arguments</h3>
 
 <p>As described in the
 <a href="templating#keyword-arguments">templating section</a>, nunjucks supports
@@ -920,12 +938,12 @@ that leverages them.</p>
 
 <p>All keyword arguments are passed in as a hash as the last argument.
 This is a filter <code>foo</code> that uses keyword arguments:</p>
-<div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="nx">env</span><span class="p">.</span><span class="nx">addFilter</span><span class="p">(</span><span class="s1">&#39;foo&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">num</span><span class="p">,</span> <span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">,</span> <span class="nx">kwargs</span><span class="p">)</span> <span class="p">{</span>
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">env</span><span class="p">.</span><span class="nx">addFilter</span><span class="p">(</span><span class="s1">&#39;foo&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">num</span><span class="p">,</span> <span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">,</span> <span class="nx">kwargs</span><span class="p">)</span> <span class="p">{</span>
    <span class="k">return</span> <span class="nx">num</span> <span class="o">+</span> <span class="p">(</span><span class="nx">kwargs</span><span class="p">.</span><span class="nx">bar</span> <span class="o">||</span> <span class="mi">10</span><span class="p">);</span>
 <span class="p">})</span>
 </code></pre></div>
 <p>The template can use it like this:</p>
-<div class="highlight"><pre><code class="jinja language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="m">5</span> <span class="o">|</span> <span class="nf">foo</span><span class="o">(</span><span class="m">1</span><span class="o">,</span> <span class="m">2</span><span class="o">)</span> <span class="cp">}}</span><span class="x">          -&gt; 15</span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="m">5</span> <span class="o">|</span> <span class="nf">foo</span><span class="o">(</span><span class="m">1</span><span class="o">,</span> <span class="m">2</span><span class="o">)</span> <span class="cp">}}</span><span class="x">          -&gt; 15</span>
 <span class="cp">{{</span> <span class="m">5</span> <span class="o">|</span> <span class="nf">foo</span><span class="o">(</span><span class="m">1</span><span class="o">,</span> <span class="m">2</span><span class="o">,</span> <span class="nv">bar</span><span class="o">=</span><span class="m">3</span><span class="o">)</span> <span class="cp">}}</span><span class="x">   -&gt; 8</span>
 </code></pre></div>
 <p>You <em>must</em> pass all of the positional arguments before keyword
@@ -933,11 +951,11 @@ arguments (<code>foo(1)</code> is valid but <code>foo(1, bar=10)</code> is not).
 cannot set a positional argument with a keyword argument like you can
 in Python (such as <code>foo(1, y=1)</code>)</p>
 
-<h3 id="asynchronous1">Asynchronous</h3>
+<h3 id="asynchronous">Asynchronous</h3>
 
 <p>Asynchronous filters receive a callback to resume rendering, and are
 created by passing <code>true</code> as the third argument to <code>addFilter</code>.</p>
-<div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="kd">var</span> <span class="nx">env</span> <span class="o">=</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">configure</span><span class="p">(</span><span class="s1">&#39;views&#39;</span><span class="p">);</span>
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">env</span> <span class="o">=</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">configure</span><span class="p">(</span><span class="s1">&#39;views&#39;</span><span class="p">);</span>
 
 <span class="nx">env</span><span class="p">.</span><span class="nx">addFilter</span><span class="p">(</span><span class="s1">&#39;lookup&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">name</span><span class="p">,</span> <span class="nx">callback</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">db</span><span class="p">.</span><span class="nx">getItem</span><span class="p">(</span><span class="nx">name</span><span class="p">,</span> <span class="nx">callback</span><span class="p">);</span>
@@ -1008,7 +1026,7 @@ the tag, and a list of content blocks (parsed with
 
 <p>For example, here&#39;s how you would implement an extension that fetches
 content from a URL and injects it into the page:</p>
-<div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="kd">function</span> <span class="nx">RemoteExtension</span><span class="p">()</span> <span class="p">{</span>
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">function</span> <span class="nx">RemoteExtension</span><span class="p">()</span> <span class="p">{</span>
     <span class="k">this</span><span class="p">.</span><span class="nx">tags</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;remote&#39;</span><span class="p">];</span>
 
     <span class="k">this</span><span class="p">.</span><span class="nx">parse</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">parser</span><span class="p">,</span> <span class="nx">nodes</span><span class="p">,</span> <span class="nx">lexer</span><span class="p">)</span> <span class="p">{</span>
@@ -1061,13 +1079,13 @@ content from a URL and injects it into the page:</p>
 <span class="nx">env</span><span class="p">.</span><span class="nx">addExtension</span><span class="p">(</span><span class="s1">&#39;RemoteExtension&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">RemoteExtension</span><span class="p">());</span>
 </code></pre></div>
 <p>Use it like this:</p>
-<div class="highlight"><pre><code class="jinja language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">remote</span> <span class="s2">&quot;/stuff&quot;</span> <span class="cp">%}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">remote</span> <span class="s2">&quot;/stuff&quot;</span> <span class="cp">%}</span><span class="x"></span>
 <span class="x">  This content will be replaced with the content from /stuff</span>
 <span class="cp">{%</span> <span class="k">error</span> <span class="cp">%}</span><span class="x"></span>
 <span class="x">  There was an error fetching /stuff</span>
 <span class="cp">{%</span> <span class="k">endremote</span> <span class="cp">%}</span><span class="x"></span>
 </code></pre></div>
-<h3 id="asynchronous2">Asynchronous</h3>
+<h3 id="asynchronous">Asynchronous</h3>
 
 <p>Another available node is <code>CallExtensionAsync</code> which is an
 asynchronous version of <code>CallExtension</code>. It calls back into your
@@ -1075,7 +1093,7 @@ extension at runtime, with an additional parameter: a callback.
 Template rendering is paused until you call the callback to resume.</p>
 
 <p>The <code>run</code> function from the above example would now look like:</p>
-<div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="k">this</span><span class="p">.</span><span class="nx">run</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">context</span><span class="p">,</span> <span class="nx">url</span><span class="p">,</span> <span class="nx">body</span><span class="p">,</span> <span class="nx">errorBody</span><span class="p">,</span> <span class="nx">callback</span><span class="p">)</span> <span class="p">{</span>
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="k">this</span><span class="p">.</span><span class="nx">run</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">context</span><span class="p">,</span> <span class="nx">url</span><span class="p">,</span> <span class="nx">body</span><span class="p">,</span> <span class="nx">errorBody</span><span class="p">,</span> <span class="nx">callback</span><span class="p">)</span> <span class="p">{</span>
    <span class="c1">// do async stuff and then call callback(err, res)</span>
 <span class="p">};</span>
 </code></pre></div>
