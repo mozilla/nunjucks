@@ -487,7 +487,6 @@ le [support asynchrone](#support-asynchrone).
   [Soyez prudent !](#soyez-prudent-).
 
 
-
 ## Utilisation dans un navigateur
 
 L'utilisation de nunjucks dans le navigateur demande une réflexion plus approfondie, car vous
@@ -525,7 +524,6 @@ précompilation des templates.
 Cette méthode vous donnera une configuration qui charge dynamiquement les templates
 lors du développement (vous pouvez voir immédiatement les changements), mais utilise
 des templates précompilés en production.
-
 
 1. Chargez [nunjucks.js](../files/nunjucks.js) soit avec une balise script ou un chargeur de module.
 2. Rendez les templates ([par exemple](#api-simplifie))!
@@ -690,17 +688,18 @@ quelques règles lors de l'écriture des templates asynchrones :
 
 ## Autoescaping
 
-Par défaut, nunjucks rendra toutes les sorties telles quelles. Si autoescaping
-est activé, nunjucks échappera par défaut toutes les sorties. Il est
-recommandé de le faire pour des raisons de sécurité.
+Par défaut, nunjucks échappera toutes les sorties. Il est recommandé
+de le faire pour des raisons de sécurité. Si autoescaping est désactivé,
+nunjucks rendra par défaut toutes les sorties telles quelles.
 
-L'Autoescaping est plutôt simpliste dans nunjucks. Tout ce que vous avez
-à faire, c'est de passer l'option `autoescape` à `true` sur l'objet
-`Environment`. A l'avenir, vous aurez plus de contrôle sur les fichiers
-utilisés.
+L'Autoescaping est plutôt simpliste dans nunjucks. A l'avenir, vous aurez
+plus de contrôle sur les fichiers utilisés.
+
+Pour le désactiver, tout ce que vous avez à faire, c'est de passer
+l'option `autoescape` à `false` sur l'objet `Environment`.
 
 ```js
-var env = nunjucks.configure('/path/to/templates', { autoescape: true });
+var env = nunjucks.configure('/path/to/templates', { autoescape: false });
 ```
 
 ## Personnalisation de la syntaxe
