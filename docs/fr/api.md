@@ -250,9 +250,23 @@ Voir les [Tags personnalisés](#tags-personnaliss).
 {% endapi %}
 
 {% api %}
+removeExtension
+env.removeExtension(name)
+
+Supprime une extension personnalisée nommée **name** ajoutée précédemment.
+
+{% endapi %}
+
+{% api %}
 getExtension
 env.getExtension(name)
 Récupère une extension nommée **name**.
+{% endapi %}
+
+{% api %}
+hasExtension
+env.hasExtension(name)
+Retourne true si une extension personnalisée nommée **name** a été ajoutée.
 {% endapi %}
 
 {% api %}
