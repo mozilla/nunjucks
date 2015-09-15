@@ -48,9 +48,16 @@ nunjucks.configure([path], [opts]);
 
 传入 **path** 指定存放模板的目录，**opts** 可让某些功能开启或关闭，这两个变量都是可选的。**path** 的默认值为当前的工作目录，**opts** 提供以下功能：
 
-* **watch** *(默认值: true)* 当模板变化时重新加载
+* **autoescape** *(默认值: true)* 控制输出是否被转义，查看 [Autoescaping](#autoescaping)
+* **throwOnUndefined** *(default: false)* 当输出为 null 或 undefined 会抛出异常
+* **trimBlocks** *(default: false)* 自动去除 block/tag 后面的换行符
+* **lstripBlocks** *(default: false)* 自动去除 block/tag 签名的空格
+* **watch** *(默认值: false)* 当模板变化时重新加载
+* **noCache** *(default: false)* 不使用缓存，每次都重新编译
+* **web** 浏览器模块的配置项
+  * **useCache** *(default: false)* 是否使用缓存，否则会重新请求下载模板
+  * **async** *(default: false)* 是否使用 ajax 异步下载模板
 * **express** 传入 express 实例初始化模板设置
-* **autoescape** *(默认值: false)* 控制输出是否被转义，查看 [Autoescaping](#autoescaping)
 * **tags:** *(默认值: see nunjucks syntax)* 定义模板语法，查看 [Customizing Syntax](#customizing-syntax)
 
 `configure` 返回一个 `Environment` 实例, 他提供了简单的 api 添加过滤器 (filters) 和扩展 (extensions)，可在 `Environment` 查看更多的使用方法。
@@ -74,6 +81,15 @@ var env = nunjucks.configure('views');
 ```
 
 {% endapi %}
+
+{% api %}
+installJinjaCompat
+nunjucks.installJinjaCompat()
+
+这个方法为了与 Jinja 更好的兼容，增加了一些适配 Python 的 API。但是 nunjucks 不是为了完全兼容 Jinja/Pyhton，这只为了帮助使用者查看。
+
+增加了 `True` 和 `False`，与 js 的 `true` 和 `false` 相对应。并增加 Array 和 Object 使之适配 Python 风格的。[查看源码](https://github.com/mozilla/nunjucks/blob/master/src/jinja-compat.js)能看到所有功能。
+{% endapi %}
 {% raw %}
 
 就是这么简单，如果希望自己定义模板加载等更多的个性化设置，那么可以继续往下看。
@@ -91,7 +107,7 @@ new Environment([loaders], [opts])
 
 实例化 `Environment` 时传入两个参数，一组 **loaders** 和配置项 **opts**。如果 **loaders** 不存在，则默认从当前目录或地址加载。**loaders** 可为一个或多个，如果传入一个数组，nunjucks 会按顺序查找直到找到模板。更多查看 [`Loader`](#loader)
 
-**opts** 的配置有 **autoescape** and **tags**，在 [`configure`](#configure) 查看具体配置（express 和 watch 配置在这里不适用，而是在 [`env.express`](#express) 进行配置）。
+**opts** 的配置有 **autoescape**、**throwOnUndefined**、**trimBlocks** 和 **lstripBlocks**，在 [`configure`](#configure) 查看具体配置（express 和 watch 配置在这里不适用，而是在 [`env.express`](#express) 进行配置）。
 
 在 node 端使用 [`FileSystemLoader`](#filesystemloader) 加载模板，浏览器端则使用 [`WebLoader`](#webloader) 通过 http 加载（或使用编译后的模板）。如果你使用了 [`configure`](#configure) 的 api，nunjucks 会根据平台（node 或浏览器）自动选择对应的 loader。查看更多 [`Loader`](#loader)。
 
@@ -165,6 +181,14 @@ env.addExtension(name, ext)
 {% endapi %}
 
 {% api %}
+removeExtension
+env.removeExtension(name)
+
+删除之前添加的扩展 **name**。
+
+{% endapi %}
+
+{% api %}
 getExtension
 env.getExtension(name)
 
@@ -173,10 +197,24 @@ env.getExtension(name)
 {% endapi %}
 
 {% api %}
+hasExtension
+env.hasExtension(name)
+
+如果 **name** 扩展已经被添加，那返回 true。
+{% endapi %}
+
+{% api %}
 addGlobal
 env.addGlobal(name, value)
 
 添加一个全局变量，可以在所有模板使用。注意：这个会覆盖已有的 `name` 变量。
+{% endapi %}
+
+{% api %}
+getGlobal
+env.getGlobal(name)
+
+返回一个名为 **name** 的全局变量。
 {% endapi %}
 
 {% api %}
@@ -209,6 +247,14 @@ app.get('/', function(req, res) {
     res.render('index.html');
 });
 ```
+{% endapi %}
+
+{% api %}
+opts.autoescape
+env.opts.autoescape
+
+你可以通过这个配置控制是否全局开启模板转义，这对于创建高级过滤（如 html 操作）非常有用。
+正常情况你可以返回 SafeString，输出保持和输入一致不做任何处理，但这只在很少场景下有用。
 {% endapi %}
 {% raw %}
 
@@ -253,9 +299,14 @@ loaders exist, each for different contexts.
 {% endraw %}
 {% api %}
 FileSystemLoader
-new FileSystemLoader([searchPaths], [noWatch])
+new FileSystemLoader([searchPaths], [opt])
 
-只在 node 端可用，他可从文件系统中加载模板，**searchPaths** 为查找模板的路径，可以是一个也可以是多个，默认为当前的工作目录。如果 **noWatch** 为 `true`，模板会永久缓存，否则使用 `fs.watch` 来监听文件的变化。
+只在 node 端可用，他可从文件系统中加载模板，**searchPaths** 为查找模板的路径，可以是一个也可以是多个，默认为当前的工作目录。
+
+**opt** 为一个对象，包含如下属性：
+
+* **watch** - 如果为 `true`，当文件系统上的模板变化了，系统会自动更新他。
+* **noCache** - 如果为 `true`，不使用缓存，模板每次都会重新编译。
 
 ```js
 // Loads templates from the "views" folder
@@ -266,9 +317,17 @@ var env = new nunjucks.Environment(new nunjucks.FileSystemLoader('views'));
 
 {% api %}
 WebLoader
-new WebLoader([baseURL], [neverUpdate])
+new WebLoader([baseURL], [opts])
 
-只在浏览器端可用，通过 **baseURL**（必须为同域）加载模板，默认为当前相对目录。如果 **neverUpdate** 为 `true`，模板只会加载一次，以后不会变化，默认每次渲染的时候都会加载。
+只在浏览器端可用，通过 **baseURL**（必须为同域）加载模板，默认为当前相对目录。
+
+**opt** 为一个对象，包含如下属性：
+
+* **useCache** 如果为 `true`，模板将会永远缓存，你将看不到他们更新。缓存默认关闭，因为这样就无法监听变化并更新缓存。
+    记住，你应该在生产环境预编译模板。
+* **async** 如果为 `true`，模板会异步请求，而非同步，同时你必须使用异步 render API（调用 `render` 时传入一个 callback）。
+
+如果 **neverUpdate** 为 `true`，模板只会加载一次，以后不会变化，默认每次渲染的时候都会加载。
 
 他还能加载预编译后的模板，自动使用这些模板而不是通过 http 获取，在生产环境应该使用预编译。查看 [Precompiling Templates](#precompiling-templates)。
 
