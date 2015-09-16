@@ -61,6 +61,9 @@
 <li>
 <a href="#configure">configure</a>
 </li>
+<li>
+<a href="#installjinjacompat">installJinjaCompat</a>
+</li>
 </ul>
 </li>
 <li>
@@ -85,16 +88,28 @@
 <a href="#addextension">addExtension</a>
 </li>
 <li>
+<a href="#removeextension">removeExtension</a>
+</li>
+<li>
 <a href="#getextension">getExtension</a>
 </li>
 <li>
+<a href="#hasextension">hasExtension</a>
+</li>
+<li>
 <a href="#addglobal">addGlobal</a>
+</li>
+<li>
+<a href="#getglobal">getGlobal</a>
 </li>
 <li>
 <a href="#gettemplate">getTemplate</a>
 </li>
 <li>
 <a href="#express">express</a>
+</li>
+<li>
+<a href="#opts-autoescape">opts.autoescape</a>
 </li>
 </ul>
 </li>
@@ -238,9 +253,19 @@
 <div class="api-desc"><p>传入 <strong>path</strong> 指定存放模板的目录，<strong>opts</strong> 可让某些功能开启或关闭，这两个变量都是可选的。<strong>path</strong> 的默认值为当前的工作目录，<strong>opts</strong> 提供以下功能：</p>
 
 <ul>
-<li><strong>watch</strong> <em>(默认值: true)</em> 当模板变化时重新加载</li>
+<li><strong>autoescape</strong> <em>(默认值: true)</em> 控制输出是否被转义，查看 <a href="#autoescaping">Autoescaping</a></li>
+<li><strong>throwOnUndefined</strong> <em>(default: false)</em> 当输出为 null 或 undefined 会抛出异常</li>
+<li><strong>trimBlocks</strong> <em>(default: false)</em> 自动去除 block/tag 后面的换行符</li>
+<li><strong>lstripBlocks</strong> <em>(default: false)</em> 自动去除 block/tag 签名的空格</li>
+<li><strong>watch</strong> <em>(默认值: false)</em> 当模板变化时重新加载</li>
+<li><strong>noCache</strong> <em>(default: false)</em> 不使用缓存，每次都重新编译</li>
+<li><strong>web</strong> 浏览器模块的配置项
+
+<ul>
+<li><strong>useCache</strong> <em>(default: false)</em> 是否使用缓存，否则会重新请求下载模板</li>
+<li><strong>async</strong> <em>(default: false)</em> 是否使用 ajax 异步下载模板</li>
+</ul></li>
 <li><strong>express</strong> 传入 express 实例初始化模板设置</li>
-<li><strong>autoescape</strong> <em>(默认值: false)</em> 控制输出是否被转义，查看 <a href="#autoescaping">Autoescaping</a></li>
 <li><strong>tags:</strong> <em>(默认值: see nunjucks syntax)</em> 定义模板语法，查看 <a href="#customizing-syntax">Customizing Syntax</a></li>
 </ul>
 
@@ -263,6 +288,15 @@
 </code></pre></div>
 </div>
 
+<h3 id="installjinjacompat">installJinjaCompat</h3>
+
+<div class="api-sig"><code>nunjucks.installJinjaCompat()</code></div>
+
+<div class="api-desc"><p>这个方法为了与 Jinja 更好的兼容，增加了一些适配 Python 的 API。但是 nunjucks 不是为了完全兼容 Jinja/Pyhton，这只为了帮助使用者查看。</p>
+
+<p>增加了 <code>True</code> 和 <code>False</code>，与 js 的 <code>true</code> 和 <code>false</code> 相对应。并增加 Array 和 Object 使之适配 Python 风格的。<a href="https://github.com/mozilla/nunjucks/blob/master/src/jinja-compat.js">查看源码</a>能看到所有功能。</p>
+</div>
+
 <p>就是这么简单，如果希望自己定义模板加载等更多的个性化设置，那么可以继续往下看。</p>
 
 <h2 id="environment">Environment</h2>
@@ -277,7 +311,7 @@
 
 <div class="api-desc"><p>实例化 <code>Environment</code> 时传入两个参数，一组 <strong>loaders</strong> 和配置项 <strong>opts</strong>。如果 <strong>loaders</strong> 不存在，则默认从当前目录或地址加载。<strong>loaders</strong> 可为一个或多个，如果传入一个数组，nunjucks 会按顺序查找直到找到模板。更多查看 <a href="#loader"><code>Loader</code></a></p>
 
-<p><strong>opts</strong> 的配置有 <strong>autoescape</strong> and <strong>tags</strong>，在 <a href="#configure"><code>configure</code></a> 查看具体配置（express 和 watch 配置在这里不适用，而是在 <a href="#express"><code>env.express</code></a> 进行配置）。</p>
+<p><strong>opts</strong> 的配置有 <strong>autoescape</strong>、<strong>throwOnUndefined</strong>、<strong>trimBlocks</strong> 和 <strong>lstripBlocks</strong>，在 <a href="#configure"><code>configure</code></a> 查看具体配置（express 和 watch 配置在这里不适用，而是在 <a href="#express"><code>env.express</code></a> 进行配置）。</p>
 
 <p>在 node 端使用 <a href="#filesystemloader"><code>FileSystemLoader</code></a> 加载模板，浏览器端则使用 <a href="#webloader"><code>WebLoader</code></a> 通过 http 加载（或使用编译后的模板）。如果你使用了 <a href="#configure"><code>configure</code></a> 的 api，nunjucks 会根据平台（node 或浏览器）自动选择对应的 loader。查看更多 <a href="#loader"><code>Loader</code></a>。</p>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="c1">// the FileSystemLoader is available if in node</span>
@@ -338,6 +372,13 @@
 <div class="api-desc"><p>添加一个名为 <strong>name</strong> 的扩展，<strong>ext</strong> 为一个对象，并存在几个指定的方法供系统调用，查看 <a href="#custom-tags">Custom Tags</a>。</p>
 </div>
 
+<h3 id="removeextension">removeExtension</h3>
+
+<div class="api-sig"><code>env.removeExtension(name)</code></div>
+
+<div class="api-desc"><p>删除之前添加的扩展 <strong>name</strong>。</p>
+</div>
+
 <h3 id="getextension">getExtension</h3>
 
 <div class="api-sig"><code>env.getExtension(name)</code></div>
@@ -345,11 +386,25 @@
 <div class="api-desc"><p>获取扩展，传入名字返回一个函数。</p>
 </div>
 
+<h3 id="hasextension">hasExtension</h3>
+
+<div class="api-sig"><code>env.hasExtension(name)</code></div>
+
+<div class="api-desc"><p>如果 <strong>name</strong> 扩展已经被添加，那返回 true。</p>
+</div>
+
 <h3 id="addglobal">addGlobal</h3>
 
 <div class="api-sig"><code>env.addGlobal(name, value)</code></div>
 
 <div class="api-desc"><p>添加一个全局变量，可以在所有模板使用。注意：这个会覆盖已有的 <code>name</code> 变量。</p>
+</div>
+
+<h3 id="getglobal">getGlobal</h3>
+
+<div class="api-sig"><code>env.getGlobal(name)</code></div>
+
+<div class="api-desc"><p>返回一个名为 <strong>name</strong> 的全局变量。</p>
 </div>
 
 <h3 id="gettemplate">getTemplate</h3>
@@ -378,6 +433,14 @@
     <span class="nx">res</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="s1">&#39;index.html&#39;</span><span class="p">);</span>
 <span class="p">});</span>
 </code></pre></div>
+</div>
+
+<h3 id="opts-autoescape">opts.autoescape</h3>
+
+<div class="api-sig"><code>env.opts.autoescape</code></div>
+
+<div class="api-desc"><p>你可以通过这个配置控制是否全局开启模板转义，这对于创建高级过滤（如 html 操作）非常有用。
+正常情况你可以返回 SafeString，输出保持和输入一致不做任何处理，但这只在很少场景下有用。</p>
 </div>
 
 <h2 id="template">Template</h2>
@@ -412,9 +475,16 @@ loaders exist, each for different contexts.</p>
 
 <h3 id="filesystemloader">FileSystemLoader</h3>
 
-<div class="api-sig"><code>new FileSystemLoader([searchPaths], [noWatch])</code></div>
+<div class="api-sig"><code>new FileSystemLoader([searchPaths], [opt])</code></div>
 
-<div class="api-desc"><p>只在 node 端可用，他可从文件系统中加载模板，<strong>searchPaths</strong> 为查找模板的路径，可以是一个也可以是多个，默认为当前的工作目录。如果 <strong>noWatch</strong> 为 <code>true</code>，模板会永久缓存，否则使用 <code>fs.watch</code> 来监听文件的变化。</p>
+<div class="api-desc"><p>只在 node 端可用，他可从文件系统中加载模板，<strong>searchPaths</strong> 为查找模板的路径，可以是一个也可以是多个，默认为当前的工作目录。</p>
+
+<p><strong>opt</strong> 为一个对象，包含如下属性：</p>
+
+<ul>
+<li><strong>watch</strong> - 如果为 <code>true</code>，当文件系统上的模板变化了，系统会自动更新他。</li>
+<li><strong>noCache</strong> - 如果为 <code>true</code>，不使用缓存，模板每次都会重新编译。</li>
+</ul>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="c1">// Loads templates from the &quot;views&quot; folder</span>
 <span class="kd">var</span> <span class="nx">env</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">Environment</span><span class="p">(</span><span class="k">new</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">FileSystemLoader</span><span class="p">(</span><span class="s1">&#39;views&#39;</span><span class="p">));</span>
 </code></pre></div>
@@ -422,9 +492,19 @@ loaders exist, each for different contexts.</p>
 
 <h3 id="webloader">WebLoader</h3>
 
-<div class="api-sig"><code>new WebLoader([baseURL], [neverUpdate])</code></div>
+<div class="api-sig"><code>new WebLoader([baseURL], [opts])</code></div>
 
-<div class="api-desc"><p>只在浏览器端可用，通过 <strong>baseURL</strong>（必须为同域）加载模板，默认为当前相对目录。如果 <strong>neverUpdate</strong> 为 <code>true</code>，模板只会加载一次，以后不会变化，默认每次渲染的时候都会加载。</p>
+<div class="api-desc"><p>只在浏览器端可用，通过 <strong>baseURL</strong>（必须为同域）加载模板，默认为当前相对目录。</p>
+
+<p><strong>opt</strong> 为一个对象，包含如下属性：</p>
+
+<ul>
+<li><strong>useCache</strong> 如果为 <code>true</code>，模板将会永远缓存，你将看不到他们更新。缓存默认关闭，因为这样就无法监听变化并更新缓存。
+记住，你应该在生产环境预编译模板。</li>
+<li><strong>async</strong> 如果为 <code>true</code>，模板会异步请求，而非同步，同时你必须使用异步 render API（调用 <code>render</code> 时传入一个 callback）。</li>
+</ul>
+
+<p>如果 <strong>neverUpdate</strong> 为 <code>true</code>，模板只会加载一次，以后不会变化，默认每次渲染的时候都会加载。</p>
 
 <p>他还能加载预编译后的模板，自动使用这些模板而不是通过 http 获取，在生产环境应该使用预编译。查看 <a href="#precompiling-templates">Precompiling Templates</a>。</p>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="c1">// Load templates from /views</span>

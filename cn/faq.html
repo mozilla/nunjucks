@@ -76,14 +76,15 @@
 
 <p>首先，nunjucks 可以操作原生的 Javascript 而 <a href="http://jinja.pocoo.org/">jinja2</a> 操作的是 python，比如在 nunjucks 中布尔值为 <code>true</code> 而 jinja2 为 <code>True</code>，在调用数组原生方法的时候也不同。</p>
 
-<p>但是，如果你避免使用原生语言的特性（如 <code>{{ str.trim() }}</code>） 而完全使用模板的特性和过滤器，那么两者的模块可以兼容。在 <a href="https://marketplace.firefox.com/">Firefox Marketplace</a> 中，开发者开发了一个兼容层来覆盖 nunjucks 的一些内部实现，能更好的兼容 jinja2（如可使用 <code>True</code>），可查看<a href="https://github.com/mozilla/fireplace/blob/master/hearth/media/js/lib/nunjucks.compat.js">源码</a>.</p>
+<p>但是，如果你避免使用原生语言的特性（如 <code>{{ str.trim() }}</code>） 而完全使用模板的特性和过滤器，那么两者的模块可以兼容。</p>
+
+<p>Nunjucks 支持与 Jinja 兼容，查看 <a href="/api.html#installjinjacompat">installJinjaCompat</a> 获取更多信息。</p>
 
 <p>除此之外，nunjucks 还有一些未实现的功能：</p>
 
 <ul>
 <li><code>self</code> 变量</li>
 <li><code>for</code> 不支持 <code>if not</code> and <code>else</code></li>
-<li>不存在 <code>with context</code></li>
 <li><code>if i is divisibleby(3)</code> 式的条件判断</li>
 <li>可命名的结束区块： <code>{% endblock content %}</code></li>
 <li>沙箱模式 (Sandboxed mode)</li>
