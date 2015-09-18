@@ -6,19 +6,20 @@ var PrecompiledLoader = require('./precompiled-loader.js');
 var WebLoader = Loader.extend({
     init: function(baseURL, opts) {
         this.baseURL = baseURL || '.';
+        opts = opts || {};
 
         // By default, the cache is turned off because there's no way
         // to "watch" templates over HTTP, so they are re-downloaded
         // and compiled each time. (Remember, PRECOMPILE YOUR
         // TEMPLATES in production!)
-        this.useCache = opts.useCache;
+        this.useCache = !!opts.useCache;
 
         // We default `async` to false so that the simple synchronous
         // API can be used when you aren't doing anything async in
         // your templates (which is most of the time). This performs a
         // sync ajax request, but that's ok because it should *only*
         // happen in development. PRECOMPILE YOUR TEMPLATES.
-        this.async = opts.async;
+        this.async = !!opts.async;
     },
 
     resolve: function(from, to) { // jshint ignore:line
