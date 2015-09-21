@@ -4,6 +4,10 @@ Changelog
 master (unreleased)
 -------------------
 
+* Add `hasExtension` and `removeExtension` methods to `Environment`. Merge of
+  [#512](https://github.com/mozilla/nunjucks/pull/512).
+* Add support for kwargs in `sort` filter. Merge of
+  [#510](https://github.com/mozilla/nunjucks/pull/510).
 * Add `none` as a lexed constant evaluating to `null`. Merge of
   [#480](https://github.com/mozilla/nunjucks/pull/480).
 * Fix rendering of multiple `raw` blocks. Thanks Aaron O'Mullan. Merge of
