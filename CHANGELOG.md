@@ -4,6 +4,8 @@ Changelog
 master (unreleased)
 -------------------
 
+* Fix creating `WebLoader` without `opts`. Merge of
+  [#524](https://github.com/mozilla/nunjucks/pull/524).
 * Add `hasExtension` and `removeExtension` methods to `Environment`. Merge of
   [#512](https://github.com/mozilla/nunjucks/pull/512).
 * Add support for kwargs in `sort` filter. Merge of
