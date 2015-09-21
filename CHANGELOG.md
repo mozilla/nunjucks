@@ -1,8 +1,8 @@
 Changelog
 =========
 
-master (unreleased)
--------------------
+v2.1.0 (Sep 21 2015)
+--------------------
 
 * Fix creating `WebLoader` without `opts`. Merge of
   [#524](https://github.com/mozilla/nunjucks/pull/524).
