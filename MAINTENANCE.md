@@ -14,7 +14,9 @@ from here on out it will most likely be point releases.
 
 Replace `v1.2.3` with whatever the last version was, and you'll see all the
 changes going out in this version. Ensure that all significant user-facing
-changes (new features and bugfixes) are mentioned in `CHANGELOG.md`.
+changes (new features and bugfixes) are mentioned in `CHANGELOG.md`. Change the
+"master (unreleased)" heading in `CHANGELOG.md` to the new version number and
+date.
 
 3. Update the version in `package.json`.
 
@@ -46,5 +48,10 @@ changes (new features and bugfixes) are mentioned in `CHANGELOG.md`.
    cd _site && git push origin gh-pages
    ```
 
-The last step assumes you have setup a git repo in _site pointing to nunjucks'
-gh-pages branch.
+   The last step assumes you have setup a git repo in _site pointing to
+   nunjucks' gh-pages branch.
+
+9. Add a new "master (unreleased)" section at the top of `CHANGELOG.md`.
+
+10. Bump the version number in `package.json` to a development pre-release of
+    the next anticipated release number (e.g. "2.2.0-dev.1").
