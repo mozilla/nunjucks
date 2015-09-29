@@ -1125,5 +1125,35 @@
                   'may the forth be with you');
             finish(done);
         });
+        
+
+        it('should thrown an error when including a file that calls an undefined macro', function(done) {
+            render(
+                '{% include "undefined-macro.html" %}',
+                {},
+                { noThrow: true },
+                function(err, res) {
+                    expect(res).to.be(undefined);
+                    expect(err).to.match(/Unable to call `\w+`, which is undefined or falsey/);
+                }
+            );
+
+            finish(done);
+        });
+
+        it('should thrown an error when including a file that end up calling an undefined macro', function(done) {
+            render(
+                '{% include "import-macro-call-undefined-macro.html" %}',
+                { 'list' : [1,2,3] },
+                { noThrow: true },
+                function(err, res) {
+                    expect(res).to.be(undefined);
+                    expect(err).to.match(/Unable to call `\w+`, which is undefined or falsey/);
+                }
+            );
+
+            finish(done);
+        });
+
     });
 })();
