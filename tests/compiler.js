@@ -1127,7 +1127,7 @@
         });
         
 
-        it('should thrown an error', function(done) {
+        it('should thrown an error when including a file that calls an undefined macro', function(done) {
             render(
                 '{% include "undefined-macro.html" %}',
                 {},
@@ -1141,7 +1141,7 @@
             finish(done);
         });
 
-        it('should thrown an error', function(done) {
+        it('should thrown an error when including a file that end up calling an undefined macro', function(done) {
             render(
                 '{% include "import-macro-call-undefined-macro.html" %}',
                 { 'list' : [1,2,3] },
