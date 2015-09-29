@@ -509,8 +509,12 @@ Template = Obj.extend({
                             context,
                             frame,
                             runtime,
-                            function() {
-                                cb(null, context.getExported());
+                            function(err) {
+        		        if ( err ) {
+        			    cb(err, null);
+        		        } else {
+        			    cb(null, context.getExported());
+        		        }
                             });
     },
 

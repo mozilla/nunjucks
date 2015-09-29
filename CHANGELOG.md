@@ -4,6 +4,10 @@ Changelog
 master (unreleased)
 -------------------
 
+* Fix error propagation. Thanks Tom Delmas. Merge of
+  [#534](https://github.com/mozilla/nunjucks/pull/534).
+
+
 v2.1.0 (Sep 21 2015)
 --------------------
 
