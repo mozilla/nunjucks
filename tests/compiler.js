@@ -1154,5 +1154,15 @@
             finish(done);
         });
 
+        it('\'if\' should behaves exactly as javascript\'s if behaves (if after set)', function(done) {
+            equal('{% set a = \'\' %}{% if a %}true{% else %}false{% endif %}', 'false');
+            finish(done);
+        });
+
+        it('\'if\' should behaves exactly as javascript\'s if behaves (if after set=macro)', function(done) {
+            equal('{% macro m(t)%}{{ t }}{% endmacro %}{% set a = m(\'\') %}{% if a %}true{% else %}false{% endif %}', 'false');
+            finish(done);
+        });
+
     });
 })();
