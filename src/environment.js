@@ -97,6 +97,7 @@ var Environment = Obj.extend({
         extension._name = name;
         this.extensions[name] = extension;
         this.extensionsList.push(extension);
+        return this;
     },
 
     removeExtension: function(name) {
@@ -117,6 +118,7 @@ var Environment = Obj.extend({
 
     addGlobal: function(name, value) {
         globals[name] = value;
+        return this;
     },
 
     getGlobal: function(name) {
@@ -133,6 +135,7 @@ var Environment = Obj.extend({
             this.asyncFilters.push(name);
         }
         this.filters[name] = wrapped;
+        return this;
     },
 
     getFilter: function(name) {
@@ -267,6 +270,7 @@ var Environment = Obj.extend({
         };
 
         app.set('view', NunjucksView);
+        return this;
     },
 
     render: function(name, ctx, cb) {
@@ -348,6 +352,7 @@ var Context = Obj.extend({
     addBlock: function(name, block) {
         this.blocks[name] = this.blocks[name] || [];
         this.blocks[name].push(block);
+        return this;
     },
 
     getBlock: function(name) {

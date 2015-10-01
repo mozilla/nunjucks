@@ -228,7 +228,7 @@ env.addFilter(name, func, [async])
 
 Add a custom filter named **name** which calls **func** whenever
 invoked. If the filter needs to be async, **async** must be `true`
-(see [asynchronous support](#asynchronous-support)). See
+(see [asynchronous support](#asynchronous-support)). Returns `env` for further method chaining. See
 [Custom Filters](#custom-filters).
 
 {% endapi %}
@@ -244,7 +244,7 @@ addExtension
 env.addExtension(name, ext)
 
 Add the custom extension **ext** named **name**. **ext** is an object
-with a few specific methods that are called by the extension system.
+with a few specific methods that are called by the extension system. Returns `env` for further method chaining.
 See [Custom Tags](#custom-tags).
 
 {% endapi %}
@@ -272,7 +272,8 @@ Return true if a custom extension named **name** has been added.
 {% api %}
 addGlobal
 env.addGlobal(name, value)
-Add a global value that will be available to all templates. Note: this will overwrite any existing global called `name`.
+Add a global value that will be available to all templates. Note: this will overwrite any existing global called `name`. 
+Returns `env` for further method chaining.
 {% endapi %}
 
 {% api %}
@@ -309,7 +310,7 @@ env.express(app)
 Install nunjucks as the rendering engine for the express **app**.
 After doing this, you can use express normally. Note that you can do
 this automatically with the simple API call [`configure`](#configure)
-by passing in the app as the **express** option.
+by passing in the app as the **express** option. Returns `env` for further method chaining.
 
 ```js
 var app = express();
