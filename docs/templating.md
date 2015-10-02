@@ -188,11 +188,13 @@ var items = [{ title: "foo", id: 1 }, { title: "bar", id: 2}];
 <ul>
 {% for item in items %}
   <li>{{ item.title }}</li>
+{% else %}
+  <li>This would display if the 'item' collection were empty</li>
 {% endfor %}
 </ul>
 ```
 
-The above example lists all the posts using the `title` attribute of each item in the `items` array as the display value.
+The above example lists all the posts using the `title` attribute of each item in the `items` array as the display value. If the `items` array were empty, the contents of the optional `else` clause would instead be rendered.
 
 You can also iterate over objects/hashes:
 
