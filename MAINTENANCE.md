@@ -50,7 +50,7 @@ date.
    ```
    cp browser/* docs/files
    cd docs && make prod
-   cd _site && git push
+   cd _site && git add -A && git commit && git push
    ```
 
 9. Add a new "master (unreleased)" section at the top of `CHANGELOG.md`.
