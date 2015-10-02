@@ -84,6 +84,21 @@
           finish(done);
         });
 
+        it('should allow chaining of globals', function(done) {
+          var env = new Environment(new Loader(templatesPath));
+
+          env.addGlobal('hello', function(arg1) {
+            return 'Hello ' + arg1;
+          }).addGlobal('goodbye', function(arg1) {
+            return 'Goodbye ' + arg1;
+          });
+
+          equal('{{ hello("World!") }}', 'Hello World!');
+          equal('{{ goodbye("World!") }}', 'Goodbye World!');
+
+          finish(done);
+        });
+
         it('should allow getting of globals', function(done) {
             var env = new Environment(new Loader(templatesPath));
             var hello = function(arg1) {

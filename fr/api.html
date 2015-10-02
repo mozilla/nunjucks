@@ -103,6 +103,9 @@
 <a href="#addglobal">addGlobal</a>
 </li>
 <li>
+<a href="#getglobal">getGlobal</a>
+</li>
+<li>
 <a href="#gettemplate">getTemplate</a>
 </li>
 <li>
@@ -419,7 +422,7 @@ de charger un template.</p>
 
 <div class="api-desc"><p>Ajoute un filtre personnalisé nommé <strong>name</strong> qui appelle <strong>func</strong> à chaque fois
 qu&#39;il est appelé. Si le filtre doit être asynchrone, <strong>async</strong> doit être à <code>true</code>
-(voir le <a href="#support-asynchrone">support asynchrone</a>). Voir
+(voir le <a href="#support-asynchrone">support asynchrone</a>). Retourne <code>env</code> pour chaîner d&#39;autres méthodes. Voir
 <a href="#filtres-personnaliss">Filtres personnalisés</a>.</p>
 </div>
 
@@ -435,7 +438,7 @@ qu&#39;il est appelé. Si le filtre doit être asynchrone, <strong>async</strong
 <div class="api-sig"><code>env.addExtension(name, ext)</code></div>
 
 <div class="api-desc"><p>Ajoute l&#39;extension personnalisée <strong>ext</strong> nommée <strong>name</strong>. <strong>ext</strong> est un objet
-avec quelques méthodes spécifiques qui sont appelés par le système d&#39;extension.
+avec quelques méthodes spécifiques qui sont appelés par le système d&#39;extension. Retourne <code>env</code> pour chaîner d&#39;autres méthodes.
 Voir les <a href="#tags-personnaliss">Tags personnalisés</a>.</p>
 </div>
 
@@ -464,7 +467,15 @@ Voir les <a href="#tags-personnaliss">Tags personnalisés</a>.</p>
 
 <div class="api-sig"><code>env.addGlobal(name, value)</code></div>
 
-<div class="api-desc"><p>Ajoute une valeur globale qui sera disponible pour tous les templates. Remarque : ceci écrasera toute valeur globale nommée <code>name</code>.</p>
+<div class="api-desc"><p>Ajoute une valeur globale qui sera disponible pour tous les templates. Remarque : ceci écrasera toute valeur globale nommée <code>name</code>.
+Retourne <code>env</code> pour chaîner d&#39;autres méthodes.</p>
+</div>
+
+<h3 id="getglobal">getGlobal</h3>
+
+<div class="api-sig"><code>env.getGlobal(name)</code></div>
+
+<div class="api-desc"><p>Retourne une valeur globale nommée <strong>name</strong>.</p>
 </div>
 
 <h3 id="gettemplate">getTemplate</h3>
@@ -493,7 +504,7 @@ l&#39;API asynchrone. Les chargeurs intégrés ne nécessitent pas cela. Voir le
 <div class="api-desc"><p>Installe nunjucks comme moteur de rendu pour l&#39;<strong>app</strong> express. Après
 avoir fait cela, vous pouvez utiliser express normalement. Remarquez que vous pouvez le
 faire automatiquement avec l&#39;API simplifiée par l&#39;appel de <a href="#configure"><code>configure</code></a>
-en passant dans l&#39;app l&#39;option <strong>express</strong>.</p>
+en passant dans l&#39;app l&#39;option <strong>express</strong>. Retourne <code>env</code> pour chaîner d&#39;autres méthodes.</p>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="kd">var</span> <span class="nx">app</span> <span class="o">=</span> <span class="nx">express</span><span class="p">();</span>
 <span class="nx">env</span><span class="p">.</span><span class="nx">express</span><span class="p">(</span><span class="nx">app</span><span class="p">);</span>
 

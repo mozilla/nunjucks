@@ -329,10 +329,12 @@ template. Nunjucks comes with several builtin, but <a href="api.html#custom-tags
 <span class="x">&lt;ul&gt;</span>
 <span class="cp">{%</span> <span class="k">for</span> <span class="nv">item</span> <span class="k">in</span> <span class="nv">items</span> <span class="cp">%}</span><span class="x"></span>
 <span class="x">  &lt;li&gt;</span><span class="cp">{{</span> <span class="nv">item.title</span> <span class="cp">}}</span><span class="x">&lt;/li&gt;</span>
+<span class="cp">{%</span> <span class="k">else</span> <span class="cp">%}</span><span class="x"></span>
+<span class="x">  &lt;li&gt;This would display if the &#39;item&#39; collection were empty&lt;/li&gt;</span>
 <span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span><span class="x"></span>
 <span class="x">&lt;/ul&gt;</span>
 </code></pre></div>
-<p>The above example lists all the posts using the <code>title</code> attribute of each item in the <code>items</code> array as the display value.</p>
+<p>The above example lists all the posts using the <code>title</code> attribute of each item in the <code>items</code> array as the display value. If the <code>items</code> array were empty, the contents of the optional <code>else</code> clause would instead be rendered.</p>
 
 <p>You can also iterate over objects/hashes:</p>
 <div class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">food</span> <span class="o">=</span> <span class="p">{</span>

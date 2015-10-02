@@ -422,7 +422,7 @@ loading a template.</p>
 
 <div class="api-desc"><p>Add a custom filter named <strong>name</strong> which calls <strong>func</strong> whenever
 invoked. If the filter needs to be async, <strong>async</strong> must be <code>true</code>
-(see <a href="#asynchronous-support">asynchronous support</a>). See
+(see <a href="#asynchronous-support">asynchronous support</a>). Returns <code>env</code> for further method chaining. See
 <a href="#custom-filters">Custom Filters</a>.</p>
 </div>
 
@@ -438,7 +438,7 @@ invoked. If the filter needs to be async, <strong>async</strong> must be <code>t
 <div class="api-sig"><code>env.addExtension(name, ext)</code></div>
 
 <div class="api-desc"><p>Add the custom extension <strong>ext</strong> named <strong>name</strong>. <strong>ext</strong> is an object
-with a few specific methods that are called by the extension system.
+with a few specific methods that are called by the extension system. Returns <code>env</code> for further method chaining.
 See <a href="#custom-tags">Custom Tags</a>.</p>
 </div>
 
@@ -467,7 +467,8 @@ See <a href="#custom-tags">Custom Tags</a>.</p>
 
 <div class="api-sig"><code>env.addGlobal(name, value)</code></div>
 
-<div class="api-desc"><p>Add a global value that will be available to all templates. Note: this will overwrite any existing global called <code>name</code>.</p>
+<div class="api-desc"><p>Add a global value that will be available to all templates. Note: this will overwrite any existing global called <code>name</code>. 
+Returns <code>env</code> for further method chaining.</p>
 </div>
 
 <h3 id="getglobal">getGlobal</h3>
@@ -503,7 +504,7 @@ The builtin loaders do not require this. See
 <div class="api-desc"><p>Install nunjucks as the rendering engine for the express <strong>app</strong>.
 After doing this, you can use express normally. Note that you can do
 this automatically with the simple API call <a href="#configure"><code>configure</code></a>
-by passing in the app as the <strong>express</strong> option.</p>
+by passing in the app as the <strong>express</strong> option. Returns <code>env</code> for further method chaining.</p>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="kd">var</span> <span class="nx">app</span> <span class="o">=</span> <span class="nx">express</span><span class="p">();</span>
 <span class="nx">env</span><span class="p">.</span><span class="nx">express</span><span class="p">(</span><span class="nx">app</span><span class="p">);</span>
 
