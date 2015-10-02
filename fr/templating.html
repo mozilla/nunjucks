@@ -329,10 +329,12 @@ Nunjucks est livré avec plusieurs tags intégrés, mais <a href="api.html#tags-
 <span class="x">&lt;ul&gt;</span>
 <span class="cp">{%</span> <span class="k">for</span> <span class="nv">item</span> <span class="k">in</span> <span class="nv">items</span> <span class="cp">%}</span><span class="x"></span>
 <span class="x">  &lt;li&gt;</span><span class="cp">{{</span> <span class="nv">item.title</span> <span class="cp">}}</span><span class="x">&lt;/li&gt;</span>
+<span class="cp">{%</span> <span class="k">else</span> <span class="cp">%}</span><span class="x"></span>
+<span class="x">  &lt;li&gt;Cela devrait s&#39;afficher si la collection &#39;item&#39; est vide&lt;/li&gt;</span>
 <span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span><span class="x"></span>
 <span class="x">&lt;/ul&gt;</span>
 </code></pre></div>
-<p>L&#39;exemple ci-dessus liste tous les articles en utilisant l&#39;attribut <code>title</code> qui est affiché pour chaque élément dans le tableau <code>items</code>.</p>
+<p>L&#39;exemple ci-dessus liste tous les articles en utilisant l&#39;attribut <code>title</code> qui est affiché pour chaque élément dans le tableau <code>items</code>. Si le tableau <code>items</code> est vide, le contenu de la clause facultatif <code>else</code> sera rendu.</p>
 
 <p>Vous pouvez aussi itérez sur des objets/tables de hachage :</p>
 <div class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">food</span> <span class="o">=</span> <span class="p">{</span>
