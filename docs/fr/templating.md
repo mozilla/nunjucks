@@ -188,11 +188,13 @@ var items = [{ title: "foo", id: 1 }, { title: "bar", id: 2}];
 <ul>
 {% for item in items %}
   <li>{{ item.title }}</li>
+{% else %}
+  <li>Cela devrait s'afficher si la collection 'item' est vide</li>
 {% endfor %}
 </ul>
 ```
 
-L'exemple ci-dessus liste tous les articles en utilisant l'attribut `title` qui est affiché pour chaque élément dans le tableau `items`.
+L'exemple ci-dessus liste tous les articles en utilisant l'attribut `title` qui est affiché pour chaque élément dans le tableau `items`. Si le tableau `items` est vide, le contenu de la clause facultatif `else` sera rendu.
 
 Vous pouvez aussi itérez sur des objets/tables de hachage :
 
