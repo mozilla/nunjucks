@@ -27,8 +27,8 @@ which only works with precompiled templates.
   this to get started, and use in production if you don't mind a
   larger file size.
 
-* Use **nunjucks-slim.js** to load precompiled templates and use them. Only
-  comes with runtime so is smaller (8K min/gzipped), but *only* works with
+* Use **nunjucks-slim.js** to load precompiled templates and use them. Doesn't
+  comes with the full compiler so it's smaller (8K min/gzipped), but *only* works with
   precompiled templates. Typically used for production, and possibly
   development if you use the [grunt task](https://github.com/jlongster/grunt-nunjucks) to
   automatically recompile templates.
@@ -52,10 +52,10 @@ define(['nunjucks'], function(nunjucks) {
 > that. Read more about optimal client-side configurations in [Browser
 > Usage](api.html#browser-usage).
 
-## Using
+## Usage
 
 This is the simplest way to use nunjucks. First, set any configuration
-flags like autoescaping and then render a string:
+flags (i.e. autoescaping) and then render a string:
 
 ```js
 nunjucks.configure({ autoescape: true });
@@ -96,9 +96,9 @@ node, obviously). In node, nunjucks loads templates from the
 filesystem by default, and in the browser loads them over HTTP.
 
 If you [precompiled](api.html#precompiling) your templates in the browser, they will
-automatically be picked up by the system and you don't have to do
-anything different. This makes it easy to use the same code in
-development and production, while only using precompiled templates in
+automatically be picked up by the system and nothing more has
+to be changed. This makes it easy to use the same code in
+development and production, while using precompiled templates in
 production.
 
 ## More Information
