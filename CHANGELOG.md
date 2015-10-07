@@ -8,6 +8,8 @@ master (unreleased)
   [#537](https://github.com/mozilla/nunjucks/pull/537)
 * Fix error propagation. Thanks Tom Delmas. Merge of
   [#534](https://github.com/mozilla/nunjucks/pull/534).
+* trimBlocks now also trims windows style line endings. Thanks Magnus Tovslid. Merge of
+  [#548](https://github.com/mozilla/nunjucks/pull/548)
 
 
 v2.1.0 (Sep 21 2015)
