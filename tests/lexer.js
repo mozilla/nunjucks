@@ -87,6 +87,35 @@
                       lexer.TOKEN_BLOCK_END);
         });
 
+        it('should trim windows-style CRLF line endings after blocks', function () {
+            tokens = lexer.lex('  {% if true %}\r\n    foo\r\n  {% endif %}\r\n', {trimBlocks: true});
+            hasTokens(tokens,
+                [lexer.TOKEN_DATA, '  '],
+                lexer.TOKEN_BLOCK_START,
+                lexer.TOKEN_SYMBOL,
+                lexer.TOKEN_BOOLEAN,
+                lexer.TOKEN_BLOCK_END,
+                [lexer.TOKEN_DATA, '    foo\r\n  '],
+                lexer.TOKEN_BLOCK_START,
+                lexer.TOKEN_SYMBOL,
+                lexer.TOKEN_BLOCK_END);
+        });
+
+        it('should not trim CR after blocks', function () {
+            tokens = lexer.lex('  {% if true %}\r    foo\r\n  {% endif %}\r', {trimBlocks: true});
+            hasTokens(tokens,
+                [lexer.TOKEN_DATA, '  '],
+                lexer.TOKEN_BLOCK_START,
+                lexer.TOKEN_SYMBOL,
+                lexer.TOKEN_BOOLEAN,
+                lexer.TOKEN_BLOCK_END,
+                [lexer.TOKEN_DATA, '\r    foo\r\n  '],
+                lexer.TOKEN_BLOCK_START,
+                lexer.TOKEN_SYMBOL,
+                lexer.TOKEN_BLOCK_END,
+                [lexer.TOKEN_DATA, '\r']);
+        });
+
         it('should lstrip and trim blocks', function () {
             tokens = lexer.lex('test\n {% if true %}\n  foo\n {% endif %}\n</div>', {
                 lstripBlocks: true,

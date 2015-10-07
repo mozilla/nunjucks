@@ -109,6 +109,16 @@ Tokenizer.prototype.nextToken = function() {
                 if(cur === '\n') {
                     // Skip newline
                     this.forward();
+                }else if(cur === '\r'){
+                    // Skip CRLF newline
+                    this.forward();
+                    cur = this.current();
+                    if(cur === '\n'){
+                        this.forward();
+                    }else{
+                        // Was not a CRLF, so go back
+                        this.back();
+                    }
                 }
             }
             return token(TOKEN_BLOCK_END, tok, lineno, colno);
