@@ -694,6 +694,13 @@
                   { name: 'thedude', data: {tmpl: 'include.html'} },
                   'hello world FooInclude thedude');
 
+            equal('hello world {% include "missing.html" ignoreMissing %}',
+                  'hello world ');
+
+            equal('hello world {% include "missing.html" ignoreMissing %}',
+                  { name: 'thedude' },
+                  'hello world ');
+
             finish(done);
         });
 

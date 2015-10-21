@@ -150,7 +150,7 @@ var Environment = Obj.extend({
         return (isRelative && loader.resolve)? loader.resolve(parentName, filename) : filename;
     },
 
-    getTemplate: function(name, eagerCompile, parentName, cb) {
+    getTemplate: function(name, eagerCompile, parentName, ignoreMissing, cb) {
         var that = this;
         var tmpl = null;
         if(name && name.raw) {
@@ -193,10 +193,16 @@ var Environment = Obj.extend({
         } else {
             var syncResult;
             var _this = this;
+            var fileMissing = false;
 
             var createTemplate = function(err, info) {
                 if(!info && !err) {
-                    err = new Error('template not found: ' + name);
+                    if(!ignoreMissing) {
+                        err = new Error('template not found: ' + name);
+                    }
+                    else {
+                        fileMissing = true;
+                    }
                 }
 
                 if (err) {
@@ -208,11 +214,18 @@ var Environment = Obj.extend({
                     }
                 }
                 else {
-                    var tmpl = new Template(info.src, _this,
+                    var tmpl;
+                    if(ignoreMissing && fileMissing) {
+                        tmpl = new Template('', _this,
+                                            '', eagerCompile);
+                    }
+                    else {
+                        tmpl = new Template(info.src, _this,
                                             info.path, eagerCompile);
 
-                    if(!info.noCache) {
-                        info.loader.cache[name] = tmpl;
+                        if(!info.noCache) {
+                            info.loader.cache[name] = tmpl;
+                        }
                     }
 
                     if(cb) {

@@ -427,7 +427,21 @@ var Parser = Object.extend({
     },
 
     parseInclude: function() {
-        return this.parseTemplateRef('include', nodes.Include);
+        var tagName = 'include';
+        var tag = this.peekToken();
+        if(!this.skipSymbol(tagName)) {
+            this.fail('parseInclude: expected '+ tagName);
+        }
+
+        var node = new nodes.Include(tag.lineno, tag.colno);
+        node.template = this.parseExpression();
+
+        if(this.skipSymbol('ignoreMissing')) {
+            node.ignoreMissing = true;
+        }
+
+        this.advanceAfterBlockEnd(tag.value);
+        return node;
     },
 
     parseIf: function() {
