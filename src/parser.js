@@ -409,21 +409,18 @@ var Parser = Object.extend({
         return node;
     },
 
-    parseTemplateRef: function(tagName, NodeType) {
+    parseExtends: function() {
+        var tagName = 'extends';
         var tag = this.peekToken();
         if(!this.skipSymbol(tagName)) {
             this.fail('parseTemplateRef: expected '+ tagName);
         }
 
-        var node = new NodeType(tag.lineno, tag.colno);
+        var node = new nodes.Extends(tag.lineno, tag.colno);
         node.template = this.parseExpression();
 
         this.advanceAfterBlockEnd(tag.value);
         return node;
-    },
-
-    parseExtends: function() {
-        return this.parseTemplateRef('extends', nodes.Extends);
     },
 
     parseInclude: function() {
@@ -436,7 +433,7 @@ var Parser = Object.extend({
         var node = new nodes.Include(tag.lineno, tag.colno);
         node.template = this.parseExpression();
 
-        if(this.skipSymbol('ignoreMissing')) {
+        if(this.skipSymbol('ignore') && this.skipSymbol('missing')) {
             node.ignoreMissing = true;
         }
 

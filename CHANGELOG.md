@@ -10,6 +10,8 @@ master (unreleased)
   [#534](https://github.com/mozilla/nunjucks/pull/534).
 * trimBlocks now also trims windows style line endings. Thanks Magnus Tovslid. Merge of
   [#548](https://github.com/mozilla/nunjucks/pull/548)
+* `include` now supports an option to suppress errors if the template does not exist. Thanks Mathias Nestler. Merge of
+  [#559](https://github.com/mozilla/nunjucks/pull/559)
 
 
 v2.1.0 (Sep 21 2015)

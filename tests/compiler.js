@@ -694,10 +694,35 @@
                   { name: 'thedude', data: {tmpl: 'include.html'} },
                   'hello world FooInclude thedude');
 
-            equal('hello world {% include "missing.html" ignoreMissing %}',
+            equal('hello world {% include "missing.html" ignore missing %}',
                   'hello world ');
 
-            equal('hello world {% include "missing.html" ignoreMissing %}',
+            equal('hello world {% include "missing.html" ignore missing %}',
+                  { name: 'thedude' },
+                  'hello world ');
+
+            finish(done);
+        });
+
+        it('should throw an error when including a file that does not exist', function(done) {
+            render(
+                '{% include "missing.html" %}',
+                {},
+                { noThrow: true },
+                function(err, res) {
+                    expect(res).to.be(undefined);
+                    expect(err).to.match(/template not found: missing.html/);
+                }
+            );
+
+            finish(done);
+        });
+
+        it('should include templates that does not exist if the error is suppressed', function(done) {
+            equal('hello world {% include "missing.html" ignore missing %}',
+                  'hello world ');
+
+            equal('hello world {% include "missing.html" ignore missing %}',
                   { name: 'thedude' },
                   'hello world ');
 
