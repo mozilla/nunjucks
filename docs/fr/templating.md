@@ -421,11 +421,17 @@ Ceci est particulièrement utile pour découper des templates en petits morceaux
 
 `include` accepte n'importe quelle expression arbitraire, donc vous pouvez y passer n'importe quoi : `{% include name + ".html" %}`.
 
+Dans certains cas, il peut être utile de ne pas générer une erreur quand un template n'existe pas. Utilisez l'option `ignore missing` pour supprimer ces erreurs.
+
+```jinja
+{% include "missing.html" ignore missing %}
+```
+
 ### import
 
 `import` charge un template différent et vous permet d'accéder à ses valeurs exportées. Les macros et les affectations de haut niveau (faites avec [`set`](#set)) sont exportées depuis les templates, ceci vous permet donc d'y accéder dans un template différent.
 
-Les templates importés sont traités sans le contexte actuel, ils n'ont pas accès à toutes les variables du template actuel. 
+Les templates importés sont traités sans le contexte actuel, ils n'ont pas accès à toutes les variables du template actuel.
 
 Commençons par un template appelé `forms.html` qui contient ce qui suit :
 
