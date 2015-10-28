@@ -761,9 +761,7 @@ Si `value` est strictement `undefined`, cela retourne `default`, sinon
   Auparavant, il agissait comme si `boolean` était à true par défaut et donc toute
   valeur fausse retournait `default`. Dans la 2.0, le comportement par défaut retourne
   `default` seulement pour une valeur `undefined`. Vous pouvez obtenir l'ancien
-  comportement en passant `true` à `boolean`, ou en utilisant simplement `value or default`.
-  La 2.0 affichera un avertissement si `boolean` n'est pas passé, mais nous allons supprimer
-  cet avertissement dans la prochaine version.**
+  comportement en passant `true` à `boolean`, ou en utilisant simplement `value or default`.**
 
 ### sort(arr, reverse, caseSens, attr)
 

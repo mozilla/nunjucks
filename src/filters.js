@@ -10,8 +10,6 @@ function normalize(value, defaultValue) {
     return value;
 }
 
-var hasWarnedDefault = false;
-
 var filters = {
     abs: function(n) {
         return Math.abs(n);
@@ -65,18 +63,6 @@ var filters = {
     },
 
     'default': function(val, def, bool) {
-        if(bool !== true && bool !== false && !hasWarnedDefault) {
-            hasWarnedDefault = true;
-            console.log(
-                '[nunjucks] Warning: the "default" filter was used without ' +
-                'specifying the type of comparison. 2.0 changed the default ' +
-                'behavior from boolean (val ? val : def) to strictly undefined, ' +
-                'so you should make sure that doesn\'t break anything. ' +
-                'Be explicit about this to make this warning go away, or wait until 2.1. ' +
-                'See http://mozilla.github.io/nunjucks/templating.html#defaultvalue-default-boolean'
-            );
-        }
-
         if(bool) {
             return val ? val : def;
         }

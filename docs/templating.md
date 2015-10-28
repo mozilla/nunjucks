@@ -760,9 +760,7 @@ If `value` is strictly `undefined`, return `default`, otherwise
   filter. Previously, it acted as if `boolean` was true by default,
   and any falsy value would return `default`. In 2.0 the default is
   only an `undefined` value returns `default`. You can get the old
-  behavior by passing `true` to `boolean`, or just use `value or default`.
-  2.0 will show a warning if `boolean` is not passed, but we will remove 
-  this warning in the next version.**
+  behavior by passing `true` to `boolean`, or just use `value or default`.**
 
 ### sort(arr, reverse, caseSens, attr)
 
