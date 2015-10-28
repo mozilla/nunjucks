@@ -896,7 +896,7 @@ var Compiler = Object.extend({
 
         this.emit('env.getTemplate(');
         this._compileExpression(node.template, frame);
-        this.emitLine(', false, '+this._templateName()+', ' + this.makeCallback(id));
+        this.emitLine(', false, '+this._templateName()+', false, ' + this.makeCallback(id));
         this.addScopeLevel();
 
         this.emitLine(id + '.getExported(' +
@@ -919,7 +919,7 @@ var Compiler = Object.extend({
 
         this.emit('env.getTemplate(');
         this._compileExpression(node.template, frame);
-        this.emitLine(', false, '+this._templateName()+', ' + this.makeCallback(importedId));
+        this.emitLine(', false, '+this._templateName()+', false, ' + this.makeCallback(importedId));
         this.addScopeLevel();
 
         this.emitLine(importedId + '.getExported(' +
@@ -1002,7 +1002,7 @@ var Compiler = Object.extend({
 
         this.emit('env.getTemplate(');
         this._compileExpression(node.template, frame);
-        this.emitLine(', true, '+this._templateName()+', ' + this.makeCallback('_parentTemplate'));
+        this.emitLine(', true, '+this._templateName()+', false, ' + this.makeCallback('_parentTemplate'));
 
         // extends is a dynamic tag and can occur within a block like
         // `if`, so if this happens we need to capture the parent
@@ -1023,7 +1023,7 @@ var Compiler = Object.extend({
 
         this.emit('env.getTemplate(');
         this._compileExpression(node.template, frame);
-        this.emitLine(', false, '+this._templateName()+', '+ this.makeCallback(id));
+        this.emitLine(', false, '+this._templateName()+', ' + node.ignoreMissing + ', ' + this.makeCallback(id));
         this.addScopeLevel();
 
         this.emitLine(id + '.render(' +

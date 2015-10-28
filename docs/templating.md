@@ -421,6 +421,12 @@ This is especially useful for cutting up templates into pieces so that the brows
 
 `include` actually accepts any arbitrary expression, so you can pass anything into it: `{% include name + ".html" %}`.
 
+It might be useful to not throw an error if a template does not exist. Use the `ignore missing` option to suppress such errors.
+
+```jinja
+{% include "missing.html" ignore missing %}
+```
+
 ### import
 
 `import` loads a different template and allows you to access its exported values. Macros and top-level assignments (done with [`set`](#set)) are exported from templates, allowing you to access them in a different template.

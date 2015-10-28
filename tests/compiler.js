@@ -697,6 +697,31 @@
             finish(done);
         });
 
+        it('should throw an error when including a file that does not exist', function(done) {
+            render(
+                '{% include "missing.html" %}',
+                {},
+                { noThrow: true },
+                function(err, res) {
+                    expect(res).to.be(undefined);
+                    expect(err).to.match(/template not found: missing.html/);
+                }
+            );
+
+            finish(done);
+        });
+
+        it('should fail silently on missing templates if requested', function(done) {
+            equal('hello world {% include "missing.html" ignore missing %}',
+                  'hello world ');
+
+            equal('hello world {% include "missing.html" ignore missing %}',
+                  { name: 'thedude' },
+                  'hello world ');
+
+            finish(done);
+        });
+
         /**
          * This test checks that this issue is resolved: http://stackoverflow.com/questions/21777058/loop-index-in-included-nunjucks-file
          */
