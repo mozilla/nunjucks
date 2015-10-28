@@ -694,13 +694,6 @@
                   { name: 'thedude', data: {tmpl: 'include.html'} },
                   'hello world FooInclude thedude');
 
-            equal('hello world {% include "missing.html" ignore missing %}',
-                  'hello world ');
-
-            equal('hello world {% include "missing.html" ignore missing %}',
-                  { name: 'thedude' },
-                  'hello world ');
-
             finish(done);
         });
 
@@ -718,7 +711,7 @@
             finish(done);
         });
 
-        it('should include templates that does not exist if the error is suppressed', function(done) {
+        it('should fail silently on missing templates if requested', function(done) {
             equal('hello world {% include "missing.html" ignore missing %}',
                   'hello world ');
 
