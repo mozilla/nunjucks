@@ -86,8 +86,8 @@
         });
 
         it('escape', function(done) {
-            var res = render('{{ "<html>" | escape }}', {}, { autoescape: false });
-            expect(res).to.be('&lt;html&gt;');
+            var res = render('{{ "<html> \' \\" &amp; &lt;html&gt; &quot; &#39;" | escape }}', {}, { autoescape: false });
+            expect(res).to.be('&lt;html&gt; &#39; &quot; &amp; &lt;html&gt; &quot; &#39;');
             finish(done);
         });
 

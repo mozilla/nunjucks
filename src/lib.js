@@ -11,7 +11,7 @@ var escapeMap = {
     '>': '&gt;'
 };
 
-var escapeRegex = /[&"'<>]/g;
+var escapeRegex = /&(?!amp;|lt;|gt;|quot;|#39;)|["'<>]/g;
 
 var lookupEscape = function(ch) {
     return escapeMap[ch];
