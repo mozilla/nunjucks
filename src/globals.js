@@ -34,34 +34,39 @@ function joiner(sep) {
     };
 }
 
-var globals = {
-    range: function(start, stop, step) {
-        if(!stop) {
-            stop = start;
-            start = 0;
-            step = 1;
+// Making this a function instead so it returns a new object
+// each time it's called. That way, if something like an environment
+// uses it, they will each have their own copy.
+function globals() {
+    return {
+        range: function(start, stop, step) {
+            if(!stop) {
+                stop = start;
+                start = 0;
+                step = 1;
+            }
+            else if(!step) {
+                step = 1;
+            }
+
+            var arr = [];
+            for(var i=start; i<stop; i+=step) {
+                arr.push(i);
+            }
+            return arr;
+        },
+
+        // lipsum: function(n, html, min, max) {
+        // },
+
+        cycler: function() {
+            return cycler(Array.prototype.slice.call(arguments));
+        },
+
+        joiner: function(sep) {
+            return joiner(sep);
         }
-        else if(!step) {
-            step = 1;
-        }
-
-        var arr = [];
-        for(var i=start; i<stop; i+=step) {
-            arr.push(i);
-        }
-        return arr;
-    },
-
-    // lipsum: function(n, html, min, max) {
-    // },
-
-    cycler: function() {
-        return cycler(Array.prototype.slice.call(arguments));
-    },
-
-    joiner: function(sep) {
-        return joiner(sep);
-    }
-};
+    };
+}
 
 module.exports = globals;

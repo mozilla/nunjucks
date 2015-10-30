@@ -26,13 +26,14 @@
         doneHandler = null;
     });
 
-    function equal(str, ctx, str2) {
+    function equal(str, ctx, str2, env) {
         if(typeof ctx === 'string') {
+            env = str2;
             str2 = ctx;
             ctx = null;
         }
 
-        var res = render(str, ctx, {});
+        var res = render(str, ctx, {}, env);
         expect(res).to.be(str2);
     }
 
@@ -50,20 +51,26 @@
         return str.replace(/\r\n|\r/g, '\n');
     }
 
-    function render(str, ctx, opts, cb) {
+    function render(str, ctx, opts, env, cb) {
         if(typeof ctx === 'function') {
             cb = ctx;
             ctx = null;
             opts = null;
+            env = null;
         }
         else if(typeof opts === 'function') {
             cb = opts;
             opts = null;
+            env = null;
+        }
+        else if(typeof env === 'function') {
+            cb = env;
+            env = null;
         }
 
         opts = opts || {};
         opts.dev = true;
-        var e = new Environment(new Loader(templatesPath), opts);
+        var e = env || new Environment(new Loader(templatesPath), opts);
 
         var name;
         if(opts.filters) {
