@@ -4,6 +4,8 @@ Changelog
 master (unreleased)
 -------------------
 
+* Fix issue with different nunjucks environments sharing same globals. Each environment is now independent.
+  Thanks Paul Pechin. Merge of [#574](https://github.com/mozilla/nunjucks/pull/574).
 * Remove deprecation warning when using the `default` filter without specifying a third argument. Merge of
   [#567](https://github.com/mozilla/nunjucks/pull/567).
 * Add support for chaining of addGlobal, addFilter, etc. Thanks Rob Graeber. Merge of
