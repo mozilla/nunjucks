@@ -32,8 +32,8 @@
             equal('{% for i in range(5, 10, 2.5) %}{{ i }}{% endfor %}', '57.5');
             equal('{% for i in range(5, 10, 2.5) %}{{ i }}{% endfor %}', '57.5');
 
-            //equal('{% for i in range(5, 10, -1) %}{{ i }}{% endfor %}', '56789');
-            //equal('{% for i in range(5, 10, -1 | abs) %}{{ i }}{% endfor %}','56789');
+            equal('{% for i in range(10, 5, -1) %}{{ i }}{% endfor %}', '109876');
+            equal('{% for i in range(10, 5, -2.5) %}{{ i }}{% endfor %}', '107.5');
 
             finish(done);
         });
