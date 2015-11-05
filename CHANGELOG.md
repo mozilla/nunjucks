@@ -4,6 +4,7 @@ Changelog
 master (unreleased)
 -------------------
 
+* Add negative steps support for range function
 * Remove deprecation warning when using the `default` filter without specifying a third argument. Merge of
   [#567](https://github.com/mozilla/nunjucks/pull/567).
 * Add support for chaining of addGlobal, addFilter, etc. Thanks Rob Graeber. Merge of
