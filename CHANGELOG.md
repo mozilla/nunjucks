@@ -4,8 +4,10 @@ Changelog
 master (unreleased)
 -------------------
 
-* Add negative steps support for range function
-* Remove deprecation warning when using the `default` filter without specifying a third argument. Merge of
+* Add negative steps support for range function. Thanks Nikita Mostovoy. Merge
+  of [#575](https://github.com/mozilla/nunjucks/pull/575).
+* Remove deprecation warning when using the `default` filter without specifying
+  a third argument. Merge of
   [#567](https://github.com/mozilla/nunjucks/pull/567).
 * Add support for chaining of addGlobal, addFilter, etc. Thanks Rob Graeber. Merge of
   [#537](https://github.com/mozilla/nunjucks/pull/537)
@@ -13,7 +15,8 @@ master (unreleased)
   [#534](https://github.com/mozilla/nunjucks/pull/534).
 * trimBlocks now also trims windows style line endings. Thanks Magnus Tovslid. Merge of
   [#548](https://github.com/mozilla/nunjucks/pull/548)
-* `include` now supports an option to suppress errors if the template does not exist. Thanks Mathias Nestler. Merge of
+* `include` now supports an option to suppress errors if the template does not
+  exist. Thanks Mathias Nestler. Merge of
   [#559](https://github.com/mozilla/nunjucks/pull/559)
 
 
