@@ -50,8 +50,15 @@ function globals() {
             }
 
             var arr = [];
-            for(var i=start; i<stop; i+=step) {
-                arr.push(i);
+            var i;
+            if (step > 0) {
+                for (i=start; i<stop; i+=step) {
+                    arr.push(i);
+                }
+            } else {
+                for (i=start; i>stop; i+=step) {
+                    arr.push(i);
+                }
             }
             return arr;
         },
