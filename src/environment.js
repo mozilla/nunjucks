@@ -70,6 +70,8 @@ var Environment = Obj.extend({
         }
 
         this.initCache();
+
+        this.globals = globals();
         this.filters = {};
         this.asyncFilters = [];
         this.extensions = {};
@@ -117,15 +119,15 @@ var Environment = Obj.extend({
     },
 
     addGlobal: function(name, value) {
-        globals[name] = value;
+        this.globals[name] = value;
         return this;
     },
 
     getGlobal: function(name) {
-        if(!globals[name]) {
+        if(!this.globals[name]) {
             throw new Error('global not found: ' + name);
         }
-        return globals[name];
+        return this.globals[name];
     },
 
     addFilter: function(name, func, async) {
@@ -322,7 +324,10 @@ var Environment = Obj.extend({
 });
 
 var Context = Obj.extend({
-    init: function(ctx, blocks) {
+    init: function(ctx, blocks, env) {
+        // Has to be tied to an environment so we can tap into its globals.
+        this.env = env || new Environment();
+
         // Make a duplicate of ctx
         this.ctx = {};
         for(var k in ctx) {
@@ -342,8 +347,8 @@ var Context = Obj.extend({
     lookup: function(name) {
         // This is one of the most called functions, so optimize for
         // the typical case where the name isn't in the globals
-        if(name in globals && !(name in this.ctx)) {
-            return globals[name];
+        if(name in this.env.globals && !(name in this.ctx)) {
+            return this.env.globals[name];
         }
         else {
             return this.ctx[name];
@@ -461,7 +466,7 @@ Template = Obj.extend({
             else throw err;
         }
 
-        var context = new Context(ctx || {}, _this.blocks);
+        var context = new Context(ctx || {}, _this.blocks, _this.env);
         var frame = parentFrame ? parentFrame.push() : new Frame();
         frame.topLevel = true;
         var syncResult = null;
@@ -518,7 +523,7 @@ Template = Obj.extend({
         frame.topLevel = true;
 
         // Run the rootRenderFunc to populate the context with exported vars
-        var context = new Context(ctx || {}, this.blocks);
+        var context = new Context(ctx || {}, this.blocks, this.env);
         this.rootRenderFunc(this.env,
                             context,
                             frame,
