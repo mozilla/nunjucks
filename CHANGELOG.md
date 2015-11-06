@@ -4,9 +4,9 @@ Changelog
 master (unreleased)
 -------------------
 
-* Fix issue with different nunjucks environments sharing same globals. Each environment is now independent.
-  Thanks Paul Pechin. Merge of [#574](https://github.com/mozilla/nunjucks/pull/574).
-* Remove deprecation warning when using the `default` filter without specifying a third argument. Merge of
+* Fix issue with different nunjucks environments sharing same globals. Each
+  environment is now independent.  Thanks Paul Pechin. Merge of
+  [#574](https://github.com/mozilla/nunjucks/pull/574).
 * Add negative steps support for range function. Thanks Nikita Mostovoy. Merge
   of [#575](https://github.com/mozilla/nunjucks/pull/575).
 * Remove deprecation warning when using the `default` filter without specifying
