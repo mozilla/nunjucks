@@ -171,14 +171,18 @@ var Environment = Obj.extend({
             eagerCompile = false;
         }
 
-        if(typeof name !== 'string') {
+        if (name instanceof Template) {
+             tmpl = name;
+        }
+        else if(typeof name !== 'string') {
             throw new Error('template names must be a string: ' + name);
         }
-
-        for (var i = 0; i < this.loaders.length; i++) {
-            var _name = this.resolveTemplate(this.loaders[i], parentName, name);
-            tmpl = this.loaders[i].cache[_name];
-            if (tmpl) break;
+        else {
+            for (var i = 0; i < this.loaders.length; i++) {
+                var _name = this.resolveTemplate(this.loaders[i], parentName, name);
+                tmpl = this.loaders[i].cache[_name];
+                if (tmpl) break;
+            }
         }
 
         if(tmpl) {
