@@ -477,7 +477,7 @@ var Parser = Object.extend({
             this.advanceAfterBlockEnd();
             break;
         default:
-            this.fail('parseIf: expected endif, else, or endif, ' +
+            this.fail('parseIf: expected elif, else, or endif, ' +
                       'got end of file');
         }
 
