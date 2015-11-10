@@ -177,6 +177,7 @@ var Environment = Obj.extend({
 
         for (var i = 0; i < this.loaders.length; i++) {
             var _name = this.resolveTemplate(this.loaders[i], parentName, name);
+            if(!this.loaders[i].cache) this.loaders[i].cache = {};
             tmpl = this.loaders[i].cache[_name];
             if (tmpl) break;
         }
