@@ -549,6 +549,11 @@
                   { tmpl : tmpl },
                   'Inside a macro BAZ');
 
+            equal('{% from tmpl import foo as baz, bar %}' +
+                  '{{ bar }} {{ baz() }}',
+                  { tmpl : tmpl },
+                  'BAZ Inside a macro');
+
             finish(done);
         });
 

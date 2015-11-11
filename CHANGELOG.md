@@ -4,6 +4,8 @@ Changelog
 master (unreleased)
 -------------------
 
+* Allows compiled templates to be imported, included and extended. Thanks 
+  Luis Gutierrez-Sheris. Merge of [#581](https://github.com/mozilla/nunjucks/pull/581).
 * Fix issue with different nunjucks environments sharing same globals. Each
   environment is now independent.  Thanks Paul Pechin. Merge of
   [#574](https://github.com/mozilla/nunjucks/pull/574).
