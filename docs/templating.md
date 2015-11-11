@@ -110,8 +110,10 @@ This is the default content
 ```
 
 You can store the template to inherit in a variable and use it by
-omitting quotes. That way you can dynamically change which template is
-inherited when rendering by setting it in the context.
+omitting quotes. This variable can contain a string that points to a 
+template file, or it can contain a compiled Template object that has
+been added to the context. That way you can dynamically change which 
+template is inherited when rendering by setting it in the context.
 
 ```jinja
 {% extends parentTemplate %}
@@ -357,7 +359,9 @@ Inheritance](#template-inheritance).
 ```
 
 You can store the template to inherit in a variable and use it by
-omitting quotes. That way you can dynamically change which template is
+omitting quotes. This variable can contain a string that points to a 
+template file, or it can contain a compiled Template object that has
+been added to the context. That way you can dynamically change which template is
 inherited when rendering by setting it in the context.
 
 ```jinja
@@ -365,7 +369,12 @@ inherited when rendering by setting it in the context.
 ```
 
 In fact, `extends` accepts any arbitrary expression, so you can pass
-anything into it: `{% extends name + ".html" %}`.
+anything into it, as long as that expression evaluates to a string or 
+a compiled Template object: 
+
+```jinja
+{% extends name + ".html" %}`.
+```
 
 ### block
 
@@ -419,7 +428,7 @@ You can even include templates in the middle of loops:
 
 This is especially useful for cutting up templates into pieces so that the browser-side environment can render the small chunks when it needs to change the page.
 
-`include` actually accepts any arbitrary expression, so you can pass anything into it: `{% include name + ".html" %}`.
+`include` actually accepts any arbitrary expression, so you can pass anything into it, as long as the expression evaluates to a string or a compiled Template object: `{% include name + ".html" %}`.
 
 It might be useful to not throw an error if a template does not exist. Use the `ignore missing` option to suppress such errors.
 
@@ -472,7 +481,7 @@ You can also import specific values from a template into the current namespace w
 {{ field('pass', type='password') }}
 ```
 
-`import` actually accepts any arbitrary expression, so you can pass anything into it: `{% import name + ".html" as obj %}`.
+`import` actually accepts any arbitrary expression, so you can pass anything into it, as long as the expression evaluates to a string or a compiled Template object: `{% import name + ".html" as obj %}`.
 
 ### raw
 
