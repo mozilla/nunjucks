@@ -110,7 +110,9 @@ C'est le contenu par défaut
 ```
 
 Vous pouvez stocker le template à hériter dans une variable et l'utiliser en
-omettant les guillemets. De cette façon, vous pouvez modifier dynamiquement le
+omettant les guillemets. Cette variable peut contenir un string qui pointe vers
+un fichier template ou peut contenir un objet Template compilé qui a été ajouté
+au contexte. De cette façon, vous pouvez modifier dynamiquement le
 template à hériter lors du rendu en le plaçant dans le contexte.
 
 ```jinja
@@ -357,7 +359,9 @@ de template](#l39hritage-de-template).
 ```
 
 Vous pouvez stocker le template à hériter dans une variable et l'utiliser en
-omettant les guillemets. De cette façon, vous pouvez modifier dynamiquement le
+omettant les guillemets. Cette variable peut contenir un string qui pointe vers
+un fichier template ou peut contenir un objet Template compilé qui a été ajouté
+au contexte. De cette façon, vous pouvez modifier dynamiquement le
 template à hériter lors du rendu en le plaçant dans le contexte.
 
 ```jinja
@@ -365,7 +369,12 @@ template à hériter lors du rendu en le plaçant dans le contexte.
 ```
 
 En fait, `extends` accepte n'importe quelle expression arbitraire, donc vous
-pouvez y passer n'importe quoi : `{% extends name + ".html" %}`.
+pouvez y passer n'importe quoi, aussi longtemps que cette expression correspond
+à un string ou un objet Template compilé :
+
+```jinja
+{% extends name + ".html" %}`.
+```
 
 ### block
 
@@ -419,7 +428,7 @@ Vous pouvez même inclure des templates à l'intérieur des boucles :
 
 Ceci est particulièrement utile pour découper des templates en petits morceaux afin que l'environnement du côté du navigateur puisse rendre les petits morceaux quand il est nécessaire de changer de page.
 
-`include` accepte n'importe quelle expression arbitraire, donc vous pouvez y passer n'importe quoi : `{% include name + ".html" %}`.
+`include` accepte n'importe quelle expression arbitraire, donc vous pouvez y passer n'importe quoi, aussi longtemps que cette expression correspond à un string ou un objet Template compilé : `{% include name + ".html" %}`.
 
 Dans certains cas, il peut être utile de ne pas générer une erreur quand un template n'existe pas. Utilisez l'option `ignore missing` pour supprimer ces erreurs.
 
@@ -472,7 +481,7 @@ Vous pouvez aussi importer des valeurs depuis un template dans l'espace de nomma
 {{ field('pass', type='password') }}
 ```
 
-`import` accepte n'importe quelle expression arbitraire, donc vous pouvez y passer n'importe quoi : `{% import name + ".html" as obj %}`.
+`import` accepte n'importe quelle expression arbitraire, donc vous pouvez y passer n'importe quoi, aussi longtemps que cette expression correspond à un string ou un objet Template compilé : `{% import name + ".html" as obj %}`.
 
 ### raw
 
@@ -722,7 +731,6 @@ Si vous avez besoin d'itérer sur un ensemble de numéros fixes, `range` génèr
 L'affichage ci-dessus est `0,1,2,3,4`.
 
 ### cycler(item1, item2, ...itemN)
-
 
 Une façon simple de faire un cycle avec plusieurs valeurs est d'utiliser `cycler`, qui prend un certain nombre d'arguments et fait des cycles à travers eux.
 
