@@ -13,7 +13,7 @@
     "expect.js": "*",
     "express": "4.x",
     "istanbul": "0.3.x",
-    "jshint": "*",
+    "jshint": "2.8.x",
     "mocha": "*",
     "node-libs-browser": "^0.4.3",
     "supertest": "*",
