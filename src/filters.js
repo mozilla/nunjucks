@@ -398,6 +398,12 @@ var filters = {
         return r.copySafeness(obj, obj);
     },
 
+    striptags: function(input) {
+        input = normalize(input, '');
+        var tags = /<\/?([a-z][a-z0-9]*)\b[^>]*>|<!--[\s\S]*?-->/gi;
+        return r.copySafeness(input, filters.trim(input.replace(tags, '')).replace(/\s+/gi, ' '));
+    },
+
     title: function(str) {
         str = normalize(str, '');
         var words = str.split(' ');

@@ -809,6 +809,7 @@ passé, cela permettra de comparer `attr` à chaque élément.
 * [selectattr](http://jinja.pocoo.org/docs/templates/#selectattr) (seulement pour le formulaire avec un unique argument)
 * [slice](http://jinja.pocoo.org/docs/templates/#slice)
 * [string](http://jinja.pocoo.org/docs/templates/#string)
+* [striptags](http://jinja.pocoo.org/docs/templates/#striptags)
 * [title](http://jinja.pocoo.org/docs/templates/#title)
 * [trim](http://jinja.pocoo.org/docs/templates/#trim)
 * [truncate](http://jinja.pocoo.org/docs/templates/#truncate)

@@ -809,6 +809,7 @@ passed, will compare `attr` from each item.
 * [selectattr](http://jinja.pocoo.org/docs/templates/#selectattr) (only the single-argument form)
 * [slice](http://jinja.pocoo.org/docs/templates/#slice)
 * [string](http://jinja.pocoo.org/docs/templates/#string)
+* [striptags](http://jinja.pocoo.org/docs/templates/#striptags)
 * [title](http://jinja.pocoo.org/docs/templates/#title)
 * [trim](http://jinja.pocoo.org/docs/templates/#trim)
 * [truncate](http://jinja.pocoo.org/docs/templates/#truncate)
