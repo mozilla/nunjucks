@@ -634,6 +634,7 @@ Nunjucks 已经支持了大部分 jinja 的过滤器 (点击查看文档)。
 * [slice](http://jinja.pocoo.org/docs/templates/#slice)
 * [sort](http://jinja.pocoo.org/docs/templates/#sort)
 * [string](http://jinja.pocoo.org/docs/templates/#string)
+* [striptags](http://jinja.pocoo.org/docs/templates/#striptags)
 * [title](http://jinja.pocoo.org/docs/templates/#title)
 * [trim](http://jinja.pocoo.org/docs/templates/#trim)
 * [truncate](http://jinja.pocoo.org/docs/templates/#truncate)
