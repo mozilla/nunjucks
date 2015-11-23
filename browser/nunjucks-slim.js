@@ -1,4 +1,4 @@
-/*! Browser bundle of nunjucks 2.1.0 (slim, only works with precompiled templates) */
+/*! Browser bundle of nunjucks 2.2.0 (slim, only works with precompiled templates) */
 var nunjucks =
 /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
@@ -507,6 +507,8 @@ var nunjucks =
 	        }
 
 	        this.initCache();
+
+	        this.globals = globals();
 	        this.filters = {};
 	        this.asyncFilters = [];
 	        this.extensions = {};
@@ -534,6 +536,7 @@ var nunjucks =
 	        extension._name = name;
 	        this.extensions[name] = extension;
 	        this.extensionsList.push(extension);
+	        return this;
 	    },
 
 	    removeExtension: function(name) {
@@ -553,14 +556,15 @@ var nunjucks =
 	    },
 
 	    addGlobal: function(name, value) {
-	        globals[name] = value;
+	        this.globals[name] = value;
+	        return this;
 	    },
 
 	    getGlobal: function(name) {
-	        if(!globals[name]) {
+	        if(!this.globals[name]) {
 	            throw new Error('global not found: ' + name);
 	        }
-	        return globals[name];
+	        return this.globals[name];
 	    },
 
 	    addFilter: function(name, func, async) {
@@ -570,6 +574,7 @@ var nunjucks =
 	            this.asyncFilters.push(name);
 	        }
 	        this.filters[name] = wrapped;
+	        return this;
 	    },
 
 	    getFilter: function(name) {
@@ -584,7 +589,7 @@ var nunjucks =
 	        return (isRelative && loader.resolve)? loader.resolve(parentName, filename) : filename;
 	    },
 
-	    getTemplate: function(name, eagerCompile, parentName, cb) {
+	    getTemplate: function(name, eagerCompile, parentName, ignoreMissing, cb) {
 	        var that = this;
 	        var tmpl = null;
 	        if(name && name.raw) {
@@ -603,14 +608,18 @@ var nunjucks =
 	            eagerCompile = false;
 	        }
 
-	        if(typeof name !== 'string') {
+	        if (name instanceof Template) {
+	             tmpl = name;
+	        }
+	        else if(typeof name !== 'string') {
 	            throw new Error('template names must be a string: ' + name);
 	        }
-
-	        for (var i = 0; i < this.loaders.length; i++) {
-	            var _name = this.resolveTemplate(this.loaders[i], parentName, name);
-	            tmpl = this.loaders[i].cache[_name];
-	            if (tmpl) break;
+	        else {
+	            for (var i = 0; i < this.loaders.length; i++) {
+	                var _name = this.resolveTemplate(this.loaders[i], parentName, name);
+	                tmpl = this.loaders[i].cache[_name];
+	                if (tmpl) break;
+	            }
 	        }
 
 	        if(tmpl) {
@@ -630,7 +639,9 @@ var nunjucks =
 
 	            var createTemplate = function(err, info) {
 	                if(!info && !err) {
-	                    err = new Error('template not found: ' + name);
+	                    if(!ignoreMissing) {
+	                        err = new Error('template not found: ' + name);
+	                    }
 	                }
 
 	                if (err) {
@@ -642,11 +653,18 @@ var nunjucks =
 	                    }
 	                }
 	                else {
-	                    var tmpl = new Template(info.src, _this,
+	                    var tmpl;
+	                    if(info) {
+	                        tmpl = new Template(info.src, _this,
 	                                            info.path, eagerCompile);
 
-	                    if(!info.noCache) {
-	                        info.loader.cache[name] = tmpl;
+	                        if(!info.noCache) {
+	                            info.loader.cache[name] = tmpl;
+	                        }
+	                    }
+	                    else {
+	                        tmpl = new Template('', _this,
+	                                            '', eagerCompile);
 	                    }
 
 	                    if(cb) {
@@ -704,6 +722,7 @@ var nunjucks =
 	        };
 
 	        app.set('view', NunjucksView);
+	        return this;
 	    },
 
 	    render: function(name, ctx, cb) {
@@ -746,7 +765,10 @@ var nunjucks =
 	});
 
 	var Context = Obj.extend({
-	    init: function(ctx, blocks) {
+	    init: function(ctx, blocks, env) {
+	        // Has to be tied to an environment so we can tap into its globals.
+	        this.env = env || new Environment();
+
 	        // Make a duplicate of ctx
 	        this.ctx = {};
 	        for(var k in ctx) {
@@ -766,8 +788,8 @@ var nunjucks =
 	    lookup: function(name) {
 	        // This is one of the most called functions, so optimize for
 	        // the typical case where the name isn't in the globals
-	        if(name in globals && !(name in this.ctx)) {
-	            return globals[name];
+	        if(name in this.env.globals && !(name in this.ctx)) {
+	            return this.env.globals[name];
 	        }
 	        else {
 	            return this.ctx[name];
@@ -785,6 +807,7 @@ var nunjucks =
 	    addBlock: function(name, block) {
 	        this.blocks[name] = this.blocks[name] || [];
 	        this.blocks[name].push(block);
+	        return this;
 	    },
 
 	    getBlock: function(name) {
@@ -884,7 +907,7 @@ var nunjucks =
 	            else throw err;
 	        }
 
-	        var context = new Context(ctx || {}, _this.blocks);
+	        var context = new Context(ctx || {}, _this.blocks, _this.env);
 	        var frame = parentFrame ? parentFrame.push() : new Frame();
 	        frame.topLevel = true;
 	        var syncResult = null;
@@ -941,13 +964,17 @@ var nunjucks =
 	        frame.topLevel = true;
 
 	        // Run the rootRenderFunc to populate the context with exported vars
-	        var context = new Context(ctx || {}, this.blocks);
+	        var context = new Context(ctx || {}, this.blocks, this.env);
 	        this.rootRenderFunc(this.env,
 	                            context,
 	                            frame,
 	                            runtime,
-	                            function() {
-	                                cb(null, context.getExported());
+	                            function(err) {
+	        		        if ( err ) {
+	        			    cb(err, null);
+	        		        } else {
+	        			    cb(null, context.getExported());
+	        		        }
 	                            });
 	    },
 
@@ -1015,8 +1042,6 @@ var nunjucks =
 	    return value;
 	}
 
-	var hasWarnedDefault = false;
-
 	var filters = {
 	    abs: function(n) {
 	        return Math.abs(n);
@@ -1070,18 +1095,6 @@ var nunjucks =
 	    },
 
 	    'default': function(val, def, bool) {
-	        if(bool !== true && bool !== false && !hasWarnedDefault) {
-	            hasWarnedDefault = true;
-	            console.log(
-	                '[nunjucks] Warning: the "default" filter was used without ' +
-	                'specifying the type of comparison. 2.0 changed the default ' +
-	                'behavior from boolean (val ? val : def) to strictly undefined, ' +
-	                'so you should make sure that doesn\'t break anything. ' +
-	                'Be explicit about this to make this warning go away, or wait until 2.1. ' +
-	                'See http://mozilla.github.io/nunjucks/templating.html#defaultvalue-default-boolean'
-	            );
-	        }
-
 	        if(bool) {
 	            return val ? val : def;
 	        }
@@ -1415,6 +1428,12 @@ var nunjucks =
 
 	    string: function(obj) {
 	        return r.copySafeness(obj, obj);
+	    },
+
+	    striptags: function(input) {
+	        input = normalize(input, '');
+	        var tags = /<\/?([a-z][a-z0-9]*)\b[^>]*>|<!--[\s\S]*?-->/gi;
+	        return r.copySafeness(input, filters.trim(input.replace(tags, '')).replace(/\s+/gi, ' '));
 	    },
 
 	    title: function(str) {
@@ -2323,35 +2342,47 @@ var nunjucks =
 	    };
 	}
 
-	var globals = {
-	    range: function(start, stop, step) {
-	        if(!stop) {
-	            stop = start;
-	            start = 0;
-	            step = 1;
+	// Making this a function instead so it returns a new object
+	// each time it's called. That way, if something like an environment
+	// uses it, they will each have their own copy.
+	function globals() {
+	    return {
+	        range: function(start, stop, step) {
+	            if(!stop) {
+	                stop = start;
+	                start = 0;
+	                step = 1;
+	            }
+	            else if(!step) {
+	                step = 1;
+	            }
+
+	            var arr = [];
+	            var i;
+	            if (step > 0) {
+	                for (i=start; i<stop; i+=step) {
+	                    arr.push(i);
+	                }
+	            } else {
+	                for (i=start; i>stop; i+=step) {
+	                    arr.push(i);
+	                }
+	            }
+	            return arr;
+	        },
+
+	        // lipsum: function(n, html, min, max) {
+	        // },
+
+	        cycler: function() {
+	            return cycler(Array.prototype.slice.call(arguments));
+	        },
+
+	        joiner: function(sep) {
+	            return joiner(sep);
 	        }
-	        else if(!step) {
-	            step = 1;
-	        }
-
-	        var arr = [];
-	        for(var i=start; i<stop; i+=step) {
-	            arr.push(i);
-	        }
-	        return arr;
-	    },
-
-	    // lipsum: function(n, html, min, max) {
-	    // },
-
-	    cycler: function() {
-	        return cycler(Array.prototype.slice.call(arguments));
-	    },
-
-	    joiner: function(sep) {
-	        return joiner(sep);
-	    }
-	};
+	    };
+	}
 
 	module.exports = globals;
 

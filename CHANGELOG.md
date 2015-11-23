@@ -1,8 +1,8 @@
 Changelog
 =========
 
-master (unreleased)
--------------------
+v2.2.0 (Nov 23 2015)
+--------------------
 
 * Add `striptags` filter. Thanks Anthony Giniers. Merge of
   [#589](https://github.com/mozilla/nunjucks/pull/589).
