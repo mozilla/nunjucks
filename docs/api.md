@@ -9,17 +9,18 @@ title: API
 The API for nunjucks covers rendering templates, adding filters and
 extensions, customizing template loading, and more.
 
-## Simple API
-
-If you don't need deep customization of the system, you can use this simple
-higher-level API for loading and rendering templates.
-
 **Warning**: nunjucks does not sandbox execution so it is potentially
   unsafe to run user-defined templates. On the server, you may expose
   attack vectors for accessing sensitive data. On the client, you may
   expose cross-site scripting vulnerabilities (see [this
   issue](https://github.com/mozilla/nunjucks-docs/issues/17) for more
   information).
+
+
+## Simple API
+
+If you don't need deep customization of the system, you can use this simple
+higher-level API for loading and rendering templates.
 
 {% endraw %}
 {% api %}
@@ -96,6 +97,13 @@ directory, and the following options are available in **opts**:
 `configure` returns an `Environment` instance, which lets you add
 filters and extensions while still using the simple API. See below for
 more information on `Environment`.
+
+**Warning**: The simple API (above; e.g. `nunjucks.render`) always uses the
+  configuration from the most recent call to `nunjucks.configure`. Since this
+  is implicit and can result in unexpected side effects, use of the simple API
+  is discouraged in most cases (especially if `configure` is used); instead,
+  explicitly create an environment using `var env = nunjucks.configure(...)`
+  and then call `env.render(...)` etc.
 
 ```js
 nunjucks.configure('views');
