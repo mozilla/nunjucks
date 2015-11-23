@@ -32,8 +32,8 @@
             equal('{% for i in range(5, 10, 2.5) %}{{ i }}{% endfor %}', '57.5');
             equal('{% for i in range(5, 10, 2.5) %}{{ i }}{% endfor %}', '57.5');
 
-            //equal('{% for i in range(5, 10, -1) %}{{ i }}{% endfor %}', '56789');
-            //equal('{% for i in range(5, 10, -1 | abs) %}{{ i }}{% endfor %}','56789');
+            equal('{% for i in range(10, 5, -1) %}{{ i }}{% endfor %}', '109876');
+            equal('{% for i in range(10, 5, -2.5) %}{{ i }}{% endfor %}', '107.5');
 
             finish(done);
         });
@@ -79,7 +79,7 @@
             return 'Hello ' + arg1;
           });
 
-          equal('{{ hello("World!") }}', 'Hello World!');
+          equal('{{ hello("World!") }}', 'Hello World!', env);
 
           finish(done);
         });
@@ -93,8 +93,8 @@
             return 'Goodbye ' + arg1;
           });
 
-          equal('{{ hello("World!") }}', 'Hello World!');
-          equal('{{ goodbye("World!") }}', 'Goodbye World!');
+          equal('{{ hello("World!") }}', 'Hello World!', env);
+          equal('{{ goodbye("World!") }}', 'Goodbye World!', env);
 
           finish(done);
         });
@@ -115,7 +115,8 @@
         it('should fail on getting non-existent global', function(done) {
             var env = new Environment(new Loader(templatesPath));
 
-            expect(env.getGlobal).withArgs('hello1').to.throwError();
+            // Using this format instead of .withArgs since env.getGlobal uses 'this'
+            expect(function() { env.getGlobal('hello') }).to.throwError();
 
             finish(done);
         });
@@ -127,8 +128,21 @@
                 return 'Hello ' + this.lookup('user');
             });
 
-            equal('{{ hello() }}', { user: 'James' }, 'Hello James');
+            equal('{{ hello() }}', { user: 'James' }, 'Hello James', env);
             finish(done);
+        });
+
+        it('should be exclusive to each environment', function(done) {
+          var env = new Environment(new Loader(templatesPath));
+          var env2;
+
+          env.addGlobal('hello', 'konichiwa');
+          env2 = new Environment(new Loader(templatesPath));
+
+          // Using this format instead of .withArgs since env2.getGlobal uses 'this'
+          expect(function() { env2.getGlobal('hello') }).to.throwError();
+
+          finish(done);
         });
     });
 })();

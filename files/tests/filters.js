@@ -394,6 +394,20 @@
             finish(done);
         });
 
+        it('striptags', function(done) {
+            equal('{{ html | striptags }}', {html: '<foo>bar'}, 'bar');
+            equal('{{ html | striptags }}',
+                  {
+                      html: '  <p>an  \n <a href="#">example</a> link</p>\n<p>to a webpage</p> ' +
+                            '<!-- <p>and some comments</p> -->'
+                  },
+                  'an example link to a webpage');
+            equal('{{ undefined | striptags }}', '');
+            equal('{{ null | striptags }}', '');
+            equal('{{ nothing | striptags }}', '');
+            finish(done);
+        });
+
         it('title', function(done) {
             equal('{{ "foo bar baz" | title }}', 'Foo Bar Baz');
             equal('{{ str | title }}', {str: r.markSafe('foo bar baz')}, 'Foo Bar Baz');

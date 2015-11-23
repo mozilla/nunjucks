@@ -604,7 +604,7 @@
 
             expect(function() {
                 parser.parse('hello {% if sdf %} data');
-            }).to.throwException(/expected endif, else, or endif/);
+            }).to.throwException(/expected elif, else, or endif/);
 
             expect(function() {
                 parser.parse('hello {% block sdf %} data');

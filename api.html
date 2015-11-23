@@ -223,17 +223,17 @@
 <p>The API for nunjucks covers rendering templates, adding filters and
 extensions, customizing template loading, and more.</p>
 
-<h2 id="simple-api">Simple API</h2>
-
-<p>If you don&#39;t need deep customization of the system, you can use this simple
-higher-level API for loading and rendering templates.</p>
-
 <p><strong>Warning</strong>: nunjucks does not sandbox execution so it is potentially
   unsafe to run user-defined templates. On the server, you may expose
   attack vectors for accessing sensitive data. On the client, you may
   expose cross-site scripting vulnerabilities (see <a href="https://github.com/mozilla/nunjucks-docs/issues/17">this
   issue</a> for more
   information).</p>
+
+<h2 id="simple-api">Simple API</h2>
+
+<p>If you don&#39;t need deep customization of the system, you can use this simple
+higher-level API for loading and rendering templates.</p>
 
 <h3 id="render">render</h3>
 
@@ -304,6 +304,13 @@ nunjucks tags. See <a href="#customizing-syntax">Customizing Syntax</a></li>
 <p><code>configure</code> returns an <code>Environment</code> instance, which lets you add
 filters and extensions while still using the simple API. See below for
 more information on <code>Environment</code>.</p>
+
+<p><strong>Warning</strong>: The simple API (above; e.g. <code>nunjucks.render</code>) always uses the
+  configuration from the most recent call to <code>nunjucks.configure</code>. Since this
+  is implicit and can result in unexpected side effects, use of the simple API
+  is discouraged in most cases (especially if <code>configure</code> is used); instead,
+  explicitly create an environment using <code>var env = nunjucks.configure(...)</code>
+  and then call <code>env.render(...)</code> etc.</p>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="nx">nunjucks</span><span class="p">.</span><span class="nx">configure</span><span class="p">(</span><span class="s1">&#39;views&#39;</span><span class="p">);</span>
 
 <span class="c1">// if in the browser, you probably want to use an absolute URL</span>

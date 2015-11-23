@@ -540,6 +540,23 @@
             finish(done);
         });
 
+        it('should import template objects', function(done) {
+            var tmpl = new Template('{% macro foo() %}Inside a macro{% endmacro %}' +
+                                    '{% set bar = "BAZ" %}');
+
+            equal('{% import tmpl as imp %}' +
+                  '{{ imp.foo() }} {{ imp.bar }}',
+                  { tmpl : tmpl },
+                  'Inside a macro BAZ');
+
+            equal('{% from tmpl import foo as baz, bar %}' +
+                  '{{ bar }} {{ baz() }}',
+                  { tmpl : tmpl },
+                  'BAZ Inside a macro');
+
+            finish(done);
+        });
+
         it('should import templates with context', function(done) {
             equal('{% set bar = "BAR" %}' +
                   '{% import "import-context.html" as imp with context %}' +
@@ -629,6 +646,23 @@
             finish(done);
         });
 
+        it('should inherit template objects', function(done) {
+            var tmpl = new Template('Foo{% block block1 %}Bar{% endblock %}' +
+                                    '{% block block2 %}Baz{% endblock %}Whizzle');
+
+            equal('hola {% extends tmpl %} fizzle mumble',
+                  { tmpl: tmpl },
+                  'FooBarBazWhizzle');
+
+            equal('{% extends tmpl %}' +
+                  '{% block block1 %}BAR{% endblock %}' +
+                  '{% block block2 %}BAZ{% endblock %}',
+                  { tmpl: tmpl },
+                  'FooBARBAZWhizzle');
+
+            finish(done);
+        });
+
         it('should conditionally inherit templates', function(done) {
             equal('{% if false %}{% extends "base.html" %}{% endif %}' +
                   '{% block block1 %}BAR{% endblock %}',
@@ -693,6 +727,41 @@
             equal('hello world {% include data.tmpl %}',
                   { name: 'thedude', data: {tmpl: 'include.html'} },
                   'hello world FooInclude thedude');
+
+            finish(done);
+        });
+
+        it('should include template objects', function(done) {
+            var tmpl = new Template('FooInclude {{ name }}');
+
+            equal('hello world {% include tmpl %}',
+                  { name: 'thedude', tmpl: tmpl },
+                  'hello world FooInclude thedude');
+
+            finish(done);
+        });
+
+        it('should throw an error when including a file that does not exist', function(done) {
+            render(
+                '{% include "missing.html" %}',
+                {},
+                { noThrow: true },
+                function(err, res) {
+                    expect(res).to.be(undefined);
+                    expect(err).to.match(/template not found: missing.html/);
+                }
+            );
+
+            finish(done);
+        });
+
+        it('should fail silently on missing templates if requested', function(done) {
+            equal('hello world {% include "missing.html" ignore missing %}',
+                  'hello world ');
+
+            equal('hello world {% include "missing.html" ignore missing %}',
+                  { name: 'thedude' },
+                  'hello world ');
 
             finish(done);
         });

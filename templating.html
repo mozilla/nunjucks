@@ -269,8 +269,10 @@ override. The inheritance chain can be as long as you like.</p>
 <span class="x">&lt;/section&gt;  </span>
 </code></pre></div>
 <p>You can store the template to inherit in a variable and use it by
-omitting quotes. That way you can dynamically change which template is
-inherited when rendering by setting it in the context.</p>
+omitting quotes. This variable can contain a string that points to a 
+template file, or it can contain a compiled Template object that has
+been added to the context. That way you can dynamically change which 
+template is inherited when rendering by setting it in the context.</p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">extends</span> <span class="nv">parentTemplate</span> <span class="cp">%}</span><span class="x"></span>
 </code></pre></div>
 <p>You leverage inheritance with the <a href="#extends"><code>extends</code></a> and
@@ -469,13 +471,17 @@ Inheritance</a>.</p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">extends</span> <span class="s2">&quot;base.html&quot;</span> <span class="cp">%}</span><span class="x"></span>
 </code></pre></div>
 <p>You can store the template to inherit in a variable and use it by
-omitting quotes. That way you can dynamically change which template is
+omitting quotes. This variable can contain a string that points to a 
+template file, or it can contain a compiled Template object that has
+been added to the context. That way you can dynamically change which template is
 inherited when rendering by setting it in the context.</p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">extends</span> <span class="nv">parentTemplate</span> <span class="cp">%}</span><span class="x"></span>
 </code></pre></div>
 <p>In fact, <code>extends</code> accepts any arbitrary expression, so you can pass
-anything into it: <code>{% extends name + &quot;.html&quot; %}</code>.</p>
-
+anything into it, as long as that expression evaluates to a string or 
+a compiled Template object: </p>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">extends</span> <span class="nv">name</span> <span class="o">+</span> <span class="s2">&quot;.html&quot;</span> <span class="cp">%}</span><span class="x">`.</span>
+</code></pre></div>
 <h3 id="block">block</h3>
 
 <p><code>block</code> defines a section on the template and identifies it with a
@@ -513,8 +519,11 @@ render the parent block&#39;s content. See <a href="#super">super</a>.</p>
 </code></pre></div>
 <p>This is especially useful for cutting up templates into pieces so that the browser-side environment can render the small chunks when it needs to change the page.</p>
 
-<p><code>include</code> actually accepts any arbitrary expression, so you can pass anything into it: <code>{% include name + &quot;.html&quot; %}</code>.</p>
+<p><code>include</code> actually accepts any arbitrary expression, so you can pass anything into it, as long as the expression evaluates to a string or a compiled Template object: <code>{% include name + &quot;.html&quot; %}</code>.</p>
 
+<p>It might be useful to not throw an error if a template does not exist. Use the <code>ignore missing</code> option to suppress such errors.</p>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">include</span> <span class="s2">&quot;missing.html&quot;</span> <span class="k">ignore missing</span> <span class="cp">%}</span><span class="x"></span>
+</code></pre></div>
 <h3 id="import">import</h3>
 
 <p><code>import</code> loads a different template and allows you to access its exported values. Macros and top-level assignments (done with <a href="#set"><code>set</code></a>) are exported from templates, allowing you to access them in a different template.</p>
@@ -551,7 +560,7 @@ render the parent block&#39;s content. See <a href="#super">super</a>.</p>
 <span class="cp">{{</span> <span class="nv">description</span><span class="o">(</span><span class="s1">&#39;Password&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
 <span class="cp">{{</span> <span class="nv">field</span><span class="o">(</span><span class="s1">&#39;pass&#39;</span><span class="o">,</span> <span class="nv">type</span><span class="o">=</span><span class="s1">&#39;password&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
 </code></pre></div>
-<p><code>import</code> actually accepts any arbitrary expression, so you can pass anything into it: <code>{% import name + &quot;.html&quot; as obj %}</code>.</p>
+<p><code>import</code> actually accepts any arbitrary expression, so you can pass anything into it, as long as the expression evaluates to a string or a compiled Template object: <code>{% import name + &quot;.html&quot; as obj %}</code>.</p>
 
 <h3 id="raw">raw</h3>
 
@@ -786,9 +795,7 @@ documented below, for the rest you can click through to jinja&#39;s site.</p>
   filter. Previously, it acted as if <code>boolean</code> was true by default,
   and any falsy value would return <code>default</code>. In 2.0 the default is
   only an <code>undefined</code> value returns <code>default</code>. You can get the old
-  behavior by passing <code>true</code> to <code>boolean</code>, or just use <code>value or default</code>.
-  2.0 will show a warning if <code>boolean</code> is not passed, but we will remove 
-  this warning in the next version.</strong></p>
+  behavior by passing <code>true</code> to <code>boolean</code>, or just use <code>value or default</code>.</strong></p>
 
 <h3 id="sort-arr-reverse-casesens-attr">sort(arr, reverse, caseSens, attr)</h3>
 
@@ -823,6 +830,7 @@ passed, will compare <code>attr</code> from each item.</p>
 <li><a href="http://jinja.pocoo.org/docs/templates/#selectattr">selectattr</a> (only the single-argument form)</li>
 <li><a href="http://jinja.pocoo.org/docs/templates/#slice">slice</a></li>
 <li><a href="http://jinja.pocoo.org/docs/templates/#string">string</a></li>
+<li><a href="http://jinja.pocoo.org/docs/templates/#striptags">striptags</a></li>
 <li><a href="http://jinja.pocoo.org/docs/templates/#title">title</a></li>
 <li><a href="http://jinja.pocoo.org/docs/templates/#trim">trim</a></li>
 <li><a href="http://jinja.pocoo.org/docs/templates/#truncate">truncate</a></li>
