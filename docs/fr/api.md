@@ -9,17 +9,18 @@ title: API
 L'API pour nunjucks couvre le rendu des templates, l'ajout des filtres et
 des extensions, la personnalisation du chargement des templates et plus encore.
 
-## API simplifiée
-
-Si vous n'avez pas besoin d'une personnalisation en profondeur du système, vous pouvez utiliser
-l'API simplifiée de haut niveau pour le chargement et le rendu des templates.
-
 **Avertissement** : nunjucks n'a pas d'exécution de [sandbox](https://fr.wikipedia.org/wiki/Sandbox_%28s%C3%A9curit%C3%A9_informatique%29) donc il est potentiellement
   dangereux d'exécuter des templates définis par l'utilisateur. Sur le serveur, vous risquez
   des [vecteurs d'attaque](https://fr.wiktionary.org/wiki/vecteur_d%E2%80%99attaque) pour accéder aux données sensibles. Sur le client, vous risquez
   des vulnérabilités de [cross-site scripting](https://fr.wikipedia.org/wiki/Cross-site_scripting) (voir [cette
   question](https://github.com/mozilla/nunjucks-docs/issues/17) pour
   plus d'informations).
+
+
+## API simplifiée
+
+  Si vous n'avez pas besoin d'une personnalisation en profondeur du système, vous pouvez utiliser
+  l'API simplifiée de haut niveau pour le chargement et le rendu des templates.
 
 {% endraw %}
 {% api %}
@@ -97,6 +98,13 @@ et les options suivantes sont disponibles dans **opts** :
 filtres et des extensions tout en utilisant l'API simplifiée. Voir ci-dessous pour
 plus d'informations sur `Environment`.
 
+**Avertissement** : L'API simplifiée (ci-dessus, par exemple `nunjucks.render`) utilise toujours la
+  configuration de l'appel le plus récent de `nunjucks.configure`. Comme cela est
+  implicite et peut entraîner des effets secondaires inattendus, l'utilisation de l'API simplifiée
+  est déconseillée dans la plupart des cas (surtout si `configure` est utilisé). A la place,
+  créez explicitement un environnement en utilisant `var env = nunjucks.configure(...)`
+  et ensuite appeler `env.render(...)` etc.
+
 ```js
 nunjucks.configure('views');
 
@@ -153,7 +161,7 @@ des chargeurs de templates personnalisés.
 constructor
 new Environment([loaders], [opts])
 
-Le constructeur prend une liste de **loaders** (chargeurs) et un hash de 
+Le constructeur prend une liste de **loaders** (chargeurs) et un hash de
 paramètres de configuration **opts**. Si **loaders** est null, sa valeur par
 défaut pour le chargement est le répertoire ou l'URL courant. Vous pouvez passer
 un seul chargeur ou un tableau de chargeurs. Si vous passez un tableau de chargeurs,
@@ -468,7 +476,7 @@ var MyLoader = nunjucks.Loader.extend({
         // et appelle `this.emit('update', name)` lorsqu'un template
         // est modifié
     }
-    
+
     getSource: function(name) {
         // charge le template
     }
@@ -489,7 +497,7 @@ utilisé de façon asynchrone.
 ```js
 var MyLoader = nunjucks.Loader.extend({
     async: true,
-    
+
     getSource: function(name, callback) {
         // charge le template
         // ...
@@ -663,9 +671,9 @@ Vous avez besoin de lire cette section seulement si vous êtes intéressé par l
 rendu asynchrone. Il n'y a aucun avantage en termes de performance, il doit uniquement
 permettre aux filtres et aux extensions personnalisées de faire des appels asynchrones. Si
 vous ne vous souciez pas de cela, vous devez simplement utiliser l'API normal tel que
-`var res = env.render('foo.html');`. Il n'y a pas besoin de forcer le 
+`var res = env.render('foo.html');`. Il n'y a pas besoin de forcer le
 `callback`, et c'est pourquoi il est facultatif dans toutes les fonctions
-de rendu. 
+de rendu.
 
 Depuis la version 1.0, nunjucks fournit un moyen de rendre les templates de
 manière asynchrone. Cela signifie que les filtres et extensions personnalisées peuvent faire
@@ -802,7 +810,7 @@ Le template peut l'utiliser ainsi :
 
 Vous *devez* passer tous les arguments de position avant les arguments avec mots
 clefs (`foo(1)` est valide, mais `foo(1, bar=10)` ne l'est pas). Donc, vous ne
-pouvez pas définir un argument de position avec un argument avec mots clefs, bien 
+pouvez pas définir un argument de position avec un argument avec mots clefs, bien
 que cela soit possible en Python (comme `foo(1, y=1)`).
 
 ### Asynchrone
@@ -835,7 +843,7 @@ Cela vous permet d'utiliser l'API du parser (analyseur) et vous permet de faire 
 ce que vous voulez avec le template.
 
 Remarque: Lors de la précompilation, **vous devez installer les extensions pour
-la compilation**. Vous devez utiliser l'API de [précompilation](#api1) (ou la 
+la compilation**. Vous devez utiliser l'API de [précompilation](#api1) (ou la
 [tâche de grunt](https://github.com/jlongster/grunt-nunjucks)) à la place du
 script. Vous devrez créer un objet [`Environment`](#environment),
 installez vos extensions et les transmettre au précompilateur.
