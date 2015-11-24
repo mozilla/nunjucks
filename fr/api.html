@@ -223,17 +223,17 @@
 <p>L&#39;API pour nunjucks couvre le rendu des templates, l&#39;ajout des filtres et
 des extensions, la personnalisation du chargement des templates et plus encore.</p>
 
-<h2 id="api-simplifiée">API simplifiée</h2>
-
-<p>Si vous n&#39;avez pas besoin d&#39;une personnalisation en profondeur du système, vous pouvez utiliser
-l&#39;API simplifiée de haut niveau pour le chargement et le rendu des templates.</p>
-
 <p><strong>Avertissement</strong> : nunjucks n&#39;a pas d&#39;exécution de <a href="https://fr.wikipedia.org/wiki/Sandbox_%28s%C3%A9curit%C3%A9_informatique%29">sandbox</a> donc il est potentiellement
   dangereux d&#39;exécuter des templates définis par l&#39;utilisateur. Sur le serveur, vous risquez
   des <a href="https://fr.wiktionary.org/wiki/vecteur_d%E2%80%99attaque">vecteurs d&#39;attaque</a> pour accéder aux données sensibles. Sur le client, vous risquez
   des vulnérabilités de <a href="https://fr.wikipedia.org/wiki/Cross-site_scripting">cross-site scripting</a> (voir <a href="https://github.com/mozilla/nunjucks-docs/issues/17">cette
   question</a> pour
   plus d&#39;informations).</p>
+
+<h2 id="api-simplifiée">API simplifiée</h2>
+
+<p>Si vous n&#39;avez pas besoin d&#39;une personnalisation en profondeur du système, vous pouvez utiliser
+  l&#39;API simplifiée de haut niveau pour le chargement et le rendu des templates.</p>
 
 <h3 id="render">render</h3>
 
@@ -304,6 +304,13 @@ les tags de nunjucks. Voir <a href="#personnalisation-de-la-syntaxe">Personnalis
 <p><code>configure</code> retourne une instance <code>Environment</code>, qui vous permet d&#39;ajouter des
 filtres et des extensions tout en utilisant l&#39;API simplifiée. Voir ci-dessous pour
 plus d&#39;informations sur <code>Environment</code>.</p>
+
+<p><strong>Avertissement</strong> : L&#39;API simplifiée (ci-dessus, par exemple <code>nunjucks.render</code>) utilise toujours la
+  configuration de l&#39;appel le plus récent de <code>nunjucks.configure</code>. Comme cela est
+  implicite et peut entraîner des effets secondaires inattendus, l&#39;utilisation de l&#39;API simplifiée
+  est déconseillée dans la plupart des cas (surtout si <code>configure</code> est utilisé). A la place,
+  créez explicitement un environnement en utilisant <code>var env = nunjucks.configure(...)</code>
+  et ensuite appeler <code>env.render(...)</code> etc.</p>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="nx">nunjucks</span><span class="p">.</span><span class="nx">configure</span><span class="p">(</span><span class="s1">&#39;views&#39;</span><span class="p">);</span>
 
 <span class="c1">// dans le navigateur, vous voudrez probablement utiliser une URL absolue</span>
@@ -356,7 +363,7 @@ des chargeurs de templates personnalisés.</p>
 
 <div class="api-sig"><code>new Environment([loaders], [opts])</code></div>
 
-<div class="api-desc"><p>Le constructeur prend une liste de <strong>loaders</strong> (chargeurs) et un hash de 
+<div class="api-desc"><p>Le constructeur prend une liste de <strong>loaders</strong> (chargeurs) et un hash de
 paramètres de configuration <strong>opts</strong>. Si <strong>loaders</strong> est null, sa valeur par
 défaut pour le chargement est le répertoire ou l&#39;URL courant. Vous pouvez passer
 un seul chargeur ou un tableau de chargeurs. Si vous passez un tableau de chargeurs,
@@ -832,9 +839,9 @@ générés automatiquement lors de la compilation d&#39;un répertoire.</li>
 rendu asynchrone. Il n&#39;y a aucun avantage en termes de performance, il doit uniquement
 permettre aux filtres et aux extensions personnalisées de faire des appels asynchrones. Si
 vous ne vous souciez pas de cela, vous devez simplement utiliser l&#39;API normal tel que
-<code>var res = env.render(&#39;foo.html&#39;);</code>. Il n&#39;y a pas besoin de forcer le 
+<code>var res = env.render(&#39;foo.html&#39;);</code>. Il n&#39;y a pas besoin de forcer le
 <code>callback</code>, et c&#39;est pourquoi il est facultatif dans toutes les fonctions
-de rendu. </p>
+de rendu.</p>
 
 <p>Depuis la version 1.0, nunjucks fournit un moyen de rendre les templates de
 manière asynchrone. Cela signifie que les filtres et extensions personnalisées peuvent faire
@@ -949,7 +956,7 @@ Voici le filtre <code>foo</code> qui utilise des arguments avec mots clefs :</p>
 </code></pre></div>
 <p>Vous <em>devez</em> passer tous les arguments de position avant les arguments avec mots
 clefs (<code>foo(1)</code> est valide, mais <code>foo(1, bar=10)</code> ne l&#39;est pas). Donc, vous ne
-pouvez pas définir un argument de position avec un argument avec mots clefs, bien 
+pouvez pas définir un argument de position avec un argument avec mots clefs, bien
 que cela soit possible en Python (comme <code>foo(1, y=1)</code>).</p>
 
 <h3 id="asynchrone">Asynchrone</h3>
@@ -979,7 +986,7 @@ Cela vous permet d&#39;utiliser l&#39;API du parser (analyseur) et vous permet d
 ce que vous voulez avec le template.</p>
 
 <p>Remarque: Lors de la précompilation, <strong>vous devez installer les extensions pour
-la compilation</strong>. Vous devez utiliser l&#39;API de <a href="#api1">précompilation</a> (ou la 
+la compilation</strong>. Vous devez utiliser l&#39;API de <a href="#api1">précompilation</a> (ou la
 <a href="https://github.com/jlongster/grunt-nunjucks">tâche de grunt</a>) à la place du
 script. Vous devrez créer un objet <a href="#environment"><code>Environment</code></a>,
 installez vos extensions et les transmettre au précompilateur.</p>
