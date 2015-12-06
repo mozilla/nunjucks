@@ -386,7 +386,7 @@ blocks and child templates can override them with new content. See
 ```jinja
 {% block css %}
 <link rel="stylesheet" href="app.css" />
-{% endblock }
+{% endblock %}
 ```
 
 You can even define blocks within looping:
