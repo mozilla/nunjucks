@@ -295,7 +295,7 @@ var env = new nunjucks.Environment(AsyncLoaderFromDatabase, opts);
 ```jinja
 {% block css %}
 <link rel="stylesheet" href="app.css" />
-{% endblock }
+{% endblock %}
 ```
 
 可以在循环中定义区块
