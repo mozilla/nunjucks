@@ -386,7 +386,7 @@ des blocs, ainsi des templates enfants peuvent les remplacer avec du nouveau con
 ```jinja
 {% block css %}
 <link rel="stylesheet" href="app.css" />
-{% endblock }
+{% endblock %}
 ```
 
 Vous pouvez même définir des blocs dans une boucle :
