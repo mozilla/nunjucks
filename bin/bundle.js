@@ -35,7 +35,8 @@ var config = {
     output: {
         path: path.join(__dirname, '../browser'),
         filename: TARGET,
-        library: 'nunjucks'
+        library: 'nunjucks',
+        libraryTarget: 'umd'
     },
     node: {
         process: 'empty'
