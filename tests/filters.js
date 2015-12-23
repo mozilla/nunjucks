@@ -405,6 +405,12 @@
             equal('{{ undefined | striptags }}', '');
             equal('{{ null | striptags }}', '');
             equal('{{ nothing | striptags }}', '');
+            equal('{{ html | striptags(true) }}',
+                  {
+                      html: '<div>\n  row1\nrow2  \n  <strong>row3</strong>\n</div>\n\n' +
+                            ' HEADER \n\n<ul>\n  <li>option  1</li>\n<li>option  2</li>\n</ul>'
+                  },
+                  'row1\nrow2\nrow3\n\nHEADER\n\noption 1\noption 2');
             finish(done);
         });
 
