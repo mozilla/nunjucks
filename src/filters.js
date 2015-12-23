@@ -406,11 +406,12 @@ var filters = {
         if (preserve_linebreaks) {
             res = filters.trim(input.replace(tags, ''))
                 .replace(/^ +| +$/gm, '')     // remove leading and trailing spaces
-                .replace(/ +/g, ' ')          // squash consequent spaces
+                .replace(/ +/g, ' ')          // squash adjacent spaces
                 .replace(/(\r\n)/g, '\n')     // normalize linebreaks (CRLF -> LF)
-                .replace(/\n\n\n+/g, '\n\n'); // squash abnormal consequent linebreaks
+                .replace(/\n\n\n+/g, '\n\n'); // squash abnormal adjacent linebreaks
         } else {
-            res = filters.trim(input.replace(tags, '')).replace(/\s+/gi, ' ');
+            res = filters.trim(input.replace(tags, ''))
+                .replace(/\s+/gi, ' ');
         }
         return r.copySafeness(input, res);
     },

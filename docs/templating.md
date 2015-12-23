@@ -784,6 +784,14 @@ true, result will be reversed. Sort is case-insensitive by default,
 but setting `caseSens` to true makes it case-sensitive. If `attr` is
 passed, will compare `attr` from each item.
 
+### striptags (value, [preserve_linebreaks])
+
+Analog of jinja's [striptags](http://jinja.pocoo.org/docs/templates/#striptags). If `preserve_linebreaks` is false (default),
+strips SGML/XML tags and replaces adjacent whitespace with one space.
+If `preserve_linebreaks` is true, normalizes whitespace, trying to preserve original
+linebreaks. Use second behavior if you want to pipe
+`{{ text | striptags | nl2br }}`. Use default one otherwise.
+
 ### More Filters
 
 * [abs](http://jinja.pocoo.org/docs/templates/#abs)
@@ -809,7 +817,6 @@ passed, will compare `attr` from each item.
 * [selectattr](http://jinja.pocoo.org/docs/templates/#selectattr) (only the single-argument form)
 * [slice](http://jinja.pocoo.org/docs/templates/#slice)
 * [string](http://jinja.pocoo.org/docs/templates/#string)
-* [striptags](http://jinja.pocoo.org/docs/templates/#striptags)
 * [title](http://jinja.pocoo.org/docs/templates/#title)
 * [trim](http://jinja.pocoo.org/docs/templates/#trim)
 * [truncate](http://jinja.pocoo.org/docs/templates/#truncate)
