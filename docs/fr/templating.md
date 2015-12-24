@@ -784,6 +784,14 @@ true, le résultat sera inversé. Le tri est insensible à la casse par défaut,
 mais en paramétrant `caseSens` à true, cela le rend sensible à la casse. Si `attr` est
 passé, cela permettra de comparer `attr` à chaque élément.
 
+### striptags (value, [preserve_linebreaks])
+
+C'est similaire à [striptags](http://jinja.pocoo.org/docs/templates/#striptags) de jinja. Si `preserve_linebreaks` est à false (par défaut),
+cela enlève les balises SGML/XML et remplace les espaces adjacents par un seul espace.
+Si `preserve_linebreaks` est à true, cela normalise les espaces, en essayant de préserver les
+sauts de lignes originaux. Utiliser le second comportement si vous voulez utiliser ceci
+`{{ text | striptags | nl2br }}`. Sinon utilisez le comportement par défaut.
+
 ### Plus de filtres
 
 * [abs](http://jinja.pocoo.org/docs/templates/#abs)
@@ -809,7 +817,6 @@ passé, cela permettra de comparer `attr` à chaque élément.
 * [selectattr](http://jinja.pocoo.org/docs/templates/#selectattr) (seulement pour le formulaire avec un unique argument)
 * [slice](http://jinja.pocoo.org/docs/templates/#slice)
 * [string](http://jinja.pocoo.org/docs/templates/#string)
-* [striptags](http://jinja.pocoo.org/docs/templates/#striptags)
 * [title](http://jinja.pocoo.org/docs/templates/#title)
 * [trim](http://jinja.pocoo.org/docs/templates/#trim)
 * [truncate](http://jinja.pocoo.org/docs/templates/#truncate)
