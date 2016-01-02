@@ -639,6 +639,11 @@ Precompile a file or directory at **path**. **opts** is a hash with any of the f
 * **env**: the Environment to use (gets extensions and async filters from it)
 * **include**: array of file/folders to include (folders are auto-included, files are auto-excluded)
 * **exclude**: array of file/folders to exclude (folders are auto-included, files are auto-excluded)
+* **wrapper**: `function(templates, opts)` Customize the output format of the precompiled templates. This function must return a string 
+    * **templates**: array of objects with the following properties:
+        * **name**: name of the template
+        * **template**: string source of the precompiled template in javascript
+    * **opts**: object of all the above options
 
 ```js
 var env = new nunjucks.Environment();

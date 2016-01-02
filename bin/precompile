@@ -6,7 +6,7 @@ var lib = require('../src/lib');
 
 var optimist = require('optimist')
 
-    .usage('$0 [-f|--force] [-a|--filters <filters>] [-n|--name <name>] [-i|--include <regex>] [-x|--exclude <regex>] <path>')
+    .usage('$0 [-f|--force] [-a|--filters <filters>] [-n|--name <name>] [-i|--include <regex>] [-x|--exclude <regex>] [-w|--wrapper <wrapper>] <path>')
     .wrap(80)
 
     .describe('help', 'Display this help message')
@@ -36,7 +36,7 @@ var optimist = require('optimist')
         .default('exclude', [])
         .alias('x', 'exclude')
 
-    .describe('wrapper', 'Something something change')
+    .describe('wrapper', 'Load a external plugin to change the output format of the precompiled templates (for example, "-w custom" will load a module named "nunjucks-custom")')
         .string('wrapper')
         .alias('w', 'wrapper')
 
