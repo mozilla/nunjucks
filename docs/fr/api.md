@@ -639,6 +639,11 @@ Précompile un fichier ou un répertoire depuis **path**. **opts** est un hash a
 * **env**: un environnement à utiliser (on récupère via ce dernier les extensions et les filtres asynchrone)
 * **include**: un tableau de fichiers/dossiers à inclure (les dossiers sont automatiquement inclus, les fichiers sont automatiquement exclus)
 * **exclude**: un tableau de fichiers/dossiers à exclure (les dossiers sont automatiquement inclus, les fichiers sont automatiquement exclus)
+* **wrapper**: `function(templates, opts)` Personnalise le format de sortie des templates précompilés. Cette fonction doit renvoyer un string
+    * **templates**: un tableau d'objets avec les propriétés suivantes :
+        * **name**: nom du template
+        * **template**: la chaine du source du template précompilé en javascript
+    * **opts**: objet de toutes les options ci-dessus
 
 ```js
 var env = new nunjucks.Environment();
