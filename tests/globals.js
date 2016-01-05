@@ -14,7 +14,7 @@
     else {
         expect = window.expect;
         util = window.util;
-        lib = nunjucks.require('lib');
+        lib = nunjucks.lib;
         Environment = nunjucks.Environment;
         Loader = nunjucks.WebLoader;
         templatesPath = '../templates';

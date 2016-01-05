@@ -12,8 +12,8 @@
     else {
         expect = window.expect;
         util = window.util;
-        lib = nunjucks.require('lib');
-        r = nunjucks.require('runtime');
+        lib = nunjucks.lib;
+        r = nunjucks.runtime;
     }
 
     var render = util.render;

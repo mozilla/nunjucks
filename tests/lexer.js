@@ -10,8 +10,8 @@
     }
     else {
         expect = window.expect;
-        lib = nunjucks.require('lib');
-        lexer = nunjucks.require('lexer');
+        lib = nunjucks.lib;
+        lexer = nunjucks.lexer;
     }
 
     function _hasTokens(ws, tokens, types) {
