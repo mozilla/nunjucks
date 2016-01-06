@@ -116,7 +116,8 @@ var filters = {
     },
 
     escape: function(str) {
-        if(typeof str === 'string') {
+        if(typeof str === 'string' ||
+           str instanceof r.SafeString) {
             return lib.escape(str);
         }
         return str;

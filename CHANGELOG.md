@@ -11,9 +11,6 @@ master (unreleased)
   for any other loader. Ajax errors other than 404 will still cause `WebLoader`
   to throw an error directly.
 
-* [Breaking Change] Prevent filter.escape from escaping SafeString. Thanks
-  atian25. Merge of [#623](https://github.com/mozilla/nunjucks/pull/589).
-
 * Add preserve-linebreaks option to `striptags` filter. Thanks Ivan
   Kleshnin. Merge of [#619](https://github.com/mozilla/nunjucks/pull/619).
 

@@ -91,12 +91,6 @@
             finish(done);
         });
 
-        it('escape skip safe', function(done) {
-            var res = render('{{ "<html>" | safe | escape }}', {}, { autoescape: false });
-            expect(res).to.be('<html>');
-            finish(done);
-        });
-
         it('dictsort', function(done) {
             // no real foolproof way to test that a js obj has been transformed
             // from unsorted -> sorted, as its enumeration ordering is undefined
