@@ -1,7 +1,7 @@
 Changelog
 =========
 
-master (unreleased)
+v2.3.0 (Jan 6 2016)
 -------------------
 
 * Return `null` from `WebLoader` on missing template instead of throwing an
