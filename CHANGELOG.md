@@ -4,6 +4,10 @@ Changelog
 master (unreleased)
 -------------------
 
+* [Breaking Change] Prevent filter.escape from escaping SafeString. Thanks
+  atian25. Merge of [#623](https://github.com/mozilla/nunjucks/pull/589).
+
+
 v2.3.0 (Jan 6 2016)
 -------------------
 
@@ -13,9 +17,6 @@ v2.3.0 (Jan 6 2016)
   not set, a generic "template not found" error will still be thrown, just like
   for any other loader. Ajax errors other than 404 will still cause `WebLoader`
   to throw an error directly.
-
-* [Breaking Change] Prevent filter.escape from escaping SafeString. Thanks
-  atian25. Merge of [#623](https://github.com/mozilla/nunjucks/pull/589).
 
 * Add preserve-linebreaks option to `striptags` filter. Thanks Ivan
   Kleshnin. Merge of [#619](https://github.com/mozilla/nunjucks/pull/619).
