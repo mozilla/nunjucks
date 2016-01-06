@@ -3,7 +3,10 @@ Changelog
 
 master (unreleased)
 -------------------
-* Fix: [Breaking Change] filter.escape should not escape SafeString(#168).
+
+* [Breaking Change] Prevent filter.escape from escaping SafeString. Thanks
+  atian25. Merge of [#623](https://github.com/mozilla/nunjucks/pull/589).
+
 
 v2.2.0 (Nov 23 2015)
 --------------------
