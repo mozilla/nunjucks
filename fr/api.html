@@ -811,6 +811,17 @@ générés automatiquement lors de la compilation d&#39;un répertoire.</li>
 <li><strong>env</strong>: un environnement à utiliser (on récupère via ce dernier les extensions et les filtres asynchrone)</li>
 <li><strong>include</strong>: un tableau de fichiers/dossiers à inclure (les dossiers sont automatiquement inclus, les fichiers sont automatiquement exclus)</li>
 <li><strong>exclude</strong>: un tableau de fichiers/dossiers à exclure (les dossiers sont automatiquement inclus, les fichiers sont automatiquement exclus)</li>
+<li><strong>wrapper</strong>: <code>function(templates, opts)</code> Personnalise le format de sortie des templates précompilés. Cette fonction doit renvoyer un string
+
+<ul>
+<li><strong>templates</strong>: un tableau d&#39;objets avec les propriétés suivantes :
+
+<ul>
+<li><strong>name</strong>: nom du template</li>
+<li><strong>template</strong>: la chaine du source du template précompilé en javascript</li>
+</ul></li>
+<li><strong>opts</strong>: objet de toutes les options ci-dessus</li>
+</ul></li>
 </ul>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="kd">var</span> <span class="nx">env</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">Environment</span><span class="p">();</span>
 

@@ -1,4 +1,4 @@
-/*! Browser bundle of nunjucks 2.2.0  */
+/*! Browser bundle of nunjucks 2.3.0  */
 var nunjucks =
 /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
@@ -48,8 +48,8 @@ var nunjucks =
 
 	'use strict';
 
-	var lib = __webpack_require__(4);
-	var env = __webpack_require__(10);
+	var lib = __webpack_require__(1);
+	var env = __webpack_require__(2);
 	var Loader = __webpack_require__(15);
 	var loaders = __webpack_require__(14);
 	var precompile = __webpack_require__(3);
@@ -63,11 +63,12 @@ var nunjucks =
 	module.exports.PrecompiledLoader = loaders.PrecompiledLoader;
 	module.exports.WebLoader = loaders.WebLoader;
 
-	module.exports.compiler = __webpack_require__(1);
-	module.exports.parser = __webpack_require__(6);
-	module.exports.lexer = __webpack_require__(7);
-	module.exports.runtime = __webpack_require__(9);
+	module.exports.compiler = __webpack_require__(7);
+	module.exports.parser = __webpack_require__(8);
+	module.exports.lexer = __webpack_require__(9);
+	module.exports.runtime = __webpack_require__(12);
 	module.exports.lib = lib;
+	module.exports.nodes = __webpack_require__(10);
 
 	module.exports.installJinjaCompat = __webpack_require__(18);
 
@@ -135,17 +136,1279 @@ var nunjucks =
 
 /***/ },
 /* 1 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	var ArrayProto = Array.prototype;
+	var ObjProto = Object.prototype;
+
+	var escapeMap = {
+	    '&': '&amp;',
+	    '"': '&quot;',
+	    '\'': '&#39;',
+	    '<': '&lt;',
+	    '>': '&gt;'
+	};
+
+	var escapeRegex = /[&"'<>]/g;
+
+	var lookupEscape = function(ch) {
+	    return escapeMap[ch];
+	};
+
+	var exports = module.exports = {};
+
+	exports.prettifyError = function(path, withInternals, err) {
+	    // jshint -W022
+	    // http://jslinterrors.com/do-not-assign-to-the-exception-parameter
+	    if (!err.Update) {
+	        // not one of ours, cast it
+	        err = new exports.TemplateError(err);
+	    }
+	    err.Update(path);
+
+	    // Unless they marked the dev flag, show them a trace from here
+	    if (!withInternals) {
+	        var old = err;
+	        err = new Error(old.message);
+	        err.name = old.name;
+	    }
+
+	    return err;
+	};
+
+	exports.TemplateError = function(message, lineno, colno) {
+	    var err = this;
+
+	    if (message instanceof Error) { // for casting regular js errors
+	        err = message;
+	        message = message.name + ': ' + message.message;
+
+	        try {
+	            if(err.name = '') {}
+	        }
+	        catch(e) {
+	            // If we can't set the name of the error object in this
+	            // environment, don't use it
+	            err = this;
+	        }
+	    } else {
+	        if(Error.captureStackTrace) {
+	            Error.captureStackTrace(err);
+	        }
+	    }
+
+	    err.name = 'Template render error';
+	    err.message = message;
+	    err.lineno = lineno;
+	    err.colno = colno;
+	    err.firstUpdate = true;
+
+	    err.Update = function(path) {
+	        var message = '(' + (path || 'unknown path') + ')';
+
+	        // only show lineno + colno next to path of template
+	        // where error occurred
+	        if (this.firstUpdate) {
+	            if(this.lineno && this.colno) {
+	                message += ' [Line ' + this.lineno + ', Column ' + this.colno + ']';
+	            }
+	            else if(this.lineno) {
+	                message += ' [Line ' + this.lineno + ']';
+	            }
+	        }
+
+	        message += '\n ';
+	        if (this.firstUpdate) {
+	            message += ' ';
+	        }
+
+	        this.message = message + (this.message || '');
+	        this.firstUpdate = false;
+	        return this;
+	    };
+
+	    return err;
+	};
+
+	exports.TemplateError.prototype = Error.prototype;
+
+	exports.escape = function(val) {
+	  return val.replace(escapeRegex, lookupEscape);
+	};
+
+	exports.isFunction = function(obj) {
+	    return ObjProto.toString.call(obj) === '[object Function]';
+	};
+
+	exports.isArray = Array.isArray || function(obj) {
+	    return ObjProto.toString.call(obj) === '[object Array]';
+	};
+
+	exports.isString = function(obj) {
+	    return ObjProto.toString.call(obj) === '[object String]';
+	};
+
+	exports.isObject = function(obj) {
+	    return ObjProto.toString.call(obj) === '[object Object]';
+	};
+
+	exports.groupBy = function(obj, val) {
+	    var result = {};
+	    var iterator = exports.isFunction(val) ? val : function(obj) { return obj[val]; };
+	    for(var i=0; i<obj.length; i++) {
+	        var value = obj[i];
+	        var key = iterator(value, i);
+	        (result[key] || (result[key] = [])).push(value);
+	    }
+	    return result;
+	};
+
+	exports.toArray = function(obj) {
+	    return Array.prototype.slice.call(obj);
+	};
+
+	exports.without = function(array) {
+	    var result = [];
+	    if (!array) {
+	        return result;
+	    }
+	    var index = -1,
+	    length = array.length,
+	    contains = exports.toArray(arguments).slice(1);
+
+	    while(++index < length) {
+	        if(exports.indexOf(contains, array[index]) === -1) {
+	            result.push(array[index]);
+	        }
+	    }
+	    return result;
+	};
+
+	exports.extend = function(obj, obj2) {
+	    for(var k in obj2) {
+	        obj[k] = obj2[k];
+	    }
+	    return obj;
+	};
+
+	exports.repeat = function(char_, n) {
+	    var str = '';
+	    for(var i=0; i<n; i++) {
+	        str += char_;
+	    }
+	    return str;
+	};
+
+	exports.each = function(obj, func, context) {
+	    if(obj == null) {
+	        return;
+	    }
+
+	    if(ArrayProto.each && obj.each === ArrayProto.each) {
+	        obj.forEach(func, context);
+	    }
+	    else if(obj.length === +obj.length) {
+	        for(var i=0, l=obj.length; i<l; i++) {
+	            func.call(context, obj[i], i, obj);
+	        }
+	    }
+	};
+
+	exports.map = function(obj, func) {
+	    var results = [];
+	    if(obj == null) {
+	        return results;
+	    }
+
+	    if(ArrayProto.map && obj.map === ArrayProto.map) {
+	        return obj.map(func);
+	    }
+
+	    for(var i=0; i<obj.length; i++) {
+	        results[results.length] = func(obj[i], i);
+	    }
+
+	    if(obj.length === +obj.length) {
+	        results.length = obj.length;
+	    }
+
+	    return results;
+	};
+
+	exports.asyncIter = function(arr, iter, cb) {
+	    var i = -1;
+
+	    function next() {
+	        i++;
+
+	        if(i < arr.length) {
+	            iter(arr[i], i, next, cb);
+	        }
+	        else {
+	            cb();
+	        }
+	    }
+
+	    next();
+	};
+
+	exports.asyncFor = function(obj, iter, cb) {
+	    var keys = exports.keys(obj);
+	    var len = keys.length;
+	    var i = -1;
+
+	    function next() {
+	        i++;
+	        var k = keys[i];
+
+	        if(i < len) {
+	            iter(k, obj[k], i, len, next);
+	        }
+	        else {
+	            cb();
+	        }
+	    }
+
+	    next();
+	};
+
+	// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/indexOf#Polyfill
+	exports.indexOf = Array.prototype.indexOf ?
+	    function (arr, searchElement, fromIndex) {
+	        return Array.prototype.indexOf.call(arr, searchElement, fromIndex);
+	    } :
+	    function (arr, searchElement, fromIndex) {
+	        var length = this.length >>> 0; // Hack to convert object.length to a UInt32
+
+	        fromIndex = +fromIndex || 0;
+
+	        if(Math.abs(fromIndex) === Infinity) {
+	            fromIndex = 0;
+	        }
+
+	        if(fromIndex < 0) {
+	            fromIndex += length;
+	            if (fromIndex < 0) {
+	                fromIndex = 0;
+	            }
+	        }
+
+	        for(;fromIndex < length; fromIndex++) {
+	            if (arr[fromIndex] === searchElement) {
+	                return fromIndex;
+	            }
+	        }
+
+	        return -1;
+	    };
+
+	if(!Array.prototype.map) {
+	    Array.prototype.map = function() {
+	        throw new Error('map is unimplemented for this js engine');
+	    };
+	}
+
+	exports.keys = function(obj) {
+	    if(Object.prototype.keys) {
+	        return obj.keys();
+	    }
+	    else {
+	        var keys = [];
+	        for(var k in obj) {
+	            if(obj.hasOwnProperty(k)) {
+	                keys.push(k);
+	            }
+	        }
+	        return keys;
+	    }
+	};
+
+
+/***/ },
+/* 2 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var lib = __webpack_require__(4);
-	var parser = __webpack_require__(6);
-	var transformer = __webpack_require__(8);
-	var nodes = __webpack_require__(2);
+	var path = __webpack_require__(3);
+	var asap = __webpack_require__(4);
+	var lib = __webpack_require__(1);
+	var Obj = __webpack_require__(6);
+	var compiler = __webpack_require__(7);
+	var builtin_filters = __webpack_require__(13);
+	var builtin_loaders = __webpack_require__(14);
+	var runtime = __webpack_require__(12);
+	var globals = __webpack_require__(17);
+	var Frame = runtime.Frame;
+	var Template;
+
+	// Unconditionally load in this loader, even if no other ones are
+	// included (possible in the slim browser build)
+	builtin_loaders.PrecompiledLoader = __webpack_require__(16);
+
+	// If the user is using the async API, *always* call it
+	// asynchronously even if the template was synchronous.
+	function callbackAsap(cb, err, res) {
+	    asap(function() { cb(err, res); });
+	}
+
+	var Environment = Obj.extend({
+	    init: function(loaders, opts) {
+	        // The dev flag determines the trace that'll be shown on errors.
+	        // If set to true, returns the full trace from the error point,
+	        // otherwise will return trace starting from Template.render
+	        // (the full trace from within nunjucks may confuse developers using
+	        //  the library)
+	        // defaults to false
+	        opts = this.opts = opts || {};
+	        this.opts.dev = !!opts.dev;
+
+	        // The autoescape flag sets global autoescaping. If true,
+	        // every string variable will be escaped by default.
+	        // If false, strings can be manually escaped using the `escape` filter.
+	        // defaults to true
+	        this.opts.autoescape = opts.autoescape != null ? opts.autoescape : true;
+
+	        // If true, this will make the system throw errors if trying
+	        // to output a null or undefined value
+	        this.opts.throwOnUndefined = !!opts.throwOnUndefined;
+	        this.opts.trimBlocks = !!opts.trimBlocks;
+	        this.opts.lstripBlocks = !!opts.lstripBlocks;
+
+	        this.loaders = [];
+
+	        if(!loaders) {
+	            // The filesystem loader is only available server-side
+	            if(builtin_loaders.FileSystemLoader) {
+	                this.loaders = [new builtin_loaders.FileSystemLoader('views')];
+	            }
+	            else if(builtin_loaders.WebLoader) {
+	                this.loaders = [new builtin_loaders.WebLoader('/views')];
+	            }
+	        }
+	        else {
+	            this.loaders = lib.isArray(loaders) ? loaders : [loaders];
+	        }
+
+	        // It's easy to use precompiled templates: just include them
+	        // before you configure nunjucks and this will automatically
+	        // pick it up and use it
+	        if((true) && window.nunjucksPrecompiled) {
+	            this.loaders.unshift(
+	                new builtin_loaders.PrecompiledLoader(window.nunjucksPrecompiled)
+	            );
+	        }
+
+	        this.initCache();
+
+	        this.globals = globals();
+	        this.filters = {};
+	        this.asyncFilters = [];
+	        this.extensions = {};
+	        this.extensionsList = [];
+
+	        for(var name in builtin_filters) {
+	            this.addFilter(name, builtin_filters[name]);
+	        }
+	    },
+
+	    initCache: function() {
+	        // Caching and cache busting
+	        lib.each(this.loaders, function(loader) {
+	            loader.cache = {};
+
+	            if(typeof loader.on === 'function') {
+	                loader.on('update', function(template) {
+	                    loader.cache[template] = null;
+	                });
+	            }
+	        });
+	    },
+
+	    addExtension: function(name, extension) {
+	        extension._name = name;
+	        this.extensions[name] = extension;
+	        this.extensionsList.push(extension);
+	        return this;
+	    },
+
+	    removeExtension: function(name) {
+	        var extension = this.getExtension(name);
+	        if (!extension) return;
+
+	        this.extensionsList = lib.without(this.extensionsList, extension);
+	        delete this.extensions[name];
+	    },
+
+	    getExtension: function(name) {
+	        return this.extensions[name];
+	    },
+
+	    hasExtension: function(name) {
+	        return !!this.extensions[name];
+	    },
+
+	    addGlobal: function(name, value) {
+	        this.globals[name] = value;
+	        return this;
+	    },
+
+	    getGlobal: function(name) {
+	        if(!this.globals[name]) {
+	            throw new Error('global not found: ' + name);
+	        }
+	        return this.globals[name];
+	    },
+
+	    addFilter: function(name, func, async) {
+	        var wrapped = func;
+
+	        if(async) {
+	            this.asyncFilters.push(name);
+	        }
+	        this.filters[name] = wrapped;
+	        return this;
+	    },
+
+	    getFilter: function(name) {
+	        if(!this.filters[name]) {
+	            throw new Error('filter not found: ' + name);
+	        }
+	        return this.filters[name];
+	    },
+
+	    resolveTemplate: function(loader, parentName, filename) {
+	        var isRelative = (loader.isRelative && parentName)? loader.isRelative(filename) : false;
+	        return (isRelative && loader.resolve)? loader.resolve(parentName, filename) : filename;
+	    },
+
+	    getTemplate: function(name, eagerCompile, parentName, ignoreMissing, cb) {
+	        var that = this;
+	        var tmpl = null;
+	        if(name && name.raw) {
+	            // this fixes autoescape for templates referenced in symbols
+	            name = name.raw;
+	        }
+
+	        if(lib.isFunction(parentName)) {
+	            cb = parentName;
+	            parentName = null;
+	            eagerCompile = eagerCompile || false;
+	        }
+
+	        if(lib.isFunction(eagerCompile)) {
+	            cb = eagerCompile;
+	            eagerCompile = false;
+	        }
+
+	        if (name instanceof Template) {
+	             tmpl = name;
+	        }
+	        else if(typeof name !== 'string') {
+	            throw new Error('template names must be a string: ' + name);
+	        }
+	        else {
+	            for (var i = 0; i < this.loaders.length; i++) {
+	                var _name = this.resolveTemplate(this.loaders[i], parentName, name);
+	                tmpl = this.loaders[i].cache[_name];
+	                if (tmpl) break;
+	            }
+	        }
+
+	        if(tmpl) {
+	            if(eagerCompile) {
+	                tmpl.compile();
+	            }
+
+	            if(cb) {
+	                cb(null, tmpl);
+	            }
+	            else {
+	                return tmpl;
+	            }
+	        } else {
+	            var syncResult;
+	            var _this = this;
+
+	            var createTemplate = function(err, info) {
+	                if(!info && !err) {
+	                    if(!ignoreMissing) {
+	                        err = new Error('template not found: ' + name);
+	                    }
+	                }
+
+	                if (err) {
+	                    if(cb) {
+	                        cb(err);
+	                    }
+	                    else {
+	                        throw err;
+	                    }
+	                }
+	                else {
+	                    var tmpl;
+	                    if(info) {
+	                        tmpl = new Template(info.src, _this,
+	                                            info.path, eagerCompile);
+
+	                        if(!info.noCache) {
+	                            info.loader.cache[name] = tmpl;
+	                        }
+	                    }
+	                    else {
+	                        tmpl = new Template('', _this,
+	                                            '', eagerCompile);
+	                    }
+
+	                    if(cb) {
+	                        cb(null, tmpl);
+	                    }
+	                    else {
+	                        syncResult = tmpl;
+	                    }
+	                }
+	            };
+
+	            lib.asyncIter(this.loaders, function(loader, i, next, done) {
+	                function handle(err, src) {
+	                    if(err) {
+	                        done(err);
+	                    }
+	                    else if(src) {
+	                        src.loader = loader;
+	                        done(null, src);
+	                    }
+	                    else {
+	                        next();
+	                    }
+	                }
+
+	                // Resolve name relative to parentName
+	                name = that.resolveTemplate(loader, parentName, name);
+
+	                if(loader.async) {
+	                    loader.getSource(name, handle);
+	                }
+	                else {
+	                    handle(null, loader.getSource(name));
+	                }
+	            }, createTemplate);
+
+	            return syncResult;
+	        }
+	    },
+
+	    express: function(app) {
+	        var env = this;
+
+	        function NunjucksView(name, opts) {
+	            this.name          = name;
+	            this.path          = name;
+	            this.defaultEngine = opts.defaultEngine;
+	            this.ext           = path.extname(name);
+	            if (!this.ext && !this.defaultEngine) throw new Error('No default engine was specified and no extension was provided.');
+	            if (!this.ext) this.name += (this.ext = ('.' !== this.defaultEngine[0] ? '.' : '') + this.defaultEngine);
+	        }
+
+	        NunjucksView.prototype.render = function(opts, cb) {
+	          env.render(this.name, opts, cb);
+	        };
+
+	        app.set('view', NunjucksView);
+	        return this;
+	    },
+
+	    render: function(name, ctx, cb) {
+	        if(lib.isFunction(ctx)) {
+	            cb = ctx;
+	            ctx = null;
+	        }
+
+	        // We support a synchronous API to make it easier to migrate
+	        // existing code to async. This works because if you don't do
+	        // anything async work, the whole thing is actually run
+	        // synchronously.
+	        var syncResult = null;
+
+	        this.getTemplate(name, function(err, tmpl) {
+	            if(err && cb) {
+	                callbackAsap(cb, err);
+	            }
+	            else if(err) {
+	                throw err;
+	            }
+	            else {
+	                syncResult = tmpl.render(ctx, cb);
+	            }
+	        });
+
+	        return syncResult;
+	    },
+
+	    renderString: function(src, ctx, opts, cb) {
+	        if(lib.isFunction(opts)) {
+	            cb = opts;
+	            opts = {};
+	        }
+	        opts = opts || {};
+
+	        var tmpl = new Template(src, this, opts.path);
+	        return tmpl.render(ctx, cb);
+	    }
+	});
+
+	var Context = Obj.extend({
+	    init: function(ctx, blocks, env) {
+	        // Has to be tied to an environment so we can tap into its globals.
+	        this.env = env || new Environment();
+
+	        // Make a duplicate of ctx
+	        this.ctx = {};
+	        for(var k in ctx) {
+	            if(ctx.hasOwnProperty(k)) {
+	                this.ctx[k] = ctx[k];
+	            }
+	        }
+
+	        this.blocks = {};
+	        this.exported = [];
+
+	        for(var name in blocks) {
+	            this.addBlock(name, blocks[name]);
+	        }
+	    },
+
+	    lookup: function(name) {
+	        // This is one of the most called functions, so optimize for
+	        // the typical case where the name isn't in the globals
+	        if(name in this.env.globals && !(name in this.ctx)) {
+	            return this.env.globals[name];
+	        }
+	        else {
+	            return this.ctx[name];
+	        }
+	    },
+
+	    setVariable: function(name, val) {
+	        this.ctx[name] = val;
+	    },
+
+	    getVariables: function() {
+	        return this.ctx;
+	    },
+
+	    addBlock: function(name, block) {
+	        this.blocks[name] = this.blocks[name] || [];
+	        this.blocks[name].push(block);
+	        return this;
+	    },
+
+	    getBlock: function(name) {
+	        if(!this.blocks[name]) {
+	            throw new Error('unknown block "' + name + '"');
+	        }
+
+	        return this.blocks[name][0];
+	    },
+
+	    getSuper: function(env, name, block, frame, runtime, cb) {
+	        var idx = lib.indexOf(this.blocks[name] || [], block);
+	        var blk = this.blocks[name][idx + 1];
+	        var context = this;
+
+	        if(idx === -1 || !blk) {
+	            throw new Error('no super block available for "' + name + '"');
+	        }
+
+	        blk(env, context, frame, runtime, cb);
+	    },
+
+	    addExport: function(name) {
+	        this.exported.push(name);
+	    },
+
+	    getExported: function() {
+	        var exported = {};
+	        for(var i=0; i<this.exported.length; i++) {
+	            var name = this.exported[i];
+	            exported[name] = this.ctx[name];
+	        }
+	        return exported;
+	    }
+	});
+
+	Template = Obj.extend({
+	    init: function (src, env, path, eagerCompile) {
+	        this.env = env || new Environment();
+
+	        if(lib.isObject(src)) {
+	            switch(src.type) {
+	            case 'code': this.tmplProps = src.obj; break;
+	            case 'string': this.tmplStr = src.obj; break;
+	            }
+	        }
+	        else if(lib.isString(src)) {
+	            this.tmplStr = src;
+	        }
+	        else {
+	            throw new Error('src must be a string or an object describing ' +
+	                            'the source');
+	        }
+
+	        this.path = path;
+
+	        if(eagerCompile) {
+	            var _this = this;
+	            try {
+	                _this._compile();
+	            }
+	            catch(err) {
+	                throw lib.prettifyError(this.path, this.env.dev, err);
+	            }
+	        }
+	        else {
+	            this.compiled = false;
+	        }
+	    },
+
+	    render: function(ctx, parentFrame, cb) {
+	        if (typeof ctx === 'function') {
+	            cb = ctx;
+	            ctx = {};
+	        }
+	        else if (typeof parentFrame === 'function') {
+	            cb = parentFrame;
+	            parentFrame = null;
+	        }
+
+	        var forceAsync = true;
+	        if(parentFrame) {
+	            // If there is a frame, we are being called from internal
+	            // code of another template, and the internal system
+	            // depends on the sync/async nature of the parent template
+	            // to be inherited, so force an async callback
+	            forceAsync = false;
+	        }
+
+	        var _this = this;
+	        // Catch compile errors for async rendering
+	        try {
+	            _this.compile();
+	        } catch (_err) {
+	            var err = lib.prettifyError(this.path, this.env.dev, _err);
+	            if (cb) return callbackAsap(cb, err);
+	            else throw err;
+	        }
+
+	        var context = new Context(ctx || {}, _this.blocks, _this.env);
+	        var frame = parentFrame ? parentFrame.push() : new Frame();
+	        frame.topLevel = true;
+	        var syncResult = null;
+
+	        _this.rootRenderFunc(
+	            _this.env,
+	            context,
+	            frame || new Frame(),
+	            runtime,
+	            function(err, res) {
+	                if(err) {
+	                    err = lib.prettifyError(_this.path, _this.env.dev, err);
+	                }
+
+	                if(cb) {
+	                    if(forceAsync) {
+	                        callbackAsap(cb, err, res);
+	                    }
+	                    else {
+	                        cb(err, res);
+	                    }
+	                }
+	                else {
+	                    if(err) { throw err; }
+	                    syncResult = res;
+	                }
+	            }
+	        );
+
+	        return syncResult;
+	    },
+
+
+	    getExported: function(ctx, parentFrame, cb) {
+	        if (typeof ctx === 'function') {
+	            cb = ctx;
+	            ctx = {};
+	        }
+
+	        if (typeof parentFrame === 'function') {
+	            cb = parentFrame;
+	            parentFrame = null;
+	        }
+
+	        // Catch compile errors for async rendering
+	        try {
+	            this.compile();
+	        } catch (e) {
+	            if (cb) return cb(e);
+	            else throw e;
+	        }
+
+	        var frame = parentFrame ? parentFrame.push() : new Frame();
+	        frame.topLevel = true;
+
+	        // Run the rootRenderFunc to populate the context with exported vars
+	        var context = new Context(ctx || {}, this.blocks, this.env);
+	        this.rootRenderFunc(this.env,
+	                            context,
+	                            frame,
+	                            runtime,
+	                            function(err) {
+	        		        if ( err ) {
+	        			    cb(err, null);
+	        		        } else {
+	        			    cb(null, context.getExported());
+	        		        }
+	                            });
+	    },
+
+	    compile: function() {
+	        if(!this.compiled) {
+	            this._compile();
+	        }
+	    },
+
+	    _compile: function() {
+	        var props;
+
+	        if(this.tmplProps) {
+	            props = this.tmplProps;
+	        }
+	        else {
+	            var source = compiler.compile(this.tmplStr,
+	                                          this.env.asyncFilters,
+	                                          this.env.extensionsList,
+	                                          this.path,
+	                                          this.env.opts);
+
+	            /* jslint evil: true */
+	            var func = new Function(source);
+	            props = func();
+	        }
+
+	        this.blocks = this._getBlocks(props);
+	        this.rootRenderFunc = props.root;
+	        this.compiled = true;
+	    },
+
+	    _getBlocks: function(props) {
+	        var blocks = {};
+
+	        for(var k in props) {
+	            if(k.slice(0, 2) === 'b_') {
+	                blocks[k.slice(2)] = props[k];
+	            }
+	        }
+
+	        return blocks;
+	    }
+	});
+
+	module.exports = {
+	    Environment: Environment,
+	    Template: Template
+	};
+
+
+/***/ },
+/* 3 */
+/***/ function(module, exports) {
+
+	
+
+/***/ },
+/* 4 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	// rawAsap provides everything we need except exception management.
+	var rawAsap = __webpack_require__(5);
+	// RawTasks are recycled to reduce GC churn.
+	var freeTasks = [];
+	// We queue errors to ensure they are thrown in right order (FIFO).
+	// Array-as-queue is good enough here, since we are just dealing with exceptions.
+	var pendingErrors = [];
+	var requestErrorThrow = rawAsap.makeRequestCallFromTimer(throwFirstError);
+
+	function throwFirstError() {
+	    if (pendingErrors.length) {
+	        throw pendingErrors.shift();
+	    }
+	}
+
+	/**
+	 * Calls a task as soon as possible after returning, in its own event, with priority
+	 * over other events like animation, reflow, and repaint. An error thrown from an
+	 * event will not interrupt, nor even substantially slow down the processing of
+	 * other events, but will be rather postponed to a lower priority event.
+	 * @param {{call}} task A callable object, typically a function that takes no
+	 * arguments.
+	 */
+	module.exports = asap;
+	function asap(task) {
+	    var rawTask;
+	    if (freeTasks.length) {
+	        rawTask = freeTasks.pop();
+	    } else {
+	        rawTask = new RawTask();
+	    }
+	    rawTask.task = task;
+	    rawAsap(rawTask);
+	}
+
+	// We wrap tasks with recyclable task objects.  A task object implements
+	// `call`, just like a function.
+	function RawTask() {
+	    this.task = null;
+	}
+
+	// The sole purpose of wrapping the task is to catch the exception and recycle
+	// the task object after its single use.
+	RawTask.prototype.call = function () {
+	    try {
+	        this.task.call();
+	    } catch (error) {
+	        if (asap.onerror) {
+	            // This hook exists purely for testing purposes.
+	            // Its name will be periodically randomized to break any code that
+	            // depends on its existence.
+	            asap.onerror(error);
+	        } else {
+	            // In a web browser, exceptions are not fatal. However, to avoid
+	            // slowing down the queue of pending tasks, we rethrow the error in a
+	            // lower priority turn.
+	            pendingErrors.push(error);
+	            requestErrorThrow();
+	        }
+	    } finally {
+	        this.task = null;
+	        freeTasks[freeTasks.length] = this;
+	    }
+	};
+
+
+/***/ },
+/* 5 */
+/***/ function(module, exports) {
+
+	/* WEBPACK VAR INJECTION */(function(global) {"use strict";
+
+	// Use the fastest means possible to execute a task in its own turn, with
+	// priority over other events including IO, animation, reflow, and redraw
+	// events in browsers.
+	//
+	// An exception thrown by a task will permanently interrupt the processing of
+	// subsequent tasks. The higher level `asap` function ensures that if an
+	// exception is thrown by a task, that the task queue will continue flushing as
+	// soon as possible, but if you use `rawAsap` directly, you are responsible to
+	// either ensure that no exceptions are thrown from your task, or to manually
+	// call `rawAsap.requestFlush` if an exception is thrown.
+	module.exports = rawAsap;
+	function rawAsap(task) {
+	    if (!queue.length) {
+	        requestFlush();
+	        flushing = true;
+	    }
+	    // Equivalent to push, but avoids a function call.
+	    queue[queue.length] = task;
+	}
+
+	var queue = [];
+	// Once a flush has been requested, no further calls to `requestFlush` are
+	// necessary until the next `flush` completes.
+	var flushing = false;
+	// `requestFlush` is an implementation-specific method that attempts to kick
+	// off a `flush` event as quickly as possible. `flush` will attempt to exhaust
+	// the event queue before yielding to the browser's own event loop.
+	var requestFlush;
+	// The position of the next task to execute in the task queue. This is
+	// preserved between calls to `flush` so that it can be resumed if
+	// a task throws an exception.
+	var index = 0;
+	// If a task schedules additional tasks recursively, the task queue can grow
+	// unbounded. To prevent memory exhaustion, the task queue will periodically
+	// truncate already-completed tasks.
+	var capacity = 1024;
+
+	// The flush function processes all tasks that have been scheduled with
+	// `rawAsap` unless and until one of those tasks throws an exception.
+	// If a task throws an exception, `flush` ensures that its state will remain
+	// consistent and will resume where it left off when called again.
+	// However, `flush` does not make any arrangements to be called again if an
+	// exception is thrown.
+	function flush() {
+	    while (index < queue.length) {
+	        var currentIndex = index;
+	        // Advance the index before calling the task. This ensures that we will
+	        // begin flushing on the next task the task throws an error.
+	        index = index + 1;
+	        queue[currentIndex].call();
+	        // Prevent leaking memory for long chains of recursive calls to `asap`.
+	        // If we call `asap` within tasks scheduled by `asap`, the queue will
+	        // grow, but to avoid an O(n) walk for every task we execute, we don't
+	        // shift tasks off the queue after they have been executed.
+	        // Instead, we periodically shift 1024 tasks off the queue.
+	        if (index > capacity) {
+	            // Manually shift all values starting at the index back to the
+	            // beginning of the queue.
+	            for (var scan = 0, newLength = queue.length - index; scan < newLength; scan++) {
+	                queue[scan] = queue[scan + index];
+	            }
+	            queue.length -= index;
+	            index = 0;
+	        }
+	    }
+	    queue.length = 0;
+	    index = 0;
+	    flushing = false;
+	}
+
+	// `requestFlush` is implemented using a strategy based on data collected from
+	// every available SauceLabs Selenium web driver worker at time of writing.
+	// https://docs.google.com/spreadsheets/d/1mG-5UYGup5qxGdEMWkhP6BWCz053NUb2E1QoUTU16uA/edit#gid=783724593
+
+	// Safari 6 and 6.1 for desktop, iPad, and iPhone are the only browsers that
+	// have WebKitMutationObserver but not un-prefixed MutationObserver.
+	// Must use `global` instead of `window` to work in both frames and web
+	// workers. `global` is a provision of Browserify, Mr, Mrs, or Mop.
+	var BrowserMutationObserver = global.MutationObserver || global.WebKitMutationObserver;
+
+	// MutationObservers are desirable because they have high priority and work
+	// reliably everywhere they are implemented.
+	// They are implemented in all modern browsers.
+	//
+	// - Android 4-4.3
+	// - Chrome 26-34
+	// - Firefox 14-29
+	// - Internet Explorer 11
+	// - iPad Safari 6-7.1
+	// - iPhone Safari 7-7.1
+	// - Safari 6-7
+	if (typeof BrowserMutationObserver === "function") {
+	    requestFlush = makeRequestCallFromMutationObserver(flush);
+
+	// MessageChannels are desirable because they give direct access to the HTML
+	// task queue, are implemented in Internet Explorer 10, Safari 5.0-1, and Opera
+	// 11-12, and in web workers in many engines.
+	// Although message channels yield to any queued rendering and IO tasks, they
+	// would be better than imposing the 4ms delay of timers.
+	// However, they do not work reliably in Internet Explorer or Safari.
+
+	// Internet Explorer 10 is the only browser that has setImmediate but does
+	// not have MutationObservers.
+	// Although setImmediate yields to the browser's renderer, it would be
+	// preferrable to falling back to setTimeout since it does not have
+	// the minimum 4ms penalty.
+	// Unfortunately there appears to be a bug in Internet Explorer 10 Mobile (and
+	// Desktop to a lesser extent) that renders both setImmediate and
+	// MessageChannel useless for the purposes of ASAP.
+	// https://github.com/kriskowal/q/issues/396
+
+	// Timers are implemented universally.
+	// We fall back to timers in workers in most engines, and in foreground
+	// contexts in the following browsers.
+	// However, note that even this simple case requires nuances to operate in a
+	// broad spectrum of browsers.
+	//
+	// - Firefox 3-13
+	// - Internet Explorer 6-9
+	// - iPad Safari 4.3
+	// - Lynx 2.8.7
+	} else {
+	    requestFlush = makeRequestCallFromTimer(flush);
+	}
+
+	// `requestFlush` requests that the high priority event queue be flushed as
+	// soon as possible.
+	// This is useful to prevent an error thrown in a task from stalling the event
+	// queue if the exception handled by Node.js’s
+	// `process.on("uncaughtException")` or by a domain.
+	rawAsap.requestFlush = requestFlush;
+
+	// To request a high priority event, we induce a mutation observer by toggling
+	// the text of a text node between "1" and "-1".
+	function makeRequestCallFromMutationObserver(callback) {
+	    var toggle = 1;
+	    var observer = new BrowserMutationObserver(callback);
+	    var node = document.createTextNode("");
+	    observer.observe(node, {characterData: true});
+	    return function requestCall() {
+	        toggle = -toggle;
+	        node.data = toggle;
+	    };
+	}
+
+	// The message channel technique was discovered by Malte Ubl and was the
+	// original foundation for this library.
+	// http://www.nonblocking.io/2011/06/windownexttick.html
+
+	// Safari 6.0.5 (at least) intermittently fails to create message ports on a
+	// page's first load. Thankfully, this version of Safari supports
+	// MutationObservers, so we don't need to fall back in that case.
+
+	// function makeRequestCallFromMessageChannel(callback) {
+	//     var channel = new MessageChannel();
+	//     channel.port1.onmessage = callback;
+	//     return function requestCall() {
+	//         channel.port2.postMessage(0);
+	//     };
+	// }
+
+	// For reasons explained above, we are also unable to use `setImmediate`
+	// under any circumstances.
+	// Even if we were, there is another bug in Internet Explorer 10.
+	// It is not sufficient to assign `setImmediate` to `requestFlush` because
+	// `setImmediate` must be called *by name* and therefore must be wrapped in a
+	// closure.
+	// Never forget.
+
+	// function makeRequestCallFromSetImmediate(callback) {
+	//     return function requestCall() {
+	//         setImmediate(callback);
+	//     };
+	// }
+
+	// Safari 6.0 has a problem where timers will get lost while the user is
+	// scrolling. This problem does not impact ASAP because Safari 6.0 supports
+	// mutation observers, so that implementation is used instead.
+	// However, if we ever elect to use timers in Safari, the prevalent work-around
+	// is to add a scroll event listener that calls for a flush.
+
+	// `setTimeout` does not call the passed callback if the delay is less than
+	// approximately 7 in web workers in Firefox 8 through 18, and sometimes not
+	// even then.
+
+	function makeRequestCallFromTimer(callback) {
+	    return function requestCall() {
+	        // We dispatch a timeout with a specified delay of 0 for engines that
+	        // can reliably accommodate that request. This will usually be snapped
+	        // to a 4 milisecond delay, but once we're flushing, there's no delay
+	        // between events.
+	        var timeoutHandle = setTimeout(handleTimer, 0);
+	        // However, since this timer gets frequently dropped in Firefox
+	        // workers, we enlist an interval handle that will try to fire
+	        // an event 20 times per second until it succeeds.
+	        var intervalHandle = setInterval(handleTimer, 50);
+
+	        function handleTimer() {
+	            // Whichever timer succeeds will cancel both timers and
+	            // execute the callback.
+	            clearTimeout(timeoutHandle);
+	            clearInterval(intervalHandle);
+	            callback();
+	        }
+	    };
+	}
+
+	// This is for `asap.js` only.
+	// Its name will be periodically randomized to break any code that depends on
+	// its existence.
+	rawAsap.makeRequestCallFromTimer = makeRequestCallFromTimer;
+
+	// ASAP was originally a nextTick shim included in Q. This was factored out
+	// into this ASAP package. It was later adapted to RSVP which made further
+	// amendments. These decisions, particularly to marginalize MessageChannel and
+	// to capture the MutationObserver implementation in a closure, were integrated
+	// back into ASAP proper.
+	// https://github.com/tildeio/rsvp.js/blob/cddf7232546a9cf858524b75cde6f9edf72620a7/lib/rsvp/asap.js
+
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
+
+/***/ },
+/* 6 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	// A simple class system, more documentation to come
+
+	function extend(cls, name, props) {
+	    // This does that same thing as Object.create, but with support for IE8
+	    var F = function() {};
+	    F.prototype = cls.prototype;
+	    var prototype = new F();
+
+	    // jshint undef: false
+	    var fnTest = /xyz/.test(function(){ xyz; }) ? /\bparent\b/ : /.*/;
+	    props = props || {};
+
+	    for(var k in props) {
+	        var src = props[k];
+	        var parent = prototype[k];
+
+	        if(typeof parent === 'function' &&
+	           typeof src === 'function' &&
+	           fnTest.test(src)) {
+	            /*jshint -W083 */
+	            prototype[k] = (function (src, parent) {
+	                return function() {
+	                    // Save the current parent method
+	                    var tmp = this.parent;
+
+	                    // Set parent to the previous method, call, and restore
+	                    this.parent = parent;
+	                    var res = src.apply(this, arguments);
+	                    this.parent = tmp;
+
+	                    return res;
+	                };
+	            })(src, parent);
+	        }
+	        else {
+	            prototype[k] = src;
+	        }
+	    }
+
+	    prototype.typename = name;
+
+	    var new_cls = function() {
+	        if(prototype.init) {
+	            prototype.init.apply(this, arguments);
+	        }
+	    };
+
+	    new_cls.prototype = prototype;
+	    new_cls.prototype.constructor = new_cls;
+
+	    new_cls.extend = function(name, props) {
+	        if(typeof name === 'object') {
+	            props = name;
+	            name = 'anonymous';
+	        }
+	        return extend(new_cls, name, props);
+	    };
+
+	    return new_cls;
+	}
+
+	module.exports = extend(Object, 'Object', {});
+
+
+/***/ },
+/* 7 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var lib = __webpack_require__(1);
+	var parser = __webpack_require__(8);
+	var transformer = __webpack_require__(11);
+	var nodes = __webpack_require__(10);
 	// jshint -W079
-	var Object = __webpack_require__(5);
-	var Frame = __webpack_require__(9).Frame;
+	var Object = __webpack_require__(6);
+	var Frame = __webpack_require__(12).Frame;
 
 	// These are all the same for now, but shouldn't be passed straight
 	// through
@@ -1296,692 +2559,16 @@ var nunjucks =
 
 
 /***/ },
-/* 2 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
-
-	var lib = __webpack_require__(4);
-	// jshint -W079
-	var Object = __webpack_require__(5);
-
-	function traverseAndCheck(obj, type, results) {
-	    if(obj instanceof type) {
-	        results.push(obj);
-	    }
-
-	    if(obj instanceof Node) {
-	        obj.findAll(type, results);
-	    }
-	}
-
-	var Node = Object.extend('Node', {
-	    init: function(lineno, colno) {
-	        this.lineno = lineno;
-	        this.colno = colno;
-
-	        var fields = this.fields;
-	        for(var i = 0, l = fields.length; i < l; i++) {
-	            var field = fields[i];
-
-	            // The first two args are line/col numbers, so offset by 2
-	            var val = arguments[i + 2];
-
-	            // Fields should never be undefined, but null. It makes
-	            // testing easier to normalize values.
-	            if(val === undefined) {
-	                val = null;
-	            }
-
-	            this[field] = val;
-	        }
-	    },
-
-	    findAll: function(type, results) {
-	        results = results || [];
-
-	        var i, l;
-	        if(this instanceof NodeList) {
-	            var children = this.children;
-
-	            for(i = 0, l = children.length; i < l; i++) {
-	                traverseAndCheck(children[i], type, results);
-	            }
-	        }
-	        else {
-	            var fields = this.fields;
-
-	            for(i = 0, l = fields.length; i < l; i++) {
-	                traverseAndCheck(this[fields[i]], type, results);
-	            }
-	        }
-
-	        return results;
-	    },
-
-	    iterFields: function(func) {
-	        lib.each(this.fields, function(field) {
-	            func(this[field], field);
-	        }, this);
-	    }
-	});
-
-	// Abstract nodes
-	var Value = Node.extend('Value', { fields: ['value'] });
-
-	// Concrete nodes
-	var NodeList = Node.extend('NodeList', {
-	    fields: ['children'],
-
-	    init: function(lineno, colno, nodes) {
-	        this.parent(lineno, colno, nodes || []);
-	    },
-
-	    addChild: function(node) {
-	        this.children.push(node);
-	    }
-	});
-
-	var Root = NodeList.extend('Root');
-	var Literal = Value.extend('Literal');
-	var Symbol = Value.extend('Symbol');
-	var Group = NodeList.extend('Group');
-	var Array = NodeList.extend('Array');
-	var Pair = Node.extend('Pair', { fields: ['key', 'value'] });
-	var Dict = NodeList.extend('Dict');
-	var LookupVal = Node.extend('LookupVal', { fields: ['target', 'val'] });
-	var If = Node.extend('If', { fields: ['cond', 'body', 'else_'] });
-	var IfAsync = If.extend('IfAsync');
-	var InlineIf = Node.extend('InlineIf', { fields: ['cond', 'body', 'else_'] });
-	var For = Node.extend('For', { fields: ['arr', 'name', 'body', 'else_'] });
-	var AsyncEach = For.extend('AsyncEach');
-	var AsyncAll = For.extend('AsyncAll');
-	var Macro = Node.extend('Macro', { fields: ['name', 'args', 'body'] });
-	var Caller = Macro.extend('Caller');
-	var Import = Node.extend('Import', { fields: ['template', 'target', 'withContext'] });
-	var FromImport = Node.extend('FromImport', {
-	    fields: ['template', 'names', 'withContext'],
-
-	    init: function(lineno, colno, template, names, withContext) {
-	        this.parent(lineno, colno,
-	                    template,
-	                    names || new NodeList(), withContext);
-	    }
-	});
-	var FunCall = Node.extend('FunCall', { fields: ['name', 'args'] });
-	var Filter = FunCall.extend('Filter');
-	var FilterAsync = Filter.extend('FilterAsync', {
-	    fields: ['name', 'args', 'symbol']
-	});
-	var KeywordArgs = Dict.extend('KeywordArgs');
-	var Block = Node.extend('Block', { fields: ['name', 'body'] });
-	var Super = Node.extend('Super', { fields: ['blockName', 'symbol'] });
-	var TemplateRef = Node.extend('TemplateRef', { fields: ['template'] });
-	var Extends = TemplateRef.extend('Extends');
-	var Include = Node.extend('Include', { fields: ['template', 'ignoreMissing'] });
-	var Set = Node.extend('Set', { fields: ['targets', 'value'] });
-	var Output = NodeList.extend('Output');
-	var TemplateData = Literal.extend('TemplateData');
-	var UnaryOp = Node.extend('UnaryOp', { fields: ['target'] });
-	var BinOp = Node.extend('BinOp', { fields: ['left', 'right'] });
-	var In = BinOp.extend('In');
-	var Or = BinOp.extend('Or');
-	var And = BinOp.extend('And');
-	var Not = UnaryOp.extend('Not');
-	var Add = BinOp.extend('Add');
-	var Concat = BinOp.extend('Concat');
-	var Sub = BinOp.extend('Sub');
-	var Mul = BinOp.extend('Mul');
-	var Div = BinOp.extend('Div');
-	var FloorDiv = BinOp.extend('FloorDiv');
-	var Mod = BinOp.extend('Mod');
-	var Pow = BinOp.extend('Pow');
-	var Neg = UnaryOp.extend('Neg');
-	var Pos = UnaryOp.extend('Pos');
-	var Compare = Node.extend('Compare', { fields: ['expr', 'ops'] });
-	var CompareOperand = Node.extend('CompareOperand', {
-	    fields: ['expr', 'type']
-	});
-
-	var CallExtension = Node.extend('CallExtension', {
-	    fields: ['extName', 'prop', 'args', 'contentArgs'],
-
-	    init: function(ext, prop, args, contentArgs) {
-	        this.extName = ext._name || ext;
-	        this.prop = prop;
-	        this.args = args || new NodeList();
-	        this.contentArgs = contentArgs || [];
-	        this.autoescape = ext.autoescape;
-	    }
-	});
-
-	var CallExtensionAsync = CallExtension.extend('CallExtensionAsync');
-
-	// Print the AST in a nicely formatted tree format for debuggin
-	function printNodes(node, indent) {
-	    indent = indent || 0;
-
-	    // This is hacky, but this is just a debugging function anyway
-	    function print(str, indent, inline) {
-	        var lines = str.split('\n');
-
-	        for(var i=0; i<lines.length; i++) {
-	            if(lines[i]) {
-	                if((inline && i > 0) || !inline) {
-	                    for(var j=0; j<indent; j++) {
-	                        process.stdout.write(' ');
-	                    }
-	                }
-	            }
-
-	            if(i === lines.length-1) {
-	                process.stdout.write(lines[i]);
-	            }
-	            else {
-	                process.stdout.write(lines[i] + '\n');
-	            }
-	        }
-	    }
-
-	    print(node.typename + ': ', indent);
-
-	    if(node instanceof NodeList) {
-	        print('\n');
-	        lib.each(node.children, function(n) {
-	            printNodes(n, indent + 2);
-	        });
-	    }
-	    else if(node instanceof CallExtension) {
-	        print(node.extName + '.' + node.prop);
-	        print('\n');
-
-	        if(node.args) {
-	            printNodes(node.args, indent + 2);
-	        }
-
-	        if(node.contentArgs) {
-	            lib.each(node.contentArgs, function(n) {
-	                printNodes(n, indent + 2);
-	            });
-	        }
-	    }
-	    else {
-	        var nodes = null;
-	        var props = null;
-
-	        node.iterFields(function(val, field) {
-	            if(val instanceof Node) {
-	                nodes = nodes || {};
-	                nodes[field] = val;
-	            }
-	            else {
-	                props = props || {};
-	                props[field] = val;
-	            }
-	        });
-
-	        if(props) {
-	            print(JSON.stringify(props, null, 2) + '\n', null, true);
-	        }
-	        else {
-	            print('\n');
-	        }
-
-	        if(nodes) {
-	            for(var k in nodes) {
-	                printNodes(nodes[k], indent + 2);
-	            }
-	        }
-
-	    }
-	}
-
-	// var t = new NodeList(0, 0,
-	//                      [new Value(0, 0, 3),
-	//                       new Value(0, 0, 10),
-	//                       new Pair(0, 0,
-	//                                new Value(0, 0, 'key'),
-	//                                new Value(0, 0, 'value'))]);
-	// printNodes(t);
-
-	module.exports = {
-	    Node: Node,
-	    Root: Root,
-	    NodeList: NodeList,
-	    Value: Value,
-	    Literal: Literal,
-	    Symbol: Symbol,
-	    Group: Group,
-	    Array: Array,
-	    Pair: Pair,
-	    Dict: Dict,
-	    Output: Output,
-	    TemplateData: TemplateData,
-	    If: If,
-	    IfAsync: IfAsync,
-	    InlineIf: InlineIf,
-	    For: For,
-	    AsyncEach: AsyncEach,
-	    AsyncAll: AsyncAll,
-	    Macro: Macro,
-	    Caller: Caller,
-	    Import: Import,
-	    FromImport: FromImport,
-	    FunCall: FunCall,
-	    Filter: Filter,
-	    FilterAsync: FilterAsync,
-	    KeywordArgs: KeywordArgs,
-	    Block: Block,
-	    Super: Super,
-	    Extends: Extends,
-	    Include: Include,
-	    Set: Set,
-	    LookupVal: LookupVal,
-	    BinOp: BinOp,
-	    In: In,
-	    Or: Or,
-	    And: And,
-	    Not: Not,
-	    Add: Add,
-	    Concat: Concat,
-	    Sub: Sub,
-	    Mul: Mul,
-	    Div: Div,
-	    FloorDiv: FloorDiv,
-	    Mod: Mod,
-	    Pow: Pow,
-	    Neg: Neg,
-	    Pos: Pos,
-	    Compare: Compare,
-	    CompareOperand: CompareOperand,
-
-	    CallExtension: CallExtension,
-	    CallExtensionAsync: CallExtensionAsync,
-
-	    printNodes: printNodes
-	};
-
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(3)))
-
-/***/ },
-/* 3 */
-/***/ function(module, exports) {
-
-	
-
-/***/ },
-/* 4 */
-/***/ function(module, exports) {
-
-	'use strict';
-
-	var ArrayProto = Array.prototype;
-	var ObjProto = Object.prototype;
-
-	var escapeMap = {
-	    '&': '&amp;',
-	    '"': '&quot;',
-	    '\'': '&#39;',
-	    '<': '&lt;',
-	    '>': '&gt;'
-	};
-
-	var escapeRegex = /[&"'<>]/g;
-
-	var lookupEscape = function(ch) {
-	    return escapeMap[ch];
-	};
-
-	var exports = module.exports = {};
-
-	exports.prettifyError = function(path, withInternals, err) {
-	    // jshint -W022
-	    // http://jslinterrors.com/do-not-assign-to-the-exception-parameter
-	    if (!err.Update) {
-	        // not one of ours, cast it
-	        err = new exports.TemplateError(err);
-	    }
-	    err.Update(path);
-
-	    // Unless they marked the dev flag, show them a trace from here
-	    if (!withInternals) {
-	        var old = err;
-	        err = new Error(old.message);
-	        err.name = old.name;
-	    }
-
-	    return err;
-	};
-
-	exports.TemplateError = function(message, lineno, colno) {
-	    var err = this;
-
-	    if (message instanceof Error) { // for casting regular js errors
-	        err = message;
-	        message = message.name + ': ' + message.message;
-
-	        try {
-	            if(err.name = '') {}
-	        }
-	        catch(e) {
-	            // If we can't set the name of the error object in this
-	            // environment, don't use it
-	            err = this;
-	        }
-	    } else {
-	        if(Error.captureStackTrace) {
-	            Error.captureStackTrace(err);
-	        }
-	    }
-
-	    err.name = 'Template render error';
-	    err.message = message;
-	    err.lineno = lineno;
-	    err.colno = colno;
-	    err.firstUpdate = true;
-
-	    err.Update = function(path) {
-	        var message = '(' + (path || 'unknown path') + ')';
-
-	        // only show lineno + colno next to path of template
-	        // where error occurred
-	        if (this.firstUpdate) {
-	            if(this.lineno && this.colno) {
-	                message += ' [Line ' + this.lineno + ', Column ' + this.colno + ']';
-	            }
-	            else if(this.lineno) {
-	                message += ' [Line ' + this.lineno + ']';
-	            }
-	        }
-
-	        message += '\n ';
-	        if (this.firstUpdate) {
-	            message += ' ';
-	        }
-
-	        this.message = message + (this.message || '');
-	        this.firstUpdate = false;
-	        return this;
-	    };
-
-	    return err;
-	};
-
-	exports.TemplateError.prototype = Error.prototype;
-
-	exports.escape = function(val) {
-	  return val.replace(escapeRegex, lookupEscape);
-	};
-
-	exports.isFunction = function(obj) {
-	    return ObjProto.toString.call(obj) === '[object Function]';
-	};
-
-	exports.isArray = Array.isArray || function(obj) {
-	    return ObjProto.toString.call(obj) === '[object Array]';
-	};
-
-	exports.isString = function(obj) {
-	    return ObjProto.toString.call(obj) === '[object String]';
-	};
-
-	exports.isObject = function(obj) {
-	    return ObjProto.toString.call(obj) === '[object Object]';
-	};
-
-	exports.groupBy = function(obj, val) {
-	    var result = {};
-	    var iterator = exports.isFunction(val) ? val : function(obj) { return obj[val]; };
-	    for(var i=0; i<obj.length; i++) {
-	        var value = obj[i];
-	        var key = iterator(value, i);
-	        (result[key] || (result[key] = [])).push(value);
-	    }
-	    return result;
-	};
-
-	exports.toArray = function(obj) {
-	    return Array.prototype.slice.call(obj);
-	};
-
-	exports.without = function(array) {
-	    var result = [];
-	    if (!array) {
-	        return result;
-	    }
-	    var index = -1,
-	    length = array.length,
-	    contains = exports.toArray(arguments).slice(1);
-
-	    while(++index < length) {
-	        if(exports.indexOf(contains, array[index]) === -1) {
-	            result.push(array[index]);
-	        }
-	    }
-	    return result;
-	};
-
-	exports.extend = function(obj, obj2) {
-	    for(var k in obj2) {
-	        obj[k] = obj2[k];
-	    }
-	    return obj;
-	};
-
-	exports.repeat = function(char_, n) {
-	    var str = '';
-	    for(var i=0; i<n; i++) {
-	        str += char_;
-	    }
-	    return str;
-	};
-
-	exports.each = function(obj, func, context) {
-	    if(obj == null) {
-	        return;
-	    }
-
-	    if(ArrayProto.each && obj.each === ArrayProto.each) {
-	        obj.forEach(func, context);
-	    }
-	    else if(obj.length === +obj.length) {
-	        for(var i=0, l=obj.length; i<l; i++) {
-	            func.call(context, obj[i], i, obj);
-	        }
-	    }
-	};
-
-	exports.map = function(obj, func) {
-	    var results = [];
-	    if(obj == null) {
-	        return results;
-	    }
-
-	    if(ArrayProto.map && obj.map === ArrayProto.map) {
-	        return obj.map(func);
-	    }
-
-	    for(var i=0; i<obj.length; i++) {
-	        results[results.length] = func(obj[i], i);
-	    }
-
-	    if(obj.length === +obj.length) {
-	        results.length = obj.length;
-	    }
-
-	    return results;
-	};
-
-	exports.asyncIter = function(arr, iter, cb) {
-	    var i = -1;
-
-	    function next() {
-	        i++;
-
-	        if(i < arr.length) {
-	            iter(arr[i], i, next, cb);
-	        }
-	        else {
-	            cb();
-	        }
-	    }
-
-	    next();
-	};
-
-	exports.asyncFor = function(obj, iter, cb) {
-	    var keys = exports.keys(obj);
-	    var len = keys.length;
-	    var i = -1;
-
-	    function next() {
-	        i++;
-	        var k = keys[i];
-
-	        if(i < len) {
-	            iter(k, obj[k], i, len, next);
-	        }
-	        else {
-	            cb();
-	        }
-	    }
-
-	    next();
-	};
-
-	// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/indexOf#Polyfill
-	exports.indexOf = Array.prototype.indexOf ?
-	    function (arr, searchElement, fromIndex) {
-	        return Array.prototype.indexOf.call(arr, searchElement, fromIndex);
-	    } :
-	    function (arr, searchElement, fromIndex) {
-	        var length = this.length >>> 0; // Hack to convert object.length to a UInt32
-
-	        fromIndex = +fromIndex || 0;
-
-	        if(Math.abs(fromIndex) === Infinity) {
-	            fromIndex = 0;
-	        }
-
-	        if(fromIndex < 0) {
-	            fromIndex += length;
-	            if (fromIndex < 0) {
-	                fromIndex = 0;
-	            }
-	        }
-
-	        for(;fromIndex < length; fromIndex++) {
-	            if (arr[fromIndex] === searchElement) {
-	                return fromIndex;
-	            }
-	        }
-
-	        return -1;
-	    };
-
-	if(!Array.prototype.map) {
-	    Array.prototype.map = function() {
-	        throw new Error('map is unimplemented for this js engine');
-	    };
-	}
-
-	exports.keys = function(obj) {
-	    if(Object.prototype.keys) {
-	        return obj.keys();
-	    }
-	    else {
-	        var keys = [];
-	        for(var k in obj) {
-	            if(obj.hasOwnProperty(k)) {
-	                keys.push(k);
-	            }
-	        }
-	        return keys;
-	    }
-	};
-
-
-/***/ },
-/* 5 */
-/***/ function(module, exports) {
-
-	'use strict';
-
-	// A simple class system, more documentation to come
-
-	function extend(cls, name, props) {
-	    // This does that same thing as Object.create, but with support for IE8
-	    var F = function() {};
-	    F.prototype = cls.prototype;
-	    var prototype = new F();
-
-	    // jshint undef: false
-	    var fnTest = /xyz/.test(function(){ xyz; }) ? /\bparent\b/ : /.*/;
-	    props = props || {};
-
-	    for(var k in props) {
-	        var src = props[k];
-	        var parent = prototype[k];
-
-	        if(typeof parent === 'function' &&
-	           typeof src === 'function' &&
-	           fnTest.test(src)) {
-	            /*jshint -W083 */
-	            prototype[k] = (function (src, parent) {
-	                return function() {
-	                    // Save the current parent method
-	                    var tmp = this.parent;
-
-	                    // Set parent to the previous method, call, and restore
-	                    this.parent = parent;
-	                    var res = src.apply(this, arguments);
-	                    this.parent = tmp;
-
-	                    return res;
-	                };
-	            })(src, parent);
-	        }
-	        else {
-	            prototype[k] = src;
-	        }
-	    }
-
-	    prototype.typename = name;
-
-	    var new_cls = function() {
-	        if(prototype.init) {
-	            prototype.init.apply(this, arguments);
-	        }
-	    };
-
-	    new_cls.prototype = prototype;
-	    new_cls.prototype.constructor = new_cls;
-
-	    new_cls.extend = function(name, props) {
-	        if(typeof name === 'object') {
-	            props = name;
-	            name = 'anonymous';
-	        }
-	        return extend(new_cls, name, props);
-	    };
-
-	    return new_cls;
-	}
-
-	module.exports = extend(Object, 'Object', {});
-
-
-/***/ },
-/* 6 */
+/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var lexer = __webpack_require__(7);
-	var nodes = __webpack_require__(2);
+	var lexer = __webpack_require__(9);
+	var nodes = __webpack_require__(10);
 	// jshint -W079
-	var Object = __webpack_require__(5);
-	var lib = __webpack_require__(4);
+	var Object = __webpack_require__(6);
+	var lib = __webpack_require__(1);
 
 	var Parser = Object.extend({
 	    init: function (tokens) {
@@ -3235,12 +3822,12 @@ var nunjucks =
 
 
 /***/ },
-/* 7 */
+/* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var lib = __webpack_require__(4);
+	var lib = __webpack_require__(1);
 
 	var whitespaceChars = ' \n\t\r\u00A0';
 	var delimChars = '()[]{}%*-+~/#,:|.<>=!';
@@ -3755,13 +4342,321 @@ var nunjucks =
 
 
 /***/ },
-/* 8 */
+/* 10 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
+
+	var lib = __webpack_require__(1);
+	// jshint -W079
+	var Object = __webpack_require__(6);
+
+	function traverseAndCheck(obj, type, results) {
+	    if(obj instanceof type) {
+	        results.push(obj);
+	    }
+
+	    if(obj instanceof Node) {
+	        obj.findAll(type, results);
+	    }
+	}
+
+	var Node = Object.extend('Node', {
+	    init: function(lineno, colno) {
+	        this.lineno = lineno;
+	        this.colno = colno;
+
+	        var fields = this.fields;
+	        for(var i = 0, l = fields.length; i < l; i++) {
+	            var field = fields[i];
+
+	            // The first two args are line/col numbers, so offset by 2
+	            var val = arguments[i + 2];
+
+	            // Fields should never be undefined, but null. It makes
+	            // testing easier to normalize values.
+	            if(val === undefined) {
+	                val = null;
+	            }
+
+	            this[field] = val;
+	        }
+	    },
+
+	    findAll: function(type, results) {
+	        results = results || [];
+
+	        var i, l;
+	        if(this instanceof NodeList) {
+	            var children = this.children;
+
+	            for(i = 0, l = children.length; i < l; i++) {
+	                traverseAndCheck(children[i], type, results);
+	            }
+	        }
+	        else {
+	            var fields = this.fields;
+
+	            for(i = 0, l = fields.length; i < l; i++) {
+	                traverseAndCheck(this[fields[i]], type, results);
+	            }
+	        }
+
+	        return results;
+	    },
+
+	    iterFields: function(func) {
+	        lib.each(this.fields, function(field) {
+	            func(this[field], field);
+	        }, this);
+	    }
+	});
+
+	// Abstract nodes
+	var Value = Node.extend('Value', { fields: ['value'] });
+
+	// Concrete nodes
+	var NodeList = Node.extend('NodeList', {
+	    fields: ['children'],
+
+	    init: function(lineno, colno, nodes) {
+	        this.parent(lineno, colno, nodes || []);
+	    },
+
+	    addChild: function(node) {
+	        this.children.push(node);
+	    }
+	});
+
+	var Root = NodeList.extend('Root');
+	var Literal = Value.extend('Literal');
+	var Symbol = Value.extend('Symbol');
+	var Group = NodeList.extend('Group');
+	var Array = NodeList.extend('Array');
+	var Pair = Node.extend('Pair', { fields: ['key', 'value'] });
+	var Dict = NodeList.extend('Dict');
+	var LookupVal = Node.extend('LookupVal', { fields: ['target', 'val'] });
+	var If = Node.extend('If', { fields: ['cond', 'body', 'else_'] });
+	var IfAsync = If.extend('IfAsync');
+	var InlineIf = Node.extend('InlineIf', { fields: ['cond', 'body', 'else_'] });
+	var For = Node.extend('For', { fields: ['arr', 'name', 'body', 'else_'] });
+	var AsyncEach = For.extend('AsyncEach');
+	var AsyncAll = For.extend('AsyncAll');
+	var Macro = Node.extend('Macro', { fields: ['name', 'args', 'body'] });
+	var Caller = Macro.extend('Caller');
+	var Import = Node.extend('Import', { fields: ['template', 'target', 'withContext'] });
+	var FromImport = Node.extend('FromImport', {
+	    fields: ['template', 'names', 'withContext'],
+
+	    init: function(lineno, colno, template, names, withContext) {
+	        this.parent(lineno, colno,
+	                    template,
+	                    names || new NodeList(), withContext);
+	    }
+	});
+	var FunCall = Node.extend('FunCall', { fields: ['name', 'args'] });
+	var Filter = FunCall.extend('Filter');
+	var FilterAsync = Filter.extend('FilterAsync', {
+	    fields: ['name', 'args', 'symbol']
+	});
+	var KeywordArgs = Dict.extend('KeywordArgs');
+	var Block = Node.extend('Block', { fields: ['name', 'body'] });
+	var Super = Node.extend('Super', { fields: ['blockName', 'symbol'] });
+	var TemplateRef = Node.extend('TemplateRef', { fields: ['template'] });
+	var Extends = TemplateRef.extend('Extends');
+	var Include = Node.extend('Include', { fields: ['template', 'ignoreMissing'] });
+	var Set = Node.extend('Set', { fields: ['targets', 'value'] });
+	var Output = NodeList.extend('Output');
+	var TemplateData = Literal.extend('TemplateData');
+	var UnaryOp = Node.extend('UnaryOp', { fields: ['target'] });
+	var BinOp = Node.extend('BinOp', { fields: ['left', 'right'] });
+	var In = BinOp.extend('In');
+	var Or = BinOp.extend('Or');
+	var And = BinOp.extend('And');
+	var Not = UnaryOp.extend('Not');
+	var Add = BinOp.extend('Add');
+	var Concat = BinOp.extend('Concat');
+	var Sub = BinOp.extend('Sub');
+	var Mul = BinOp.extend('Mul');
+	var Div = BinOp.extend('Div');
+	var FloorDiv = BinOp.extend('FloorDiv');
+	var Mod = BinOp.extend('Mod');
+	var Pow = BinOp.extend('Pow');
+	var Neg = UnaryOp.extend('Neg');
+	var Pos = UnaryOp.extend('Pos');
+	var Compare = Node.extend('Compare', { fields: ['expr', 'ops'] });
+	var CompareOperand = Node.extend('CompareOperand', {
+	    fields: ['expr', 'type']
+	});
+
+	var CallExtension = Node.extend('CallExtension', {
+	    fields: ['extName', 'prop', 'args', 'contentArgs'],
+
+	    init: function(ext, prop, args, contentArgs) {
+	        this.extName = ext._name || ext;
+	        this.prop = prop;
+	        this.args = args || new NodeList();
+	        this.contentArgs = contentArgs || [];
+	        this.autoescape = ext.autoescape;
+	    }
+	});
+
+	var CallExtensionAsync = CallExtension.extend('CallExtensionAsync');
+
+	// Print the AST in a nicely formatted tree format for debuggin
+	function printNodes(node, indent) {
+	    indent = indent || 0;
+
+	    // This is hacky, but this is just a debugging function anyway
+	    function print(str, indent, inline) {
+	        var lines = str.split('\n');
+
+	        for(var i=0; i<lines.length; i++) {
+	            if(lines[i]) {
+	                if((inline && i > 0) || !inline) {
+	                    for(var j=0; j<indent; j++) {
+	                        process.stdout.write(' ');
+	                    }
+	                }
+	            }
+
+	            if(i === lines.length-1) {
+	                process.stdout.write(lines[i]);
+	            }
+	            else {
+	                process.stdout.write(lines[i] + '\n');
+	            }
+	        }
+	    }
+
+	    print(node.typename + ': ', indent);
+
+	    if(node instanceof NodeList) {
+	        print('\n');
+	        lib.each(node.children, function(n) {
+	            printNodes(n, indent + 2);
+	        });
+	    }
+	    else if(node instanceof CallExtension) {
+	        print(node.extName + '.' + node.prop);
+	        print('\n');
+
+	        if(node.args) {
+	            printNodes(node.args, indent + 2);
+	        }
+
+	        if(node.contentArgs) {
+	            lib.each(node.contentArgs, function(n) {
+	                printNodes(n, indent + 2);
+	            });
+	        }
+	    }
+	    else {
+	        var nodes = null;
+	        var props = null;
+
+	        node.iterFields(function(val, field) {
+	            if(val instanceof Node) {
+	                nodes = nodes || {};
+	                nodes[field] = val;
+	            }
+	            else {
+	                props = props || {};
+	                props[field] = val;
+	            }
+	        });
+
+	        if(props) {
+	            print(JSON.stringify(props, null, 2) + '\n', null, true);
+	        }
+	        else {
+	            print('\n');
+	        }
+
+	        if(nodes) {
+	            for(var k in nodes) {
+	                printNodes(nodes[k], indent + 2);
+	            }
+	        }
+
+	    }
+	}
+
+	// var t = new NodeList(0, 0,
+	//                      [new Value(0, 0, 3),
+	//                       new Value(0, 0, 10),
+	//                       new Pair(0, 0,
+	//                                new Value(0, 0, 'key'),
+	//                                new Value(0, 0, 'value'))]);
+	// printNodes(t);
+
+	module.exports = {
+	    Node: Node,
+	    Root: Root,
+	    NodeList: NodeList,
+	    Value: Value,
+	    Literal: Literal,
+	    Symbol: Symbol,
+	    Group: Group,
+	    Array: Array,
+	    Pair: Pair,
+	    Dict: Dict,
+	    Output: Output,
+	    TemplateData: TemplateData,
+	    If: If,
+	    IfAsync: IfAsync,
+	    InlineIf: InlineIf,
+	    For: For,
+	    AsyncEach: AsyncEach,
+	    AsyncAll: AsyncAll,
+	    Macro: Macro,
+	    Caller: Caller,
+	    Import: Import,
+	    FromImport: FromImport,
+	    FunCall: FunCall,
+	    Filter: Filter,
+	    FilterAsync: FilterAsync,
+	    KeywordArgs: KeywordArgs,
+	    Block: Block,
+	    Super: Super,
+	    Extends: Extends,
+	    Include: Include,
+	    Set: Set,
+	    LookupVal: LookupVal,
+	    BinOp: BinOp,
+	    In: In,
+	    Or: Or,
+	    And: And,
+	    Not: Not,
+	    Add: Add,
+	    Concat: Concat,
+	    Sub: Sub,
+	    Mul: Mul,
+	    Div: Div,
+	    FloorDiv: FloorDiv,
+	    Mod: Mod,
+	    Pow: Pow,
+	    Neg: Neg,
+	    Pos: Pos,
+	    Compare: Compare,
+	    CompareOperand: CompareOperand,
+
+	    CallExtension: CallExtension,
+	    CallExtensionAsync: CallExtensionAsync,
+
+	    printNodes: printNodes
+	};
+
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(3)))
+
+/***/ },
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var nodes = __webpack_require__(2);
-	var lib = __webpack_require__(4);
+	var nodes = __webpack_require__(10);
+	var lib = __webpack_require__(1);
 
 	var sym = 0;
 	function gensym() {
@@ -4001,13 +4896,13 @@ var nunjucks =
 
 
 /***/ },
-/* 9 */
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var lib = __webpack_require__(4);
-	var Obj = __webpack_require__(5);
+	var lib = __webpack_require__(1);
+	var Obj = __webpack_require__(6);
 
 	// Frames keep track of scoping both at compile-time and run-time so
 	// we know how to access variables. Block tags can introduce special
@@ -4366,608 +5261,13 @@ var nunjucks =
 
 
 /***/ },
-/* 10 */
+/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var path = __webpack_require__(3);
-	var asap = __webpack_require__(12);
-	var lib = __webpack_require__(4);
-	var Obj = __webpack_require__(5);
-	var compiler = __webpack_require__(1);
-	var builtin_filters = __webpack_require__(11);
-	var builtin_loaders = __webpack_require__(14);
-	var runtime = __webpack_require__(9);
-	var globals = __webpack_require__(17);
-	var Frame = runtime.Frame;
-	var Template;
-
-	// Unconditionally load in this loader, even if no other ones are
-	// included (possible in the slim browser build)
-	builtin_loaders.PrecompiledLoader = __webpack_require__(16);
-
-	// If the user is using the async API, *always* call it
-	// asynchronously even if the template was synchronous.
-	function callbackAsap(cb, err, res) {
-	    asap(function() { cb(err, res); });
-	}
-
-	var Environment = Obj.extend({
-	    init: function(loaders, opts) {
-	        // The dev flag determines the trace that'll be shown on errors.
-	        // If set to true, returns the full trace from the error point,
-	        // otherwise will return trace starting from Template.render
-	        // (the full trace from within nunjucks may confuse developers using
-	        //  the library)
-	        // defaults to false
-	        opts = this.opts = opts || {};
-	        this.opts.dev = !!opts.dev;
-
-	        // The autoescape flag sets global autoescaping. If true,
-	        // every string variable will be escaped by default.
-	        // If false, strings can be manually escaped using the `escape` filter.
-	        // defaults to true
-	        this.opts.autoescape = opts.autoescape != null ? opts.autoescape : true;
-
-	        // If true, this will make the system throw errors if trying
-	        // to output a null or undefined value
-	        this.opts.throwOnUndefined = !!opts.throwOnUndefined;
-	        this.opts.trimBlocks = !!opts.trimBlocks;
-	        this.opts.lstripBlocks = !!opts.lstripBlocks;
-
-	        this.loaders = [];
-
-	        if(!loaders) {
-	            // The filesystem loader is only available server-side
-	            if(builtin_loaders.FileSystemLoader) {
-	                this.loaders = [new builtin_loaders.FileSystemLoader('views')];
-	            }
-	            else if(builtin_loaders.WebLoader) {
-	                this.loaders = [new builtin_loaders.WebLoader('/views')];
-	            }
-	        }
-	        else {
-	            this.loaders = lib.isArray(loaders) ? loaders : [loaders];
-	        }
-
-	        // It's easy to use precompiled templates: just include them
-	        // before you configure nunjucks and this will automatically
-	        // pick it up and use it
-	        if((true) && window.nunjucksPrecompiled) {
-	            this.loaders.unshift(
-	                new builtin_loaders.PrecompiledLoader(window.nunjucksPrecompiled)
-	            );
-	        }
-
-	        this.initCache();
-
-	        this.globals = globals();
-	        this.filters = {};
-	        this.asyncFilters = [];
-	        this.extensions = {};
-	        this.extensionsList = [];
-
-	        for(var name in builtin_filters) {
-	            this.addFilter(name, builtin_filters[name]);
-	        }
-	    },
-
-	    initCache: function() {
-	        // Caching and cache busting
-	        lib.each(this.loaders, function(loader) {
-	            loader.cache = {};
-
-	            if(typeof loader.on === 'function') {
-	                loader.on('update', function(template) {
-	                    loader.cache[template] = null;
-	                });
-	            }
-	        });
-	    },
-
-	    addExtension: function(name, extension) {
-	        extension._name = name;
-	        this.extensions[name] = extension;
-	        this.extensionsList.push(extension);
-	        return this;
-	    },
-
-	    removeExtension: function(name) {
-	        var extension = this.getExtension(name);
-	        if (!extension) return;
-
-	        this.extensionsList = lib.without(this.extensionsList, extension);
-	        delete this.extensions[name];
-	    },
-
-	    getExtension: function(name) {
-	        return this.extensions[name];
-	    },
-
-	    hasExtension: function(name) {
-	        return !!this.extensions[name];
-	    },
-
-	    addGlobal: function(name, value) {
-	        this.globals[name] = value;
-	        return this;
-	    },
-
-	    getGlobal: function(name) {
-	        if(!this.globals[name]) {
-	            throw new Error('global not found: ' + name);
-	        }
-	        return this.globals[name];
-	    },
-
-	    addFilter: function(name, func, async) {
-	        var wrapped = func;
-
-	        if(async) {
-	            this.asyncFilters.push(name);
-	        }
-	        this.filters[name] = wrapped;
-	        return this;
-	    },
-
-	    getFilter: function(name) {
-	        if(!this.filters[name]) {
-	            throw new Error('filter not found: ' + name);
-	        }
-	        return this.filters[name];
-	    },
-
-	    resolveTemplate: function(loader, parentName, filename) {
-	        var isRelative = (loader.isRelative && parentName)? loader.isRelative(filename) : false;
-	        return (isRelative && loader.resolve)? loader.resolve(parentName, filename) : filename;
-	    },
-
-	    getTemplate: function(name, eagerCompile, parentName, ignoreMissing, cb) {
-	        var that = this;
-	        var tmpl = null;
-	        if(name && name.raw) {
-	            // this fixes autoescape for templates referenced in symbols
-	            name = name.raw;
-	        }
-
-	        if(lib.isFunction(parentName)) {
-	            cb = parentName;
-	            parentName = null;
-	            eagerCompile = eagerCompile || false;
-	        }
-
-	        if(lib.isFunction(eagerCompile)) {
-	            cb = eagerCompile;
-	            eagerCompile = false;
-	        }
-
-	        if (name instanceof Template) {
-	             tmpl = name;
-	        }
-	        else if(typeof name !== 'string') {
-	            throw new Error('template names must be a string: ' + name);
-	        }
-	        else {
-	            for (var i = 0; i < this.loaders.length; i++) {
-	                var _name = this.resolveTemplate(this.loaders[i], parentName, name);
-	                tmpl = this.loaders[i].cache[_name];
-	                if (tmpl) break;
-	            }
-	        }
-
-	        if(tmpl) {
-	            if(eagerCompile) {
-	                tmpl.compile();
-	            }
-
-	            if(cb) {
-	                cb(null, tmpl);
-	            }
-	            else {
-	                return tmpl;
-	            }
-	        } else {
-	            var syncResult;
-	            var _this = this;
-
-	            var createTemplate = function(err, info) {
-	                if(!info && !err) {
-	                    if(!ignoreMissing) {
-	                        err = new Error('template not found: ' + name);
-	                    }
-	                }
-
-	                if (err) {
-	                    if(cb) {
-	                        cb(err);
-	                    }
-	                    else {
-	                        throw err;
-	                    }
-	                }
-	                else {
-	                    var tmpl;
-	                    if(info) {
-	                        tmpl = new Template(info.src, _this,
-	                                            info.path, eagerCompile);
-
-	                        if(!info.noCache) {
-	                            info.loader.cache[name] = tmpl;
-	                        }
-	                    }
-	                    else {
-	                        tmpl = new Template('', _this,
-	                                            '', eagerCompile);
-	                    }
-
-	                    if(cb) {
-	                        cb(null, tmpl);
-	                    }
-	                    else {
-	                        syncResult = tmpl;
-	                    }
-	                }
-	            };
-
-	            lib.asyncIter(this.loaders, function(loader, i, next, done) {
-	                function handle(err, src) {
-	                    if(err) {
-	                        done(err);
-	                    }
-	                    else if(src) {
-	                        src.loader = loader;
-	                        done(null, src);
-	                    }
-	                    else {
-	                        next();
-	                    }
-	                }
-
-	                // Resolve name relative to parentName
-	                name = that.resolveTemplate(loader, parentName, name);
-
-	                if(loader.async) {
-	                    loader.getSource(name, handle);
-	                }
-	                else {
-	                    handle(null, loader.getSource(name));
-	                }
-	            }, createTemplate);
-
-	            return syncResult;
-	        }
-	    },
-
-	    express: function(app) {
-	        var env = this;
-
-	        function NunjucksView(name, opts) {
-	            this.name          = name;
-	            this.path          = name;
-	            this.defaultEngine = opts.defaultEngine;
-	            this.ext           = path.extname(name);
-	            if (!this.ext && !this.defaultEngine) throw new Error('No default engine was specified and no extension was provided.');
-	            if (!this.ext) this.name += (this.ext = ('.' !== this.defaultEngine[0] ? '.' : '') + this.defaultEngine);
-	        }
-
-	        NunjucksView.prototype.render = function(opts, cb) {
-	          env.render(this.name, opts, cb);
-	        };
-
-	        app.set('view', NunjucksView);
-	        return this;
-	    },
-
-	    render: function(name, ctx, cb) {
-	        if(lib.isFunction(ctx)) {
-	            cb = ctx;
-	            ctx = null;
-	        }
-
-	        // We support a synchronous API to make it easier to migrate
-	        // existing code to async. This works because if you don't do
-	        // anything async work, the whole thing is actually run
-	        // synchronously.
-	        var syncResult = null;
-
-	        this.getTemplate(name, function(err, tmpl) {
-	            if(err && cb) {
-	                callbackAsap(cb, err);
-	            }
-	            else if(err) {
-	                throw err;
-	            }
-	            else {
-	                syncResult = tmpl.render(ctx, cb);
-	            }
-	        });
-
-	        return syncResult;
-	    },
-
-	    renderString: function(src, ctx, opts, cb) {
-	        if(lib.isFunction(opts)) {
-	            cb = opts;
-	            opts = {};
-	        }
-	        opts = opts || {};
-
-	        var tmpl = new Template(src, this, opts.path);
-	        return tmpl.render(ctx, cb);
-	    }
-	});
-
-	var Context = Obj.extend({
-	    init: function(ctx, blocks, env) {
-	        // Has to be tied to an environment so we can tap into its globals.
-	        this.env = env || new Environment();
-
-	        // Make a duplicate of ctx
-	        this.ctx = {};
-	        for(var k in ctx) {
-	            if(ctx.hasOwnProperty(k)) {
-	                this.ctx[k] = ctx[k];
-	            }
-	        }
-
-	        this.blocks = {};
-	        this.exported = [];
-
-	        for(var name in blocks) {
-	            this.addBlock(name, blocks[name]);
-	        }
-	    },
-
-	    lookup: function(name) {
-	        // This is one of the most called functions, so optimize for
-	        // the typical case where the name isn't in the globals
-	        if(name in this.env.globals && !(name in this.ctx)) {
-	            return this.env.globals[name];
-	        }
-	        else {
-	            return this.ctx[name];
-	        }
-	    },
-
-	    setVariable: function(name, val) {
-	        this.ctx[name] = val;
-	    },
-
-	    getVariables: function() {
-	        return this.ctx;
-	    },
-
-	    addBlock: function(name, block) {
-	        this.blocks[name] = this.blocks[name] || [];
-	        this.blocks[name].push(block);
-	        return this;
-	    },
-
-	    getBlock: function(name) {
-	        if(!this.blocks[name]) {
-	            throw new Error('unknown block "' + name + '"');
-	        }
-
-	        return this.blocks[name][0];
-	    },
-
-	    getSuper: function(env, name, block, frame, runtime, cb) {
-	        var idx = lib.indexOf(this.blocks[name] || [], block);
-	        var blk = this.blocks[name][idx + 1];
-	        var context = this;
-
-	        if(idx === -1 || !blk) {
-	            throw new Error('no super block available for "' + name + '"');
-	        }
-
-	        blk(env, context, frame, runtime, cb);
-	    },
-
-	    addExport: function(name) {
-	        this.exported.push(name);
-	    },
-
-	    getExported: function() {
-	        var exported = {};
-	        for(var i=0; i<this.exported.length; i++) {
-	            var name = this.exported[i];
-	            exported[name] = this.ctx[name];
-	        }
-	        return exported;
-	    }
-	});
-
-	Template = Obj.extend({
-	    init: function (src, env, path, eagerCompile) {
-	        this.env = env || new Environment();
-
-	        if(lib.isObject(src)) {
-	            switch(src.type) {
-	            case 'code': this.tmplProps = src.obj; break;
-	            case 'string': this.tmplStr = src.obj; break;
-	            }
-	        }
-	        else if(lib.isString(src)) {
-	            this.tmplStr = src;
-	        }
-	        else {
-	            throw new Error('src must be a string or an object describing ' +
-	                            'the source');
-	        }
-
-	        this.path = path;
-
-	        if(eagerCompile) {
-	            var _this = this;
-	            try {
-	                _this._compile();
-	            }
-	            catch(err) {
-	                throw lib.prettifyError(this.path, this.env.dev, err);
-	            }
-	        }
-	        else {
-	            this.compiled = false;
-	        }
-	    },
-
-	    render: function(ctx, parentFrame, cb) {
-	        if (typeof ctx === 'function') {
-	            cb = ctx;
-	            ctx = {};
-	        }
-	        else if (typeof parentFrame === 'function') {
-	            cb = parentFrame;
-	            parentFrame = null;
-	        }
-
-	        var forceAsync = true;
-	        if(parentFrame) {
-	            // If there is a frame, we are being called from internal
-	            // code of another template, and the internal system
-	            // depends on the sync/async nature of the parent template
-	            // to be inherited, so force an async callback
-	            forceAsync = false;
-	        }
-
-	        var _this = this;
-	        // Catch compile errors for async rendering
-	        try {
-	            _this.compile();
-	        } catch (_err) {
-	            var err = lib.prettifyError(this.path, this.env.dev, _err);
-	            if (cb) return callbackAsap(cb, err);
-	            else throw err;
-	        }
-
-	        var context = new Context(ctx || {}, _this.blocks, _this.env);
-	        var frame = parentFrame ? parentFrame.push() : new Frame();
-	        frame.topLevel = true;
-	        var syncResult = null;
-
-	        _this.rootRenderFunc(
-	            _this.env,
-	            context,
-	            frame || new Frame(),
-	            runtime,
-	            function(err, res) {
-	                if(err) {
-	                    err = lib.prettifyError(_this.path, _this.env.dev, err);
-	                }
-
-	                if(cb) {
-	                    if(forceAsync) {
-	                        callbackAsap(cb, err, res);
-	                    }
-	                    else {
-	                        cb(err, res);
-	                    }
-	                }
-	                else {
-	                    if(err) { throw err; }
-	                    syncResult = res;
-	                }
-	            }
-	        );
-
-	        return syncResult;
-	    },
-
-
-	    getExported: function(ctx, parentFrame, cb) {
-	        if (typeof ctx === 'function') {
-	            cb = ctx;
-	            ctx = {};
-	        }
-
-	        if (typeof parentFrame === 'function') {
-	            cb = parentFrame;
-	            parentFrame = null;
-	        }
-
-	        // Catch compile errors for async rendering
-	        try {
-	            this.compile();
-	        } catch (e) {
-	            if (cb) return cb(e);
-	            else throw e;
-	        }
-
-	        var frame = parentFrame ? parentFrame.push() : new Frame();
-	        frame.topLevel = true;
-
-	        // Run the rootRenderFunc to populate the context with exported vars
-	        var context = new Context(ctx || {}, this.blocks, this.env);
-	        this.rootRenderFunc(this.env,
-	                            context,
-	                            frame,
-	                            runtime,
-	                            function(err) {
-	        		        if ( err ) {
-	        			    cb(err, null);
-	        		        } else {
-	        			    cb(null, context.getExported());
-	        		        }
-	                            });
-	    },
-
-	    compile: function() {
-	        if(!this.compiled) {
-	            this._compile();
-	        }
-	    },
-
-	    _compile: function() {
-	        var props;
-
-	        if(this.tmplProps) {
-	            props = this.tmplProps;
-	        }
-	        else {
-	            var source = compiler.compile(this.tmplStr,
-	                                          this.env.asyncFilters,
-	                                          this.env.extensionsList,
-	                                          this.path,
-	                                          this.env.opts);
-
-	            /* jslint evil: true */
-	            var func = new Function(source);
-	            props = func();
-	        }
-
-	        this.blocks = this._getBlocks(props);
-	        this.rootRenderFunc = props.root;
-	        this.compiled = true;
-	    },
-
-	    _getBlocks: function(props) {
-	        var blocks = {};
-
-	        for(var k in props) {
-	            if(k.slice(0, 2) === 'b_') {
-	                blocks[k.slice(2)] = props[k];
-	            }
-	        }
-
-	        return blocks;
-	    }
-	});
-
-	module.exports = {
-	    Environment: Environment,
-	    Template: Template
-	};
-
-
-/***/ },
-/* 11 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var lib = __webpack_require__(4);
-	var r = __webpack_require__(9);
+	var lib = __webpack_require__(1);
+	var r = __webpack_require__(12);
 
 	function normalize(value, defaultValue) {
 	    if(value === null || value === undefined || value === false) {
@@ -5364,10 +5664,22 @@ var nunjucks =
 	        return r.copySafeness(obj, obj);
 	    },
 
-	    striptags: function(input) {
+	    striptags: function(input, preserve_linebreaks) {
 	        input = normalize(input, '');
+	        preserve_linebreaks = preserve_linebreaks || false;
 	        var tags = /<\/?([a-z][a-z0-9]*)\b[^>]*>|<!--[\s\S]*?-->/gi;
-	        return r.copySafeness(input, filters.trim(input.replace(tags, '')).replace(/\s+/gi, ' '));
+	        var trimmedInput = filters.trim(input.replace(tags, ''));
+	        var res = '';
+	        if (preserve_linebreaks) {
+	            res = trimmedInput
+	                .replace(/^ +| +$/gm, '')     // remove leading and trailing spaces
+	                .replace(/ +/g, ' ')          // squash adjacent spaces
+	                .replace(/(\r\n)/g, '\n')     // normalize linebreaks (CRLF -> LF)
+	                .replace(/\n\n\n+/g, '\n\n'); // squash abnormal adjacent linebreaks
+	        } else {
+	            res = trimmedInput.replace(/\s+/gi, ' ');
+	        }
+	        return r.copySafeness(input, res);
 	    },
 
 	    title: function(str) {
@@ -5503,305 +5815,6 @@ var nunjucks =
 
 
 /***/ },
-/* 12 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-
-	// rawAsap provides everything we need except exception management.
-	var rawAsap = __webpack_require__(13);
-	// RawTasks are recycled to reduce GC churn.
-	var freeTasks = [];
-	// We queue errors to ensure they are thrown in right order (FIFO).
-	// Array-as-queue is good enough here, since we are just dealing with exceptions.
-	var pendingErrors = [];
-	var requestErrorThrow = rawAsap.makeRequestCallFromTimer(throwFirstError);
-
-	function throwFirstError() {
-	    if (pendingErrors.length) {
-	        throw pendingErrors.shift();
-	    }
-	}
-
-	/**
-	 * Calls a task as soon as possible after returning, in its own event, with priority
-	 * over other events like animation, reflow, and repaint. An error thrown from an
-	 * event will not interrupt, nor even substantially slow down the processing of
-	 * other events, but will be rather postponed to a lower priority event.
-	 * @param {{call}} task A callable object, typically a function that takes no
-	 * arguments.
-	 */
-	module.exports = asap;
-	function asap(task) {
-	    var rawTask;
-	    if (freeTasks.length) {
-	        rawTask = freeTasks.pop();
-	    } else {
-	        rawTask = new RawTask();
-	    }
-	    rawTask.task = task;
-	    rawAsap(rawTask);
-	}
-
-	// We wrap tasks with recyclable task objects.  A task object implements
-	// `call`, just like a function.
-	function RawTask() {
-	    this.task = null;
-	}
-
-	// The sole purpose of wrapping the task is to catch the exception and recycle
-	// the task object after its single use.
-	RawTask.prototype.call = function () {
-	    try {
-	        this.task.call();
-	    } catch (error) {
-	        if (asap.onerror) {
-	            // This hook exists purely for testing purposes.
-	            // Its name will be periodically randomized to break any code that
-	            // depends on its existence.
-	            asap.onerror(error);
-	        } else {
-	            // In a web browser, exceptions are not fatal. However, to avoid
-	            // slowing down the queue of pending tasks, we rethrow the error in a
-	            // lower priority turn.
-	            pendingErrors.push(error);
-	            requestErrorThrow();
-	        }
-	    } finally {
-	        this.task = null;
-	        freeTasks[freeTasks.length] = this;
-	    }
-	};
-
-
-/***/ },
-/* 13 */
-/***/ function(module, exports) {
-
-	/* WEBPACK VAR INJECTION */(function(global) {"use strict";
-
-	// Use the fastest means possible to execute a task in its own turn, with
-	// priority over other events including IO, animation, reflow, and redraw
-	// events in browsers.
-	//
-	// An exception thrown by a task will permanently interrupt the processing of
-	// subsequent tasks. The higher level `asap` function ensures that if an
-	// exception is thrown by a task, that the task queue will continue flushing as
-	// soon as possible, but if you use `rawAsap` directly, you are responsible to
-	// either ensure that no exceptions are thrown from your task, or to manually
-	// call `rawAsap.requestFlush` if an exception is thrown.
-	module.exports = rawAsap;
-	function rawAsap(task) {
-	    if (!queue.length) {
-	        requestFlush();
-	        flushing = true;
-	    }
-	    // Equivalent to push, but avoids a function call.
-	    queue[queue.length] = task;
-	}
-
-	var queue = [];
-	// Once a flush has been requested, no further calls to `requestFlush` are
-	// necessary until the next `flush` completes.
-	var flushing = false;
-	// `requestFlush` is an implementation-specific method that attempts to kick
-	// off a `flush` event as quickly as possible. `flush` will attempt to exhaust
-	// the event queue before yielding to the browser's own event loop.
-	var requestFlush;
-	// The position of the next task to execute in the task queue. This is
-	// preserved between calls to `flush` so that it can be resumed if
-	// a task throws an exception.
-	var index = 0;
-	// If a task schedules additional tasks recursively, the task queue can grow
-	// unbounded. To prevent memory exhaustion, the task queue will periodically
-	// truncate already-completed tasks.
-	var capacity = 1024;
-
-	// The flush function processes all tasks that have been scheduled with
-	// `rawAsap` unless and until one of those tasks throws an exception.
-	// If a task throws an exception, `flush` ensures that its state will remain
-	// consistent and will resume where it left off when called again.
-	// However, `flush` does not make any arrangements to be called again if an
-	// exception is thrown.
-	function flush() {
-	    while (index < queue.length) {
-	        var currentIndex = index;
-	        // Advance the index before calling the task. This ensures that we will
-	        // begin flushing on the next task the task throws an error.
-	        index = index + 1;
-	        queue[currentIndex].call();
-	        // Prevent leaking memory for long chains of recursive calls to `asap`.
-	        // If we call `asap` within tasks scheduled by `asap`, the queue will
-	        // grow, but to avoid an O(n) walk for every task we execute, we don't
-	        // shift tasks off the queue after they have been executed.
-	        // Instead, we periodically shift 1024 tasks off the queue.
-	        if (index > capacity) {
-	            // Manually shift all values starting at the index back to the
-	            // beginning of the queue.
-	            for (var scan = 0, newLength = queue.length - index; scan < newLength; scan++) {
-	                queue[scan] = queue[scan + index];
-	            }
-	            queue.length -= index;
-	            index = 0;
-	        }
-	    }
-	    queue.length = 0;
-	    index = 0;
-	    flushing = false;
-	}
-
-	// `requestFlush` is implemented using a strategy based on data collected from
-	// every available SauceLabs Selenium web driver worker at time of writing.
-	// https://docs.google.com/spreadsheets/d/1mG-5UYGup5qxGdEMWkhP6BWCz053NUb2E1QoUTU16uA/edit#gid=783724593
-
-	// Safari 6 and 6.1 for desktop, iPad, and iPhone are the only browsers that
-	// have WebKitMutationObserver but not un-prefixed MutationObserver.
-	// Must use `global` instead of `window` to work in both frames and web
-	// workers. `global` is a provision of Browserify, Mr, Mrs, or Mop.
-	var BrowserMutationObserver = global.MutationObserver || global.WebKitMutationObserver;
-
-	// MutationObservers are desirable because they have high priority and work
-	// reliably everywhere they are implemented.
-	// They are implemented in all modern browsers.
-	//
-	// - Android 4-4.3
-	// - Chrome 26-34
-	// - Firefox 14-29
-	// - Internet Explorer 11
-	// - iPad Safari 6-7.1
-	// - iPhone Safari 7-7.1
-	// - Safari 6-7
-	if (typeof BrowserMutationObserver === "function") {
-	    requestFlush = makeRequestCallFromMutationObserver(flush);
-
-	// MessageChannels are desirable because they give direct access to the HTML
-	// task queue, are implemented in Internet Explorer 10, Safari 5.0-1, and Opera
-	// 11-12, and in web workers in many engines.
-	// Although message channels yield to any queued rendering and IO tasks, they
-	// would be better than imposing the 4ms delay of timers.
-	// However, they do not work reliably in Internet Explorer or Safari.
-
-	// Internet Explorer 10 is the only browser that has setImmediate but does
-	// not have MutationObservers.
-	// Although setImmediate yields to the browser's renderer, it would be
-	// preferrable to falling back to setTimeout since it does not have
-	// the minimum 4ms penalty.
-	// Unfortunately there appears to be a bug in Internet Explorer 10 Mobile (and
-	// Desktop to a lesser extent) that renders both setImmediate and
-	// MessageChannel useless for the purposes of ASAP.
-	// https://github.com/kriskowal/q/issues/396
-
-	// Timers are implemented universally.
-	// We fall back to timers in workers in most engines, and in foreground
-	// contexts in the following browsers.
-	// However, note that even this simple case requires nuances to operate in a
-	// broad spectrum of browsers.
-	//
-	// - Firefox 3-13
-	// - Internet Explorer 6-9
-	// - iPad Safari 4.3
-	// - Lynx 2.8.7
-	} else {
-	    requestFlush = makeRequestCallFromTimer(flush);
-	}
-
-	// `requestFlush` requests that the high priority event queue be flushed as
-	// soon as possible.
-	// This is useful to prevent an error thrown in a task from stalling the event
-	// queue if the exception handled by Node.js’s
-	// `process.on("uncaughtException")` or by a domain.
-	rawAsap.requestFlush = requestFlush;
-
-	// To request a high priority event, we induce a mutation observer by toggling
-	// the text of a text node between "1" and "-1".
-	function makeRequestCallFromMutationObserver(callback) {
-	    var toggle = 1;
-	    var observer = new BrowserMutationObserver(callback);
-	    var node = document.createTextNode("");
-	    observer.observe(node, {characterData: true});
-	    return function requestCall() {
-	        toggle = -toggle;
-	        node.data = toggle;
-	    };
-	}
-
-	// The message channel technique was discovered by Malte Ubl and was the
-	// original foundation for this library.
-	// http://www.nonblocking.io/2011/06/windownexttick.html
-
-	// Safari 6.0.5 (at least) intermittently fails to create message ports on a
-	// page's first load. Thankfully, this version of Safari supports
-	// MutationObservers, so we don't need to fall back in that case.
-
-	// function makeRequestCallFromMessageChannel(callback) {
-	//     var channel = new MessageChannel();
-	//     channel.port1.onmessage = callback;
-	//     return function requestCall() {
-	//         channel.port2.postMessage(0);
-	//     };
-	// }
-
-	// For reasons explained above, we are also unable to use `setImmediate`
-	// under any circumstances.
-	// Even if we were, there is another bug in Internet Explorer 10.
-	// It is not sufficient to assign `setImmediate` to `requestFlush` because
-	// `setImmediate` must be called *by name* and therefore must be wrapped in a
-	// closure.
-	// Never forget.
-
-	// function makeRequestCallFromSetImmediate(callback) {
-	//     return function requestCall() {
-	//         setImmediate(callback);
-	//     };
-	// }
-
-	// Safari 6.0 has a problem where timers will get lost while the user is
-	// scrolling. This problem does not impact ASAP because Safari 6.0 supports
-	// mutation observers, so that implementation is used instead.
-	// However, if we ever elect to use timers in Safari, the prevalent work-around
-	// is to add a scroll event listener that calls for a flush.
-
-	// `setTimeout` does not call the passed callback if the delay is less than
-	// approximately 7 in web workers in Firefox 8 through 18, and sometimes not
-	// even then.
-
-	function makeRequestCallFromTimer(callback) {
-	    return function requestCall() {
-	        // We dispatch a timeout with a specified delay of 0 for engines that
-	        // can reliably accommodate that request. This will usually be snapped
-	        // to a 4 milisecond delay, but once we're flushing, there's no delay
-	        // between events.
-	        var timeoutHandle = setTimeout(handleTimer, 0);
-	        // However, since this timer gets frequently dropped in Firefox
-	        // workers, we enlist an interval handle that will try to fire
-	        // an event 20 times per second until it succeeds.
-	        var intervalHandle = setInterval(handleTimer, 50);
-
-	        function handleTimer() {
-	            // Whichever timer succeeds will cancel both timers and
-	            // execute the callback.
-	            clearTimeout(timeoutHandle);
-	            clearInterval(intervalHandle);
-	            callback();
-	        }
-	    };
-	}
-
-	// This is for `asap.js` only.
-	// Its name will be periodically randomized to break any code that depends on
-	// its existence.
-	rawAsap.makeRequestCallFromTimer = makeRequestCallFromTimer;
-
-	// ASAP was originally a nextTick shim included in Q. This was factored out
-	// into this ASAP package. It was later adapted to RSVP which made further
-	// amendments. These decisions, particularly to marginalize MessageChannel and
-	// to capture the MutationObserver implementation in a closure, were integrated
-	// back into ASAP proper.
-	// https://github.com/tildeio/rsvp.js/blob/cddf7232546a9cf858524b75cde6f9edf72620a7/lib/rsvp/asap.js
-
-	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
-
-/***/ },
 /* 14 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -5838,10 +5851,15 @@ var nunjucks =
 	        var result;
 	        this.fetch(this.baseURL + '/' + name, function(err, src) {
 	            if(err) {
-	                if(!cb) {
-	                    throw err;
+	                if(cb) {
+	                    cb(err.content);
+	                } else {
+	                    if (err.status === 404) {
+	                      result = null;
+	                    } else {
+	                      throw err.content;
+	                    }
 	                }
-	                cb(err);
 	            }
 	            else {
 	                result = { src: src,
@@ -5879,7 +5897,7 @@ var nunjucks =
 	                    cb(null, ajax.responseText);
 	                }
 	                else {
-	                    cb(ajax.responseText);
+	                    cb({ status: ajax.status, content: ajax.responseText });
 	                }
 	            }
 	        };
@@ -5905,8 +5923,8 @@ var nunjucks =
 	'use strict';
 
 	var path = __webpack_require__(3);
-	var Obj = __webpack_require__(5);
-	var lib = __webpack_require__(4);
+	var Obj = __webpack_require__(6);
+	var lib = __webpack_require__(1);
 
 	var Loader = Obj.extend({
 	    on: function(name, func) {

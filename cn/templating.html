@@ -384,7 +384,7 @@ foo.bar }}</code>, <code>{{ foo.bar.baz }}</code> 也不显示)。</p>
 <p>区块(<code>block</code>) 定义了模板片段并标识一个名字，在模板继承中使用。父级模板可指定一个区块，子模板覆盖这个区块，查看<a href="#template-inheritance">模板继承</a>。</p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">block</span> <span class="nv">css</span> <span class="cp">%}</span><span class="x"></span>
 <span class="x">&lt;link rel=&quot;stylesheet&quot; href=&quot;app.css&quot; /&gt;</span>
-<span class="cp">{%</span> <span class="k">endblock</span> <span class="o">}</span>
+<span class="cp">{%</span> <span class="k">endblock</span> <span class="cp">%}</span><span class="x"></span>
 </code></pre></div>
 <p>可以在循环中定义区块</p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">for</span> <span class="nv">item</span> <span class="k">in</span> <span class="nv">items</span> <span class="cp">%}</span><span class="x"></span>

@@ -166,6 +166,9 @@
 <a href="#sort-arr-reverse-casesens-attr">sort(arr, reverse, caseSens, attr)</a>
 </li>
 <li>
+<a href="#striptags-value-preserve_linebreaks">striptags (value, [preserve_linebreaks])</a>
+</li>
+<li>
 <a href="#plus-de-filtres">Plus de filtres</a>
 </li>
 </ul>
@@ -490,7 +493,7 @@ des blocs, ainsi des templates enfants peuvent les remplacer avec du nouveau con
 <a href="#l39hritage-de-template">l&#39;héritage de template</a>.</p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">block</span> <span class="nv">css</span> <span class="cp">%}</span><span class="x"></span>
 <span class="x">&lt;link rel=&quot;stylesheet&quot; href=&quot;app.css&quot; /&gt;</span>
-<span class="cp">{%</span> <span class="k">endblock</span> <span class="o">}</span>
+<span class="cp">{%</span> <span class="k">endblock</span> <span class="cp">%}</span><span class="x"></span>
 </code></pre></div>
 <p>Vous pouvez même définir des blocs dans une boucle :</p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">for</span> <span class="nv">item</span> <span class="k">in</span> <span class="nv">items</span> <span class="cp">%}</span><span class="x"></span>
@@ -804,6 +807,14 @@ true, le résultat sera inversé. Le tri est insensible à la casse par défaut,
 mais en paramétrant <code>caseSens</code> à true, cela le rend sensible à la casse. Si <code>attr</code> est
 passé, cela permettra de comparer <code>attr</code> à chaque élément.</p>
 
+<h3 id="striptags-value-preserve_linebreaks">striptags (value, [preserve_linebreaks])</h3>
+
+<p>C&#39;est similaire à <a href="http://jinja.pocoo.org/docs/templates/#striptags">striptags</a> de jinja. Si <code>preserve_linebreaks</code> est à false (par défaut),
+cela enlève les balises SGML/XML et remplace les espaces adjacents par un seul espace.
+Si <code>preserve_linebreaks</code> est à true, cela normalise les espaces, en essayant de préserver les
+sauts de lignes originaux. Utiliser le second comportement si vous voulez utiliser ceci
+<code>{{ text | striptags | nl2br }}</code>. Sinon utilisez le comportement par défaut.</p>
+
 <h3 id="plus-de-filtres">Plus de filtres</h3>
 
 <ul>
@@ -830,7 +841,6 @@ passé, cela permettra de comparer <code>attr</code> à chaque élément.</p>
 <li><a href="http://jinja.pocoo.org/docs/templates/#selectattr">selectattr</a> (seulement pour le formulaire avec un unique argument)</li>
 <li><a href="http://jinja.pocoo.org/docs/templates/#slice">slice</a></li>
 <li><a href="http://jinja.pocoo.org/docs/templates/#string">string</a></li>
-<li><a href="http://jinja.pocoo.org/docs/templates/#striptags">striptags</a></li>
 <li><a href="http://jinja.pocoo.org/docs/templates/#title">title</a></li>
 <li><a href="http://jinja.pocoo.org/docs/templates/#trim">trim</a></li>
 <li><a href="http://jinja.pocoo.org/docs/templates/#truncate">truncate</a></li>

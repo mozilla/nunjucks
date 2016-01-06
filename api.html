@@ -811,6 +811,17 @@ auto-generated when compiling a directory.</li>
 <li><strong>env</strong>: the Environment to use (gets extensions and async filters from it)</li>
 <li><strong>include</strong>: array of file/folders to include (folders are auto-included, files are auto-excluded)</li>
 <li><strong>exclude</strong>: array of file/folders to exclude (folders are auto-included, files are auto-excluded)</li>
+<li><strong>wrapper</strong>: <code>function(templates, opts)</code> Customize the output format of the precompiled templates. This function must return a string 
+
+<ul>
+<li><strong>templates</strong>: array of objects with the following properties:
+
+<ul>
+<li><strong>name</strong>: name of the template</li>
+<li><strong>template</strong>: string source of the precompiled template in javascript</li>
+</ul></li>
+<li><strong>opts</strong>: object of all the above options</li>
+</ul></li>
 </ul>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="kd">var</span> <span class="nx">env</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">Environment</span><span class="p">();</span>
 
