@@ -360,6 +360,23 @@
             finish(done);
         });
 
+        it('sum', function(done) {
+            equal('{{ items | sum }}',
+                  { items: [1, 2, 3] },
+                  6);
+
+            equal('{{ items | sum(10) }}',
+                  { items: [1, 2, 3] },
+                  16);
+
+            equal('{{ items | sum(10, "value") }}',
+                  { items: [{ value: 1 },
+                            { value: 2 },
+                            { value: 3 }] },
+                  16);
+            finish(done);
+        });
+
         it('sort', function(done) {
             equal('{% for i in [3,5,2,1,4,6] | sort %}{{ i }}{% endfor %}',
                   '123456');
