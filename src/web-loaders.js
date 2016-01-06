@@ -31,10 +31,15 @@ var WebLoader = Loader.extend({
         var result;
         this.fetch(this.baseURL + '/' + name, function(err, src) {
             if(err) {
-                if(!cb) {
-                    throw err;
+                if(cb) {
+                    cb(err.content);
+                } else {
+                    if (err.status === 404) {
+                      result = null;
+                    } else {
+                      throw err.content;
+                    }
                 }
-                cb(err);
             }
             else {
                 result = { src: src,
@@ -72,7 +77,7 @@ var WebLoader = Loader.extend({
                     cb(null, ajax.responseText);
                 }
                 else {
-                    cb(ajax.responseText);
+                    cb({ status: ajax.status, content: ajax.responseText });
                 }
             }
         };
