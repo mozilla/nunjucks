@@ -26,10 +26,11 @@ date.
    $ npm run browserfiles
    ```
 
-5. Commit above changes and push to `master`.
+5. Commit above changes and push to `master` (or a release branch, if using one).
 
 6. Draft a new release on GitHub and copy the changelog to the description. The
-   title should be the version.
+   tag and title should both be the version, in the form `v2.3.0`. Publish the
+   release.
 
 7. Publish to npm:
 
@@ -52,7 +53,10 @@ date.
    cp browser/* docs/files
    rsync -a tests/ docs/files/tests/
    cd docs && make prod
-   cd _site && git add -A && git commit && git push
+   cd files
+   python -m SimpleHTTPServer
+   # load http://localhost:8000/tests/browser/ and verify tests pass in browser
+   cd ../_site && git add -A && git commit && git push
    ```
 
 9. Add a new "master (unreleased)" section at the top of `CHANGELOG.md`.
