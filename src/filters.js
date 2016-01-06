@@ -358,25 +358,27 @@ var filters = {
 
         return res;
     },
-    
-    sum: function(arr, start, attr) {
-        if(typeof start !== 'number'){
-            start = 0;
+
+    sum: function(arr, attr, start) {
+        var sum = 0;
+
+        if(typeof start === 'number'){
+            sum += start;
         }
-        
+
         if(attr) {
             arr = lib.map(arr, function(v) {
                 return v[attr];
             });
         }
-        
+
         for(var i = 0; i < arr.length; i++) {
             sum += arr[i];
         }
-        
+
         return sum;
     },
-    
+
     sort: r.makeMacro(['value', 'reverse', 'case_sensitive', 'attribute'], [], function(arr, reverse, caseSens, attr) {
          // Copy it
         arr = lib.map(arr, function(v) { return v; });

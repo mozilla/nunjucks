@@ -21,6 +21,7 @@
     var finish = util.finish;
 
     describe('filter', function() {
+
         it('abs', function(done) {
             equal('{{ -3|abs }}', '3');
             equal('{{ -3.456|abs }}', '3.456');
@@ -365,15 +366,18 @@
                   { items: [1, 2, 3] },
                   6);
 
-            equal('{{ items | sum(10) }}',
-                  { items: [1, 2, 3] },
-                  16);
+            equal('{{ items | sum("value") }}',
+                  { items: [{ value: 1 },
+                            { value: 2 },
+                            { value: 3 }] },
+                  6);
 
-            equal('{{ items | sum(10, "value") }}',
+            equal('{{ items | sum("value", 10) }}',
                   { items: [{ value: 1 },
                             { value: 2 },
                             { value: 3 }] },
                   16);
+
             finish(done);
         });
 
