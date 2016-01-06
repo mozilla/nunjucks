@@ -3,6 +3,7 @@ Changelog
 
 master (unreleased)
 -------------------
+* Fix: [Breaking Change] filter.escape should not escape SafeString(#168).
 
 v2.2.0 (Nov 23 2015)
 --------------------
