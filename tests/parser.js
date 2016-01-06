@@ -11,9 +11,9 @@
     }
     else {
         expect = window.expect;
-        lib = nunjucks.require('lib');
-        nodes = nunjucks.require('nodes');
-        parser = nunjucks.require('parser');
+        lib = nunjucks.lib;
+        nodes = nunjucks.nodes;
+        parser = nunjucks.parser;
     }
 
     function _isAST(node1, node2) {
