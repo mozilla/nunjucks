@@ -20,6 +20,7 @@ module.exports.parser = require('./src/parser');
 module.exports.lexer = require('./src/lexer');
 module.exports.runtime = require('./src/runtime');
 module.exports.lib = lib;
+module.exports.nodes = require('./src/nodes');
 
 module.exports.installJinjaCompat = require('./src/jinja-compat.js');
 

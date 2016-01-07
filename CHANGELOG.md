@@ -4,6 +4,24 @@ Changelog
 master (unreleased)
 -------------------
 
+* [Breaking Change] Prevent filter.escape from escaping SafeString. Thanks
+  atian25. Merge of [#623](https://github.com/mozilla/nunjucks/pull/589).
+
+
+v2.3.0 (Jan 6 2016)
+-------------------
+
+* Return `null` from `WebLoader` on missing template instead of throwing an
+  error, for consistency with other loaders. This allows `WebLoader` to support
+  the new `ignore missing` flag on the `include` tag. If `ignore missing` is
+  not set, a generic "template not found" error will still be thrown, just like
+  for any other loader. Ajax errors other than 404 will still cause `WebLoader`
+  to throw an error directly.
+
+* Add preserve-linebreaks option to `striptags` filter. Thanks Ivan
+  Kleshnin. Merge of [#619](https://github.com/mozilla/nunjucks/pull/619).
+
+
 v2.2.0 (Nov 23 2015)
 --------------------
 

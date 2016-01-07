@@ -12,8 +12,8 @@
     else {
         expect = window.expect;
         util = window.util;
-        lib = nunjucks.require('lib');
-        r = nunjucks.require('runtime');
+        lib = nunjucks.lib;
+        r = nunjucks.runtime;
     }
 
     var render = util.render;
@@ -88,6 +88,12 @@
         it('escape', function(done) {
             var res = render('{{ "<html>" | escape }}', {}, { autoescape: false });
             expect(res).to.be('&lt;html&gt;');
+            finish(done);
+        });
+
+        it('escape skip safe', function(done) {
+            var res = render('{{ "<html>" | safe | escape }}', {}, { autoescape: false });
+            expect(res).to.be('<html>');
             finish(done);
         });
 
