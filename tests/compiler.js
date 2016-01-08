@@ -1223,5 +1223,25 @@
             finish(done);
         });
 
+
+        it('should control whitespaces correctly', function(done) {
+            equal(
+              '{% if true -%}{{"hello"}} {{"world"}}{% endif %}',
+              'hello world'
+            );
+
+            equal(
+              '{% if true -%}{% if true %} {{"hello"}} {{"world"}}'
+                + '{% endif %}{% endif %}',
+              ' hello world'
+            );
+
+            equal(
+              '{% if true -%}{# comment #} {{"hello"}}{% endif %}',
+              ' hello'
+            );
+
+            finish(done);
+        });
     });
 })();
