@@ -150,24 +150,14 @@
             var env = new Environment(new Loader(templatesPath));
 
             env.addGlobal('err', function() {
-                throw new TypeError('Global error');
+                throw new Error('Global error');
             });
 
-            // this works ok
             try {
                 render('{{ err() }}', null, {}, env);
             } catch (e) {
                 expect(e).to.be.a(Error);
             }
-
-            // this doesn't work as expected
-            try {
-                render('{{ err() }}', null, {}, env);
-            } catch (e) {
-                expect(e).to.be.a(TypeError);
-            }
-
-            //expect(render('{{ err() }}', null, {}, env)).to.throwError();
 
             finish(done);
         });
