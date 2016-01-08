@@ -1,8 +1,12 @@
 Changelog
 =========
 
-master (unreleased)
--------------------
+2.x (unreleased)
+----------------
+
+* Fix whitespace control around nested tags/variables/comments. Thanks Ouyang
+  Yadong. Merge of [#631](https://github.com/mozilla/nunjucks/pull/631).
+
 
 v2.3.0 (Jan 6 2016)
 -------------------
