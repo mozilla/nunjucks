@@ -1202,6 +1202,7 @@ var Parser = Object.extend({
                                                                   data)]));
             }
             else if(tok.type === lexer.TOKEN_BLOCK_START) {
+                this.dropLeadingWhitespace = false;
                 var n = this.parseStatement();
                 if(!n) {
                     break;
@@ -1211,12 +1212,16 @@ var Parser = Object.extend({
             else if(tok.type === lexer.TOKEN_VARIABLE_START) {
                 var e = this.parseExpression();
                 this.advanceAfterVariableEnd();
+                this.dropLeadingWhitespace = false;
                 buf.push(new nodes.Output(tok.lineno, tok.colno, [e]));
             }
-            else if(tok.type !== lexer.TOKEN_COMMENT) {
+            else if(tok.type === lexer.TOKEN_COMMENT) {
+              this.dropLeadingWhitespace = false;
+            } else {
                 // Ignore comments, otherwise this should be an error
                 this.fail('Unexpected token at top-level: ' +
                                 tok.type, tok.lineno, tok.colno);
+
             }
         }
 
