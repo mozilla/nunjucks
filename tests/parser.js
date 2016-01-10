@@ -564,6 +564,30 @@
                      [nodes.Output,
                       [nodes.TemplateData, 'hi']]]]]);
 
+            isAST(parser.parse('hello \n{#- comment #}'),
+                  [nodes.Root,
+                   [nodes.Output,
+                    [nodes.TemplateData, 'hello']]]);
+
+            isAST(parser.parse('{# comment -#} \n world'),
+                  [nodes.Root,
+                   [nodes.Output,
+                    [nodes.TemplateData, 'world']]]);
+
+            isAST(parser.parse('hello \n{#- comment -#} \n world'),
+                  [nodes.Root,
+                   [nodes.Output,
+                    [nodes.TemplateData, 'hello']],
+                   [nodes.Output,
+                    [nodes.TemplateData, 'world']]]);
+
+            isAST(parser.parse('hello \n{# - comment - #} \n world'),
+                  [nodes.Root,
+                   [nodes.Output,
+                    [nodes.TemplateData, 'hello \n']],
+                   [nodes.Output,
+                    [nodes.TemplateData, ' \n world']]]);
+
             // The from statement required a special case so make sure to
             // test it
             isAST(parser.parse('{% from x import y %}\n  hi \n'),

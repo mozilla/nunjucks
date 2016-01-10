@@ -1189,8 +1189,11 @@ var Parser = Object.extend({
 
                 // Same for the succeding block start token
                 if(nextToken &&
-                   nextToken.type === lexer.TOKEN_BLOCK_START &&
-                   nextVal.charAt(nextVal.length - 1) === '-') {
+                   ((nextToken.type === lexer.TOKEN_BLOCK_START &&
+                      nextVal.charAt(nextVal.length - 1) === '-') ||
+                    (nextToken.type === lexer.TOKEN_COMMENT &&
+                      nextVal.charAt(this.tokens.tags.COMMENT_START.length)
+                        === '-'))) {
                     // TODO: this could be optimized (don't use regex)
                     data = data.replace(/\s*$/, '');
                 }
@@ -1216,7 +1219,9 @@ var Parser = Object.extend({
                 buf.push(new nodes.Output(tok.lineno, tok.colno, [e]));
             }
             else if(tok.type === lexer.TOKEN_COMMENT) {
-              this.dropLeadingWhitespace = false;
+                this.dropLeadingWhitespace = tok.value.charAt(
+                    tok.value.length - this.tokens.tags.COMMENT_END.length- 1
+                ) === '-';
             } else {
                 // Ignore comments, otherwise this should be an error
                 this.fail('Unexpected token at top-level: ' +
