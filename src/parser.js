@@ -1189,7 +1189,7 @@ var Parser = Object.extend({
 
                 // Same for the succeding block start token
                 if(nextToken &&
-                   ((nextToken.type === lexer.TOKEN_BLOCK_START &&
+                    ((nextToken.type === lexer.TOKEN_BLOCK_START &&
                       nextVal.charAt(nextVal.length - 1) === '-') ||
                     (nextToken.type === lexer.TOKEN_COMMENT &&
                       nextVal.charAt(this.tokens.tags.COMMENT_START.length)
@@ -1220,7 +1220,7 @@ var Parser = Object.extend({
             }
             else if(tok.type === lexer.TOKEN_COMMENT) {
                 this.dropLeadingWhitespace = tok.value.charAt(
-                    tok.value.length - this.tokens.tags.COMMENT_END.length- 1
+                    tok.value.length - this.tokens.tags.COMMENT_END.length - 1
                 ) === '-';
             } else {
                 // Ignore comments, otherwise this should be an error
