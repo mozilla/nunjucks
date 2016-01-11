@@ -1209,6 +1209,20 @@
             finish(done);
         });
 
+        it('should throw an error when including a file that calls an undefined macro even inside {% if %} tag', function(done) {
+            render(
+                '{% if true %}{% include "undefined-macro.html" %}{% endif %}',
+                {},
+                { noThrow: true },
+                function(err, res) {
+                    expect(res).to.be(undefined);
+                    expect(err).to.match(/Unable to call `\w+`, which is undefined or falsey/);
+                }
+            );
+
+            finish(done);
+        });
+
         it('should throw an error when including a file that imports macro that calls an undefined macro', function(done) {
             render(
                 '{% include "import-macro-call-undefined-macro.html" %}',
