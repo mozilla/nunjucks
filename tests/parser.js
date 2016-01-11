@@ -583,6 +583,46 @@
                      [nodes.Symbol, 'y']]],
                    [nodes.Output,
                     [nodes.TemplateData, 'hi \n']]]);
+
+            isAST(parser.parse('{% if x -%}{{y}} {{z}}{% endif %}'),
+                  [nodes.Root,
+                   [nodes.If,
+                    [nodes.Symbol, 'x'],
+                    [nodes.NodeList,
+                     [nodes.Output,
+                      [nodes.Symbol, 'y']],
+                     [nodes.Output,
+                      // the value of TemplateData should be ' ' instead of ''
+                      [nodes.TemplateData, ' ']],
+                     [nodes.Output,
+                      [nodes.Symbol, 'z']]]]]);
+
+            isAST(parser.parse('{% if x -%}{% if y %} {{z}}{% endif %}{% endif %}'),
+                [nodes.Root,
+                 [nodes.If,
+                  [nodes.Symbol, 'x'],
+                  [nodes.NodeList,
+                   [nodes.If,
+                    [nodes.Symbol, 'y'],
+                    [nodes.NodeList,
+                      [nodes.Output,
+                        // the value of TemplateData should be ' ' instead of ''
+                       [nodes.TemplateData, ' ']],
+                      [nodes.Output,
+                       [nodes.Symbol, 'z']]
+                      ]]]]]);
+
+            isAST(parser.parse('{% if x -%}{# comment #} {{z}}{% endif %}'),
+                 [nodes.Root,
+                  [nodes.If,
+                   [nodes.Symbol, 'x'],
+                   [nodes.NodeList,
+                    [nodes.Output,
+                     // the value of TemplateData should be ' ' instead of ''
+                     [nodes.TemplateData, ' ']],
+                    [nodes.Output,
+                     [nodes.Symbol, 'z']]]]]);
+
         });
 
         it('should throw errors', function() {

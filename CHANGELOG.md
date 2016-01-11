@@ -4,8 +4,11 @@ Changelog
 master (unreleased)
 -------------------
 
+* Fix whitespace control around nested tags/variables/comments. Thanks Ouyang
+  Yadong. Merge of [#631](https://github.com/mozilla/nunjucks/pull/631).
+
 * [Breaking Change] Prevent filter.escape from escaping SafeString. Thanks
-  atian25. Merge of [#623](https://github.com/mozilla/nunjucks/pull/589).
+  atian25. Merge of [#623](https://github.com/mozilla/nunjucks/pull/623).
 
 
 v2.3.0 (Jan 6 2016)
