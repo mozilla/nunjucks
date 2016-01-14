@@ -4,6 +4,9 @@ Changelog
 master (unreleased)
 -------------------
 
+* Allow whitespace control on comment blocks, too. Thanks Ouyang Yadong. Merge
+  of [#632](https://github.com/mozilla/nunjucks/pull/632).
+
 * Fix whitespace control around nested tags/variables/comments. Thanks Ouyang
   Yadong. Merge of [#631](https://github.com/mozilla/nunjucks/pull/631).
 
