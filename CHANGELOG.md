@@ -4,6 +4,10 @@ Changelog
 master (unreleased)
 -------------------
 
+* Don't suppress errors inside {% if %} tags. Thanks Artemy Tregubenko for
+  report and test, Ouyang Yadong for fix. Merge of
+  [#634](https://github.com/mozilla/nunjucks/pull/634).
+
 * Allow whitespace control on comment blocks, too. Thanks Ouyang Yadong. Merge
   of [#632](https://github.com/mozilla/nunjucks/pull/632).
 
