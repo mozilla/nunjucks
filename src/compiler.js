@@ -581,7 +581,7 @@ var Compiler = Object.extend({
     compileIfAsync: function(node, frame) {
         this.emit('(function(cb) {');
         this.compileIf(node, frame, true);
-        this.emit('})(function() {');
+        this.emit('})(' + this.makeCallback());
         this.addScopeLevel();
     },
 
