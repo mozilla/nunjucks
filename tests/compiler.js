@@ -724,6 +724,10 @@
                   { name: 'thedude', tmpl: 'include.html' },
                   'hello world FooInclude thedude');
 
+            equal('hello world {% set tmpl = "include.html" %}{% include tmpl %}',
+                  { name: 'thedude' },
+                  'hello world FooInclude thedude');
+
             equal('hello world {% include data.tmpl %}',
                   { name: 'thedude', data: {tmpl: 'include.html'} },
                   'hello world FooInclude thedude');
