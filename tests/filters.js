@@ -364,19 +364,19 @@
         it('sum', function(done) {
             equal('{{ items | sum }}',
                   { items: [1, 2, 3] },
-                  6);
+                  '6');
 
             equal('{{ items | sum("value") }}',
                   { items: [{ value: 1 },
                             { value: 2 },
                             { value: 3 }] },
-                  6);
+                  '6');
 
             equal('{{ items | sum("value", 10) }}',
                   { items: [{ value: 1 },
                             { value: 2 },
                             { value: 3 }] },
-                  16);
+                  '16');
 
             finish(done);
         });
