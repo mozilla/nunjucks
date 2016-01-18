@@ -4,6 +4,8 @@ Changelog
 master (unreleased)
 -------------------
 
+* Fix a bug in urlize that would remove line break, tabs and any other
+  "white spacey" char different than white space.
 * Don't suppress errors inside {% if %} tags. Thanks Artemy Tregubenko for
   report and test, Ouyang Yadong for fix. Merge of
   [#634](https://github.com/mozilla/nunjucks/pull/634).

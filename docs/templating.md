@@ -822,6 +822,7 @@ linebreaks. Use second behavior if you want to pipe
 * [truncate](http://jinja.pocoo.org/docs/templates/#truncate)
 * [upper](http://jinja.pocoo.org/docs/templates/#upper)
 * [urlencode](http://jinja.pocoo.org/docs/templates/#urlencode)
+* [urlize](http://jinja.pocoo.org/docs/templates/#urlize)
 * [wordcount](http://jinja.pocoo.org/docs/templates/#wordcount)
 * [float](http://jinja.pocoo.org/docs/templates/#float)
 * [int](http://jinja.pocoo.org/docs/templates/#int)

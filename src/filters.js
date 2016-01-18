@@ -492,7 +492,7 @@ var filters = {
         var wwwRE = /^www\./;
         var tldRE = /\.(?:org|net|com)(?:\:|\/|$)/;
 
-        var words = str.split(/\s+/).filter(function(word) {
+        var words = str.split(/(\s+)/).filter(function(word) {
           // If the word has no length, bail. This can happen for str with
           // trailing whitespace.
           return word && word.length;
@@ -520,7 +520,7 @@ var filters = {
 
         });
 
-        return words.join(' ');
+        return words.join('');
     },
 
     wordcount: function(str) {
