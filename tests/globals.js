@@ -28,6 +28,7 @@
             equal('{% for i in range(0, 10) %}{{ i }}{% endfor %}', '0123456789');
             equal('{% for i in range(10) %}{{ i }}{% endfor %}', '0123456789');
             equal('{% for i in range(5, 10) %}{{ i }}{% endfor %}', '56789');
+            equal('{% for i in range(-2, 0) %}{{ i }}{% endfor %}', '-2-1');
             equal('{% for i in range(5, 10, 2) %}{{ i }}{% endfor %}', '579');
             equal('{% for i in range(5, 10, 2.5) %}{{ i }}{% endfor %}', '57.5');
             equal('{% for i in range(5, 10, 2.5) %}{{ i }}{% endfor %}', '57.5');
