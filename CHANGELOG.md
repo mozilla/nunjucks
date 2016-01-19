@@ -4,6 +4,9 @@ Changelog
 2.x (unreleased)
 ----------------
 
+* Add `sum` filter. Thanks Pablo Matías Lazo. Merge of
+  [#629](https://github.com/mozilla/nunjucks/pull/629).
+
 * Don't suppress errors inside {% if %} tags. Thanks Artemy Tregubenko for
   report and test, Ouyang Yadong for fix. Merge of
   [#634](https://github.com/mozilla/nunjucks/pull/634).
