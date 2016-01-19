@@ -21,6 +21,7 @@
     var finish = util.finish;
 
     describe('filter', function() {
+
         it('abs', function(done) {
             equal('{{ -3|abs }}', '3');
             equal('{{ -3.456|abs }}', '3.456');
@@ -362,6 +363,26 @@
             equal(tmpl,
                   { arr: [1,2,3,4,5,6,7,8,9,10] },
                   '--1234----567----8910--');
+
+            finish(done);
+        });
+
+        it('sum', function(done) {
+            equal('{{ items | sum }}',
+                  { items: [1, 2, 3] },
+                  '6');
+
+            equal('{{ items | sum("value") }}',
+                  { items: [{ value: 1 },
+                            { value: 2 },
+                            { value: 3 }] },
+                  '6');
+
+            equal('{{ items | sum("value", 10) }}',
+                  { items: [{ value: 1 },
+                            { value: 2 },
+                            { value: 3 }] },
+                  '16');
 
             finish(done);
         });
