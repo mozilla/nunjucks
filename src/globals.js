@@ -40,7 +40,7 @@ function joiner(sep) {
 function globals() {
     return {
         range: function(start, stop, step) {
-            if(!stop) {
+            if(!stop && stop !== 0) {
                 stop = start;
                 start = 0;
                 step = 1;
