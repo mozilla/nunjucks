@@ -4,6 +4,9 @@ Changelog
 master (unreleased)
 -------------------
 
+* Fix `range` global with zero as stop-value. Thanks Thomas Hunkapiller. Merge
+  of [#638](https://github.com/mozilla/nunjucks/pull/638)
+
 * Fix a bug in urlize that collapsed whitespace. Thanks Paulo Bu. Merge of
   [#637](https://github.com/mozilla/nunjucks/pull/637).
 
