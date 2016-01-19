@@ -4,6 +4,9 @@ Changelog
 master (unreleased)
 -------------------
 
+* Fix a bug in urlize that collapsed whitespace. Thanks Paulo Bu. Merge of
+  [#637](https://github.com/mozilla/nunjucks/pull/637).
+
 * Add `sum` filter. Thanks Pablo Matías Lazo. Merge of
   [#629](https://github.com/mozilla/nunjucks/pull/629).
 

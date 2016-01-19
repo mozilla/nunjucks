@@ -558,7 +558,7 @@
             equal('{{ "http://jinja.pocoo.org/docs/templates/)" | urlize | safe }}',
                 '<a href="http://jinja.pocoo.org/docs/templates/">http://jinja.pocoo.org/docs/templates/</a>');
             equal('{{ "http://jinja.pocoo.org/docs/templates/\n" | urlize | safe }}',
-                '<a href="http://jinja.pocoo.org/docs/templates/">http://jinja.pocoo.org/docs/templates/</a>');
+                '<a href="http://jinja.pocoo.org/docs/templates/">http://jinja.pocoo.org/docs/templates/</a>\n');
             equal('{{ "http://jinja.pocoo.org/docs/templates/&gt;" | urlize | safe }}',
                 '<a href="http://jinja.pocoo.org/docs/templates/">http://jinja.pocoo.org/docs/templates/</a>');
 
@@ -576,6 +576,10 @@
 
             //markup in the text
             equal('{{ "<b>what up</b>" | urlize | safe }}', '<b>what up</b>');
+
+            //breaklines and tabs in the text
+            equal('{{ "what\nup" | urlize | safe }}', 'what\nup');
+            equal('{{ "what\tup" | urlize | safe }}', 'what\tup');
 
             finish(done);
         });
