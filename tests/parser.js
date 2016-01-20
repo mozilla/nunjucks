@@ -289,6 +289,9 @@
             n = parser.parse('{% block foo %}stuff{% endblock %}');
             expect(n.children[0].typename).to.be('Block');
 
+            n = parser.parse('{% block foo %}stuff{% endblock foo %}');
+            expect(n.children[0].typename).to.be('Block');
+
             n = parser.parse('{% extends "test.html" %}stuff');
             expect(n.children[0].typename).to.be('Extends');
 
@@ -673,6 +676,10 @@
             expect(function() {
                 parser.parse('hello {% block sdf %} data');
             }).to.throwException(/expected endblock/);
+
+            expect(function() {
+                parser.parse('hello {% block sdf %} data{% endblock foo %}');
+            }).to.throwException(/expected block end/);
 
             expect(function() {
                 parser.parse('hello {% bar %} dsfsdf');

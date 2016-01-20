@@ -399,12 +399,15 @@ var Parser = Object.extend({
         this.advanceAfterBlockEnd(tag.value);
 
         node.body = this.parseUntilBlocks('endblock');
+        this.skipSymbol('endblock');
+        this.skipSymbol(node.name.value);
 
-        if(!this.peekToken()) {
+        var tok = this.peekToken();
+        if(!tok) {
             this.fail('parseBlock: expected endblock, got end of file');
         }
 
-        this.advanceAfterBlockEnd();
+        this.advanceAfterBlockEnd(tok.value);
 
         return node;
     },
