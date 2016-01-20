@@ -4,8 +4,11 @@ Changelog
 master (unreleased)
 -------------------
 
+* Add support for named `endblock` (e.g. `{% endblock foo %}`). Thanks
+  ricordisamoa. Merge of [#641](https://github.com/mozilla/nunjucks/pull/641).
+
 * Fix `range` global with zero as stop-value. Thanks Thomas Hunkapiller. Merge
-  of [#638](https://github.com/mozilla/nunjucks/pull/638)
+  of [#638](https://github.com/mozilla/nunjucks/pull/638).
 
 * Fix a bug in urlize that collapsed whitespace. Thanks Paulo Bu. Merge of
   [#637](https://github.com/mozilla/nunjucks/pull/637).
