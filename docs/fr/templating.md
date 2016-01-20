@@ -821,6 +821,7 @@ sauts de lignes originaux. Utiliser le second comportement si vous voulez utilis
 * [trim](http://jinja.pocoo.org/docs/templates/#trim)
 * [truncate](http://jinja.pocoo.org/docs/templates/#truncate)
 * [upper](http://jinja.pocoo.org/docs/templates/#upper)
+* [urlize](http://jinja.pocoo.org/docs/templates/#urlize)
 * [urlencode](http://jinja.pocoo.org/docs/templates/#urlencode)
 * [wordcount](http://jinja.pocoo.org/docs/templates/#wordcount)
 * [float](http://jinja.pocoo.org/docs/templates/#float)
