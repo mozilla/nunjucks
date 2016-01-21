@@ -1196,6 +1196,13 @@
 
             equal('{% filter replace("force", "forth") %}may the force be with you{% endfilter %}',
                   'may the forth be with you');
+
+            equal('{% set foo = "force" %}{% filter replace("force", "forth") %}may the {{ foo }} be with you{% endfilter %}',
+                  'may the forth be with you');
+
+            equal('{% extends "filter-block.html" %}' +
+                  '{% block block1 %}force{% endblock %}',
+                  'may the forth be with you');
             finish(done);
         });
 
