@@ -57,26 +57,17 @@ module.exports.configure = function(templatesPath, opts) {
     return e;
 };
 
+module.exports.configure();
+
 module.exports.compile = function(src, env, path, eagerCompile) {
-    if(!e) {
-        module.exports.configure();
-    }
     return new module.exports.Template(src, env, path, eagerCompile);
 };
 
 module.exports.render = function(name, ctx, cb) {
-    if(!e) {
-        module.exports.configure();
-    }
-
     return e.render(name, ctx, cb);
 };
 
 module.exports.renderString = function(src, ctx, cb) {
-    if(!e) {
-        module.exports.configure();
-    }
-
     return e.renderString(src, ctx, cb);
 };
 
