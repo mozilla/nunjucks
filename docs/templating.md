@@ -794,8 +794,7 @@ linebreaks. Use second behavior if you want to pipe
 
 ### dump (object)
 
-Mainly debugging, it's possible to see what's available on an object, it is pretty useful. `dump` is a builtin
-filter that allows to make it. So you can do `{{ foo | dump }}` and it just calls `JSON.stringify`.
+Call `JSON.stringify` on an object and dump the result into the template. Useful for debugging: `{{ foo | dump }}`.
 
 ### More Filters
 

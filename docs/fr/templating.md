@@ -794,8 +794,7 @@ sauts de lignes originaux. Utiliser le second comportement si vous voulez utilis
 
 ### dump (object)
 
-Principalement lors du débogage, il est possible de voir ce que possède un objet, c'est très utile. `dump` est un filtre
-intégré qui permet de le faire. Donc vous pouvez faire `{{ foo | dump }}` et ceci appelle simplement `JSON.stringify`.
+Appelle `JSON.stringify` sur un objet et déverse le résultat dans le template. C'est utile pour le débogage : `{{ foo | dump }}`.
 
 ### Plus de filtres
 
