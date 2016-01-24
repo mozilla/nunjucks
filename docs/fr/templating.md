@@ -792,6 +792,10 @@ Si `preserve_linebreaks` est à true, cela normalise les espaces, en essayant de
 sauts de lignes originaux. Utiliser le second comportement si vous voulez utiliser ceci
 `{{ text | striptags | nl2br }}`. Sinon utilisez le comportement par défaut.
 
+### dump (object)
+
+Appelle `JSON.stringify` sur un objet et déverse le résultat dans le template. C'est utile pour le débogage : `{{ foo | dump }}`.
+
 ### Plus de filtres
 
 * [abs](http://jinja.pocoo.org/docs/templates/#abs)
@@ -800,10 +804,11 @@ sauts de lignes originaux. Utiliser le second comportement si vous voulez utilis
 * [center](http://jinja.pocoo.org/docs/templates/#center)
 * [dictsort](http://jinja.pocoo.org/docs/templates/#dictsort)
 * [escape](http://jinja.pocoo.org/docs/templates/#escape) (raccourci avec `e`)
-* [safe](http://jinja.pocoo.org/docs/templates/#safe)
+* [float](http://jinja.pocoo.org/docs/templates/#float)
 * [first](http://jinja.pocoo.org/docs/templates/#first)
 * [groupby](http://jinja.pocoo.org/docs/templates/#groupby)
 * [indent](http://jinja.pocoo.org/docs/templates/#indent)
+* [int](http://jinja.pocoo.org/docs/templates/#int)
 * [join](http://jinja.pocoo.org/docs/templates/#join)
 * [last](http://jinja.pocoo.org/docs/templates/#last)
 * [length](http://jinja.pocoo.org/docs/templates/#length)
@@ -814,9 +819,11 @@ sauts de lignes originaux. Utiliser le second comportement si vous voulez utilis
 * [replace](http://jinja.pocoo.org/docs/templates/#replace) (le premier argument peut prendre une expression régulière JS)
 * [reverse](http://jinja.pocoo.org/docs/templates/#reverse)
 * [round](http://jinja.pocoo.org/docs/templates/#round)
+* [safe](http://jinja.pocoo.org/docs/templates/#safe)
 * [selectattr](http://jinja.pocoo.org/docs/templates/#selectattr) (seulement pour le formulaire avec un unique argument)
 * [slice](http://jinja.pocoo.org/docs/templates/#slice)
 * [string](http://jinja.pocoo.org/docs/templates/#string)
+* [sum](http://jinja.pocoo.org/docs/dev/templates/#sum)
 * [title](http://jinja.pocoo.org/docs/templates/#title)
 * [trim](http://jinja.pocoo.org/docs/templates/#trim)
 * [truncate](http://jinja.pocoo.org/docs/templates/#truncate)
@@ -824,8 +831,6 @@ sauts de lignes originaux. Utiliser le second comportement si vous voulez utilis
 * [urlize](http://jinja.pocoo.org/docs/templates/#urlize)
 * [urlencode](http://jinja.pocoo.org/docs/templates/#urlencode)
 * [wordcount](http://jinja.pocoo.org/docs/templates/#wordcount)
-* [float](http://jinja.pocoo.org/docs/templates/#float)
-* [int](http://jinja.pocoo.org/docs/templates/#int)
 
 Sinon, il est facile de lire le [code
 JavaScript](https://github.com/mozilla/nunjucks/blob/master/src/filters.js)
