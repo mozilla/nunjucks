@@ -792,6 +792,10 @@ If `preserve_linebreaks` is true, normalizes whitespace, trying to preserve orig
 linebreaks. Use second behavior if you want to pipe
 `{{ text | striptags | nl2br }}`. Use default one otherwise.
 
+### dump (object)
+
+Call `JSON.stringify` on an object and dump the result into the template. Useful for debugging: `{{ foo | dump }}`.
+
 ### More Filters
 
 * [abs](http://jinja.pocoo.org/docs/templates/#abs)
@@ -800,10 +804,11 @@ linebreaks. Use second behavior if you want to pipe
 * [center](http://jinja.pocoo.org/docs/templates/#center)
 * [dictsort](http://jinja.pocoo.org/docs/templates/#dictsort)
 * [escape](http://jinja.pocoo.org/docs/templates/#escape) (aliased as `e`)
-* [safe](http://jinja.pocoo.org/docs/templates/#safe)
+* [float](http://jinja.pocoo.org/docs/templates/#float)
 * [first](http://jinja.pocoo.org/docs/templates/#first)
 * [groupby](http://jinja.pocoo.org/docs/templates/#groupby)
 * [indent](http://jinja.pocoo.org/docs/templates/#indent)
+* [int](http://jinja.pocoo.org/docs/templates/#int)
 * [join](http://jinja.pocoo.org/docs/templates/#join)
 * [last](http://jinja.pocoo.org/docs/templates/#last)
 * [length](http://jinja.pocoo.org/docs/templates/#length)
@@ -814,9 +819,11 @@ linebreaks. Use second behavior if you want to pipe
 * [replace](http://jinja.pocoo.org/docs/templates/#replace) (the first argument can take a JS regular expression)
 * [reverse](http://jinja.pocoo.org/docs/templates/#reverse)
 * [round](http://jinja.pocoo.org/docs/templates/#round)
+* [safe](http://jinja.pocoo.org/docs/templates/#safe)
 * [selectattr](http://jinja.pocoo.org/docs/templates/#selectattr) (only the single-argument form)
 * [slice](http://jinja.pocoo.org/docs/templates/#slice)
 * [string](http://jinja.pocoo.org/docs/templates/#string)
+* [sum](http://jinja.pocoo.org/docs/dev/templates/#sum)
 * [title](http://jinja.pocoo.org/docs/templates/#title)
 * [trim](http://jinja.pocoo.org/docs/templates/#trim)
 * [truncate](http://jinja.pocoo.org/docs/templates/#truncate)
@@ -824,8 +831,6 @@ linebreaks. Use second behavior if you want to pipe
 * [urlencode](http://jinja.pocoo.org/docs/templates/#urlencode)
 * [urlize](http://jinja.pocoo.org/docs/templates/#urlize)
 * [wordcount](http://jinja.pocoo.org/docs/templates/#wordcount)
-* [float](http://jinja.pocoo.org/docs/templates/#float)
-* [int](http://jinja.pocoo.org/docs/templates/#int)
 
 Alternatively, it's easy to [read the JavaScript
 code](https://github.com/mozilla/nunjucks/blob/master/src/filters.js)
