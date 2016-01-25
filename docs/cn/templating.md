@@ -607,42 +607,77 @@ Examples:
 
 如果 `tags` 为 `["food", "beer", "dessert"]`, 上面将输出 `food, beer, dessert`。
 
-## Builtin Filters
+## 内置的过滤器
 
-Nunjucks 已经支持了大部分 jinja 的过滤器 (点击查看文档)。
+Nunjucks已经实现了jinja中的大部分过滤器，同时也新增了一些属于自己的过滤器。
+我们需要为这些过滤器编写文档。下面是一部分过滤器的文档，其他的你可以点击链接查看jinja上的文档。
+
+### default(value, default, [boolean])
+
+(简写为 `d`)
+
+如果`value`全等于`undefined`则返回`default`，否则返回`value`。
+如果`boolean`为true，则会在`value`为JavaScript中的假值时（比如：false, ""等）返回`default`。
+
+**在2.0版本中，这个过滤器的默认表现与以前有所不同。在之前的版本中，它会把`boolean`的默认值
+  设置为true，所以传入任何假值都会返回`default`。在2.0中，默认只有值为`undefined`时会
+  返回`default`。如果你仍旧希望保持原来版本的表现的话，你可以给`boolean`传入`true`，或是
+  直接使用`value or default`。**
+
+### sort(arr, reverse, caseSens, attr)
+
+用JavaScript中的`arr.sort`函数排序`arr`。如果`reverse`为true，则会返回相反的
+排序结果。默认状态下排序不会区分大小写，但你可以将`caseSens`设置为true来让排序
+区分大小写。我们可以用`attr`来指定要比较的属性。
+
+### striptags (value, [preserve_linebreaks])
+
+类似于jinja中的[striptags](http://jinja.pocoo.org/docs/templates/#striptags).
+如果`preserve_linebreaks`为false（同时也是默认值），则会移去SGML/XML标签并用一个空格符
+替换临近的、连续的空白符号。如果`preserve_linebreaks`为true，则会尝试保留临近的空白符号。
+如果你希望使用管道操作符进行类似于`{{ text | striptags | nl2br }}`这样的操作时，你就会
+需要用到后一种。否则你还是应该使用默认的用法。
+
+### dump (object)
+
+在一个对象上调用`JSON.stringify`，并将结果输出到模板上。这在调试时很有用：`{{ foo | dump }}`。
+
+### 其他过滤器
 
 * [abs](http://jinja.pocoo.org/docs/templates/#abs)
 * [batch](http://jinja.pocoo.org/docs/templates/#batch)
 * [capitalize](http://jinja.pocoo.org/docs/templates/#capitalize)
 * [center](http://jinja.pocoo.org/docs/templates/#center)
-* [default](http://jinja.pocoo.org/docs/templates/#default) (aliased as `d`)
 * [dictsort](http://jinja.pocoo.org/docs/templates/#dictsort)
-* [escape](http://jinja.pocoo.org/docs/templates/#escape) (aliased as `e`)
-* [safe](http://jinja.pocoo.org/docs/templates/#safe)
+* [escape](http://jinja.pocoo.org/docs/templates/#escape) (简写为`e`)
+* [float](http://jinja.pocoo.org/docs/templates/#float)
 * [first](http://jinja.pocoo.org/docs/templates/#first)
 * [groupby](http://jinja.pocoo.org/docs/templates/#groupby)
 * [indent](http://jinja.pocoo.org/docs/templates/#indent)
+* [int](http://jinja.pocoo.org/docs/templates/#int)
 * [join](http://jinja.pocoo.org/docs/templates/#join)
 * [last](http://jinja.pocoo.org/docs/templates/#last)
 * [length](http://jinja.pocoo.org/docs/templates/#length)
 * [list](http://jinja.pocoo.org/docs/templates/#list)
 * [lower](http://jinja.pocoo.org/docs/templates/#lower)
 * [random](http://jinja.pocoo.org/docs/templates/#random)
-* [replace](http://jinja.pocoo.org/docs/templates/#replace)
+* [rejectattr](http://jinja.pocoo.org/docs/templates/#rejectattr) (只接受单个参数)
+* [replace](http://jinja.pocoo.org/docs/templates/#replace) (第一个参数也可以接受
+  JavaScript中的正则表达式)
 * [reverse](http://jinja.pocoo.org/docs/templates/#reverse)
 * [round](http://jinja.pocoo.org/docs/templates/#round)
+* [safe](http://jinja.pocoo.org/docs/templates/#safe)
+* [selectattr](http://jinja.pocoo.org/docs/templates/#selectattr) (只接受单个参数)
 * [slice](http://jinja.pocoo.org/docs/templates/#slice)
-* [sort](http://jinja.pocoo.org/docs/templates/#sort)
 * [string](http://jinja.pocoo.org/docs/templates/#string)
-* [striptags](http://jinja.pocoo.org/docs/templates/#striptags)
+* [sum](http://jinja.pocoo.org/docs/dev/templates/#sum)
 * [title](http://jinja.pocoo.org/docs/templates/#title)
 * [trim](http://jinja.pocoo.org/docs/templates/#trim)
 * [truncate](http://jinja.pocoo.org/docs/templates/#truncate)
 * [upper](http://jinja.pocoo.org/docs/templates/#upper)
 * [urlencode](http://jinja.pocoo.org/docs/templates/#urlencode)
+* [urlize](http://jinja.pocoo.org/docs/templates/#urlize)
 * [wordcount](http://jinja.pocoo.org/docs/templates/#wordcount)
-* [float](http://jinja.pocoo.org/docs/templates/#float)
-* [int](http://jinja.pocoo.org/docs/templates/#int)
 
 你也可以直接[看代码](https://github.com/mozilla/nunjucks/blob/master/src/filters.js)。
 
