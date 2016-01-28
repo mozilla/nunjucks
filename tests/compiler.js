@@ -485,6 +485,27 @@
                   { name: 'james' },
                   'FooInclude james');
 
+            equal('{% macro foo() %}{% set x = "foo"%}{{ x }}{% endmacro %}' +
+                  '{% set x = "bar" %}' +
+                  '{{ x }}' +
+                  '{{ foo() }}' +
+                  '{{ x }}',
+                  'barfoobar');
+
+            // this test checks that the issue #577 is resolved
+            equal('{% macro foo(topLevel = "false", prefix = "") %}' +
+                  '{% set x = prefix + "foo" %}' +
+                  '{% if topLevel %}' +
+                  '{% for i in [1,2,3] %}' +
+                  '{{ foo(false, x) }}' +
+                  '{% endfor %}' +
+                  '{% else %}' +
+                  '{{ x }}' +
+                  '{% endif %}' +
+                  '{% endmacro %}' +
+                  '{{ foo(true) }}',
+                  'foofoofoofoofoofoo');
+
             finish(done);
         });
 

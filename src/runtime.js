@@ -7,10 +7,11 @@ var Obj = require('./object');
 // we know how to access variables. Block tags can introduce special
 // variables, for example.
 var Frame = Obj.extend({
-    init: function(parent) {
+    init: function(parent, inMacro) {
         this.variables = {};
         this.parent = parent;
         this.topLevel = false;
+        this.inMacro = inMacro;
     },
 
     set: function(name, val, resolveUp) {
@@ -20,7 +21,7 @@ var Frame = Obj.extend({
         var obj = this.variables;
         var frame = this;
 
-        if(resolveUp) {
+        if(resolveUp && !frame.inMacro) {
             if((frame = this.resolve(parts[0]))) {
                 frame.set(name, val);
                 return;
@@ -66,8 +67,8 @@ var Frame = Obj.extend({
         return p && p.resolve(name);
     },
 
-    push: function() {
-        return new Frame(this);
+    push: function(inMacro) {
+        return new Frame(this, inMacro);
     },
 
     pop: function() {
