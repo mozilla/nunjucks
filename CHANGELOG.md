@@ -4,6 +4,11 @@ Changelog
 master (unreleased)
 -------------------
 
+* Fix `{% set %}` scoping within macros.
+  Fixes [#577](https://github.com/mozilla/nunjucks/issues/577) and
+  the macro portion of [#561](https://github.com/mozilla/nunjucks/issues/561).
+  Thanks Ouyang Yadong. Merge of [#653](https://github.com/mozilla/nunjucks/pull/653).
+
 * Add support for named `endblock` (e.g. `{% endblock foo %}`). Thanks
   ricordisamoa. Merge of [#641](https://github.com/mozilla/nunjucks/pull/641).
 
