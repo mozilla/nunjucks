@@ -492,19 +492,36 @@
                   '{{ x }}',
                   'barfoobar');
 
-            // this test checks that the issue #577 is resolved
-            equal('{% macro foo(topLevel = "false", prefix = "") %}' +
-                  '{% set x = prefix + "foo" %}' +
-                  '{% if topLevel %}' +
-                  '{% for i in [1,2,3] %}' +
-                  '{{ foo(false, x) }}' +
-                  '{% endfor %}' +
-                  '{% else %}' +
+            equal('{% macro setFoo() %}' +
+                  '{% set x = "foo" %}' +
                   '{{ x }}' +
+                  '{% endmacro %}' +
+                  '{% macro display() %}' +
+                  '{% set x = "bar" %}' +
+                  '{{ setFoo() }}' +
+                  '{{ x }}' +
+                  '{% endmacro %}' +
+                  '{{ display() }}',
+                  'foobar');
+
+            // This test checks that the issue #577 is resolved.
+            // If the bug is not fixed, and set variables leak into the
+            // caller scope, there will be too many "foo"s here ("foofoofoo"),
+            // because each recursive call will append a "foo" to the
+            // variable x in its caller's scope, instead of just its own.
+            equal('{% macro foo(topLevel, prefix="") %}' +
+                  '{% if topLevel %}' +
+                    '{% set x = "" %}' +
+                    '{% for i in [1,2] %}' +
+                    '{{ foo(false, x) }}' +
+                    '{% endfor %}' +
+                  '{% else %}' +
+                    '{% set x = prefix + "foo" %}' +
+                    '{{ x }}' +
                   '{% endif %}' +
                   '{% endmacro %}' +
                   '{{ foo(true) }}',
-                  'foofoofoofoofoofoo');
+                  'foofoo');
 
             finish(done);
         });
