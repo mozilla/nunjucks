@@ -822,7 +822,7 @@ var Compiler = Object.extend({
             '[' + argNames.join(', ') + '], ',
             '[' + kwargNames.join(', ') + '], ',
             'function (' + realNames.join(', ') + ') {',
-            'frame = frame.push();',
+            'frame = frame.push(true);',
             'kwargs = kwargs || {};',
             'if (kwargs.hasOwnProperty("caller")) {',
             'frame.set("caller", kwargs.caller); }'
