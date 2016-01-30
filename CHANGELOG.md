@@ -3,6 +3,7 @@ Changelog
 
 master (unreleased)
 -------------------
+* Add support for `{% set %}` block assignments as in jinja2.
 
 * Fix `{% set %}` scoping within macros.
   Fixes [#577](https://github.com/mozilla/nunjucks/issues/577) and

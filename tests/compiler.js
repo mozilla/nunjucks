@@ -923,6 +923,47 @@
             finish(done);
         });
 
+        it('should compile set blocks', function(done) {
+          equal('{% set block_content %}test string{% endset %}'+
+                '{{ block_content }}',
+                'test string'
+                );
+
+          equal('{% set block_content %}'+
+                '{% for item in [1, 2, 3] %}'+
+                '{% include "item.html" %} '+
+                '{% endfor %}'+
+                '{% endset %}'+
+                '{{ block_content }}',
+                'showing 1 showing 2 showing 3 '
+                );
+
+          equal('{% set block_content %}'+
+                '{% set inner_block_content %}'+
+                '{% for i in [1, 2, 3] %}'+
+                'item {{ i }} '+
+                '{% endfor %}'+
+                '{% endset %}'+
+                '{% for i in [1, 2, 3] %}'+
+                'inner {{i}}: "{{ inner_block_content }}" '+
+                '{% endfor %}'+
+                '{% endset %}'+
+                '{{ block_content | safe }}',
+                'inner 1: "item 1 item 2 item 3 " '+
+                'inner 2: "item 1 item 2 item 3 " '+
+                'inner 3: "item 1 item 2 item 3 " '
+                );
+
+            equal('{% set x,y,z %}'+
+                  'cool'+
+                  '{% endset %}'+
+                  '{{ x }} {{ y }} {{ z }}',
+                  'cool cool cool'
+                  );
+
+            finish(done);
+        });
+
         it('should throw errors', function(done) {
             render('{% from "import.html" import boozle %}',
                    {},

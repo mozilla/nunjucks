@@ -465,6 +465,7 @@ Template = Obj.extend({
         try {
             _this.compile();
         } catch (_err) {
+            console.log(_err.stack);
             var err = lib.prettifyError(this.path, this.env.dev, _err);
             if (cb) return callbackAsap(cb, err);
             else throw err;
