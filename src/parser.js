@@ -509,12 +509,14 @@ var Parser = Object.extend({
                 this.fail('parseSet: expected = or block end in set tag',
                           tag.lineno,
                           tag.colno);
-            } else {
+            }
+            else {
                 node.body = this.parseUntilBlocks('endset');
                 node.value = null;
                 this.advanceAfterBlockEnd();
             }
-        } else {
+        }
+        else {
             node.value = this.parseExpression();
             this.advanceAfterBlockEnd(tag.value);
         }

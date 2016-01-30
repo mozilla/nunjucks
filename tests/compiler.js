@@ -924,6 +924,11 @@
         });
 
         it('should compile set blocks', function(done) {
+          equal('{% set block_content %}{% endset %}'+
+                '{{ block_content }}',
+                ''
+                );
+
           equal('{% set block_content %}test string{% endset %}'+
                 '{{ block_content }}',
                 'test string'

@@ -527,7 +527,8 @@ var Compiler = Object.extend({
           this.emit(ids.join(' = ') + ' = ');
           this._compileExpression(node.value, frame);
           this.emitLine(';');
-        } else if (node.body) {
+        }
+        else {
           this.emitLine(ids.join(' = ') + ' = (function() {');
           this.emitLine('var output = "";');
           this.compile(node.body, frame);
