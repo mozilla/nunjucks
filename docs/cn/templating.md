@@ -41,7 +41,7 @@ foo.bar }}`, `{{ foo.bar.baz }}` 也不显示)。
 
 第三个例子展示了链式过滤器，最终会显示 "Bar"，第一个过滤器将 "foo" 替换成 "bar"，第二个过滤器将首字母大写。
 
-Nunjucks 提供了一些[内置的过滤器](#builtin-filters)，你也可以[自定义过滤器](api#custom-filters)。
+Nunjucks 提供了一些[内置的过滤器](#内置的过滤器)，你也可以[自定义过滤器](api#custom-filters)。
 
 ## 模板继承
 
@@ -145,7 +145,7 @@ Right side!
 {% endif %}
 ```
 
-在[内联表达式](#if-expression)(inline expression)中也可以使用 if。
+在[内联表达式](#if-表达式)(inline expression)中也可以使用 if。
 
 ### for
 
@@ -272,7 +272,7 @@ var env = new nunjucks.Environment(AsyncLoaderFromDatabase, opts);
 {{ field('pass', type='password') }}
 ```
 
-支持[关键字参数](#keyword-arguments)，通过链接查看具体使用方式。
+支持[关键字参数](#关键字参数)，通过链接查看具体使用方式。
 
 还可以从其他模板 [import](#import) 宏，可以使宏在整个项目中复用。
 
@@ -300,7 +300,7 @@ var env = new nunjucks.Environment(AsyncLoaderFromDatabase, opts);
 
 ### extends
 
-`extends` 用来指定模板继承，被指定的模板为父级模板，查看[模板继承](#template-inheritance)。
+`extends` 用来指定模板继承，被指定的模板为父级模板，查看[模板继承](#模板继承)。
 
 ```jinja
 {% extends "base.html" %}
@@ -320,7 +320,7 @@ var env = new nunjucks.Environment(AsyncLoaderFromDatabase, opts);
 
 ### block
 
-区块(`block`) 定义了模板片段并标识一个名字，在模板继承中使用。父级模板可指定一个区块，子模板覆盖这个区块，查看[模板继承](#template-inheritance)。
+区块(`block`) 定义了模板片段并标识一个名字，在模板继承中使用。父级模板可指定一个区块，子模板覆盖这个区块，查看[模板继承](#模板继承)。
 
 ```jinja
 {% block css %}
@@ -484,7 +484,7 @@ foo(1, 2, { bar: 3, baz: 4})
 
 定义宏的时候也可以使用关键字参数，定义参数值时可设置默认值。Nunjucks 会自动将关键字参数与宏里定义的值做匹配。
 
-```
+```jinja
 {% macro foo(x, y, z=5, w=6) %}
 {{ x }}, {{ y }}, {{ z }}, {{ w}}
 {% endmacro %}
@@ -538,7 +538,7 @@ foo(1, 2, { bar: 3, baz: 4})
 
 ## 表达式
 
-你可以使用和 javascript 一样的[字面量](literal expressions)。
+你可以使用和 javascript 一样的字面量。
 
 * Strings: `"How are you?"`, `'How are you?'`
 * Numbers: `40`, `30.123`
@@ -623,7 +623,7 @@ Examples:
 
 你可以像在JavaScript中一样创建一个正则表达式:
 
-```
+```jinja
 {{ /^foo.*/ }}
 {{ /bar$/g }}
 ```
