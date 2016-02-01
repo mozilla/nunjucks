@@ -8,7 +8,8 @@ title: Templates
 
 这里包括 nunjuck 所有可用的功能。
 
-> Nunjucks 是 [jinja2](http://jinja.pocoo.org/docs/) 的 javascript 的实现，所以如果此文档有什么缺失，你可以直接查看 [jinja2 的文档](http://jinja.pocoo.org/docs/templates/)，不过两者之间还存在一些[差异](http://mozilla.github.io/nunjucks/cn/faq.html)。
+> Nunjucks 是
+> [jinja2](http://jinja.pocoo.org/docs/) 的 javascript 的实现，所以如果此文档有什么缺失，你可以直接查看 [jinja2 的文档](http://jinja.pocoo.org/docs/templates/)，不过两者之间还存在一些[差异](http://mozilla.github.io/nunjucks/cn/faq.html)。
 
 ## 变量
 
@@ -40,7 +41,7 @@ foo.bar }}`, `{{ foo.bar.baz }}` 也不显示)。
 
 第三个例子展示了链式过滤器，最终会显示 "Bar"，第一个过滤器将 "foo" 替换成 "bar"，第二个过滤器将首字母大写。
 
-Nunjucks 提供了一些[内置的过滤器](#builtin-filters)，你也可以[自定义过滤器](api#custom-filters)。
+Nunjucks 提供了一些[内置的过滤器](#内置的过滤器)，你也可以[自定义过滤器](api#custom-filters)。
 
 ## 模板继承
 
@@ -92,13 +93,31 @@ This is the default content
 </section>
 ```
 
-你可以将继承的模板设为一个变量，这样就可以动态指定继承的模板。
+你可以将继承的模板设为一个变量，这样就可以动态指定继承的模板。这个变量既可以是个指向模板文件的字符串，也可以是个模板编译后所生成的对象(需要添加上下文环境)。因此你可以通过设置上下文变量，从而在渲染时动态地改变所要继承的模板。
 
 ```jinja
 {% extends parentTemplate %}
 ```
 
 继承功能使用了 [`extends`](#extends) 和 [`block`](#block) 标签，[jinja2 文档](http://jinja.pocoo.org/docs/templates/#template-inheritance)中有更细节的描述。
+
+### super
+
+你可以通过调用`super`从而将父级区块中的内容渲染到子区块中。如果在前面的例子中你的子模板是这样的：
+
+```jinja
+{% block right %}
+{{ super() }}
+Right side!
+{% endblock %}
+```
+
+这个区块的渲染结果将是：
+
+```
+This is more content
+Right side!
+```
 
 ## 标签
 
@@ -126,7 +145,7 @@ This is the default content
 {% endif %}
 ```
 
-在[内联表达式](#if-expression)(inline expression)中也可以使用 if。
+在[内联表达式](#if-表达式)(inline expression)中也可以使用 if。
 
 ### for
 
@@ -143,13 +162,15 @@ var items = [{ title: "foo", id: 1 }, { title: "bar", id: 2}];
 <ul>
 {% for item in items %}
   <li>{{ item.title }}</li>
+{% else %}
+  <li>This would display if the 'item' collection were empty</li>
 {% endfor %}
 </ul>
 ```
 
-上面的示例显示了所有文章的标题。
+上面的示例通过使用`items`数组中的每一项的`title`属性显示了所有文章的标题。如果`items`数组是空数组的话则会渲染`else`语句中的内容。
 
-你还可以遍历对象
+你还可以遍历对象：
 
 ```js
 var food = {
@@ -193,11 +214,11 @@ var points = [[0, 1, 2], [5, 6, 7], [12, 13, 14]];
 
 > 这个是适用于异步模板，请读[文档](api.html#asynchronous-support)。
 
-`asyncEach` 为 `for` 的异步版本，只有当使用[自定义异步模板加载器](#asynchronous)的时候才使用，否则请不要使用。异步过滤器和扩展也需要他，但是一旦使用了会自动转换成 `asyncEach`。
+`asyncEach` 为 `for` 的异步版本，只有当使用[自定义异步模板加载器](#asynchronous)的时候才使用，否则请不要使用。异步过滤器和扩展也需要他。如果你在循环中使用了异步过滤器的话，nunjucks就会在内部自动将循环转换成 `asyncEach`。
 
 `asyncEach` 和 `for` 的使用方式一致，但他支持循环的异步控制。将两者区分的原因是性能，大部分人使用同步模板，将 `for` 转换成原生的 for 语句会快很多。
 
-编译时 nunjuck 不用关心模板是如何加载的，所以无法决定 `include` 是同步或异步。这也是为什么无法自动转换的原因，所以如果你使用异步模板加载器需要使用 `asyncEach`。
+编译时 nunjuck 不用关心模板是如何加载的，所以无法决定 `include` 是同步或异步。这也是为什么nunjucks无法自动将普通的循环语句转换成异步循环语句的原因，所以如果你要使用异步模板加载器的话，就需要使用 `asyncEach`。
 
 ```js
 // If you are using a custom loader that is async, you need asyncEach
@@ -216,7 +237,7 @@ var env = new nunjucks.Environment(AsyncLoaderFromDatabase, opts);
 
 > 这个是适用于异步模板，请读[文档](api.html#asynchronous-support)。
 
-`asyncAll` 和 `asyncEach` 类似，但 `asyncAll` 会并行的执行，每项的顺序仍然会保留。除非使用异步的过滤器、扩展或加载器，否则不要使用。
+`asyncAll` 和 `asyncEach` 类似，但 `asyncAll` 会并行的执行，并且每项的顺序仍然会保留。除非使用异步的过滤器、扩展或加载器，否则不要使用。
 
 如果你写了一个 `lookup` 的过滤器用来从数据库获取一些文本，使用 `asyncAll` 可以并行渲染。
 
@@ -251,11 +272,11 @@ var env = new nunjucks.Environment(AsyncLoaderFromDatabase, opts);
 {{ field('pass', type='password') }}
 ```
 
-支持[关键字参数](#keyword-arguments)，通过链接查看具体使用方式。
+支持[关键字参数](#关键字参数)，通过链接查看具体使用方式。
 
 还可以从其他模板 [import](#import) 宏，可以使宏在整个项目中复用。
 
-**重要**：如果你使用异步 API，请注意你 **不能** 在宏中做任何异步的操作，因为宏只是被简单的函数调用。将来会提供一种异步的调用方式，现在使用是不支持的。
+**重要**：如果你使用异步 API，请注意你 **不能** 在宏中做任何异步的操作，因为宏只是像函数一样被简单地调用。将来我们可能会提供一种异步的宏调用方式，但现在这么使用是不被支持的。
 
 ### set
 
@@ -279,18 +300,27 @@ var env = new nunjucks.Environment(AsyncLoaderFromDatabase, opts);
 
 ### extends
 
-`extends` 用来指定模板继承，被指定的模板为父级模板，查看[模板继承](#template-inheritance)。
+`extends` 用来指定模板继承，被指定的模板为父级模板，查看[模板继承](#模板继承)。
 
 ```jinja
 {% extends "base.html" %}
 ```
 
-`extends` 可以接受任何表达式，你可以如下传入: `{% extends name + ".html" as obj %}`.
+你可以将继承的模板设为一个变量，这样就可以动态指定继承的模板。这个变量既可以是个指向模板文件的字符串，也可以是个模板编译后所生成的对象(需要添加上下文环境)。因此你可以通过设置上下文变量，从而在渲染时动态地改变所要继承的模板。
+
+```jinja
+{% extends parentTemplate %}
+```
+
+`extends`也可以接受任意表达式，只要它最终返回一个字符串或是模板所编译成的对象：
+
+```jinja
+{% extends name + ".html" %}`.
+```
 
 ### block
 
-
-区块(`block`) 定义了模板片段并标识一个名字，在模板继承中使用。父级模板可指定一个区块，子模板覆盖这个区块，查看[模板继承](#template-inheritance)。
+区块(`block`) 定义了模板片段并标识一个名字，在模板继承中使用。父级模板可指定一个区块，子模板覆盖这个区块，查看[模板继承](#模板继承)。
 
 ```jinja
 {% block css %}
@@ -316,6 +346,8 @@ The name of the item is: {{ item.name }}
 {% endblock %}
 ```
 
+在区块中，你可以调用特殊的`super`函数。它会渲染父级区块中的内容。具体请查看[super](#super)。
+
 ### include
 
 `include` 可引入其他的模板，可以在多模板之间共享一些小模板，如果某个模板已使用了继承那么 `include` 将会非常有用。
@@ -334,11 +366,17 @@ The name of the item is: {{ item.name }}
 
 这一点可以帮助我们把模板切分成更小的部分，从而使得在浏览器上，当我们需要改变页面时，我们可以渲染这些小部分的模板，而非一整个的大的模板。
 
-`include` 可以接受任何表达式，你可以如下传入: `{% include name + ".html" as obj %}`.
+`include` 可以接受任意表达式，只要它最终返回一个字符串或是模板所编译成的对象: `{% include name + ".html" as obj %}`.
+
+在某些情况下，我们可能希望在模板文件不存在时不要抛出异常。对于这类情况，我们可以使用`ignore missing`来略过这些异常：
+
+```jinja
+{% include "missing.html" ignore missing %}
+```
 
 ### import
 
-`import` 可加载不同的模板，可使你操作模板输出的数据，模板将会输出宏 (macro) 和顶级作用域的赋值 (使用 [`set`](#set))。
+`import` 可加载不同的模板，可使你操作模板输出的数据，模板将会输出宏 (macro) 和在顶级作用域进行的赋值 (使用 [`set`](#set))。
 
 被 import 进来的模板没有当前模板的上下文，所以无法使用当前模板的变量，
 
@@ -382,17 +420,49 @@ The name of the item is: {{ item.name }}
 {{ input('pass', type='password') }}
 ```
 
-`import` 可以接受任何表达式，你可以如下传入: `{% import name + ".html" as obj %}`.
+`import` 可以接受任意表达式，只要它最终返回一个字符串或是模板所编译成的对象: `{% import name + ".html" as obj %}`.
 
 ### raw
 
-如果你想输出一些 nunjucks 特殊的标签 (如 `{{`)，可以使用 `raw` 使所有的内容输出为纯文本。
+如果你想输出一些 nunjucks 特殊的标签 (如 `{{`)，可以使用 `raw` 将所有的内容输出为纯文本。
 
 ```jinja
 {% raw %}
   this will {{ not be processed }}
 {％ endraw %}
 ```
+
+### filter
+
+`filter`区块允许我们使用区块中的内容来调用过滤器。不同于使用`|`语法，它会将区块渲染出的内容传递给过滤器。
+
+```jinja
+{% filter title %}
+may the force be with you
+{% endfilter %}
+
+{% filter replace("force", "forth") %}
+may the force be with you
+{% endfilter %}
+```
+
+切记：你不能在这些区块中进行任何异步操作。
+
+### call
+
+`call`区块允许你使用标签之间的内容来调用一个宏。这在你需要给宏传入大量内容时是十分有用的。在宏中，你可以通过`caller()`来获取这些内容。
+
+```jinja
+{% macro add(x, y) %}
+{{ caller() }}: {{ x + y }}
+{% endmacro%}
+
+{% call add(1, 2) -%}
+The result is
+{%- endcall %}
+```
+
+上面的例子将会输出"The result is: 3"。
 
 ## 关键字参数
 
@@ -414,7 +484,7 @@ foo(1, 2, { bar: 3, baz: 4})
 
 定义宏的时候也可以使用关键字参数，定义参数值时可设置默认值。Nunjucks 会自动将关键字参数与宏里定义的值做匹配。
 
-```
+```jinja
 {% macro foo(x, y, z=5, w=6) %}
 {{ x }}, {{ y }}, {{ z }}, {{ w}}
 {% endmacro %}
@@ -468,7 +538,7 @@ foo(1, 2, { bar: 3, baz: 4})
 
 ## 表达式
 
-你可以使用和 javascript 一样的[字面量](literal expressions)。
+你可以使用和 javascript 一样的字面量。
 
 * Strings: `"How are you?"`, `'How are you?'`
 * Numbers: `40`, `30.123`
@@ -549,6 +619,22 @@ Examples:
 {{ foo(1, 2, 3) }}
 ```
 
+### 正则表达式
+
+你可以像在JavaScript中一样创建一个正则表达式:
+
+```jinja
+{{ /^foo.*/ }}
+{{ /bar$/g }}
+```
+
+正则表达式所支持的标志如下。查阅[Regex on MDN](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/RegExp)以获取更多信息。
+
+* `g`: 应用到全局
+* `i`: 不区分大小写
+* `m`: 多行模式
+* `y`: 粘性支持（sticky）
+
 ## 自动转义 (Autoescaping)
 
 如果在环境变量中设置了 autoescaping，所有的输出都会自动转义，但可以使用 `safe` 过滤器，Nunjucks 就不会转义了。
@@ -592,7 +678,7 @@ Examples:
 {% endfor %}
 ```
 
-上面的例子中奇数行的 class 为 "odd"，偶数行的 class 为 "even"。
+上面的例子中奇数行的 class 为 "odd"，偶数行的 class 为 "even"。你可以使用`current`属性来获取当前项（在上面的例子中对应`cls.current`）。
 
 ### joiner([separator])
 
