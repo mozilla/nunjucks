@@ -127,6 +127,10 @@
                   { food: 'beer' },
                   'beer');
 
+            equal('{% if "pizza" in food %}yum{% endif %}',
+                  { food: {'pizza': true }},
+                  'yum');
+
             finish(done);
         });
 
@@ -398,6 +402,34 @@
             equal('{% if 1 not in [2, 3] %}yes{% endif %}', 'yes');
             equal('{% if "a" in vals %}yes{% endif %}',
                   {'vals': ['a', 'b']}, 'yes');
+            equal('{% if "a" in obj %}yes{% endif %}',
+                  {'obj': { a: true }}, 'yes');
+            equal('{% if "a" in obj %}yes{% endif %}',
+                  {'obj': { b: true }}, '');
+
+            render(
+                '{% if "a" in 1 %}yes{% endif %}',
+                {},
+                { noThrow: true },
+                function(err, res) {
+                    expect(res).to.be(undefined);
+                    expect(err).to.match(
+                        /Cannot use "in" operator to search for "a" in unexpected types\./
+                    );
+                }
+            );
+
+            render(
+                '{% if "a" in obj %}yes{% endif %}',
+                {},
+                { noThrow: true },
+                function(err, res) {
+                    expect(res).to.be(undefined);
+                    expect(err).to.match(
+                        /Cannot use "in" operator to search for "a" in unexpected types\./
+                    );
+                }
+            );
 
             finish(done);
         });

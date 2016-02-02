@@ -356,5 +356,6 @@ module.exports = {
     copySafeness: copySafeness,
     markSafe: markSafe,
     asyncEach: asyncEach,
-    asyncAll: asyncAll
+    asyncAll: asyncAll,
+    inOperator: lib.inOperator
 };
