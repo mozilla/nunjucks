@@ -364,11 +364,11 @@ var Compiler = Object.extend({
     },
 
     compileIn: function(node, frame) {
-      this.emit('(');
-      this.compile(node.right, frame);
-      this.emit('.indexOf(');
+      this.emit('runtime.inOperator(');
       this.compile(node.left, frame);
-      this.emit(') !== -1)');
+      this.emit(',');
+      this.compile(node.right, frame);
+      this.emit(')');
     },
 
     compileOr: binOpEmitter(' || '),

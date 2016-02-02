@@ -4,6 +4,12 @@ Changelog
 master (unreleased)
 -------------------
 
+* Support using `in` operator to search in both arrays and objects,
+  and it will throw an error for other data types.
+  Fix [#659](https://github.com/mozilla/nunjucks/pull/659).
+  Thanks Alex Mayfield for report and test, Ouyang Yadong for fix.
+  Merge of [#661](https://github.com/mozilla/nunjucks/pull/661).
+
 * Add support for `{% set %}` block assignments as in jinja2. Thanks Daniele
   Rapagnani. Merge of [#656](https://github.com/mozilla/nunjucks/pull/656)
 
