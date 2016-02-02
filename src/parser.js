@@ -505,13 +505,21 @@ var Parser = Object.extend({
         }
 
         if(!this.skipValue(lexer.TOKEN_OPERATOR, '=')) {
-            this.fail('parseSet: expected = in set tag',
-                      tag.lineno,
-                      tag.colno);
+            if (!this.skip(lexer.TOKEN_BLOCK_END)) {
+                this.fail('parseSet: expected = or block end in set tag',
+                          tag.lineno,
+                          tag.colno);
+            }
+            else {
+                node.body = this.parseUntilBlocks('endset');
+                node.value = null;
+                this.advanceAfterBlockEnd();
+            }
         }
-
-        node.value = this.parseExpression();
-        this.advanceAfterBlockEnd(tag.value);
+        else {
+            node.value = this.parseExpression();
+            this.advanceAfterBlockEnd(tag.value);
+        }
 
         return node;
     },

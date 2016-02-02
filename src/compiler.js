@@ -523,9 +523,18 @@ var Compiler = Object.extend({
             ids.push(id);
         }, this);
 
-        this.emit(ids.join(' = ') + ' = ');
-        this._compileExpression(node.value, frame);
-        this.emitLine(';');
+        if (node.value) {
+          this.emit(ids.join(' = ') + ' = ');
+          this._compileExpression(node.value, frame);
+          this.emitLine(';');
+        }
+        else {
+          this.emitLine(ids.join(' = ') + ' = (function() {');
+          this.emitLine('var output = "";');
+          this.compile(node.body, frame);
+          this.emitLine('return output;');
+          this.emitLine('})();');
+        }
 
         lib.each(node.targets, function(target, i) {
             var id = ids[i];
