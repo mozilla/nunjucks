@@ -8,6 +8,7 @@ master (unreleased)
   and it will throw an error for other data types.
   Fix [#659](https://github.com/mozilla/nunjucks/pull/659).
   Thanks Alex Mayfield for report and test.
+  Merge of [#661](https://github.com/mozilla/nunjucks/pull/661).
 
 * Fix `{% set %}` scoping within macros.
   Fixes [#577](https://github.com/mozilla/nunjucks/issues/577) and
