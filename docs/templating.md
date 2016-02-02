@@ -110,9 +110,9 @@ This is the default content
 ```
 
 You can store the template to inherit in a variable and use it by
-omitting quotes. This variable can contain a string that points to a 
+omitting quotes. This variable can contain a string that points to a
 template file, or it can contain a compiled Template object that has
-been added to the context. That way you can dynamically change which 
+been added to the context. That way you can dynamically change which
 template is inherited when rendering by setting it in the context.
 
 ```jinja
@@ -348,6 +348,20 @@ You can introduce new variables, and also set multiple at once:
 
 If `set` is used at the top-level, it changes the value of the global template context. If used inside scoped blocks, like `for`, `include`, and others, it only modifies the current scope.
 
+It is also possible to capture the contents of a block into a variable using block assignments.
+The syntax is similar to the standard `set`, except that the `=` is omitted, and
+everything until the `{% endset %}` is captured.
+
+This can be useful in some situations as an alternative for macros:
+
+```jinja
+{% set standardModal %}
+    {% include 'standardModalData.html' %}
+{% endset %}
+
+<div class="js-modal" data-modal="{{standardModal | e}}">
+```
+
 ### extends
 
 `extends` is used to specify template inheritance. The specified
@@ -359,7 +373,7 @@ Inheritance](#template-inheritance).
 ```
 
 You can store the template to inherit in a variable and use it by
-omitting quotes. This variable can contain a string that points to a 
+omitting quotes. This variable can contain a string that points to a
 template file, or it can contain a compiled Template object that has
 been added to the context. That way you can dynamically change which template is
 inherited when rendering by setting it in the context.
@@ -369,8 +383,8 @@ inherited when rendering by setting it in the context.
 ```
 
 In fact, `extends` accepts any arbitrary expression, so you can pass
-anything into it, as long as that expression evaluates to a string or 
-a compiled Template object: 
+anything into it, as long as that expression evaluates to a string or
+a compiled Template object:
 
 ```jinja
 {% extends name + ".html" %}`.
