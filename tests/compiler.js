@@ -127,6 +127,10 @@
                   { food: 'beer' },
                   'beer');
 
+            equal('{% if "pizza" in food %}yum{% endif %}',
+                  { food: {'pizza': true }},
+                  'yum');
+
             finish(done);
         });
 
