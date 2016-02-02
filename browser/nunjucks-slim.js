@@ -1,4 +1,4 @@
-/*! Browser bundle of nunjucks 3.0.0-dev.1 (slim, only works with precompiled templates) */
+/*! Browser bundle of nunjucks 2.3.0 (slim, only works with precompiled templates) */
 var nunjucks =
 /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
@@ -897,7 +897,6 @@ var nunjucks =
 	        try {
 	            _this.compile();
 	        } catch (_err) {
-	            console.log(_err.stack);
 	            var err = lib.prettifyError(this.path, this.env.dev, _err);
 	            if (cb) return callbackAsap(cb, err);
 	            else throw err;
@@ -1519,7 +1518,8 @@ var nunjucks =
 	    },
 
 	    escape: function(str) {
-	        if(typeof str === 'string') {
+	        if(typeof str === 'string' ||
+	           str instanceof r.SafeString) {
 	            return lib.escape(str);
 	        }
 	        return str;
@@ -1761,26 +1761,6 @@ var nunjucks =
 	        return res;
 	    },
 
-	    sum: function(arr, attr, start) {
-	        var sum = 0;
-
-	        if(typeof start === 'number'){
-	            sum += start;
-	        }
-
-	        if(attr) {
-	            arr = lib.map(arr, function(v) {
-	                return v[attr];
-	            });
-	        }
-
-	        for(var i = 0; i < arr.length; i++) {
-	            sum += arr[i];
-	        }
-
-	        return sum;
-	    },
-
 	    sort: r.makeMacro(['value', 'reverse', 'case_sensitive', 'attribute'], [], function(arr, reverse, caseSens, attr) {
 	         // Copy it
 	        arr = lib.map(arr, function(v) { return v; });
@@ -1915,7 +1895,7 @@ var nunjucks =
 	        var wwwRE = /^www\./;
 	        var tldRE = /\.(?:org|net|com)(?:\:|\/|$)/;
 
-	        var words = str.split(/(\s+)/).filter(function(word) {
+	        var words = str.split(/\s+/).filter(function(word) {
 	          // If the word has no length, bail. This can happen for str with
 	          // trailing whitespace.
 	          return word && word.length;
@@ -1943,7 +1923,7 @@ var nunjucks =
 
 	        });
 
-	        return words.join('');
+	        return words.join(' ');
 	    },
 
 	    wordcount: function(str) {
@@ -1983,11 +1963,10 @@ var nunjucks =
 	// we know how to access variables. Block tags can introduce special
 	// variables, for example.
 	var Frame = Obj.extend({
-	    init: function(parent, isolate) {
+	    init: function(parent) {
 	        this.variables = {};
 	        this.parent = parent;
 	        this.topLevel = false;
-	        this.isolate = isolate;
 	    },
 
 	    set: function(name, val, resolveUp) {
@@ -1997,7 +1976,7 @@ var nunjucks =
 	        var obj = this.variables;
 	        var frame = this;
 
-	        if(resolveUp && !frame.isolate) {
+	        if(resolveUp) {
 	            if((frame = this.resolve(parts[0]))) {
 	                frame.set(name, val);
 	                return;
@@ -2043,8 +2022,8 @@ var nunjucks =
 	        return p && p.resolve(name);
 	    },
 
-	    push: function(isolate) {
-	        return new Frame(this, isolate);
+	    push: function() {
+	        return new Frame(this);
 	    },
 
 	    pop: function() {
@@ -2382,7 +2361,7 @@ var nunjucks =
 	function globals() {
 	    return {
 	        range: function(start, stop, step) {
-	            if(typeof stop === 'undefined') {
+	            if(!stop) {
 	                stop = start;
 	                start = 0;
 	                step = 1;

@@ -1,4 +1,4 @@
-/*! Browser bundle of nunjucks 3.0.0-dev.1  */
+/*! Browser bundle of nunjucks 2.3.0  */
 var nunjucks =
 /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
@@ -897,7 +897,6 @@ var nunjucks =
 	        try {
 	            _this.compile();
 	        } catch (_err) {
-	            console.log(_err.stack);
 	            var err = lib.prettifyError(this.path, this.env.dev, _err);
 	            if (cb) return callbackAsap(cb, err);
 	            else throw err;
@@ -1926,17 +1925,9 @@ var nunjucks =
 	            ids.push(id);
 	        }, this);
 
-	        if (node.value) {
-	          this.emit(ids.join(' = ') + ' = ');
-	          this._compileExpression(node.value, frame);
-	          this.emitLine(';');
-	        } else if (node.body) {
-	          this.emitLine(ids.join(' = ') + ' = (function() {');
-	          this.emitLine('var output = "";');
-	          this.compile(node.body, frame);
-	          this.emitLine('return output;');
-	          this.emitLine('})();');
-	        }
+	        this.emit(ids.join(' = ') + ' = ');
+	        this._compileExpression(node.value, frame);
+	        this.emitLine(';');
 
 	        lib.each(node.targets, function(target, i) {
 	            var id = ids[i];
@@ -1992,7 +1983,7 @@ var nunjucks =
 	    compileIfAsync: function(node, frame) {
 	        this.emit('(function(cb) {');
 	        this.compileIf(node, frame, true);
-	        this.emit('})(' + this.makeCallback());
+	        this.emit('})(function() {');
 	        this.addScopeLevel();
 	    },
 
@@ -2233,7 +2224,7 @@ var nunjucks =
 	            '[' + argNames.join(', ') + '], ',
 	            '[' + kwargNames.join(', ') + '], ',
 	            'function (' + realNames.join(', ') + ') {',
-	            'frame = frame.push(true);',
+	            'frame = frame.push();',
 	            'kwargs = kwargs || {};',
 	            'if (kwargs.hasOwnProperty("caller")) {',
 	            'frame.set("caller", kwargs.caller); }'
@@ -2972,15 +2963,12 @@ var nunjucks =
 	        this.advanceAfterBlockEnd(tag.value);
 
 	        node.body = this.parseUntilBlocks('endblock');
-	        this.skipSymbol('endblock');
-	        this.skipSymbol(node.name.value);
 
-	        var tok = this.peekToken();
-	        if(!tok) {
+	        if(!this.peekToken()) {
 	            this.fail('parseBlock: expected endblock, got end of file');
 	        }
 
-	        this.advanceAfterBlockEnd(tok.value);
+	        this.advanceAfterBlockEnd();
 
 	        return node;
 	    },
@@ -3078,19 +3066,13 @@ var nunjucks =
 	        }
 
 	        if(!this.skipValue(lexer.TOKEN_OPERATOR, '=')) {
-	            if (!this.skip(lexer.TOKEN_BLOCK_END)) {
-	                this.fail('parseSet: expected = or block end in set tag',
-	                          tag.lineno,
-	                          tag.colno);
-	            } else {
-	                node.body = this.parseUntilBlocks('endset');
-	                node.value = null;
-	                this.advanceAfterBlockEnd();
-	            }
-	        } else {
-	            node.value = this.parseExpression();
-	            this.advanceAfterBlockEnd(tag.value);
+	            this.fail('parseSet: expected = in set tag',
+	                      tag.lineno,
+	                      tag.colno);
 	        }
+
+	        node.value = this.parseExpression();
+	        this.advanceAfterBlockEnd(tag.value);
 
 	        return node;
 	    },
@@ -3771,11 +3753,8 @@ var nunjucks =
 
 	                // Same for the succeding block start token
 	                if(nextToken &&
-	                    ((nextToken.type === lexer.TOKEN_BLOCK_START &&
-	                      nextVal.charAt(nextVal.length - 1) === '-') ||
-	                    (nextToken.type === lexer.TOKEN_COMMENT &&
-	                      nextVal.charAt(this.tokens.tags.COMMENT_START.length)
-	                        === '-'))) {
+	                   nextToken.type === lexer.TOKEN_BLOCK_START &&
+	                   nextVal.charAt(nextVal.length - 1) === '-') {
 	                    // TODO: this could be optimized (don't use regex)
 	                    data = data.replace(/\s*$/, '');
 	                }
@@ -3787,7 +3766,6 @@ var nunjucks =
 	                                                                  data)]));
 	            }
 	            else if(tok.type === lexer.TOKEN_BLOCK_START) {
-	                this.dropLeadingWhitespace = false;
 	                var n = this.parseStatement();
 	                if(!n) {
 	                    break;
@@ -3797,18 +3775,12 @@ var nunjucks =
 	            else if(tok.type === lexer.TOKEN_VARIABLE_START) {
 	                var e = this.parseExpression();
 	                this.advanceAfterVariableEnd();
-	                this.dropLeadingWhitespace = false;
 	                buf.push(new nodes.Output(tok.lineno, tok.colno, [e]));
 	            }
-	            else if(tok.type === lexer.TOKEN_COMMENT) {
-	                this.dropLeadingWhitespace = tok.value.charAt(
-	                    tok.value.length - this.tokens.tags.COMMENT_END.length - 1
-	                ) === '-';
-	            } else {
+	            else if(tok.type !== lexer.TOKEN_COMMENT) {
 	                // Ignore comments, otherwise this should be an error
 	                this.fail('Unexpected token at top-level: ' +
 	                                tok.type, tok.lineno, tok.colno);
-
 	            }
 	        }
 
@@ -4936,11 +4908,10 @@ var nunjucks =
 	// we know how to access variables. Block tags can introduce special
 	// variables, for example.
 	var Frame = Obj.extend({
-	    init: function(parent, isolate) {
+	    init: function(parent) {
 	        this.variables = {};
 	        this.parent = parent;
 	        this.topLevel = false;
-	        this.isolate = isolate;
 	    },
 
 	    set: function(name, val, resolveUp) {
@@ -4950,7 +4921,7 @@ var nunjucks =
 	        var obj = this.variables;
 	        var frame = this;
 
-	        if(resolveUp && !frame.isolate) {
+	        if(resolveUp) {
 	            if((frame = this.resolve(parts[0]))) {
 	                frame.set(name, val);
 	                return;
@@ -4996,8 +4967,8 @@ var nunjucks =
 	        return p && p.resolve(name);
 	    },
 
-	    push: function(isolate) {
-	        return new Frame(this, isolate);
+	    push: function() {
+	        return new Frame(this);
 	    },
 
 	    pop: function() {
@@ -5411,7 +5382,8 @@ var nunjucks =
 	    },
 
 	    escape: function(str) {
-	        if(typeof str === 'string') {
+	        if(typeof str === 'string' ||
+	           str instanceof r.SafeString) {
 	            return lib.escape(str);
 	        }
 	        return str;
@@ -5653,26 +5625,6 @@ var nunjucks =
 	        return res;
 	    },
 
-	    sum: function(arr, attr, start) {
-	        var sum = 0;
-
-	        if(typeof start === 'number'){
-	            sum += start;
-	        }
-
-	        if(attr) {
-	            arr = lib.map(arr, function(v) {
-	                return v[attr];
-	            });
-	        }
-
-	        for(var i = 0; i < arr.length; i++) {
-	            sum += arr[i];
-	        }
-
-	        return sum;
-	    },
-
 	    sort: r.makeMacro(['value', 'reverse', 'case_sensitive', 'attribute'], [], function(arr, reverse, caseSens, attr) {
 	         // Copy it
 	        arr = lib.map(arr, function(v) { return v; });
@@ -5807,7 +5759,7 @@ var nunjucks =
 	        var wwwRE = /^www\./;
 	        var tldRE = /\.(?:org|net|com)(?:\:|\/|$)/;
 
-	        var words = str.split(/(\s+)/).filter(function(word) {
+	        var words = str.split(/\s+/).filter(function(word) {
 	          // If the word has no length, bail. This can happen for str with
 	          // trailing whitespace.
 	          return word && word.length;
@@ -5835,7 +5787,7 @@ var nunjucks =
 
 	        });
 
-	        return words.join('');
+	        return words.join(' ');
 	    },
 
 	    wordcount: function(str) {
@@ -6077,7 +6029,7 @@ var nunjucks =
 	function globals() {
 	    return {
 	        range: function(start, stop, step) {
-	            if(typeof stop === 'undefined') {
+	            if(!stop) {
 	                stop = start;
 	                start = 0;
 	                step = 1;
