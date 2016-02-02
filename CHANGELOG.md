@@ -4,6 +4,11 @@ Changelog
 master (unreleased)
 -------------------
 
+* Support using `in` operator to search in both arrays and objects,
+  and it will throw an error for other data types.
+  Fix [#659](https://github.com/mozilla/nunjucks/pull/659).
+  Thanks Alex Mayfield for report and test.
+
 * Fix `{% set %}` scoping within macros.
   Fixes [#577](https://github.com/mozilla/nunjucks/issues/577) and
   the macro portion of [#561](https://github.com/mozilla/nunjucks/issues/561).
