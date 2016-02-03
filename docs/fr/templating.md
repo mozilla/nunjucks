@@ -348,6 +348,20 @@ Vous pouvez inclure des nouvelles variables et en définir aussi plusieurs à la
 
 Si `set` est utilisé au plus haut niveau, il modifie la valeur du contexte du template global. Si il est utilisé à l'intérieur de la portée des blocs, comme `for`, `include` et d'autres, cela modifie seulement dans cette portée.
 
+Il est également possible de capter le contenu d'un bloc dans une variable en utilisant l'affectation de bloc.
+La syntaxe est similaire au standard `set`, sauf que le `=` est omis, et
+tout ce qui se trouve jusqu'au `{% endset %}` est capturé.
+
+Cela peut être utile dans certains cas, comme une alternative aux macros :
+
+```jinja
+{% set standardModal %}
+    {% include 'standardModalData.html' %}
+{% endset %}
+
+<div class="js-modal" data-modal="{{standardModal | e}}">
+```
+
 ### extends
 
 `extends` est utilisé pour définir l'héritage de template. Le template
