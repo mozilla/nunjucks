@@ -587,6 +587,16 @@
           finish(done);
         });
 
+        it('should compile nested call blocks', function(done) {
+            equal('{%- macro wrapdiv() -%}<div>{{ caller() }}</div>{%- endmacro -%}' +
+                  '{%- macro wrapdivspan() -%}' +
+                  '{%- call wrapdiv() -%}<span>{{ caller() }}</span>{%- endcall -%}' +
+                  '{%- endmacro -%}' +
+                  '{%- call wrapdivspan() -%}Foo{%- endcall -%}',
+                  '<div><span>Foo</span></div>');
+            finish(done);
+        });
+
         it('should import templates', function(done) {
             equal('{% import "import.html" as imp %}' +
                   '{{ imp.foo() }} {{ imp.bar }}',
