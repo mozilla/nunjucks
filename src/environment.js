@@ -31,7 +31,7 @@ var Environment = Obj.extend({
         //  the library)
         // defaults to false
         opts = this.opts = opts || {};
-        this.opts.dev = !!opts.dev;
+        this.dev = !!opts.dev;
 
         // The autoescape flag sets global autoescaping. If true,
         // every string variable will be escaped by default.
