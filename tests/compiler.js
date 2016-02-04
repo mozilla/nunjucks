@@ -834,19 +834,31 @@
         it('should include templates', function(done) {
             equal('hello world {% include "include.html" %}',
                   'hello world FooInclude ');
+            finish(done);
+        });
 
+        it('should include templates with context', function(done) {
             equal('hello world {% include "include.html" %}',
                   { name: 'james' },
                   'hello world FooInclude james');
+            finish(done);
+        });
 
+        it('should include templates dynamically', function(done) {
             equal('hello world {% include tmpl %}',
                   { name: 'thedude', tmpl: 'include.html' },
                   'hello world FooInclude thedude');
+            finish(done);
+        });
 
+        it('should include templates dynamically based on a set var', function(done) {
             equal('hello world {% set tmpl = "include.html" %}{% include tmpl %}',
                   { name: 'thedude' },
                   'hello world FooInclude thedude');
+            finish(done);
+        });
 
+        it('should include templates dynamically based on an object attr', function(done) {
             equal('hello world {% include data.tmpl %}',
                   { name: 'thedude', data: {tmpl: 'include.html'} },
                   'hello world FooInclude thedude');
