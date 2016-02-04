@@ -445,56 +445,88 @@
             equal('{% macro foo() %}This is a macro{% endmacro %}' +
                   '{{ foo() }}',
                   'This is a macro');
+            finish(done);
+        });
 
+        it('should compile macros with optional args', function(done) {
             equal('{% macro foo(x, y) %}{{ y }}{% endmacro %}' +
                   '{{ foo(1) }}',
                   '');
+            finish(done);
+        });
 
+        it('should compile macros with args that can be passed to filters', function(done) {
             equal('{% macro foo(x) %}{{ x|title }}{% endmacro %}' +
                   '{{ foo("foo") }}',
                   'Foo');
+            finish(done);
+        });
 
+        it('should compile macros with positional args', function(done) {
             equal('{% macro foo(x, y) %}{{ y }}{% endmacro %}' +
                   '{{ foo(1, 2) }}',
                   '2');
+            finish(done);
+        });
 
+        it('should compile macros with arg defaults', function(done) {
             equal('{% macro foo(x, y, z=5) %}{{ y }}{% endmacro %}' +
                   '{{ foo(1, 2) }}',
                   '2');
-
             equal('{% macro foo(x, y, z=5) %}{{ z }}{% endmacro %}' +
                   '{{ foo(1, 2) }}',
                   '5');
+            finish(done);
+        });
 
+        it('should compile macros with keyword args', function(done) {
             equal('{% macro foo(x, y, z=5) %}{{ y }}{% endmacro %}' +
                   '{{ foo(1, y=2) }}',
                   '2');
+            finish(done);
+        });
 
+        it('should compile macros with only keyword args', function(done) {
             equal('{% macro foo(x, y, z=5) %}{{ x }}{{ y }}{{ z }}' +
                   '{% endmacro %}' +
                   '{{ foo(x=1, y=2) }}',
                   '125');
+            finish(done);
+        });
 
+        it('should compile macros with keyword args overriding defaults', function(done) {
             equal('{% macro foo(x, y, z=5) %}{{ x }}{{ y }}{{ z }}' +
                   '{% endmacro %}' +
                   '{{ foo(x=1, y=2, z=3) }}',
                   '123');
+            finish(done);
+        });
 
+        it('should compile macros with out-of-order keyword args', function(done) {
             equal('{% macro foo(x, y=2, z=5) %}{{ x }}{{ y }}{{ z }}' +
                   '{% endmacro %}' +
                   '{{ foo(1, z=3) }}',
                   '123');
+            finish(done);
+        });
 
+        it('should compile macros', function(done) {
             equal('{% macro foo(x, y=2, z=5) %}{{ x }}{{ y }}{{ z }}' +
                   '{% endmacro %}' +
                   '{{ foo(1) }}',
                   '125');
+            finish(done);
+        });
 
+        it('should compile macros with multiple overridden arg defaults', function(done) {
             equal('{% macro foo(x, y=2, z=5) %}{{ x }}{{ y }}{{ z }}' +
                   '{% endmacro %}' +
                   '{{ foo(1, 10, 20) }}',
                   '11020');
+            finish(done);
+        });
 
+        it('should compile macro calls inside blocks', function(done) {
             equal('{% extends "base.html" %}' +
                   '{% macro foo(x, y=2, z=5) %}{{ x }}{{ y }}{{ z }}' +
                   '{% endmacro %}' +
@@ -502,7 +534,10 @@
                   '{{ foo(1) }}' +
                   '{% endblock %}',
                   'Foo125BazFizzle');
+            finish(done);
+        });
 
+        it('should compile macros defined in one block and called in another', function(done) {
             equal('{% block bar %}' +
                   '{% macro foo(x, y=2, z=5) %}{{ x }}{{ y }}{{ z }}' +
                   '{% endmacro %}' +
@@ -511,12 +546,18 @@
                   '{{ foo(1) }}' +
                   '{% endblock %}',
                   '125');
+            finish(done);
+        });
 
+        it('should compile macros that include other templates', function(done) {
             equal('{% macro foo() %}{% include "include.html" %}{% endmacro %}' +
                   '{{ foo() }}',
                   { name: 'james' },
                   'FooInclude james');
+            finish(done);
+        });
 
+        it('should compile macros that set vars', function(done) {
             equal('{% macro foo() %}{% set x = "foo"%}{{ x }}{% endmacro %}' +
                   '{% set x = "bar" %}' +
                   '{{ x }}' +
@@ -524,6 +565,10 @@
                   '{{ x }}',
                   'barfoobar');
 
+            finish(done);
+        });
+
+        it('should not leak variables set in macro to calling scope', function(done) {
             equal('{% macro setFoo() %}' +
                   '{% set x = "foo" %}' +
                   '{{ x }}' +
@@ -536,6 +581,10 @@
                   '{{ display() }}',
                   'foobar');
 
+            finish(done);
+        });
+
+        it('should compile macros without leaking set to calling scope', function(done) {
             // This test checks that the issue #577 is resolved.
             // If the bug is not fixed, and set variables leak into the
             // caller scope, there will be too many "foo"s here ("foofoofoo"),
@@ -559,32 +608,32 @@
         });
 
         it('should compile call blocks', function(done) {
-          equal('{% macro wrap(el) %}' +
-                '<{{ el }}>{{ caller() }}</{{ el }}>' +
-                '{% endmacro %}' +
-                '{% call wrap("div") %}Hello{% endcall %}',
-                '<div>Hello</div>');
+            equal('{% macro wrap(el) %}' +
+                  '<{{ el }}>{{ caller() }}</{{ el }}>' +
+                  '{% endmacro %}' +
+                  '{% call wrap("div") %}Hello{% endcall %}',
+                  '<div>Hello</div>');
 
-          finish(done);
+            finish(done);
         });
 
         it('should compile call blocks with args', function(done) {
-          equal('{% macro list(items) %}' +
-                '<ul>{% for i in items %}' +
-                '<li>{{ caller(i) }}</li>' +
-                '{% endfor %}</ul>' +
-                '{% endmacro %}' +
-                '{% call(item) list(["a", "b"]) %}{{ item }}{% endcall %}',
-                '<ul><li>a</li><li>b</li></ul>');
+            equal('{% macro list(items) %}' +
+                  '<ul>{% for i in items %}' +
+                  '<li>{{ caller(i) }}</li>' +
+                  '{% endfor %}</ul>' +
+                  '{% endmacro %}' +
+                  '{% call(item) list(["a", "b"]) %}{{ item }}{% endcall %}',
+                  '<ul><li>a</li><li>b</li></ul>');
 
-          finish(done);
+            finish(done);
         });
 
         it('should compile call blocks using imported macros', function(done) {
-          equal('{% import "import.html" as imp %}' +
-                '{% call imp.wrap("span") %}Hey{% endcall %}',
-                '<span>Hey</span>');
-          finish(done);
+            equal('{% import "import.html" as imp %}' +
+                  '{% call imp.wrap("span") %}Hey{% endcall %}',
+                  '<span>Hey</span>');
+            finish(done);
         });
 
         it('should import templates', function(done) {
