@@ -4,6 +4,9 @@ Changelog
 master (unreleased)
 -------------------
 
+* Fix handling of `dev` environment option, to get full tracebacks on errors
+  (including nunjucks internals). Thanks Chandrasekhar Ambula V for the report.
+
 * Support using `in` operator to search in both arrays and objects,
   and it will throw an error for other data types.
   Fix [#659](https://github.com/mozilla/nunjucks/pull/659).
