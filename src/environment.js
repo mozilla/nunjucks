@@ -433,7 +433,7 @@ Template = Obj.extend({
                 _this._compile();
             }
             catch(err) {
-                throw lib.prettifyError(this.path, this.env.dev, err);
+                throw lib.prettifyError(this.path, this.env.opts.dev, err);
             }
         }
         else {
@@ -465,7 +465,7 @@ Template = Obj.extend({
         try {
             _this.compile();
         } catch (_err) {
-            var err = lib.prettifyError(this.path, this.env.dev, _err);
+            var err = lib.prettifyError(this.path, this.env.opts.dev, _err);
             if (cb) return callbackAsap(cb, err);
             else throw err;
         }
@@ -482,7 +482,7 @@ Template = Obj.extend({
             runtime,
             function(err, res) {
                 if(err) {
-                    err = lib.prettifyError(_this.path, _this.env.dev, err);
+                    err = lib.prettifyError(_this.path, _this.env.opts.dev, err);
                 }
 
                 if(cb) {
