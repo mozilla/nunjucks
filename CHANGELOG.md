@@ -4,6 +4,9 @@ Changelog
 master (unreleased)
 -------------------
 
+* Prevent includes from writing to their including scope. Merge of
+  [#667](https://github.com/mozilla/nunjucks/pull/667).
+
 * Fix handling of `dev` environment option, to get full tracebacks on errors
   (including nunjucks internals). Thanks Tobias Petry and Chandrasekhar Ambula
   V for the report, Aleksandr Motsjonov for draft patch.
@@ -45,8 +48,7 @@ master (unreleased)
   Yadong. Merge of [#631](https://github.com/mozilla/nunjucks/pull/631).
 
 * [Breaking Change] Prevent macros from seeing or affecting their calling
-  scope; prevent includes from writing to the including scope. Merge of
-  [#667](https://github.com/mozilla/nunjucks/pull/667).
+  scope. Merge of [#667](https://github.com/mozilla/nunjucks/pull/667).
 
 * [Breaking Change] Prevent filter.escape from escaping SafeString. Thanks
   atian25. Merge of [#623](https://github.com/mozilla/nunjucks/pull/623).
