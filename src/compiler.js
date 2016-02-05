@@ -831,7 +831,8 @@ var Compiler = Object.extend({
             '[' + argNames.join(', ') + '], ',
             '[' + kwargNames.join(', ') + '], ',
             'function (' + realNames.join(', ') + ') {',
-            'frame = frame.push(true);',
+            'var callerFrame = frame;',
+            'frame = new runtime.Frame();',
             'kwargs = kwargs || {};',
             'if (kwargs.hasOwnProperty("caller")) {',
             'frame.set("caller", kwargs.caller); }'
@@ -866,7 +867,7 @@ var Compiler = Object.extend({
         });
 
         frame = frame.pop();
-        this.emitLine('frame = frame.pop();');
+        this.emitLine('frame = callerFrame;');
         this.emitLine('return new runtime.SafeString(' + bufferId + ');');
         this.emitLine('});');
         this.popBufferId();

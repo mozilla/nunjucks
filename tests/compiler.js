@@ -584,6 +584,21 @@
             finish(done);
         });
 
+        it('should not leak variables set in nested scope within macro out to calling scope', function(done) {
+            equal('{% macro setFoo() %}' +
+                  '{% for y in [1] %}{% set x = "foo" %}{{ x }}{% endfor %}' +
+                  '{% endmacro %}' +
+                  '{% macro display() %}' +
+                  '{% set x = "bar" %}' +
+                  '{{ setFoo() }}' +
+                  '{{ x }}' +
+                  '{% endmacro %}' +
+                  '{{ display() }}',
+                  'foobar');
+
+            finish(done);
+        });
+
         it('should compile macros without leaking set to calling scope', function(done) {
             // This test checks that the issue #577 is resolved.
             // If the bug is not fixed, and set variables leak into the
@@ -604,6 +619,14 @@
                   '{{ foo(true) }}',
                   'foofoo');
 
+            finish(done);
+        });
+
+        it('should compile macros that cannot see variables in caller scope', function(done) {
+            equal('{% macro one(var) %}{{ two() }}{% endmacro %}' +
+                  '{% macro two() %}{{ var }}{% endmacro %}' +
+                  '{{ one("foo") }}',
+                  '');
             finish(done);
         });
 
@@ -841,6 +864,11 @@
             equal('hello world {% include "include.html" %}',
                   { name: 'james' },
                   'hello world FooInclude james');
+            finish(done);
+        });
+
+        it('should include templates that can see including scope, but not write to it', function(done) {
+            equal('{% set var = 1 %}{% include "include-set.html" %}{{ var }}', '12\n1');
             finish(done);
         });
 
