@@ -471,7 +471,7 @@ Template = Obj.extend({
         }
 
         var context = new Context(ctx || {}, _this.blocks, _this.env);
-        var frame = parentFrame ? parentFrame.push() : new Frame();
+        var frame = parentFrame ? parentFrame.push(true) : new Frame();
         frame.topLevel = true;
         var syncResult = null;
 

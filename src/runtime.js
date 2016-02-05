@@ -7,11 +7,13 @@ var Obj = require('./object');
 // we know how to access variables. Block tags can introduce special
 // variables, for example.
 var Frame = Obj.extend({
-    init: function(parent, isolate) {
+    init: function(parent, isolateWrites) {
         this.variables = {};
         this.parent = parent;
         this.topLevel = false;
-        this.isolate = isolate;
+        // if this is true, writes (set) should never propagate upwards past
+        // this frame to its parent (though reads may).
+        this.isolateWrites = isolateWrites;
     },
 
     set: function(name, val, resolveUp) {
@@ -21,12 +23,11 @@ var Frame = Obj.extend({
         var obj = this.variables;
         var frame = this;
 
-        if(resolveUp && !frame.isolate) {
-            if((frame = this.resolve(parts[0]))) {
+        if(resolveUp) {
+            if((frame = this.resolve(parts[0], true))) {
                 frame.set(name, val);
                 return;
             }
-            frame = this;
         }
 
         for(var i=0; i<parts.length - 1; i++) {
@@ -58,8 +59,8 @@ var Frame = Obj.extend({
         return p && p.lookup(name);
     },
 
-    resolve: function(name) {
-        var p = this.parent;
+    resolve: function(name, forWrite) {
+        var p = (forWrite && this.isolateWrites) ? undefined : this.parent;
         var val = this.variables[name];
         if(val !== undefined && val !== null) {
             return this;
@@ -67,8 +68,8 @@ var Frame = Obj.extend({
         return p && p.resolve(name);
     },
 
-    push: function(isolate) {
-        return new Frame(this, isolate);
+    push: function(isolateWrites) {
+        return new Frame(this, isolateWrites);
     },
 
     pop: function() {

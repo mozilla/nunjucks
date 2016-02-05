@@ -844,6 +844,11 @@
             finish(done);
         });
 
+        it('should include templates that can see including scope, but not write to it', function(done) {
+            equal('{% set var = 1 %}{% include "include-set.html" %}{{ var }}', '12\n1');
+            finish(done);
+        });
+
         it('should include templates dynamically', function(done) {
             equal('hello world {% include tmpl %}',
                   { name: 'thedude', tmpl: 'include.html' },
