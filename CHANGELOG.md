@@ -4,6 +4,10 @@ Changelog
 2.x (unreleased)
 ----------------
 
+* Prevent includes from writing to their including scope. Merge of
+  [#667](https://github.com/mozilla/nunjucks/pull/667) (only partially
+  backported to 2.x; macro var visibility not backported).
+
 * Fix handling of `dev` environment option, to get full tracebacks on errors
   (including nunjucks internals). Thanks Tobias Petry and Chandrasekhar Ambula
   V for the report, Aleksandr Motsjonov for draft patch.
