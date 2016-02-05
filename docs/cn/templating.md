@@ -298,6 +298,20 @@ var env = new nunjucks.Environment(AsyncLoaderFromDatabase, opts);
 
 如果在顶级作用域使用 `set`，将会改变全局的上下文中的值。如果只在某个作用域 (`for`、 `include` 或其他) 中使用，只会影响该作用域。
 
+同样地，你也可以使用区块赋值将一个区块的内容储存在一个变量中。
+
+它的语法和标准的`set`语法相似，只不过你不需要用`=`。区块中从头到`{% endset %}`之间的内容都会被捕获，并作为值来使用。
+
+在某些情境下，你可以用这种语法来替代宏：
+
+```jinja
+{% set standardModal %}
+    {% include 'standardModalData.html' %}
+{% endset %}
+
+<div class="js-modal" data-modal="{{standardModal | e}}">
+```
+
 ### extends
 
 `extends` 用来指定模板继承，被指定的模板为父级模板，查看[模板继承](#模板继承)。
