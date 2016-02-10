@@ -45,6 +45,18 @@ exports.TemplateError = function(message, lineno, colno) {
         err = message;
         message = message.name + ': ' + message.message;
 
+        // Useful to have the stack info in cases where an error occurs
+        // in a filter or any rendering error.
+        if (err.stack) {
+            // Prevents displaying the same error message line twice that appears
+            // near the stack's beginning (applies to Chrome)
+            if (err.stack.indexOf(message) !== -1) {
+                message = err.stack;
+            } else {
+                message += '\n' + err.stack;
+            }
+        }
+
         try {
             if(err.name = '') {}
         }
