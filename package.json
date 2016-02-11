@@ -6,7 +6,7 @@
   "dependencies": {
     "asap": "^2.0.3",
     "chokidar": "^1.0.0",
-    "optimist": "*"
+    "yargs": "^3.32.0"
   },
   "browser": "./browser/nunjucks.js",
   "devDependencies": {
