@@ -14,6 +14,9 @@ Changelog
 2.x (unreleased)
 ----------------
 
+* Switch from Optimist to Yargs for argument-parsing. Thanks Bogdan
+  Chadkin. Merge of [#672](https://github.com/mozilla/nunjucks/pull/672).
+
 * Prevent includes from writing to their including scope. Merge of
   [#667](https://github.com/mozilla/nunjucks/pull/667).
 
