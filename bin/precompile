@@ -4,7 +4,7 @@ var precompile = require('../src/precompile').precompile;
 var Environment = require('../src/environment').Environment;
 var lib = require('../src/lib');
 
-var optimist = require('optimist')
+var yargs = require('yargs')
 
     .usage('$0 [-f|--force] [-a|--filters <filters>] [-n|--name <name>] [-i|--include <regex>] [-x|--exclude <regex>] [-w|--wrapper <wrapper>] <path>')
     .wrap(80)
@@ -42,10 +42,10 @@ var optimist = require('optimist')
 
     .demand(1);
 
-var argv = optimist.argv;
+var argv = yargs.argv;
 
 if (argv.help) {
-    optimist.showHelp();
+    yargs.showHelp();
     process.exit(1);
 }
 
