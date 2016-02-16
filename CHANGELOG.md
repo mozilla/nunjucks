@@ -4,6 +4,13 @@ Changelog
 2.x (unreleased)
 ----------------
 
+* Don't automatically convert any for-loop that has an include statement into
+  an async loop. Reverts
+  [7d4716f4fd](https://github.com/mozilla/nunjucks/commit/7d4716f4fd), re-opens
+  [#372](https://github.com/mozilla/nunjucks/issues/372), fixes
+  [#527](https://github.com/mozilla/nunjucks/issues/527). Thanks Tom Delmas for
+  the report.
+
 * Switch from Optimist to Yargs for argument-parsing. Thanks Bogdan
   Chadkin. Merge of [#672](https://github.com/mozilla/nunjucks/pull/672).
 
