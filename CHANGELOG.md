@@ -4,6 +4,13 @@ Changelog
 3.x (unreleased)
 ----------------
 
+* Execute blocks in a child frame that can't write to its parent. This means
+  that vars set inside blocks will not leak outside of the block, base
+  templates can no longer see vars set in templates that inherit them, and
+  `super()` can no longer set vars in its calling scope. Fixes the inheritance
+  portion of [#561](https://github.com/mozilla/nunjucks/issues/561), which
+  fully closes that issue.
+
 * Prevent macros from seeing or affecting their calling scope. Merge of
   [#667](https://github.com/mozilla/nunjucks/pull/667).
 

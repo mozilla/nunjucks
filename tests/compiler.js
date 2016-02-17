@@ -854,6 +854,55 @@
             finish(done);
         });
 
+        it('should let super() see global vars from child template', function(done) {
+            equal('{% extends "base-show.j2" %}{% set var = "child" %}' +
+                  '{% block main %}{{ super() }}{% endblock %}',
+                  'child');
+
+            finish(done);
+        });
+
+        it('should not let super() see vars from child block', function(done) {
+            equal('{% extends "base-show.j2" %}' +
+                  '{% block main %}{% set var = "child" %}{{ super() }}{% endblock %}',
+                  '');
+
+            finish(done);
+        });
+
+        it('should let child templates access parent global scope', function(done) {
+            equal('{% extends "base-set.j2" %}' +
+                  '{% block main %}{{ var }}{% endblock %}',
+                  'parent');
+
+            finish(done);
+        });
+
+        it('should not let super() modify calling scope', function(done) {
+            equal('{% extends "base-set-inside-block.j2" %}' +
+                  '{% block main %}{{ super() }}{{ var }}{% endblock %}',
+                 '');
+
+            finish(done);
+        });
+
+        it('should not let child templates set vars in parent scope', function(done) {
+            equal('{% extends "base-set-and-show.j2" %}' +
+                  '{% block main %}{% set var = "child" %}{% endblock %}',
+                 'parent');
+
+            finish(done);
+        });
+
+        it('should render blocks in their own scope', function(done) {
+            equal('{% set var = "parent" %}' +
+                  '{% block main %}{% set var = "inner" %}{% endblock %}' +
+                  '{{ var }}',
+                  'parent');
+
+            finish(done);
+        });
+
         it('should include templates', function(done) {
             equal('hello world {% include "include.j2" %}',
                   'hello world FooInclude ');

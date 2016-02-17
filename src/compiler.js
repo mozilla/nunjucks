@@ -1099,6 +1099,7 @@ var Compiler = Object.extend({
             this.emitFuncBegin('b_' + name);
 
             var tmpFrame = new Frame();
+            this.emitLine('var frame = frame.push(true);');
             this.compile(block.body, tmpFrame);
             this.emitFuncEnd();
         }
