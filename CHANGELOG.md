@@ -9,7 +9,7 @@ Changelog
   templates can no longer see vars set in templates that inherit them, and
   `super()` can no longer set vars in its calling scope. Fixes the inheritance
   portion of [#561](https://github.com/mozilla/nunjucks/issues/561), which
-  fully closes that issue.
+  fully closes that issue. Thanks legutierr for the report.
 
 * Prevent macros from seeing or affecting their calling scope. Merge of
   [#667](https://github.com/mozilla/nunjucks/pull/667).
