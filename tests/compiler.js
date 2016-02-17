@@ -222,16 +222,16 @@
                   { items: { foo: 1, bar: 2 }},
                   '22');
 
-            equal('{% ' + block + ' item, v in items %}{% include "item.html" %}{% ' + end + ' %}',
+            equal('{% ' + block + ' item, v in items %}{% include "item.j2" %}{% ' + end + ' %}',
                   { items: { foo: 1, bar: 2 }},
                   'showing fooshowing bar');
 
             var res = render(
                 '{% set item = passed_var %}' +
-                '{% include "item.html" %}\n' +
+                '{% include "item.j2" %}\n' +
                 '{% ' + block + ' i in passed_iter %}' +
                 '{% set item = i %}' +
-                '{% include "item.html" %}\n' +
+                '{% include "item.j2" %}\n' +
                 '{% ' + end + ' %}',
                 {
                     passed_var: 'test',
@@ -273,42 +273,42 @@
                 };
 
                 render('{{ tmpl | getContents }}',
-                       { tmpl: 'tests/templates/for-async-content.html' },
+                       { tmpl: 'tests/templates/for-async-content.j2' },
                        opts,
                        function(err, res) {
                            expect(res).to.be('somecontenthere');
                        });
 
                 render('{% if tmpl %}{{ tmpl | getContents }}{% endif %}',
-                       { tmpl: 'tests/templates/for-async-content.html' },
+                       { tmpl: 'tests/templates/for-async-content.j2' },
                        opts,
                        function(err, res) {
                            expect(res).to.be('somecontenthere');
                        });
 
                 render('{% if tmpl | getContents %}yes{% endif %}',
-                       { tmpl: 'tests/templates/for-async-content.html' },
+                       { tmpl: 'tests/templates/for-async-content.j2' },
                        opts,
                        function(err, res) {
                            expect(res).to.be('yes');
                        });
 
                 render('{% for t in [tmpl, tmpl] %}{{ t | getContents }}*{% endfor %}',
-                       { tmpl: 'tests/templates/for-async-content.html' },
+                       { tmpl: 'tests/templates/for-async-content.j2' },
                        opts,
                        function(err, res) {
                            expect(res).to.be('somecontenthere*somecontenthere*');
                        });
 
                 render('{% for t in [tmpl, tmpl] | getContentsArr %}{{ t }}{% endfor %}',
-                       { tmpl: 'tests/templates/for-async-content.html' },
+                       { tmpl: 'tests/templates/for-async-content.j2' },
                        opts,
                        function(err, res) {
                            expect(res).to.be('somecontenthere');
                        });
 
                 render('{% if test %}{{ tmpl | getContents }}{% endif %}oof',
-                       { tmpl: 'tests/templates/for-async-content.html' },
+                       { tmpl: 'tests/templates/for-async-content.j2' },
                        opts,
                        function(err, res) {
                            expect(res).to.be('oof');
@@ -317,49 +317,49 @@
                 render('{% if tmpl %}' +
                        '{% for i in [0, 1] %}{{ tmpl | getContents }}*{% endfor %}' +
                        '{% endif %}',
-                       { tmpl: 'tests/templates/for-async-content.html' },
+                       { tmpl: 'tests/templates/for-async-content.j2' },
                        opts,
                        function(err, res) {
                            expect(res).to.be('somecontenthere*somecontenthere*');
                        });
 
                 render('{% block content %}{{ tmpl | getContents }}{% endblock %}',
-                       { tmpl: 'tests/templates/for-async-content.html' },
+                       { tmpl: 'tests/templates/for-async-content.j2' },
                        opts,
                        function(err, res) {
                            expect(res).to.be('somecontenthere');
                        });
 
                 render('{% block content %}hello{% endblock %} {{ tmpl | getContents }}',
-                       { tmpl: 'tests/templates/for-async-content.html' },
+                       { tmpl: 'tests/templates/for-async-content.j2' },
                        opts,
                        function(err, res) {
                            expect(res).to.be('hello somecontenthere');
                        });
 
                 render('{% block content %}{% set foo = tmpl | getContents %}{{ foo }}{% endblock %}',
-                       { tmpl: 'tests/templates/for-async-content.html' },
+                       { tmpl: 'tests/templates/for-async-content.j2' },
                        opts,
                        function(err, res) {
                            expect(res).to.be('somecontenthere');
                        });
 
-                render('{% block content %}{% include "async.html" %}{% endblock %}',
-                       { tmpl: 'tests/templates/for-async-content.html' },
+                render('{% block content %}{% include "async.j2" %}{% endblock %}',
+                       { tmpl: 'tests/templates/for-async-content.j2' },
                        opts,
                        function(err, res) {
                            expect(res).to.be('somecontenthere\n');
                        });
 
-                render('{% asyncEach i in [0, 1] %}{% include "async.html" %}{% endeach %}',
-                       { tmpl: 'tests/templates/for-async-content.html' },
+                render('{% asyncEach i in [0, 1] %}{% include "async.j2" %}{% endeach %}',
+                       { tmpl: 'tests/templates/for-async-content.j2' },
                        opts,
                        function(err, res) {
                            expect(res).to.be('somecontenthere\nsomecontenthere\n');
                        });
 
-                render('{% asyncAll i in [0, 1, 2, 3, 4] %}-{{ i }}:{% include "async.html" %}-{% endall %}',
-                       { tmpl: 'tests/templates/for-async-content.html' },
+                render('{% asyncAll i in [0, 1, 2, 3, 4] %}-{{ i }}:{% include "async.j2" %}-{% endall %}',
+                       { tmpl: 'tests/templates/for-async-content.j2' },
                        opts,
                        function(err, res) {
                            expect(res).to.be('-0:somecontenthere\n-' +
@@ -527,7 +527,7 @@
         });
 
         it('should compile macro calls inside blocks', function(done) {
-            equal('{% extends "base.html" %}' +
+            equal('{% extends "base.j2" %}' +
                   '{% macro foo(x, y=2, z=5) %}{{ x }}{{ y }}{{ z }}' +
                   '{% endmacro %}' +
                   '{% block block1 %}' +
@@ -550,7 +550,7 @@
         });
 
         it('should compile macros that include other templates', function(done) {
-            equal('{% macro foo() %}{% include "include.html" %}{% endmacro %}' +
+            equal('{% macro foo() %}{% include "include.j2" %}{% endmacro %}' +
                   '{{ foo() }}',
                   { name: 'james' },
                   'FooInclude james');
@@ -630,18 +630,18 @@
         });
 
         it('should compile call blocks using imported macros', function(done) {
-            equal('{% import "import.html" as imp %}' +
+            equal('{% import "import.j2" as imp %}' +
                   '{% call imp.wrap("span") %}Hey{% endcall %}',
                   '<span>Hey</span>');
             finish(done);
         });
 
         it('should import templates', function(done) {
-            equal('{% import "import.html" as imp %}' +
+            equal('{% import "import.j2" as imp %}' +
                   '{{ imp.foo() }} {{ imp.bar }}',
                   'Here\'s a macro baz');
 
-            equal('{% from "import.html" import foo as baz, bar %}' +
+            equal('{% from "import.j2" import foo as baz, bar %}' +
                   '{{ bar }} {{ baz() }}',
                   'baz Here\'s a macro');
 
@@ -650,7 +650,7 @@
             // the first one sets it
             equal('{% for i in [1,2] %}' +
                   'start: {{ num }}' +
-                  '{% from "import.html" import bar as num %}' +
+                  '{% from "import.j2" import bar as num %}' +
                   'end: {{ num }}' +
                   '{% endfor %}' +
                   'final: {{ num }}',
@@ -678,32 +678,32 @@
 
         it('should import templates with context', function(done) {
             equal('{% set bar = "BAR" %}' +
-                  '{% import "import-context.html" as imp with context %}' +
+                  '{% import "import-context.j2" as imp with context %}' +
                   '{{ imp.foo() }}',
                   'Here\'s BAR');
 
             equal('{% set bar = "BAR" %}' +
-                  '{% from "import-context.html" import foo with context %}' +
+                  '{% from "import-context.j2" import foo with context %}' +
                   '{{ foo() }}',
                   'Here\'s BAR');
 
             equal('{% set bar = "BAR" %}' +
-                  '{% import "import-context-set.html" as imp %}' +
+                  '{% import "import-context-set.j2" as imp %}' +
                   '{{ bar }}',
                   'BAR');
 
             equal('{% set bar = "BAR" %}' +
-                  '{% import "import-context-set.html" as imp %}' +
+                  '{% import "import-context-set.j2" as imp %}' +
                   '{{ imp.bar }}',
                   'FOO');
 
             equal('{% set bar = "BAR" %}' +
-                  '{% import "import-context-set.html" as imp with context %}' +
+                  '{% import "import-context-set.j2" as imp with context %}' +
                   '{{ bar }}{{ buzz }}',
                   'FOO');
 
             equal('{% set bar = "BAR" %}' +
-                  '{% import "import-context-set.html" as imp with context %}' +
+                  '{% import "import-context-set.j2" as imp with context %}' +
                   '{{ imp.bar }}{{ buzz }}',
                   'FOO');
 
@@ -712,12 +712,12 @@
 
         it('should import templates without context', function(done) {
             equal('{% set bar = "BAR" %}' +
-                  '{% import "import-context.html" as imp without context %}' +
+                  '{% import "import-context.j2" as imp without context %}' +
                   '{{ imp.foo() }}',
                   'Here\'s ');
 
             equal('{% set bar = "BAR" %}' +
-                  '{% from "import-context.html" import foo without context %}' +
+                  '{% from "import-context.j2" import foo without context %}' +
                   '{{ foo() }}',
                   'Here\'s ');
 
@@ -726,12 +726,12 @@
 
         it('should default to importing without context', function(done) {
             equal('{% set bar = "BAR" %}' +
-                  '{% import "import-context.html" as imp %}' +
+                  '{% import "import-context.j2" as imp %}' +
                   '{{ imp.foo() }}',
                   'Here\'s ');
 
             equal('{% set bar = "BAR" %}' +
-                  '{% from "import-context.html" import foo %}' +
+                  '{% from "import-context.j2" import foo %}' +
                   '{{ foo() }}',
                   'Here\'s ');
 
@@ -739,23 +739,23 @@
         });
 
         it('should inherit templates', function(done) {
-            equal('{% extends "base.html" %}', 'FooBarBazFizzle');
-            equal('hola {% extends "base.html" %} hizzle mumble', 'FooBarBazFizzle');
+            equal('{% extends "base.j2" %}', 'FooBarBazFizzle');
+            equal('hola {% extends "base.j2" %} hizzle mumble', 'FooBarBazFizzle');
 
-            equal('{% extends "base.html" %}{% block block1 %}BAR{% endblock %}',
+            equal('{% extends "base.j2" %}{% block block1 %}BAR{% endblock %}',
                   'FooBARBazFizzle');
 
-            equal('{% extends "base.html" %}' +
+            equal('{% extends "base.j2" %}' +
                   '{% block block1 %}BAR{% endblock %}' +
                   '{% block block2 %}BAZ{% endblock %}',
                   'FooBARBAZFizzle');
 
             equal('hola {% extends tmpl %} hizzle mumble',
-                  { tmpl: 'base.html' },
+                  { tmpl: 'base.j2' },
                   'FooBarBazFizzle');
 
             var count = 0;
-            render('{% extends "base.html" %}' +
+            render('{% extends "base.j2" %}' +
                    '{% block notReal %}{{ foo() }}{% endblock %}',
                    { foo: function() { count++; }},
                    function() {
@@ -783,26 +783,26 @@
         });
 
         it('should conditionally inherit templates', function(done) {
-            equal('{% if false %}{% extends "base.html" %}{% endif %}' +
+            equal('{% if false %}{% extends "base.j2" %}{% endif %}' +
                   '{% block block1 %}BAR{% endblock %}',
                   'BAR');
 
-            equal('{% if true %}{% extends "base.html" %}{% endif %}' +
+            equal('{% if true %}{% extends "base.j2" %}{% endif %}' +
                   '{% block block1 %}BAR{% endblock %}',
                   'FooBARBazFizzle');
 
             equal('{% if true %}' +
-                  '{% extends "base.html" %}' +
+                  '{% extends "base.j2" %}' +
                   '{% else %}' +
-                  '{% extends "base2.html" %}' +
+                  '{% extends "base2.j2" %}' +
                   '{% endif %}' +
                   '{% block block1 %}HELLO{% endblock %}',
                   'FooHELLOBazFizzle');
 
             equal('{% if false %}' +
-                  '{% extends "base.html" %}' +
+                  '{% extends "base.j2" %}' +
                   '{% else %}' +
-                  '{% extends "base2.html" %}' +
+                  '{% extends "base2.j2" %}' +
                   '{% endif %}' +
                   '{% block item %}hello{{ item }}{% endblock %}',
                   'hello1hello2');
@@ -811,7 +811,7 @@
         });
 
         it('should render nested blocks in child template', function(done) {
-            equal('{% extends "base.html" %}' +
+            equal('{% extends "base.j2" %}' +
                   '{% block block1 %}{% block nested %}BAR{% endblock %}{% endblock %}',
                   'FooBARBazFizzle');
 
@@ -819,12 +819,12 @@
         });
 
         it('should render parent blocks with super()', function(done) {
-            equal('{% extends "base.html" %}' +
+            equal('{% extends "base.j2" %}' +
                   '{% block block1 %}{{ super() }}BAR{% endblock %}',
                   'FooBarBARBazFizzle');
 
             // two levels of `super` should work
-            equal('{% extends "base-inherit.html" %}' +
+            equal('{% extends "base-inherit.j2" %}' +
                   '{% block block1 %}*{{ super() }}*{% endblock %}',
                   'Foo**Bar**BazFizzle');
 
@@ -832,32 +832,32 @@
         });
 
         it('should include templates', function(done) {
-            equal('hello world {% include "include.html" %}',
+            equal('hello world {% include "include.j2" %}',
                   'hello world FooInclude ');
             finish(done);
         });
 
         it('should include templates with context', function(done) {
-            equal('hello world {% include "include.html" %}',
+            equal('hello world {% include "include.j2" %}',
                   { name: 'james' },
                   'hello world FooInclude james');
             finish(done);
         });
 
         it('should include templates that can see including scope, but not write to it', function(done) {
-            equal('{% set var = 1 %}{% include "include-set.html" %}{{ var }}', '12\n1');
+            equal('{% set var = 1 %}{% include "include-set.j2" %}{{ var }}', '12\n1');
             finish(done);
         });
 
         it('should include templates dynamically', function(done) {
             equal('hello world {% include tmpl %}',
-                  { name: 'thedude', tmpl: 'include.html' },
+                  { name: 'thedude', tmpl: 'include.j2' },
                   'hello world FooInclude thedude');
             finish(done);
         });
 
         it('should include templates dynamically based on a set var', function(done) {
-            equal('hello world {% set tmpl = "include.html" %}{% include tmpl %}',
+            equal('hello world {% set tmpl = "include.j2" %}{% include tmpl %}',
                   { name: 'thedude' },
                   'hello world FooInclude thedude');
             finish(done);
@@ -865,7 +865,7 @@
 
         it('should include templates dynamically based on an object attr', function(done) {
             equal('hello world {% include data.tmpl %}',
-                  { name: 'thedude', data: {tmpl: 'include.html'} },
+                  { name: 'thedude', data: {tmpl: 'include.j2'} },
                   'hello world FooInclude thedude');
 
             finish(done);
@@ -883,12 +883,12 @@
 
         it('should throw an error when including a file that does not exist', function(done) {
             render(
-                '{% include "missing.html" %}',
+                '{% include "missing.j2" %}',
                 {},
                 { noThrow: true },
                 function(err, res) {
                     expect(res).to.be(undefined);
-                    expect(err).to.match(/template not found: missing.html/);
+                    expect(err).to.match(/template not found: missing.j2/);
                 }
             );
 
@@ -896,10 +896,10 @@
         });
 
         it('should fail silently on missing templates if requested', function(done) {
-            equal('hello world {% include "missing.html" ignore missing %}',
+            equal('hello world {% include "missing.j2" ignore missing %}',
                   'hello world ');
 
-            equal('hello world {% include "missing.html" ignore missing %}',
+            equal('hello world {% include "missing.j2" ignore missing %}',
                   { name: 'thedude' },
                   'hello world ');
 
@@ -910,10 +910,10 @@
          * This test checks that this issue is resolved: http://stackoverflow.com/questions/21777058/loop-index-in-included-nunjucks-file
          */
         it('should have access to "loop" inside an include', function(done) {
-            equal('{% for item in [1,2,3] %}{% include "include-in-loop.html" %}{% endfor %}',
+            equal('{% for item in [1,2,3] %}{% include "include-in-loop.j2" %}{% endfor %}',
                   '1,0,true\n2,1,false\n3,2,false\n');
 
-            equal('{% for k,v in items %}{% include "include-in-loop.html" %}{% endfor %}',
+            equal('{% for k,v in items %}{% include "include-in-loop.j2" %}{% endfor %}',
                 {items: {'a': 'A', 'b': 'B'}},
                 '1,0,true\n2,1,false\n');
 
@@ -930,7 +930,7 @@
         });
 
         it('should allow blocks in for loops', function(done) {
-            equal('{% extends "base2.html" %}' +
+            equal('{% extends "base2.j2" %}' +
                   '{% block item %}hello{{ item }}{% endblock %}',
                   'hello1hello2');
 
@@ -939,7 +939,7 @@
 
         it('should make includes inherit scope', function(done) {
             equal('{% for item in [1,2] %}' +
-                  '{% include "item.html" %}' +
+                  '{% include "item.j2" %}' +
                   '{% endfor %}',
                   'showing 1showing 2');
 
@@ -961,7 +961,7 @@
                   { foo: 2 },
                   '2');
 
-            equal('{% include "set.html" %}{{ foo }}',
+            equal('{% include "set.j2" %}{{ foo }}',
                   { foo: 'bar' },
                   'bar');
 
@@ -1034,7 +1034,7 @@
 
           equal('{% set block_content %}'+
                 '{% for item in [1, 2, 3] %}'+
-                '{% include "item.html" %} '+
+                '{% include "item.j2" %} '+
                 '{% endfor %}'+
                 '{% endset %}'+
                 '{{ block_content }}',
@@ -1068,7 +1068,7 @@
         });
 
         it('should throw errors', function(done) {
-            render('{% from "import.html" import boozle %}',
+            render('{% from "import.j2" import boozle %}',
                    {},
                    { noThrow: true },
                    function(err) {
@@ -1298,7 +1298,7 @@
 
         it('should not autoescape super()', function(done) {
             render(
-                '{% extends "base3.html" %}' +
+                '{% extends "base3.j2" %}' +
                     '{% block block1 %}{{ super() }}{% endblock %}',
                 null,
                 { autoescape: true },
@@ -1383,7 +1383,7 @@
 
         it('should throw an error when including a file that calls an undefined macro', function(done) {
             render(
-                '{% include "undefined-macro.html" %}',
+                '{% include "undefined-macro.j2" %}',
                 {},
                 { noThrow: true },
                 function(err, res) {
@@ -1397,7 +1397,7 @@
 
         it('should throw an error when including a file that calls an undefined macro even inside {% if %} tag', function(done) {
             render(
-                '{% if true %}{% include "undefined-macro.html" %}{% endif %}',
+                '{% if true %}{% include "undefined-macro.j2" %}{% endif %}',
                 {},
                 { noThrow: true },
                 function(err, res) {
@@ -1411,7 +1411,7 @@
 
         it('should throw an error when including a file that imports macro that calls an undefined macro', function(done) {
             render(
-                '{% include "import-macro-call-undefined-macro.html" %}',
+                '{% include "import-macro-call-undefined-macro.j2" %}',
                 { 'list' : [1, 2, 3] },
                 { noThrow: true },
                 function(err, res) {

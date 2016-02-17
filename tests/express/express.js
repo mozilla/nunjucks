@@ -19,7 +19,7 @@ describe('express', function() {
     });
 
     it('should render a view with extension', function(done) {
-        app.get('/', function(req, res) { res.render('about.html'); });
+        app.get('/', function(req, res) { res.render('about.j2'); });
         request(app)
             .get('/')
             .expect(/This is just the about page/)

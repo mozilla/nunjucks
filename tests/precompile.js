@@ -16,7 +16,7 @@
 
     describe('precompile', function() {
         it('should return a string', function() {
-            expect(precompileString('{{ test }}', { name: 'test.html' })).to.be.an('string');
+            expect(precompileString('{{ test }}', { name: 'test.j2' })).to.be.an('string');
         });
     });
 })();
