@@ -2446,10 +2446,10 @@ function HTML(runner) {
 
       stackString = stackString || '';
 
-      if (test.err.htmlMessage && stackString) {
-        el.appendChild(fragment('<div class="html-error">%s\n<pre class="error">%e</pre></div>', test.err.htmlMessage, stackString));
-      } else if (test.err.htmlMessage) {
-        el.appendChild(fragment('<div class="html-error">%s</div>', test.err.htmlMessage));
+      if (test.err.j2Message && stackString) {
+        el.appendChild(fragment('<div class="html-error">%s\n<pre class="error">%e</pre></div>', test.err.j2Message, stackString));
+      } else if (test.err.j2Message) {
+        el.appendChild(fragment('<div class="html-error">%s</div>', test.err.j2Message));
       } else {
         el.appendChild(fragment('<pre class="error">%e%e</pre>', message, stackString));
       }
@@ -2601,7 +2601,7 @@ exports.Dot = exports.dot = require('./dot');
 exports.Doc = exports.doc = require('./doc');
 exports.TAP = exports.tap = require('./tap');
 exports.JSON = exports.json = require('./json');
-exports.HTML = exports.html = require('./html');
+exports.HTML = exports.j2 = require('./html');
 exports.List = exports.list = require('./list');
 exports.Min = exports.min = require('./min');
 exports.Spec = exports.spec = require('./spec');
