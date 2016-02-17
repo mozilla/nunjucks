@@ -246,6 +246,14 @@
             finish(done);
         });
 
+        it('should allow overriding var with none inside nested scope', function(done) {
+            equal('{% set var = "foo" %}' +
+                  '{% for i in [1] %}{% set var = none %}{{ var }}{% endfor %}',
+                 '');
+
+            finish(done);
+        });
+
         it('should compile asyncEach', function(done) {
             runLoopTests('asyncEach', 'endeach');
             finish(done);

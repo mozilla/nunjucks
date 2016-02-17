@@ -4,6 +4,11 @@ Changelog
 3.x (unreleased)
 ----------------
 
+* Allow explicitly setting `null` (aka `none`) as the value of a variable;
+  don't ignore that value and look on up the frame stack or context. Fixes
+  [#478](https://github.com/mozilla/nunjucks/issues/478). Thanks Jonny Gerig
+  Meyer for the report.
+
 * Execute blocks in a child frame that can't write to its parent. This means
   that vars set inside blocks will not leak outside of the block, base
   templates can no longer see vars set in templates that inherit them, and

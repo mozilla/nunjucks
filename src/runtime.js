@@ -44,7 +44,7 @@ var Frame = Obj.extend({
 
     get: function(name) {
         var val = this.variables[name];
-        if(val !== undefined && val !== null) {
+        if(val !== undefined) {
             return val;
         }
         return null;
@@ -53,7 +53,7 @@ var Frame = Obj.extend({
     lookup: function(name) {
         var p = this.parent;
         var val = this.variables[name];
-        if(val !== undefined && val !== null) {
+        if(val !== undefined) {
             return val;
         }
         return p && p.lookup(name);
@@ -62,7 +62,7 @@ var Frame = Obj.extend({
     resolve: function(name, forWrite) {
         var p = (forWrite && this.isolateWrites) ? undefined : this.parent;
         var val = this.variables[name];
-        if(val !== undefined && val !== null) {
+        if(val !== undefined) {
             return this;
         }
         return p && p.resolve(name);
@@ -250,7 +250,7 @@ function callWrap(obj, name, context, args) {
 
 function contextOrFrameLookup(context, frame, name) {
     var val = frame.lookup(name);
-    return (val !== undefined && val !== null) ?
+    return (val !== undefined) ?
         val :
         context.lookup(name);
 }
