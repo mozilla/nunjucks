@@ -25,7 +25,7 @@
   },
   "scripts": {
     "lint": "jshint .",
-    "test": "jshint . && istanbul cover ./node_modules/mocha/bin/_mocha -- -R tap tests",
+    "test": "jshint . && istanbul cover ./node_modules/mocha/bin/_mocha -- -R dot tests",
     "browserfiles": "./bin/bundle"
   },
   "bin": {
