@@ -918,6 +918,14 @@
             finish(done);
         });
 
+        it('should throw an error synchronously when including a file with an invalid tag', function() {
+            var callRender = function () {
+                render('{% include "undefined-tag.j2" %}');
+            };
+
+            expect(callRender).to.throwException();
+        });
+
         it('should fail silently on missing templates if requested', function(done) {
             equal('hello world {% include "missing.j2" ignore missing %}',
                   'hello world ');
