@@ -504,7 +504,7 @@ If you want to output any of the special nunjucks tags like `{{`, you can use `r
 ```jinja
 {% raw %}
   this will {{ not be processed }}
-{％ endraw %}
+{% endraw %}
 ```
 
 ### filter
