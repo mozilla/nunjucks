@@ -6,13 +6,17 @@ title: Templates
 
 # Templating
 
-This is an overview of the templating features available in nunjucks.
+This is an overview of the templating features available in Nunjucks .
 
 > Nunjucks is essentially a port of
 > [jinja2](http://jinja.pocoo.org/docs/), so you can read their
 > [docs](http://jinja.pocoo.org/docs/templates/) if you find anything
 > lacking here. Read about the differences
 > [here](http://mozilla.github.io/nunjucks/faq.html#can-i-use-the-same-templates-between-nunjucks-and-jinja2-what-are-the-differences).
+
+## File Extensions
+
+Although you are free to use any file extension you wish for your Nunjucks template files the Nunjucks community has adopted  `.njk`.  If you are developing tools or editor syntax helpers for Nunjucks please include recognition of this extension.
 
 ## Variables
 
@@ -216,7 +220,7 @@ var food = {
 
 The [`dictsort`](http://jinja.pocoo.org/docs/templates/#dictsort) filter is available for sorting objects when iterating over them (*new in 0.1.8*).
 
-Additionally, nunjucks will unpack arrays into variables (*new in 0.1.8*):
+Additionally, Nunjucks will unpack arrays into variables (*new in 0.1.8*):
 
 ```js
 var points = [[0, 1, 2], [5, 6, 7], [12, 13, 14]];
@@ -255,7 +259,7 @@ asynchronous control of the loop. The reason those tags are separate
 is performance; most people use templates synchronously and it's
 much faster for `for` to compile to a straight JavaScript `for` loop.
 
-At compile-time, nunjucks is not aware how templates are loaded so
+At compile-time, Nunjucks is not aware how templates are loaded so
 it's unable to determine if an `include` block is asynchronous or not.
 That's why it can't automatically convert loops for you, and you must
 use `asyncEach` for iteration if you are loading templates
@@ -499,7 +503,7 @@ You can also import specific values from a template into the current namespace w
 
 ### raw
 
-If you want to output any of the special nunjucks tags like `{{`, you can use `raw` and anything inside of it will be output as plain text.
+If you want to output any of the special Nunjucks tags like `{{`, you can use `raw` and anything inside of it will be output as plain text.
 
 ```jinja
 {% raw %}
