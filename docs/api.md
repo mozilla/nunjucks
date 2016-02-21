@@ -131,7 +131,7 @@ nunjucks.installJinjaCompat()
 
 This installs experimental support for more consistent Jinja
 compatibility by adding Pythonic APIs to the environment. While
-nunjucks does not aim for complete Jinja/Python compatiblity, this
+nunjucks does not aim for complete Jinja/Python compatibility, this
 might help users seeking just that.
 
 This adds `True` and `False` which map to the JS `true` and `false`
@@ -849,7 +849,7 @@ with the template.
 Note: When precompiling, **you must install the extensions at
 compile-time**. You have to use the [precompiling API](#api1) (or the
 [grunt task](https://github.com/jlongster/grunt-nunjucks)) instead of
-the script. You'll want to create a [`Environment`](#environment)
+the script. You'll want to create an [`Environment`](#environment)
 object, install your extensions, and pass it to the precompiler.
 
 An extension is a javascript object with at least two fields: `tags`
