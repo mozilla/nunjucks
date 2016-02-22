@@ -106,7 +106,7 @@ This is the default content
 
 <section class="right">
   This is the right side!
-</section>  
+</section>
 ```
 
 You can store the template to inherit in a variable and use it by
@@ -150,7 +150,8 @@ template. Nunjucks comes with several builtin, but [you can add your own](api.ht
 
 ### if
 
-`if` tests a condition and lets you selectively display content. It behaves exactly as javascript's `if` behaves.
+`if` tests a condition and lets you selectively display content. It behaves
+exactly as javascript's `if` behaves.
 
 ```jinja
 {% if variable %}
@@ -158,7 +159,8 @@ template. Nunjucks comes with several builtin, but [you can add your own](api.ht
 {% endif %}
 ```
 
-If variable is defined and evaluates to true, "It is true" will be displayed. Otherwise, nothing will be.
+If variable is defined and evaluates to true, "It is true" will be
+displayed. Otherwise, nothing will be.
 
 You can specify alternate conditions with `elif` and `else`:
 
@@ -196,7 +198,9 @@ var items = [{ title: "foo", id: 1 }, { title: "bar", id: 2}];
 </ul>
 ```
 
-The above example lists all the posts using the `title` attribute of each item in the `items` array as the display value. If the `items` array were empty, the contents of the optional `else` clause would instead be rendered.
+The above example lists all the posts using the `title` attribute of each item
+in the `items` array as the display value. If the `items` array were empty, the
+contents of the optional `else` clause would instead be rendered.
 
 You can also iterate over objects/hashes:
 
@@ -214,9 +218,10 @@ var food = {
 {% endfor %}
 ```
 
-The [`dictsort`](http://jinja.pocoo.org/docs/templates/#dictsort) filter is available for sorting objects when iterating over them (*new in 0.1.8*).
+The [`dictsort`](http://jinja.pocoo.org/docs/templates/#dictsort) filter is
+available for sorting objects when iterating over them.
 
-Additionally, nunjucks will unpack arrays into variables (*new in 0.1.8*):
+Additionally, nunjucks will unpack arrays into variables:
 
 ```js
 var points = [[0, 1, 2], [5, 6, 7], [12, 13, 14]];
@@ -305,7 +310,8 @@ all the items are done.
 
 ### macro
 
-`macro` allows you to define reusable chunks of content. It is similar to a function in a programming language. Here's an example:
+`macro` allows you to define reusable chunks of content. It is similar to a
+function in a programming language. Here's an example:
 
 ```jinja
 {% macro field(name, value='', type='text') %}
@@ -322,11 +328,16 @@ Now `field` is available to be called like a normal function:
 {{ field('pass', type='password') }}
 ```
 
-Keyword/default arguments are available. See [keyword arguments](#keyword-arguments) for a more detailed explanation.
+Keyword/default arguments are available. See
+[keyword arguments](#keyword-arguments) for a more detailed explanation.
 
-You can [import](#import) macros from other templates, allowing you to reuse them freely across your project.
+You can [import](#import) macros from other templates, allowing you to reuse
+them freely across your project.
 
-**Important note**: If you are using the asynchronous API, please be aware that you **cannot** do anything asynchronous inside macros. This is because macros are called like normal functions. In the future we may have a way to call a function asynchronously. If you do this now, the behavior is undefined.
+**Important note**: If you are using the asynchronous API, please be aware that
+you **cannot** do anything asynchronous inside macros. This is because macros
+are called like normal functions. In the future we may have a way to call a
+function asynchronously. If you do this now, the behavior is undefined.
 
 ### set
 
@@ -346,11 +357,13 @@ You can introduce new variables, and also set multiple at once:
 {% set x, y, z = 5 %}
 ```
 
-If `set` is used at the top-level, it changes the value of the global template context. If used inside scoped blocks, like `for`, `include`, and others, it only modifies the current scope.
+If `set` is used at the top-level, it changes the value of the global template
+context. If used inside scoped blocks like an include or a macro, it only
+modifies the current scope.
 
-It is also possible to capture the contents of a block into a variable using block assignments.
-The syntax is similar to the standard `set`, except that the `=` is omitted, and
-everything until the `{% endset %}` is captured.
+It is also possible to capture the contents of a block into a variable using
+block assignments.  The syntax is similar to the standard `set`, except that
+the `=` is omitted, and everything until the `{% endset %}` is captured.
 
 This can be useful in some situations as an alternative for macros:
 
@@ -426,7 +439,8 @@ render the parent block's content. See [super](#super).
 
 ### include
 
-`include` pulls in other templates in place. It's useful when you need to share smaller chunks across several templates that already inherit other templates.
+`include` pulls in other templates in place. It's useful when you need to share
+smaller chunks across several templates that already inherit other templates.
 
 ```jinja
 {% include "item.html" %}
@@ -440,21 +454,37 @@ You can even include templates in the middle of loops:
 {% endfor %}
 ```
 
-This is especially useful for cutting up templates into pieces so that the browser-side environment can render the small chunks when it needs to change the page.
+This is especially useful for cutting up templates into pieces so that the
+browser-side environment can render the small chunks when it needs to change
+the page.
 
-`include` actually accepts any arbitrary expression, so you can pass anything into it, as long as the expression evaluates to a string or a compiled Template object: `{% include name + ".html" %}`.
+`include` actually accepts any arbitrary expression, so you can pass anything
+into it, as long as the expression evaluates to a string or a compiled Template
+object: `{% include name + ".html" %}`.
 
-It might be useful to not throw an error if a template does not exist. Use the `ignore missing` option to suppress such errors.
+It might be useful to not throw an error if a template does not exist. Use the
+`ignore missing` option to suppress such errors.
 
 ```jinja
 {% include "missing.html" ignore missing %}
 ```
 
+Included templates can themselves `extend` another template (so you could have
+a set of related includes that all inherit a common structure). An included
+template does not participate in the block structure of its including template;
+it has a totally separate inheritance tree and block namespace. In other words,
+an `include` is _not_ a pre-processor that pulls the included template code
+into the including template before rendering; instead, it fires off a separate
+render of the included template, and the results of that render are included.
+
 ### import
 
-`import` loads a different template and allows you to access its exported values. Macros and top-level assignments (done with [`set`](#set)) are exported from templates, allowing you to access them in a different template.
+`import` loads a different template and allows you to access its exported
+values. Macros and top-level assignments (done with [`set`](#set)) are exported
+from templates, allowing you to access them in a different template.
 
-Imported templates are processed without the current context, so they do not have access to any of the current template variables.
+Imported templates are processed without the current context, so they do not
+have access to any of the current template variables.
 
 Let's start with a template called `forms.html` that has the following in it:
 
@@ -473,7 +503,8 @@ Let's start with a template called `forms.html` that has the following in it:
 {% endmacro %}
 ```
 
-We can import this template and bind all of its exported values to a variable so that we can use it:
+We can import this template and bind all of its exported values to a variable
+so that we can use it:
 
 ```jinja
 {% import "forms.html" as forms %}
@@ -484,7 +515,8 @@ We can import this template and bind all of its exported values to a variable so
 {{ forms.field('pass', type='password') }}
 ```
 
-You can also import specific values from a template into the current namespace with `from import`:
+You can also import specific values from a template into the current namespace
+with `from import`:
 
 ```jinja
 {% from "forms.html" import field, label as description %}
@@ -495,11 +527,14 @@ You can also import specific values from a template into the current namespace w
 {{ field('pass', type='password') }}
 ```
 
-`import` actually accepts any arbitrary expression, so you can pass anything into it, as long as the expression evaluates to a string or a compiled Template object: `{% import name + ".html" as obj %}`.
+`import` actually accepts any arbitrary expression, so you can pass anything
+into it, as long as the expression evaluates to a string or a compiled Template
+object: `{% import name + ".html" as obj %}`.
 
 ### raw
 
-If you want to output any of the special nunjucks tags like `{{`, you can use `raw` and anything inside of it will be output as plain text.
+If you want to output any of the special nunjucks tags like `{{`, you can use
+`raw` and anything inside of it will be output as plain text.
 
 ```jinja
 {% raw %}
@@ -527,7 +562,9 @@ NOTE: You cannot do anything asynchronous inside these blocks.
 
 ### call
 
-A `call` block enables you to call a macro with all the text inside the tag. This is helpful if you want to pass a lot of content into a macro. The content is available inside the macro as `caller()`.
+A `call` block enables you to call a macro with all the text inside the
+tag. This is helpful if you want to pass a lot of content into a macro. The
+content is available inside the macro as `caller()`.
 
 ```jinja
 {% macro add(x, y) %}
@@ -543,7 +580,9 @@ The above example would output "The result is: 3".
 
 ## Keyword Arguments
 
-jinja2 uses Python's keyword arguments support to allow keyword arguments in functions, filters, and macros. Nunjucks supports keyword arguments as well by introducing a new calling convention.
+jinja2 uses Python's keyword arguments support to allow keyword arguments in
+functions, filters, and macros. Nunjucks supports keyword arguments as well by
+introducing a new calling convention.
 
 Keyword arguments look like this:
 
@@ -551,15 +590,20 @@ Keyword arguments look like this:
 {{ foo(1, 2, bar=3, baz=4) }}
 ```
 
-`bar` and `baz` are keyword arguments. Nunjucks converts them into a hash and passes it as the last argument. It's equivalent to this call in javascript:
+`bar` and `baz` are keyword arguments. Nunjucks converts them into a hash and
+passes it as the last argument. It's equivalent to this call in javascript:
 
 ```js
 foo(1, 2, { bar: 3, baz: 4})
 ```
 
-Since this is a standard calling convention, it works for all functions and filters if they are written to expect them. [Read more](api#Keyword-Arguments) about this in the API section.
+Since this is a standard calling convention, it works for all functions and
+filters if they are written to expect them. [Read more](api#Keyword-Arguments)
+about this in the API section.
 
-Macros allow you to also use keyword arguments in the definition, which allows you to specify default values. Nunjucks automatically maps the keyword arguments to the ones defined with the macro.
+Macros allow you to also use keyword arguments in the definition, which allows
+you to specify default values. Nunjucks automatically maps the keyword
+arguments to the ones defined with the macro.
 
 ```
 {% macro foo(x, y, z=5, w=6) %}
@@ -570,7 +614,8 @@ Macros allow you to also use keyword arguments in the definition, which allows y
 {{ foo(1, 2, w=10) }}  -> 1, 2, 5, 10
 ```
 
-You can mix positional and keyword arguments with macros. For example, you can specify a positional argument as a keyword argument:
+You can mix positional and keyword arguments with macros. For example, you can
+specify a positional argument as a keyword argument:
 
 ```jinja
 {{ foo(20, y=21) }}     -> 20, 21, 5, 6
@@ -590,7 +635,8 @@ In this way, you can "skip" positional arguments:
 
 ## Comments
 
-You can write comments using `{#` and `#}`. Comments are completely stripped out when rendering.
+You can write comments using `{#` and `#}`. Comments are completely stripped
+out when rendering.
 
 ```jinja
 {# Loop through all the users #}
@@ -599,11 +645,13 @@ You can write comments using `{#` and `#}`. Comments are completely stripped out
 
 ## Whitespace Control
 
-*Introduced in v0.1.8*
+Normally the template engine outputs everything outside of variable and tag
+blocks verbatim, with all the whitespace as it is in the file. Occasionally you
+don't want the extra whitespace, but you still want to format the template
+cleanly, which requires whitespace.
 
-Normally the template engine outputs everything outside of variable and tag blocks verbatim, with all the whitespace as it is in the file. Occasionally you don't want the extra whitespace, but you still want to format the template cleanly, which requires whitespace.
-
-You can tell the engine to strip all leading or trailing whitespace by adding a minus sign (`-`) to the start or end block tag.
+You can tell the engine to strip all leading or trailing whitespace by adding a
+minus sign (`-`) to the start or end block tag.
 
 ```jinja
 {% for i in [1,2,3,4,5] -%}
@@ -611,7 +659,8 @@ You can tell the engine to strip all leading or trailing whitespace by adding a 
 {%- endfor %}
 ```
 
-The exact output of the above would be "12345". The `-%}` strips the whitespace right after the tag, and the `{%-` strips the whitespace right before the tag.
+The exact output of the above would be "12345". The `-%}` strips the whitespace
+right after the tag, and the `{%-` strips the whitespace right before the tag.
 
 ## Expressions
 
@@ -625,7 +674,9 @@ You can use many types of literal expressions that you are used to in javascript
 
 ### Math
 
-Nunjucks allows you to operate on values (though it should be used sparingly, as most of your logic should be in code). The following operators are available:
+Nunjucks allows you to operate on values (though it should be used sparingly,
+as most of your logic should be in code). The following operators are
+available:
 
 * Addition: `+`
 * Subtraction: `-`
@@ -676,13 +727,15 @@ Examples:
 
 ### If Expression
 
-Similar to javascript's ternary operator, you can use `if` as if it were an inline expression:
+Similar to javascript's ternary operator, you can use `if` as if it were an
+inline expression:
 
 ```jinja
 {{ "true" if foo else "false" }}
 ```
 
-The above outputs the string "true" if foo is truthy, otherwise "false". This is especially useful for default values like so:
+The above outputs the string "true" if foo is truthy, otherwise "false". This
+is especially useful for default values like so:
 
 ```jinja
 {{ baz(foo if foo else "default") }}
@@ -690,7 +743,8 @@ The above outputs the string "true" if foo is truthy, otherwise "false". This is
 
 ### Function Calls
 
-If you have passed a javascript method to your template, you can call it like normal.
+If you have passed a javascript method to your template, you can call it like
+normal.
 
 ```jinja
 {{ foo(1, 2, 3) }}
@@ -705,7 +759,9 @@ A regular expression can be created just like JavaScript:
 {{ /bar$/g }}
 ```
 
-The supported flags are the following. See [Regex on MDN](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/RegExp) for more information.
+The supported flags are the following. See
+[Regex on MDN](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/RegExp)
+for more information.
 
 * `g`: apply globally
 * `i`: case insensitive
@@ -714,14 +770,17 @@ The supported flags are the following. See [Regex on MDN](https://developer.mozi
 
 ## Autoescaping
 
-If autoescaping is turned on in the environment, all output will automatically be escaped for safe output. To manually mark output as safe, use the `safe` filter. Nunjucks will not escape this output.
+If autoescaping is turned on in the environment, all output will automatically
+be escaped for safe output. To manually mark output as safe, use the `safe`
+filter. Nunjucks will not escape this output.
 
 ```jinja
 {{ foo }}           // &lt;span%gt;
 {{ foo | safe }}    // <span>
 ```
 
-If autoescaping is turned off, all output will be rendered as it is. You can manually escape variables with the `escape` filter.
+If autoescaping is turned off, all output will be rendered as it is. You can
+manually escape variables with the `escape` filter.
 
 ```jinja
 {{ foo }}           // <span>
@@ -734,7 +793,9 @@ There are a few builtin global functions that cover some common cases.
 
 ### range([start], stop, [step])
 
-If you need to iterate over a fixed set of numbers, `range` generates the set for you. The numbers begin at `start` (default 0) and increment by `step` (default 1) until it reaches `stop`, not including it.
+If you need to iterate over a fixed set of numbers, `range` generates the set
+for you. The numbers begin at `start` (default 0) and increment by `step`
+(default 1) until it reaches `stop`, not including it.
 
 ```jinja
 {% for i in range(0, 5) -%}
@@ -746,7 +807,8 @@ The above outputs `0,1,2,3,4`.
 
 ### cycler(item1, item2, ...itemN)
 
-An easy way to rotate through several values is to use `cycler`, which takes any number of arguments and cycles through them.
+An easy way to rotate through several values is to use `cycler`, which takes
+any number of arguments and cycles through them.
 
 ```jinja
 {% set cls = cycler("odd", "even") %}
@@ -755,12 +817,16 @@ An easy way to rotate through several values is to use `cycler`, which takes any
 {% endfor %}
 ```
 
-In the above example, odd rows have the class "odd" and even rows have the class "even". You can access the current item on the `current` property
-(in the above example, `cls.current`).
+In the above example, odd rows have the class "odd" and even rows have the
+class "even". You can access the current item on the `current` property (in the
+above example, `cls.current`).
 
 ### joiner([separator])
 
-When combining multiple items, it's common to want to delimit them with something like a comma, but you don't want to output the separator for the first item. The `joiner` class will output `separator` (default ",") whenever it is called except for the first time.
+When combining multiple items, it's common to want to delimit them with
+something like a comma, but you don't want to output the separator for the
+first item. The `joiner` class will output `separator` (default ",") whenever
+it is called except for the first time.
 
 ```jinja
 {% set comma = joiner() %}
@@ -773,42 +839,45 @@ If `tags` was `["food", "beer", "dessert"]`, the above example would output `foo
 
 ## Builtin Filters
 
-Nunjucks has ported most of jinja's filters, and has a few of its own.
-We need to work on our own documentation for filters. Some of them are
-documented below, for the rest you can click through to jinja's site.
+Nunjucks has ported most of jinja's filters, and has a few of its own.  We need
+to work on our own documentation for filters. Some of them are documented
+below, for the rest you can click through to jinja's site.
 
 ### default(value, default, [boolean])
 
 (aliased as `d`)
 
-If `value` is strictly `undefined`, return `default`, otherwise
-`value`. If `boolean` is true, any JavaScript falsy value will return
-`default` (false, "", etc)
+If `value` is strictly `undefined`, return `default`, otherwise `value`. If
+`boolean` is true, any JavaScript falsy value will return `default` (false, "",
+etc)
 
 **In version 2.0, this filter changed the default behavior of this
-  filter. Previously, it acted as if `boolean` was true by default,
-  and any falsy value would return `default`. In 2.0 the default is
-  only an `undefined` value returns `default`. You can get the old
-  behavior by passing `true` to `boolean`, or just use `value or default`.**
+  filter. Previously, it acted as if `boolean` was true by default, and any
+  falsy value would return `default`. In 2.0 the default is only an `undefined`
+  value returns `default`. You can get the old behavior by passing `true` to
+  `boolean`, or just use `value or default`.**
 
 ### sort(arr, reverse, caseSens, attr)
 
-Sort `arr` with JavaScript's `arr.sort` function. If `reverse` is
-true, result will be reversed. Sort is case-insensitive by default,
-but setting `caseSens` to true makes it case-sensitive. If `attr` is
-passed, will compare `attr` from each item.
+Sort `arr` with JavaScript's `arr.sort` function. If `reverse` is true, result
+will be reversed. Sort is case-insensitive by default, but setting `caseSens`
+to true makes it case-sensitive. If `attr` is passed, will compare `attr` from
+each item.
 
 ### striptags (value, [preserve_linebreaks])
 
-Analog of jinja's [striptags](http://jinja.pocoo.org/docs/templates/#striptags). If `preserve_linebreaks` is false (default),
-strips SGML/XML tags and replaces adjacent whitespace with one space.
-If `preserve_linebreaks` is true, normalizes whitespace, trying to preserve original
-linebreaks. Use second behavior if you want to pipe
-`{{ text | striptags | nl2br }}`. Use default one otherwise.
+Analog of jinja's
+[striptags](http://jinja.pocoo.org/docs/templates/#striptags). If
+`preserve_linebreaks` is false (default), strips SGML/XML tags and replaces
+adjacent whitespace with one space.  If `preserve_linebreaks` is true,
+normalizes whitespace, trying to preserve original linebreaks. Use second
+behavior if you want to pipe `{{ text | striptags | nl2br }}`. Use default one
+otherwise.
 
 ### dump (object)
 
-Call `JSON.stringify` on an object and dump the result into the template. Useful for debugging: `{{ foo | dump }}`.
+Call `JSON.stringify` on an object and dump the result into the
+template. Useful for debugging: `{{ foo | dump }}`.
 
 ### More Filters
 
