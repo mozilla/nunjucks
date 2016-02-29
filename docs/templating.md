@@ -18,8 +18,9 @@ This is an overview of the templating features available in Nunjucks .
 
 Although you are free to use any file extension you wish for your 
 Nunjucks template, files the Nunjucks community has adopted  `.njk`.  
+
 If you are developing tools or editor syntax helpers for Nunjucks 
-please include recognition of this extension.
+please include recognition of this extension `.njk`.
 
 ## Variables
 
