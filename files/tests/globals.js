@@ -21,6 +21,7 @@
     }
 
     var equal = util.equal;
+    var render = util.render;
     var finish = util.finish;
 
     describe('global', function() {
@@ -28,6 +29,7 @@
             equal('{% for i in range(0, 10) %}{{ i }}{% endfor %}', '0123456789');
             equal('{% for i in range(10) %}{{ i }}{% endfor %}', '0123456789');
             equal('{% for i in range(5, 10) %}{{ i }}{% endfor %}', '56789');
+            equal('{% for i in range(-2, 0) %}{{ i }}{% endfor %}', '-2-1');
             equal('{% for i in range(5, 10, 2) %}{{ i }}{% endfor %}', '579');
             equal('{% for i in range(5, 10, 2.5) %}{{ i }}{% endfor %}', '57.5');
             equal('{% for i in range(5, 10, 2.5) %}{{ i }}{% endfor %}', '57.5');
@@ -112,6 +114,17 @@
             finish(done);
         });
 
+        it('should allow getting boolean globals', function(done) {
+            var env = new Environment(new Loader(templatesPath));
+            var hello = false;
+
+            env.addGlobal('hello', hello);
+
+            expect(env.getGlobal('hello')).to.be.equal(hello);
+
+            finish(done);
+        });
+
         it('should fail on getting non-existent global', function(done) {
             var env = new Environment(new Loader(templatesPath));
 
@@ -143,6 +156,22 @@
           expect(function() { env2.getGlobal('hello') }).to.throwError();
 
           finish(done);
+        });
+
+        it('should return errors from globals', function(done) {
+            var env = new Environment(new Loader(templatesPath));
+
+            env.addGlobal('err', function() {
+                throw new Error('Global error');
+            });
+
+            try {
+                render('{{ err() }}', null, {}, env);
+            } catch (e) {
+                expect(e).to.be.a(Error);
+            }
+
+            finish(done);
         });
     });
 })();

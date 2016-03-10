@@ -169,6 +169,9 @@
 <a href="#striptags-value-preserve_linebreaks">striptags (value, [preserve_linebreaks])</a>
 </li>
 <li>
+<a href="#dump-object">dump (object)</a>
+</li>
+<li>
 <a href="#plus-de-filtres">Plus de filtres</a>
 </li>
 </ul>
@@ -466,6 +469,17 @@ Le rendu du template reprend une fois que tous les éléments sont traités.</p>
 </code></pre></div>
 <p>Si <code>set</code> est utilisé au plus haut niveau, il modifie la valeur du contexte du template global. Si il est utilisé à l&#39;intérieur de la portée des blocs, comme <code>for</code>, <code>include</code> et d&#39;autres, cela modifie seulement dans cette portée.</p>
 
+<p>Il est également possible de capter le contenu d&#39;un bloc dans une variable en utilisant l&#39;affectation de bloc.
+La syntaxe est similaire au standard <code>set</code>, sauf que le <code>=</code> est omis, et
+tout ce qui se trouve jusqu&#39;au <code>{% endset %}</code> est capturé.</p>
+
+<p>Cela peut être utile dans certains cas, comme une alternative aux macros :</p>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">set</span> <span class="nv">standardModal</span> <span class="cp">%}</span><span class="x"></span>
+<span class="x">    </span><span class="cp">{%</span> <span class="k">include</span> <span class="s1">&#39;standardModalData.html&#39;</span> <span class="cp">%}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">endset</span> <span class="cp">%}</span><span class="x"></span>
+
+<span class="x">&lt;div class=&quot;js-modal&quot; data-modal=&quot;</span><span class="cp">{{</span><span class="nv">standardModal</span> <span class="o">|</span> <span class="nf">e</span><span class="cp">}}</span><span class="x">&quot;&gt;</span>
+</code></pre></div>
 <h3 id="extends">extends</h3>
 
 <p><code>extends</code> est utilisé pour définir l&#39;héritage de template. Le template
@@ -815,6 +829,10 @@ Si <code>preserve_linebreaks</code> est à true, cela normalise les espaces, en 
 sauts de lignes originaux. Utiliser le second comportement si vous voulez utiliser ceci
 <code>{{ text | striptags | nl2br }}</code>. Sinon utilisez le comportement par défaut.</p>
 
+<h3 id="dump-object">dump (object)</h3>
+
+<p>Appelle <code>JSON.stringify</code> sur un objet et déverse le résultat dans le template. C&#39;est utile pour le débogage : <code>{{ foo | dump }}</code>.</p>
+
 <h3 id="plus-de-filtres">Plus de filtres</h3>
 
 <ul>
@@ -824,10 +842,11 @@ sauts de lignes originaux. Utiliser le second comportement si vous voulez utilis
 <li><a href="http://jinja.pocoo.org/docs/templates/#center">center</a></li>
 <li><a href="http://jinja.pocoo.org/docs/templates/#dictsort">dictsort</a></li>
 <li><a href="http://jinja.pocoo.org/docs/templates/#escape">escape</a> (raccourci avec <code>e</code>)</li>
-<li><a href="http://jinja.pocoo.org/docs/templates/#safe">safe</a></li>
+<li><a href="http://jinja.pocoo.org/docs/templates/#float">float</a></li>
 <li><a href="http://jinja.pocoo.org/docs/templates/#first">first</a></li>
 <li><a href="http://jinja.pocoo.org/docs/templates/#groupby">groupby</a></li>
 <li><a href="http://jinja.pocoo.org/docs/templates/#indent">indent</a></li>
+<li><a href="http://jinja.pocoo.org/docs/templates/#int">int</a></li>
 <li><a href="http://jinja.pocoo.org/docs/templates/#join">join</a></li>
 <li><a href="http://jinja.pocoo.org/docs/templates/#last">last</a></li>
 <li><a href="http://jinja.pocoo.org/docs/templates/#length">length</a></li>
@@ -838,17 +857,18 @@ sauts de lignes originaux. Utiliser le second comportement si vous voulez utilis
 <li><a href="http://jinja.pocoo.org/docs/templates/#replace">replace</a> (le premier argument peut prendre une expression régulière JS)</li>
 <li><a href="http://jinja.pocoo.org/docs/templates/#reverse">reverse</a></li>
 <li><a href="http://jinja.pocoo.org/docs/templates/#round">round</a></li>
+<li><a href="http://jinja.pocoo.org/docs/templates/#safe">safe</a></li>
 <li><a href="http://jinja.pocoo.org/docs/templates/#selectattr">selectattr</a> (seulement pour le formulaire avec un unique argument)</li>
 <li><a href="http://jinja.pocoo.org/docs/templates/#slice">slice</a></li>
 <li><a href="http://jinja.pocoo.org/docs/templates/#string">string</a></li>
+<li><a href="http://jinja.pocoo.org/docs/dev/templates/#sum">sum</a></li>
 <li><a href="http://jinja.pocoo.org/docs/templates/#title">title</a></li>
 <li><a href="http://jinja.pocoo.org/docs/templates/#trim">trim</a></li>
 <li><a href="http://jinja.pocoo.org/docs/templates/#truncate">truncate</a></li>
 <li><a href="http://jinja.pocoo.org/docs/templates/#upper">upper</a></li>
+<li><a href="http://jinja.pocoo.org/docs/templates/#urlize">urlize</a></li>
 <li><a href="http://jinja.pocoo.org/docs/templates/#urlencode">urlencode</a></li>
 <li><a href="http://jinja.pocoo.org/docs/templates/#wordcount">wordcount</a></li>
-<li><a href="http://jinja.pocoo.org/docs/templates/#float">float</a></li>
-<li><a href="http://jinja.pocoo.org/docs/templates/#int">int</a></li>
 </ul>
 
 <p>Sinon, il est facile de lire le <a href="https://github.com/mozilla/nunjucks/blob/master/src/filters.js">code

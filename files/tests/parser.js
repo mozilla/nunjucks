@@ -289,10 +289,13 @@
             n = parser.parse('{% block foo %}stuff{% endblock %}');
             expect(n.children[0].typename).to.be('Block');
 
-            n = parser.parse('{% extends "test.html" %}stuff');
+            n = parser.parse('{% block foo %}stuff{% endblock foo %}');
+            expect(n.children[0].typename).to.be('Block');
+
+            n = parser.parse('{% extends "test.j2" %}stuff');
             expect(n.children[0].typename).to.be('Extends');
 
-            n = parser.parse('{% include "test.html" %}');
+            n = parser.parse('{% include "test.j2" %}');
             expect(n.children[0].typename).to.be('Include');
         });
 
@@ -500,17 +503,17 @@
         });
 
         it('should parse imports', function() {
-            isAST(parser.parse('{% import "foo/bar.html" as baz %}'),
+            isAST(parser.parse('{% import "foo/bar.j2" as baz %}'),
                   [nodes.Root,
                    [nodes.Import,
-                    [nodes.Literal, 'foo/bar.html'],
+                    [nodes.Literal, 'foo/bar.j2'],
                     [nodes.Symbol, 'baz']]]);
 
-            isAST(parser.parse('{% from "foo/bar.html" import baz, ' +
+            isAST(parser.parse('{% from "foo/bar.j2" import baz, ' +
                                '   foobar as foobarbaz %}'),
                   [nodes.Root,
                    [nodes.FromImport,
-                    [nodes.Literal, 'foo/bar.html'],
+                    [nodes.Literal, 'foo/bar.j2'],
                     [nodes.NodeList,
                      [nodes.Symbol, 'baz'],
                      [nodes.Pair,
@@ -564,6 +567,30 @@
                      [nodes.Output,
                       [nodes.TemplateData, 'hi']]]]]);
 
+            isAST(parser.parse('hello \n{#- comment #}'),
+                  [nodes.Root,
+                   [nodes.Output,
+                    [nodes.TemplateData, 'hello']]]);
+
+            isAST(parser.parse('{# comment -#} \n world'),
+                  [nodes.Root,
+                   [nodes.Output,
+                    [nodes.TemplateData, 'world']]]);
+
+            isAST(parser.parse('hello \n{#- comment -#} \n world'),
+                  [nodes.Root,
+                   [nodes.Output,
+                    [nodes.TemplateData, 'hello']],
+                   [nodes.Output,
+                    [nodes.TemplateData, 'world']]]);
+
+            isAST(parser.parse('hello \n{# - comment - #} \n world'),
+                  [nodes.Root,
+                   [nodes.Output,
+                    [nodes.TemplateData, 'hello \n']],
+                   [nodes.Output,
+                    [nodes.TemplateData, ' \n world']]]);
+
             // The from statement required a special case so make sure to
             // test it
             isAST(parser.parse('{% from x import y %}\n  hi \n'),
@@ -583,6 +610,46 @@
                      [nodes.Symbol, 'y']]],
                    [nodes.Output,
                     [nodes.TemplateData, 'hi \n']]]);
+
+            isAST(parser.parse('{% if x -%}{{y}} {{z}}{% endif %}'),
+                  [nodes.Root,
+                   [nodes.If,
+                    [nodes.Symbol, 'x'],
+                    [nodes.NodeList,
+                     [nodes.Output,
+                      [nodes.Symbol, 'y']],
+                     [nodes.Output,
+                      // the value of TemplateData should be ' ' instead of ''
+                      [nodes.TemplateData, ' ']],
+                     [nodes.Output,
+                      [nodes.Symbol, 'z']]]]]);
+
+            isAST(parser.parse('{% if x -%}{% if y %} {{z}}{% endif %}{% endif %}'),
+                [nodes.Root,
+                 [nodes.If,
+                  [nodes.Symbol, 'x'],
+                  [nodes.NodeList,
+                   [nodes.If,
+                    [nodes.Symbol, 'y'],
+                    [nodes.NodeList,
+                      [nodes.Output,
+                        // the value of TemplateData should be ' ' instead of ''
+                       [nodes.TemplateData, ' ']],
+                      [nodes.Output,
+                       [nodes.Symbol, 'z']]
+                      ]]]]]);
+
+            isAST(parser.parse('{% if x -%}{# comment #} {{z}}{% endif %}'),
+                 [nodes.Root,
+                  [nodes.If,
+                   [nodes.Symbol, 'x'],
+                   [nodes.NodeList,
+                    [nodes.Output,
+                     // the value of TemplateData should be ' ' instead of ''
+                     [nodes.TemplateData, ' ']],
+                    [nodes.Output,
+                     [nodes.Symbol, 'z']]]]]);
+
         });
 
         it('should throw errors', function() {
@@ -609,6 +676,10 @@
             expect(function() {
                 parser.parse('hello {% block sdf %} data');
             }).to.throwException(/expected endblock/);
+
+            expect(function() {
+                parser.parse('hello {% block sdf %} data{% endblock foo %}');
+            }).to.throwException(/expected block end/);
 
             expect(function() {
                 parser.parse('hello {% bar %} dsfsdf');

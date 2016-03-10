@@ -62,6 +62,9 @@
 <a href="#configure">configure</a>
 </li>
 <li>
+<a href="#configure">configure</a>
+</li>
+<li>
 <a href="#installjinjacompat">installJinjaCompat</a>
 </li>
 </ul>
@@ -219,6 +222,8 @@
 
 <p>Nunjucks 的 API 包括渲染模板，添加过滤器和扩展，自定义模板加载器等等。</p>
 
+<p><strong>注意</strong>: nunjucks并不是在沙盒中运行的，所以使用用户定义的模板可能存在风险。这可能导致的风险有：在服务器上运行时敏感数据被窃取，或是在客户端运行时遭遇跨站脚本攻击(详情请查看<a href="https://github.com/mozilla/nunjucks-docs/issues/17">这里</a>)。</p>
+
 <h2 id="simple-api">Simple API</h2>
 
 <p>如果你不需要深度定制，可以直接使用初级(higher-level) api 来加载和渲染模板。</p>
@@ -250,6 +255,16 @@
 
 <div class="api-sig"><code>nunjucks.configure([path], [opts]);</code></div>
 
+<div class="api-desc"><p>将给定的字符串编译成可重复使用的nunjucks模板对象。</p>
+<div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="kd">var</span> <span class="nx">template</span> <span class="o">=</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">compile</span><span class="p">(</span><span class="s1">&#39;Hello {{ username }}&#39;</span><span class="p">);</span>
+<span class="nx">template</span><span class="p">.</span><span class="nx">render</span><span class="p">({</span> <span class="nx">username</span><span class="o">:</span> <span class="s1">&#39;James&#39;</span> <span class="p">});</span>
+</code></pre></div>
+</div>
+
+<h3 id="configure">configure</h3>
+
+<div class="api-sig"><code>nunjucks.configure([path], [opts]);</code></div>
+
 <div class="api-desc"><p>传入 <strong>path</strong> 指定存放模板的目录，<strong>opts</strong> 可让某些功能开启或关闭，这两个变量都是可选的。<strong>path</strong> 的默认值为当前的工作目录，<strong>opts</strong> 提供以下功能：</p>
 
 <ul>
@@ -270,6 +285,8 @@
 </ul>
 
 <p><code>configure</code> 返回一个 <code>Environment</code> 实例, 他提供了简单的 api 添加过滤器 (filters) 和扩展 (extensions)，可在 <code>Environment</code> 查看更多的使用方法。</p>
+
+<p><strong>注意</strong>: 简单的API (比如说上面的<code>nunjucks.render</code>) 通常会使用最近一次调用<code>nunjucks.configure</code>时的配置。由于这种做法是隐性的，它可能会渲染出意料之外的结果，所以在大多数情况下我们不推荐使用这类简单的API(特别是用到<code>configure</code>的情况);我们推荐使用<code>var env = nunjucks.configure(...)</code>创建一个独立的环境，并调用<code>env.render(...)</code>进行渲染。</p>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="nx">nunjucks</span><span class="p">.</span><span class="nx">configure</span><span class="p">(</span><span class="s1">&#39;views&#39;</span><span class="p">);</span>
 
 <span class="c1">// 在浏览器端最好使用绝对地址</span>
@@ -346,7 +363,7 @@
 
 <div class="api-sig"><code>env.renderString(src, [context], [callback])</code></div>
 
-<div class="api-desc"><p>和 <a href="#render1"><code>render</code></a> 相同，只是渲染一个字符串而不是加载的模块。</p>
+<div class="api-desc"><p>和 <a href="#render"><code>render</code></a> 相同，只是渲染一个字符串而不是加载的模块。</p>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="kd">var</span> <span class="nx">res</span> <span class="o">=</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">renderString</span><span class="p">(</span><span class="s1">&#39;Hello {{ username }}&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">username</span><span class="o">:</span> <span class="s1">&#39;James&#39;</span> <span class="p">});</span>
 </code></pre></div>
 </div>
@@ -504,9 +521,7 @@ loaders exist, each for different contexts.</p>
 <li><strong>async</strong> 如果为 <code>true</code>，模板会异步请求，而非同步，同时你必须使用异步 render API（调用 <code>render</code> 时传入一个 callback）。</li>
 </ul>
 
-<p>如果 <strong>neverUpdate</strong> 为 <code>true</code>，模板只会加载一次，以后不会变化，默认每次渲染的时候都会加载。</p>
-
-<p>他还能加载预编译后的模板，自动使用这些模板而不是通过 http 获取，在生产环境应该使用预编译。查看 <a href="#precompiling-templates">Precompiling Templates</a>。</p>
+<p>他还能加载预编译后的模板，自动使用这些模板而不是通过 http 获取，在生产环境应该使用预编译。查看 <a href="#precompiling">Precompiling Templates</a>。</p>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="c1">// Load templates from /views</span>
 <span class="kd">var</span> <span class="nx">env</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">Environment</span><span class="p">(</span><span class="k">new</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">WebLoader</span><span class="p">(</span><span class="s1">&#39;/views&#39;</span><span class="p">))</span>
 </code></pre></div>
@@ -557,7 +572,7 @@ loaders exist, each for different contexts.</p>
 </code></pre></div>
 <p>记住现在必须使用异步 api，查看 <a href="#asynchronous-support">asynchronous support</a>。</p>
 
-<p><strong>注意</strong>: 如果使用了异步加载器，你将不能在 <code>for</code> 循环中加载模块，但可以使用 <code>asyncEach</code> 替换之。<code>asyncEach</code> 和 <code>for</code> 相同，只是在异步的时候使用。更多查看 <a href="#be-careful">Be Careful!</a>。</p>
+<p><strong>注意</strong>: 如果使用了异步加载器，你将不能在 <code>for</code> 循环中加载模块，但可以使用 <code>asyncEach</code> 替换之。<code>asyncEach</code> 和 <code>for</code> 相同，只是在异步的时候使用。更多查看 <a href="#be-careful!">Be Careful!</a>。</p>
 
 <h2 id="browser-usage">Browser Usage</h2>
 
@@ -637,6 +652,17 @@ $ nunjucks-precompile views/about.html &gt;&gt; templates.js
 <li><strong>env</strong>: <code>Environment</code> 的实例</li>
 <li><strong>include</strong>: 包括额外的文件和文件夹 (folders are auto-included, files are auto-excluded)</li>
 <li><strong>exclude</strong>: 排除额外的文件和文件夹 (folders are auto-included, files are auto-excluded)</li>
+<li><strong>wrapper</strong>: <code>function(templates, opts)</code> 自定义预编译模板的输出格式。这个函数必须返回一个字符串
+
+<ul>
+<li><strong>templates</strong>: 由对象组成的，带有下列属性的数组:
+
+<ul>
+<li><strong>name</strong>: 模板名称</li>
+<li><strong>template</strong>: 编译后的模板所生成的，运行在javascript上的字符串源码</li>
+</ul></li>
+<li><strong>opts</strong>: 上面所有配置选项所组成的对象</li>
+</ul></li>
 </ul>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="kd">var</span> <span class="nx">env</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">Environment</span><span class="p">();</span>
 
@@ -855,8 +881,8 @@ mytag foo, bar, baz=10 %}</code>。</p></li>
    <span class="c1">// do async stuff and then call callback(err, res)</span>
 <span class="p">};</span>
 </code></pre></div>
-<p>If you create anything interesting, make sure to
-<a href="https://github.com/mozilla/nunjucks/wiki/Custom-Tags">add it to the wiki!</a></p>
+<p>如果你做了些有趣的东西的话，请记得把他们
+<a href="https://github.com/mozilla/nunjucks/wiki/Custom-Tags">添加到wiki中!</a></p>
 
   </div>
 </div>

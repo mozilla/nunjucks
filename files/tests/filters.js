@@ -21,6 +21,7 @@
     var finish = util.finish;
 
     describe('filter', function() {
+
         it('abs', function(done) {
             equal('{{ -3|abs }}', '3');
             equal('{{ -3.456|abs }}', '3.456');
@@ -360,6 +361,26 @@
             finish(done);
         });
 
+        it('sum', function(done) {
+            equal('{{ items | sum }}',
+                  { items: [1, 2, 3] },
+                  '6');
+
+            equal('{{ items | sum("value") }}',
+                  { items: [{ value: 1 },
+                            { value: 2 },
+                            { value: 3 }] },
+                  '6');
+
+            equal('{{ items | sum("value", 10) }}',
+                  { items: [{ value: 1 },
+                            { value: 2 },
+                            { value: 3 }] },
+                  '16');
+
+            finish(done);
+        });
+
         it('sort', function(done) {
             equal('{% for i in [3,5,2,1,4,6] | sort %}{{ i }}{% endfor %}',
                   '123456');
@@ -531,7 +552,7 @@
             equal('{{ "http://jinja.pocoo.org/docs/templates/)" | urlize | safe }}',
                 '<a href="http://jinja.pocoo.org/docs/templates/">http://jinja.pocoo.org/docs/templates/</a>');
             equal('{{ "http://jinja.pocoo.org/docs/templates/\n" | urlize | safe }}',
-                '<a href="http://jinja.pocoo.org/docs/templates/">http://jinja.pocoo.org/docs/templates/</a>');
+                '<a href="http://jinja.pocoo.org/docs/templates/">http://jinja.pocoo.org/docs/templates/</a>\n');
             equal('{{ "http://jinja.pocoo.org/docs/templates/&gt;" | urlize | safe }}',
                 '<a href="http://jinja.pocoo.org/docs/templates/">http://jinja.pocoo.org/docs/templates/</a>');
 
@@ -549,6 +570,10 @@
 
             //markup in the text
             equal('{{ "<b>what up</b>" | urlize | safe }}', '<b>what up</b>');
+
+            //breaklines and tabs in the text
+            equal('{{ "what\nup" | urlize | safe }}', 'what\nup');
+            equal('{{ "what\tup" | urlize | safe }}', 'what\tup');
 
             finish(done);
         });

@@ -57,6 +57,11 @@
 </li>
 <li>
 <a href="#模板继承">模板继承</a>
+<ul>
+<li>
+<a href="#super">super</a>
+</li>
+</ul>
 </li>
 <li>
 <a href="#标签">标签</a>
@@ -94,6 +99,12 @@
 <li>
 <a href="#raw">raw</a>
 </li>
+<li>
+<a href="#filter">filter</a>
+</li>
+<li>
+<a href="#call">call</a>
+</li>
 </ul>
 </li>
 <li>
@@ -122,6 +133,9 @@
 </li>
 <li>
 <a href="#函数调用-function-calls">函数调用 (Function Calls)</a>
+</li>
+<li>
+<a href="#正则表达式">正则表达式</a>
 </li>
 </ul>
 </li>
@@ -159,7 +173,8 @@
 <p>这里包括 nunjuck 所有可用的功能。</p>
 
 <blockquote>
-<p>Nunjucks 是 <a href="http://jinja.pocoo.org/docs/">jinja2</a> 的 javascript 的实现，所以如果此文档有什么缺失，你可以直接查看 <a href="http://jinja.pocoo.org/docs/templates/">jinja2 的文档</a>，不过两者之间还存在一些<a href="http://mozilla.github.io/nunjucks/cn/faq.html">差异</a>。</p>
+<p>Nunjucks 是
+<a href="http://jinja.pocoo.org/docs/">jinja2</a> 的 javascript 的实现，所以如果此文档有什么缺失，你可以直接查看 <a href="http://jinja.pocoo.org/docs/templates/">jinja2 的文档</a>，不过两者之间还存在一些<a href="http://mozilla.github.io/nunjucks/cn/faq.html">差异</a>。</p>
 </blockquote>
 
 <h2 id="变量">变量</h2>
@@ -183,7 +198,7 @@ foo.bar }}</code>, <code>{{ foo.bar.baz }}</code> 也不显示)。</p>
 </code></pre></div>
 <p>第三个例子展示了链式过滤器，最终会显示 &quot;Bar&quot;，第一个过滤器将 &quot;foo&quot; 替换成 &quot;bar&quot;，第二个过滤器将首字母大写。</p>
 
-<p>Nunjucks 提供了一些<a href="#builtin-filters">内置的过滤器</a>，你也可以<a href="api#custom-filters">自定义过滤器</a>。</p>
+<p>Nunjucks 提供了一些<a href="#%E5%86%85%E7%BD%AE%E7%9A%84%E8%BF%87%E6%BB%A4%E5%99%A8">内置的过滤器</a>，你也可以<a href="api#custom-filters">自定义过滤器</a>。</p>
 
 <h2 id="模板继承">模板继承</h2>
 
@@ -226,11 +241,23 @@ foo.bar }}</code>, <code>{{ foo.bar.baz }}</code> 也不显示)。</p>
 <span class="x">  This is the right side!</span>
 <span class="x">&lt;/section&gt;</span>
 </code></pre></div>
-<p>你可以将继承的模板设为一个变量，这样就可以动态指定继承的模板。</p>
+<p>你可以将继承的模板设为一个变量，这样就可以动态指定继承的模板。这个变量既可以是个指向模板文件的字符串，也可以是个模板编译后所生成的对象(需要添加上下文环境)。因此你可以通过设置上下文变量，从而在渲染时动态地改变所要继承的模板。</p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">extends</span> <span class="nv">parentTemplate</span> <span class="cp">%}</span><span class="x"></span>
 </code></pre></div>
 <p>继承功能使用了 <a href="#extends"><code>extends</code></a> 和 <a href="#block"><code>block</code></a> 标签，<a href="http://jinja.pocoo.org/docs/templates/#template-inheritance">jinja2 文档</a>中有更细节的描述。</p>
 
+<h3 id="super">super</h3>
+
+<p>你可以通过调用<code>super</code>从而将父级区块中的内容渲染到子区块中。如果在前面的例子中你的子模板是这样的：</p>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">block</span> <span class="nv">right</span> <span class="cp">%}</span><span class="x"></span>
+<span class="cp">{{</span> <span class="nb">super</span><span class="o">()</span> <span class="cp">}}</span><span class="x"></span>
+<span class="x">Right side!</span>
+<span class="cp">{%</span> <span class="k">endblock</span> <span class="cp">%}</span><span class="x"></span>
+</code></pre></div>
+<p>这个区块的渲染结果将是：</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">This is more content
+Right side!
+</code></pre></div>
 <h2 id="标签">标签</h2>
 
 <p>标签是一些特殊的区块，它们可以对模板执行一些操作。Nunjucks 包含一些内置的标签，你也可以<a href="api.html#custom-tags">自定义</a>。</p>
@@ -251,7 +278,7 @@ foo.bar }}</code>, <code>{{ foo.bar.baz }}</code> 也不显示)。</p>
 <span class="x">  I am good!</span>
 <span class="cp">{%</span> <span class="k">endif</span> <span class="cp">%}</span><span class="x"></span>
 </code></pre></div>
-<p>在<a href="#if-expression">内联表达式</a>(inline expression)中也可以使用 if。</p>
+<p>在<a href="#if-%E8%A1%A8%E8%BE%BE%E5%BC%8F">内联表达式</a>(inline expression)中也可以使用 if。</p>
 
 <h3 id="for">for</h3>
 
@@ -265,12 +292,14 @@ foo.bar }}</code>, <code>{{ foo.bar.baz }}</code> 也不显示)。</p>
 <span class="x">&lt;ul&gt;</span>
 <span class="cp">{%</span> <span class="k">for</span> <span class="nv">item</span> <span class="k">in</span> <span class="nv">items</span> <span class="cp">%}</span><span class="x"></span>
 <span class="x">  &lt;li&gt;</span><span class="cp">{{</span> <span class="nv">item.title</span> <span class="cp">}}</span><span class="x">&lt;/li&gt;</span>
+<span class="cp">{%</span> <span class="k">else</span> <span class="cp">%}</span><span class="x"></span>
+<span class="x">  &lt;li&gt;This would display if the &#39;item&#39; collection were empty&lt;/li&gt;</span>
 <span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span><span class="x"></span>
 <span class="x">&lt;/ul&gt;</span>
 </code></pre></div>
-<p>上面的示例显示了所有文章的标题。</p>
+<p>上面的示例通过使用<code>items</code>数组中的每一项的<code>title</code>属性显示了所有文章的标题。如果<code>items</code>数组是空数组的话则会渲染<code>else</code>语句中的内容。</p>
 
-<p>你还可以遍历对象</p>
+<p>你还可以遍历对象：</p>
 <div class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">food</span> <span class="o">=</span> <span class="p">{</span>
   <span class="s1">&#39;ketchup&#39;</span><span class="o">:</span> <span class="s1">&#39;5 tbsp&#39;</span><span class="p">,</span>
   <span class="s1">&#39;mustard&#39;</span><span class="o">:</span> <span class="s1">&#39;1 tbsp&#39;</span><span class="p">,</span>
@@ -306,11 +335,11 @@ foo.bar }}</code>, <code>{{ foo.bar.baz }}</code> 也不显示)。</p>
 <p>这个是适用于异步模板，请读<a href="api.html#asynchronous-support">文档</a>。</p>
 </blockquote>
 
-<p><code>asyncEach</code> 为 <code>for</code> 的异步版本，只有当使用<a href="#asynchronous">自定义异步模板加载器</a>的时候才使用，否则请不要使用。异步过滤器和扩展也需要他，但是一旦使用了会自动转换成 <code>asyncEach</code>。</p>
+<p><code>asyncEach</code> 为 <code>for</code> 的异步版本，只有当使用<a href="#asynchronous">自定义异步模板加载器</a>的时候才使用，否则请不要使用。异步过滤器和扩展也需要他。如果你在循环中使用了异步过滤器的话，nunjucks就会在内部自动将循环转换成 <code>asyncEach</code>。</p>
 
 <p><code>asyncEach</code> 和 <code>for</code> 的使用方式一致，但他支持循环的异步控制。将两者区分的原因是性能，大部分人使用同步模板，将 <code>for</code> 转换成原生的 for 语句会快很多。</p>
 
-<p>编译时 nunjuck 不用关心模板是如何加载的，所以无法决定 <code>include</code> 是同步或异步。这也是为什么无法自动转换的原因，所以如果你使用异步模板加载器需要使用 <code>asyncEach</code>。</p>
+<p>编译时 nunjuck 不用关心模板是如何加载的，所以无法决定 <code>include</code> 是同步或异步。这也是为什么nunjucks无法自动将普通的循环语句转换成异步循环语句的原因，所以如果你要使用异步模板加载器的话，就需要使用 <code>asyncEach</code>。</p>
 <div class="highlight"><pre><code class="language-js" data-lang="js"><span class="c1">// If you are using a custom loader that is async, you need asyncEach</span>
 <span class="kd">var</span> <span class="nx">env</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">Environment</span><span class="p">(</span><span class="nx">AsyncLoaderFromDatabase</span><span class="p">,</span> <span class="nx">opts</span><span class="p">);</span>
 </code></pre></div><div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="x">&lt;h1&gt;Posts&lt;/h1&gt;</span>
@@ -326,7 +355,7 @@ foo.bar }}</code>, <code>{{ foo.bar.baz }}</code> 也不显示)。</p>
 <p>这个是适用于异步模板，请读<a href="api.html#asynchronous-support">文档</a>。</p>
 </blockquote>
 
-<p><code>asyncAll</code> 和 <code>asyncEach</code> 类似，但 <code>asyncAll</code> 会并行的执行，每项的顺序仍然会保留。除非使用异步的过滤器、扩展或加载器，否则不要使用。</p>
+<p><code>asyncAll</code> 和 <code>asyncEach</code> 类似，但 <code>asyncAll</code> 会并行的执行，并且每项的顺序仍然会保留。除非使用异步的过滤器、扩展或加载器，否则不要使用。</p>
 
 <p>如果你写了一个 <code>lookup</code> 的过滤器用来从数据库获取一些文本，使用 <code>asyncAll</code> 可以并行渲染。</p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="x">&lt;h1&gt;Posts&lt;/h1&gt;</span>
@@ -352,11 +381,11 @@ foo.bar }}</code>, <code>{{ foo.bar.baz }}</code> 也不显示)。</p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">field</span><span class="o">(</span><span class="s1">&#39;user&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
 <span class="cp">{{</span> <span class="nv">field</span><span class="o">(</span><span class="s1">&#39;pass&#39;</span><span class="o">,</span> <span class="nv">type</span><span class="o">=</span><span class="s1">&#39;password&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
 </code></pre></div>
-<p>支持<a href="#keyword-arguments">关键字参数</a>，通过链接查看具体使用方式。</p>
+<p>支持<a href="#%E5%85%B3%E9%94%AE%E5%AD%97%E5%8F%82%E6%95%B0">关键字参数</a>，通过链接查看具体使用方式。</p>
 
 <p>还可以从其他模板 <a href="#import">import</a> 宏，可以使宏在整个项目中复用。</p>
 
-<p><strong>重要</strong>：如果你使用异步 API，请注意你 <strong>不能</strong> 在宏中做任何异步的操作，因为宏只是被简单的函数调用。将来会提供一种异步的调用方式，现在使用是不支持的。</p>
+<p><strong>重要</strong>：如果你使用异步 API，请注意你 <strong>不能</strong> 在宏中做任何异步的操作，因为宏只是像函数一样被简单地调用。将来我们可能会提供一种异步的宏调用方式，但现在这么使用是不被支持的。</p>
 
 <h3 id="set">set</h3>
 
@@ -372,16 +401,31 @@ foo.bar }}</code>, <code>{{ foo.bar.baz }}</code> 也不显示)。</p>
 </code></pre></div>
 <p>如果在顶级作用域使用 <code>set</code>，将会改变全局的上下文中的值。如果只在某个作用域 (<code>for</code>、 <code>include</code> 或其他) 中使用，只会影响该作用域。</p>
 
+<p>同样地，你也可以使用区块赋值将一个区块的内容储存在一个变量中。</p>
+
+<p>它的语法和标准的<code>set</code>语法相似，只不过你不需要用<code>=</code>。区块中从头到<code>{% endset %}</code>之间的内容都会被捕获，并作为值来使用。</p>
+
+<p>在某些情境下，你可以用这种语法来替代宏：</p>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">set</span> <span class="nv">standardModal</span> <span class="cp">%}</span><span class="x"></span>
+<span class="x">    </span><span class="cp">{%</span> <span class="k">include</span> <span class="s1">&#39;standardModalData.html&#39;</span> <span class="cp">%}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">endset</span> <span class="cp">%}</span><span class="x"></span>
+
+<span class="x">&lt;div class=&quot;js-modal&quot; data-modal=&quot;</span><span class="cp">{{</span><span class="nv">standardModal</span> <span class="o">|</span> <span class="nf">e</span><span class="cp">}}</span><span class="x">&quot;&gt;</span>
+</code></pre></div>
 <h3 id="extends">extends</h3>
 
-<p><code>extends</code> 用来指定模板继承，被指定的模板为父级模板，查看<a href="#template-inheritance">模板继承</a>。</p>
+<p><code>extends</code> 用来指定模板继承，被指定的模板为父级模板，查看<a href="#%E6%A8%A1%E6%9D%BF%E7%BB%A7%E6%89%BF">模板继承</a>。</p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">extends</span> <span class="s2">&quot;base.html&quot;</span> <span class="cp">%}</span><span class="x"></span>
 </code></pre></div>
-<p><code>extends</code> 可以接受任何表达式，你可以如下传入: <code>{% extends name + &quot;.html&quot; as obj %}</code>.</p>
-
+<p>你可以将继承的模板设为一个变量，这样就可以动态指定继承的模板。这个变量既可以是个指向模板文件的字符串，也可以是个模板编译后所生成的对象(需要添加上下文环境)。因此你可以通过设置上下文变量，从而在渲染时动态地改变所要继承的模板。</p>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">extends</span> <span class="nv">parentTemplate</span> <span class="cp">%}</span><span class="x"></span>
+</code></pre></div>
+<p><code>extends</code>也可以接受任意表达式，只要它最终返回一个字符串或是模板所编译成的对象：</p>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">extends</span> <span class="nv">name</span> <span class="o">+</span> <span class="s2">&quot;.html&quot;</span> <span class="cp">%}</span><span class="x">`.</span>
+</code></pre></div>
 <h3 id="block">block</h3>
 
-<p>区块(<code>block</code>) 定义了模板片段并标识一个名字，在模板继承中使用。父级模板可指定一个区块，子模板覆盖这个区块，查看<a href="#template-inheritance">模板继承</a>。</p>
+<p>区块(<code>block</code>) 定义了模板片段并标识一个名字，在模板继承中使用。父级模板可指定一个区块，子模板覆盖这个区块，查看<a href="#%E6%A8%A1%E6%9D%BF%E7%BB%A7%E6%89%BF">模板继承</a>。</p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">block</span> <span class="nv">css</span> <span class="cp">%}</span><span class="x"></span>
 <span class="x">&lt;link rel=&quot;stylesheet&quot; href=&quot;app.css&quot; /&gt;</span>
 <span class="cp">{%</span> <span class="k">endblock</span> <span class="cp">%}</span><span class="x"></span>
@@ -398,6 +442,8 @@ foo.bar }}</code>, <code>{{ foo.bar.baz }}</code> 也不显示)。</p>
 <span class="x">The name of the item is: </span><span class="cp">{{</span> <span class="nv">item.name</span> <span class="cp">}}</span><span class="x"></span>
 <span class="cp">{%</span> <span class="k">endblock</span> <span class="cp">%}</span><span class="x"></span>
 </code></pre></div>
+<p>在区块中，你可以调用特殊的<code>super</code>函数。它会渲染父级区块中的内容。具体请查看<a href="#super">super</a>。</p>
+
 <h3 id="include">include</h3>
 
 <p><code>include</code> 可引入其他的模板，可以在多模板之间共享一些小模板，如果某个模板已使用了继承那么 <code>include</code> 将会非常有用。</p>
@@ -410,11 +456,14 @@ foo.bar }}</code>, <code>{{ foo.bar.baz }}</code> 也不显示)。</p>
 </code></pre></div>
 <p>这一点可以帮助我们把模板切分成更小的部分，从而使得在浏览器上，当我们需要改变页面时，我们可以渲染这些小部分的模板，而非一整个的大的模板。</p>
 
-<p><code>include</code> 可以接受任何表达式，你可以如下传入: <code>{% include name + &quot;.html&quot; as obj %}</code>.</p>
+<p><code>include</code> 可以接受任意表达式，只要它最终返回一个字符串或是模板所编译成的对象: <code>{% include name + &quot;.html&quot; as obj %}</code>.</p>
 
+<p>在某些情况下，我们可能希望在模板文件不存在时不要抛出异常。对于这类情况，我们可以使用<code>ignore missing</code>来略过这些异常：</p>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">include</span> <span class="s2">&quot;missing.html&quot;</span> <span class="k">ignore missing</span> <span class="cp">%}</span><span class="x"></span>
+</code></pre></div>
 <h3 id="import">import</h3>
 
-<p><code>import</code> 可加载不同的模板，可使你操作模板输出的数据，模板将会输出宏 (macro) 和顶级作用域的赋值 (使用 <a href="#set"><code>set</code></a>)。</p>
+<p><code>import</code> 可加载不同的模板，可使你操作模板输出的数据，模板将会输出宏 (macro) 和在顶级作用域进行的赋值 (使用 <a href="#set"><code>set</code></a>)。</p>
 
 <p>被 import 进来的模板没有当前模板的上下文，所以无法使用当前模板的变量，</p>
 
@@ -448,15 +497,41 @@ foo.bar }}</code>, <code>{{ foo.bar.baz }}</code> 也不显示)。</p>
 <span class="cp">{{</span> <span class="nv">description</span><span class="o">(</span><span class="s1">&#39;Password&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
 <span class="cp">{{</span> <span class="nv">input</span><span class="o">(</span><span class="s1">&#39;pass&#39;</span><span class="o">,</span> <span class="nv">type</span><span class="o">=</span><span class="s1">&#39;password&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
 </code></pre></div>
-<p><code>import</code> 可以接受任何表达式，你可以如下传入: <code>{% import name + &quot;.html&quot; as obj %}</code>.</p>
+<p><code>import</code> 可以接受任意表达式，只要它最终返回一个字符串或是模板所编译成的对象: <code>{% import name + &quot;.html&quot; as obj %}</code>.</p>
 
 <h3 id="raw">raw</h3>
 
-<p>如果你想输出一些 nunjucks 特殊的标签 (如 <code>{{</code>)，可以使用 <code>raw</code> 使所有的内容输出为纯文本。</p>
+<p>如果你想输出一些 nunjucks 特殊的标签 (如 <code>{{</code>)，可以使用 <code>raw</code> 将所有的内容输出为纯文本。</p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">raw</span> <span class="cp">%}</span><span class="x"></span>
 <span class="x">  this will </span><span class="cp">{{</span> <span class="k">not</span> <span class="nv">be</span> <span class="nv">processed</span> <span class="cp">}}</span><span class="x"></span>
 <span class="x">{％ endraw %}</span>
 </code></pre></div>
+<h3 id="filter">filter</h3>
+
+<p><code>filter</code>区块允许我们使用区块中的内容来调用过滤器。不同于使用<code>|</code>语法，它会将区块渲染出的内容传递给过滤器。</p>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">filter</span> <span class="nf">title</span> <span class="cp">%}</span><span class="x"></span>
+<span class="x">may the force be with you</span>
+<span class="cp">{%</span> <span class="k">endfilter</span> <span class="cp">%}</span><span class="x"></span>
+
+<span class="cp">{%</span> <span class="k">filter</span> <span class="nf">replace</span><span class="o">(</span><span class="s2">&quot;force&quot;</span><span class="o">,</span> <span class="s2">&quot;forth&quot;</span><span class="o">)</span> <span class="cp">%}</span><span class="x"></span>
+<span class="x">may the force be with you</span>
+<span class="cp">{%</span> <span class="k">endfilter</span> <span class="cp">%}</span><span class="x"></span>
+</code></pre></div>
+<p>切记：你不能在这些区块中进行任何异步操作。</p>
+
+<h3 id="call">call</h3>
+
+<p><code>call</code>区块允许你使用标签之间的内容来调用一个宏。这在你需要给宏传入大量内容时是十分有用的。在宏中，你可以通过<code>caller()</code>来获取这些内容。</p>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">macro</span> <span class="nv">add</span><span class="o">(</span><span class="nv">x</span><span class="o">,</span> <span class="nv">y</span><span class="o">)</span> <span class="cp">%}</span><span class="x"></span>
+<span class="cp">{{</span> <span class="nv">caller</span><span class="o">()</span> <span class="cp">}}</span><span class="x">: </span><span class="cp">{{</span> <span class="nv">x</span> <span class="o">+</span> <span class="nv">y</span> <span class="cp">}}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">endmacro</span><span class="cp">%}</span><span class="x"></span>
+
+<span class="cp">{%</span> <span class="k">call</span> <span class="nv">add</span><span class="o">(</span><span class="m">1</span><span class="o">,</span> <span class="m">2</span><span class="o">)</span> -<span class="cp">%}</span><span class="x"></span>
+<span class="x">The result is</span>
+<span class="cp">{%</span>- <span class="k">endcall</span> <span class="cp">%}</span><span class="x"></span>
+</code></pre></div>
+<p>上面的例子将会输出&quot;The result is: 3&quot;。</p>
+
 <h2 id="关键字参数">关键字参数</h2>
 
 <p>jinja2 使用 Python 的关键字参数，支持函数，过滤器和宏。Nunjucks 会通过一个调用转换 (calling convention) 来支持。</p>
@@ -470,12 +545,12 @@ foo.bar }}</code>, <code>{{ foo.bar.baz }}</code> 也不显示)。</p>
 <p>因为这使一个标准的调用转换，所以适用于所有的符合预期的函数和过滤器。查看 <a href="api#Keyword-Arguments">API 章节</a>获得更多信息。</p>
 
 <p>定义宏的时候也可以使用关键字参数，定义参数值时可设置默认值。Nunjucks 会自动将关键字参数与宏里定义的值做匹配。</p>
-<div class="highlight"><pre><code class="language-text" data-lang="text">{% macro foo(x, y, z=5, w=6) %}
-{{ x }}, {{ y }}, {{ z }}, {{ w}}
-{% endmacro %}
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">macro</span> <span class="nv">foo</span><span class="o">(</span><span class="nv">x</span><span class="o">,</span> <span class="nv">y</span><span class="o">,</span> <span class="nv">z</span><span class="o">=</span><span class="m">5</span><span class="o">,</span> <span class="nv">w</span><span class="o">=</span><span class="m">6</span><span class="o">)</span> <span class="cp">%}</span><span class="x"></span>
+<span class="cp">{{</span> <span class="nv">x</span> <span class="cp">}}</span><span class="x">, </span><span class="cp">{{</span> <span class="nv">y</span> <span class="cp">}}</span><span class="x">, </span><span class="cp">{{</span> <span class="nv">z</span> <span class="cp">}}</span><span class="x">, </span><span class="cp">{{</span> <span class="nv">w</span><span class="cp">}}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">endmacro</span> <span class="cp">%}</span><span class="x"></span>
 
-{{ foo(1, 2) }}        -&gt; 1, 2, 5, 6
-{{ foo(1, 2, w=10) }}  -&gt; 1, 2, 5, 10
+<span class="cp">{{</span> <span class="nv">foo</span><span class="o">(</span><span class="m">1</span><span class="o">,</span> <span class="m">2</span><span class="o">)</span> <span class="cp">}}</span><span class="x">        -&gt; 1, 2, 5, 6</span>
+<span class="cp">{{</span> <span class="nv">foo</span><span class="o">(</span><span class="m">1</span><span class="o">,</span> <span class="m">2</span><span class="o">,</span> <span class="nv">w</span><span class="o">=</span><span class="m">10</span><span class="o">)</span> <span class="cp">}}</span><span class="x">  -&gt; 1, 2, 5, 10</span>
 </code></pre></div>
 <p>在宏中还可以混合使用位置参数 (positional arguments) 和关键字参数。如示例，你可以将位置参数用作关键字参数：</p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">foo</span><span class="o">(</span><span class="m">20</span><span class="o">,</span> <span class="nv">y</span><span class="o">=</span><span class="m">21</span><span class="o">)</span> <span class="cp">}}</span><span class="x">     -&gt; 20, 21, 5, 6</span>
@@ -507,7 +582,7 @@ foo.bar }}</code>, <code>{{ foo.bar.baz }}</code> 也不显示)。</p>
 
 <h2 id="表达式">表达式</h2>
 
-<p>你可以使用和 javascript 一样的<a href="literal%20expressions">字面量</a>。</p>
+<p>你可以使用和 javascript 一样的字面量。</p>
 
 <ul>
 <li>Strings: <code>&quot;How are you?&quot;</code>, <code>&#39;How are you?&#39;</code></li>
@@ -578,6 +653,21 @@ foo.bar }}</code>, <code>{{ foo.bar.baz }}</code> 也不显示)。</p>
 <p>如果你传入一个函数，则可以直接调用</p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">foo</span><span class="o">(</span><span class="m">1</span><span class="o">,</span> <span class="m">2</span><span class="o">,</span> <span class="m">3</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
 </code></pre></div>
+<h3 id="正则表达式">正则表达式</h3>
+
+<p>你可以像在JavaScript中一样创建一个正则表达式:</p>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="o">/</span><span class="err">^</span><span class="nv">foo</span><span class="err">.</span><span class="o">*/</span> <span class="cp">}}</span><span class="x"></span>
+<span class="cp">{{</span> <span class="o">/</span><span class="nv">bar</span><span class="err">$</span><span class="o">/</span><span class="nv">g</span> <span class="cp">}}</span><span class="x"></span>
+</code></pre></div>
+<p>正则表达式所支持的标志如下。查阅<a href="https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/RegExp">Regex on MDN</a>以获取更多信息。</p>
+
+<ul>
+<li><code>g</code>: 应用到全局</li>
+<li><code>i</code>: 不区分大小写</li>
+<li><code>m</code>: 多行模式</li>
+<li><code>y</code>: 粘性支持（sticky）</li>
+</ul>
+
 <h2 id="自动转义-autoescaping">自动转义 (Autoescaping)</h2>
 
 <p>如果在环境变量中设置了 autoescaping，所有的输出都会自动转义，但可以使用 <code>safe</code> 过滤器，Nunjucks 就不会转义了。</p>
@@ -609,7 +699,7 @@ foo.bar }}</code>, <code>{{ foo.bar.baz }}</code> 也不显示)。</p>
 <span class="x">  &lt;div class=&quot;</span><span class="cp">{{</span> <span class="nv">cls.next</span><span class="o">()</span> <span class="cp">}}</span><span class="x">&quot;&gt;</span><span class="cp">{{</span> <span class="nv">row.name</span> <span class="cp">}}</span><span class="x">&lt;/div&gt;</span>
 <span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span><span class="x"></span>
 </code></pre></div>
-<p>上面的例子中奇数行的 class 为 &quot;odd&quot;，偶数行的 class 为 &quot;even&quot;。</p>
+<p>上面的例子中奇数行的 class 为 &quot;odd&quot;，偶数行的 class 为 &quot;even&quot;。你可以使用<code>current</code>属性来获取当前项（在上面的例子中对应<code>cls.current</code>）。</p>
 
 <h3 id="joiner-separator">joiner([separator])</h3>
 
