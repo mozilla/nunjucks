@@ -41,17 +41,16 @@ date.
 8. Make sure docs are up-to-date. You need to copy all the `nunjucks*.js` files
    in `browser/` to the docs. This is where the "download" link points to in
    the docs. You also need to copy the tests into the docs, for the online
-   browser tests. Push (force push if necessary) the build out _site folder
-   onto the `gh-pages` branch of the `nunjucks` repo to get it live. One way to
-   do that is the following commands. These commands presume that you have
-   another nunjucks git clone inside the (git-ignored) `docs/_site` directory,
-   checked out to the `gh-pages` branch (and tracking `origin/gh-pages`). (To
-   set that up the first time, `cd docs/_site`, `rm -rf *`, `git clone
+   browser tests. ``make prod`` in the ``docs/`` dir will handle these tasks
+   for you. Push (force push if necessary) the build out _site folder onto the
+   `gh-pages` branch of the `nunjucks` repo to get it live. One way to do that
+   is the following commands. These commands presume that you have another
+   nunjucks git clone inside the (git-ignored) `docs/_site` directory, checked
+   out to the `gh-pages` branch (and tracking `origin/gh-pages`). (To set that
+   up the first time, `cd docs/_site`, `rm -rf *`, `git clone
    git@github.com:mozilla/nunjucks.git .`, and `git checkout gh-pages`).
 
    ```
-   cp browser/* docs/files
-   rsync -a tests/ docs/files/tests/
    cd docs && make prod
    cd files
    python -m SimpleHTTPServer
