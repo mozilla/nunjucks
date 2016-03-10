@@ -4,6 +4,9 @@ Changelog
 2.x (unreleased)
 ----------------
 
+* Allow retrieving boolean-false as a global. Thanks Marius Büscher. Merge of
+  [#694](https://github.com/mozilla/nunjucks/pull/694).
+
 * Don't automatically convert any for-loop that has an include statement into
   an async loop. Reverts
   [7d4716f4fd](https://github.com/mozilla/nunjucks/commit/7d4716f4fd), re-opens
