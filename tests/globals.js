@@ -114,6 +114,17 @@
             finish(done);
         });
 
+        it('should allow getting boolean globals', function(done) {
+            var env = new Environment(new Loader(templatesPath));
+            var hello = false;
+
+            env.addGlobal('hello', hello);
+
+            expect(env.getGlobal('hello')).to.be.equal(hello);
+
+            finish(done);
+        });
+
         it('should fail on getting non-existent global', function(done) {
             var env = new Environment(new Loader(templatesPath));
 
