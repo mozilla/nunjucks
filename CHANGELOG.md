@@ -26,6 +26,10 @@ Changelog
 2.x (unreleased)
 ----------------
 
+
+2.4.0 (Mar 10 2016)
+-------------------
+
 * Allow retrieving boolean-false as a global. Thanks Marius Büscher. Merge of
   [#694](https://github.com/mozilla/nunjucks/pull/694).
 
@@ -40,7 +44,8 @@ Changelog
   Chadkin. Merge of [#672](https://github.com/mozilla/nunjucks/pull/672).
 
 * Prevent includes from writing to their including scope. Merge of
-  [#667](https://github.com/mozilla/nunjucks/pull/667).
+  [#667](https://github.com/mozilla/nunjucks/pull/667) (only partially
+  backported to 2.x; macro var visibility not backported).
 
 * Fix handling of `dev` environment option, to get full tracebacks on errors
   (including nunjucks internals). Thanks Tobias Petry and Chandrasekhar Ambula
