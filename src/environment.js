@@ -124,7 +124,7 @@ var Environment = Obj.extend({
     },
 
     getGlobal: function(name) {
-        if(!this.globals[name]) {
+        if(typeof this.globals[name] === 'undefined') {
             throw new Error('global not found: ' + name);
         }
         return this.globals[name];
