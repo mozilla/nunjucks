@@ -26,6 +26,13 @@
             expect(child.render()).to.be('Foo*Bar*BazFizzle');
         });
 
+        it('should respect if statement then extending block', function() {
+            var env = new Environment(new Loader(templatesPath));
+
+            var child = env.getTemplate('extends-blocks.j2');
+            expect(child.render()).to.be('Foocase 1BazFizzle');
+        });
+
         it('should handle correctly relative paths', function() {
             var env = new Environment(new Loader(templatesPath));
 
