@@ -292,10 +292,10 @@
             n = parser.parse('{% block foo %}stuff{% endblock foo %}');
             expect(n.children[0].typename).to.be('Block');
 
-            n = parser.parse('{% extends "test.html" %}stuff');
+            n = parser.parse('{% extends "test.j2" %}stuff');
             expect(n.children[0].typename).to.be('Extends');
 
-            n = parser.parse('{% include "test.html" %}');
+            n = parser.parse('{% include "test.j2" %}');
             expect(n.children[0].typename).to.be('Include');
         });
 
@@ -503,17 +503,17 @@
         });
 
         it('should parse imports', function() {
-            isAST(parser.parse('{% import "foo/bar.html" as baz %}'),
+            isAST(parser.parse('{% import "foo/bar.j2" as baz %}'),
                   [nodes.Root,
                    [nodes.Import,
-                    [nodes.Literal, 'foo/bar.html'],
+                    [nodes.Literal, 'foo/bar.j2'],
                     [nodes.Symbol, 'baz']]]);
 
-            isAST(parser.parse('{% from "foo/bar.html" import baz, ' +
+            isAST(parser.parse('{% from "foo/bar.j2" import baz, ' +
                                '   foobar as foobarbaz %}'),
                   [nodes.Root,
                    [nodes.FromImport,
-                    [nodes.Literal, 'foo/bar.html'],
+                    [nodes.Literal, 'foo/bar.j2'],
                     [nodes.NodeList,
                      [nodes.Symbol, 'baz'],
                      [nodes.Pair,

@@ -364,11 +364,11 @@ var Compiler = Object.extend({
     },
 
     compileIn: function(node, frame) {
-      this.emit('(');
-      this.compile(node.right, frame);
-      this.emit('.indexOf(');
+      this.emit('runtime.inOperator(');
       this.compile(node.left, frame);
-      this.emit(') !== -1)');
+      this.emit(',');
+      this.compile(node.right, frame);
+      this.emit(')');
     },
 
     compileOr: binOpEmitter(' || '),
@@ -523,9 +523,18 @@ var Compiler = Object.extend({
             ids.push(id);
         }, this);
 
-        this.emit(ids.join(' = ') + ' = ');
-        this._compileExpression(node.value, frame);
-        this.emitLine(';');
+        if (node.value) {
+          this.emit(ids.join(' = ') + ' = ');
+          this._compileExpression(node.value, frame);
+          this.emitLine(';');
+        }
+        else {
+          this.emitLine(ids.join(' = ') + ' = (function() {');
+          this.emitLine('var output = "";');
+          this.compile(node.body, frame);
+          this.emitLine('return output;');
+          this.emitLine('})();');
+        }
 
         lib.each(node.targets, function(target, i) {
             var id = ids[i];
@@ -822,7 +831,8 @@ var Compiler = Object.extend({
             '[' + argNames.join(', ') + '], ',
             '[' + kwargNames.join(', ') + '], ',
             'function (' + realNames.join(', ') + ') {',
-            'frame = frame.push();',
+            'var callerFrame = frame;',
+            'frame = new runtime.Frame();',
             'kwargs = kwargs || {};',
             'if (kwargs.hasOwnProperty("caller")) {',
             'frame.set("caller", kwargs.caller); }'
@@ -857,7 +867,7 @@ var Compiler = Object.extend({
         });
 
         frame = frame.pop();
-        this.emitLine('frame = frame.pop();');
+        this.emitLine('frame = callerFrame;');
         this.emitLine('return new runtime.SafeString(' + bufferId + ');');
         this.emitLine('});');
         this.popBufferId();
@@ -1089,6 +1099,7 @@ var Compiler = Object.extend({
             this.emitFuncBegin('b_' + name);
 
             var tmpFrame = new Frame();
+            this.emitLine('var frame = frame.push(true);');
             this.compile(block.body, tmpFrame);
             this.emitFuncEnd();
         }

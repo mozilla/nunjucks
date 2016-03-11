@@ -124,7 +124,7 @@ var Environment = Obj.extend({
     },
 
     getGlobal: function(name) {
-        if(!this.globals[name]) {
+        if(typeof this.globals[name] === 'undefined') {
             throw new Error('global not found: ' + name);
         }
         return this.globals[name];
@@ -433,7 +433,7 @@ Template = Obj.extend({
                 _this._compile();
             }
             catch(err) {
-                throw lib.prettifyError(this.path, this.env.dev, err);
+                throw lib.prettifyError(this.path, this.env.opts.dev, err);
             }
         }
         else {
@@ -465,13 +465,13 @@ Template = Obj.extend({
         try {
             _this.compile();
         } catch (_err) {
-            var err = lib.prettifyError(this.path, this.env.dev, _err);
+            var err = lib.prettifyError(this.path, this.env.opts.dev, _err);
             if (cb) return callbackAsap(cb, err);
             else throw err;
         }
 
         var context = new Context(ctx || {}, _this.blocks, _this.env);
-        var frame = parentFrame ? parentFrame.push() : new Frame();
+        var frame = parentFrame ? parentFrame.push(true) : new Frame();
         frame.topLevel = true;
         var syncResult = null;
 
@@ -482,7 +482,7 @@ Template = Obj.extend({
             runtime,
             function(err, res) {
                 if(err) {
-                    err = lib.prettifyError(_this.path, _this.env.dev, err);
+                    err = lib.prettifyError(_this.path, _this.env.opts.dev, err);
                 }
 
                 if(cb) {

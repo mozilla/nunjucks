@@ -21,6 +21,7 @@
     }
 
     var equal = util.equal;
+    var render = util.render;
     var finish = util.finish;
 
     describe('global', function() {
@@ -113,6 +114,17 @@
             finish(done);
         });
 
+        it('should allow getting boolean globals', function(done) {
+            var env = new Environment(new Loader(templatesPath));
+            var hello = false;
+
+            env.addGlobal('hello', hello);
+
+            expect(env.getGlobal('hello')).to.be.equal(hello);
+
+            finish(done);
+        });
+
         it('should fail on getting non-existent global', function(done) {
             var env = new Environment(new Loader(templatesPath));
 
@@ -144,6 +156,22 @@
           expect(function() { env2.getGlobal('hello') }).to.throwError();
 
           finish(done);
+        });
+
+        it('should return errors from globals', function(done) {
+            var env = new Environment(new Loader(templatesPath));
+
+            env.addGlobal('err', function() {
+                throw new Error('Global error');
+            });
+
+            try {
+                render('{{ err() }}', null, {}, env);
+            } catch (e) {
+                expect(e).to.be.a(Error);
+            }
+
+            finish(done);
         });
     });
 })();

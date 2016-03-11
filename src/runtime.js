@@ -7,10 +7,13 @@ var Obj = require('./object');
 // we know how to access variables. Block tags can introduce special
 // variables, for example.
 var Frame = Obj.extend({
-    init: function(parent) {
+    init: function(parent, isolateWrites) {
         this.variables = {};
         this.parent = parent;
         this.topLevel = false;
+        // if this is true, writes (set) should never propagate upwards past
+        // this frame to its parent (though reads may).
+        this.isolateWrites = isolateWrites;
     },
 
     set: function(name, val, resolveUp) {
@@ -21,11 +24,10 @@ var Frame = Obj.extend({
         var frame = this;
 
         if(resolveUp) {
-            if((frame = this.resolve(parts[0]))) {
+            if((frame = this.resolve(parts[0], true))) {
                 frame.set(name, val);
                 return;
             }
-            frame = this;
         }
 
         for(var i=0; i<parts.length - 1; i++) {
@@ -42,7 +44,7 @@ var Frame = Obj.extend({
 
     get: function(name) {
         var val = this.variables[name];
-        if(val !== undefined && val !== null) {
+        if(val !== undefined) {
             return val;
         }
         return null;
@@ -51,23 +53,23 @@ var Frame = Obj.extend({
     lookup: function(name) {
         var p = this.parent;
         var val = this.variables[name];
-        if(val !== undefined && val !== null) {
+        if(val !== undefined) {
             return val;
         }
         return p && p.lookup(name);
     },
 
-    resolve: function(name) {
-        var p = this.parent;
+    resolve: function(name, forWrite) {
+        var p = (forWrite && this.isolateWrites) ? undefined : this.parent;
         var val = this.variables[name];
-        if(val !== undefined && val !== null) {
+        if(val !== undefined) {
             return this;
         }
         return p && p.resolve(name);
     },
 
-    push: function() {
-        return new Frame(this);
+    push: function(isolateWrites) {
+        return new Frame(this, isolateWrites);
     },
 
     pop: function() {
@@ -248,7 +250,7 @@ function callWrap(obj, name, context, args) {
 
 function contextOrFrameLookup(context, frame, name) {
     var val = frame.lookup(name);
-    return (val !== undefined && val !== null) ?
+    return (val !== undefined) ?
         val :
         context.lookup(name);
 }
@@ -355,5 +357,6 @@ module.exports = {
     copySafeness: copySafeness,
     markSafe: markSafe,
     asyncEach: asyncEach,
-    asyncAll: asyncAll
+    asyncAll: asyncAll,
+    inOperator: lib.inOperator
 };

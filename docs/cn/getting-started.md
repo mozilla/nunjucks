@@ -20,7 +20,7 @@ $ npm install nunjucks
 ### 你应该使用哪个文件
 
 * **nunjucks.js** 可用于动态加载模板，当模板变化时重新加载，也可以用于预编译后的模板。包含编译器，所以会比较大 (20K min/gzipped)。如果你刚接触 nunjucks 可使用这个文件，如果你不在意大小也可以在生产环境使用。
- 
+
 * **nunjucks-slim.js** 只能用于预编译后的模板，只包含运行时的代码，所以比较小 (8K min/gzipped)。一般用于生产环境，如果你使用 [grunt task](https://github.com/jlongster/grunt-nunjucks) 自动预编译，也可以在开发环境使用。
 
 直接用 `script` 引入文件：
@@ -75,13 +75,8 @@ app.get('/', function(req, res) {
 
 上面的 API 适用于 node 端和浏览器端 (express 只适用于 node 端)，在 node 端 nunjucks 从文件系统加载模板，在浏览器端通过 http 加载模板。
 
-If you [precompiled](api.html#precompiling) your templates in the browser, they will
-automatically be picked up by the system and you don't have to do
-anything different. This makes it easy to use the same code in
-development and production, while only using precompiled templates in
-production.
+如果你在浏览器上使用[编译后](api.html#precompiling)的模板的话，你不需要额外做其他的事情系统也能够理解它们。这使得我们可以轻松地在开发环境和生产环境上使用同一份代码，并在生产环境上只使用已经编译过的模板。
 
 ## 更多信息
 
 这只是冰山一角，可继续查看 [API](api.html) 文档和[模板语言](templating.html)。
-

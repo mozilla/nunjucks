@@ -1,8 +1,69 @@
 Changelog
 =========
 
-master (unreleased)
+3.x (unreleased)
+----------------
+
+* Allow explicitly setting `null` (aka `none`) as the value of a variable;
+  don't ignore that value and look on up the frame stack or context. Fixes
+  [#478](https://github.com/mozilla/nunjucks/issues/478). Thanks Jonny Gerig
+  Meyer for the report.
+
+* Execute blocks in a child frame that can't write to its parent. This means
+  that vars set inside blocks will not leak outside of the block, base
+  templates can no longer see vars set in templates that inherit them, and
+  `super()` can no longer set vars in its calling scope. Fixes the inheritance
+  portion of [#561](https://github.com/mozilla/nunjucks/issues/561), which
+  fully closes that issue. Thanks legutierr for the report.
+
+* Prevent macros from seeing or affecting their calling scope. Merge of
+  [#667](https://github.com/mozilla/nunjucks/pull/667).
+
+* Prevent filter.escape from escaping SafeString. Thanks atian25. Merge of
+  [#623](https://github.com/mozilla/nunjucks/pull/623).
+
+
+2.x (unreleased)
+----------------
+
+
+2.4.0 (Mar 10 2016)
 -------------------
+
+* Allow retrieving boolean-false as a global. Thanks Marius Büscher. Merge of
+  [#694](https://github.com/mozilla/nunjucks/pull/694).
+
+* Don't automatically convert any for-loop that has an include statement into
+  an async loop. Reverts
+  [7d4716f4fd](https://github.com/mozilla/nunjucks/commit/7d4716f4fd), re-opens
+  [#372](https://github.com/mozilla/nunjucks/issues/372), fixes
+  [#527](https://github.com/mozilla/nunjucks/issues/527). Thanks Tom Delmas for
+  the report.
+
+* Switch from Optimist to Yargs for argument-parsing. Thanks Bogdan
+  Chadkin. Merge of [#672](https://github.com/mozilla/nunjucks/pull/672).
+
+* Prevent includes from writing to their including scope. Merge of
+  [#667](https://github.com/mozilla/nunjucks/pull/667) (only partially
+  backported to 2.x; macro var visibility not backported).
+
+* Fix handling of `dev` environment option, to get full tracebacks on errors
+  (including nunjucks internals). Thanks Tobias Petry and Chandrasekhar Ambula
+  V for the report, Aleksandr Motsjonov for draft patch.
+
+* Support using `in` operator to search in both arrays and objects,
+  and it will throw an error for other data types.
+  Fix [#659](https://github.com/mozilla/nunjucks/pull/659).
+  Thanks Alex Mayfield for report and test, Ouyang Yadong for fix.
+  Merge of [#661](https://github.com/mozilla/nunjucks/pull/661).
+
+* Add support for `{% set %}` block assignments as in jinja2. Thanks Daniele
+  Rapagnani. Merge of [#656](https://github.com/mozilla/nunjucks/pull/656)
+
+* Fix `{% set %}` scoping within macros.
+  Fixes [#577](https://github.com/mozilla/nunjucks/issues/577) and
+  the macro portion of [#561](https://github.com/mozilla/nunjucks/issues/561).
+  Thanks Ouyang Yadong. Merge of [#653](https://github.com/mozilla/nunjucks/pull/653).
 
 * Add support for named `endblock` (e.g. `{% endblock foo %}`). Thanks
   ricordisamoa. Merge of [#641](https://github.com/mozilla/nunjucks/pull/641).
@@ -25,9 +86,6 @@ master (unreleased)
 
 * Fix whitespace control around nested tags/variables/comments. Thanks Ouyang
   Yadong. Merge of [#631](https://github.com/mozilla/nunjucks/pull/631).
-
-* [Breaking Change] Prevent filter.escape from escaping SafeString. Thanks
-  atian25. Merge of [#623](https://github.com/mozilla/nunjucks/pull/623).
 
 
 v2.3.0 (Jan 6 2016)

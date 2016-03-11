@@ -1,4 +1,4 @@
-/*! Browser bundle of nunjucks 2.3.0  */
+/*! Browser bundle of nunjucks 2.4.0  */
 var nunjucks =
 /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
@@ -425,6 +425,17 @@ var nunjucks =
 	    }
 	};
 
+	exports.inOperator = function (key, arrOrObj) {
+	    if (exports.isArray(arrOrObj)) {
+	        return exports.indexOf(arrOrObj, key) !== -1;
+	    } else if (exports.isObject(arrOrObj)) {
+	        return key in arrOrObj;
+	    } else {
+	        throw new Error('Cannot use "in" operator to search for "'
+	            + key + '" in unexpected types.');
+	    }
+	};
+
 
 /***/ },
 /* 2 */
@@ -556,7 +567,7 @@ var nunjucks =
 	    },
 
 	    getGlobal: function(name) {
-	        if(!this.globals[name]) {
+	        if(typeof this.globals[name] === 'undefined') {
 	            throw new Error('global not found: ' + name);
 	        }
 	        return this.globals[name];
@@ -865,7 +876,7 @@ var nunjucks =
 	                _this._compile();
 	            }
 	            catch(err) {
-	                throw lib.prettifyError(this.path, this.env.dev, err);
+	                throw lib.prettifyError(this.path, this.env.opts.dev, err);
 	            }
 	        }
 	        else {
@@ -897,13 +908,13 @@ var nunjucks =
 	        try {
 	            _this.compile();
 	        } catch (_err) {
-	            var err = lib.prettifyError(this.path, this.env.dev, _err);
+	            var err = lib.prettifyError(this.path, this.env.opts.dev, _err);
 	            if (cb) return callbackAsap(cb, err);
 	            else throw err;
 	        }
 
 	        var context = new Context(ctx || {}, _this.blocks, _this.env);
-	        var frame = parentFrame ? parentFrame.push() : new Frame();
+	        var frame = parentFrame ? parentFrame.push(true) : new Frame();
 	        frame.topLevel = true;
 	        var syncResult = null;
 
@@ -914,7 +925,7 @@ var nunjucks =
 	            runtime,
 	            function(err, res) {
 	                if(err) {
-	                    err = lib.prettifyError(_this.path, _this.env.dev, err);
+	                    err = lib.prettifyError(_this.path, _this.env.opts.dev, err);
 	                }
 
 	                if(cb) {
@@ -1766,11 +1777,11 @@ var nunjucks =
 	    },
 
 	    compileIn: function(node, frame) {
-	      this.emit('(');
-	      this.compile(node.right, frame);
-	      this.emit('.indexOf(');
+	      this.emit('runtime.inOperator(');
 	      this.compile(node.left, frame);
-	      this.emit(') !== -1)');
+	      this.emit(',');
+	      this.compile(node.right, frame);
+	      this.emit(')');
 	    },
 
 	    compileOr: binOpEmitter(' || '),
@@ -1925,9 +1936,18 @@ var nunjucks =
 	            ids.push(id);
 	        }, this);
 
-	        this.emit(ids.join(' = ') + ' = ');
-	        this._compileExpression(node.value, frame);
-	        this.emitLine(';');
+	        if (node.value) {
+	          this.emit(ids.join(' = ') + ' = ');
+	          this._compileExpression(node.value, frame);
+	          this.emitLine(';');
+	        }
+	        else {
+	          this.emitLine(ids.join(' = ') + ' = (function() {');
+	          this.emitLine('var output = "";');
+	          this.compile(node.body, frame);
+	          this.emitLine('return output;');
+	          this.emitLine('})();');
+	        }
 
 	        lib.each(node.targets, function(target, i) {
 	            var id = ids[i];
@@ -1983,7 +2003,7 @@ var nunjucks =
 	    compileIfAsync: function(node, frame) {
 	        this.emit('(function(cb) {');
 	        this.compileIf(node, frame, true);
-	        this.emit('})(function() {');
+	        this.emit('})(' + this.makeCallback());
 	        this.addScopeLevel();
 	    },
 
@@ -2224,7 +2244,7 @@ var nunjucks =
 	            '[' + argNames.join(', ') + '], ',
 	            '[' + kwargNames.join(', ') + '], ',
 	            'function (' + realNames.join(', ') + ') {',
-	            'frame = frame.push();',
+	            'frame = frame.push(true);',
 	            'kwargs = kwargs || {};',
 	            'if (kwargs.hasOwnProperty("caller")) {',
 	            'frame.set("caller", kwargs.caller); }'
@@ -2963,12 +2983,15 @@ var nunjucks =
 	        this.advanceAfterBlockEnd(tag.value);
 
 	        node.body = this.parseUntilBlocks('endblock');
+	        this.skipSymbol('endblock');
+	        this.skipSymbol(node.name.value);
 
-	        if(!this.peekToken()) {
+	        var tok = this.peekToken();
+	        if(!tok) {
 	            this.fail('parseBlock: expected endblock, got end of file');
 	        }
 
-	        this.advanceAfterBlockEnd();
+	        this.advanceAfterBlockEnd(tok.value);
 
 	        return node;
 	    },
@@ -3066,13 +3089,21 @@ var nunjucks =
 	        }
 
 	        if(!this.skipValue(lexer.TOKEN_OPERATOR, '=')) {
-	            this.fail('parseSet: expected = in set tag',
-	                      tag.lineno,
-	                      tag.colno);
+	            if (!this.skip(lexer.TOKEN_BLOCK_END)) {
+	                this.fail('parseSet: expected = or block end in set tag',
+	                          tag.lineno,
+	                          tag.colno);
+	            }
+	            else {
+	                node.body = this.parseUntilBlocks('endset');
+	                node.value = null;
+	                this.advanceAfterBlockEnd();
+	            }
 	        }
-
-	        node.value = this.parseExpression();
-	        this.advanceAfterBlockEnd(tag.value);
+	        else {
+	            node.value = this.parseExpression();
+	            this.advanceAfterBlockEnd(tag.value);
+	        }
 
 	        return node;
 	    },
@@ -3753,8 +3784,11 @@ var nunjucks =
 
 	                // Same for the succeding block start token
 	                if(nextToken &&
-	                   nextToken.type === lexer.TOKEN_BLOCK_START &&
-	                   nextVal.charAt(nextVal.length - 1) === '-') {
+	                    ((nextToken.type === lexer.TOKEN_BLOCK_START &&
+	                      nextVal.charAt(nextVal.length - 1) === '-') ||
+	                    (nextToken.type === lexer.TOKEN_COMMENT &&
+	                      nextVal.charAt(this.tokens.tags.COMMENT_START.length)
+	                        === '-'))) {
 	                    // TODO: this could be optimized (don't use regex)
 	                    data = data.replace(/\s*$/, '');
 	                }
@@ -3766,6 +3800,7 @@ var nunjucks =
 	                                                                  data)]));
 	            }
 	            else if(tok.type === lexer.TOKEN_BLOCK_START) {
+	                this.dropLeadingWhitespace = false;
 	                var n = this.parseStatement();
 	                if(!n) {
 	                    break;
@@ -3775,12 +3810,18 @@ var nunjucks =
 	            else if(tok.type === lexer.TOKEN_VARIABLE_START) {
 	                var e = this.parseExpression();
 	                this.advanceAfterVariableEnd();
+	                this.dropLeadingWhitespace = false;
 	                buf.push(new nodes.Output(tok.lineno, tok.colno, [e]));
 	            }
-	            else if(tok.type !== lexer.TOKEN_COMMENT) {
+	            else if(tok.type === lexer.TOKEN_COMMENT) {
+	                this.dropLeadingWhitespace = tok.value.charAt(
+	                    tok.value.length - this.tokens.tags.COMMENT_END.length - 1
+	                ) === '-';
+	            } else {
 	                // Ignore comments, otherwise this should be an error
 	                this.fail('Unexpected token at top-level: ' +
 	                                tok.type, tok.lineno, tok.colno);
+
 	            }
 	        }
 
@@ -4845,8 +4886,7 @@ var nunjucks =
 	               node instanceof nodes.IfAsync ||
 	               node instanceof nodes.AsyncEach ||
 	               node instanceof nodes.AsyncAll ||
-	               node instanceof nodes.CallExtensionAsync ||
-	               node instanceof nodes.Include) {
+	               node instanceof nodes.CallExtensionAsync) {
 	                async = true;
 	                // Stop iterating by returning the node
 	                return node;
@@ -4908,10 +4948,13 @@ var nunjucks =
 	// we know how to access variables. Block tags can introduce special
 	// variables, for example.
 	var Frame = Obj.extend({
-	    init: function(parent) {
+	    init: function(parent, isolateWrites) {
 	        this.variables = {};
 	        this.parent = parent;
 	        this.topLevel = false;
+	        // if this is true, writes (set) should never propagate upwards past
+	        // this frame to its parent (though reads may).
+	        this.isolateWrites = isolateWrites;
 	    },
 
 	    set: function(name, val, resolveUp) {
@@ -4922,11 +4965,10 @@ var nunjucks =
 	        var frame = this;
 
 	        if(resolveUp) {
-	            if((frame = this.resolve(parts[0]))) {
+	            if((frame = this.resolve(parts[0], true))) {
 	                frame.set(name, val);
 	                return;
 	            }
-	            frame = this;
 	        }
 
 	        for(var i=0; i<parts.length - 1; i++) {
@@ -4958,8 +5000,8 @@ var nunjucks =
 	        return p && p.lookup(name);
 	    },
 
-	    resolve: function(name) {
-	        var p = this.parent;
+	    resolve: function(name, forWrite) {
+	        var p = (forWrite && this.isolateWrites) ? undefined : this.parent;
 	        var val = this.variables[name];
 	        if(val !== undefined && val !== null) {
 	            return this;
@@ -4967,8 +5009,8 @@ var nunjucks =
 	        return p && p.resolve(name);
 	    },
 
-	    push: function() {
-	        return new Frame(this);
+	    push: function(isolateWrites) {
+	        return new Frame(this, isolateWrites);
 	    },
 
 	    pop: function() {
@@ -5256,7 +5298,8 @@ var nunjucks =
 	    copySafeness: copySafeness,
 	    markSafe: markSafe,
 	    asyncEach: asyncEach,
-	    asyncAll: asyncAll
+	    asyncAll: asyncAll,
+	    inOperator: lib.inOperator
 	};
 
 
@@ -5625,6 +5668,26 @@ var nunjucks =
 	        return res;
 	    },
 
+	    sum: function(arr, attr, start) {
+	        var sum = 0;
+
+	        if(typeof start === 'number'){
+	            sum += start;
+	        }
+
+	        if(attr) {
+	            arr = lib.map(arr, function(v) {
+	                return v[attr];
+	            });
+	        }
+
+	        for(var i = 0; i < arr.length; i++) {
+	            sum += arr[i];
+	        }
+
+	        return sum;
+	    },
+
 	    sort: r.makeMacro(['value', 'reverse', 'case_sensitive', 'attribute'], [], function(arr, reverse, caseSens, attr) {
 	         // Copy it
 	        arr = lib.map(arr, function(v) { return v; });
@@ -5759,7 +5822,7 @@ var nunjucks =
 	        var wwwRE = /^www\./;
 	        var tldRE = /\.(?:org|net|com)(?:\:|\/|$)/;
 
-	        var words = str.split(/\s+/).filter(function(word) {
+	        var words = str.split(/(\s+)/).filter(function(word) {
 	          // If the word has no length, bail. This can happen for str with
 	          // trailing whitespace.
 	          return word && word.length;
@@ -5787,7 +5850,7 @@ var nunjucks =
 
 	        });
 
-	        return words.join(' ');
+	        return words.join('');
 	    },
 
 	    wordcount: function(str) {
@@ -6029,7 +6092,7 @@ var nunjucks =
 	function globals() {
 	    return {
 	        range: function(start, stop, step) {
-	            if(!stop) {
+	            if(typeof stop === 'undefined') {
 	                stop = start;
 	                start = 0;
 	                step = 1;

@@ -22,15 +22,15 @@
         it('should always force compilation of parent template', function() {
             var env = new Environment(new Loader(templatesPath));
 
-            var child = env.getTemplate('base-inherit.html');
+            var child = env.getTemplate('base-inherit.j2');
             expect(child.render()).to.be('Foo*Bar*BazFizzle');
         });
 
         it('should handle correctly relative paths', function() {
             var env = new Environment(new Loader(templatesPath));
 
-            var child1 = env.getTemplate('relative/test1.html');
-            var child2 = env.getTemplate('relative/test2.html');
+            var child1 = env.getTemplate('relative/test1.j2');
+            var child2 = env.getTemplate('relative/test2.j2');
 
             expect(child1.render()).to.be('FooTest1BazFizzle');
             expect(child2.render()).to.be('FooTest2BazFizzle');
@@ -39,15 +39,15 @@
         it('should handle correctly cache for relative paths', function() {
             var env = new Environment(new Loader(templatesPath));
 
-            var test = env.getTemplate('relative/test-cache.html');
+            var test = env.getTemplate('relative/test-cache.j2');
 
             expect(util.normEOL(test.render())).to.be('Test1\nTest2');
         });
 
         it('should handle correctly relative paths in renderString', function() {
             var env = new Environment(new Loader(templatesPath));
-            expect(env.renderString('{% extends "./relative/test1.html" %}{% block block1 %}Test3{% endblock %}', {}, {
-                path: path.resolve(templatesPath, 'string.html')
+            expect(env.renderString('{% extends "./relative/test1.j2" %}{% block block1 %}Test3{% endblock %}', {}, {
+                path: path.resolve(templatesPath, 'string.j2')
             })).to.be('FooTest3BazFizzle');
         });
     });
