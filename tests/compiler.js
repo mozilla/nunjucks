@@ -1476,7 +1476,7 @@
             it('should work with blocks in the body', function(done) {
                 equal('{% extends "filter-block.html" %}' +
                       '{% block block1 %}force{% endblock %}',
-                      'may the forth be with you');
+                      'may the forth be with you\n');
                 finish(done);
             });
         });
