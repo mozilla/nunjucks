@@ -1452,20 +1452,33 @@
             finish(done);
         });
 
-        it('should handle filter blocks', function(done) {
-            equal('{% filter title %}may the force be with you{% endfilter %}',
-                  'May The Force Be With You');
+        describe('the filter tag', function() {
 
-            equal('{% filter replace("force", "forth") %}may the force be with you{% endfilter %}',
-                  'may the forth be with you');
+            it('should apply the title filter to the body', function(done) {
+                equal('{% filter title %}may the force be with you{% endfilter %}',
+                      'May The Force Be With You');
+                finish(done);
+            });
 
-            equal('{% set foo = "force" %}{% filter replace("force", "forth") %}may the {{ foo }} be with you{% endfilter %}',
-                  'may the forth be with you');
+            it('should apply the replace filter to the body', function(done) {
 
-            equal('{% extends "filter-block.html" %}' +
-                  '{% block block1 %}force{% endblock %}',
-                  'may the forth be with you');
-            finish(done);
+                equal('{% filter replace("force", "forth") %}may the force be with you{% endfilter %}',
+                      'may the forth be with you');
+                finish(done);
+            });
+
+            it('should work with variables in the body', function(done) {
+                equal('{% set foo = "force" %}{% filter replace("force", "forth") %}may the {{ foo }} be with you{% endfilter %}',
+                      'may the forth be with you');
+                finish(done);
+            });
+
+            it('should work with blocks in the body', function(done) {
+                equal('{% extends "filter-block.html" %}' +
+                      '{% block block1 %}force{% endblock %}',
+                      'may the forth be with you');
+                finish(done);
+            });
         });
 
         it('should throw an error when including a file that calls an undefined macro', function(done) {
