@@ -471,7 +471,6 @@ var Compiler = Object.extend({
     compileFilter: function(node, frame) {
         var name = node.name;
         this.assertType(name, nodes.Symbol);
-
         this.emit('env.getFilter("' + name.value + '").call(context, ');
         this._compileAggregate(node.args, frame);
         this.emit(')');
@@ -529,11 +528,9 @@ var Compiler = Object.extend({
           this.emitLine(';');
         }
         else {
-          this.emitLine(ids.join(' = ') + ' = (function() {');
-          this.emitLine('var output = "";');
+          this.emit(ids.join(' = ') + ' = ');
           this.compile(node.body, frame);
-          this.emitLine('return output;');
-          this.emitLine('})();');
+          this.emitLine(';');
         }
 
         lib.each(node.targets, function(target, i) {
@@ -1043,6 +1040,16 @@ var Compiler = Object.extend({
 
     compileTemplateData: function(node, frame) {
         this.compileLiteral(node, frame);
+    },
+
+    compileCapture: function(node, frame) {
+        this.emitLine('(function() {');
+        this.emitLine('var output = "";');
+        this.withScopedSyntax(function () {
+            this.compile(node.body, frame);
+        });
+        this.emitLine('return output;');
+        this.emitLine('})()');
     },
 
     compileOutput: function(node, frame) {

@@ -1021,41 +1021,41 @@
             finish(done);
         });
 
-        it('should compile set blocks', function(done) {
-          equal('{% set block_content %}{% endset %}'+
-                '{{ block_content }}',
-                ''
-                );
+        it('should compile block-set', function(done) {
+            equal('{% set block_content %}{% endset %}'+
+                  '{{ block_content }}',
+                  ''
+                  );
 
-          equal('{% set block_content %}test string{% endset %}'+
-                '{{ block_content }}',
-                'test string'
-                );
+            equal('{% set block_content %}test string{% endset %}'+
+                  '{{ block_content }}',
+                  'test string'
+                  );
 
-          equal('{% set block_content %}'+
-                '{% for item in [1, 2, 3] %}'+
-                '{% include "item.j2" %} '+
-                '{% endfor %}'+
-                '{% endset %}'+
-                '{{ block_content }}',
-                'showing 1 showing 2 showing 3 '
-                );
+            equal('{% set block_content %}'+
+                  '{% for item in [1, 2, 3] %}'+
+                  '{% include "item.j2" %} '+
+                  '{% endfor %}'+
+                  '{% endset %}'+
+                  '{{ block_content }}',
+                  'showing 1 showing 2 showing 3 '
+                  );
 
-          equal('{% set block_content %}'+
-                '{% set inner_block_content %}'+
-                '{% for i in [1, 2, 3] %}'+
-                'item {{ i }} '+
-                '{% endfor %}'+
-                '{% endset %}'+
-                '{% for i in [1, 2, 3] %}'+
-                'inner {{i}}: "{{ inner_block_content }}" '+
-                '{% endfor %}'+
-                '{% endset %}'+
-                '{{ block_content | safe }}',
-                'inner 1: "item 1 item 2 item 3 " '+
-                'inner 2: "item 1 item 2 item 3 " '+
-                'inner 3: "item 1 item 2 item 3 " '
-                );
+            equal('{% set block_content %}'+
+                  '{% set inner_block_content %}'+
+                  '{% for i in [1, 2, 3] %}'+
+                  'item {{ i }} '+
+                  '{% endfor %}'+
+                  '{% endset %}'+
+                  '{% for i in [1, 2, 3] %}'+
+                  'inner {{i}}: "{{ inner_block_content }}" '+
+                  '{% endfor %}'+
+                  '{% endset %}'+
+                  '{{ block_content | safe }}',
+                  'inner 1: "item 1 item 2 item 3 " '+
+                  'inner 2: "item 1 item 2 item 3 " '+
+                  'inner 3: "item 1 item 2 item 3 " '
+                  );
 
             equal('{% set x,y,z %}'+
                   'cool'+
@@ -1064,6 +1064,14 @@
                   'cool cool cool'
                   );
 
+            finish(done);
+        });
+
+        it('should compile block-set wrapping an inherited block', function(done) {
+            equal('{% extends "base-set-wraps-block.j2" %}'+
+                  '{% block somevar %}foo{% endblock %}',
+                  'foo\n'
+                 );
             finish(done);
         });
 
@@ -1372,13 +1380,33 @@
             finish(done);
         });
 
-        it('should handle filter blocks', function(done) {
-            equal('{% filter title %}may the force be with you{% endfilter %}',
-                  'May The Force Be With You');
+        describe('the filter tag', function() {
 
-            equal('{% filter replace("force", "forth") %}may the force be with you{% endfilter %}',
-                  'may the forth be with you');
-            finish(done);
+            it('should apply the title filter to the body', function(done) {
+                equal('{% filter title %}may the force be with you{% endfilter %}',
+                      'May The Force Be With You');
+                finish(done);
+            });
+
+            it('should apply the replace filter to the body', function(done) {
+
+                equal('{% filter replace("force", "forth") %}may the force be with you{% endfilter %}',
+                      'may the forth be with you');
+                finish(done);
+            });
+
+            it('should work with variables in the body', function(done) {
+                equal('{% set foo = "force" %}{% filter replace("force", "forth") %}may the {{ foo }} be with you{% endfilter %}',
+                      'may the forth be with you');
+                finish(done);
+            });
+
+            it('should work with blocks in the body', function(done) {
+                equal('{% extends "filter-block.html" %}' +
+                      '{% block block1 %}force{% endblock %}',
+                      'may the forth be with you\n');
+                finish(done);
+            });
         });
 
         it('should throw an error when including a file that calls an undefined macro', function(done) {
