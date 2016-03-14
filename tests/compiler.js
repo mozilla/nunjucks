@@ -810,6 +810,18 @@
             finish(done);
         });
 
+        it('should error if same block is defined multiple times', function(done) {
+            var func = function () {
+                render('{% extends "simple-base.j2" %}' +
+                       '{% block test %}{% endblock %}' +
+                       '{% block test %}{% endblock %}');
+            };
+
+            expect(func).to.throwException(/Block "test" defined more than once./);
+
+            finish(done);
+        });
+
         it('should render nested blocks in child template', function(done) {
             equal('{% extends "base.j2" %}' +
                   '{% block block1 %}{% block nested %}BAR{% endblock %}{% endblock %}',

@@ -4,6 +4,9 @@ Changelog
 2.x (unreleased)
 ----------------
 
+* Throw an error if a block is defined multiple times. Refs
+  [#696](https://github.com/mozilla/nunjucks/issues/696).
+
 * Officially recommend the `.njk` extension. Thanks David Kebler. Merge of
   [#691](https://github.com/mozilla/nunjucks/pull/691).
 
