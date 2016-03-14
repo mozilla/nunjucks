@@ -1098,10 +1098,17 @@ var Compiler = Object.extend({
 
         this.inBlock = true;
 
+        var blockNames = [];
+
         var i, name, block, blocks = node.findAll(nodes.Block);
         for (i = 0; i < blocks.length; i++) {
             block = blocks[i];
             name = block.name.value;
+
+            if (blockNames.indexOf(name) !== -1) {
+                throw new Error('Block "' + name + '" defined more than once.');
+            }
+            blockNames.push(name);
 
             this.emitFuncBegin('b_' + name);
 
