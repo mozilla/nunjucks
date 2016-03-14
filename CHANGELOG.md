@@ -4,6 +4,9 @@ Changelog
 2.x (unreleased)
 ----------------
 
+* Officially recommend the `.njk` extension. Thanks David Kebler. Merge of
+  [#691](https://github.com/mozilla/nunjucks/pull/691).
+
 * Allow block-set to wrap an inheritance block. Unreported; fixed as a side
   effect of the fix for [#576](https://github.com/mozilla/nunjucks/issues/576).
 
