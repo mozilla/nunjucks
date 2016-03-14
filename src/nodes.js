@@ -120,6 +120,7 @@ var Extends = TemplateRef.extend('Extends');
 var Include = Node.extend('Include', { fields: ['template', 'ignoreMissing'] });
 var Set = Node.extend('Set', { fields: ['targets', 'value'] });
 var Output = NodeList.extend('Output');
+var Capture = Node.extend('Capture', { fields: ['body'] });
 var TemplateData = Literal.extend('TemplateData');
 var UnaryOp = Node.extend('UnaryOp', { fields: ['target'] });
 var BinOp = Node.extend('BinOp', { fields: ['left', 'right'] });
@@ -255,6 +256,7 @@ module.exports = {
     Pair: Pair,
     Dict: Dict,
     Output: Output,
+    Capture: Capture,
     TemplateData: TemplateData,
     If: If,
     IfAsync: IfAsync,

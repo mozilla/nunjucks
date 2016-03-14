@@ -511,7 +511,11 @@ var Parser = Object.extend({
                           tag.colno);
             }
             else {
-                node.body = this.parseUntilBlocks('endset');
+                node.body = new nodes.Capture(
+                    tag.lineno,
+                    tag.colno,
+                    this.parseUntilBlocks('endset')
+                );
                 node.value = null;
                 this.advanceAfterBlockEnd();
             }
@@ -1025,7 +1029,11 @@ var Parser = Object.extend({
         var args = this.parseFilterArgs(name);
 
         this.advanceAfterBlockEnd(filterTok.value);
-        var body = this.parseUntilBlocks('endfilter');
+        var body = new nodes.Capture(
+            name.lineno,
+            name.colno,
+            this.parseUntilBlocks('endfilter')
+        );
         this.advanceAfterBlockEnd();
 
         var node = new nodes.Filter(
@@ -1035,9 +1043,7 @@ var Parser = Object.extend({
             new nodes.NodeList(
                 name.lineno,
                 name.colno,
-                // Body is a NodeList with an Output node as a child,
-                // need to strip those
-                body.children[0].children.concat(args)
+                [body].concat(args)
             )
         );
 
