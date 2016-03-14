@@ -4,6 +4,13 @@ Changelog
 2.x (unreleased)
 ----------------
 
+* Allow block-set to wrap an inheritance block. Unreported; fixed as a side
+  effect of the fix for [#576](https://github.com/mozilla/nunjucks/issues/576).
+
+* Fix `filter` tag with non-trivial contents. Thanks Stefan Cruz and Fabien
+  Franzen for report and investigation, Jan Oopkaup for failing tests. Fixes
+  [#576](https://github.com/mozilla/nunjucks/issues/576).
+
 
 2.4.0 (Mar 10 2016)
 -------------------
