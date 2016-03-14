@@ -106,7 +106,7 @@ C'est le contenu par défaut
 
 <section class="right">
   C'est la partie droite !
-</section>  
+</section>
 ```
 
 Vous pouvez stocker le template à hériter dans une variable et l'utiliser en
@@ -150,7 +150,8 @@ Nunjucks est livré avec plusieurs tags intégrés, mais [vous pouvez ajouter vo
 
 ### if
 
-`if` teste une condition et vous permet d'afficher de manière sélective le contenu. Il se comporte exactement comme le `if` de javascript.
+`if` teste une condition et vous permet d'afficher de manière sélective le contenu. Il se comporte
+exactement comme le `if` de javascript.
 
 ```jinja
 {% if variable %}
@@ -158,7 +159,8 @@ Nunjucks est livré avec plusieurs tags intégrés, mais [vous pouvez ajouter vo
 {% endif %}
 ```
 
-Si `variable` est défini et évalué à `true`, "C'est vrai" s'affichera, sinon rien n'apparaitra.
+Si `variable` est défini et évalué à `true`, "C'est vrai"
+s'affichera, sinon rien n'apparaitra.
 
 Vous pouvez spécifier des conditions alternatives avec `elif` et `else` :
 
@@ -196,7 +198,9 @@ var items = [{ title: "foo", id: 1 }, { title: "bar", id: 2}];
 </ul>
 ```
 
-L'exemple ci-dessus liste tous les articles en utilisant l'attribut `title` qui est affiché pour chaque élément dans le tableau `items`. Si le tableau `items` est vide, le contenu de la clause facultatif `else` sera rendu.
+L'exemple ci-dessus liste tous les articles en utilisant l'attribut `title` qui est affiché pour chaque élément
+dans le tableau `items`. Si le tableau `items` est vide, le contenu
+de la clause facultatif `else` sera rendu.
 
 Vous pouvez aussi itérez sur des objets/tables de hachage :
 
@@ -214,9 +218,10 @@ var food = {
 {% endfor %}
 ```
 
-Le filtre [`dictsort`](http://jinja.pocoo.org/docs/templates/#dictsort) est disponible pour trier les objets lors de leur itération (*nouveau depuis la 0.1.8*).
+Le filtre [`dictsort`](http://jinja.pocoo.org/docs/templates/#dictsort) est disponible
+pour trier les objets lors de leur itération.
 
-De plus, nunjucks découpera les tableaux dans des variables (*nouveau depuis la 0.1.8*) :
+De plus, nunjucks découpera les tableaux dans des variables :
 
 ```js
 var points = [[0, 1, 2], [5, 6, 7], [12, 13, 14]];
@@ -305,7 +310,8 @@ Le rendu du template reprend une fois que tous les éléments sont traités.
 
 ### macro
 
-`macro` vous permet de définir des morceaux de contenu réutilisables. C'est semblable à une fonction dans un langage de programmation. Voici un exemple :
+`macro` vous permet de définir des morceaux de contenu réutilisables. C'est semblable à
+une fonction dans un langage de programmation. Voici un exemple :
 
 ```jinja
 {% macro field(name, value='', type='text') %}
@@ -322,11 +328,16 @@ Maintenant `field` est disponible, il peut être appelé comme une fonction norm
 {{ field('pass', type='password') }}
 ```
 
-Les arguments par défaut et avec mots clefs sont disponibles. Regardez [arguments avec mots clefs](#arguments-avec-mots-clefs) pour une explication plus détaillée.
+Les arguments par défaut et avec mots clefs sont disponibles. Regardez
+[arguments avec mots clefs](#arguments-avec-mots-clefs) pour une explication plus détaillée.
 
-Vous pouvez importer ([import](#import)) des macros à partir d'autres templates, cela vous permet de les réutiliser librement à travers votre projet.
+Vous pouvez importer ([import](#import)) des macros à partir d'autres templates, cela vous permet
+de les réutiliser librement à travers votre projet.
 
-**Remarque importante** : Si vous utilisez l'API asynchrone, soyez conscient que vous ne pouvez rien faire d'asynchrone à l'intérieur des macros. Car les macros sont appelées comme des fonctions normales. Dans le futur, nous pourrions avoir un moyen d'appeler une fonction de manière asynchrone. Si vous faites cela maintenant, le comportement est inconnu.
+**Remarque importante** : Si vous utilisez l'API asynchrone, soyez conscient que
+vous ne pouvez rien faire d'asynchrone à l'intérieur des macros. Car les macros
+sont appelées comme des fonctions normales. Dans le futur, nous pourrions avoir un moyen d'appeler
+une fonction de manière asynchrone. Si vous faites cela maintenant, le comportement est inconnu.
 
 ### set
 
@@ -346,11 +357,13 @@ Vous pouvez inclure des nouvelles variables et en définir aussi plusieurs à la
 {% set x, y, z = 5 %}
 ```
 
-Si `set` est utilisé au plus haut niveau, il modifie la valeur du contexte du template global. Si il est utilisé à l'intérieur de la portée des blocs, comme `for`, `include` et d'autres, cela modifie seulement dans cette portée.
+Si `set` est utilisé au plus haut niveau, il modifie la valeur du contexte du template
+global. Si il est utilisé à l'intérieur de la portée des blocs, comme `for`, `include` et d'autres, cela modifie
+seulement dans cette portée.
 
-Il est également possible de capter le contenu d'un bloc dans une variable en utilisant l'affectation de bloc.
-La syntaxe est similaire au standard `set`, sauf que le `=` est omis, et
-tout ce qui se trouve jusqu'au `{% endset %}` est capturé.
+Il est également possible de capter le contenu d'un bloc dans une variable en utilisant
+l'affectation de bloc. La syntaxe est similaire au standard `set`, sauf que le
+`=` est omis, et tout ce qui se trouve jusqu'au `{% endset %}` est capturé.
 
 Cela peut être utile dans certains cas, comme une alternative aux macros :
 
@@ -426,7 +439,8 @@ rendra le contenu du bloc parent. Regardez [super](#super).
 
 ### include
 
-`include` récupère depuis d'autres templates disponibles. C'est utile lorsque vous avez besoin de partager des petits morceaux sur plusieurs templates qui héritent déjà d'autres templates.
+`include` récupère depuis d'autres templates disponibles. C'est utile lorsque vous avez besoin de partager des
+petits morceaux sur plusieurs templates qui héritent déjà d'autres templates.
 
 ```jinja
 {% include "item.html" %}
@@ -440,21 +454,37 @@ Vous pouvez même inclure des templates à l'intérieur des boucles :
 {% endfor %}
 ```
 
-Ceci est particulièrement utile pour découper des templates en petits morceaux afin que l'environnement du côté du navigateur puisse rendre les petits morceaux quand il est nécessaire de changer de page.
+Ceci est particulièrement utile pour découper des templates en petits morceaux afin que l'environnement du
+côté du navigateur puisse rendre les petits morceaux quand il est nécessaire de changer
+de page.
 
-`include` accepte n'importe quelle expression arbitraire, donc vous pouvez y passer n'importe quoi, aussi longtemps que cette expression correspond à un string ou un objet Template compilé : `{% include name + ".html" %}`.
+`include` accepte n'importe quelle expression arbitraire, donc vous pouvez y passer n'importe quoi,
+aussi longtemps que cette expression correspond à un string ou un objet Template
+compilé : `{% include name + ".html" %}`.
 
-Dans certains cas, il peut être utile de ne pas générer une erreur quand un template n'existe pas. Utilisez l'option `ignore missing` pour supprimer ces erreurs.
+Dans certains cas, il peut être utile de ne pas générer une erreur quand un template n'existe pas. Utilisez
+l'option `ignore missing` pour supprimer ces erreurs.
 
 ```jinja
 {% include "missing.html" ignore missing %}
 ```
 
+Un template inclus peut lui même étendre (`extend`) un autre template (donc vous pourriez avoir
+un ensemble de template qui hérite tous d'une structure commune). Un template
+inclus ne participe pas à la structure du bloc du template l'incluant;
+il dispoose d'un arbre d'héritage et d'un espace nommé totalement distinct. En d'autres termes,
+un `include` _n'_ est _pas_ un pré-processeur qui tire le code du template inclus
+dans le template, en l'incluant avant de le rendre; au lieu de cela, il déclenche un rendu distinct
+du template inclus, et les résultats de ce rendu sont inclus.
+
 ### import
 
-`import` charge un template différent et vous permet d'accéder à ses valeurs exportées. Les macros et les affectations de haut niveau (faites avec [`set`](#set)) sont exportées depuis les templates, ceci vous permet donc d'y accéder dans un template différent.
+`import` charge un template différent et vous permet d'accéder à ses valeurs
+exportées. Les macros et les affectations de haut niveau (faites avec [`set`](#set)) sont exportées
+depuis les templates, ceci vous permet donc d'y accéder dans un template différent.
 
-Les templates importés sont traités sans le contexte actuel, ils n'ont pas accès à toutes les variables du template actuel.
+Les templates importés sont traités sans le contexte actuel, ils n'ont pas
+accès à toutes les variables du template actuel.
 
 Commençons par un template appelé `forms.html` qui contient ce qui suit :
 
@@ -473,7 +503,8 @@ Commençons par un template appelé `forms.html` qui contient ce qui suit :
 {% endmacro %}
 ```
 
-Nous pouvons importer ce template et lier toutes ses valeurs exportées à une variable afin que nous puissions l'utiliser :
+Nous pouvons importer ce template et lier toutes ses valeurs exportées à une variable
+afin que nous puissions l'utiliser :
 
 ```jinja
 {% import "forms.html" as forms %}
@@ -484,7 +515,8 @@ Nous pouvons importer ce template et lier toutes ses valeurs exportées à une v
 {{ forms.field('pass', type='password') }}
 ```
 
-Vous pouvez aussi importer des valeurs depuis un template dans l'espace de nommage actuel avec `from import` :
+Vous pouvez aussi importer des valeurs depuis un template dans l'espace de nommage
+actuel avec `from import` :
 
 ```jinja
 {% from "forms.html" import field, label as description %}
@@ -495,16 +527,19 @@ Vous pouvez aussi importer des valeurs depuis un template dans l'espace de nomma
 {{ field('pass', type='password') }}
 ```
 
-`import` accepte n'importe quelle expression arbitraire, donc vous pouvez y passer n'importe quoi, aussi longtemps que cette expression correspond à un string ou un objet Template compilé : `{% import name + ".html" as obj %}`.
+`import` accepte n'importe quelle expression arbitraire, donc vous pouvez y passer
+n'importe quoi, aussi longtemps que cette expression correspond à un string ou un objet
+Template compilé : `{% import name + ".html" as obj %}`.
 
 ### raw
 
-Si vous voulez afficher des balises spéciales de nunjucks comme `{{`, vous pouvez utiliser `raw` et tout ce qui sera à l'intérieur de celui-ci sera afficher au format texte brut.
+Si vous voulez afficher des balises spéciales de nunjucks comme `{{`, vous pouvez utiliser
+`raw` et tout ce qui sera à l'intérieur de celui-ci sera afficher au format texte brut.
 
 ```jinja
 {% raw %}
   Ceci {{ ne sera pas traité }}
-{％ endraw %}
+{% endraw %}
 ```
 
 ### filter
@@ -527,7 +562,9 @@ REMARQUE : Vous ne pouvez pas faire quelque chose d'asynchrone à l'intérieur d
 
 ### call
 
-Un bloc `call` vous permet d'appeler une macro avec tout le texte à l'intérieur de la balise. Ceci est utile si vous voulez passer beaucoup de contenu dans une macro. Le contenu est disponible à l'intérieur de la macro telle que `caller()`.
+Un bloc `call` vous permet d'appeler une macro avec tout le texte à l'intérieur de
+la balise. Ceci est utile si vous voulez passer beaucoup de contenu dans une macro. Le
+contenu est disponible à l'intérieur de la macro telle que `caller()`.
 
 ```jinja
 {% macro add(x, y) %}
@@ -543,7 +580,9 @@ L'exemple ci-dessus affichera "Le résultat est : 3".
 
 ## Arguments avec mots clefs
 
-jinja2 utilise le support des arguments avec mots clefs de Python pour permettre de les utiliser dans les fonctions, les filtres et les macros. Nunjucks supporte bien les arguments avec mots clefs en introduisant une nouvelle convention d'appel.
+jinja2 utilise le support des arguments avec mots clefs de Python pour permettre de les utiliser dans
+les fonctions, les filtres et les macros. Nunjucks supporte bien les arguments avec mots clefs en
+introduisant une nouvelle convention d'appel.
 
 Les arguments avec mots clefs ressemblent à ceci :
 
@@ -551,15 +590,20 @@ Les arguments avec mots clefs ressemblent à ceci :
 {{ foo(1, 2, bar=3, baz=4) }}
 ```
 
-`bar` et `baz` sont les arguments avec mots clefs. Nunjucks les convertit dans un hash et le passe comme dernier argument. C'est équivalent à cet appel en javascript :
+`bar` et `baz` sont les arguments avec mots clefs. Nunjucks les convertit dans un hash et le
+passe comme dernier argument. C'est équivalent à cet appel en javascript :
 
 ```js
 foo(1, 2, { bar: 3, baz: 4})
 ```
 
-Puisqu'il s'agit d'une convention d'appel standard, ça marche pour toutes les fonctions et les filtres, s'ils sont écrits pour les gérer. [Lisez-en plus](api.html#arguments-avec-mots-clefspar-dfaut) dans la section de l'API.
+Puisqu'il s'agit d'une convention d'appel standard, ça marche pour toutes les fonctions et les
+filtres, s'ils sont écrits pour les gérer. [Lisez-en plus](api.html#arguments-avec-mots-clefspar-dfaut)
+dans la section de l'API.
 
-Les macros vous permettent d'utiliser également des arguments avec mots clefs dans la définition, cela vous permet de définir des valeurs par défaut. Nunjucks fait correspondre automatiquement les arguments avec mots clefs à ceux définis dans la macro.
+Les macros vous permettent d'utiliser également des arguments avec mots clefs dans la définition, cela vous permet
+de définir des valeurs par défaut. Nunjucks fait correspondre automatiquement les
+arguments avec mots clefs à ceux définis dans la macro.
 
 ```
 {% macro foo(x, y, z=5, w=6) %}
@@ -570,7 +614,8 @@ Les macros vous permettent d'utiliser également des arguments avec mots clefs d
 {{ foo(1, 2, w=10) }}  -> 1, 2, 5, 10
 ```
 
-Vous pouvez mélanger des arguments de position et des arguments avec mots clefs dans des macros. Par exemple, vous pouvez spécifier un argument de position comme un argument mot clef :
+Vous pouvez mélanger des arguments de position et des arguments avec mots clefs dans des macros. Par exemple, vous pouvez
+spécifier un argument de position comme un argument mot clef :
 
 ```jinja
 {{ foo(20, y=21) }}     -> 20, 21, 5, 6
@@ -590,7 +635,8 @@ De cette façon, vous pouvez «sauter» les arguments de position :
 
 ## Commentaires
 
-Vous pouvez écrire des commentaires en utilisant `{#` et `#}`. Les commentaires sont complètement retirés lors du rendu.
+Vous pouvez écrire des commentaires en utilisant `{#` et `#}`. Les commentaires sont complètement retirés
+lors du rendu.
 
 ```jinja
 {# Boucle pour tous les users #}
@@ -599,11 +645,13 @@ Vous pouvez écrire des commentaires en utilisant `{#` et `#}`. Les commentaires
 
 ## Contrôle des espaces
 
-*Introduit dans v0.1.8*
+Normalement, le moteur de template affiche tout, à l'exception des blocks verbeux de tag et
+de variable, avec tous les espaces qui se trouvent dans le fichier. Parfois, vous ne
+voulez pas les espaces supplémentaires, mais vous voulez continuer à formater le template
+proprement, ce qui nécessite des espaces.
 
-Normalement, le moteur de template affiche tout, à l'exception des blocks verbeux de tag et de variable, avec tous les espaces qui se trouvent dans le fichier. Parfois, vous ne voulez pas les espaces supplémentaires, mais vous voulez continuer à formater le template proprement, ce qui nécessite des espaces.
-
-Vous pouvez dire au moteur d'enlever les espaces de début et de fin en ajoutant le signe moins (`-`) sur le tag de début ou de fin..
+Vous pouvez dire au moteur d'enlever les espaces de début et de fin en ajoutant le signe
+moins (`-`) sur le tag de début ou de fin..
 
 ```jinja
 {% for i in [1,2,3,4,5] -%}
@@ -611,7 +659,8 @@ Vous pouvez dire au moteur d'enlever les espaces de début et de fin en ajoutant
 {%- endfor %}
 ```
 
-L'affichage exact de l'exemple du dessus sera "12345". Le `-%}` enlève les espaces à droite après le tag et le `{%-` enlève les espaces à gauche avant le tag.
+L'affichage exact de l'exemple du dessus sera "12345". Le `-%}` enlève les espaces à
+droite après le tag et le `{%-` enlève les espaces à gauche avant le tag.
 
 ## Expressions
 
@@ -625,7 +674,9 @@ Vous pouvez utiliser plusieurs types d'expressions littérales que vous avez l'h
 
 ### Math
 
-Nunjucks vous permet de faire des opérations sur des valeurs (bien que cela doit être utilisée avec parcimonie, car la plupart de votre logique doit être dans le code). Les opérateurs suivants sont disponibles :
+Nunjucks vous permet de faire des opérations sur des valeurs (bien que cela doit être utilisée avec parcimonie,
+car la plupart de votre logique doit être dans le code). Les opérateurs suivants sont
+disponibles :
 
 * Addition : `+`
 * Soustraction : `-`
@@ -676,13 +727,15 @@ Exemples :
 
 ### Expression If
 
-Similaire aux opérateurs ternaires de javascript, vous pouvez utiliser `if` comme si c'était une expression en ligne :
+Similaire aux opérateurs ternaires de javascript, vous pouvez utiliser `if` comme si c'était une
+expression en ligne :
 
 ```jinja
 {{ "true" if foo else "false" }}
 ```
 
-L'affichage du dessus sera "true" si foo est vrai sinon "false". Ceci est particulièrement utile pour les valeurs par défaut comme celle-ci :
+L'affichage du dessus sera "true" si foo est vrai sinon "false". Ceci
+est particulièrement utile pour les valeurs par défaut comme celle-ci :
 
 ```jinja
 {{ baz(foo if foo else "default") }}
@@ -690,7 +743,8 @@ L'affichage du dessus sera "true" si foo est vrai sinon "false". Ceci est partic
 
 ### Appels de fonction
 
-Si vous avez passé une méthode javascript à votre template, vous pouvez l'appeler normalement.
+Si vous avez passé une méthode javascript à votre template, vous pouvez l'appeler
+normalement.
 
 ```jinja
 {{ foo(1, 2, 3) }}
@@ -705,7 +759,9 @@ Une expression régulière peut être créée comme en JavaScript :
 {{ /bar$/g }}
 ```
 
-Les flags supportés sont les suivants. Voir [Regex sur MDN](https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Objets_globaux/RegExp) pour plus d'informations.
+Les flags supportés sont les suivants. Voir
+[Regex sur MDN](https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Objets_globaux/RegExp)
+pour plus d'informations.
 
 * `g` : La correspondance est cherchée partout
 * `i` : La casse est ignorée
@@ -714,14 +770,17 @@ Les flags supportés sont les suivants. Voir [Regex sur MDN](https://developer.m
 
 ## Auto-échappement
 
-Si autoescaping est activé dans l'environnement, tout l'affichage sera automatiquement échappé pour un affichage safe. Pour marquer manuellement un affichage à safe, utilisez le filtre `safe`. Nunjucks n'échappera pas cet affichage.
+Si autoescaping est activé dans l'environnement, tout l'affichage sera automatiquement
+échappé pour un affichage safe. Pour marquer manuellement un affichage à safe, utilisez le
+filtre `safe`. Nunjucks n'échappera pas cet affichage.
 
 ```jinja
 {{ foo }}           // &lt;span%gt;
 {{ foo | safe }}    // <span>
 ```
 
-Si autoescaping n'est pas activé, tout l'affichage sera rendu tel quel. Vous pouvez manuellement échapper les variables avec le filtre `escape`.
+Si autoescaping n'est pas activé, tout l'affichage sera rendu tel quel. Vous pouvez
+manuellement échapper les variables avec le filtre `escape`.
 
 ```jinja
 {{ foo }}           // <span>
@@ -734,7 +793,9 @@ Il y a quelques fonctions globales intégrées qui couvrent certains cas courant
 
 ### range([start], stop, [step])
 
-Si vous avez besoin d'itérer sur un ensemble de numéros fixes, `range` génère cet ensemble pour vous. Les numéros commencent à `start` (0 par défaut) et s'incrémente de `step` (par défaut 1) jusqu'à ce qu'il atteigne `stop`, qui n'est pas inclus.
+Si vous avez besoin d'itérer sur un ensemble de numéros fixes, `range` génère cet ensemble
+pour vous. Les numéros commencent à `start` (0 par défaut) et s'incrémente de `step` (par défaut 1)
+jusqu'à ce qu'il atteigne `stop`, qui n'est pas inclus.
 
 ```jinja
 {% for i in range(0, 5) -%}
@@ -746,7 +807,8 @@ L'affichage ci-dessus est `0,1,2,3,4`.
 
 ### cycler(item1, item2, ...itemN)
 
-Une façon simple de faire un cycle avec plusieurs valeurs est d'utiliser `cycler`, qui prend un certain nombre d'arguments et fait des cycles à travers eux.
+Une façon simple de faire un cycle avec plusieurs valeurs est d'utiliser `cycler`, qui prend
+un certain nombre d'arguments et fait des cycles à travers eux.
 
 ```jinja
 {% set cls = cycler("odd", "even") %}
@@ -755,12 +817,16 @@ Une façon simple de faire un cycle avec plusieurs valeurs est d'utiliser `cycle
 {% endfor %}
 ```
 
-Dans l'exemple ci-dessus, les lignes impaires ont la classe "odd" et les lignes paires ont la classe "even". Vous pouvez accéder à l'élément en cours avec la propriété `current`
-(dans l'exemple du dessus : `cls.current`).
+Dans l'exemple ci-dessus, les lignes impaires ont la classe "odd" et les lignes paires ont la
+classe "even". Vous pouvez accéder à l'élément en cours avec la propriété `current` (dans
+l'exemple du dessus : `cls.current`).
 
 ### joiner([separator])
 
-En combinant plusieurs éléments, il est fréquent de vouloir les délimiter par quelque chose comme une virgule, mais vous ne voulez pas afficher le séparateur pour le premier élément. La classe `joiner` affichera le `separator` (par défaut ",") chaque fois qu'elle sera appelée sauf pour la première fois.
+En combinant plusieurs éléments, il est fréquent de vouloir les délimiter par
+quelque chose comme une virgule, mais vous ne voulez pas afficher le séparateur pour le
+premier élément. La classe `joiner` affichera le `separator` (par défaut ",") chaque fois qu'elle
+sera appelée sauf pour la première fois.
 
 ```jinja
 {% set comma = joiner() %}
@@ -773,17 +839,17 @@ Si `tags` avait `["food", "beer", "dessert"]`, l'exemple ci-dessus afficherait `
 
 ## Filtres intégrés
 
-Nunjucks a porté la plupart des filtres de jinja, et il a ses propres filtres.
-Nous avons besoin de travailler sur notre documentation pour les filtres. Certains d'entre eux
-sont documentés ci-dessous, pour le reste, vous pouvez cliquer sur le site de jinja.
+Nunjucks a porté la plupart des filtres de jinja, et il a ses propres filtres. Nous avons besoin
+de travailler sur notre documentation pour les filtres. Certains d'entre eux sont documentés
+ci-dessous, pour le reste, vous pouvez cliquer sur le site de jinja.
 
 ### default(value, default, [boolean])
 
 (raccourci avec `d`)
 
-Si `value` est strictement `undefined`, cela retourne `default`, sinon
-`value`. Si `boolean` est true, toute valeur JavaScript fausse retournera
-`default` (false, "", etc)
+Si `value` est strictement `undefined`, cela retourne `default`, sinon `value`. Si
+`boolean` est true, toute valeur JavaScript fausse retournera `default` (false, "",
+etc)
 
 **La version 2.0 a changé le comportement par défaut de ce filtre.
   Auparavant, il agissait comme si `boolean` était à true par défaut et donc toute
@@ -793,22 +859,25 @@ Si `value` est strictement `undefined`, cela retourne `default`, sinon
 
 ### sort(arr, reverse, caseSens, attr)
 
-Tri `arr` avec la fonction `arr.sort` de JavaScript. Si `reverse` est à
-true, le résultat sera inversé. Le tri est insensible à la casse par défaut,
-mais en paramétrant `caseSens` à true, cela le rend sensible à la casse. Si `attr` est
-passé, cela permettra de comparer `attr` à chaque élément.
+Tri `arr` avec la fonction `arr.sort` de JavaScript. Si `reverse` est à true, le résultat
+sera inversé. Le tri est insensible à la casse par défaut, mais en paramétrant `caseSens`
+à true, cela le rend sensible à la casse. Si `attr` est passé, cela permettra de comparer `attr` à
+chaque élément.
 
 ### striptags (value, [preserve_linebreaks])
 
-C'est similaire à [striptags](http://jinja.pocoo.org/docs/templates/#striptags) de jinja. Si `preserve_linebreaks` est à false (par défaut),
-cela enlève les balises SGML/XML et remplace les espaces adjacents par un seul espace.
-Si `preserve_linebreaks` est à true, cela normalise les espaces, en essayant de préserver les
-sauts de lignes originaux. Utiliser le second comportement si vous voulez utiliser ceci
-`{{ text | striptags | nl2br }}`. Sinon utilisez le comportement par défaut.
+C'est similaire à
+[striptags](http://jinja.pocoo.org/docs/templates/#striptags) de jinja. Si
+`preserve_linebreaks` est à false (par défaut), cela enlève les balises SGML/XML et remplace
+les espaces adjacents par un seul espace. Si `preserve_linebreaks` est à true,
+cela normalise les espaces, en essayant de préserver les sauts de lignes originaux. Utiliser le second
+comportement si vous voulez utiliser ceci `{{ text | striptags | nl2br }}`. Sinon
+utilisez le comportement par défaut.
 
 ### dump (object)
 
-Appelle `JSON.stringify` sur un objet et déverse le résultat dans le template. C'est utile pour le débogage : `{{ foo | dump }}`.
+Appelle `JSON.stringify` sur un objet et déverse le résultat dans le
+template. C'est utile pour le débogage : `{{ foo | dump }}`.
 
 ### Plus de filtres
 
