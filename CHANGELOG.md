@@ -1,8 +1,8 @@
 Changelog
 =========
 
-2.x (unreleased)
-----------------
+2.4.1 (Mar 17 2016)
+-------------------
 
 * Don't double-escape. Thanks legutierr. Merge of
   [#701](https://github.com/mozilla/nunjucks/pull/701).
