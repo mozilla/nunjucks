@@ -52,7 +52,6 @@ Changelog
 
 2.4.0 (Mar 10 2016)
 -------------------
-* Fix: [Breaking Change] filter.escape should not escape SafeString(#168).
 
 * Allow retrieving boolean-false as a global. Thanks Marius Büscher. Merge of
   [#694](https://github.com/mozilla/nunjucks/pull/694).
