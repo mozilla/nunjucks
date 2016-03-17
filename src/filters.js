@@ -117,7 +117,7 @@ var filters = {
 
     escape: function(str) {
         if(typeof str === 'string') {
-            return lib.escape(str);
+            return r.markSafe(lib.escape(str));
         }
         return str;
     },
