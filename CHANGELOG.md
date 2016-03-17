@@ -4,6 +4,9 @@ Changelog
 2.x (unreleased)
 ----------------
 
+* Remove truncation of long function names in error messages. Thanks Daniel
+  Bendavid. Merge of [#702](https://github.com/mozilla/nunjucks/pull/702).
+
 
 2.4.1 (Mar 17 2016)
 -------------------
