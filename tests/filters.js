@@ -98,6 +98,33 @@
             finish(done);
         });
 
+        it('should not double escape strings', function(done) {
+            var res = render('{{ "<html>" | escape | escape }}', {}, { autoescape: false });
+            expect(res).to.be('&lt;html&gt;');
+            finish(done);
+        });
+
+        it('should not double escape with autoescape on', function(done) {
+            var res = render('{% set val = "<html>" | escape %}{{ val }}', {}, { autoescape: true });
+            expect(res).to.be('&lt;html&gt;');
+            finish(done);
+        });
+
+        it('should not escape safe strings with autoescape on', function(done) {
+            var res1 = render('{{ "<html>" | safe | escape }}', {}, { autoescape: true });
+            expect(res1).to.be('<html>');
+
+            var res2 = render('{% set val = "<html>" | safe | e %}{{ val }}', {}, { autoescape: true });
+            expect(res2).to.be('<html>');
+            finish(done);
+        });
+
+        it('should keep strings escaped after they have been escaped', function(done) {
+            var res = render('{% set val = "<html>" | e | safe %}{{ val }}', {}, { autoescape: false });
+            expect(res).to.be('&lt;html&gt;');
+            finish(done);
+        });
+
         it('dictsort', function(done) {
             // no real foolproof way to test that a js obj has been transformed
             // from unsorted -> sorted, as its enumeration ordering is undefined
