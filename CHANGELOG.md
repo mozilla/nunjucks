@@ -19,15 +19,15 @@ Changelog
 * Prevent macros from seeing or affecting their calling scope. Merge of
   [#667](https://github.com/mozilla/nunjucks/pull/667).
 
-* Prevent filter.escape from escaping SafeString. Thanks atian25. Merge of
-  [#623](https://github.com/mozilla/nunjucks/pull/623).
-
 
 2.x (unreleased)
 ----------------
 
 * Don't double-escape. Thanks legutierr. Merge of
   [#701](https://github.com/mozilla/nunjucks/pull/701).
+
+* Prevent filter.escape from escaping SafeString. Thanks atian25. Merge of
+  [#623](https://github.com/mozilla/nunjucks/pull/623).
 
 * Throw an error if a block is defined multiple times. Refs
   [#696](https://github.com/mozilla/nunjucks/issues/696).
