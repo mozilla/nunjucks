@@ -26,6 +26,9 @@ Changelog
 2.x (unreleased)
 ----------------
 
+* Don't double-escape. Thanks legutierr. Merge of
+  [#701](https://github.com/mozilla/nunjucks/pull/701).
+
 * Throw an error if a block is defined multiple times. Refs
   [#696](https://github.com/mozilla/nunjucks/issues/696).
 
