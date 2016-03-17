@@ -1,4 +1,4 @@
-/*! Browser bundle of nunjucks 2.4.0  */
+/*! Browser bundle of nunjucks 2.4.1  */
 var nunjucks =
 /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
@@ -1884,7 +1884,6 @@ var nunjucks =
 	    compileFilter: function(node, frame) {
 	        var name = node.name;
 	        this.assertType(name, nodes.Symbol);
-
 	        this.emit('env.getFilter("' + name.value + '").call(context, ');
 	        this._compileAggregate(node.args, frame);
 	        this.emit(')');
@@ -1942,11 +1941,9 @@ var nunjucks =
 	          this.emitLine(';');
 	        }
 	        else {
-	          this.emitLine(ids.join(' = ') + ' = (function() {');
-	          this.emitLine('var output = "";');
+	          this.emit(ids.join(' = ') + ' = ');
 	          this.compile(node.body, frame);
-	          this.emitLine('return output;');
-	          this.emitLine('})();');
+	          this.emitLine(';');
 	        }
 
 	        lib.each(node.targets, function(target, i) {
@@ -2458,6 +2455,16 @@ var nunjucks =
 	        this.compileLiteral(node, frame);
 	    },
 
+	    compileCapture: function(node, frame) {
+	        this.emitLine('(function() {');
+	        this.emitLine('var output = "";');
+	        this.withScopedSyntax(function () {
+	            this.compile(node.body, frame);
+	        });
+	        this.emitLine('return output;');
+	        this.emitLine('})()');
+	    },
+
 	    compileOutput: function(node, frame) {
 	        var children = node.children;
 	        for(var i=0, l=children.length; i<l; i++) {
@@ -2503,10 +2510,17 @@ var nunjucks =
 
 	        this.inBlock = true;
 
+	        var blockNames = [];
+
 	        var i, name, block, blocks = node.findAll(nodes.Block);
 	        for (i = 0; i < blocks.length; i++) {
 	            block = blocks[i];
 	            name = block.name.value;
+
+	            if (blockNames.indexOf(name) !== -1) {
+	                throw new Error('Block "' + name + '" defined more than once.');
+	            }
+	            blockNames.push(name);
 
 	            this.emitFuncBegin('b_' + name);
 
@@ -3095,7 +3109,11 @@ var nunjucks =
 	                          tag.colno);
 	            }
 	            else {
-	                node.body = this.parseUntilBlocks('endset');
+	                node.body = new nodes.Capture(
+	                    tag.lineno,
+	                    tag.colno,
+	                    this.parseUntilBlocks('endset')
+	                );
 	                node.value = null;
 	                this.advanceAfterBlockEnd();
 	            }
@@ -3609,7 +3627,11 @@ var nunjucks =
 	        var args = this.parseFilterArgs(name);
 
 	        this.advanceAfterBlockEnd(filterTok.value);
-	        var body = this.parseUntilBlocks('endfilter');
+	        var body = new nodes.Capture(
+	            name.lineno,
+	            name.colno,
+	            this.parseUntilBlocks('endfilter')
+	        );
 	        this.advanceAfterBlockEnd();
 
 	        var node = new nodes.Filter(
@@ -3619,9 +3641,7 @@ var nunjucks =
 	            new nodes.NodeList(
 	                name.lineno,
 	                name.colno,
-	                // Body is a NodeList with an Output node as a child,
-	                // need to strip those
-	                body.children[0].children.concat(args)
+	                [body].concat(args)
 	            )
 	        );
 
@@ -4508,6 +4528,7 @@ var nunjucks =
 	var Include = Node.extend('Include', { fields: ['template', 'ignoreMissing'] });
 	var Set = Node.extend('Set', { fields: ['targets', 'value'] });
 	var Output = NodeList.extend('Output');
+	var Capture = Node.extend('Capture', { fields: ['body'] });
 	var TemplateData = Literal.extend('TemplateData');
 	var UnaryOp = Node.extend('UnaryOp', { fields: ['target'] });
 	var BinOp = Node.extend('BinOp', { fields: ['left', 'right'] });
@@ -4643,6 +4664,7 @@ var nunjucks =
 	    Pair: Pair,
 	    Dict: Dict,
 	    Output: Output,
+	    Capture: Capture,
 	    TemplateData: TemplateData,
 	    If: If,
 	    IfAsync: IfAsync,
@@ -5425,9 +5447,8 @@ var nunjucks =
 	    },
 
 	    escape: function(str) {
-	        if(typeof str === 'string' ||
-	           str instanceof r.SafeString) {
-	            return lib.escape(str);
+	        if(typeof str === 'string') {
+	            return r.markSafe(lib.escape(str));
 	        }
 	        return str;
 	    },

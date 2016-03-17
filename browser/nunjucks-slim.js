@@ -1,4 +1,4 @@
-/*! Browser bundle of nunjucks 2.4.0 (slim, only works with precompiled templates) */
+/*! Browser bundle of nunjucks 2.4.1 (slim, only works with precompiled templates) */
 var nunjucks =
 /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
@@ -1529,9 +1529,8 @@ var nunjucks =
 	    },
 
 	    escape: function(str) {
-	        if(typeof str === 'string' ||
-	           str instanceof r.SafeString) {
-	            return lib.escape(str);
+	        if(typeof str === 'string') {
+	            return r.markSafe(lib.escape(str));
 	        }
 	        return str;
 	    },
