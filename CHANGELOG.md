@@ -23,6 +23,10 @@ Changelog
 2.x (unreleased)
 ----------------
 
+
+2.4.1 (Mar 17 2016)
+-------------------
+
 * Don't double-escape. Thanks legutierr. Merge of
   [#701](https://github.com/mozilla/nunjucks/pull/701).
 
@@ -45,6 +49,7 @@ Changelog
 
 2.4.0 (Mar 10 2016)
 -------------------
+* Fix: [Breaking Change] filter.escape should not escape SafeString(#168).
 
 * Allow retrieving boolean-false as a global. Thanks Marius Büscher. Merge of
   [#694](https://github.com/mozilla/nunjucks/pull/694).
