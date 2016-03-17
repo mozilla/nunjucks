@@ -50,6 +50,9 @@
 <a href="#templating">Templating</a>
 <ul>
 <li>
+<a href="#file-extensions">File Extensions</a>
+</li>
+<li>
 <a href="#variables">Variables</a>
 </li>
 <li>
@@ -187,7 +190,7 @@
     <div class="locale btn-group"><a href="/nunjucks/templating.html" class="btn btn-success">English</a><a href="/nunjucks/cn/templating.html" class="btn btn-default">中文</a><a href="/nunjucks/fr/templating.html" class="btn btn-default">Français</a></div>
     <h1 id="templating">Templating</h1>
 
-<p>This is an overview of the templating features available in nunjucks.</p>
+<p>This is an overview of the templating features available in Nunjucks.</p>
 
 <blockquote>
 <p>Nunjucks is essentially a port of
@@ -196,6 +199,14 @@
 lacking here. Read about the differences
 <a href="http://mozilla.github.io/nunjucks/faq.html#can-i-use-the-same-templates-between-nunjucks-and-jinja2-what-are-the-differences">here</a>.</p>
 </blockquote>
+
+<h2 id="file-extensions">File Extensions</h2>
+
+<p>Although you are free to use any file extension you wish for your
+Nunjucks template files, the Nunjucks community has adopted  <code>.njk</code>.</p>
+
+<p>If you are developing tools or editor syntax helpers for Nunjucks, please
+include recognition of the <code>.njk</code> extension.</p>
 
 <h2 id="variables">Variables</h2>
 
@@ -361,7 +372,7 @@ contents of the optional <code>else</code> clause would instead be rendered.</p>
 <p>The <a href="http://jinja.pocoo.org/docs/templates/#dictsort"><code>dictsort</code></a> filter is
 available for sorting objects when iterating over them.</p>
 
-<p>Additionally, nunjucks will unpack arrays into variables:</p>
+<p>Additionally, Nunjucks will unpack arrays into variables:</p>
 <div class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">points</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span> <span class="p">[</span><span class="mi">12</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">14</span><span class="p">]];</span>
 </code></pre></div><div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">for</span> <span class="nv">x</span><span class="o">,</span> <span class="nv">y</span><span class="o">,</span> <span class="nv">z</span> <span class="k">in</span> <span class="nv">points</span> <span class="cp">%}</span><span class="x"></span>
 <span class="x">  Point: </span><span class="cp">{{</span> <span class="nv">x</span> <span class="cp">}}</span><span class="x">, </span><span class="cp">{{</span> <span class="nv">y</span> <span class="cp">}}</span><span class="x">, </span><span class="cp">{{</span> <span class="nv">z</span> <span class="cp">}}</span><span class="x"></span>
@@ -398,7 +409,7 @@ asynchronous control of the loop. The reason those tags are separate
 is performance; most people use templates synchronously and it&#39;s
 much faster for <code>for</code> to compile to a straight JavaScript <code>for</code> loop.</p>
 
-<p>At compile-time, nunjucks is not aware how templates are loaded so
+<p>At compile-time, Nunjucks is not aware how templates are loaded so
 it&#39;s unable to determine if an <code>include</code> block is asynchronous or not.
 That&#39;s why it can&#39;t automatically convert loops for you, and you must
 use <code>asyncEach</code> for iteration if you are loading templates
@@ -615,7 +626,7 @@ object: <code>{% import name + &quot;.html&quot; as obj %}</code>.</p>
 
 <h3 id="raw">raw</h3>
 
-<p>If you want to output any of the special nunjucks tags like <code>{{</code>, you can use
+<p>If you want to output any of the special Nunjucks tags like <code>{{</code>, you can use
 <code>raw</code> and anything inside of it will be output as plain text.</p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">raw</span> <span class="cp">%}</span><span class="x"></span>
 <span class="x">  this will </span><span class="cp">{{</span> <span class="k">not</span> <span class="nv">be</span> <span class="nv">processed</span> <span class="cp">}}</span><span class="x"></span>
