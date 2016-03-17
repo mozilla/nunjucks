@@ -40,6 +40,14 @@
             finish(done);
         });
 
+        it('should report full function name in error', function(done) {
+            render('{{ foo.barThatIsLongerThanTen() }}', {}, { noThrow: true }, function(err) {
+                expect(err).to.match(/foo\["barThatIsLongerThanTen"\]/);
+            });
+
+            finish(done);
+        });
+
         it('should report the failed function calls w/multiple args', function(done) {
             render('{{ foo.bar("multiple", "args") }}', {}, { noThrow: true }, function(err) {
                 expect(err).to.match(/foo\["bar"\]/);
