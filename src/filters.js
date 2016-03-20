@@ -175,7 +175,17 @@ var filters = {
     length: function(val) {
         var value = normalize(val, '');
 
-        return value !== undefined ? value.length : 0;
+        if(value !== undefined) {
+            if(
+                (typeof Map === 'function' && value instanceof Map) ||
+                (typeof Set === 'function' && value instanceof Set)
+            ) {
+                // ECMAScript 2015 Maps and Sets
+                return value.size;
+            }
+            return value.length;
+        }
+        return 0;
     },
 
     list: function(val) {
