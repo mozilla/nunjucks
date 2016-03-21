@@ -30,8 +30,7 @@ which only works with precompiled templates.
 * Use **nunjucks-slim.js** to load precompiled templates and use them. Doesn't
   come with the full compiler so it's smaller (8K min/gzipped), but *only* works with
   precompiled templates. Typically used for production, and possibly
-  development if you use the [grunt task](https://github.com/jlongster/grunt-nunjucks) to
-  automatically recompile templates.
+  development if you use the [grunt](https://github.com/jlongster/grunt-nunjucks) or [gulp](https://github.com/sindresorhus/gulp-nunjucks) tasks to automatically recompile templates.
 
 Simply include nunjucks with a `script` tag on the page:
 
@@ -47,8 +46,8 @@ define(['nunjucks'], function(nunjucks) {
 ```
 
 > Whatever you do, make sure to precompile your templates in
-> production! There is a [grunt
-> task](https://github.com/jlongster/grunt-nunjucks) to help with
+> production! There are [grunt](https://github.com/jlongster/grunt-nunjucks)
+> and [gulp](https://github.com/sindresorhus/gulp-nunjucks) tasks to help with
 > that. Read more about optimal client-side configurations in [Browser
 > Usage](api.html#browser-usage).
 
