@@ -574,7 +574,7 @@ something that automatically recompiles templates while developing
 unless you want to manually recompile them after every change.
 
 1. For development, use the [grunt](https://github.com/jlongster/grunt-nunjucks) or
-[gulp](https://github.com/sindresorhus/gulp-nunjucks) taskls  to watch your template
+[gulp](https://github.com/sindresorhus/gulp-nunjucks) tasks to watch your template
 directory for changes and automatically [precompile](#precompiling) them into a js file
 2. Load [nunjucks-slim.js](files/nunjucks-slim.js) and `templates.js`, or whatever you named
 the precompiled js file, with either a script tag or a module loader.
