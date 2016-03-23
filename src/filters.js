@@ -317,8 +317,10 @@ var filters = {
         return arr;
     },
 
-    round: function(val, precision, method) {
+    round: function(val, precision, method, jinjaCompat) {
         precision = precision || 0;
+        jinjaCompat = jinjaCompat || false;
+
         var factor = Math.pow(10, precision);
         var rounder;
 
@@ -332,7 +334,14 @@ var filters = {
             rounder = Math.round;
         }
 
-        return rounder(val * factor) / factor;
+        var roundedValue = rounder(val * factor) / factor;
+
+        if(Number.isInteger(roundedValue) && jinjaCompat) {
+            var floatingPointNumber = roundedValue.toFixed(1);
+            roundedValue = floatingPointNumber;
+        }
+
+        return roundedValue;
     },
 
     slice: function(arr, slices, fillWith) {
