@@ -299,6 +299,17 @@
             expect(n.children[0].typename).to.be('Include');
         });
 
+        it('should parse include tags', function() {
+            var n = parser.parse('{% include "test.j2" %}');
+            expect(n.children[0].typename).to.be('Include');
+
+            n = parser.parse('{% include "test.html"|replace("html","j2") %}');
+            expect(n.children[0].typename).to.be('Include');
+
+            n = parser.parse('{% include ""|default("test.j2") %}');
+            expect(n.children[0].typename).to.be('Include');
+        });
+
         it('should parse for loops', function() {
           isAST(parser.parse('{% for x in [1, 2] %}{{ x }}{% endfor %}'),
                 [nodes.Root,
@@ -514,6 +525,36 @@
                   [nodes.Root,
                    [nodes.FromImport,
                     [nodes.Literal, 'foo/bar.j2'],
+                    [nodes.NodeList,
+                     [nodes.Symbol, 'baz'],
+                     [nodes.Pair,
+                      [nodes.Symbol, 'foobar'],
+                      [nodes.Symbol, 'foobarbaz']]]]]);
+
+            isAST(parser.parse('{% import "foo/bar.html"|replace("html", "j2") as baz %}'),
+                  [nodes.Root,
+                   [nodes.Import,
+                    [nodes.Filter, 
+                     [nodes.Symbol, 'replace'],
+                     [nodes.NodeList,
+                      [nodes.Literal, 'foo/bar.html'],
+                      [nodes.Literal, 'html'],
+                      [nodes.Literal, 'j2']
+                     ]
+                    ],
+                    [nodes.Symbol, 'baz']]]);
+
+            isAST(parser.parse('{% from ""|default("foo/bar.j2") import baz, ' +
+                               '   foobar as foobarbaz %}'),
+                  [nodes.Root,
+                   [nodes.FromImport,
+                    [nodes.Filter, 
+                     [nodes.Symbol, 'default'],
+                     [nodes.NodeList,
+                      [nodes.Literal, ''],
+                      [nodes.Literal, 'foo/bar.j2']
+                     ]
+                    ],
                     [nodes.NodeList,
                      [nodes.Symbol, 'baz'],
                      [nodes.Pair,
