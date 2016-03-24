@@ -10,6 +10,10 @@ function normalize(value, defaultValue) {
     return value;
 }
 
+function isInt(n) {
+    return n % 1 === 0;
+}
+
 var filters = {
     abs: function(n) {
         return Math.abs(n);
@@ -336,7 +340,7 @@ var filters = {
 
         var roundedValue = rounder(val * factor) / factor;
 
-        if(Number.isInteger(roundedValue) && jinjaCompat) {
+        if(isInt(roundedValue) && jinjaCompat) {
             var floatingPointNumber = roundedValue.toFixed(1);
             roundedValue = floatingPointNumber;
         }
