@@ -542,8 +542,8 @@ var Parser = Object.extend({
         }
 
         switch(tok.value) {
-        case 'raw':
-        case 'endraw':
+        case 'raw': 
+        case 'endraw': 
             return this.parseRaw();
         case 'if':
         case 'ifAsync':
@@ -578,7 +578,7 @@ var Parser = Object.extend({
 
     parseRaw: function() {
         // Look for upcoming raw blocks (ignore all other kinds of blocks)
-        var rawBlockRegex = new RegExp('([\\s\\S]*?)'+this.tokens.tags.BLOCK_START+'\\s*(raw|endraw)\\s*(?='+this.tokens.tags.BLOCK_END+')'+this.tokens.tags.BLOCK_END);
+        var rawBlockRegex = new RegExp("([\\s\\S]*?)"+this.tokens.tags.BLOCK_START+"\\s*(raw|endraw)\\s*(?="+this.tokens.tags.BLOCK_END+")"+this.tokens.tags.BLOCK_END);
         var rawLevel = 1;
         var str = '';
         var matches = null;
