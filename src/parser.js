@@ -542,7 +542,7 @@ var Parser = Object.extend({
         }
 
         switch(tok.value) {
-		case 'raw': return this.parseRaw();
+        case 'raw': return this.parseRaw();
         case 'if':
         case 'ifAsync':
             return this.parseIf();
