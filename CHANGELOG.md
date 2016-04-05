@@ -4,9 +4,6 @@ Changelog
 3.x (unreleased)
 ----------------
 
-* Support ES2015 Map and Set in `length` filter. Merge of
-  [#705](https://github.com/mozilla/nunjucks/pull/705). Thanks ricordisamoa.
-
 * Allow explicitly setting `null` (aka `none`) as the value of a variable;
   don't ignore that value and look on up the frame stack or context. Fixes
   [#478](https://github.com/mozilla/nunjucks/issues/478). Thanks Jonny Gerig
@@ -25,6 +22,9 @@ Changelog
 
 2.x (unreleased)
 ----------------
+
+* Support ES2015 Map and Set in `length` filter. Merge of
+  [#705](https://github.com/mozilla/nunjucks/pull/705). Thanks ricordisamoa.
 
 * Remove truncation of long function names in error messages. Thanks Daniel
   Bendavid. Merge of [#702](https://github.com/mozilla/nunjucks/pull/702).
