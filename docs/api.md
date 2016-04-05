@@ -280,7 +280,7 @@ Return true if a custom extension named **name** has been added.
 {% api %}
 addGlobal
 env.addGlobal(name, value)
-Add a global value that will be available to all templates. Note: this will overwrite any existing global called `name`. 
+Add a global value that will be available to all templates. Note: this will overwrite any existing global called `name`.
 Returns `env` for further method chaining.
 {% endapi %}
 
@@ -573,9 +573,9 @@ production, which simplifies the setup. However, you're going to want
 something that automatically recompiles templates while developing
 unless you want to manually recompile them after every change.
 
-1. For development, use the [grunt task](https://github.com/jlongster/grunt-nunjucks) to watch
-your template directory for changes and automatically [precompile](#precompiling) them
-into a js file
+1. For development, use the [grunt](https://github.com/jlongster/grunt-nunjucks) or
+[gulp](https://github.com/sindresorhus/gulp-nunjucks) tasks to watch your template
+directory for changes and automatically [precompile](#precompiling) them into a js file
 2. Load [nunjucks-slim.js](files/nunjucks-slim.js) and `templates.js`, or whatever you named
 the precompiled js file, with either a script tag or a module loader.
 3. Render templates ([example](#simple-api))!
@@ -639,7 +639,7 @@ Precompile a file or directory at **path**. **opts** is a hash with any of the f
 * **env**: the Environment to use (gets extensions and async filters from it)
 * **include**: array of file/folders to include (folders are auto-included, files are auto-excluded)
 * **exclude**: array of file/folders to exclude (folders are auto-included, files are auto-excluded)
-* **wrapper**: `function(templates, opts)` Customize the output format of the precompiled templates. This function must return a string 
+* **wrapper**: `function(templates, opts)` Customize the output format of the precompiled templates. This function must return a string
     * **templates**: array of objects with the following properties:
         * **name**: name of the template
         * **template**: string source of the precompiled template in javascript
@@ -848,7 +848,8 @@ with the template.
 
 Note: When precompiling, **you must install the extensions at
 compile-time**. You have to use the [precompiling API](#api1) (or the
-[grunt task](https://github.com/jlongster/grunt-nunjucks)) instead of
+[grunt](https://github.com/jlongster/grunt-nunjucks) or
+[gulp](https://github.com/sindresorhus/gulp-nunjucks) tasks) instead of
 the script. You'll want to create an [`Environment`](#environment)
 object, install your extensions, and pass it to the precompiler.
 
