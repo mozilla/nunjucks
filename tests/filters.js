@@ -264,6 +264,16 @@
             equal('{{ undefined | length }}', '0');
             equal('{{ null | length }}', '0');
             equal('{{ nothing | length }}', '0');
+            if(typeof Map === 'function') {
+                var map = new Map([['key1', 'value1'], ['key2', 'value2']]);
+                map.set('key3', 'value3');
+                equal('{{ map | length }}', {map: map}, '3');
+            }
+            if(typeof Set === 'function') {
+                var set = new Set(['value1']);
+                set.add('value2');
+                equal('{{ set | length }}', {set: set}, '2');
+            }
             finish(done);
         });
 
