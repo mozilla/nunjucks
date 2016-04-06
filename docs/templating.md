@@ -909,7 +909,7 @@ template. Useful for debugging: `{{ foo | dump }}`.
 * [rejectattr](http://jinja.pocoo.org/docs/templates/#rejectattr) (only the single-argument form)
 * [replace](http://jinja.pocoo.org/docs/templates/#replace) (the first argument can take a JS regular expression)
 * [reverse](http://jinja.pocoo.org/docs/templates/#reverse)
-* [round](http://jinja.pocoo.org/docs/templates/#round)
+* [round](http://jinja.pocoo.org/docs/templates/#round) (additional argument `jinjaCompat` adds ability to match jinja's default floating point of one decimal place if set to true)
 * [safe](http://jinja.pocoo.org/docs/templates/#safe)
 * [selectattr](http://jinja.pocoo.org/docs/templates/#selectattr) (only the single-argument form)
 * [slice](http://jinja.pocoo.org/docs/templates/#slice)

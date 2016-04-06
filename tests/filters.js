@@ -378,7 +378,9 @@
 
         it('round', function(done) {
             equal('{{ 4.5 | round }}', '5');
+            equal('{{ 4.5 | round(0, "normal", true) }}', '5.0');
             equal('{{ 4.5 | round(0, "floor") }}', '4');
+            equal('{{ 4.5 | round(0, "floor", true) }}', '4.0');
             equal('{{ 4.12345 | round(4) }}', '4.1235');
             equal('{{ 4.12344 | round(4) }}', ('4.1234'));
             finish(done);
