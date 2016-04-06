@@ -30,8 +30,7 @@ qui fonctionne uniquement avec les templates précompilés.
 * Utilisez **nunjucks-slim.js** pour charger et utiliser les templates précompilés. Comme
   le fichier est livré uniquement avec le runtime, il est plus petit (8K min/gzipped), mais il fonctionne
   *seulement* avec les templates précompilés. Généralement utilisé en production, il est quand même possible
-  de s'en servir en développement à condition de lancer la [tâche grunt](https://github.com/jlongster/grunt-nunjucks)
-  pour recompiler automatiquement les templates.
+  de s'en servir en développement à condition de lancer la tâche [grunt](https://github.com/jlongster/grunt-nunjucks) ou [gulp](https://github.com/sindresorhus/gulp-nunjucks) pour recompiler automatiquement les templates.
 
 Il suffit d'inclure nunjucks avec une balise `script` dans la page :
 
@@ -47,8 +46,8 @@ define(['nunjucks'], function(nunjucks) {
 ```
 
 > Quoi que vous fassiez, assurez-vous de précompiler vos templates en
-> production ! Il existe une [tâche
-> grunt](https://github.com/jlongster/grunt-nunjucks) pour vous aider à
+> production ! Il existe des tâches [grunt](https://github.com/jlongster/grunt-nunjucks)
+> et [gulp](https://github.com/sindresorhus/gulp-nunjucks) pour vous aider à
 > faire cela. Lisez [Utilisation dans un navigateur](api.html#utilisation-dans-un-navigateur)
 > pour en savoir plus sur les configurations optimales côté client.
 
