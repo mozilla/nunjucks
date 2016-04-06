@@ -183,16 +183,16 @@ the browser. See [`Loader`](#loader) for more information.
 
 ```js
 // the FileSystemLoader is available if in node
-var env = new Environment(new nunjucks.FileSystemLoader('views'));
+var env = new nunjucks.Environment(new nunjucks.FileSystemLoader('views'));
 
-var env = new Environment(new nunjucks.FileSystemLoader('views'),
+var env = new nunjucks.Environment(new nunjucks.FileSystemLoader('views'),
                           { autoescape: false });
 
-var env = new Environment([new nunjucks.FileSystemLoader('views'),
+var env = new nunjucks.Environment([new nunjucks.FileSystemLoader('views'),
                            new MyCustomLoader()]);
 
 // the WebLoader is available if in the browser
-var env = new Environment(new nunjucks.WebLoader('/views'));
+var env = new nunjucks.Environment(new nunjucks.WebLoader('/views'));
 ```
 {% endapi %}
 
