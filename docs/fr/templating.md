@@ -6,13 +6,21 @@ title: Templates
 
 # Templating
 
-Ceci est un aperçu des caractéristiques des templates disponibles dans nunjucks.
+Ceci est un aperçu des caractéristiques des templates disponibles dans Nunjucks.
 
 > Nunjucks est essentiellement un port de
 > [jinja2](http://jinja.pocoo.org/docs/), donc vous pouvez lire leurs
 > [docs](http://jinja.pocoo.org/docs/templates/) s'il manque quelque
 > chose ici. Découvrez les différences
 > [ici](faq.html#puis-je-utiliser-les-mmes-modles-entre-nunjucks-et-jinja2-quelles-sont-les-diffrences).
+
+## File Extensions
+
+Bien que vous soyez libre d'utiliser n'importe quelle extension de fichier pour vos
+fichiers de template Nunjucks, la communauté de Nunjucks a adopté `.njk`.  
+
+Si vous développez des outils ou des aides de syntaxe pour éditeur pour Nunjucks,
+veuillez inclure la reconnaissance de l'extension `.njk`.
 
 ## Variables
 
@@ -216,7 +224,7 @@ var food = {
 
 Le filtre [`dictsort`](http://jinja.pocoo.org/docs/templates/#dictsort) est disponible pour trier les objets lors de leur itération (*nouveau depuis la 0.1.8*).
 
-De plus, nunjucks découpera les tableaux dans des variables (*nouveau depuis la 0.1.8*) :
+De plus, Nunjucks découpera les tableaux dans des variables :
 
 ```js
 var points = [[0, 1, 2], [5, 6, 7], [12, 13, 14]];
@@ -255,7 +263,7 @@ la boucle de façon asynchrone. La raison pour laquelle ces balises sont distinc
 c'est la performance. La plupart des gens utilisent des templates de façon synchrone et c'est beaucoup
 plus rapide avec `for` que de le compiler avec une boucle normale `for` en JavaScript.
 
-Au moment de la compilation, nunjucks ne sait pas comment les templates sont chargés,
+Au moment de la compilation, Nunjucks ne sait pas comment les templates sont chargés,
 donc il n'est pas en mesure de déterminer si un bloc `include` est asynchrone ou non.
 C'est pourquoi il ne peut pas convertir automatiquement les boucles pour vous et donc vous
 devez utiliser `asyncEach` pour itérer si vous chargez des templates de façon asynchrone
@@ -499,7 +507,8 @@ Vous pouvez aussi importer des valeurs depuis un template dans l'espace de nomma
 
 ### raw
 
-Si vous voulez afficher des balises spéciales de nunjucks comme `{{`, vous pouvez utiliser `raw` et tout ce qui sera à l'intérieur de celui-ci sera afficher au format texte brut.
+Si vous voulez afficher des balises spéciales de Nunjucks comme `{{`, vous pouvez utiliser
+`raw` et tout ce qui sera à l'intérieur de celui-ci sera afficher au format texte brut.
 
 ```jinja
 {% raw %}
