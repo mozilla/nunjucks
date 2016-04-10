@@ -300,6 +300,7 @@
         });
 
         it('should parse include tags', function() {
+
             var n = parser.parse('{% include "test.j2" %}');
             expect(n.children[0].typename).to.be('Include');
 
