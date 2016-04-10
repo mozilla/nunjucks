@@ -183,16 +183,16 @@ le navigateur. Voir [`Chargeur`](#chargeur) pour plus d'informations.
 
 ```js
 // Le FileSystemLoader est disponible si on est dans node
-var env = new Environment(new nunjucks.FileSystemLoader('views'));
+var env = new nunjucks.Environment(new nunjucks.FileSystemLoader('views'));
 
-var env = new Environment(new nunjucks.FileSystemLoader('views'),
+var env = new nunjucks.Environment(new nunjucks.FileSystemLoader('views'),
                           { autoescape: false });
 
-var env = new Environment([new nunjucks.FileSystemLoader('views'),
+var env = new nunjucks.Environment([new nunjucks.FileSystemLoader('views'),
                            new MyCustomLoader()]);
 
 // Le WebLoader est disponible si on est dans le navigateur
-var env = new Environment(new nunjucks.WebLoader('/views'));
+var env = new nunjucks.Environment(new nunjucks.WebLoader('/views'));
 ```
 {% endapi %}
 
@@ -573,8 +573,8 @@ production, ce qui simplifie la configuration. Cependant, vous allez vouloir que
 chose qui recompile automatiquement les templates lors du développement sauf si
 vous voulez les recompiler manuellement après chaque changement.
 
-1. Pour le développement, utilisez la [tâche grunt](https://github.com/jlongster/grunt-nunjucks) qui surveillera
-les modifications de votre répertoire de template et automatiquement les [précompilera](#prcompilation)
+1. Pour le développement, utilisez les tâches [grunt](https://github.com/jlongster/grunt-nunjucks) ou [gulp](https://github.com/sindresorhus/gulp-nunjucks) qui surveilleront
+les modifications de votre répertoire de template et automatiquement les [précompileront](#prcompilation)
 dans un fichier js
 2. Chargez [nunjucks-slim.js](../files/nunjucks-slim.js) et `templates.js`, ou tout ce que vous avez
 nommé comme fichier js précompilé, avec soit une balise script ou un chargeur de module.
@@ -848,8 +848,8 @@ Cela vous permet d'utiliser l'API du parser (analyseur) et vous permet de faire 
 ce que vous voulez avec le template.
 
 Remarque: Lors de la précompilation, **vous devez installer les extensions pour
-la compilation**. Vous devez utiliser l'API de [précompilation](#api1) (ou la
-[tâche de grunt](https://github.com/jlongster/grunt-nunjucks)) à la place du
+la compilation**. Vous devez utiliser l'API de [précompilation](#api1) (ou les tâches [grunt](https://github.com/jlongster/grunt-nunjucks) ou
+[gulp](https://github.com/sindresorhus/gulp-nunjucks)) à la place du
 script. Vous devrez créer un objet [`Environment`](#environment),
 installez vos extensions et les transmettre au précompilateur.
 
