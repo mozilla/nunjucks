@@ -50,6 +50,9 @@
 <a href="#templating">Templating</a>
 <ul>
 <li>
+<a href="#file-extensions">File Extensions</a>
+</li>
+<li>
 <a href="#variables">Variables</a>
 </li>
 <li>
@@ -187,7 +190,7 @@
     <div class="locale btn-group"><a href="/nunjucks/templating.html" class="btn btn-default">English</a><a href="/nunjucks/cn/templating.html" class="btn btn-default">中文</a><a href="/nunjucks/fr/templating.html" class="btn btn-success">Français</a></div>
     <h1 id="templating">Templating</h1>
 
-<p>Ceci est un aperçu des caractéristiques des templates disponibles dans nunjucks.</p>
+<p>Ceci est un aperçu des caractéristiques des templates disponibles dans Nunjucks.</p>
 
 <blockquote>
 <p>Nunjucks est essentiellement un port de
@@ -196,6 +199,14 @@
 chose ici. Découvrez les différences
 <a href="faq.html#puis-je-utiliser-les-mmes-modles-entre-nunjucks-et-jinja2-quelles-sont-les-diffrences">ici</a>.</p>
 </blockquote>
+
+<h2 id="file-extensions">File Extensions</h2>
+
+<p>Bien que vous soyez libre d&#39;utiliser n&#39;importe quelle extension de fichier pour vos
+fichiers de template Nunjucks, la communauté de Nunjucks a adopté <code>.njk</code>.  </p>
+
+<p>Si vous développez des outils ou des aides de syntaxe pour éditeur pour Nunjucks,
+veuillez inclure la reconnaissance de l&#39;extension <code>.njk</code>.</p>
 
 <h2 id="variables">Variables</h2>
 
@@ -356,7 +367,7 @@ Nunjucks est livré avec plusieurs tags intégrés, mais <a href="api.html#tags-
 </code></pre></div>
 <p>Le filtre <a href="http://jinja.pocoo.org/docs/templates/#dictsort"><code>dictsort</code></a> est disponible pour trier les objets lors de leur itération (<em>nouveau depuis la 0.1.8</em>).</p>
 
-<p>De plus, nunjucks découpera les tableaux dans des variables (<em>nouveau depuis la 0.1.8</em>) :</p>
+<p>De plus, Nunjucks découpera les tableaux dans des variables :</p>
 <div class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">points</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span> <span class="p">[</span><span class="mi">12</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">14</span><span class="p">]];</span>
 </code></pre></div><div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">for</span> <span class="nv">x</span><span class="o">,</span> <span class="nv">y</span><span class="o">,</span> <span class="nv">z</span> <span class="k">in</span> <span class="nv">points</span> <span class="cp">%}</span><span class="x"></span>
 <span class="x">  Point: </span><span class="cp">{{</span> <span class="nv">x</span> <span class="cp">}}</span><span class="x">, </span><span class="cp">{{</span> <span class="nv">y</span> <span class="cp">}}</span><span class="x">, </span><span class="cp">{{</span> <span class="nv">z</span> <span class="cp">}}</span><span class="x"></span>
@@ -393,7 +404,7 @@ la boucle de façon asynchrone. La raison pour laquelle ces balises sont distinc
 c&#39;est la performance. La plupart des gens utilisent des templates de façon synchrone et c&#39;est beaucoup
 plus rapide avec <code>for</code> que de le compiler avec une boucle normale <code>for</code> en JavaScript.</p>
 
-<p>Au moment de la compilation, nunjucks ne sait pas comment les templates sont chargés,
+<p>Au moment de la compilation, Nunjucks ne sait pas comment les templates sont chargés,
 donc il n&#39;est pas en mesure de déterminer si un bloc <code>include</code> est asynchrone ou non.
 C&#39;est pourquoi il ne peut pas convertir automatiquement les boucles pour vous et donc vous
 devez utiliser <code>asyncEach</code> pour itérer si vous chargez des templates de façon asynchrone
@@ -581,11 +592,9 @@ rendra le contenu du bloc parent. Regardez <a href="#super">super</a>.</p>
 
 <h3 id="raw">raw</h3>
 
-<p>Si vous voulez afficher des balises spéciales de nunjucks comme <code>{{</code>, vous pouvez utiliser <code>raw</code> et tout ce qui sera à l&#39;intérieur de celui-ci sera afficher au format texte brut.</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">raw</span> <span class="cp">%}</span><span class="x"></span>
-<span class="x">  Ceci </span><span class="cp">{{</span> <span class="nv">ne</span> <span class="nv">sera</span> <span class="nv">pas</span> <span class="nv">trait</span><span class="err">é</span> <span class="cp">}}</span><span class="x"></span>
-<span class="x">{％ endraw %}</span>
-</code></pre></div>
+<p>Si vous voulez afficher des balises spéciales de Nunjucks comme <code>{{</code>, vous pouvez utiliser
+<code>raw</code> et tout ce qui sera à l&#39;intérieur de celui-ci sera afficher au format texte brut.</p>
+
 <h3 id="filter">filter</h3>
 
 <p>Un bloc <code>filter</code> vous permet d&#39;appeler un filtre avec le contenu de ce

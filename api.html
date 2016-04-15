@@ -294,7 +294,7 @@ escaped automatically. See <a href="#autoescaping">Autoescaping</a></li>
 
 <ul>
 <li><strong>useCache</strong> <em>(default: false)</em> will enable cache and templates will never see updates.</li>
-<li><strong>async</strong> <em>(default: false)</em> will load templates asynchronously instead of synchronously.</li>
+<li><strong>async</strong> <em>(default: false)</em> will load templates asynchronously instead of synchronously (requires use of the <a href="#asynchronous-support">asynchronous API</a> for rendering).</li>
 </ul></li>
 <li><strong>express</strong> an express app that nunjucks should install to</li>
 <li><strong>tags:</strong> <em>(default: see nunjucks syntax)</em> defines the syntax for
@@ -383,16 +383,16 @@ use the simple <a href="#configure"><code>configure</code></a> API, nunjucks aut
 creates the appropriate loader for you, depending if you&#39;re in node or
 the browser. See <a href="#loader"><code>Loader</code></a> for more information.</p>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="c1">// the FileSystemLoader is available if in node</span>
-<span class="kd">var</span> <span class="nx">env</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Environment</span><span class="p">(</span><span class="k">new</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">FileSystemLoader</span><span class="p">(</span><span class="s1">&#39;views&#39;</span><span class="p">));</span>
+<span class="kd">var</span> <span class="nx">env</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">Environment</span><span class="p">(</span><span class="k">new</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">FileSystemLoader</span><span class="p">(</span><span class="s1">&#39;views&#39;</span><span class="p">));</span>
 
-<span class="kd">var</span> <span class="nx">env</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Environment</span><span class="p">(</span><span class="k">new</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">FileSystemLoader</span><span class="p">(</span><span class="s1">&#39;views&#39;</span><span class="p">),</span>
+<span class="kd">var</span> <span class="nx">env</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">Environment</span><span class="p">(</span><span class="k">new</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">FileSystemLoader</span><span class="p">(</span><span class="s1">&#39;views&#39;</span><span class="p">),</span>
                           <span class="p">{</span> <span class="nx">autoescape</span><span class="o">:</span> <span class="kc">false</span> <span class="p">});</span>
 
-<span class="kd">var</span> <span class="nx">env</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Environment</span><span class="p">([</span><span class="k">new</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">FileSystemLoader</span><span class="p">(</span><span class="s1">&#39;views&#39;</span><span class="p">),</span>
+<span class="kd">var</span> <span class="nx">env</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">Environment</span><span class="p">([</span><span class="k">new</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">FileSystemLoader</span><span class="p">(</span><span class="s1">&#39;views&#39;</span><span class="p">),</span>
                            <span class="k">new</span> <span class="nx">MyCustomLoader</span><span class="p">()]);</span>
 
 <span class="c1">// the WebLoader is available if in the browser</span>
-<span class="kd">var</span> <span class="nx">env</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Environment</span><span class="p">(</span><span class="k">new</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">WebLoader</span><span class="p">(</span><span class="s1">&#39;/views&#39;</span><span class="p">));</span>
+<span class="kd">var</span> <span class="nx">env</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">Environment</span><span class="p">(</span><span class="k">new</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">WebLoader</span><span class="p">(</span><span class="s1">&#39;/views&#39;</span><span class="p">));</span>
 </code></pre></div>
 </div>
 
@@ -474,7 +474,7 @@ See <a href="#custom-tags">Custom Tags</a>.</p>
 
 <div class="api-sig"><code>env.addGlobal(name, value)</code></div>
 
-<div class="api-desc"><p>Add a global value that will be available to all templates. Note: this will overwrite any existing global called <code>name</code>. 
+<div class="api-desc"><p>Add a global value that will be available to all templates. Note: this will overwrite any existing global called <code>name</code>.
 Returns <code>env</code> for further method chaining.</p>
 </div>
 
@@ -747,9 +747,9 @@ something that automatically recompiles templates while developing
 unless you want to manually recompile them after every change.</p>
 
 <ol>
-<li>For development, use the <a href="https://github.com/jlongster/grunt-nunjucks">grunt task</a> to watch
-your template directory for changes and automatically <a href="#precompiling">precompile</a> them
-into a js file</li>
+<li>For development, use the <a href="https://github.com/jlongster/grunt-nunjucks">grunt</a> or
+<a href="https://github.com/sindresorhus/gulp-nunjucks">gulp</a> tasks to watch your template
+directory for changes and automatically <a href="#precompiling">precompile</a> them into a js file</li>
 <li>Load <a href="files/nunjucks-slim.js">nunjucks-slim.js</a> and <code>templates.js</code>, or whatever you named
 the precompiled js file, with either a script tag or a module loader.</li>
 <li>Render templates (<a href="#simple-api">example</a>)!</li>
@@ -811,7 +811,7 @@ auto-generated when compiling a directory.</li>
 <li><strong>env</strong>: the Environment to use (gets extensions and async filters from it)</li>
 <li><strong>include</strong>: array of file/folders to include (folders are auto-included, files are auto-excluded)</li>
 <li><strong>exclude</strong>: array of file/folders to exclude (folders are auto-included, files are auto-excluded)</li>
-<li><strong>wrapper</strong>: <code>function(templates, opts)</code> Customize the output format of the precompiled templates. This function must return a string 
+<li><strong>wrapper</strong>: <code>function(templates, opts)</code> Customize the output format of the precompiled templates. This function must return a string
 
 <ul>
 <li><strong>templates</strong>: array of objects with the following properties:
@@ -998,7 +998,8 @@ with the template.</p>
 
 <p>Note: When precompiling, <strong>you must install the extensions at
 compile-time</strong>. You have to use the <a href="#api1">precompiling API</a> (or the
-<a href="https://github.com/jlongster/grunt-nunjucks">grunt task</a>) instead of
+<a href="https://github.com/jlongster/grunt-nunjucks">grunt</a> or
+<a href="https://github.com/sindresorhus/gulp-nunjucks">gulp</a> tasks) instead of
 the script. You&#39;ll want to create an <a href="#environment"><code>Environment</code></a>
 object, install your extensions, and pass it to the precompiler.</p>
 

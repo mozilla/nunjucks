@@ -99,8 +99,7 @@ larger file size.</p></li>
 <li><p>Use <strong>nunjucks-slim.js</strong> to load precompiled templates and use them. Doesn&#39;t
 come with the full compiler so it&#39;s smaller (8K min/gzipped), but <em>only</em> works with
 precompiled templates. Typically used for production, and possibly
-development if you use the <a href="https://github.com/jlongster/grunt-nunjucks">grunt task</a> to
-automatically recompile templates.</p></li>
+development if you use the <a href="https://github.com/jlongster/grunt-nunjucks">grunt</a> or <a href="https://github.com/sindresorhus/gulp-nunjucks">gulp</a> tasks to automatically recompile templates.</p></li>
 </ul>
 
 <p>Simply include nunjucks with a <code>script</code> tag on the page:</p>
@@ -112,8 +111,8 @@ automatically recompile templates.</p></li>
 </code></pre></div>
 <blockquote>
 <p>Whatever you do, make sure to precompile your templates in
-production! There is a <a href="https://github.com/jlongster/grunt-nunjucks">grunt
-task</a> to help with
+production! There are <a href="https://github.com/jlongster/grunt-nunjucks">grunt</a>
+and <a href="https://github.com/sindresorhus/gulp-nunjucks">gulp</a> tasks to help with
 that. Read more about optimal client-side configurations in <a href="api.html#browser-usage">Browser
 Usage</a>.</p>
 </blockquote>

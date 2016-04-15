@@ -99,8 +99,7 @@ fichier ne vous dérange pas.</p></li>
 <li><p>Utilisez <strong>nunjucks-slim.js</strong> pour charger et utiliser les templates précompilés. Comme
 le fichier est livré uniquement avec le runtime, il est plus petit (8K min/gzipped), mais il fonctionne
 <em>seulement</em> avec les templates précompilés. Généralement utilisé en production, il est quand même possible
-de s&#39;en servir en développement à condition de lancer la <a href="https://github.com/jlongster/grunt-nunjucks">tâche grunt</a>
-pour recompiler automatiquement les templates.</p></li>
+de s&#39;en servir en développement à condition de lancer la tâche <a href="https://github.com/jlongster/grunt-nunjucks">grunt</a> ou <a href="https://github.com/sindresorhus/gulp-nunjucks">gulp</a> pour recompiler automatiquement les templates.</p></li>
 </ul>
 
 <p>Il suffit d&#39;inclure nunjucks avec une balise <code>script</code> dans la page :</p>
@@ -112,8 +111,8 @@ pour recompiler automatiquement les templates.</p></li>
 </code></pre></div>
 <blockquote>
 <p>Quoi que vous fassiez, assurez-vous de précompiler vos templates en
-production ! Il existe une <a href="https://github.com/jlongster/grunt-nunjucks">tâche
-grunt</a> pour vous aider à
+production ! Il existe des tâches <a href="https://github.com/jlongster/grunt-nunjucks">grunt</a>
+et <a href="https://github.com/sindresorhus/gulp-nunjucks">gulp</a> pour vous aider à
 faire cela. Lisez <a href="api.html#utilisation-dans-un-navigateur">Utilisation dans un navigateur</a>
 pour en savoir plus sur les configurations optimales côté client.</p>
 </blockquote>

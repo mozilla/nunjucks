@@ -383,16 +383,16 @@ utilisez l&#39;API de configuration simplifiée, nunjucks crée  pour vous
 automatiquement le chargeur approprié, selon si vous êtes dans node ou dans
 le navigateur. Voir <a href="#chargeur"><code>Chargeur</code></a> pour plus d&#39;informations.</p>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="c1">// Le FileSystemLoader est disponible si on est dans node</span>
-<span class="kd">var</span> <span class="nx">env</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Environment</span><span class="p">(</span><span class="k">new</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">FileSystemLoader</span><span class="p">(</span><span class="s1">&#39;views&#39;</span><span class="p">));</span>
+<span class="kd">var</span> <span class="nx">env</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">Environment</span><span class="p">(</span><span class="k">new</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">FileSystemLoader</span><span class="p">(</span><span class="s1">&#39;views&#39;</span><span class="p">));</span>
 
-<span class="kd">var</span> <span class="nx">env</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Environment</span><span class="p">(</span><span class="k">new</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">FileSystemLoader</span><span class="p">(</span><span class="s1">&#39;views&#39;</span><span class="p">),</span>
+<span class="kd">var</span> <span class="nx">env</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">Environment</span><span class="p">(</span><span class="k">new</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">FileSystemLoader</span><span class="p">(</span><span class="s1">&#39;views&#39;</span><span class="p">),</span>
                           <span class="p">{</span> <span class="nx">autoescape</span><span class="o">:</span> <span class="kc">false</span> <span class="p">});</span>
 
-<span class="kd">var</span> <span class="nx">env</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Environment</span><span class="p">([</span><span class="k">new</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">FileSystemLoader</span><span class="p">(</span><span class="s1">&#39;views&#39;</span><span class="p">),</span>
+<span class="kd">var</span> <span class="nx">env</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">Environment</span><span class="p">([</span><span class="k">new</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">FileSystemLoader</span><span class="p">(</span><span class="s1">&#39;views&#39;</span><span class="p">),</span>
                            <span class="k">new</span> <span class="nx">MyCustomLoader</span><span class="p">()]);</span>
 
 <span class="c1">// Le WebLoader est disponible si on est dans le navigateur</span>
-<span class="kd">var</span> <span class="nx">env</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Environment</span><span class="p">(</span><span class="k">new</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">WebLoader</span><span class="p">(</span><span class="s1">&#39;/views&#39;</span><span class="p">));</span>
+<span class="kd">var</span> <span class="nx">env</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">Environment</span><span class="p">(</span><span class="k">new</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">WebLoader</span><span class="p">(</span><span class="s1">&#39;/views&#39;</span><span class="p">));</span>
 </code></pre></div>
 </div>
 
@@ -747,8 +747,8 @@ chose qui recompile automatiquement les templates lors du développement sauf si
 vous voulez les recompiler manuellement après chaque changement.</p>
 
 <ol>
-<li>Pour le développement, utilisez la <a href="https://github.com/jlongster/grunt-nunjucks">tâche grunt</a> qui surveillera
-les modifications de votre répertoire de template et automatiquement les <a href="#prcompilation">précompilera</a>
+<li>Pour le développement, utilisez les tâches <a href="https://github.com/jlongster/grunt-nunjucks">grunt</a> ou <a href="https://github.com/sindresorhus/gulp-nunjucks">gulp</a> qui surveilleront
+les modifications de votre répertoire de template et automatiquement les <a href="#prcompilation">précompileront</a>
 dans un fichier js</li>
 <li>Chargez <a href="../files/nunjucks-slim.js">nunjucks-slim.js</a> et <code>templates.js</code>, ou tout ce que vous avez
 nommé comme fichier js précompilé, avec soit une balise script ou un chargeur de module.</li>
@@ -997,8 +997,8 @@ Cela vous permet d&#39;utiliser l&#39;API du parser (analyseur) et vous permet d
 ce que vous voulez avec le template.</p>
 
 <p>Remarque: Lors de la précompilation, <strong>vous devez installer les extensions pour
-la compilation</strong>. Vous devez utiliser l&#39;API de <a href="#api1">précompilation</a> (ou la
-<a href="https://github.com/jlongster/grunt-nunjucks">tâche de grunt</a>) à la place du
+la compilation</strong>. Vous devez utiliser l&#39;API de <a href="#api1">précompilation</a> (ou les tâches <a href="https://github.com/jlongster/grunt-nunjucks">grunt</a> ou
+<a href="https://github.com/sindresorhus/gulp-nunjucks">gulp</a>) à la place du
 script. Vous devrez créer un objet <a href="#environment"><code>Environment</code></a>,
 installez vos extensions et les transmettre au précompilateur.</p>
 
