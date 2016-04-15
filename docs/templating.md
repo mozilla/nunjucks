@@ -542,13 +542,7 @@ object: `{% import name + ".html" as obj %}`.
 ### raw
 
 If you want to output any of the special Nunjucks tags like `{{`, you can use
-`raw` and anything inside of it will be output as plain text.
-
-```jinja
-{% raw %}
-  this will {{ not be processed }}
-{% endraw %}
-```
+a `{% raw %}` block and anything inside of it will be output as plain text.
 
 ### filter
 
