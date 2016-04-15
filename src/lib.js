@@ -285,11 +285,13 @@ exports.keys = function(obj) {
     }
 };
 
-exports.inOperator = function (key, arrOrObj) {
-    if (exports.isArray(arrOrObj)) {
-        return exports.indexOf(arrOrObj, key) !== -1;
-    } else if (exports.isObject(arrOrObj)) {
-        return key in arrOrObj;
+exports.inOperator = function (key, val) {
+    if (exports.isArray(val)) {
+        return exports.indexOf(val, key) !== -1;
+    } else if (exports.isObject(val)) {
+        return key in val;
+    } else if (exports.isString(val)) {
+        return val.indexOf(key) !== -1;
     } else {
         throw new Error('Cannot use "in" operator to search for "'
             + key + '" in unexpected types.');

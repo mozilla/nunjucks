@@ -414,6 +414,7 @@
                   {'obj': { a: true }}, 'yes');
             equal('{% if "a" in obj %}yes{% endif %}',
                   {'obj': { b: true }}, '');
+            equal('{% if "foo" in "foobar" %}yes{% endif %}', 'yes');
 
             render(
                 '{% if "a" in 1 %}yes{% endif %}',
