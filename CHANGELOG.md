@@ -5,6 +5,10 @@ Changelog
 2.x (unreleased)
 ----------------
 
+* Fix use of `in` operator with strings. Fixes
+  [#714](https://github.com/mozilla/nunjucks/issues/714). Thanks Zubrik for the
+  report.
+
 * Support ES2015 Map and Set in `length` filter. Merge of
   [#705](https://github.com/mozilla/nunjucks/pull/705). Thanks ricordisamoa.
 
