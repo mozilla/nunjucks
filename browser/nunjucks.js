@@ -1,4 +1,4 @@
-/*! Browser bundle of nunjucks 2.4.1  */
+/*! Browser bundle of nunjucks 3.0.0-dev.3  */
 var nunjucks =
 /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
@@ -425,11 +425,13 @@ var nunjucks =
 	    }
 	};
 
-	exports.inOperator = function (key, arrOrObj) {
-	    if (exports.isArray(arrOrObj)) {
-	        return exports.indexOf(arrOrObj, key) !== -1;
-	    } else if (exports.isObject(arrOrObj)) {
-	        return key in arrOrObj;
+	exports.inOperator = function (key, val) {
+	    if (exports.isArray(val)) {
+	        return exports.indexOf(val, key) !== -1;
+	    } else if (exports.isObject(val)) {
+	        return key in val;
+	    } else if (exports.isString(val)) {
+	        return val.indexOf(key) !== -1;
 	    } else {
 	        throw new Error('Cannot use "in" operator to search for "'
 	            + key + '" in unexpected types.');
@@ -1854,7 +1856,7 @@ var nunjucks =
 	                return this._getNodeName(node.target) + '["' +
 	                       this._getNodeName(node.val) + '"]';
 	            case 'Literal':
-	                return node.value.toString().substr(0, 10);
+	                return node.value.toString();
 	            default:
 	                return '--expression--';
 	        }
@@ -2241,7 +2243,8 @@ var nunjucks =
 	            '[' + argNames.join(', ') + '], ',
 	            '[' + kwargNames.join(', ') + '], ',
 	            'function (' + realNames.join(', ') + ') {',
-	            'frame = frame.push(true);',
+	            'var callerFrame = frame;',
+	            'frame = new runtime.Frame();',
 	            'kwargs = kwargs || {};',
 	            'if (kwargs.hasOwnProperty("caller")) {',
 	            'frame.set("caller", kwargs.caller); }'
@@ -2276,7 +2279,7 @@ var nunjucks =
 	        });
 
 	        frame = frame.pop();
-	        this.emitLine('frame = frame.pop();');
+	        this.emitLine('frame = callerFrame;');
 	        this.emitLine('return new runtime.SafeString(' + bufferId + ');');
 	        this.emitLine('});');
 	        this.popBufferId();
@@ -2525,6 +2528,7 @@ var nunjucks =
 	            this.emitFuncBegin('b_' + name);
 
 	            var tmpFrame = new Frame();
+	            this.emitLine('var frame = frame.push(true);');
 	            this.compile(block.body, tmpFrame);
 	            this.emitFuncEnd();
 	        }
@@ -5007,7 +5011,7 @@ var nunjucks =
 
 	    get: function(name) {
 	        var val = this.variables[name];
-	        if(val !== undefined && val !== null) {
+	        if(val !== undefined) {
 	            return val;
 	        }
 	        return null;
@@ -5016,7 +5020,7 @@ var nunjucks =
 	    lookup: function(name) {
 	        var p = this.parent;
 	        var val = this.variables[name];
-	        if(val !== undefined && val !== null) {
+	        if(val !== undefined) {
 	            return val;
 	        }
 	        return p && p.lookup(name);
@@ -5025,7 +5029,7 @@ var nunjucks =
 	    resolve: function(name, forWrite) {
 	        var p = (forWrite && this.isolateWrites) ? undefined : this.parent;
 	        var val = this.variables[name];
-	        if(val !== undefined && val !== null) {
+	        if(val !== undefined) {
 	            return this;
 	        }
 	        return p && p.resolve(name);
@@ -5213,7 +5217,7 @@ var nunjucks =
 
 	function contextOrFrameLookup(context, frame, name) {
 	    var val = frame.lookup(name);
-	    return (val !== undefined && val !== null) ?
+	    return (val !== undefined) ?
 	        val :
 	        context.lookup(name);
 	}
@@ -5506,7 +5510,17 @@ var nunjucks =
 	    length: function(val) {
 	        var value = normalize(val, '');
 
-	        return value !== undefined ? value.length : 0;
+	        if(value !== undefined) {
+	            if(
+	                (typeof Map === 'function' && value instanceof Map) ||
+	                (typeof Set === 'function' && value instanceof Set)
+	            ) {
+	                // ECMAScript 2015 Maps and Sets
+	                return value.size;
+	            }
+	            return value.length;
+	        }
+	        return 0;
 	    },
 
 	    list: function(val) {
