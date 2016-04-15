@@ -510,12 +510,6 @@ Vous pouvez aussi importer des valeurs depuis un template dans l'espace de nomma
 Si vous voulez afficher des balises spéciales de Nunjucks comme `{{`, vous pouvez utiliser
 `raw` et tout ce qui sera à l'intérieur de celui-ci sera afficher au format texte brut.
 
-```jinja
-{% raw %}
-  Ceci {{ ne sera pas traité }}
-{％ endraw %}
-```
-
 ### filter
 
 Un bloc `filter` vous permet d'appeler un filtre avec le contenu de ce
