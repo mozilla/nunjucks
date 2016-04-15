@@ -1,4 +1,4 @@
-/*! Browser bundle of nunjucks 2.4.1 (slim, only works with precompiled templates) */
+/*! Browser bundle of nunjucks 2.4.2 (slim, only works with precompiled templates) */
 var nunjucks =
 /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
@@ -425,11 +425,13 @@ var nunjucks =
 	    }
 	};
 
-	exports.inOperator = function (key, arrOrObj) {
-	    if (exports.isArray(arrOrObj)) {
-	        return exports.indexOf(arrOrObj, key) !== -1;
-	    } else if (exports.isObject(arrOrObj)) {
-	        return key in arrOrObj;
+	exports.inOperator = function (key, val) {
+	    if (exports.isArray(val)) {
+	        return exports.indexOf(val, key) !== -1;
+	    } else if (exports.isObject(val)) {
+	        return key in val;
+	    } else if (exports.isString(val)) {
+	        return val.indexOf(key) !== -1;
 	    } else {
 	        throw new Error('Cannot use "in" operator to search for "'
 	            + key + '" in unexpected types.');
@@ -1588,7 +1590,17 @@ var nunjucks =
 	    length: function(val) {
 	        var value = normalize(val, '');
 
-	        return value !== undefined ? value.length : 0;
+	        if(value !== undefined) {
+	            if(
+	                (typeof Map === 'function' && value instanceof Map) ||
+	                (typeof Set === 'function' && value instanceof Set)
+	            ) {
+	                // ECMAScript 2015 Maps and Sets
+	                return value.size;
+	            }
+	            return value.length;
+	        }
+	        return 0;
 	    },
 
 	    list: function(val) {

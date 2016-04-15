@@ -2,8 +2,8 @@ Changelog
 =========
 
 
-2.x (unreleased)
-----------------
+2.4.2 (Apr 15 2016)
+-------------------
 
 * Fix use of `in` operator with strings. Fixes
   [#714](https://github.com/mozilla/nunjucks/issues/714). Thanks Zubrik for the
