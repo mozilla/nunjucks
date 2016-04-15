@@ -89,7 +89,7 @@ directory, and the following options are available in **opts**:
 * **noCache** *(default: false)* never use a cache and recompile templates each time (server-side)
 * **web** an object for configuring loading templates in the browser:
   * **useCache** *(default: false)* will enable cache and templates will never see updates.
-  * **async** *(default: false)* will load templates asynchronously instead of synchronously.
+  * **async** *(default: false)* will load templates asynchronously instead of synchronously (requires use of the [asynchronous API](#asynchronous-support) for rendering).
 * **express** an express app that nunjucks should install to
 * **tags:** *(default: see nunjucks syntax)* defines the syntax for
     nunjucks tags. See [Customizing Syntax](#customizing-syntax)
