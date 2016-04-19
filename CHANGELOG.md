@@ -21,15 +21,19 @@ Changelog
   [#667](https://github.com/mozilla/nunjucks/pull/667).
 
 
+2.x (unreleased)
+----------------
+
+* Allow full expressions (incl. filters) in import and from tags. Thanks legutierr.
+  Merge of [#710](https://github.com/mozilla/nunjucks/pull/710).
+
+
 2.4.2 (Apr 15 2016)
 -------------------
 
 * Fix use of `in` operator with strings. Fixes
   [#714](https://github.com/mozilla/nunjucks/issues/714). Thanks Zubrik for the
   report.
-
-* Allow full expressions (incl. filters) in import and from tags. Thanks legutierr. 
-  Merge of [#710](https://github.com/mozilla/nunjucks/pull/710).
 
 * Support ES2015 Map and Set in `length` filter. Merge of
   [#705](https://github.com/mozilla/nunjucks/pull/705). Thanks ricordisamoa.
