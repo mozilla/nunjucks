@@ -294,7 +294,7 @@ var Parser = Object.extend({
                             importTok.colno);
         }
 
-        var target = this.parsePrimary();
+        var target = this.parseExpression();
 
         var withContext = this.parseWithContext();
 
@@ -315,7 +315,7 @@ var Parser = Object.extend({
             this.fail('parseFrom: expected from');
         }
 
-        var template = this.parsePrimary();
+        var template = this.parseExpression();
 
         if(!this.skipSymbol('import')) {
             this.fail('parseFrom: expected import',

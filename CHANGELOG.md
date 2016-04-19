@@ -13,6 +13,9 @@ Changelog
   [#714](https://github.com/mozilla/nunjucks/issues/714). Thanks Zubrik for the
   report.
 
+* Allow full expressions (incl. filters) in import and from tags. Thanks legutierr. 
+  Merge of [#710](https://github.com/mozilla/nunjucks/pull/710).
+
 * Support ES2015 Map and Set in `length` filter. Merge of
   [#705](https://github.com/mozilla/nunjucks/pull/705). Thanks ricordisamoa.
 
