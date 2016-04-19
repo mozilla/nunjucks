@@ -5,10 +5,6 @@ Changelog
 2.x (unreleased)
 ----------------
 
-
-2.x (unreleased)
-----------------
-
 * Allow full expressions (incl. filters) in import and from tags. Thanks legutierr.
   Merge of [#710](https://github.com/mozilla/nunjucks/pull/710).
 
