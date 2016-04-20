@@ -131,16 +131,16 @@ new Environment([loaders], [opts])
 
 ```js
 // the FileSystemLoader is available if in node
-var env = new Environment(new nunjucks.FileSystemLoader('views'));
+var env = new nunjucks.Environment(new nunjucks.FileSystemLoader('views'));
 
-var env = new Environment(new nunjucks.FileSystemLoader('views'),
+var env = new nunjucks.Environment(new nunjucks.FileSystemLoader('views'),
                           { autoescape: false });
 
-var env = new Environment([new nunjucks.FileSystemLoader('views'),
+var env = new nunjucks.Environment([new nunjucks.FileSystemLoader('views'),
                            new MyCustomLoader()]);
 
 // the WebLoader is available if in the browser
-var env = new Environment(new nunjucks.WebLoader('/views'));
+var env = new nunjucks.Environment(new nunjucks.WebLoader('/views'));
 ```
 {% endapi %}
 
@@ -443,7 +443,7 @@ var MyLoader = nunjucks.Loader.extend({
 
 这个方法是在开发和生产环境都使用预编译的模板，这样可以简化初始设置。但是在开发时，你需要一些工具来自动预编译，而不是手动编译。
 
-1. 开发时，使用 [grunt task](https://github.com/jlongster/grunt-nunjucks) 监听文件目录，当文件变化后自动编译成 js 文件。
+1. 开发时，使用 [grunt](https://github.com/jlongster/grunt-nunjucks)或[gulp](https://github.com/sindresorhus/gulp-nunjucks) 监听文件目录，当文件变化后自动编译成 js 文件。
 2. 使用 script 或模块加载器加载 [nunjucks-slim.js](files/nunjucks-slim.js) 和你编译的 js 文件（如 `templates.js`）。
 3. 渲染模板 ([example](#simple-api))!
 
@@ -649,7 +649,7 @@ env.render('{{ item|lookup }}', function(err, res) {
 
 你可以添加更多的自定义扩展，nunjucks 提供了 parser api 可以对模板做更多的事。
 
-注意：当预编译时，**你必须在编译时添加这些扩展**，你应该使用 [precompiling API](#api1) (或者 [grunt task](https://github.com/jlongster/grunt-nunjucks))，而不是预编译脚本。你需要创建一个 [`Environment`](#environment)
+注意：当预编译时，**你必须在编译时添加这些扩展**，你应该使用 [precompiling API](#api1) (或者 [grunt ](https://github.com/jlongster/grunt-nunjucks)或[gulp](https://github.com/sindresorhus/gulp-nunjucks)任务)，而不是预编译脚本。你需要创建一个 [`Environment`](#environment)
  实例，添加扩展，传到预编译器中。
 
 一个扩展至少有两个字段 `tags` 和 `parse`，扩展注册一个标签名，如果运行到这个标签则调用 parse。
