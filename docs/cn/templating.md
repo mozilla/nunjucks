@@ -6,10 +6,16 @@ title: Templates
 
 # 模板
 
-这里包括 nunjuck 所有可用的功能。
+这里包括 Nunjuck 所有可用的功能。
 
 > Nunjucks 是
 > [jinja2](http://jinja.pocoo.org/docs/) 的 javascript 的实现，所以如果此文档有什么缺失，你可以直接查看 [jinja2 的文档](http://jinja.pocoo.org/docs/templates/)，不过两者之间还存在一些[差异](http://mozilla.github.io/nunjucks/cn/faq.html)。
+
+## 文件扩展名
+
+虽然你可以用任意扩展名来命名你的Nunjucks模版或文件，但Nunjucks社区还是推荐使用`.njk`。
+
+如果你在给Nunjucks开发工具或是编辑器上的语法插件时，请记得使用`.njk`扩展名。
 
 ## 变量
 
@@ -188,7 +194,7 @@ var food = {
 
 [`dictsort`](http://jinja.pocoo.org/docs/templates/#dictsort) 过滤器可将对象排序 (*new in 0.1.8*)
 
-除此之外，nunjucks 会将数组解开，数组内的值对应到变量 (*new in 0.1.8*)
+除此之外，Nunjucks 会将数组解开，数组内的值对应到变量 (*new in 0.1.8*)
 
 ```js
 var points = [[0, 1, 2], [5, 6, 7], [12, 13, 14]];
@@ -214,11 +220,11 @@ var points = [[0, 1, 2], [5, 6, 7], [12, 13, 14]];
 
 > 这个是适用于异步模板，请读[文档](api.html#asynchronous-support)。
 
-`asyncEach` 为 `for` 的异步版本，只有当使用[自定义异步模板加载器](#asynchronous)的时候才使用，否则请不要使用。异步过滤器和扩展也需要他。如果你在循环中使用了异步过滤器的话，nunjucks就会在内部自动将循环转换成 `asyncEach`。
+`asyncEach` 为 `for` 的异步版本，只有当使用[自定义异步模板加载器](#asynchronous)的时候才使用，否则请不要使用。异步过滤器和扩展也需要他。如果你在循环中使用了异步过滤器的话，Nunjucks就会在内部自动将循环转换成 `asyncEach`。
 
 `asyncEach` 和 `for` 的使用方式一致，但他支持循环的异步控制。将两者区分的原因是性能，大部分人使用同步模板，将 `for` 转换成原生的 for 语句会快很多。
 
-编译时 nunjuck 不用关心模板是如何加载的，所以无法决定 `include` 是同步或异步。这也是为什么nunjucks无法自动将普通的循环语句转换成异步循环语句的原因，所以如果你要使用异步模板加载器的话，就需要使用 `asyncEach`。
+编译时 nunjuck 不用关心模板是如何加载的，所以无法决定 `include` 是同步或异步。这也是为什么Nunjucks无法自动将普通的循环语句转换成异步循环语句的原因，所以如果你要使用异步模板加载器的话，就需要使用 `asyncEach`。
 
 ```js
 // If you are using a custom loader that is async, you need asyncEach
@@ -296,7 +302,7 @@ var env = new nunjucks.Environment(AsyncLoaderFromDatabase, opts);
 {% set x, y, z = 5 %}
 ```
 
-如果在顶级作用域使用 `set`，将会改变全局的上下文中的值。如果只在某个作用域 (`for`、 `include` 或其他) 中使用，只会影响该作用域。
+如果在顶级作用域使用 `set`，将会改变全局的上下文中的值。如果只在某个作用域 (像是include或是macro) 中使用，则只会影响该作用域。
 
 同样地，你也可以使用区块赋值将一个区块的内容储存在一个变量中。
 
@@ -388,6 +394,11 @@ The name of the item is: {{ item.name }}
 {% include "missing.html" ignore missing %}
 ```
 
+被包含的模版自身可以扩展(`extends`)另一个模版（因此你可以让一系列相关联的模版继承同一种结构）。
+一个被包含的模版并不会改变包含它的模版的区块结构，它有一个分离的继承树和块级命名空间。换言之，
+在渲染时，`include`并不 _不是_ 将被包含模版代码拉取到包含它的模版中的预处理器。相对的，它对被
+包含的模版触发了一次的分离渲染，然后再将渲染的结果引入。
+
 ### import
 
 `import` 可加载不同的模板，可使你操作模板输出的数据，模板将会输出宏 (macro) 和在顶级作用域进行的赋值 (使用 [`set`](#set))。
@@ -438,12 +449,12 @@ The name of the item is: {{ item.name }}
 
 ### raw
 
-如果你想输出一些 nunjucks 特殊的标签 (如 `{{`)，可以使用 `raw` 将所有的内容输出为纯文本。
+如果你想输出一些 Nunjucks 特殊的标签 (如 `{{`)，可以使用 `raw` 将所有的内容输出为纯文本。
 
 ```jinja
 {% raw %}
   this will {{ not be processed }}
-{％ endraw %}
+{% endraw %}
 ```
 
 ### filter
@@ -535,8 +546,6 @@ foo(1, 2, { bar: 3, baz: 4})
 ```
 
 ## 空白字符控制
-
-*Introduced in v0.1.8*
 
 模板在正常情况会将变量 (variable) 和标签区块 (tag blocks) 周围的空白字符完全输出。有时，你不想输出一些额外的空白字符，但代码又需要一些空白字符来显得整洁。
 

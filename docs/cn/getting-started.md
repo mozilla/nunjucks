@@ -21,7 +21,7 @@ $ npm install nunjucks
 
 * **nunjucks.js** 可用于动态加载模板，当模板变化时重新加载，也可以用于预编译后的模板。包含编译器，所以会比较大 (20K min/gzipped)。如果你刚接触 nunjucks 可使用这个文件，如果你不在意大小也可以在生产环境使用。
 
-* **nunjucks-slim.js** 只能用于预编译后的模板，只包含运行时的代码，所以比较小 (8K min/gzipped)。一般用于生产环境，如果你使用 [grunt task](https://github.com/jlongster/grunt-nunjucks) 自动预编译，也可以在开发环境使用。
+* **nunjucks-slim.js** 只能用于预编译后的模板，只包含运行时的代码，所以比较小 (8K min/gzipped)。一般用于生产环境，如果你使用 [grunt](https://github.com/jlongster/grunt-nunjucks) 或[gulp](https://github.com/sindresorhus/gulp-nunjucks)任务自动预编译，也可以在开发环境使用。
 
 直接用 `script` 引入文件：
 
@@ -37,7 +37,7 @@ define(['nunjucks'], function(nunjucks) {
 ```
 
 > 确保在生产环境使用预编译版本，可使用 [grunt
-> task](https://github.com/jlongster/grunt-nunjucks)，可在 [浏览器使用](api.html#browser-usage) 查看客户端优化的配置。
+> ](https://github.com/jlongster/grunt-nunjucks)或[gulp](https://github.com/sindresorhus/gulp-nunjucks)，可在 [浏览器使用](api.html#browser-usage) 查看客户端优化的配置。
 
 ## 使用说明
 
