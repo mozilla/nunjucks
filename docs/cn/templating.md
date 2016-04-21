@@ -449,13 +449,7 @@ The name of the item is: {{ item.name }}
 
 ### raw
 
-如果你想输出一些 Nunjucks 特殊的标签 (如 `{{`)，可以使用 `raw` 将所有的内容输出为纯文本。
-
-```jinja
-{% raw %}
-  this will {{ not be processed }}
-{% endraw %}
-```
+如果你想输出一些 Nunjucks 特殊的标签 (如 `{{`)，可以使用 `{% raw %}` 将所有的内容输出为纯文本。
 
 ### filter
 
