@@ -850,6 +850,12 @@
             finish(done);
         });
 
+        it('should include templates while preserving indentation', function(done) {
+            equal('hello world\n  {% include "include-multiline.j2" %}',
+                  'hello world\n  FooInclude \n  FooInclude2');
+            finish(done);
+        });
+
         it('should include templates with context', function(done) {
             equal('hello world {% include "include.j2" %}',
                   { name: 'james' },
