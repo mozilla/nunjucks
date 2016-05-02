@@ -17,10 +17,10 @@ Ceci est un aperçu des caractéristiques des templates disponibles dans Nunjuck
 ## File Extensions
 
 Bien que vous soyez libre d'utiliser n'importe quelle extension de fichier pour vos
-fichiers de template Nunjucks, la communauté de Nunjucks a adopté `.njk`.  
+fichiers de template Nunjucks, la communauté de Nunjucks a adopté `.nj`.  
 
 Si vous développez des outils ou des aides de syntaxe pour éditeur pour Nunjucks,
-veuillez inclure la reconnaissance de l'extension `.njk`.
+veuillez inclure la reconnaissance de l'extension `.nj`.
 
 ## Variables
 
