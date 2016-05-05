@@ -760,7 +760,7 @@ var Parser = Object.extend({
     },
 
     parseCompare: function() {
-        var compareOps = ['==', '!=', '<', '>', '<=', '>='];
+        var compareOps = ['==', '===', '!=', '!==', '<', '>', '<=', '>='];
         var expr = this.parseConcat();
         var ops = [];
 
