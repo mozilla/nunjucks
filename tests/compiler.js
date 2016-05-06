@@ -399,6 +399,12 @@
             equal('{% if 10 != 10 %}yes{% endif %}', '');
             equal('{% if 10 == 10 %}yes{% endif %}', 'yes');
 
+            equal('{% if "0" == 0 %}yes{% endif %}', 'yes');
+            equal('{% if "0" === 0 %}yes{% endif %}', '');
+            equal('{% if "0" !== 0 %}yes{% endif %}', 'yes');
+            equal('{% if 0 == false %}yes{% endif %}', 'yes');
+            equal('{% if 0 === false %}yes{% endif %}', '');
+
             equal('{% if foo(20) > bar %}yes{% endif %}',
                   { foo: function(n) { return n - 1; },
                     bar: 15 },
