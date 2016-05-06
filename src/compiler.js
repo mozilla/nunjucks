@@ -12,7 +12,9 @@ var Frame = require('./runtime').Frame;
 // through
 var compareOps = {
     '==': '==',
+    '===': '===',
     '!=': '!=',
+    '!==': '!==',
     '<': '<',
     '>': '>',
     '<=': '<=',

@@ -5,6 +5,7 @@ Changelog
 2.x (unreleased)
 ----------------
 
+* Add support for strict type check comparisons (=== and !===)
 * Allow full expressions (incl. filters) in import and from tags. Thanks legutierr.
   Merge of [#710](https://github.com/mozilla/nunjucks/pull/710).
 

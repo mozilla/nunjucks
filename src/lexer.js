@@ -163,13 +163,19 @@ Tokenizer.prototype.nextToken = function() {
         else if(delimChars.indexOf(cur) !== -1) {
             // We've hit a delimiter (a special char like a bracket)
             this.forward();
-            var complexOps = ['==', '!=', '<=', '>=', '//', '**'];
+            var complexOps = ['==', '===', '!=', '!==', '<=', '>=', '//', '**'];
             var curComplex = cur + this.current();
             var type;
 
             if(lib.indexOf(complexOps, curComplex) !== -1) {
                 this.forward();
                 cur = curComplex;
+
+                // See if this is a strict equality/inequality comparator
+                if(lib.indexOf(complexOps, curComplex + this.current()) !== -1) {
+                    cur = curComplex + this.current();
+                    this.forward();
+                }
             }
 
             switch(cur) {

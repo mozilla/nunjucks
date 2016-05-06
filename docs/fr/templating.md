@@ -649,7 +649,9 @@ Vous pouvez les utiliser ainsi :
 ### Comparaisons
 
 * `==`
+* `===`
 * `!=`
+* `!==`
 * `>`
 * `>=`
 * `<`
