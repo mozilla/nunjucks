@@ -243,6 +243,18 @@
 
         it('should compile for blocks', function(done) {
             runLoopTests('for', 'endfor');
+
+            if(typeof Set === 'function') {
+                equal('{% for i in arr %}{{ i }}{% endfor %}',
+                      { arr: new Set([1, 2, 3, 4, 5]) }, '12345');
+
+                equal('{% for i in arr %}{{ i }}{% else %}empty{% endfor %}',
+                      { arr: new Set([1, 2, 3, 4, 5]) }, '12345');
+
+                equal('{% for i in arr %}{{ i }}{% else %}empty{% endfor %}',
+                      { arr: new Set() }, 'empty');
+            }
+
             finish(done);
         });
 

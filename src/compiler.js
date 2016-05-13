@@ -688,17 +688,40 @@ var Compiler = Object.extend({
             v = this.tmpid();
             frame.set(node.name.value, v);
 
-            this.emitLine('var ' + len + ' = ' + arr + '.length;');
-            this.emitLine('for(var ' + i + '=0; ' + i + ' < ' + arr + '.length; ' +
-                          i + '++) {');
-            this.emitLine('var ' + v + ' = ' + arr + '[' + i + '];');
-            this.emitLine('frame.set("' + node.name.value + '", ' + v + ');');
+            this.emitLine('if(runtime.isArray(' + arr + ')) {'); {
+                this.emitLine('var ' + len + ' = ' + arr + '.length;');
+                this.emitLine('for(var ' + i + '=0; ' + i + ' < ' + arr + '.length; ' +
+                              i + '++) {');
+                this.emitLine('var ' + v + ' = ' + arr + '[' + i + '];');
+                this.emitLine('frame.set("' + node.name.value + '", ' + v + ');');
 
-            this.emitLoopBindings(node, arr, i, len);
+                this.emitLoopBindings(node, arr, i, len);
 
-            this.withScopedSyntax(function() {
-                this.compile(node.body, frame);
-            });
+                this.withScopedSyntax(function() {
+                    this.compile(node.body, frame);
+                });
+
+                this.emitLine('}');
+            }
+
+            this.emitLine('} else if(runtime.isSet(' + arr + ')) {'); {
+                v = this.tmpid();
+                frame.set(node.name.value, v);
+
+                this.emitLine(i + ' = -1;');
+                this.emitLine('var ' + len + ' = ' + arr + '.size;');
+                this.emitLine('for(var ' + v + ' of ' + arr + ') {');
+                this.emitLine(i + '++;');
+                this.emitLine('frame.set("' + node.name.value + '", ' + v + ');');
+
+                this.emitLoopBindings(node, arr, i, len);
+
+                this.withScopedSyntax(function() {
+                    this.compile(node.body, frame);
+                });
+
+                this.emitLine('}');
+            }
 
             this.emitLine('}');
         }

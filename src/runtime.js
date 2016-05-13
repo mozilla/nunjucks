@@ -352,6 +352,7 @@ module.exports = {
     callWrap: callWrap,
     handleError: handleError,
     isArray: lib.isArray,
+    isSet: lib.isSet,
     keys: lib.keys,
     SafeString: SafeString,
     copySafeness: copySafeness,

@@ -106,6 +106,10 @@ exports.isArray = Array.isArray || function(obj) {
     return ObjProto.toString.call(obj) === '[object Array]';
 };
 
+exports.isSet = function(obj) {
+    return ObjProto.toString.call(obj) === '[object Set]';
+};
+
 exports.isString = function(obj) {
     return ObjProto.toString.call(obj) === '[object String]';
 };
