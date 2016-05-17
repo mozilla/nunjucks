@@ -22,6 +22,15 @@ Nunjucks template files, the Nunjucks community has adopted  `.njk`.
 If you are developing tools or editor syntax helpers for Nunjucks, please
 include recognition of the `.njk` extension.
 
+## Syntax Highlighting
+
+Plugins are available in various editors to support the `jinja` syntax highlighting of Nunjucks.
+
+* atom <https://github.com/alohaas/language-nunjucks>
+* vim <https://github.com/niftylettuce/vim-jinja>
+* brackets <https://github.com/axelboc/nunjucks-brackets>
+* sublime <https://github.com/mogga/sublime-nunjucks/blob/master/Nunjucks.tmLanguage>
+
 ## Variables
 
 A variable looks up a value from the template context. If you wanted
