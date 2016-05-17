@@ -88,7 +88,7 @@ function precompile(input, opts) {
         for(var i=0; i<templates.length; i++) {
             var name = templates[i].replace(path.join(input, '/'), '');
 
-            name = name.replace('\\', '/');
+            name = name.replace(/\\/g, '/');
 
             try {
                 precompiled.push( _precompile(
