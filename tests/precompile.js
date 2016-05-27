@@ -18,5 +18,19 @@
         it('should return a string', function() {
             expect(precompileString('{{ test }}', { name: 'test.j2' })).to.be.an('string');
         });
+
+        describe('templates', function() {
+            it('should return *NIX path seperators', function() {
+                var fileName;
+
+                precompile('./tests/templates/item.j2', {
+                    wrapper: function(templates) {
+                        fileName = templates[0].name;
+                    }
+                });
+
+                expect(fileName).to.not.contain('\\');
+            });
+        });
     });
 })();
