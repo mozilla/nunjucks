@@ -24,6 +24,9 @@ Changelog
 2.x (unreleased)
 ----------------
 
+* Ensure that precompiling on Windows still outputs POSIX-style path
+  separators. Merge of [#761](https://github.com/mozilla/nunjucks/pull/761).
+
 * Add support for strict type check comparisons (=== and !===). Thanks
   oughter. Merge of [#746](https://github.com/mozilla/nunjucks/pull/746).
 
