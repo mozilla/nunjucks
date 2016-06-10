@@ -8,6 +8,8 @@ Please file bugs and send pull requests to the
 [GitHub repository](https://github.com/mozilla/nunjucks/) and
 [issue tracker](https://github.com/mozilla/nunjucks/issues).
 
+Please DO NOT ask "how do I?" or usage questions via GitHub issues. Instead,
+use the [https://groups.google.com/forum/#!forum/nunjucks](mailing list).
 
 Submitting Issues
 -----------------
