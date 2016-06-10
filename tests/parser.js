@@ -292,22 +292,22 @@
             n = parser.parse('{% block foo %}stuff{% endblock foo %}');
             expect(n.children[0].typename).to.be('Block');
 
-            n = parser.parse('{% extends "test.j2" %}stuff');
+            n = parser.parse('{% extends "test.njk" %}stuff');
             expect(n.children[0].typename).to.be('Extends');
 
-            n = parser.parse('{% include "test.j2" %}');
+            n = parser.parse('{% include "test.njk" %}');
             expect(n.children[0].typename).to.be('Include');
         });
 
         it('should parse include tags', function() {
 
-            var n = parser.parse('{% include "test.j2" %}');
+            var n = parser.parse('{% include "test.njk" %}');
             expect(n.children[0].typename).to.be('Include');
 
             n = parser.parse('{% include "test.html"|replace("html","j2") %}');
             expect(n.children[0].typename).to.be('Include');
 
-            n = parser.parse('{% include ""|default("test.j2") %}');
+            n = parser.parse('{% include ""|default("test.njk") %}');
             expect(n.children[0].typename).to.be('Include');
         });
 
@@ -515,17 +515,17 @@
         });
 
         it('should parse imports', function() {
-            isAST(parser.parse('{% import "foo/bar.j2" as baz %}'),
+            isAST(parser.parse('{% import "foo/bar.njk" as baz %}'),
                   [nodes.Root,
                    [nodes.Import,
-                    [nodes.Literal, 'foo/bar.j2'],
+                    [nodes.Literal, 'foo/bar.njk'],
                     [nodes.Symbol, 'baz']]]);
 
-            isAST(parser.parse('{% from "foo/bar.j2" import baz, ' +
+            isAST(parser.parse('{% from "foo/bar.njk" import baz, ' +
                                '   foobar as foobarbaz %}'),
                   [nodes.Root,
                    [nodes.FromImport,
-                    [nodes.Literal, 'foo/bar.j2'],
+                    [nodes.Literal, 'foo/bar.njk'],
                     [nodes.NodeList,
                      [nodes.Symbol, 'baz'],
                      [nodes.Pair,
@@ -545,7 +545,7 @@
                     ],
                     [nodes.Symbol, 'baz']]]);
 
-            isAST(parser.parse('{% from ""|default("foo/bar.j2") import baz, ' +
+            isAST(parser.parse('{% from ""|default("foo/bar.njk") import baz, ' +
                                '   foobar as foobarbaz %}'),
                   [nodes.Root,
                    [nodes.FromImport,
@@ -553,7 +553,7 @@
                      [nodes.Symbol, 'default'],
                      [nodes.NodeList,
                       [nodes.Literal, ''],
-                      [nodes.Literal, 'foo/bar.j2']
+                      [nodes.Literal, 'foo/bar.njk']
                      ]
                     ],
                     [nodes.NodeList,

@@ -30,7 +30,7 @@
         });
 
         it('should allow a simple loader to be created', function() {
-            // From Docs: http://mozilla.github.io/nunjucks/api.j2#writing-a-loader
+            // From Docs: http://mozilla.github.io/nunjucks/api.html#writing-a-loader
             // We should be able to create a loader that only exposes getSource
             function MyLoader() {
                 // configuration
@@ -42,12 +42,12 @@
             };
 
             var env = new Environment(new MyLoader(templatesPath));
-            var parent = env.getTemplate('fake.j2');
+            var parent = env.getTemplate('fake.njk');
             expect(parent.render()).to.be('Hello World');
         });
 
         it('should catch loader error', function(done) {
-            // From Docs: http://mozilla.github.io/nunjucks/api.j2#writing-a-loader
+            // From Docs: http://mozilla.github.io/nunjucks/api.html#writing-a-loader
             // We should be able to create a loader that only exposes getSource
             function MyLoader() {
                 // configuration
@@ -61,7 +61,7 @@
             };
 
             var env = new Environment(new MyLoader(templatesPath));
-            env.getTemplate('fake.j2', function(err, parent) {
+            env.getTemplate('fake.njk', function(err, parent) {
                 expect(err).to.be.a(Error);
                 expect(parent).to.be(undefined);
 
