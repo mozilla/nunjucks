@@ -16,11 +16,11 @@ app.use(function(req, res, next) {
 });
 
 app.get('/', function(req, res) {
-    res.render('index.j2', { username: 'James Long <strong>copyright</strong>' });
+    res.render('index.njk', { username: 'James Long <strong>copyright</strong>' });
 });
 
 app.get('/about', function(req, res) {
-    res.render('about.j2');
+    res.render('about.njk');
 });
 
 app.listen(4000);

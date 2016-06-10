@@ -1,4 +1,4 @@
-window.baseTmpl = (function() {(window.nunjucksPrecompiled = window.nunjucksPrecompiled || {})["base.j2"] = (function() {function root(env, context, frame, runtime, cb) {
+window.baseTmpl = (function() {(window.nunjucksPrecompiled = window.nunjucksPrecompiled || {})["base.njk"] = (function() {function root(env, context, frame, runtime, cb) {
 var lineno = null;
 var colno = null;
 var output = "";
@@ -47,13 +47,13 @@ b_footer: b_footer,
 root: root
 };
 })();
-return function(ctx, cb) { return nunjucks.render("base.j2", ctx, cb); }})();
-window.aboutTmpl = (function() {(window.nunjucksPrecompiled = window.nunjucksPrecompiled || {})["about.j2"] = (function() {function root(env, context, frame, runtime, cb) {
+return function(ctx, cb) { return nunjucks.render("base.njk", ctx, cb); }})();
+window.aboutTmpl = (function() {(window.nunjucksPrecompiled = window.nunjucksPrecompiled || {})["about.njk"] = (function() {function root(env, context, frame, runtime, cb) {
 var lineno = null;
 var colno = null;
 var output = "";
 try {
-env.getTemplate("base.j2", true, function(t_2,parentTemplate) {
+env.getTemplate("base.njk", true, function(t_2,parentTemplate) {
 if(t_2) { cb(t_2); return; }
 for(var t_1 in parentTemplate.blocks) {
 context.addBlock(t_1, parentTemplate.blocks[t_1]);
@@ -104,4 +104,4 @@ b_footer: b_footer,
 root: root
 };
 })();
-return function(ctx, cb) { return nunjucks.render("about.j2", ctx, cb); }})();
+return function(ctx, cb) { return nunjucks.render("about.njk", ctx, cb); }})();
