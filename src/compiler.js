@@ -1030,14 +1030,28 @@ var Compiler = Object.extend({
         var id = this.tmpid();
         var id2 = this.tmpid();
 
+        this.emitLine('var tasks = [];');
+        this.emitLine('tasks.push(');
+        this.emitLine('function(callback) {');
         this.emit('env.getTemplate(');
         this._compileExpression(node.template, frame);
         this.emitLine(', false, '+this._templateName()+', ' + node.ignoreMissing + ', ' + this.makeCallback(id));
-        this.addScopeLevel();
+        this.emitLine('callback(null,' + id + ');});');
+        this.emitLine('});');
 
-        this.emitLine(id + '.render(' +
-                      'context.getVariables(), frame, ' + this.makeCallback(id2));
-        this.emitLine(this.buffer + ' += ' + id2);
+        this.emitLine('tasks.push(');
+        this.emitLine('function(template, callback){');
+        this.emitLine('template.render(' +
+            'context.getVariables(), frame, ' + this.makeCallback(id2));
+        this.emitLine('callback(null,' + id2 + ');});');
+        this.emitLine('});');
+
+        this.emitLine('tasks.push(');
+        this.emitLine('function(result, callback){');
+        this.emitLine(this.buffer + ' += result;');
+        this.emitLine('callback(null);');
+        this.emitLine('});');
+        this.emitLine('env.waterfall(tasks, function(){');
         this.addScopeLevel();
     },
 

@@ -6,7 +6,8 @@
   "dependencies": {
     "asap": "^2.0.3",
     "chokidar": "^1.0.0",
-    "yargs": "^3.32.0"
+    "yargs": "^3.32.0",
+    "a-sync-waterfall": "^1.0.0"
   },
   "browser": "./browser/nunjucks.js",
   "devDependencies": {

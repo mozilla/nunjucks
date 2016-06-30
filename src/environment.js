@@ -9,6 +9,7 @@ var builtin_filters = require('./filters');
 var builtin_loaders = require('./loaders');
 var runtime = require('./runtime');
 var globals = require('./globals');
+var waterfall = require('a-sync-waterfall');
 var Frame = runtime.Frame;
 var Template;
 
@@ -324,7 +325,9 @@ var Environment = Obj.extend({
 
         var tmpl = new Template(src, this, opts.path);
         return tmpl.render(ctx, cb);
-    }
+    },
+
+    waterfall: waterfall
 });
 
 var Context = Obj.extend({
@@ -465,7 +468,6 @@ Template = Obj.extend({
         try {
             _this.compile();
         } catch (_err) {
-            console.log('DEBUG: compile error: ', _err);
             var err = lib.prettifyError(this.path, this.env.opts.dev, _err);
             if (cb) return callbackAsap(cb, err);
             else throw err;
