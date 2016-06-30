@@ -465,6 +465,7 @@ Template = Obj.extend({
         try {
             _this.compile();
         } catch (_err) {
+            console.log('DEBUG: compile error: ', _err);
             var err = lib.prettifyError(this.path, this.env.opts.dev, _err);
             if (cb) return callbackAsap(cb, err);
             else throw err;

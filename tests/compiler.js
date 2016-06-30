@@ -936,6 +936,12 @@
             finish(done);
         });
 
+        it('should include 200 templates without call stack size exceed', function(done) {
+            equal('{% include "includeMany.njk" %}',
+                'FooInclude \n'.repeat(200));
+            finish(done);
+        });
+
         it('should include templates with context', function(done) {
             equal('hello world {% include "include.njk" %}',
                   { name: 'james' },
