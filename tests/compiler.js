@@ -936,9 +936,9 @@
             finish(done);
         });
 
-        it('should include 200 templates without call stack size exceed', function(done) {
+        it('should include 130 templates without call stack size exceed', function(done) {
             equal('{% include "includeMany.njk" %}',
-                new Array(201).join('FooInclude \n'));
+                new Array(131).join('FooInclude \n'));
             finish(done);
         });
 
