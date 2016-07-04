@@ -4,10 +4,10 @@
   "version": "3.0.0-dev.3",
   "author": "James Long <longster@gmail.com>",
   "dependencies": {
+    "a-sync-waterfall": "^1.0.0",
     "asap": "^2.0.3",
     "chokidar": "^1.0.0",
-    "yargs": "^3.32.0",
-    "a-sync-waterfall": "^1.0.0"
+    "yargs": "^3.32.0"
   },
   "browser": "./browser/nunjucks.js",
   "devDependencies": {
