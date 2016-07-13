@@ -11,19 +11,9 @@ var Frame = Obj.extend({
         this.variables = {};
         this.parent = parent;
         this.topLevel = false;
-        this.store = {};
         // if this is true, writes (set) should never propagate upwards past
         // this frame to its parent (though reads may).
         this.isolateWrites = isolateWrites;
-    },
-
-    // add key to store, so we can use is some later
-    addKey: function(key) {
-        this.store[key] = true;
-    },
-
-    has: function(key) {
-        return this.store[key] === true;
     },
 
     set: function(name, val, resolveUp) {

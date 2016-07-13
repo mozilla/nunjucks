@@ -312,12 +312,7 @@ var Compiler = Object.extend({
         var name = node.value;
         var v;
 
-        // if current scope has `node.value` in frame.store, that mean there is
-        // an formal parameter variable name as `node.value`. if just lookup
-        // variable, when parameter name can lookup from scope context, the
-        // parameter may replace by scope value.
-        // see https://github.com/mozilla/nunjucks/issues/774
-        if(!frame.has(name) && (v = frame.lookup(name))) {
+        if((v = frame.lookup(name))) {
             this.emit(v);
         }
         else {
@@ -800,7 +795,7 @@ var Compiler = Object.extend({
         this._compileAsyncLoop(node, frame, true);
     },
 
-    _compileMacro: function(node, frame) {
+    _compileMacro: function(node) {
         var args = [];
         var kwargs = null;
         var funcId = 'macro_' + this.tmpid();
@@ -829,7 +824,7 @@ var Compiler = Object.extend({
         // arguments so support setting positional args with keywords
         // args and passing keyword args as positional args
         // (essentially default values). See runtime.js.
-        frame = frame.push();
+        var frame = new Frame();
         this.emitLines(
             'var ' + funcId + ' = runtime.makeMacro(',
             '[' + argNames.join(', ') + '], ',
@@ -860,7 +855,6 @@ var Compiler = Object.extend({
                           'kwargs["' + name + '"] : ');
                 this._compileExpression(pair.value, frame);
                 this.emitLine(');');
-                frame.addKey(name);
             }, this);
         }
 
@@ -871,7 +865,6 @@ var Compiler = Object.extend({
           this.compile(node.body, frame);
         });
 
-        frame = frame.pop();
         this.emitLine('frame = callerFrame;');
         this.emitLine('return new runtime.SafeString(' + bufferId + ');');
         this.emitLine('});');
