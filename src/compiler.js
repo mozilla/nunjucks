@@ -1041,6 +1041,21 @@ var Compiler = Object.extend({
         this.addScopeLevel();
     },
 
+    compileEmbed: function(node, frame) {
+        var id = this.tmpid();
+        var id2 = this.tmpid();
+
+        this.emit('env.getTemplate(');
+        this._compileExpression(node.template, frame);
+        this.emitLine(', false, '+this._templateName()+', ' + node.ignoreMissing + ', ' + this.makeCallback(id));
+        this.addScopeLevel();
+
+        this.emitLine(id + '.render(' +
+                      'context.getVariables(), frame, ' + this.makeCallback(id2));
+        this.emitLine(this.buffer + ' += ' + id2);
+        this.addScopeLevel();
+    },
+
     compileTemplateData: function(node, frame) {
         this.compileLiteral(node, frame);
     },

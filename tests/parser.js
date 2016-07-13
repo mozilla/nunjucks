@@ -311,6 +311,18 @@
             expect(n.children[0].typename).to.be('Include');
         });
 
+        it('should parse embed tags', function() {
+
+            var n = parser.parse('{% embed "test.njk" %}');
+            expect(n.children[0].typename).to.be('Embed');
+
+            n = parser.parse('{% embed "test.html"|replace("html","j2") %}');
+            expect(n.children[0].typename).to.be('Embed');
+
+            n = parser.parse('{% embed ""|default("test.njk") %}');
+            expect(n.children[0].typename).to.be('Embed');
+        });
+
         it('should parse for loops', function() {
           isAST(parser.parse('{% for x in [1, 2] %}{{ x }}{% endfor %}'),
                 [nodes.Root,
