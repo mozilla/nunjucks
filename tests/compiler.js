@@ -1600,7 +1600,7 @@
                 '{% endmacro %}' +
                 '' +
                 '{# calling macro2 #}' +
-                '{{macro2("this should be outputted") }}', {}, {}, function(err, res) {
+                '{{macro2("this should not be outputted") }}', {}, {}, function(err, res) {
                     expect(res.trim()).to.eql('foo');
             });
 
