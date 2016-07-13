@@ -20,12 +20,12 @@ Changelog
 * Prevent macros from seeing or affecting their calling scope. Merge of
   [#667](https://github.com/mozilla/nunjucks/pull/667).
 
+* Fix handling of macro arg with default value which shares a name with another
+  macro. Merge of [#791](https://github.com/mozilla/nunjucks/pull/791).
+
 
 2.x (unreleased)
 ----------------
-
-* Fix handling of macro arg with default value which shares a name with another
-  macro. Merge of [#791](https://github.com/mozilla/nunjucks/pull/791).
 
 * Ensure that precompiling on Windows still outputs POSIX-style path
   separators. Merge of [#761](https://github.com/mozilla/nunjucks/pull/761).
