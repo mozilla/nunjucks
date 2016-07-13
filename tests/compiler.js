@@ -1570,5 +1570,41 @@
 
             finish(done);
         });
+
+        it('should get right value when macro parameter conflict with global macro name', function(done) {
+            render(
+                '{# macro1 and macro2 definition #}' +
+                '{% macro macro1() %}' +
+                '{% endmacro %}' +
+                '' +
+                '{% macro macro2(macro1="default") %}' +
+                '{{macro1}}' +
+                '{% endmacro %}' +
+                '' +
+                '{# calling macro2 #}' +
+                '{{macro2("this should be outputted") }}', {}, {}, function(err, res) {
+                    expect(res.trim()).to.eql('this should be outputted');
+            });
+
+            finish(done);
+        });
+
+        it('should get right value when macro include macro', function(done) {
+            render(
+                '{# macro1 and macro2 definition #}' +
+                '{% macro macro1() %} foo' +
+                '{% endmacro %}' +
+                '' +
+                '{% macro macro2(text="default") %}' +
+                '{{macro1()}}' +
+                '{% endmacro %}' +
+                '' +
+                '{# calling macro2 #}' +
+                '{{macro2("this should be outputted") }}', {}, {}, function(err, res) {
+                    expect(res.trim()).to.eql('foo');
+            });
+
+            finish(done);
+        });
     });
 })();
