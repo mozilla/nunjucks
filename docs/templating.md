@@ -767,7 +767,7 @@ normal.
 
 A regular expression can be created just like JavaScript:
 
-```
+```jinja
 {{ /^foo.*/ }}
 {{ /bar$/g }}
 ```
@@ -892,9 +892,754 @@ otherwise.
 Call `JSON.stringify` on an object and dump the result into the
 template. Useful for debugging: `{{ foo | dump }}`.
 
-### More Filters
+### abs
 
-* [abs](http://jinja.pocoo.org/docs/templates/#abs)
+Return the absolute value of the argument.
+
+**Input**
+
+```jinja
+{{ -3|abs }}
+```
+
+**Outcome**
+
+```jinja
+3
+```
+
+### batch
+
+A filter that batches items.It returns a list of lists with the given number of items.
+
+**Input**
+
+```jinja
+{% set items = [1,2,3,4,5,6] %}
+{% for item in items | batch(2) %}
+    -{% for items in item %}
+       {{ items }}
+    {% endfor %}
+{% endfor %}
+```
+
+**Outcome**
+
+```jinja
+12-34-56
+```
+
+### capitalize
+
+Makes the first letter uppercase, the rest lower case.
+
+**Input**
+
+```jinja
+{{ "This Is A Test" | capitalize }}
+```
+
+**Outcome**
+
+```jinja
+This is a test
+```
+
+
+### center
+
+Centers the value in a field of a given width.
+
+**Input**
+
+```jinja
+{{ "fooo" | center }}
+```
+
+**Outcome**
+
+```jinja
+fooo
+```
+
+### dictsort
+
+Sort a dict and yield (key, value) pairs.
+
+```jinja
+{% set items = {
+    'e': 1,
+    'd': 2,
+    'c': 3,
+    'a': 4,
+    'f': 5,
+    'b': 6
+} %}
+{% for item in items | dictsort %}
+    {{ item[0] }}
+{% endfor %}
+```
+
+**Outcome**
+
+```jinja
+a b c d e f
+```
+
+### escape (aliased as e)
+
+Convert the characters &, <, >, ‘, and ” in string s to HTML-safe sequences. Use this if you need to display text that might contain such characters in HTML. Marks return value as markup string.
+
+**Input**
+
+```jinja
+{{ "<html>" | escape }}
+```
+
+**Outcome**
+
+```jinja
+&lt;html&gt;
+```
+
+### float
+
+Convert the value into a floating point number. If the conversion doesn’t work it will return 0.0. You can override this default using the first parameter.
+
+**Input**
+
+```jinja
+{{ "3.5" | float }}
+```
+
+**Outcome**
+
+```jinja
+3.5
+```
+
+
+### first
+
+Get the first item in an array.
+
+**Input**
+
+```jinja
+{% set items = [1,2,3] %}
+{{ items | first }}
+```
+
+**Outcome**
+
+```jinja
+1
+```
+
+
+### groupby
+
+Group a sequence of objects by a common attribute.
+
+**Input**
+
+```jinja
+{% set items = [
+        { name: 'james', type: 'green' },
+        { name: 'john', type: 'blue' },
+        { name: 'jim', type: 'blue' },
+        { name: 'jessie', type: 'green' }
+    ]
+%}
+
+{% for type, items in items | groupby("type") %}
+    <b>{{ type }}</b> :
+    {% for item in items %}
+        {{ item.name }}
+    {% endfor %}<br>
+{% endfor %}
+```
+
+**Outcome**
+
+```jinja
+green : james jessie
+blue : john jim
+```
+
+### indent
+
+Return a copy of the passed string, each line indented by 4 spaces. The first line is not indented. If you want to change the number of spaces or indent the first line too you can pass additional parameters to the filter:
+
+**Input**
+
+```jinja
+{{ "one\ntwo\nthree" | indent }}
+```
+
+**Outcome**
+
+```jinja
+one
+    two
+    three
+```
+
+**Input**
+
+```jinja
+{{ "one\ntwo\nthree" | indent }}
+```
+
+**Outcome**
+
+```jinja
+one
+  two
+  three
+```
+
+
+### int
+
+Convert the value into an integer. If the conversion doesn’t work it will return 0. You can override this default using the first parameter. You can also override the default base (10) in the second parameter, which handles input with prefixes such as 0b, 0o and 0x for bases 2, 8 and 16 respectively. The base is ignored for decimal numbers and non-string values.
+
+
+**Input**
+
+```jinja
+{{ "3.5" | int }}
+```
+
+**Outcome**
+
+```jinja
+3
+```
+
+### join
+
+You can join items together like so:
+
+**Input**
+
+```jinja
+{% set items =  [1, 2, 3] %}
+{{ items | join }}
+```
+
+**Outcome**
+
+```jinja
+123
+```
+Or you can join like so:
+
+**Input**
+
+```jinja
+{% set items = ['foo', 'bar', 'bear'] %}
+{{ items | join(",") }}
+```
+
+**Outcome**
+
+```jinja
+foo,bar,bear
+```
+
+Or you can join on attributes of an object like so:
+
+**Input**
+
+```jinja
+{% set items = [
+    { name: 'foo' },
+    { name: 'bar' },
+    { name: 'bear' }]
+%}
+
+{{ items | join(",", "name") }}
+```
+
+**Outcome**
+
+```jinja
+foo,bar,bear
+```
+
+
+### last
+
+Get the last item in an array.
+
+**Input**
+
+```jinja
+{% set items = [1,2,3] %}
+{{ items | last }}
+```
+
+**Outcome**
+
+```jinja
+3
+```
+
+### length
+
+Return the length of an array
+
+**Input**
+
+```jinja
+{{ [1,2,3] | length }}
+```
+
+**Outcome**
+
+```jinja
+3
+```
+
+
+### list
+
+Convert the value into a list. If it was a string the returned list will be a list of characters.
+
+**Input**
+
+```jinja
+{% for i in "foobar" | list %}{{ i }},{% endfor %}
+```
+
+**Outcome**
+
+```jinja
+f,o,o,b,a,r,
+```
+
+### lower
+
+Convert string to all lower case
+
+**Input**
+
+```jinja
+{{ "fOObAr" | lower }}
+```
+
+**Outcome**
+
+```jinja
+foobar
+```
+
+### random
+
+Select a random value from an array. This will change everytime the page is refreshed.
+
+**Input**
+
+```jinja
+{{ [1,2,3,4,5,6,7,8,9] | random }}
+```
+
+**Outcome**
+A random value between 1-9 (inclusive).
+
+
+### rejectattr (only the single-argument form)
+
+Filters a sequence of objects by applying a test to the specified attribute of each object, and rejecting the objects with the test succeeding.
+
+If no test is specified, the attribute’s value will be evaluated as a boolean.
+
+This would test for false outcomes and then return the length of that outcome.
+
+This is the opposite of ```selectattr```
+
+**Input**
+
+```jinja
+{% set foods = [{tasty: true}, {tasty: false}, {tasty: true}]%}
+{{ foods | rejectattr("tasty") | length }}
+```
+
+**Outcome**
+
+```jinja
+1
+```
+
+Since it is the only falsy statement.
+
+### replace (the first argument can take a JS regular expression)
+
+This will replace one item with another. The first item is the item to be replaced, the second item is the replaced value.
+
+**Input**
+
+```jinja
+{% set numbers = 123456 %}
+{{ numbers | replace("4", ".") }}
+```
+
+**Outcome**
+
+```jinja
+123.56
+```
+
+You can also insert a replaced item before and after a value, by adding quote marks and replacing them surrounding an item.
+
+**Input**
+
+```jinja
+{% set letters = aaabbbccc%}
+{{ "letters" | replace("", ".") }}
+```
+
+**Outcome**
+
+```jinja
+.l.e.t.t.e.r.s.
+
+```
+
+We can also replace every instance of an item up to a given number (item to be replaced, item replacement, number to be replaced)
+
+**Input**
+
+```jinja
+{% set letters = "aaabbbccc" %}
+{{ letters | replace("a", "x", 2) }}
+```
+Note in this instance the required quote marks surrounding the list.
+
+**Outcome**
+
+```jinja
+xxabbbccc
+```
+
+Finally, you can also look for patterns in your list to replace
+
+**Input**
+
+```jinja
+{% set letters = "aaabbbccc" %}
+{{ letters | replace("ab", "x", 2) }}
+```
+
+**Outcome**
+
+```jinja
+aaxbbccc
+```
+
+### reverse
+
+Reverse the chosen item
+
+**Input**
+
+```jinja
+{{ "abcdef" | reverse }}
+```
+
+**Outcome**
+
+```jinja
+fedcba
+```
+
+Or you can reverse an array
+
+**Input**
+
+```jinja
+{% for i in [1, 2, 3, 4] | reverse %}
+    {{ i }}
+{% endfor %}
+```
+
+**Outcome**
+
+```jinja
+4 3 2 1
+```
+
+### round
+
+Round a number
+
+**Input**
+
+```jinja
+{{ 4.5 | round }}
+```
+
+**Outcome**
+
+```jinja
+5
+```
+
+Or we can round to the nearest whole number (which rounds down) like so:
+
+**Input**
+
+```jinja
+{{ 4 | round(0, "floor")
+```
+
+**Outcome**
+
+```jinja
+4
+```
+
+Or we can choose how many digits to round up.
+
+**Input**
+
+```jinja
+{{ 4.12346 | round(4) }}
+```
+
+**Outcome**
+
+```jinja
+4.1235
+```
+
+### safe
+
+Mark the value as safe which means that in an environment with automatic escaping enabled this variable will not be escaped.
+
+
+### selectattr (only the single-argument form)
+
+Filters a sequence of objects by applying a test to the specified attribute of each object, and only selecting the objects with the test succeeding.
+
+If no test is specified, the attribute’s value will be evaluated as a boolean.
+
+This is the opposite to ```rejectattr```. It will select all true outcomes.
+
+### Income
+
+```jinja
+{% set foods = [{tasty: true}, {tasty: false}, {tasty: true}]%}
+{{ foods | selectattr("tasty") | length }}
+```
+
+**Outcome**
+
+```jinja
+2
+```
+
+
+### slice
+
+Slice an iterator and return a list of lists containing those items. Useful if you want to create a div containing three ul tags that represent columns:
+
+**Input**
+
+```jinja
+{% set arr = [1,2,3,4,5,6,7,8,9] %}
+
+<div class="columwrapper">
+  {%- for items in arr | slice(3) %}
+    <ul class="column-{{ loop.index }}">
+    {%- for item in items %}
+      <li>{{ item }}</li>
+    {%- endfor %}
+    </ul>
+  {%- endfor %}
+</div>
+```
+
+**Outcome**
+
+```jinja
+<div class="columwrapper">
+    <ul class="column-1">
+      <li>1</li>
+      <li>2</li>
+      <li>3</li>
+    </ul>
+    <ul class="column-2">
+      <li>4</li>
+      <li>5</li>
+      <li>6</li>
+    </ul>
+    <ul class="column-3">
+      <li>7</li>
+      <li>8</li>
+      <li>9</li>
+    </ul>
+</div>
+```
+
+### string
+Make a string unicode if it isn’t already.
+
+**Input**
+
+```jinja
+{% set item = 1234 %}
+{% for i in item | string | list %}
+    {{ i }},
+{% endfor %}
+```
+
+**Outcome**
+
+```jinja
+1,2,3,4,
+```
+
+### sum
+
+The total of the items in the array
+
+**Input**
+
+```jinja
+{% set items = [1,2,3] %}
+{{ items | sum }}
+```
+
+**Outcome**
+
+```jinja
+6
+```
+
+### title
+
+Make the first letter of the string uppercase
+
+**Input**
+
+```jinja
+{{ "foo bar baz" | title }}
+```
+
+**Outcome**
+
+```jinja
+Foo Bar Baz
+```
+
+### trim
+
+Strip leading and trailing whitespace.
+
+**Input**
+
+```jinja
+{{ "  foo " | trim }}
+```
+
+### truncate
+
+Return a truncated copy of the string. The length is specified with the first parameter which defaults to 255. If the second parameter is true the filter will cut the text at length. Otherwise it will discard the last word. If the text was in fact truncated it will append an ellipsis sign ("..."). If you want a different ellipsis sign than "..." you can specify it using the third parameter.
+
+Truncate to 3 characters
+
+**Input**
+
+```jinja
+{{ "foo bar" | truncate(3) }}
+```
+
+Truncate to 6 characters and append "?" to the end
+
+**Input**
+
+```jinja
+{{ "foo bar baz" | truncate(6, true, "?") }}
+```
+
+### upper
+Convert the string to upper case.
+
+**Input**
+
+```jinja
+{{ "foo" | upper }}
+```
+
+**Outcome**
+
+```jinja
+FOO
+```
+
+### urlencode
+
+URL Encode the string
+
+**Input**
+
+```jinja
+{{ "&" | urlencode }}
+```
+
+**Outcome**
+
+```jinja
+%26
+```
+
+### urlize
+
+Converts URLs in plain text into clickable links.
+
+**Input**
+
+```jinja
+{{ "foo http://www.example.com/ bar" | urlize | safe }}
+```
+
+**Outcome**
+
+```jinja
+foo <a href="http://www.example.com/">http://www.example.com/</a> bar
+```
+
+You can also truncate URL text
+
+**Input**
+
+```jinja
+{{ "http://mozilla.github.io/" | urlize(10, true) | safe }}
+```
+
+**Outcome**
+
+```jinja
+<a href="http://mozilla.github.io/">http://moz</a>
+
+```
+
+
+### wordcount
+
+Output the number of words in the item
+
+**Input**
+
+```jinja
+{{ item.description | wordcount }}
+```
+
+
+### More Filters
+<!-- * [abs](http://jinja.pocoo.org/docs/templates/#abs) -->
 * [batch](http://jinja.pocoo.org/docs/templates/#batch)
 * [capitalize](http://jinja.pocoo.org/docs/templates/#capitalize)
 * [center](http://jinja.pocoo.org/docs/templates/#center)
