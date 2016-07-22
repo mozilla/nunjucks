@@ -76,9 +76,9 @@ Nunjucks comes with several
 
 ## Template Inheritance
 
-Template inheritance is a way to make it easy to reuse templates. When
-writing a template, you can define "blocks" that child templates can
-override. The inheritance chain can be as long as you like.
+Template inheritance is a way to make it easy to reuse templates.
+When writing a template, you can define "blocks" that child templates
+can override. The inheritance chain can be as long as you like.
 
 If we have a template `parent.html` that looks like this:
 
@@ -129,8 +129,8 @@ This is the default content
 You can store the template to inherit in a variable and use it by
 omitting quotes. This variable can contain a string that points to a
 template file, or it can contain a compiled Template object that has
-been added to the context. That way you can dynamically change which
-template is inherited when rendering by setting it in the context.
+been added to the context. That way you can dynamically change
+which template is inherited when rendering by setting it in the context.
 
 ```jinja
 {% extends parentTemplate %}
@@ -162,8 +162,8 @@ Right side!
 
 ## Tags
 
-Tags are special blocks that perform operations on sections of the
-template. Nunjucks comes with several builtin, but [you can add your own](api.html#custom-tags).
+Tags are special blocks that perform operations on sections of the template.
+Nunjucks comes with several builtin, but [you can add your own](api.html#custom-tags).
 
 ### if
 
@@ -902,7 +902,7 @@ Return the absolute value of the argument.
 {{ -3|abs }}
 ```
 
-**Outcome**
+**Output**
 
 ```jinja
 3
@@ -923,7 +923,7 @@ A filter that batches items.It returns a list of lists with the given number of 
 {% endfor %}
 ```
 
-**Outcome**
+**Output**
 
 ```jinja
 12-34-56
@@ -939,7 +939,7 @@ Makes the first letter uppercase, the rest lower case.
 {{ "This Is A Test" | capitalize }}
 ```
 
-**Outcome**
+**Output**
 
 ```jinja
 This is a test
@@ -956,7 +956,7 @@ Centers the value in a field of a given width.
 {{ "fooo" | center }}
 ```
 
-**Outcome**
+**Output**
 
 ```jinja
 fooo
@@ -980,7 +980,7 @@ Sort a dict and yield (key, value) pairs.
 {% endfor %}
 ```
 
-**Outcome**
+**Output**
 
 ```jinja
 a b c d e f
@@ -988,7 +988,9 @@ a b c d e f
 
 ### escape (aliased as e)
 
-Convert the characters &, <, >, ‘, and ” in string s to HTML-safe sequences. Use this if you need to display text that might contain such characters in HTML. Marks return value as markup string.
+Convert the characters &, <, >, ‘, and ” in string s to HTML-safe sequences.
+Use this if you need to display text that might contain such characters in
+HTML. Marks return value as markup string.
 
 **Input**
 
@@ -996,7 +998,7 @@ Convert the characters &, <, >, ‘, and ” in string s to HTML-safe sequences.
 {{ "<html>" | escape }}
 ```
 
-**Outcome**
+**Output**
 
 ```jinja
 &lt;html&gt;
@@ -1004,7 +1006,8 @@ Convert the characters &, <, >, ‘, and ” in string s to HTML-safe sequences.
 
 ### float
 
-Convert the value into a floating point number. If the conversion doesn’t work it will return 0.0. You can override this default using the first parameter.
+Convert the value into a floating point number. If the conversion doesn’t work
+it will return 0.0. You can override this default using the first parameter.
 
 **Input**
 
@@ -1012,7 +1015,7 @@ Convert the value into a floating point number. If the conversion doesn’t work
 {{ "3.5" | float }}
 ```
 
-**Outcome**
+**Output**
 
 ```jinja
 3.5
@@ -1030,7 +1033,7 @@ Get the first item in an array.
 {{ items | first }}
 ```
 
-**Outcome**
+**Output**
 
 ```jinja
 1
@@ -1060,7 +1063,7 @@ Group a sequence of objects by a common attribute.
 {% endfor %}
 ```
 
-**Outcome**
+**Output**
 
 ```jinja
 green : james jessie
@@ -1069,7 +1072,9 @@ blue : john jim
 
 ### indent
 
-Return a copy of the passed string, each line indented by 4 spaces. The first line is not indented. If you want to change the number of spaces or indent the first line too you can pass additional parameters to the filter:
+Return a copy of the passed string, each line indented by 4 spaces. The first
+line is not indented. If you want to change the number of spaces or indent
+the first line too you can pass additional parameters to the filter:
 
 **Input**
 
@@ -1077,7 +1082,7 @@ Return a copy of the passed string, each line indented by 4 spaces. The first li
 {{ "one\ntwo\nthree" | indent }}
 ```
 
-**Outcome**
+**Output**
 
 ```jinja
 one
@@ -1091,7 +1096,7 @@ one
 {{ "one\ntwo\nthree" | indent }}
 ```
 
-**Outcome**
+**Output**
 
 ```jinja
 one
@@ -1099,11 +1104,13 @@ one
   three
 ```
 
-
 ### int
 
-Convert the value into an integer. If the conversion doesn’t work it will return 0. You can override this default using the first parameter. You can also override the default base (10) in the second parameter, which handles input with prefixes such as 0b, 0o and 0x for bases 2, 8 and 16 respectively. The base is ignored for decimal numbers and non-string values.
-
+Convert the value into an integer. If the conversion doesn’t work it will
+return 0. You can override this default using the first parameter. You can
+also override the default base (10) in the second parameter, which
+handles input with prefixes such as 0b, 0o and 0x for bases 2, 8 and 16
+respectively. The base is ignored for decimal numbers and non-string values.
 
 **Input**
 
@@ -1111,7 +1118,7 @@ Convert the value into an integer. If the conversion doesn’t work it will retu
 {{ "3.5" | int }}
 ```
 
-**Outcome**
+**Output**
 
 ```jinja
 3
@@ -1128,7 +1135,7 @@ You can join items together like so:
 {{ items | join }}
 ```
 
-**Outcome**
+**Output**
 
 ```jinja
 123
@@ -1142,7 +1149,7 @@ Or you can join like so:
 {{ items | join(",") }}
 ```
 
-**Outcome**
+**Output**
 
 ```jinja
 foo,bar,bear
@@ -1162,7 +1169,7 @@ Or you can join on attributes of an object like so:
 {{ items | join(",", "name") }}
 ```
 
-**Outcome**
+**Output**
 
 ```jinja
 foo,bar,bear
@@ -1180,7 +1187,7 @@ Get the last item in an array.
 {{ items | last }}
 ```
 
-**Outcome**
+**Output**
 
 ```jinja
 3
@@ -1196,7 +1203,7 @@ Return the length of an array
 {{ [1,2,3] | length }}
 ```
 
-**Outcome**
+**Output**
 
 ```jinja
 3
@@ -1205,7 +1212,8 @@ Return the length of an array
 
 ### list
 
-Convert the value into a list. If it was a string the returned list will be a list of characters.
+Convert the value into a list. If it was a string the returned
+list will be a list of characters.
 
 **Input**
 
@@ -1213,7 +1221,7 @@ Convert the value into a list. If it was a string the returned list will be a li
 {% for i in "foobar" | list %}{{ i }},{% endfor %}
 ```
 
-**Outcome**
+**Output**
 
 ```jinja
 f,o,o,b,a,r,
@@ -1229,7 +1237,7 @@ Convert string to all lower case
 {{ "fOObAr" | lower }}
 ```
 
-**Outcome**
+**Output**
 
 ```jinja
 foobar
@@ -1237,7 +1245,8 @@ foobar
 
 ### random
 
-Select a random value from an array. This will change everytime the page is refreshed.
+Select a random value from an array.
+This will change everytime the page is refreshed.
 
 **Input**
 
@@ -1245,17 +1254,18 @@ Select a random value from an array. This will change everytime the page is refr
 {{ [1,2,3,4,5,6,7,8,9] | random }}
 ```
 
-**Outcome**
+**Output**
 A random value between 1-9 (inclusive).
 
 
 ### rejectattr (only the single-argument form)
 
-Filters a sequence of objects by applying a test to the specified attribute of each object, and rejecting the objects with the test succeeding.
+Filters a sequence of objects by applying a test to the specified attribute
+of each object, and rejecting the objects with the test succeeding.
 
 If no test is specified, the attribute’s value will be evaluated as a boolean.
 
-This would test for false outcomes and then return the length of that outcome.
+This would test for false Outputs and then return the length of that Output.
 
 This is the opposite of ```selectattr```
 
@@ -1266,7 +1276,7 @@ This is the opposite of ```selectattr```
 {{ foods | rejectattr("tasty") | length }}
 ```
 
-**Outcome**
+**Output**
 
 ```jinja
 1
@@ -1276,7 +1286,8 @@ Since it is the only falsy statement.
 
 ### replace (the first argument can take a JS regular expression)
 
-This will replace one item with another. The first item is the item to be replaced, the second item is the replaced value.
+This will replace one item with another. The first item is the item to be
+replaced, the second item is the replaced value.
 
 **Input**
 
@@ -1285,13 +1296,14 @@ This will replace one item with another. The first item is the item to be replac
 {{ numbers | replace("4", ".") }}
 ```
 
-**Outcome**
+**Output**
 
 ```jinja
 123.56
 ```
 
-You can also insert a replaced item before and after a value, by adding quote marks and replacing them surrounding an item.
+You can also insert a replaced item before and after a value, by adding quote
+marks and replacing them surrounding an item.
 
 **Input**
 
@@ -1300,14 +1312,15 @@ You can also insert a replaced item before and after a value, by adding quote ma
 {{ "letters" | replace("", ".") }}
 ```
 
-**Outcome**
+**Output**
 
 ```jinja
 .l.e.t.t.e.r.s.
 
 ```
 
-We can also replace every instance of an item up to a given number (item to be replaced, item replacement, number to be replaced)
+We can also replace every instance of an item up to a given number (item to
+be replaced, item replacement, number to be replaced)
 
 **Input**
 
@@ -1317,7 +1330,7 @@ We can also replace every instance of an item up to a given number (item to be r
 ```
 Note in this instance the required quote marks surrounding the list.
 
-**Outcome**
+**Output**
 
 ```jinja
 xxabbbccc
@@ -1332,7 +1345,7 @@ Finally, you can also look for patterns in your list to replace
 {{ letters | replace("ab", "x", 2) }}
 ```
 
-**Outcome**
+**Output**
 
 ```jinja
 aaxbbccc
@@ -1348,7 +1361,7 @@ Reverse the chosen item
 {{ "abcdef" | reverse }}
 ```
 
-**Outcome**
+**Output**
 
 ```jinja
 fedcba
@@ -1364,7 +1377,7 @@ Or you can reverse an array
 {% endfor %}
 ```
 
-**Outcome**
+**Output**
 
 ```jinja
 4 3 2 1
@@ -1380,7 +1393,7 @@ Round a number
 {{ 4.5 | round }}
 ```
 
-**Outcome**
+**Output**
 
 ```jinja
 5
@@ -1394,7 +1407,7 @@ Or we can round to the nearest whole number (which rounds down) like so:
 {{ 4 | round(0, "floor")
 ```
 
-**Outcome**
+**Output**
 
 ```jinja
 4
@@ -1408,7 +1421,7 @@ Or we can choose how many digits to round up.
 {{ 4.12346 | round(4) }}
 ```
 
-**Outcome**
+**Output**
 
 ```jinja
 4.1235
@@ -1416,16 +1429,18 @@ Or we can choose how many digits to round up.
 
 ### safe
 
-Mark the value as safe which means that in an environment with automatic escaping enabled this variable will not be escaped.
+Mark the value as safe which means that in an environment with automatic
+escaping enabled this variable will not be escaped.
 
 
 ### selectattr (only the single-argument form)
 
-Filters a sequence of objects by applying a test to the specified attribute of each object, and only selecting the objects with the test succeeding.
+Filters a sequence of objects by applying a test to the specified attribute
+of each object, and only selecting the objects with the test succeeding.
 
 If no test is specified, the attribute’s value will be evaluated as a boolean.
 
-This is the opposite to ```rejectattr```. It will select all true outcomes.
+This is the opposite to ```rejectattr```. It will select all true Outputs.
 
 **Input**
 
@@ -1434,7 +1449,7 @@ This is the opposite to ```rejectattr```. It will select all true outcomes.
 {{ foods | selectattr("tasty") | length }}
 ```
 
-**Outcome**
+**Output**
 
 ```jinja
 2
@@ -1443,7 +1458,8 @@ This is the opposite to ```rejectattr```. It will select all true outcomes.
 
 ### slice
 
-Slice an iterator and return a list of lists containing those items. Useful if you want to create a div containing three ul tags that represent columns:
+Slice an iterator and return a list of lists containing those items. Useful if
+you want to create a div containing three ul tags that represent columns:
 
 **Input**
 
@@ -1461,7 +1477,7 @@ Slice an iterator and return a list of lists containing those items. Useful if y
 </div>
 ```
 
-**Outcome**
+**Output**
 
 ```jinja
 <div class="columwrapper">
@@ -1495,7 +1511,7 @@ Make a string unicode if it isn’t already.
 {% endfor %}
 ```
 
-**Outcome**
+**Output**
 
 ```jinja
 1,2,3,4,
@@ -1512,7 +1528,7 @@ The total of the items in the array
 {{ items | sum }}
 ```
 
-**Outcome**
+**Output**
 
 ```jinja
 6
@@ -1528,7 +1544,7 @@ Make the first letter of the string uppercase
 {{ "foo bar baz" | title }}
 ```
 
-**Outcome**
+**Output**
 
 ```jinja
 Foo Bar Baz
@@ -1546,7 +1562,12 @@ Strip leading and trailing whitespace.
 
 ### truncate
 
-Return a truncated copy of the string. The length is specified with the first parameter which defaults to 255. If the second parameter is true the filter will cut the text at length. Otherwise it will discard the last word. If the text was in fact truncated it will append an ellipsis sign ("..."). If you want a different ellipsis sign than "..." you can specify it using the third parameter.
+Return a truncated copy of the string. The length is specified with the first
+parameter which defaults to 255. If the second parameter is true the filter
+will cut the text at length. Otherwise it will discard the last word. If the
+text was in fact truncated it will append an ellipsis sign ("...").
+If you want a different ellipsis sign than "..." you can specify it
+using the third parameter.
 
 Truncate to 3 characters
 
@@ -1565,6 +1586,7 @@ Truncate to 6 characters and append "?" to the end
 ```
 
 ### upper
+
 Convert the string to upper case.
 
 **Input**
@@ -1573,7 +1595,7 @@ Convert the string to upper case.
 {{ "foo" | upper }}
 ```
 
-**Outcome**
+**Output**
 
 ```jinja
 FOO
@@ -1589,7 +1611,7 @@ URL Encode the string
 {{ "&" | urlencode }}
 ```
 
-**Outcome**
+**Output**
 
 ```jinja
 %26
@@ -1605,7 +1627,7 @@ Converts URLs in plain text into clickable links.
 {{ "foo http://www.example.com/ bar" | urlize | safe }}
 ```
 
-**Outcome**
+**Output**
 
 ```jinja
 foo <a href="http://www.example.com/">http://www.example.com/</a> bar
@@ -1619,7 +1641,7 @@ You can also truncate URL text
 {{ "http://mozilla.github.io/" | urlize(10, true) | safe }}
 ```
 
-**Outcome**
+**Output**
 
 ```jinja
 <a href="http://mozilla.github.io/">http://moz</a>
