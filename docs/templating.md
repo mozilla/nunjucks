@@ -1427,7 +1427,7 @@ If no test is specified, the attribute’s value will be evaluated as a boolean.
 
 This is the opposite to ```rejectattr```. It will select all true outcomes.
 
-### Income
+**Input**
 
 ```jinja
 {% set foods = [{tasty: true}, {tasty: false}, {tasty: true}]%}
@@ -1623,7 +1623,6 @@ You can also truncate URL text
 
 ```jinja
 <a href="http://mozilla.github.io/">http://moz</a>
-
 ```
 
 
@@ -1633,45 +1632,9 @@ Output the number of words in the item
 
 **Input**
 
-```jinja
+```
 {{ item.description | wordcount }}
 ```
-
-
-### More Filters
-<!-- * [abs](http://jinja.pocoo.org/docs/templates/#abs) -->
-* [batch](http://jinja.pocoo.org/docs/templates/#batch)
-* [capitalize](http://jinja.pocoo.org/docs/templates/#capitalize)
-* [center](http://jinja.pocoo.org/docs/templates/#center)
-* [dictsort](http://jinja.pocoo.org/docs/templates/#dictsort)
-* [escape](http://jinja.pocoo.org/docs/templates/#escape) (aliased as `e`)
-* [float](http://jinja.pocoo.org/docs/templates/#float)
-* [first](http://jinja.pocoo.org/docs/templates/#first)
-* [groupby](http://jinja.pocoo.org/docs/templates/#groupby)
-* [indent](http://jinja.pocoo.org/docs/templates/#indent)
-* [int](http://jinja.pocoo.org/docs/templates/#int)
-* [join](http://jinja.pocoo.org/docs/templates/#join)
-* [last](http://jinja.pocoo.org/docs/templates/#last)
-* [length](http://jinja.pocoo.org/docs/templates/#length)
-* [list](http://jinja.pocoo.org/docs/templates/#list)
-* [lower](http://jinja.pocoo.org/docs/templates/#lower)
-* [random](http://jinja.pocoo.org/docs/templates/#random)
-* [rejectattr](http://jinja.pocoo.org/docs/templates/#rejectattr) (only the single-argument form)
-* [replace](http://jinja.pocoo.org/docs/templates/#replace) (the first argument can take a JS regular expression)
-* [reverse](http://jinja.pocoo.org/docs/templates/#reverse)
-* [round](http://jinja.pocoo.org/docs/templates/#round)
-* [safe](http://jinja.pocoo.org/docs/templates/#safe)
-* [selectattr](http://jinja.pocoo.org/docs/templates/#selectattr) (only the single-argument form)
-* [slice](http://jinja.pocoo.org/docs/templates/#slice)
-* [string](http://jinja.pocoo.org/docs/templates/#string)
-* [sum](http://jinja.pocoo.org/docs/dev/templates/#sum)
-* [title](http://jinja.pocoo.org/docs/templates/#title)
-* [trim](http://jinja.pocoo.org/docs/templates/#trim)
-* [truncate](http://jinja.pocoo.org/docs/templates/#truncate)
-* [upper](http://jinja.pocoo.org/docs/templates/#upper)
-* [urlencode](http://jinja.pocoo.org/docs/templates/#urlencode)
-* [urlize](http://jinja.pocoo.org/docs/templates/#urlize)
-* [wordcount](http://jinja.pocoo.org/docs/templates/#wordcount)
 
 Alternatively, it's easy to [read the JavaScript
 code](https://github.com/mozilla/nunjucks/blob/master/src/filters.js)
