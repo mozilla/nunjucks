@@ -910,7 +910,7 @@ Return the absolute value of the argument.
 
 ### batch
 
-A filter that batches items.It returns a list of lists with the given number of items.
+Batch returns a list of lists with the given number of items:
 
 **Input**
 
@@ -931,7 +931,7 @@ A filter that batches items.It returns a list of lists with the given number of 
 
 ### capitalize
 
-Makes the first letter uppercase, the rest lower case.
+Makes the first letter uppercase, the rest lower case:
 
 **Input**
 
@@ -948,7 +948,7 @@ This is a test
 
 ### center
 
-Centers the value in a field of a given width.
+Centers the value in a field of a given width:
 
 **Input**
 
@@ -964,7 +964,7 @@ fooo
 
 ### dictsort
 
-Sort a dict and yield (key, value) pairs.
+Sort a dict and yield (key, value) pairs:
 
 ```jinja
 {% set items = {
@@ -989,8 +989,8 @@ a b c d e f
 ### escape (aliased as e)
 
 Convert the characters &, <, >, ‘, and ” in string s to HTML-safe sequences.
-Use this if you need to display text that might contain such characters in
-HTML. Marks return value as markup string.
+Use this if you need to display text that might contain such characters in HTML.
+Marks return value as markup string
 
 **Input**
 
@@ -1006,8 +1006,8 @@ HTML. Marks return value as markup string.
 
 ### float
 
-Convert the value into a floating point number. If the conversion doesn’t work
-it will return 0.0. You can override this default using the first parameter.
+Convert a value into a floating point number. If the conversion fails 0.0 is returned.
+This default can be overridden by  using the first parameter.
 
 **Input**
 
@@ -1024,7 +1024,7 @@ it will return 0.0. You can override this default using the first parameter.
 
 ### first
 
-Get the first item in an array.
+Get the first item in an array:
 
 **Input**
 
@@ -1042,7 +1042,7 @@ Get the first item in an array.
 
 ### groupby
 
-Group a sequence of objects by a common attribute.
+Group a sequence of objects by a common attribute:
 
 **Input**
 
@@ -1072,9 +1072,9 @@ blue : john jim
 
 ### indent
 
-Return a copy of the passed string, each line indented by 4 spaces. The first
-line is not indented. If you want to change the number of spaces or indent
-the first line too you can pass additional parameters to the filter:
+Indents a string using spaces.
+Default behaviour is *not* to indent the first line.
+Default indentation is 4 spaces.
 
 **Input**
 
@@ -1088,6 +1088,38 @@ the first line too you can pass additional parameters to the filter:
 one
     two
     three
+```
+
+Change default indentation to 6 spaces:
+
+**Input**
+
+```jinja
+{{ "one\ntwo\nthree" | indent(6) }}
+```
+
+**Output**
+
+```jinja
+one
+      two
+      three
+```
+
+Change default indentation to 6 spaces and indent the first line:
+
+**Input**
+
+```jinja
+{{ "one\ntwo\nthree" | indent(6, true) }}
+```
+
+**Output**
+
+```jinja
+      one
+      two
+      three
 ```
 
 ### int
@@ -1112,7 +1144,7 @@ respectively. The base is ignored for decimal numbers and non-string values.
 
 ### join
 
-You can join items together like so:
+Return a string which is the concatenation of the strings in a sequence.
 
 **Input**
 
@@ -1126,7 +1158,9 @@ You can join items together like so:
 ```jinja
 123
 ```
-Or you can join like so:
+
+The separator between elements is an empty string by default.
+It can be defined with an optional parameter:
 
 **Input**
 
@@ -1141,7 +1175,7 @@ Or you can join like so:
 foo,bar,bear
 ```
 
-Or you can join on attributes of an object like so:
+This will also work for arrays:
 
 **Input**
 
@@ -1241,6 +1275,7 @@ This will change everytime the page is refreshed.
 ```
 
 **Output**
+
 A random value between 1-9 (inclusive).
 
 
@@ -1253,7 +1288,7 @@ If no test is specified, the attribute’s value will be evaluated as a boolean.
 
 This would test for false Outputs and then return the length of that Output.
 
-This is the opposite of ```selectattr```
+This is the opposite of ```selectattr``` since it is the only falsy statement:
 
 **Input**
 
@@ -1267,8 +1302,6 @@ This is the opposite of ```selectattr```
 ```jinja
 1
 ```
-
-Since it is the only falsy statement.
 
 ### replace (the first argument can take a JS regular expression)
 
@@ -1288,8 +1321,8 @@ replaced, the second item is the replaced value.
 123.56
 ```
 
-You can also insert a replaced item before and after a value, by adding quote
-marks and replacing them surrounding an item.
+Insert a replaced item before and after a value, by adding quote marks
+and replacing them surrounding an item:
 
 **Input**
 
@@ -1305,8 +1338,8 @@ marks and replacing them surrounding an item.
 
 ```
 
-We can also replace every instance of an item up to a given number (item to
-be replaced, item replacement, number to be replaced)
+Every instance of an item up to a given number (item to be replaced,
+item replacement, number to be replaced):
 
 **Input**
 
@@ -1322,7 +1355,7 @@ Note in this instance the required quote marks surrounding the list.
 xxabbbccc
 ```
 
-Finally, you can also look for patterns in your list to replace
+It is possible to search for patterns in a list to replace:
 
 **Input**
 
@@ -1339,7 +1372,7 @@ aaxbbccc
 
 ### reverse
 
-Reverse the chosen item
+Reverse a string:
 
 **Input**
 
@@ -1353,7 +1386,7 @@ Reverse the chosen item
 fedcba
 ```
 
-Or you can reverse an array
+Reverse an array:
 
 **Input**
 
@@ -1371,7 +1404,7 @@ Or you can reverse an array
 
 ### round
 
-Round a number
+Round a number:
 
 **Input**
 
@@ -1385,7 +1418,7 @@ Round a number
 5
 ```
 
-Or we can round to the nearest whole number (which rounds down) like so:
+Round to the nearest whole number (which rounds down):
 
 **Input**
 
@@ -1399,7 +1432,7 @@ Or we can round to the nearest whole number (which rounds down) like so:
 4
 ```
 
-Or we can choose how many digits to round up.
+Specify the number of  digits to round.
 
 **Input**
 
@@ -1444,8 +1477,7 @@ This is the opposite to ```rejectattr```. It will select all true Outputs.
 
 ### slice
 
-Slice an iterator and return a list of lists containing those items. Useful if
-you want to create a div containing three ul tags that represent columns:
+Slice an iterator and return a list of lists containing those items.
 
 **Input**
 
@@ -1555,7 +1587,7 @@ text was in fact truncated it will append an ellipsis sign ("...").
 If you want a different ellipsis sign than "..." you can specify it
 using the third parameter.
 
-Truncate to 3 characters
+Truncate to 3 characters:
 
 **Input**
 
@@ -1563,7 +1595,7 @@ Truncate to 3 characters
 {{ "foo bar" | truncate(3) }}
 ```
 
-Truncate to 6 characters and append "?" to the end
+Truncate to 6 characters and append "?" to the end:
 
 **Input**
 
@@ -1573,7 +1605,7 @@ Truncate to 6 characters and append "?" to the end
 
 ### upper
 
-Convert the string to upper case.
+Convert the string to upper case:
 
 **Input**
 
@@ -1589,7 +1621,8 @@ FOO
 
 ### urlencode
 
-URL Encode the string
+Escape strings for use in URLs, using UTF-8 encoding.
+Accepts both dictionaries and regular strings as well as pairwise iterables.
 
 **Input**
 
@@ -1605,7 +1638,7 @@ URL Encode the string
 
 ### urlize
 
-Converts URLs in plain text into clickable links.
+Convert URLs in plain text into clickable links:
 
 **Input**
 
@@ -1619,7 +1652,7 @@ Converts URLs in plain text into clickable links.
 foo <a href="http://www.example.com/">http://www.example.com/</a> bar
 ```
 
-You can also truncate URL text
+Truncate URL text by a given number:
 
 **Input**
 
@@ -1636,7 +1669,7 @@ You can also truncate URL text
 
 ### wordcount
 
-Counts and outputs the number of words in a string.
+Count and output the number of words in a string.
 
 **Input**
 
