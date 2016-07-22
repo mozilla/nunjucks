@@ -1124,11 +1124,8 @@ Change default indentation to 6 spaces and indent the first line:
 
 ### int
 
-Convert the value into an integer. If the conversion doesn’t work it will
-return 0. You can override this default using the first parameter. You can
-also override the default base (10) in the second parameter, which
-handles input with prefixes such as 0b, 0o and 0x for bases 2, 8 and 16
-respectively. The base is ignored for decimal numbers and non-string values.
+Convert the value into an integer.
+If the conversion fails 0 is returned.
 
 **Input**
 
@@ -1144,7 +1141,7 @@ respectively. The base is ignored for decimal numbers and non-string values.
 
 ### join
 
-Return a string which is the concatenation of the strings in a sequence.
+Return a string which is the concatenation of the strings in a sequence:
 
 **Input**
 
@@ -1159,8 +1156,8 @@ Return a string which is the concatenation of the strings in a sequence.
 123
 ```
 
-The separator between elements is an empty string by default.
-It can be defined with an optional parameter:
+The separator between elements is an empty string by default which can
+be defined with an optional parameter:
 
 **Input**
 
@@ -1175,7 +1172,7 @@ It can be defined with an optional parameter:
 foo,bar,bear
 ```
 
-This will also work for arrays:
+This  behaviour is applicable to arrays:
 
 **Input**
 
@@ -1195,10 +1192,9 @@ This will also work for arrays:
 foo,bar,bear
 ```
 
-
 ### last
 
-Get the last item in an array.
+Get the last item in an array:
 
 **Input**
 
@@ -1215,7 +1211,7 @@ Get the last item in an array.
 
 ### length
 
-Return the length of an array
+Return the length of an array:
 
 **Input**
 
@@ -1232,8 +1228,8 @@ Return the length of an array
 
 ### list
 
-Convert the value into a list. If it was a string the returned
-list will be a list of characters.
+Convert the value into a list.
+If it was a string the returned list will be a list of characters.
 
 **Input**
 
@@ -1249,7 +1245,7 @@ f,o,o,b,a,r,
 
 ### lower
 
-Convert string to all lower case
+Convert string to all lower case:
 
 **Input**
 
@@ -1266,7 +1262,7 @@ foobar
 ### random
 
 Select a random value from an array.
-This will change everytime the page is refreshed.
+(This will change everytime the page is refreshed).
 
 **Input**
 
@@ -1281,14 +1277,12 @@ A random value between 1-9 (inclusive).
 
 ### rejectattr (only the single-argument form)
 
+This is the opposite of ```selectattr``` filter.
+
 Filters a sequence of objects by applying a test to the specified attribute
 of each object, and rejecting the objects with the test succeeding.
 
 If no test is specified, the attribute’s value will be evaluated as a boolean.
-
-This would test for false Outputs and then return the length of that Output.
-
-This is the opposite of ```selectattr``` since it is the only falsy statement:
 
 **Input**
 
@@ -1305,7 +1299,7 @@ This is the opposite of ```selectattr``` since it is the only falsy statement:
 
 ### replace (the first argument can take a JS regular expression)
 
-This will replace one item with another. The first item is the item to be
+Replace one item with another. The first item is the item to be
 replaced, the second item is the replaced value.
 
 **Input**
@@ -1432,7 +1426,7 @@ Round to the nearest whole number (which rounds down):
 4
 ```
 
-Specify the number of  digits to round.
+Specify the number of  digits to round:
 
 **Input**
 
@@ -1451,15 +1445,26 @@ Specify the number of  digits to round.
 Mark the value as safe which means that in an environment with automatic
 escaping enabled this variable will not be escaped.
 
+**Input**
+
+```jinja
+{{ "foo http://www.example.com/ bar" | urlize | safe }}
+```
+
+**Output**
+
+```jinja
+foo <a href="http://www.example.com/">http://www.example.com/</a> bar
+```
 
 ### selectattr (only the single-argument form)
+
+This is the opposite to ```rejectattr```.
 
 Filters a sequence of objects by applying a test to the specified attribute
 of each object, and only selecting the objects with the test succeeding.
 
 If no test is specified, the attribute’s value will be evaluated as a boolean.
-
-This is the opposite to ```rejectattr```. It will select all true Outputs.
 
 **Input**
 
@@ -1474,10 +1479,9 @@ This is the opposite to ```rejectattr```. It will select all true Outputs.
 2
 ```
 
-
 ### slice
 
-Slice an iterator and return a list of lists containing those items.
+Slice an iterator and return a list of lists containing those items:
 
 **Input**
 
@@ -1518,7 +1522,7 @@ Slice an iterator and return a list of lists containing those items.
 ```
 
 ### string
-Make a string unicode if it isn’t already.
+Make a string unicode if it isn’t already:
 
 **Input**
 
@@ -1537,7 +1541,7 @@ Make a string unicode if it isn’t already.
 
 ### sum
 
-The total of the items in the array
+Output the sum of items in the array:
 
 **Input**
 
@@ -1554,7 +1558,7 @@ The total of the items in the array
 
 ### title
 
-Make the first letter of the string uppercase
+Make the first letter of the string uppercase:
 
 **Input**
 
@@ -1570,12 +1574,18 @@ Foo Bar Baz
 
 ### trim
 
-Strip leading and trailing whitespace.
+Strip leading and trailing whitespace:
 
 **Input**
 
 ```jinja
 {{ "  foo " | trim }}
+```
+
+**Output**
+
+```jinja
+foo
 ```
 
 ### truncate
@@ -1584,8 +1594,7 @@ Return a truncated copy of the string. The length is specified with the first
 parameter which defaults to 255. If the second parameter is true the filter
 will cut the text at length. Otherwise it will discard the last word. If the
 text was in fact truncated it will append an ellipsis sign ("...").
-If you want a different ellipsis sign than "..." you can specify it
-using the third parameter.
+A different ellipsis sign than "(...)"  can be specified using the third parameter.
 
 Truncate to 3 characters:
 
@@ -1595,12 +1604,24 @@ Truncate to 3 characters:
 {{ "foo bar" | truncate(3) }}
 ```
 
-Truncate to 6 characters and append "?" to the end:
+**Output**
+
+```jinja
+foo(...)
+```
+
+Truncate to 6 characters and replace "..." with a  "?":
 
 **Input**
 
 ```jinja
 {{ "foo bar baz" | truncate(6, true, "?") }}
+```
+
+**Output**
+
+```jinja
+foo ba ?
 ```
 
 ### upper
@@ -1669,7 +1690,7 @@ Truncate URL text by a given number:
 
 ### wordcount
 
-Count and output the number of words in a string.
+Count and output the number of words in a string:
 
 **Input**
 
