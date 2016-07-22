@@ -1090,20 +1090,6 @@ one
     three
 ```
 
-**Input**
-
-```jinja
-{{ "one\ntwo\nthree" | indent }}
-```
-
-**Output**
-
-```jinja
-one
-  two
-  three
-```
-
 ### int
 
 Convert the value into an integer. If the conversion doesn’t work it will
@@ -1650,12 +1636,19 @@ You can also truncate URL text
 
 ### wordcount
 
-Output the number of words in the item
+Counts and outputs the number of words in a string.
 
 **Input**
 
 ```
-{{ item.description | wordcount }}
+{% set foo = "Hello World"%}
+{{ foo | wordcount }}
+```
+
+**Output**
+
+```
+2
 ```
 
 Alternatively, it's easy to [read the JavaScript
