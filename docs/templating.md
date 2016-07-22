@@ -894,7 +894,7 @@ template. Useful for debugging: `{{ foo | dump }}`.
 
 ### abs
 
-Return the absolute value of the argument.
+Return the absolute value of the argument:
 
 **Input**
 
@@ -988,7 +988,7 @@ a b c d e f
 
 ### escape (aliased as e)
 
-Convert the characters &, <, >, ‘, and ” in string s to HTML-safe sequences.
+Convert the characters &, <, >, ‘, and ” in strings to HTML-safe sequences.
 Use this if you need to display text that might contain such characters in HTML.
 Marks return value as markup string
 
@@ -1007,7 +1007,7 @@ Marks return value as markup string
 ### float
 
 Convert a value into a floating point number. If the conversion fails 0.0 is returned.
-This default can be overridden by  using the first parameter.
+This default can be overridden by using the first parameter.
 
 **Input**
 
@@ -1020,7 +1020,6 @@ This default can be overridden by  using the first parameter.
 ```jinja
 3.5
 ```
-
 
 ### first
 
@@ -1038,7 +1037,6 @@ Get the first item in an array:
 ```jinja
 1
 ```
-
 
 ### groupby
 
@@ -1072,7 +1070,7 @@ blue : john jim
 
 ### indent
 
-Indents a string using spaces.
+Indent a string using spaces.
 Default behaviour is *not* to indent the first line.
 Default indentation is 4 spaces.
 
