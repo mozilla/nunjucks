@@ -910,7 +910,7 @@ Return the absolute value of the argument:
 
 ### batch
 
-Batch returns a list of lists with the given number of items:
+Return a list of lists with the given number of items:
 
 **Input**
 
@@ -931,7 +931,7 @@ Batch returns a list of lists with the given number of items:
 
 ### capitalize
 
-Makes the first letter uppercase, the rest lower case:
+Make the first letter uppercase, the rest lower case:
 
 **Input**
 
@@ -948,7 +948,7 @@ This is a test
 
 ### center
 
-Centers the value in a field of a given width:
+Center the value in a field of a given width:
 
 **Input**
 
@@ -1275,10 +1275,10 @@ A random value between 1-9 (inclusive).
 
 ### rejectattr (only the single-argument form)
 
-This is the opposite of ```selectattr``` filter.
-
-Filters a sequence of objects by applying a test to the specified attribute
+Filter a sequence of objects by applying a test to the specified attribute
 of each object, and rejecting the objects with the test succeeding.
+
+This is the opposite of ```selectattr``` filter.
 
 If no test is specified, the attribute’s value will be evaluated as a boolean.
 
@@ -1295,7 +1295,7 @@ If no test is specified, the attribute’s value will be evaluated as a boolean.
 1
 ```
 
-### replace (the first argument can take a JS regular expression)
+### replace
 
 Replace one item with another. The first item is the item to be
 replaced, the second item is the replaced value.
@@ -1457,10 +1457,10 @@ foo <a href="http://www.example.com/">http://www.example.com/</a> bar
 
 ### selectattr (only the single-argument form)
 
-This is the opposite to ```rejectattr```.
-
-Filters a sequence of objects by applying a test to the specified attribute
+Filter a sequence of objects by applying a test to the specified attribute
 of each object, and only selecting the objects with the test succeeding.
+
+This is the opposite to ```rejectattr```.
 
 If no test is specified, the attribute’s value will be evaluated as a boolean.
 
@@ -1520,7 +1520,8 @@ Slice an iterator and return a list of lists containing those items:
 ```
 
 ### string
-Make a string unicode if it isn’t already:
+
+Convert an object to a string:
 
 **Input**
 
