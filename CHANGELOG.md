@@ -5,6 +5,9 @@ Changelog
 3.x (unreleased)
 ----------------
 
+* Allow including many templates without reaching recursion limits. Merge of
+  [#787](https://github.com/mozilla/nunjucks/pull/787). Thanks Gleb Khudyakov.
+
 * Allow explicitly setting `null` (aka `none`) as the value of a variable;
   don't ignore that value and look on up the frame stack or context. Fixes
   [#478](https://github.com/mozilla/nunjucks/issues/478). Thanks Jonny Gerig
