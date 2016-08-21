@@ -261,9 +261,21 @@
             equal('{{ [1,2,3] | length }}', '3');
             equal('{{ blah|length }}', '0');
             equal('{{ str | length }}', {str:r.markSafe('blah')}, '4');
+            equal('{{ str | length }}', {str:'blah'}, '4');
+            equal('{{ str | length }}', {str:new String('blah')}, '4'); //jshint ignore:line
             equal('{{ undefined | length }}', '0');
             equal('{{ null | length }}', '0');
             equal('{{ nothing | length }}', '0');
+            equal('{{ obj | length }}', {obj: {}}, '0');
+            equal('{{ obj | length }}', {obj: {key: 'value'}}, '1');
+            equal('{{ obj | length }}', {obj: {key: 'value', length: 5}}, '2');
+            equal('{{ obj.length }}', {obj: {key: 'value', length: 5}}, '5');
+            equal('{{ arr | length }}', {arr: [0, 1]}, '2');
+            equal('{{ arr | length }}', {arr: [0, , 2]}, '3'); // jshint ignore:line
+            equal('{{ arr | length }}', {arr: new Array(0, 1)}, '2');
+            var arr = new Array(0, 1);
+            arr.key = 'value';
+            equal('{{ arr | length }}', {arr: arr}, '2');
             if(typeof Map === 'function') {
                 var map = new Map([['key1', 'value1'], ['key2', 'value2']]);
                 map.set('key3', 'value3');

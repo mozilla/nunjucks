@@ -30,6 +30,8 @@ Changelog
 2.x (unreleased)
 ----------------
 
+* Add support for finding an object's "length" in length filter.
+
 * Ensure that precompiling on Windows still outputs POSIX-style path
   separators. Merge of [#761](https://github.com/mozilla/nunjucks/pull/761).
 
