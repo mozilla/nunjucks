@@ -63,7 +63,7 @@ The third example shows how you can chain filters. It would display
 
 Nunjucks comes with several
 [builtin filters](#builtin-filters), and you can
-[add your own](api#Registering-custom-filters) as well.
+[add your own](api#custom-filters) as well.
 
 ## Template Inheritance
 
