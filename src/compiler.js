@@ -1025,6 +1025,63 @@ var Compiler = Object.extend({
         this.addScopeLevel();
     },
 
+    compileEmbed: function(node, frame) {
+        var rawCode = this.tmpid();
+        var id1 = this.tmpid();
+        var id3 = this.tmpid();
+
+        var blockList = [];
+        var currentId, idx, iName, iBlock, blocks = node.body.findAll(nodes.Block);
+        for (idx = 0; idx < blocks.length; idx += 1) {
+            currentId = this.tmpid();
+            iBlock = blocks[idx];
+            iName = iBlock.name.value;
+            blockList.push({id: currentId, name: iName})
+
+            this.emitLine('function b_' + currentId + '(env, context, frame, runtime, cb) {');
+            this.emitLine('var lineno = null;');
+            this.emitLine('var colno = null;');
+            this.emitLine('var ' + this.buffer + ' = "";');
+            this.emitLine('try {');
+
+            var tmpFrame = new Frame();
+            this.compile(iBlock.body, tmpFrame);
+            this.emitLine('cb(null, ' + this.buffer +');');
+            this.emitLine('} catch (e) {');
+            this.emitLine('  cb(runtime.handleError(e, lineno, colno));');
+            this.emitLine('}');
+            this.emitLine('}');
+        }
+
+        this.emitLine('var tasks = [];');
+        this.emitLine('tasks.push(function(callback) {');
+          this.emit('env.getTemplate(');
+          this._compileExpression(node.template, frame);
+          this.emitLine(', true, '+this._templateName()+', false, ' + this.makeCallback(id1));
+          this.emitLine('callback(null, ' + id1 + ');});');
+        this.emitLine('});');
+
+        this.emitLine('tasks.push(function(template, callback){');
+          blockList.forEach(function (block) {
+            this.emitLine('template.blocks["' + block.name + '"] = b_' + block.id);
+          }.bind(this))
+          this.emitLine('callback(null, template);');
+        this.emitLine('});');
+
+        this.emitLine('tasks.push(function(template, callback){');
+          this.emitLine('template.render(context.getVariables(), frame, ' + this.makeCallback(id3));
+          this.emitLine('callback(null,' + id3 + ');});');
+        this.emitLine('});');
+
+        this.emitLine('tasks.push(function(result, callback){');
+          this.emitLine(this.buffer + ' += result;');
+          this.emitLine('callback();');
+        this.emitLine('});');
+
+        this.emitLine('env.waterfall(tasks, function(){');
+        this.addScopeLevel();
+    },
+
     compileInclude: function(node, frame) {
         var id = this.tmpid();
         var id2 = this.tmpid();
