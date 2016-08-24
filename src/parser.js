@@ -454,11 +454,11 @@ var Parser = Object.extend({
         this.advanceAfterBlockEnd(tag.value);
 
         var node = new nodes.Embed(tag.lineno, tag.colno);
-        node.template = args[0]
-        node.contextVar = null
+        node.template = args[0];
+        node.contextVar = null;
 
         if (args.length === 2) {
-          node.contextVar = args[1]
+          node.contextVar = args[1];
         }
 
         node.body = this.parseUntilBlocks('endembed');

@@ -1018,17 +1018,15 @@ var Compiler = Object.extend({
         this.emitLine('parentTemplate = _parentTemplate');
 
         this.emitLine('for(var ' + k + ' in parentTemplate.blocks) {');
-        this.emitLine('context.addBlock(' + k +
-                      ', parentTemplate.blocks[' + k + ']);');
+        this.emitLine('context.addBlock(' + k + ', parentTemplate.blocks[' + k + ']);');
         this.emitLine('}');
 
         this.addScopeLevel();
     },
 
     compileEmbed: function(node, frame) {
-        var rawCode = this.tmpid();
         var id1 = this.tmpid();
-        var id3 = this.tmpid();
+        var id2 = this.tmpid();
 
         var blockList = [];
         var currentId, idx, iName, iBlock, blocks = node.body.findAll(nodes.Block);
@@ -1036,7 +1034,7 @@ var Compiler = Object.extend({
             currentId = this.tmpid();
             iBlock = blocks[idx];
             iName = iBlock.name.value;
-            blockList.push({id: currentId, name: iName})
+            blockList.push({id: currentId, name: iName});
 
             this.emitLine('function b_' + currentId + '(env, context, frame, runtime, cb) {');
             this.emitLine('var lineno = null;');
@@ -1064,13 +1062,13 @@ var Compiler = Object.extend({
         this.emitLine('tasks.push(function(template, callback){');
           blockList.forEach(function (block) {
             this.emitLine('template.blocks["' + block.name + '"] = b_' + block.id);
-          }.bind(this))
+          }.bind(this));
           this.emitLine('callback(null, template);');
         this.emitLine('});');
 
         this.emitLine('tasks.push(function(template, callback){');
-          this.emitLine('template.render(context.getVariables(), frame, ' + this.makeCallback(id3));
-          this.emitLine('callback(null,' + id3 + ');});');
+          this.emitLine('template.render(context.getVariables(), frame, ' + this.makeCallback(id2));
+          this.emitLine('callback(null,' + id2 + ');});');
         this.emitLine('});');
 
         this.emitLine('tasks.push(function(result, callback){');
