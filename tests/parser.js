@@ -297,6 +297,9 @@
 
             n = parser.parse('{% include "test.njk" %}');
             expect(n.children[0].typename).to.be('Include');
+
+            n = parser.parse('{% embed "test.njk" %}stuff{% endembed %}');
+            expect(n.children[0].typename).to.be('Embed');
         });
 
         it('should parse include tags', function() {
@@ -309,6 +312,17 @@
 
             n = parser.parse('{% include ""|default("test.njk") %}');
             expect(n.children[0].typename).to.be('Include');
+        });
+
+        it('should parse embed tags', function() {
+            var n = parser.parse('{% embed "test.njk" %}{% endembed %}');
+            expect(n.children[0].typename).to.be('Embed');
+
+            n = parser.parse('{% embed "test.html"|replace("html","j2") %}{% endembed %}');
+            expect(n.children[0].typename).to.be('Embed');
+
+            n = parser.parse('{% embed ""|default("test.njk") %}{% endembed %}');
+            expect(n.children[0].typename).to.be('Embed');
         });
 
         it('should parse for loops', function() {
