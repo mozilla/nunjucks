@@ -183,6 +183,10 @@ var filters = {
                 // ECMAScript 2015 Maps and Sets
                 return value.size;
             }
+            if(lib.isObject(value) && !(value instanceof r.SafeString)) {
+                // Objects (besides SafeStrings), non-primative Arrays
+                return Object.keys(value).length;
+            }
             return value.length;
         }
         return 0;
