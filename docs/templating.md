@@ -1209,18 +1209,22 @@ Get the last item in an array:
 
 ### length
 
-Return the length of an array:
+Return the length of an array or string, or the number of keys in an object:
 
 **Input**
 
 ```jinja
 {{ [1,2,3] | length }}
+{{ "test" | length }}
+{{ {key: value} | length }}
 ```
 
 **Output**
 
 ```jinja
 3
+4
+1
 ```
 
 
