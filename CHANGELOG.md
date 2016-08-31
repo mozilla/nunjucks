@@ -48,6 +48,7 @@ Changelog
 * Allow full expressions (incl. filters) in import and from tags. Thanks legutierr.
   Merge of [#710](https://github.com/mozilla/nunjucks/pull/710).
 
+* OS agnostic file paths in precompile. Merge of [#825](https://github.com/mozilla/nunjucks/pull/825).
 
 2.4.2 (Apr 15 2016)
 -------------------
