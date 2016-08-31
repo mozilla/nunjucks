@@ -30,6 +30,9 @@ Changelog
 2.x (unreleased)
 ----------------
 
+* Add nunjucks env to express app settings as `nunjucksEnv`.
+  Merge of [#829](https://github.com/mozilla/nunjucks/pull/829).
+
 * Add support for finding an object's "length" in length filter.
   Merge of [#813](https://github.com/mozilla/nunjucks/pull/813).
 
