@@ -29,7 +29,7 @@
                     }
                 });
 
-                expect(fileName).to.not.contain('\\');
+                expect(fileName).to.equal('./tests/templates/item.njk');
             });
 
             it('should return *NIX path seperators, when name is passed as option', function() {
@@ -43,7 +43,7 @@
                     }
                 });
 
-                expect(fileName).to.not.contain('\\');
+                expect(fileName).to.equal('path/to/file.j2');
             });
         });
     });
