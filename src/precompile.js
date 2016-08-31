@@ -88,8 +88,6 @@ function precompile(input, opts) {
         for(var i=0; i<templates.length; i++) {
             var name = templates[i].replace(path.join(input, '/'), '');
 
-            name = name.replace(/\\/g, '/');
-
             try {
                 precompiled.push( _precompile(
                     fs.readFileSync(templates[i], 'utf-8'),
@@ -118,6 +116,8 @@ function _precompile(str, name, env) {
     var asyncFilters = env.asyncFilters;
     var extensions = env.extensionsList;
     var template;
+
+    name = name.replace(/\\/g, '/');
 
     try {
         template = compiler.compile(str,

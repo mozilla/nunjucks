@@ -31,6 +31,20 @@
 
                 expect(fileName).to.not.contain('\\');
             });
+
+            it('should return *NIX path seperators, when name is passed as option', function() {
+                var fileName;
+
+                precompile('<span>test</span>', {
+                    name: 'path\\to\\file.j2',
+                    isString: true,
+                    wrapper: function(templates) {
+                        fileName = templates[0].name;
+                    }
+                });
+
+                expect(fileName).to.not.contain('\\');
+            });
         });
     });
 })();
