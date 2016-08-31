@@ -1,4 +1,4 @@
-/*! Browser bundle of nunjucks 3.0.0-dev.3 (slim, only works with precompiled templates) */
+/*! Browser bundle of nunjucks 2.4.2 (slim, only works with precompiled templates) */
 var nunjucks =
 /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
@@ -2042,7 +2042,7 @@ var nunjucks =
 
 	    get: function(name) {
 	        var val = this.variables[name];
-	        if(val !== undefined) {
+	        if(val !== undefined && val !== null) {
 	            return val;
 	        }
 	        return null;
@@ -2051,7 +2051,7 @@ var nunjucks =
 	    lookup: function(name) {
 	        var p = this.parent;
 	        var val = this.variables[name];
-	        if(val !== undefined) {
+	        if(val !== undefined && val !== null) {
 	            return val;
 	        }
 	        return p && p.lookup(name);
@@ -2060,7 +2060,7 @@ var nunjucks =
 	    resolve: function(name, forWrite) {
 	        var p = (forWrite && this.isolateWrites) ? undefined : this.parent;
 	        var val = this.variables[name];
-	        if(val !== undefined) {
+	        if(val !== undefined && val !== null) {
 	            return this;
 	        }
 	        return p && p.resolve(name);
@@ -2248,7 +2248,7 @@ var nunjucks =
 
 	function contextOrFrameLookup(context, frame, name) {
 	    var val = frame.lookup(name);
-	    return (val !== undefined) ?
+	    return (val !== undefined && val !== null) ?
 	        val :
 	        context.lookup(name);
 	}

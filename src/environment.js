@@ -286,6 +286,7 @@ var Environment = Obj.extend({
         };
 
         app.set('view', NunjucksView);
+        app.set('nunjucksEnv', this);
         return this;
     },
 
