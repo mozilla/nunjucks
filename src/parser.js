@@ -448,14 +448,14 @@ var Parser = Object.extend({
         var tag = this.peekToken();
         var node;
 
-        if(this.skipSymbol('if') || this.skipSymbol('elif')) {
+        if(this.skipSymbol('if') || this.skipSymbol('elif') || this.skipSymbol('elseif')) {
             node = new nodes.If(tag.lineno, tag.colno);
         }
         else if(this.skipSymbol('ifAsync')) {
             node = new nodes.IfAsync(tag.lineno, tag.colno);
         }
         else {
-            this.fail('parseIf: expected if or elif',
+            this.fail('parseIf: expected if, elif, or elseif',
                       tag.lineno,
                       tag.colno);
         }
@@ -463,10 +463,11 @@ var Parser = Object.extend({
         node.cond = this.parseExpression();
         this.advanceAfterBlockEnd(tag.value);
 
-        node.body = this.parseUntilBlocks('elif', 'else', 'endif');
+        node.body = this.parseUntilBlocks('elif', 'elseif', 'else', 'endif');
         var tok = this.peekToken();
 
         switch(tok && tok.value) {
+        case 'elseif':
         case 'elif':
             node.else_ = this.parseIf();
             break;
