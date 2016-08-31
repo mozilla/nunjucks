@@ -5,6 +5,9 @@ Changelog
 2.x (unreleased)
 ----------------
 
+* Add `elseif` as an alias of `elif` for parity with Twig. Thanks kswedberg.
+  Merge of [#826](https://github.com/mozilla/nunjucks/pull/826).
+
 * Add nunjucks env to express app settings as `nunjucksEnv`.
   Merge of [#829](https://github.com/mozilla/nunjucks/pull/829).
 

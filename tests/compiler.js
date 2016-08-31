@@ -131,6 +131,27 @@
                   { food: {'pizza': true }},
                   'yum');
 
+            equal('{% if pizza %}yum{% elif anchovies %}yuck{% endif %}',
+                  {pizza: true },
+                  'yum');
+
+            equal('{% if pizza %}yum{% elseif anchovies %}yuck{% endif %}',
+                  {pizza: true },
+                  'yum');
+
+            equal('{% if pizza %}yum{% elif anchovies %}yuck{% endif %}',
+                  {anchovies: true },
+                  'yuck');
+
+            equal('{% if pizza %}yum{% elseif anchovies %}yuck{% endif %}',
+                  {anchovies: true },
+                  'yuck');
+
+            equal('{% if topping == "pepperoni" %}yum{% elseif topping == "anchovies" %}' +
+                  'yuck{% else %}hmmm{% endif %}',
+                  {topping: 'sausage' },
+                  'hmmm');
+
             finish(done);
         });
 

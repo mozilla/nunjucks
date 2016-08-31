@@ -170,7 +170,8 @@ exactly as javascript's `if` behaves.
 If variable is defined and evaluates to true, "It is true" will be
 displayed. Otherwise, nothing will be.
 
-You can specify alternate conditions with `elif` and `else`:
+You can specify alternate conditions with `elif` (or `elseif`, which is simply an alias of `elif`)
+and `else`:
 
 ```jinja
 {% if hungry %}
