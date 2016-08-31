@@ -17,7 +17,7 @@ Ceci est un aperçu des caractéristiques des templates disponibles dans Nunjuck
 ## File Extensions
 
 Bien que vous soyez libre d'utiliser n'importe quelle extension de fichier pour vos
-fichiers de template Nunjucks, la communauté de Nunjucks a adopté `.njk`.  
+fichiers de template Nunjucks, la communauté de Nunjucks a adopté `.njk`.
 
 Si vous développez des outils ou des aides de syntaxe pour éditeur pour Nunjucks,
 veuillez inclure la reconnaissance de l'extension `.njk`.
@@ -170,7 +170,7 @@ exactement comme le `if` de javascript.
 Si `variable` est défini et évalué à `true`, "C'est vrai"
 s'affichera, sinon rien n'apparaitra.
 
-Vous pouvez spécifier des conditions alternatives avec `elif` et `else` :
+Vous pouvez spécifier des conditions alternatives avec `elif` (ou `elsif`) et `else` :
 
 ```jinja
 {% if faim %}

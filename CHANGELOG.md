@@ -30,6 +30,9 @@ Changelog
 2.x (unreleased)
 ----------------
 
+* Add `elseif` as an alias of `elif` for parity with Twig. Thanks kswedberg.
+  Merge of [#826](https://github.com/mozilla/nunjucks/pull/826).
+
 * Add support for finding an object's "length" in length filter.
   Merge of [#813](https://github.com/mozilla/nunjucks/pull/813).
 
