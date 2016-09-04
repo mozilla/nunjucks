@@ -629,7 +629,7 @@ everything in sync.
 precompile
 nunjucks.precompile(path, [opts])
 
-Precompile a file or directory at **path**. **opts** is a hash with any of the following options:
+Synchronously precompile a file or directory at **path**. **opts** is a hash with any of the following options:
 
 * **name**: name of the template, when compiling a string (required)
     or a file (optional, defaults to **path**). names are
@@ -644,6 +644,12 @@ Precompile a file or directory at **path**. **opts** is a hash with any of the f
         * **name**: name of the template
         * **template**: string source of the precompiled template in javascript
     * **opts**: object of all the above options
+
+This function returns the output of `opts.wrapper` if passed, defaulting to a string encompassing executable javascript
+that will assign each precompiled template to `window.nunjucksPrecompiled[<templateName>]`.  **asFunction**
+modifies this slightly by also returning a function that renders each template.  
+
+Note: The default return value is not meant for general api usage.  You should instead pass in `opts.wrapper`
 
 ```js
 var env = new nunjucks.Environment();
