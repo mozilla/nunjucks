@@ -170,7 +170,8 @@ exactement comme le `if` de javascript.
 Si `variable` est défini et évalué à `true`, "C'est vrai"
 s'affichera, sinon rien n'apparaitra.
 
-Vous pouvez spécifier des conditions alternatives avec `elif` (ou `elsif`) et `else` :
+Vous pouvez spécifier des conditions alternatives avec `elif` (ou `elseif` qui est un simple alias de `elif`)
+et `else` :
 
 ```jinja
 {% if faim %}
