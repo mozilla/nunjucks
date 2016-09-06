@@ -1,9 +1,5 @@
 # Nunjucks
 
-**Nunjucks is currently lacking an active maintainer. Issues and pull requests
-will not be reviewed or merged, unfortunately. If you are interested in
-picking up nunjucks maintenance, file an issue and mention @carljm.**
-
 [Nunjucks](http://mozilla.github.io/nunjucks/) is a full featured
 templating engine for javascript. It is heavily inspired by
 [jinja2](http://jinja.pocoo.org/). View the docs

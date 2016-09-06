@@ -1,10 +1,6 @@
 Contributing
 ============
 
-**Nunjucks is currently lacking an active maintainer. Issues and pull requests
-will not be reviewed or merged, unfortunately. If you are interested in
-picking up nunjucks maintenance, file an issue and mention @carljm.**
-
 Thanks for your interest in contributing! The advice below will help you get
 your issue fixed / pull request merged.
 
