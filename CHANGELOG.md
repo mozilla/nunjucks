@@ -27,6 +27,7 @@ Changelog
   macro. Merge of [#791](https://github.com/mozilla/nunjucks/pull/791).
 
 * Fix potential cast-related XSS vulnerability in autoescape mode, and with `escape` filter.
+  Thanks Matt Austin for the report and Thomas Hunkapiller for the fix.
   [#836](https://github.com/mozilla/nunjucks/pull/836)
 
 
