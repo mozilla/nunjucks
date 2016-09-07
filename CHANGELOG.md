@@ -26,6 +26,9 @@ Changelog
 * Fix handling of macro arg with default value which shares a name with another
   macro. Merge of [#791](https://github.com/mozilla/nunjucks/pull/791).
 
+* Fix potential cast-related XSS vulnerability in autoescape mode.
+  [#836](https://github.com/mozilla/nunjucks/pull/836)
+
 
 2.x (unreleased)
 ----------------
