@@ -207,7 +207,7 @@ function suppressValue(val, autoescape) {
     val = (val !== undefined && val !== null) ? val : '';
 
     if(autoescape && !(val instanceof SafeString)) {
-        val = lib.escape(''+val);
+        val = lib.escape(val.toString());
     }
 
     return val;
