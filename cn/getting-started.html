@@ -8,6 +8,7 @@
           href="/nunjucks/bower_components/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/nunjucks/css/highlight.css" />
     <link rel="stylesheet" type="text/css" href="/nunjucks/css/app.css" />
+    <link rel="icon" type="image/png" href="/nunjucks/img/favicon.png" />
   </head>
 
   <body id="getting-started">
@@ -90,7 +91,7 @@
 
 <ul>
 <li><p><strong>nunjucks.js</strong> 可用于动态加载模板，当模板变化时重新加载，也可以用于预编译后的模板。包含编译器，所以会比较大 (20K min/gzipped)。如果你刚接触 nunjucks 可使用这个文件，如果你不在意大小也可以在生产环境使用。</p></li>
-<li><p><strong>nunjucks-slim.js</strong> 只能用于预编译后的模板，只包含运行时的代码，所以比较小 (8K min/gzipped)。一般用于生产环境，如果你使用 <a href="https://github.com/jlongster/grunt-nunjucks">grunt task</a> 自动预编译，也可以在开发环境使用。</p></li>
+<li><p><strong>nunjucks-slim.js</strong> 只能用于预编译后的模板，只包含运行时的代码，所以比较小 (8K min/gzipped)。一般用于生产环境，如果你使用 <a href="https://github.com/jlongster/grunt-nunjucks">grunt</a> 或<a href="https://github.com/sindresorhus/gulp-nunjucks">gulp</a>任务自动预编译，也可以在开发环境使用。</p></li>
 </ul>
 
 <p>直接用 <code>script</code> 引入文件：</p>
@@ -102,7 +103,7 @@
 </code></pre></div>
 <blockquote>
 <p>确保在生产环境使用预编译版本，可使用 <a href="https://github.com/jlongster/grunt-nunjucks">grunt
-task</a>，可在 <a href="api.html#browser-usage">浏览器使用</a> 查看客户端优化的配置。</p>
+</a>或<a href="https://github.com/sindresorhus/gulp-nunjucks">gulp</a>，可在 <a href="api.html#browser-usage">浏览器使用</a> 查看客户端优化的配置。</p>
 </blockquote>
 
 <h2 id=">使用说明</h2>

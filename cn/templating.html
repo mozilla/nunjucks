@@ -8,6 +8,7 @@
           href="/nunjucks/bower_components/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/nunjucks/css/highlight.css" />
     <link rel="stylesheet" type="text/css" href="/nunjucks/css/app.css" />
+    <link rel="icon" type="image/png" href="/nunjucks/img/favicon.png" />
   </head>
 
   <body id="">
@@ -49,6 +50,9 @@
 <li>
 <a href="">模板</a>
 <ul>
+<li>
+<a href="">文件扩展名</a>
+</li>
 <li>
 <a href="">变量</a>
 </li>
@@ -170,12 +174,18 @@
     <div class="locale btn-group"><a href="/nunjucks/templating.html" class="btn btn-default">English</a><a href="/nunjucks/cn/templating.html" class="btn btn-success">中文</a><a href="/nunjucks/fr/templating.html" class="btn btn-default">Français</a></div>
     <h1 id=">模板</h1>
 
-<p>这里包括 nunjuck 所有可用的功能。</p>
+<p>这里包括 Nunjuck 所有可用的功能。</p>
 
 <blockquote>
 <p>Nunjucks 是
 <a href="http://jinja.pocoo.org/docs/">jinja2</a> 的 javascript 的实现，所以如果此文档有什么缺失，你可以直接查看 <a href="http://jinja.pocoo.org/docs/templates/">jinja2 的文档</a>，不过两者之间还存在一些<a href="http://mozilla.github.io/nunjucks/cn/faq.html">差异</a>。</p>
 </blockquote>
+
+<h2 id=">文件扩展名</h2>
+
+<p>虽然你可以用任意扩展名来命名你的Nunjucks模版或文件，但Nunjucks社区还是推荐使用<code>.njk</code>。</p>
+
+<p>如果你在给Nunjucks开发工具或是编辑器上的语法插件时，请记得使用<code>.njk</code>扩展名。</p>
 
 <h2 id=">变量</h2>
 
@@ -311,7 +321,7 @@ Right side!
 </code></pre></div>
 <p><a href="http://jinja.pocoo.org/docs/templates/#dictsort"><code>dictsort</code></a> 过滤器可将对象排序 (<em>new in 0.1.8</em>)</p>
 
-<p>除此之外，nunjucks 会将数组解开，数组内的值对应到变量 (<em>new in 0.1.8</em>)</p>
+<p>除此之外，Nunjucks 会将数组解开，数组内的值对应到变量 (<em>new in 0.1.8</em>)</p>
 <div class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">points</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span> <span class="p">[</span><span class="mi">12</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">14</span><span class="p">]];</span>
 </code></pre></div><div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">for</span> <span class="nv">x</span><span class="p">,</span> <span class="nv">y</span><span class="p">,</span> <span class="nv">z</span> <span class="ow">in</span> <span class="nv">points</span> <span class="cp">%}</span>
   Point: <span class="cp">{{</span> <span class="nv">x</span> <span class="cp">}}</span>, <span class="cp">{{</span> <span class="nv">y</span> <span class="cp">}}</span>, <span class="cp">{{</span> <span class="nv">z</span> <span class="cp">}}</span>
@@ -335,11 +345,11 @@ Right side!
 <p>这个是适用于异步模板，请读<a href="api.html#asynchronous-support">文档</a>。</p>
 </blockquote>
 
-<p><code>asyncEach</code> 为 <code>for</code> 的异步版本，只有当使用<a href="#asynchronous">自定义异步模板加载器</a>的时候才使用，否则请不要使用。异步过滤器和扩展也需要他。如果你在循环中使用了异步过滤器的话，nunjucks就会在内部自动将循环转换成 <code>asyncEach</code>。</p>
+<p><code>asyncEach</code> 为 <code>for</code> 的异步版本，只有当使用<a href="#asynchronous">自定义异步模板加载器</a>的时候才使用，否则请不要使用。异步过滤器和扩展也需要他。如果你在循环中使用了异步过滤器的话，Nunjucks就会在内部自动将循环转换成 <code>asyncEach</code>。</p>
 
 <p><code>asyncEach</code> 和 <code>for</code> 的使用方式一致，但他支持循环的异步控制。将两者区分的原因是性能，大部分人使用同步模板，将 <code>for</code> 转换成原生的 for 语句会快很多。</p>
 
-<p>编译时 nunjuck 不用关心模板是如何加载的，所以无法决定 <code>include</code> 是同步或异步。这也是为什么nunjucks无法自动将普通的循环语句转换成异步循环语句的原因，所以如果你要使用异步模板加载器的话，就需要使用 <code>asyncEach</code>。</p>
+<p>编译时 nunjuck 不用关心模板是如何加载的，所以无法决定 <code>include</code> 是同步或异步。这也是为什么Nunjucks无法自动将普通的循环语句转换成异步循环语句的原因，所以如果你要使用异步模板加载器的话，就需要使用 <code>asyncEach</code>。</p>
 <div class="highlight"><pre><code class="language-js" data-lang="js"><span class="c1">// If you are using a custom loader that is async, you need asyncEach</span>
 <span class="kd">var</span> <span class="nx">env</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">Environment</span><span class="p">(</span><span class="nx">AsyncLoaderFromDatabase</span><span class="p">,</span> <span class="nx">opts</span><span class="p">);</span>
 </code></pre></div><div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="nt">&lt;h1&gt;</span>Posts<span class="nt">&lt;/h1&gt;</span>
@@ -399,7 +409,7 @@ Right side!
 <p>可以设置新的变量，并一起赋值。</p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">set</span> <span class="nv">x</span><span class="p">,</span> <span class="nv">y</span><span class="p">,</span> <span class="nv">z</span> <span class="err">=</span> <span class="nv">5</span> <span class="cp">%}</span>
 </code></pre></div>
-<p>如果在顶级作用域使用 <code>set</code>，将会改变全局的上下文中的值。如果只在某个作用域 (<code>for</code>、 <code>include</code> 或其他) 中使用，只会影响该作用域。</p>
+<p>如果在顶级作用域使用 <code>set</code>，将会改变全局的上下文中的值。如果只在某个作用域 (像是include或是macro) 中使用，则只会影响该作用域。</p>
 
 <p>同样地，你也可以使用区块赋值将一个区块的内容储存在一个变量中。</p>
 
@@ -461,6 +471,11 @@ The name of the item is: <span class="cp">{{</span> <span class="nv">item.name</
 <p>在某些情况下，我们可能希望在模板文件不存在时不要抛出异常。对于这类情况，我们可以使用<code>ignore missing</code>来略过这些异常：</p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">include</span> <span class="s2">"missing.html"</span> <span class="k">ignore</span> <span class="k">missing</span> <span class="cp">%}</span>
 </code></pre></div>
+<p>被包含的模版自身可以扩展(<code>extends</code>)另一个模版（因此你可以让一系列相关联的模版继承同一种结构）。
+一个被包含的模版并不会改变包含它的模版的区块结构，它有一个分离的继承树和块级命名空间。换言之，
+在渲染时，<code>include</code>并不 <em>不是</em> 将被包含模版代码拉取到包含它的模版中的预处理器。相对的，它对被
+包含的模版触发了一次的分离渲染，然后再将渲染的结果引入。</p>
+
 <h3 id="import">import</h3>
 
 <p><code>import</code> 可加载不同的模板，可使你操作模板输出的数据，模板将会输出宏 (macro) 和在顶级作用域进行的赋值 (使用 <a href="#set"><code>set</code></a>)。</p>
@@ -501,14 +516,8 @@ The name of the item is: <span class="cp">{{</span> <span class="nv">item.name</
 
 <h3 id="raw">raw</h3>
 
-<p>如果你想输出一些 nunjucks 特殊的标签 (如 <code>{{</code>)，可以使用 <code>raw</code> 将所有的内容输出为纯文本。</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span><span class="err">`</span><span class="p">)</span><span class="err">，可以使用</span> <span class="err">`</span><span class="nv">raw</span><span class="err">`</span> <span class="err">将所有的内容输出为纯文本。</span>
+<p>如果你想输出一些 Nunjucks 特殊的标签 (如 <code>{{</code>)，可以使用 <code>{{</code>)，可以使用 <code>{% raw %}</code> 将所有的内容输出为纯文本。</p>
 
-<span class="err">```</span><span class="nv">jinja</span>
-<span class="err">{%</span> <span class="nv">raw</span> <span class="cp">%}</span>
-  this will <span class="cp">{{</span> <span class="nv">not</span> <span class="nv">be</span> <span class="nv">processed</span> <span class="cp">}}</span>
-{％ endraw %}
-</code></pre></div>
 <h3 id="filter">filter</h3>
 
 <p><code>filter</code>区块允许我们使用区块中的内容来调用过滤器。不同于使用<code>|</code>语法，它会将区块渲染出的内容传递给过滤器。</p>
@@ -572,8 +581,6 @@ The result is
 </code></pre></div>
 <h2 id=">空白字符控制</h2>
 
-<p><em>Introduced in v0.1.8</em></p>
-
 <p>模板在正常情况会将变量 (variable) 和标签区块 (tag blocks) 周围的空白字符完全输出。有时，你不想输出一些额外的空白字符，但代码又需要一些空白字符来显得整洁。</p>
 
 <p>你可以在开始和结束区块 (start or end block tag) 添加 (<code>-</code>) 来去除前面和后面的空白字符。</p>
@@ -618,7 +625,9 @@ The result is
 
 <ul>
 <li><code>==</code></li>
+<li><code>===</code></li>
 <li><code>!=</code></li>
+<li><code>!==</code></li>
 <li><code>&gt;</code></li>
 <li><code>&gt;=</code></li>
 <li><code>&lt;</code></li>
@@ -661,7 +670,9 @@ The result is
 
 <ul>
 <li><code>==</code></li>
+<li><code>===</code></li>
 <li><code>!=</code></li>
+<li><code>!==</code></li>
 <li><code>&gt;</code></li>
 <li><code>&gt;=</code></li>
 <li><code>&lt;</code></li>

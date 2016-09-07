@@ -8,6 +8,7 @@
           href="/nunjucks/bower_components/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/nunjucks/css/highlight.css" />
     <link rel="stylesheet" type="text/css" href="/nunjucks/css/app.css" />
+    <link rel="icon" type="image/png" href="/nunjucks/img/favicon.png" />
   </head>
 
   <body id="">
@@ -203,7 +204,7 @@ chose ici. Découvrez les différences
 <h2 id="file-extensions">File Extensions</h2>
 
 <p>Bien que vous soyez libre d&#39;utiliser n&#39;importe quelle extension de fichier pour vos
-fichiers de template Nunjucks, la communauté de Nunjucks a adopté <code>.njk</code>.  </p>
+fichiers de template Nunjucks, la communauté de Nunjucks a adopté <code>.njk</code>.</p>
 
 <p>Si vous développez des outils ou des aides de syntaxe pour éditeur pour Nunjucks,
 veuillez inclure la reconnaissance de l&#39;extension <code>.njk</code>.</p>
@@ -324,7 +325,7 @@ Nunjucks est livré avec plusieurs tags intégrés, mais <a href="api.html#tags-
 </code></pre></div>
 <p>Si <code>variable</code> est défini et évalué à <code>true</code>, &quot;C&#39;est vrai&quot; s&#39;affichera, sinon rien n&#39;apparaitra.</p>
 
-<p>Vous pouvez spécifier des conditions alternatives avec <code>elif</code> et <code>else</code> :</p>
+<p>Vous pouvez spécifier des conditions alternatives avec <code>elif</code> (ou <code>elsif</code>) et <code>else</code> :</p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">if</span> <span class="nv">faim</span> <span class="cp">%}</span>
   J'ai faim
 <span class="cp">{%</span> <span class="nv">elif</span> <span class="nv">fatigue</span> <span class="cp">%}</span>
@@ -716,7 +717,9 @@ Le résultat est
 
 <ul>
 <li><code>==</code></li>
+<li><code>===</code></li>
 <li><code>!=</code></li>
+<li><code>!==</code></li>
 <li><code>&gt;</code></li>
 <li><code>&gt;=</code></li>
 <li><code>&lt;</code></li>
@@ -759,7 +762,9 @@ Le résultat est
 
 <ul>
 <li><code>==</code></li>
+<li><code>===</code></li>
 <li><code>!=</code></li>
+<li><code>!==</code></li>
 <li><code>&gt;</code></li>
 <li><code>&gt;=</code></li>
 <li><code>&lt;</code></li>

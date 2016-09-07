@@ -1,0 +1,4 @@
+{% import 'macro-call-undefined-macro.njk' as t %}
+{% for el in list %}
+	{{ t.defined_macro() }}
+{% endfor %}
