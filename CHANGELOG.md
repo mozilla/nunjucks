@@ -26,10 +26,6 @@ Changelog
 * Fix handling of macro arg with default value which shares a name with another
   macro. Merge of [#791](https://github.com/mozilla/nunjucks/pull/791).
 
-* Fix potential cast-related XSS vulnerability in autoescape mode, and with `escape` filter.
-  Thanks Matt Austin for the report and Thomas Hunkapiller for the fix.
-  [#836](https://github.com/mozilla/nunjucks/pull/836)
-
 
 2.x (unreleased)
 ----------------
@@ -53,6 +49,15 @@ Changelog
   Merge of [#710](https://github.com/mozilla/nunjucks/pull/710).
 
 * OS agnostic file paths in precompile. Merge of [#825](https://github.com/mozilla/nunjucks/pull/825).
+
+
+2.4.3 (Sep 7 2016)
+----------------
+
+* Fix potential cast-related XSS vulnerability in autoescape mode, and with `escape` filter.
+  Thanks Matt Austin for the report and Thomas Hunkapiller for the fix.
+  [#836](https://github.com/mozilla/nunjucks/pull/836)
+
 
 2.4.2 (Apr 15 2016)
 -------------------
