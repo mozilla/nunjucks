@@ -2,6 +2,12 @@ Changelog
 =========
 
 
+2.4.3 (Sep 7 2016)
+----------------
+
+* Fix potential cast-related XSS vulnerability in autoescape mode.
+  [#836](https://github.com/mozilla/nunjucks/pull/836)
+
 2.4.2 (Apr 15 2016)
 -------------------
 
