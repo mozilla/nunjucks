@@ -1,6 +1,15 @@
-/*! Browser bundle of nunjucks 2.4.3 (slim, only works with precompiled templates) */
-var nunjucks =
-/******/ (function(modules) { // webpackBootstrap
+/*! Browser bundle of nunjucks 2.5.0 (slim, only works with precompiled templates) */
+(function webpackUniversalModuleDefinition(root, factory) {
+	if(typeof exports === 'object' && typeof module === 'object')
+		module.exports = factory();
+	else if(typeof define === 'function' && define.amd)
+		define([], factory);
+	else if(typeof exports === 'object')
+		exports["nunjucks"] = factory();
+	else
+		root["nunjucks"] = factory();
+})(this, function() {
+return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
 
@@ -730,6 +739,7 @@ var nunjucks =
 	        };
 
 	        app.set('view', NunjucksView);
+	        app.set('nunjucksEnv', this);
 	        return this;
 	    },
 
@@ -1597,6 +1607,10 @@ var nunjucks =
 	            ) {
 	                // ECMAScript 2015 Maps and Sets
 	                return value.size;
+	            }
+	            if(lib.isObject(value) && !(value instanceof r.SafeString)) {
+	                // Objects (besides SafeStrings), non-primative Arrays
+	                return Object.keys(value).length;
 	            }
 	            return value.length;
 	        }
@@ -2675,4 +2689,6 @@ var nunjucks =
 
 
 /***/ }
-/******/ ]);
+/******/ ])
+});
+;

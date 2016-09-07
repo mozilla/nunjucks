@@ -27,7 +27,7 @@ Changelog
   macro. Merge of [#791](https://github.com/mozilla/nunjucks/pull/791).
 
 
-2.x (unreleased)
+2.5.0 (Sep 7 2016)
 ----------------
 
 * Add `elseif` as an alias of `elif` for parity with Twig. Thanks kswedberg.
