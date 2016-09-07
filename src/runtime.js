@@ -206,8 +206,8 @@ function markSafe(val) {
 function suppressValue(val, autoescape) {
     val = (val !== undefined && val !== null) ? val : '';
 
-    if(autoescape && typeof val === 'string') {
-        val = lib.escape(val);
+    if(autoescape && !(val instanceof SafeString)) {
+        val = lib.escape(val.toString());
     }
 
     return val;
