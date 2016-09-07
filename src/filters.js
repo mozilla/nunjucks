@@ -116,10 +116,10 @@ var filters = {
     },
 
     escape: function(str) {
-        if(typeof str === 'string') {
-            return r.markSafe(lib.escape(str));
+        if(str instanceof r.SafeString) {
+            return str;
         }
-        return str;
+        return r.markSafe(lib.escape(str.toString()));
     },
 
     safe: function(str) {
