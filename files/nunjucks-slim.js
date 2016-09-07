@@ -1,4 +1,4 @@
-/*! Browser bundle of nunjucks 2.4.2 (slim, only works with precompiled templates) */
+/*! Browser bundle of nunjucks 2.4.3 (slim, only works with precompiled templates) */
 var nunjucks =
 /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
@@ -1531,10 +1531,10 @@ var nunjucks =
 	    },
 
 	    escape: function(str) {
-	        if(typeof str === 'string') {
-	            return r.markSafe(lib.escape(str));
+	        if(str instanceof r.SafeString) {
+	            return str;
 	        }
-	        return str;
+	        return r.markSafe(lib.escape(str.toString()));
 	    },
 
 	    safe: function(str) {
@@ -2204,8 +2204,8 @@ var nunjucks =
 	function suppressValue(val, autoescape) {
 	    val = (val !== undefined && val !== null) ? val : '';
 
-	    if(autoescape && typeof val === 'string') {
-	        val = lib.escape(val);
+	    if(autoescape && !(val instanceof SafeString)) {
+	        val = lib.escape(val.toString());
 	    }
 
 	    return val;

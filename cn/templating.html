@@ -47,16 +47,16 @@
       <p><strong>Templates</strong></p>
       <ul>
 <li>
-<a href="#模板">模板</a>
+<a href="">模板</a>
 <ul>
 <li>
-<a href="#变量">变量</a>
+<a href="">变量</a>
 </li>
 <li>
-<a href="#过滤器">过滤器</a>
+<a href="">过滤器</a>
 </li>
 <li>
-<a href="#模板继承">模板继承</a>
+<a href="">模板继承</a>
 <ul>
 <li>
 <a href="#super">super</a>
@@ -64,7 +64,7 @@
 </ul>
 </li>
 <li>
-<a href="#标签">标签</a>
+<a href="">标签</a>
 <ul>
 <li>
 <a href="#if">if</a>
@@ -108,42 +108,42 @@
 </ul>
 </li>
 <li>
-<a href="#关键字参数">关键字参数</a>
+<a href="">关键字参数</a>
 </li>
 <li>
-<a href="#注释">注释</a>
+<a href="">注释</a>
 </li>
 <li>
-<a href="#空白字符控制">空白字符控制</a>
+<a href="">空白字符控制</a>
 </li>
 <li>
-<a href="#表达式">表达式</a>
+<a href="">表达式</a>
 <ul>
 <li>
-<a href="#运算-math">运算 (Math)</a>
+<a href="#math">运算 (Math)</a>
 </li>
 <li>
-<a href="#比较-comparisons">比较 (Comparisons)</a>
+<a href="#comparisons">比较 (Comparisons)</a>
 </li>
 <li>
 <a href="#logic">Logic</a>
 </li>
 <li>
-<a href="#if-表达式">If 表达式</a>
+<a href="#if">If 表达式</a>
 </li>
 <li>
-<a href="#函数调用-function-calls">函数调用 (Function Calls)</a>
+<a href="#function-calls">函数调用 (Function Calls)</a>
 </li>
 <li>
-<a href="#正则表达式">正则表达式</a>
+<a href="">正则表达式</a>
 </li>
 </ul>
 </li>
 <li>
-<a href="#自动转义-autoescaping">自动转义 (Autoescaping)</a>
+<a href="#autoescaping">自动转义 (Autoescaping)</a>
 </li>
 <li>
-<a href="#全局函数-global-functions">全局函数 (Global Functions)</a>
+<a href="#global-functions">全局函数 (Global Functions)</a>
 <ul>
 <li>
 <a href="#range-start-stop-step">range([start], stop, [step])</a>
@@ -168,7 +168,7 @@
 
   <div class="col-sm-9 main">
     <div class="locale btn-group"><a href="/nunjucks/templating.html" class="btn btn-default">English</a><a href="/nunjucks/cn/templating.html" class="btn btn-success">中文</a><a href="/nunjucks/fr/templating.html" class="btn btn-default">Français</a></div>
-    <h1 id="模板">模板</h1>
+    <h1 id=">模板</h1>
 
 <p>这里包括 nunjuck 所有可用的功能。</p>
 
@@ -177,106 +177,106 @@
 <a href="http://jinja.pocoo.org/docs/">jinja2</a> 的 javascript 的实现，所以如果此文档有什么缺失，你可以直接查看 <a href="http://jinja.pocoo.org/docs/templates/">jinja2 的文档</a>，不过两者之间还存在一些<a href="http://mozilla.github.io/nunjucks/cn/faq.html">差异</a>。</p>
 </blockquote>
 
-<h2 id="变量">变量</h2>
+<h2 id=">变量</h2>
 
 <p>变量会从模板上下文获取，如果你想显示一个变量可以：</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">username</span> <span class="cp">}}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">username</span> <span class="cp">}}</span>
 </code></pre></div>
 <p>会从上下文查找 <code>username</code> 然后显示，可以像 javascript 一样获取变量的属性 (可使用点操作符或者中括号操作符)：</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">foo.bar</span> <span class="cp">}}</span><span class="x"></span>
-<span class="cp">{{</span> <span class="nv">foo</span><span class="o">[</span><span class="s2">&quot;bar&quot;</span><span class="o">]</span> <span class="cp">}}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">foo.bar</span> <span class="cp">}}</span>
+<span class="cp">{{</span> <span class="nv">foo</span><span class="p">[</span><span class="s2">"bar"</span><span class="p">]</span> <span class="cp">}}</span>
 </code></pre></div>
 <p>如果变量的值为 <code>undefined</code> 或 <code>null</code> 将不显示，引用到 undefined 或 null 对象也是如此 (如 <code>foo</code> 为 undefined，<code>{{ foo }}</code>, <code>{{
 foo.bar }}</code>, <code>{{ foo.bar.baz }}</code> 也不显示)。</p>
 
-<h2 id="过滤器">过滤器</h2>
+<h2 id=">过滤器</h2>
 
 <p>过滤器是一些可以执行变量的函数，通过管道操作符 (<code>|</code>) 调用，并可接受参数。</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">foo</span> <span class="o">|</span> <span class="nf">title</span> <span class="cp">}}</span><span class="x"></span>
-<span class="cp">{{</span> <span class="nv">foo</span> <span class="o">|</span> <span class="nf">join</span><span class="o">(</span><span class="s2">&quot;,&quot;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
-<span class="cp">{{</span> <span class="nv">foo</span> <span class="o">|</span> <span class="nf">replace</span><span class="o">(</span><span class="s2">&quot;foo&quot;</span><span class="o">,</span> <span class="s2">&quot;bar&quot;</span><span class="o">)</span> <span class="o">|</span> <span class="nf">capitalize</span> <span class="cp">}}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">foo</span> <span class="err">|</span> <span class="nv">title</span> <span class="cp">}}</span>
+<span class="cp">{{</span> <span class="nv">foo</span> <span class="err">|</span> <span class="nv">join</span><span class="p">(</span><span class="s2">","</span><span class="p">)</span> <span class="cp">}}</span>
+<span class="cp">{{</span> <span class="nv">foo</span> <span class="err">|</span> <span class="nv">replace</span><span class="p">(</span><span class="s2">"foo"</span><span class="p">,</span> <span class="s2">"bar"</span><span class="p">)</span> <span class="err">|</span> <span class="nv">capitalize</span> <span class="cp">}}</span>
 </code></pre></div>
 <p>第三个例子展示了链式过滤器，最终会显示 &quot;Bar&quot;，第一个过滤器将 &quot;foo&quot; 替换成 &quot;bar&quot;，第二个过滤器将首字母大写。</p>
 
 <p>Nunjucks 提供了一些<a href="#%E5%86%85%E7%BD%AE%E7%9A%84%E8%BF%87%E6%BB%A4%E5%99%A8">内置的过滤器</a>，你也可以<a href="api#custom-filters">自定义过滤器</a>。</p>
 
-<h2 id="模板继承">模板继承</h2>
+<h2 id=">模板继承</h2>
 
 <p>模板继承可以达到模板复用的效果，当写一个模板的时候可以定义 &quot;blocks&quot;，子模板可以覆盖他，同时支持多层继承。</p>
 
 <p>如果有一个叫做 <code>parent.html</code> 的模板，如下所示：</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">block</span> <span class="nv">header</span> <span class="cp">%}</span><span class="x"></span>
-<span class="x">This is the default content</span>
-<span class="cp">{%</span> <span class="k">endblock</span> <span class="cp">%}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">block</span> <span class="nv">header</span> <span class="cp">%}</span>
+This is the default content
+<span class="cp">{%</span> <span class="k">endblock</span> <span class="cp">%}</span>
 
-<span class="x">&lt;section class=&quot;left&quot;&gt;</span>
-<span class="x">  </span><span class="cp">{%</span> <span class="k">block</span> <span class="nv">left</span> <span class="cp">%}{%</span> <span class="k">endblock</span> <span class="cp">%}</span><span class="x"></span>
-<span class="x">&lt;/section&gt;</span>
+<span class="nt">&lt;section</span> <span class="na">class=</span><span class="s">"left"</span><span class="nt">&gt;</span>
+  <span class="cp">{%</span> <span class="k">block</span> <span class="nv">left</span> <span class="cp">%}{%</span> <span class="k">endblock</span> <span class="cp">%}</span>
+<span class="nt">&lt;/section&gt;</span>
 
-<span class="x">&lt;section class=&quot;right&quot;&gt;</span>
-<span class="x">  </span><span class="cp">{%</span> <span class="k">block</span> <span class="nv">right</span> <span class="cp">%}</span><span class="x"></span>
-<span class="x">  This is more content</span>
-<span class="x">  </span><span class="cp">{%</span> <span class="k">endblock</span> <span class="cp">%}</span><span class="x"></span>
-<span class="x">&lt;/section&gt;</span>
+<span class="nt">&lt;section</span> <span class="na">class=</span><span class="s">"right"</span><span class="nt">&gt;</span>
+  <span class="cp">{%</span> <span class="k">block</span> <span class="nv">right</span> <span class="cp">%}</span>
+  This is more content
+  <span class="cp">{%</span> <span class="k">endblock</span> <span class="cp">%}</span>
+<span class="nt">&lt;/section&gt;</span>
 </code></pre></div>
 <p>然后再写一个模板继承他</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">extends</span> <span class="s2">&quot;parent.html&quot;</span> <span class="cp">%}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">extends</span> <span class="s2">"parent.html"</span> <span class="cp">%}</span>
 
-<span class="cp">{%</span> <span class="k">block</span> <span class="nv">left</span> <span class="cp">%}</span><span class="x"></span>
-<span class="x">This is the left side!</span>
-<span class="cp">{%</span> <span class="k">endblock</span> <span class="cp">%}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">block</span> <span class="nv">left</span> <span class="cp">%}</span>
+This is the left side!
+<span class="cp">{%</span> <span class="k">endblock</span> <span class="cp">%}</span>
 
-<span class="cp">{%</span> <span class="k">block</span> <span class="nv">right</span> <span class="cp">%}</span><span class="x"></span>
-<span class="x">This is the right side!</span>
-<span class="cp">{%</span> <span class="k">endblock</span> <span class="cp">%}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">block</span> <span class="nv">right</span> <span class="cp">%}</span>
+This is the right side!
+<span class="cp">{%</span> <span class="k">endblock</span> <span class="cp">%}</span>
 </code></pre></div>
 <p>以下为渲染结果</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="x">This is the default content</span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja">This is the default content
 
-<span class="x">&lt;section class=&quot;left&quot;&gt;</span>
-<span class="x">  This is the left side!</span>
-<span class="x">&lt;/section&gt;</span>
+<span class="nt">&lt;section</span> <span class="na">class=</span><span class="s">"left"</span><span class="nt">&gt;</span>
+  This is the left side!
+<span class="nt">&lt;/section&gt;</span>
 
-<span class="x">&lt;section class=&quot;right&quot;&gt;</span>
-<span class="x">  This is the right side!</span>
-<span class="x">&lt;/section&gt;</span>
+<span class="nt">&lt;section</span> <span class="na">class=</span><span class="s">"right"</span><span class="nt">&gt;</span>
+  This is the right side!
+<span class="nt">&lt;/section&gt;</span>
 </code></pre></div>
 <p>你可以将继承的模板设为一个变量，这样就可以动态指定继承的模板。这个变量既可以是个指向模板文件的字符串，也可以是个模板编译后所生成的对象(需要添加上下文环境)。因此你可以通过设置上下文变量，从而在渲染时动态地改变所要继承的模板。</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">extends</span> <span class="nv">parentTemplate</span> <span class="cp">%}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">extends</span> <span class="nv">parentTemplate</span> <span class="cp">%}</span>
 </code></pre></div>
 <p>继承功能使用了 <a href="#extends"><code>extends</code></a> 和 <a href="#block"><code>block</code></a> 标签，<a href="http://jinja.pocoo.org/docs/templates/#template-inheritance">jinja2 文档</a>中有更细节的描述。</p>
 
 <h3 id="super">super</h3>
 
 <p>你可以通过调用<code>super</code>从而将父级区块中的内容渲染到子区块中。如果在前面的例子中你的子模板是这样的：</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">block</span> <span class="nv">right</span> <span class="cp">%}</span><span class="x"></span>
-<span class="cp">{{</span> <span class="nb">super</span><span class="o">()</span> <span class="cp">}}</span><span class="x"></span>
-<span class="x">Right side!</span>
-<span class="cp">{%</span> <span class="k">endblock</span> <span class="cp">%}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">block</span> <span class="nv">right</span> <span class="cp">%}</span>
+<span class="cp">{{</span> <span class="nv">super</span><span class="p">()</span> <span class="cp">}}</span>
+Right side!
+<span class="cp">{%</span> <span class="k">endblock</span> <span class="cp">%}</span>
 </code></pre></div>
 <p>这个区块的渲染结果将是：</p>
-<div class="highlight"><pre><code class="language-text" data-lang="text">This is more content
+<div class="highlight"><pre><code class="language-" data-lang="">This is more content
 Right side!
 </code></pre></div>
-<h2 id="标签">标签</h2>
+<h2 id=">标签</h2>
 
 <p>标签是一些特殊的区块，它们可以对模板执行一些操作。Nunjucks 包含一些内置的标签，你也可以<a href="api.html#custom-tags">自定义</a>。</p>
 
 <h3 id="if">if</h3>
 
 <p><code>if</code> 为分支语句，与 javascript 中的 <code>if</code> 类似。</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">if</span> <span class="nv">variable</span> <span class="cp">%}</span><span class="x"></span>
-<span class="x">  It is true</span>
-<span class="cp">{%</span> <span class="k">endif</span> <span class="cp">%}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">if</span> <span class="nv">variable</span> <span class="cp">%}</span>
+  It is true
+<span class="cp">{%</span> <span class="k">endif</span> <span class="cp">%}</span>
 </code></pre></div>
 <p>如果 <code>variable</code> 定义了并且为 true <em>(译者注：这里并非布尔值，和 javascript 的处理是一样的)</em> 则会显示 &quot;It is true&quot;，否则什么也不显示。</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">if</span> <span class="nv">hungry</span> <span class="cp">%}</span><span class="x"></span>
-<span class="x">  I am hungry</span>
-<span class="cp">{%</span> <span class="k">elif</span> <span class="nv">tired</span> <span class="cp">%}</span><span class="x"></span>
-<span class="x">  I am tired</span>
-<span class="cp">{%</span> <span class="k">else</span> <span class="cp">%}</span><span class="x"></span>
-<span class="x">  I am good!</span>
-<span class="cp">{%</span> <span class="k">endif</span> <span class="cp">%}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">if</span> <span class="nv">hungry</span> <span class="cp">%}</span>
+  I am hungry
+<span class="cp">{%</span> <span class="nv">elif</span> <span class="nv">tired</span> <span class="cp">%}</span>
+  I am tired
+<span class="cp">{%</span> <span class="k">else</span> <span class="cp">%}</span>
+  I am good!
+<span class="cp">{%</span> <span class="k">endif</span> <span class="cp">%}</span>
 </code></pre></div>
 <p>在<a href="#if-%E8%A1%A8%E8%BE%BE%E5%BC%8F">内联表达式</a>(inline expression)中也可以使用 if。</p>
 
@@ -287,35 +287,35 @@ Right side!
 <blockquote>
 <p>如果你使用的自定义模板加载器为异步的可查看 <a href="#asynceach"><code>asyncEach</code></a></p>
 </blockquote>
-<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">items</span> <span class="o">=</span> <span class="p">[{</span> <span class="nx">title</span><span class="o">:</span> <span class="s2">&quot;foo&quot;</span><span class="p">,</span> <span class="nx">id</span><span class="o">:</span> <span class="mi">1</span> <span class="p">},</span> <span class="p">{</span> <span class="nx">title</span><span class="o">:</span> <span class="s2">&quot;bar&quot;</span><span class="p">,</span> <span class="nx">id</span><span class="o">:</span> <span class="mi">2</span><span class="p">}];</span>
-</code></pre></div><div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="x">&lt;h1&gt;Posts&lt;/h1&gt;</span>
-<span class="x">&lt;ul&gt;</span>
-<span class="cp">{%</span> <span class="k">for</span> <span class="nv">item</span> <span class="k">in</span> <span class="nv">items</span> <span class="cp">%}</span><span class="x"></span>
-<span class="x">  &lt;li&gt;</span><span class="cp">{{</span> <span class="nv">item.title</span> <span class="cp">}}</span><span class="x">&lt;/li&gt;</span>
-<span class="cp">{%</span> <span class="k">else</span> <span class="cp">%}</span><span class="x"></span>
-<span class="x">  &lt;li&gt;This would display if the &#39;item&#39; collection were empty&lt;/li&gt;</span>
-<span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span><span class="x"></span>
-<span class="x">&lt;/ul&gt;</span>
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">items</span> <span class="o">=</span> <span class="p">[{</span> <span class="na">title</span><span class="p">:</span> <span class="s2">"foo"</span><span class="p">,</span> <span class="na">id</span><span class="p">:</span> <span class="mi">1</span> <span class="p">},</span> <span class="p">{</span> <span class="na">title</span><span class="p">:</span> <span class="s2">"bar"</span><span class="p">,</span> <span class="na">id</span><span class="p">:</span> <span class="mi">2</span><span class="p">}];</span>
+</code></pre></div><div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="nt">&lt;h1&gt;</span>Posts<span class="nt">&lt;/h1&gt;</span>
+<span class="nt">&lt;ul&gt;</span>
+<span class="cp">{%</span> <span class="k">for</span> <span class="nv">item</span> <span class="ow">in</span> <span class="nv">items</span> <span class="cp">%}</span>
+  <span class="nt">&lt;li&gt;</span><span class="cp">{{</span> <span class="nv">item.title</span> <span class="cp">}}</span><span class="nt">&lt;/li&gt;</span>
+<span class="cp">{%</span> <span class="k">else</span> <span class="cp">%}</span>
+  <span class="nt">&lt;li&gt;</span>This would display if the 'item' collection were empty<span class="nt">&lt;/li&gt;</span>
+<span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span>
+<span class="nt">&lt;/ul&gt;</span>
 </code></pre></div>
 <p>上面的示例通过使用<code>items</code>数组中的每一项的<code>title</code>属性显示了所有文章的标题。如果<code>items</code>数组是空数组的话则会渲染<code>else</code>语句中的内容。</p>
 
 <p>你还可以遍历对象：</p>
 <div class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">food</span> <span class="o">=</span> <span class="p">{</span>
-  <span class="s1">&#39;ketchup&#39;</span><span class="o">:</span> <span class="s1">&#39;5 tbsp&#39;</span><span class="p">,</span>
-  <span class="s1">&#39;mustard&#39;</span><span class="o">:</span> <span class="s1">&#39;1 tbsp&#39;</span><span class="p">,</span>
-  <span class="s1">&#39;pickle&#39;</span><span class="o">:</span> <span class="s1">&#39;0 tbsp&#39;</span>
+  <span class="s1">'ketchup'</span><span class="p">:</span> <span class="s1">'5 tbsp'</span><span class="p">,</span>
+  <span class="s1">'mustard'</span><span class="p">:</span> <span class="s1">'1 tbsp'</span><span class="p">,</span>
+  <span class="s1">'pickle'</span><span class="p">:</span> <span class="s1">'0 tbsp'</span>
 <span class="p">};</span>
-</code></pre></div><div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">for</span> <span class="nv">ingredient</span><span class="o">,</span> <span class="nv">amount</span> <span class="k">in</span> <span class="nv">food</span> <span class="cp">%}</span><span class="x"></span>
-<span class="x">  Use </span><span class="cp">{{</span> <span class="nv">amount</span> <span class="cp">}}</span><span class="x"> of </span><span class="cp">{{</span> <span class="nv">ingredient</span> <span class="cp">}}</span><span class="x"></span>
-<span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span><span class="x"></span>
+</code></pre></div><div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">for</span> <span class="nv">ingredient</span><span class="p">,</span> <span class="nv">amount</span> <span class="ow">in</span> <span class="nv">food</span> <span class="cp">%}</span>
+  Use <span class="cp">{{</span> <span class="nv">amount</span> <span class="cp">}}</span> of <span class="cp">{{</span> <span class="nv">ingredient</span> <span class="cp">}}</span>
+<span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span>
 </code></pre></div>
 <p><a href="http://jinja.pocoo.org/docs/templates/#dictsort"><code>dictsort</code></a> 过滤器可将对象排序 (<em>new in 0.1.8</em>)</p>
 
 <p>除此之外，nunjucks 会将数组解开，数组内的值对应到变量 (<em>new in 0.1.8</em>)</p>
 <div class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">points</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span> <span class="p">[</span><span class="mi">12</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">14</span><span class="p">]];</span>
-</code></pre></div><div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">for</span> <span class="nv">x</span><span class="o">,</span> <span class="nv">y</span><span class="o">,</span> <span class="nv">z</span> <span class="k">in</span> <span class="nv">points</span> <span class="cp">%}</span><span class="x"></span>
-<span class="x">  Point: </span><span class="cp">{{</span> <span class="nv">x</span> <span class="cp">}}</span><span class="x">, </span><span class="cp">{{</span> <span class="nv">y</span> <span class="cp">}}</span><span class="x">, </span><span class="cp">{{</span> <span class="nv">z</span> <span class="cp">}}</span><span class="x"></span>
-<span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span><span class="x"></span>
+</code></pre></div><div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">for</span> <span class="nv">x</span><span class="p">,</span> <span class="nv">y</span><span class="p">,</span> <span class="nv">z</span> <span class="ow">in</span> <span class="nv">points</span> <span class="cp">%}</span>
+  Point: <span class="cp">{{</span> <span class="nv">x</span> <span class="cp">}}</span>, <span class="cp">{{</span> <span class="nv">y</span> <span class="cp">}}</span>, <span class="cp">{{</span> <span class="nv">z</span> <span class="cp">}}</span>
+<span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span>
 </code></pre></div>
 <p>在循环中可获取一些特殊的变量</p>
 
@@ -342,12 +342,12 @@ Right side!
 <p>编译时 nunjuck 不用关心模板是如何加载的，所以无法决定 <code>include</code> 是同步或异步。这也是为什么nunjucks无法自动将普通的循环语句转换成异步循环语句的原因，所以如果你要使用异步模板加载器的话，就需要使用 <code>asyncEach</code>。</p>
 <div class="highlight"><pre><code class="language-js" data-lang="js"><span class="c1">// If you are using a custom loader that is async, you need asyncEach</span>
 <span class="kd">var</span> <span class="nx">env</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">Environment</span><span class="p">(</span><span class="nx">AsyncLoaderFromDatabase</span><span class="p">,</span> <span class="nx">opts</span><span class="p">);</span>
-</code></pre></div><div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="x">&lt;h1&gt;Posts&lt;/h1&gt;</span>
-<span class="x">&lt;ul&gt;</span>
-<span class="cp">{%</span> <span class="k">asyncEach</span> <span class="nv">item</span> <span class="k">in</span> <span class="nv">items</span> <span class="cp">%}</span><span class="x"></span>
-<span class="x">  </span><span class="cp">{%</span> <span class="k">include</span> <span class="s2">&quot;item-template.html&quot;</span> <span class="cp">%}</span><span class="x"></span>
-<span class="cp">{%</span> <span class="k">endeach</span> <span class="cp">%}</span><span class="x"></span>
-<span class="x">&lt;/ul&gt;</span>
+</code></pre></div><div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="nt">&lt;h1&gt;</span>Posts<span class="nt">&lt;/h1&gt;</span>
+<span class="nt">&lt;ul&gt;</span>
+<span class="cp">{%</span> <span class="nv">asyncEach</span> <span class="nv">item</span> <span class="ow">in</span> <span class="nv">items</span> <span class="cp">%}</span>
+  <span class="cp">{%</span> <span class="k">include</span> <span class="s2">"item-template.html"</span> <span class="cp">%}</span>
+<span class="cp">{%</span> <span class="nv">endeach</span> <span class="cp">%}</span>
+<span class="nt">&lt;/ul&gt;</span>
 </code></pre></div>
 <h3 id="asyncall">asyncAll</h3>
 
@@ -358,28 +358,28 @@ Right side!
 <p><code>asyncAll</code> 和 <code>asyncEach</code> 类似，但 <code>asyncAll</code> 会并行的执行，并且每项的顺序仍然会保留。除非使用异步的过滤器、扩展或加载器，否则不要使用。</p>
 
 <p>如果你写了一个 <code>lookup</code> 的过滤器用来从数据库获取一些文本，使用 <code>asyncAll</code> 可以并行渲染。</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="x">&lt;h1&gt;Posts&lt;/h1&gt;</span>
-<span class="x">&lt;ul&gt;</span>
-<span class="cp">{%</span> <span class="k">asyncAll</span> <span class="nv">item</span> <span class="k">in</span> <span class="nv">items</span> <span class="cp">%}</span><span class="x"></span>
-<span class="x">  &lt;li&gt;</span><span class="cp">{{</span> <span class="nv">item.id</span> <span class="o">|</span> <span class="nf">lookup</span> <span class="cp">}}</span><span class="x">&lt;/li&gt;</span>
-<span class="cp">{%</span> <span class="k">endall</span> <span class="cp">%}</span><span class="x"></span>
-<span class="x">&lt;/ul&gt;</span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="nt">&lt;h1&gt;</span>Posts<span class="nt">&lt;/h1&gt;</span>
+<span class="nt">&lt;ul&gt;</span>
+<span class="cp">{%</span> <span class="nv">asyncAll</span> <span class="nv">item</span> <span class="ow">in</span> <span class="nv">items</span> <span class="cp">%}</span>
+  <span class="nt">&lt;li&gt;</span><span class="cp">{{</span> <span class="nv">item.id</span> <span class="err">|</span> <span class="nv">lookup</span> <span class="cp">}}</span><span class="nt">&lt;/li&gt;</span>
+<span class="cp">{%</span> <span class="nv">endall</span> <span class="cp">%}</span>
+<span class="nt">&lt;/ul&gt;</span>
 </code></pre></div>
 <p>如果 <code>lookup</code> 是一个异步的过滤器，那么可能会比较慢（如从磁盘获取些数据）。<code>asyncAll</code> 会减少执行的时间，他会并行执行所有的异步操作，当所有的操作完成后才会继续渲染页面。</p>
 
 <h3 id="macro">macro</h3>
 
 <p>宏 (<code>macro</code>) 可以定义可复用的内容，类似与编程语言中的函数，看下面的示例：</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">macro</span> <span class="nv">field</span><span class="o">(</span><span class="nv">name</span><span class="o">,</span> <span class="nv">value</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="o">,</span> <span class="nv">type</span><span class="o">=</span><span class="s1">&#39;text&#39;</span><span class="o">)</span> <span class="cp">%}</span><span class="x"></span>
-<span class="x">&lt;div class=&quot;field&quot;&gt;</span>
-<span class="x">  &lt;input type=&quot;</span><span class="cp">{{</span> <span class="nv">type</span> <span class="cp">}}</span><span class="x">&quot; name=&quot;</span><span class="cp">{{</span> <span class="nv">name</span> <span class="cp">}}</span><span class="x">&quot;</span>
-<span class="x">         value=&quot;</span><span class="cp">{{</span> <span class="nv">value</span> <span class="o">|</span> <span class="nf">escape</span> <span class="cp">}}</span><span class="x">&quot; /&gt;</span>
-<span class="x">&lt;/div&gt;</span>
-<span class="cp">{%</span> <span class="k">endmacro</span> <span class="cp">%}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">macro</span> <span class="nv">field</span><span class="p">(</span><span class="nv">name</span><span class="p">,</span> <span class="nv">value</span><span class="err">=</span><span class="s1">''</span><span class="p">,</span> <span class="nv">type</span><span class="err">=</span><span class="s1">'text'</span><span class="p">)</span> <span class="cp">%}</span>
+<span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"field"</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"</span><span class="cp">{{</span> <span class="nv">type</span> <span class="cp">}}</span><span class="s">"</span> <span class="na">name=</span><span class="s">"</span><span class="cp">{{</span> <span class="nv">name</span> <span class="cp">}}</span><span class="s">"</span>
+         <span class="na">value=</span><span class="s">"</span><span class="cp">{{</span> <span class="nv">value</span> <span class="err">|</span> <span class="nv">escape</span> <span class="cp">}}</span><span class="s">"</span> <span class="nt">/&gt;</span>
+<span class="nt">&lt;/div&gt;</span>
+<span class="cp">{%</span> <span class="k">endmacro</span> <span class="cp">%}</span>
 </code></pre></div>
 <p>现在 <code>field</code> 可以当作函数一样使用了：</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">field</span><span class="o">(</span><span class="s1">&#39;user&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
-<span class="cp">{{</span> <span class="nv">field</span><span class="o">(</span><span class="s1">&#39;pass&#39;</span><span class="o">,</span> <span class="nv">type</span><span class="o">=</span><span class="s1">&#39;password&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">field</span><span class="p">(</span><span class="s1">'user'</span><span class="p">)</span> <span class="cp">}}</span>
+<span class="cp">{{</span> <span class="nv">field</span><span class="p">(</span><span class="s1">'pass'</span><span class="p">,</span> <span class="nv">type</span><span class="err">=</span><span class="s1">'password'</span><span class="p">)</span> <span class="cp">}}</span>
 </code></pre></div>
 <p>支持<a href="#%E5%85%B3%E9%94%AE%E5%AD%97%E5%8F%82%E6%95%B0">关键字参数</a>，通过链接查看具体使用方式。</p>
 
@@ -390,14 +390,14 @@ Right side!
 <h3 id="set">set</h3>
 
 <p><code>set</code> 可以设置和修改变量。</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">username</span> <span class="cp">}}</span><span class="x"></span>
-<span class="cp">{%</span> <span class="k">set</span> <span class="nv">username</span> <span class="o">=</span> <span class="s2">&quot;joe&quot;</span> <span class="cp">%}</span><span class="x"></span>
-<span class="cp">{{</span> <span class="nv">username</span> <span class="cp">}}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">username</span> <span class="cp">}}</span>
+<span class="cp">{%</span> <span class="k">set</span> <span class="nv">username</span> <span class="err">=</span> <span class="s2">"joe"</span> <span class="cp">%}</span>
+<span class="cp">{{</span> <span class="nv">username</span> <span class="cp">}}</span>
 </code></pre></div>
 <p>如果 <code>username</code> 初始化的时候为 &quot;james&#39;, 最终将显示 &quot;james joe&quot;。</p>
 
 <p>可以设置新的变量，并一起赋值。</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">set</span> <span class="nv">x</span><span class="o">,</span> <span class="nv">y</span><span class="o">,</span> <span class="nv">z</span> <span class="o">=</span> <span class="m">5</span> <span class="cp">%}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">set</span> <span class="nv">x</span><span class="p">,</span> <span class="nv">y</span><span class="p">,</span> <span class="nv">z</span> <span class="err">=</span> <span class="nv">5</span> <span class="cp">%}</span>
 </code></pre></div>
 <p>如果在顶级作用域使用 <code>set</code>，将会改变全局的上下文中的值。如果只在某个作用域 (<code>for</code>、 <code>include</code> 或其他) 中使用，只会影响该作用域。</p>
 
@@ -406,60 +406,60 @@ Right side!
 <p>它的语法和标准的<code>set</code>语法相似，只不过你不需要用<code>=</code>。区块中从头到<code>{% endset %}</code>之间的内容都会被捕获，并作为值来使用。</p>
 
 <p>在某些情境下，你可以用这种语法来替代宏：</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">set</span> <span class="nv">standardModal</span> <span class="cp">%}</span><span class="x"></span>
-<span class="x">    </span><span class="cp">{%</span> <span class="k">include</span> <span class="s1">&#39;standardModalData.html&#39;</span> <span class="cp">%}</span><span class="x"></span>
-<span class="cp">{%</span> <span class="k">endset</span> <span class="cp">%}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">set</span> <span class="nv">standardModal</span> <span class="cp">%}</span>
+    <span class="cp">{%</span> <span class="k">include</span> <span class="s1">'standardModalData.html'</span> <span class="cp">%}</span>
+<span class="cp">{%</span> <span class="k">endset</span> <span class="cp">%}</span>
 
-<span class="x">&lt;div class=&quot;js-modal&quot; data-modal=&quot;</span><span class="cp">{{</span><span class="nv">standardModal</span> <span class="o">|</span> <span class="nf">e</span><span class="cp">}}</span><span class="x">&quot;&gt;</span>
+<span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"js-modal"</span> <span class="na">data-modal=</span><span class="s">"</span><span class="cp">{{</span><span class="nv">standardModal</span> <span class="err">|</span> <span class="nv">e</span><span class="cp">}}</span><span class="s">"</span><span class="nt">&gt;</span>
 </code></pre></div>
 <h3 id="extends">extends</h3>
 
 <p><code>extends</code> 用来指定模板继承，被指定的模板为父级模板，查看<a href="#%E6%A8%A1%E6%9D%BF%E7%BB%A7%E6%89%BF">模板继承</a>。</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">extends</span> <span class="s2">&quot;base.html&quot;</span> <span class="cp">%}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">extends</span> <span class="s2">"base.html"</span> <span class="cp">%}</span>
 </code></pre></div>
 <p>你可以将继承的模板设为一个变量，这样就可以动态指定继承的模板。这个变量既可以是个指向模板文件的字符串，也可以是个模板编译后所生成的对象(需要添加上下文环境)。因此你可以通过设置上下文变量，从而在渲染时动态地改变所要继承的模板。</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">extends</span> <span class="nv">parentTemplate</span> <span class="cp">%}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">extends</span> <span class="nv">parentTemplate</span> <span class="cp">%}</span>
 </code></pre></div>
 <p><code>extends</code>也可以接受任意表达式，只要它最终返回一个字符串或是模板所编译成的对象：</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">extends</span> <span class="nv">name</span> <span class="o">+</span> <span class="s2">&quot;.html&quot;</span> <span class="cp">%}</span><span class="x">`.</span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">extends</span> <span class="nv">name</span> <span class="o">+</span> <span class="s2">".html"</span> <span class="cp">%}</span>`.
 </code></pre></div>
 <h3 id="block">block</h3>
 
 <p>区块(<code>block</code>) 定义了模板片段并标识一个名字，在模板继承中使用。父级模板可指定一个区块，子模板覆盖这个区块，查看<a href="#%E6%A8%A1%E6%9D%BF%E7%BB%A7%E6%89%BF">模板继承</a>。</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">block</span> <span class="nv">css</span> <span class="cp">%}</span><span class="x"></span>
-<span class="x">&lt;link rel=&quot;stylesheet&quot; href=&quot;app.css&quot; /&gt;</span>
-<span class="cp">{%</span> <span class="k">endblock</span> <span class="cp">%}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">block</span> <span class="nv">css</span> <span class="cp">%}</span>
+<span class="nt">&lt;link</span> <span class="na">rel=</span><span class="s">"stylesheet"</span> <span class="na">href=</span><span class="s">"app.css"</span> <span class="nt">/&gt;</span>
+<span class="cp">{%</span> <span class="k">endblock</span> <span class="cp">%}</span>
 </code></pre></div>
 <p>可以在循环中定义区块</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">for</span> <span class="nv">item</span> <span class="k">in</span> <span class="nv">items</span> <span class="cp">%}</span><span class="x"></span>
-<span class="cp">{%</span> <span class="k">block</span> <span class="nv">item</span> <span class="cp">%}{{</span> <span class="nv">item</span> <span class="cp">}}{%</span> <span class="k">endblock</span> <span class="cp">%}</span><span class="x"></span>
-<span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">for</span> <span class="nv">item</span> <span class="ow">in</span> <span class="nv">items</span> <span class="cp">%}</span>
+<span class="cp">{%</span> <span class="k">block</span> <span class="nv">item</span> <span class="cp">%}{{</span> <span class="nv">item</span> <span class="cp">}}{%</span> <span class="k">endblock</span> <span class="cp">%}</span>
+<span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span>
 </code></pre></div>
 <p>子模板可以覆盖 <code>item</code> 区块并改变里面的内容。</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">extends</span> <span class="s2">&quot;item.html&quot;</span> <span class="cp">%}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">extends</span> <span class="s2">"item.html"</span> <span class="cp">%}</span>
 
-<span class="cp">{%</span> <span class="k">block</span> <span class="nv">item</span> <span class="cp">%}</span><span class="x"></span>
-<span class="x">The name of the item is: </span><span class="cp">{{</span> <span class="nv">item.name</span> <span class="cp">}}</span><span class="x"></span>
-<span class="cp">{%</span> <span class="k">endblock</span> <span class="cp">%}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">block</span> <span class="nv">item</span> <span class="cp">%}</span>
+The name of the item is: <span class="cp">{{</span> <span class="nv">item.name</span> <span class="cp">}}</span>
+<span class="cp">{%</span> <span class="k">endblock</span> <span class="cp">%}</span>
 </code></pre></div>
 <p>在区块中，你可以调用特殊的<code>super</code>函数。它会渲染父级区块中的内容。具体请查看<a href="#super">super</a>。</p>
 
 <h3 id="include">include</h3>
 
 <p><code>include</code> 可引入其他的模板，可以在多模板之间共享一些小模板，如果某个模板已使用了继承那么 <code>include</code> 将会非常有用。</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">include</span> <span class="s2">&quot;item.html&quot;</span> <span class="cp">%}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">include</span> <span class="s2">"item.html"</span> <span class="cp">%}</span>
 </code></pre></div>
 <p>可在循环中引入模板</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">for</span> <span class="nv">item</span> <span class="k">in</span> <span class="nv">items</span> <span class="cp">%}</span><span class="x"></span>
-<span class="cp">{%</span> <span class="k">include</span> <span class="s2">&quot;item.html&quot;</span> <span class="cp">%}</span><span class="x"></span>
-<span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">for</span> <span class="nv">item</span> <span class="ow">in</span> <span class="nv">items</span> <span class="cp">%}</span>
+<span class="cp">{%</span> <span class="k">include</span> <span class="s2">"item.html"</span> <span class="cp">%}</span>
+<span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span>
 </code></pre></div>
 <p>这一点可以帮助我们把模板切分成更小的部分，从而使得在浏览器上，当我们需要改变页面时，我们可以渲染这些小部分的模板，而非一整个的大的模板。</p>
 
 <p><code>include</code> 可以接受任意表达式，只要它最终返回一个字符串或是模板所编译成的对象: <code>{% include name + &quot;.html&quot; as obj %}</code>.</p>
 
 <p>在某些情况下，我们可能希望在模板文件不存在时不要抛出异常。对于这类情况，我们可以使用<code>ignore missing</code>来略过这些异常：</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">include</span> <span class="s2">&quot;missing.html&quot;</span> <span class="k">ignore missing</span> <span class="cp">%}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">include</span> <span class="s2">"missing.html"</span> <span class="k">ignore</span> <span class="k">missing</span> <span class="cp">%}</span>
 </code></pre></div>
 <h3 id="import">import</h3>
 
@@ -468,119 +468,122 @@ Right side!
 <p>被 import 进来的模板没有当前模板的上下文，所以无法使用当前模板的变量，</p>
 
 <p>创建一个叫 <code>forms.html</code> 如下所示</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">macro</span> <span class="nv">field</span><span class="o">(</span><span class="nv">name</span><span class="o">,</span> <span class="nv">value</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="o">,</span> <span class="nv">type</span><span class="o">=</span><span class="s1">&#39;text&#39;</span><span class="o">)</span> <span class="cp">%}</span><span class="x"></span>
-<span class="x">&lt;div class=&quot;field&quot;&gt;</span>
-<span class="x">  &lt;input type=&quot;</span><span class="cp">{{</span> <span class="nv">type</span> <span class="cp">}}</span><span class="x">&quot; name=&quot;</span><span class="cp">{{</span> <span class="nv">name</span> <span class="cp">}}</span><span class="x">&quot;</span>
-<span class="x">         value=&quot;</span><span class="cp">{{</span> <span class="nv">value</span> <span class="o">|</span> <span class="nf">escape</span> <span class="cp">}}</span><span class="x">&quot; /&gt;</span>
-<span class="x">&lt;/div&gt;</span>
-<span class="cp">{%</span> <span class="k">endmacro</span> <span class="cp">%}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">macro</span> <span class="nv">field</span><span class="p">(</span><span class="nv">name</span><span class="p">,</span> <span class="nv">value</span><span class="err">=</span><span class="s1">''</span><span class="p">,</span> <span class="nv">type</span><span class="err">=</span><span class="s1">'text'</span><span class="p">)</span> <span class="cp">%}</span>
+<span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"field"</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"</span><span class="cp">{{</span> <span class="nv">type</span> <span class="cp">}}</span><span class="s">"</span> <span class="na">name=</span><span class="s">"</span><span class="cp">{{</span> <span class="nv">name</span> <span class="cp">}}</span><span class="s">"</span>
+         <span class="na">value=</span><span class="s">"</span><span class="cp">{{</span> <span class="nv">value</span> <span class="err">|</span> <span class="nv">escape</span> <span class="cp">}}</span><span class="s">"</span> <span class="nt">/&gt;</span>
+<span class="nt">&lt;/div&gt;</span>
+<span class="cp">{%</span> <span class="k">endmacro</span> <span class="cp">%}</span>
 
-<span class="cp">{%</span> <span class="k">macro</span> <span class="nv">label</span><span class="o">(</span><span class="nv">text</span><span class="o">)</span> <span class="cp">%}</span><span class="x"></span>
-<span class="x">&lt;div&gt;</span>
-<span class="x">  &lt;label&gt;</span><span class="cp">{{</span> <span class="nv">text</span> <span class="cp">}}</span><span class="x">&lt;/label&gt;</span>
-<span class="x">&lt;/div&gt;</span>
-<span class="cp">{%</span> <span class="k">endmacro</span> <span class="cp">%}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">macro</span> <span class="nv">label</span><span class="p">(</span><span class="nv">text</span><span class="p">)</span> <span class="cp">%}</span>
+<span class="nt">&lt;div&gt;</span>
+  <span class="nt">&lt;label&gt;</span><span class="cp">{{</span> <span class="nv">text</span> <span class="cp">}}</span><span class="nt">&lt;/label&gt;</span>
+<span class="nt">&lt;/div&gt;</span>
+<span class="cp">{%</span> <span class="k">endmacro</span> <span class="cp">%}</span>
 </code></pre></div>
 <p>我们可以 import 这个模板并将模板的输出绑定到变量 <code>forms</code> 上，然后就可以使用这个变量了：</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">import</span> <span class="s2">&quot;forms.html&quot;</span> <span class="k">as</span> <span class="nv">forms</span> <span class="cp">%}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">import</span> <span class="s2">"forms.html"</span> <span class="k">as</span> <span class="nv">forms</span> <span class="cp">%}</span>
 
-<span class="cp">{{</span> <span class="nv">forms.label</span><span class="o">(</span><span class="s1">&#39;Username&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
-<span class="cp">{{</span> <span class="nv">forms.input</span><span class="o">(</span><span class="s1">&#39;user&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
-<span class="cp">{{</span> <span class="nv">forms.label</span><span class="o">(</span><span class="s1">&#39;Password&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
-<span class="cp">{{</span> <span class="nv">forms.input</span><span class="o">(</span><span class="s1">&#39;pass&#39;</span><span class="o">,</span> <span class="nv">type</span><span class="o">=</span><span class="s1">&#39;password&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
+<span class="cp">{{</span> <span class="nv">forms.label</span><span class="p">(</span><span class="s1">'Username'</span><span class="p">)</span> <span class="cp">}}</span>
+<span class="cp">{{</span> <span class="nv">forms.input</span><span class="p">(</span><span class="s1">'user'</span><span class="p">)</span> <span class="cp">}}</span>
+<span class="cp">{{</span> <span class="nv">forms.label</span><span class="p">(</span><span class="s1">'Password'</span><span class="p">)</span> <span class="cp">}}</span>
+<span class="cp">{{</span> <span class="nv">forms.input</span><span class="p">(</span><span class="s1">'pass'</span><span class="p">,</span> <span class="nv">type</span><span class="err">=</span><span class="s1">'password'</span><span class="p">)</span> <span class="cp">}}</span>
 </code></pre></div>
 <p>也可以使用 <code>from import</code> 从模板中 import 指定的值到当前的命名空间：</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">from</span> <span class="s2">&quot;forms.html&quot;</span> <span class="k">import</span> <span class="nv">input</span><span class="o">,</span> <span class="nv">label</span> <span class="k">as</span> <span class="nv">description</span> <span class="cp">%}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">from</span> <span class="s2">"forms.html"</span> <span class="k">import</span> <span class="nv">input</span><span class="p">,</span> <span class="nv">label</span> <span class="k">as</span> <span class="nv">description</span> <span class="cp">%}</span>
 
-<span class="cp">{{</span> <span class="nv">description</span><span class="o">(</span><span class="s1">&#39;Username&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
-<span class="cp">{{</span> <span class="nv">input</span><span class="o">(</span><span class="s1">&#39;user&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
-<span class="cp">{{</span> <span class="nv">description</span><span class="o">(</span><span class="s1">&#39;Password&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
-<span class="cp">{{</span> <span class="nv">input</span><span class="o">(</span><span class="s1">&#39;pass&#39;</span><span class="o">,</span> <span class="nv">type</span><span class="o">=</span><span class="s1">&#39;password&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
+<span class="cp">{{</span> <span class="nv">description</span><span class="p">(</span><span class="s1">'Username'</span><span class="p">)</span> <span class="cp">}}</span>
+<span class="cp">{{</span> <span class="nv">input</span><span class="p">(</span><span class="s1">'user'</span><span class="p">)</span> <span class="cp">}}</span>
+<span class="cp">{{</span> <span class="nv">description</span><span class="p">(</span><span class="s1">'Password'</span><span class="p">)</span> <span class="cp">}}</span>
+<span class="cp">{{</span> <span class="nv">input</span><span class="p">(</span><span class="s1">'pass'</span><span class="p">,</span> <span class="nv">type</span><span class="err">=</span><span class="s1">'password'</span><span class="p">)</span> <span class="cp">}}</span>
 </code></pre></div>
 <p><code>import</code> 可以接受任意表达式，只要它最终返回一个字符串或是模板所编译成的对象: <code>{% import name + &quot;.html&quot; as obj %}</code>.</p>
 
 <h3 id="raw">raw</h3>
 
 <p>如果你想输出一些 nunjucks 特殊的标签 (如 <code>{{</code>)，可以使用 <code>raw</code> 将所有的内容输出为纯文本。</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">raw</span> <span class="cp">%}</span><span class="x"></span>
-<span class="x">  this will </span><span class="cp">{{</span> <span class="k">not</span> <span class="nv">be</span> <span class="nv">processed</span> <span class="cp">}}</span><span class="x"></span>
-<span class="x">{％ endraw %}</span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span><span class="err">`</span><span class="p">)</span><span class="err">，可以使用</span> <span class="err">`</span><span class="nv">raw</span><span class="err">`</span> <span class="err">将所有的内容输出为纯文本。</span>
+
+<span class="err">```</span><span class="nv">jinja</span>
+<span class="err">{%</span> <span class="nv">raw</span> <span class="cp">%}</span>
+  this will <span class="cp">{{</span> <span class="nv">not</span> <span class="nv">be</span> <span class="nv">processed</span> <span class="cp">}}</span>
+{％ endraw %}
 </code></pre></div>
 <h3 id="filter">filter</h3>
 
 <p><code>filter</code>区块允许我们使用区块中的内容来调用过滤器。不同于使用<code>|</code>语法，它会将区块渲染出的内容传递给过滤器。</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">filter</span> <span class="nf">title</span> <span class="cp">%}</span><span class="x"></span>
-<span class="x">may the force be with you</span>
-<span class="cp">{%</span> <span class="k">endfilter</span> <span class="cp">%}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">filter</span> <span class="nv">title</span> <span class="cp">%}</span>
+may the force be with you
+<span class="cp">{%</span> <span class="k">endfilter</span> <span class="cp">%}</span>
 
-<span class="cp">{%</span> <span class="k">filter</span> <span class="nf">replace</span><span class="o">(</span><span class="s2">&quot;force&quot;</span><span class="o">,</span> <span class="s2">&quot;forth&quot;</span><span class="o">)</span> <span class="cp">%}</span><span class="x"></span>
-<span class="x">may the force be with you</span>
-<span class="cp">{%</span> <span class="k">endfilter</span> <span class="cp">%}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">filter</span> <span class="nv">replace</span><span class="p">(</span><span class="s2">"force"</span><span class="p">,</span> <span class="s2">"forth"</span><span class="p">)</span> <span class="cp">%}</span>
+may the force be with you
+<span class="cp">{%</span> <span class="k">endfilter</span> <span class="cp">%}</span>
 </code></pre></div>
 <p>切记：你不能在这些区块中进行任何异步操作。</p>
 
 <h3 id="call">call</h3>
 
 <p><code>call</code>区块允许你使用标签之间的内容来调用一个宏。这在你需要给宏传入大量内容时是十分有用的。在宏中，你可以通过<code>caller()</code>来获取这些内容。</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">macro</span> <span class="nv">add</span><span class="o">(</span><span class="nv">x</span><span class="o">,</span> <span class="nv">y</span><span class="o">)</span> <span class="cp">%}</span><span class="x"></span>
-<span class="cp">{{</span> <span class="nv">caller</span><span class="o">()</span> <span class="cp">}}</span><span class="x">: </span><span class="cp">{{</span> <span class="nv">x</span> <span class="o">+</span> <span class="nv">y</span> <span class="cp">}}</span><span class="x"></span>
-<span class="cp">{%</span> <span class="k">endmacro</span><span class="cp">%}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">macro</span> <span class="nv">add</span><span class="p">(</span><span class="nv">x</span><span class="p">,</span> <span class="nv">y</span><span class="p">)</span> <span class="cp">%}</span>
+<span class="cp">{{</span> <span class="nv">caller</span><span class="p">()</span> <span class="cp">}}</span>: <span class="cp">{{</span> <span class="nv">x</span> <span class="o">+</span> <span class="nv">y</span> <span class="cp">}}</span>
+<span class="cp">{%</span> <span class="k">endmacro</span><span class="cp">%}</span>
 
-<span class="cp">{%</span> <span class="k">call</span> <span class="nv">add</span><span class="o">(</span><span class="m">1</span><span class="o">,</span> <span class="m">2</span><span class="o">)</span> -<span class="cp">%}</span><span class="x"></span>
-<span class="x">The result is</span>
-<span class="cp">{%</span>- <span class="k">endcall</span> <span class="cp">%}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">call</span> <span class="nv">add</span><span class="p">(</span><span class="nv">1</span><span class="p">,</span> <span class="nv">2</span><span class="p">)</span> <span class="o">-</span><span class="cp">%}</span>
+The result is
+<span class="cp">{%</span><span class="o">-</span> <span class="k">endcall</span> <span class="cp">%}</span>
 </code></pre></div>
 <p>上面的例子将会输出&quot;The result is: 3&quot;。</p>
 
-<h2 id="关键字参数">关键字参数</h2>
+<h2 id=">关键字参数</h2>
 
 <p>jinja2 使用 Python 的关键字参数，支持函数，过滤器和宏。Nunjucks 会通过一个调用转换 (calling convention) 来支持。</p>
 
 <p>关键字参数如下：</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">foo</span><span class="o">(</span><span class="m">1</span><span class="o">,</span> <span class="m">2</span><span class="o">,</span> <span class="nv">bar</span><span class="o">=</span><span class="m">3</span><span class="o">,</span> <span class="nv">baz</span><span class="o">=</span><span class="m">4</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">foo</span><span class="p">(</span><span class="nv">1</span><span class="p">,</span> <span class="nv">2</span><span class="p">,</span> <span class="nv">bar</span><span class="err">=</span><span class="nv">3</span><span class="p">,</span> <span class="nv">baz</span><span class="err">=</span><span class="nv">4</span><span class="p">)</span> <span class="cp">}}</span>
 </code></pre></div>
 <p><code>bar</code> 和 <code>baz</code> 为关键字参数，Nunjucks 将他们转换成一个对象作为最后一个参数传入，等价于 javascript 的如下调用：</p>
-<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">foo</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="p">{</span> <span class="nx">bar</span><span class="o">:</span> <span class="mi">3</span><span class="p">,</span> <span class="nx">baz</span><span class="o">:</span> <span class="mi">4</span><span class="p">})</span>
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">foo</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="p">{</span> <span class="na">bar</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="na">baz</span><span class="p">:</span> <span class="mi">4</span><span class="p">})</span>
 </code></pre></div>
 <p>因为这使一个标准的调用转换，所以适用于所有的符合预期的函数和过滤器。查看 <a href="api#Keyword-Arguments">API 章节</a>获得更多信息。</p>
 
 <p>定义宏的时候也可以使用关键字参数，定义参数值时可设置默认值。Nunjucks 会自动将关键字参数与宏里定义的值做匹配。</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">macro</span> <span class="nv">foo</span><span class="o">(</span><span class="nv">x</span><span class="o">,</span> <span class="nv">y</span><span class="o">,</span> <span class="nv">z</span><span class="o">=</span><span class="m">5</span><span class="o">,</span> <span class="nv">w</span><span class="o">=</span><span class="m">6</span><span class="o">)</span> <span class="cp">%}</span><span class="x"></span>
-<span class="cp">{{</span> <span class="nv">x</span> <span class="cp">}}</span><span class="x">, </span><span class="cp">{{</span> <span class="nv">y</span> <span class="cp">}}</span><span class="x">, </span><span class="cp">{{</span> <span class="nv">z</span> <span class="cp">}}</span><span class="x">, </span><span class="cp">{{</span> <span class="nv">w</span><span class="cp">}}</span><span class="x"></span>
-<span class="cp">{%</span> <span class="k">endmacro</span> <span class="cp">%}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">macro</span> <span class="nv">foo</span><span class="p">(</span><span class="nv">x</span><span class="p">,</span> <span class="nv">y</span><span class="p">,</span> <span class="nv">z</span><span class="err">=</span><span class="nv">5</span><span class="p">,</span> <span class="nv">w</span><span class="err">=</span><span class="nv">6</span><span class="p">)</span> <span class="cp">%}</span>
+<span class="cp">{{</span> <span class="nv">x</span> <span class="cp">}}</span>, <span class="cp">{{</span> <span class="nv">y</span> <span class="cp">}}</span>, <span class="cp">{{</span> <span class="nv">z</span> <span class="cp">}}</span>, <span class="cp">{{</span> <span class="nv">w</span><span class="cp">}}</span>
+<span class="cp">{%</span> <span class="k">endmacro</span> <span class="cp">%}</span>
 
-<span class="cp">{{</span> <span class="nv">foo</span><span class="o">(</span><span class="m">1</span><span class="o">,</span> <span class="m">2</span><span class="o">)</span> <span class="cp">}}</span><span class="x">        -&gt; 1, 2, 5, 6</span>
-<span class="cp">{{</span> <span class="nv">foo</span><span class="o">(</span><span class="m">1</span><span class="o">,</span> <span class="m">2</span><span class="o">,</span> <span class="nv">w</span><span class="o">=</span><span class="m">10</span><span class="o">)</span> <span class="cp">}}</span><span class="x">  -&gt; 1, 2, 5, 10</span>
+<span class="cp">{{</span> <span class="nv">foo</span><span class="p">(</span><span class="nv">1</span><span class="p">,</span> <span class="nv">2</span><span class="p">)</span> <span class="cp">}}</span>        -&gt; 1, 2, 5, 6
+<span class="cp">{{</span> <span class="nv">foo</span><span class="p">(</span><span class="nv">1</span><span class="p">,</span> <span class="nv">2</span><span class="p">,</span> <span class="nv">w</span><span class="err">=</span><span class="nv">10</span><span class="p">)</span> <span class="cp">}}</span>  -&gt; 1, 2, 5, 10
 </code></pre></div>
 <p>在宏中还可以混合使用位置参数 (positional arguments) 和关键字参数。如示例，你可以将位置参数用作关键字参数：</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">foo</span><span class="o">(</span><span class="m">20</span><span class="o">,</span> <span class="nv">y</span><span class="o">=</span><span class="m">21</span><span class="o">)</span> <span class="cp">}}</span><span class="x">     -&gt; 20, 21, 5, 6</span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">foo</span><span class="p">(</span><span class="nv">20</span><span class="p">,</span> <span class="nv">y</span><span class="err">=</span><span class="nv">21</span><span class="p">)</span> <span class="cp">}}</span>     -&gt; 20, 21, 5, 6
 </code></pre></div>
 <p>你还可以用位置参数来替换关键字参数：</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">foo</span><span class="o">(</span><span class="m">5</span><span class="o">,</span> <span class="m">6</span><span class="o">,</span> <span class="m">7</span><span class="o">,</span> <span class="m">8</span><span class="o">)</span> <span class="cp">}}</span><span class="x">   -&gt; 5, 6, 7, 8</span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">foo</span><span class="p">(</span><span class="nv">5</span><span class="p">,</span> <span class="nv">6</span><span class="p">,</span> <span class="nv">7</span><span class="p">,</span> <span class="nv">8</span><span class="p">)</span> <span class="cp">}}</span>   -&gt; 5, 6, 7, 8
 </code></pre></div>
 <p>如下示例，你可以跳过 (&quot;skip&quot;) 位置参数：</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">foo</span><span class="o">(</span><span class="m">8</span><span class="o">,</span> <span class="nv">z</span><span class="o">=</span><span class="m">7</span><span class="o">)</span> <span class="cp">}}</span><span class="x">      -&gt; 8, , 7, 6</span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">foo</span><span class="p">(</span><span class="nv">8</span><span class="p">,</span> <span class="nv">z</span><span class="err">=</span><span class="nv">7</span><span class="p">)</span> <span class="cp">}}</span>      -&gt; 8, , 7, 6
 </code></pre></div>
-<h2 id="注释">注释</h2>
+<h2 id=">注释</h2>
 
 <p>你可以使用 <code>{#</code> and <code>#}</code> 来写注释，渲染时将会去除所有的注释。</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="c">{# Loop through all the users #}</span><span class="x"></span>
-<span class="cp">{%</span> <span class="k">for</span> <span class="nv">user</span> <span class="k">in</span> <span class="nv">users</span> <span class="cp">%}</span><span class="x">...</span><span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="c">{# Loop through all the users #}</span>
+<span class="cp">{%</span> <span class="k">for</span> <span class="nv">user</span> <span class="ow">in</span> <span class="nv">users</span> <span class="cp">%}</span>...<span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span>
 </code></pre></div>
-<h2 id="空白字符控制">空白字符控制</h2>
+<h2 id=">空白字符控制</h2>
 
 <p><em>Introduced in v0.1.8</em></p>
 
 <p>模板在正常情况会将变量 (variable) 和标签区块 (tag blocks) 周围的空白字符完全输出。有时，你不想输出一些额外的空白字符，但代码又需要一些空白字符来显得整洁。</p>
 
 <p>你可以在开始和结束区块 (start or end block tag) 添加 (<code>-</code>) 来去除前面和后面的空白字符。</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">for</span> <span class="nv">i</span> <span class="k">in</span> <span class="o">[</span><span class="m">1</span><span class="o">,</span><span class="m">2</span><span class="o">,</span><span class="m">3</span><span class="o">,</span><span class="m">4</span><span class="o">,</span><span class="m">5</span><span class="o">]</span> -<span class="cp">%}</span><span class="x"></span>
-<span class="x">  </span><span class="cp">{{</span> <span class="nv">i</span> <span class="cp">}}</span><span class="x"></span>
-<span class="cp">{%</span>- <span class="k">endfor</span> <span class="cp">%}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">for</span> <span class="nv">i</span> <span class="ow">in</span> <span class="p">[</span><span class="nv">1</span><span class="p">,</span><span class="nv">2</span><span class="p">,</span><span class="nv">3</span><span class="p">,</span><span class="nv">4</span><span class="p">,</span><span class="nv">5</span><span class="p">]</span> <span class="o">-</span><span class="cp">%}</span>
+  <span class="cp">{{</span> <span class="nv">i</span> <span class="cp">}}</span>
+<span class="cp">{%</span><span class="o">-</span> <span class="k">endfor</span> <span class="cp">%}</span>
 </code></pre></div>
 <p>上面准确的输出为 &quot;12345&quot;，<code>-%}</code> 会去除标签右侧的空白字符，<code>{%-</code> 会去除标签之前的空白字符。</p>
 
-<h2 id="表达式">表达式</h2>
+<h2 id=">表达式</h2>
 
 <p>你可以使用和 javascript 一样的字面量。</p>
 
@@ -592,7 +595,7 @@ Right side!
 <li>Boolean: <code>true</code>, <code>false</code></li>
 </ul>
 
-<h3 id="运算-math">运算 (Math)</h3>
+<h3 id="math">运算 (Math)</h3>
 
 <p>Nunjucks 支持运算 (但尽量少用，把逻辑放在代码中)，可使用以下操作符：</p>
 
@@ -607,11 +610,11 @@ Right side!
 </ul>
 
 <p>可以如下使用：</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="m">2</span> <span class="o">+</span> <span class="m">3</span> <span class="cp">}}</span><span class="x">       (outputs 5)</span>
-<span class="cp">{{</span> <span class="m">10</span><span class="o">/</span><span class="m">5</span> <span class="cp">}}</span><span class="x">        (outputs 2)</span>
-<span class="cp">{{</span> <span class="nv">numItems</span><span class="o">*</span><span class="m">2</span> <span class="cp">}}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">2</span> <span class="o">+</span> <span class="nv">3</span> <span class="cp">}}</span>       (outputs 5)
+<span class="cp">{{</span> <span class="nv">10</span><span class="o">/</span><span class="nv">5</span> <span class="cp">}}</span>        (outputs 2)
+<span class="cp">{{</span> <span class="nv">numItems</span><span class="o">*</span><span class="nv">2</span> <span class="cp">}}</span>
 </code></pre></div>
-<h3 id="比较-comparisons">比较 (Comparisons)</h3>
+<h3 id="comparisons">比较 (Comparisons)</h3>
 
 <ul>
 <li><code>==</code></li>
@@ -623,8 +626,51 @@ Right side!
 </ul>
 
 <p>Examples:</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">if</span> <span class="nv">numUsers</span> <span class="o">&lt;</span> <span class="m">5</span> <span class="cp">%}</span><span class="x">...</span><span class="cp">{%</span> <span class="k">endif</span> <span class="cp">%}</span><span class="x"></span>
-<span class="cp">{%</span> <span class="k">if</span> <span class="nv">i</span> <span class="o">==</span> <span class="m">0</span> <span class="cp">%}</span><span class="x">...</span><span class="cp">{%</span> <span class="k">endif</span> <span class="cp">%}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span><span class="o">-</span><span class="err">`</span> <span class="err">会去除标签之前的空白字符。</span>
+
+<span class="err">##</span> <span class="err">表达式</span>
+
+<span class="err">你可以使用和</span> <span class="nv">javascript</span> <span class="err">一样的字面量。</span>
+
+<span class="o">*</span> <span class="nv">Strings</span><span class="err">:</span> <span class="err">`</span><span class="s2">"How are you?"</span><span class="err">`</span><span class="p">,</span> <span class="err">`</span><span class="s1">'How are you?'</span><span class="err">`</span>
+<span class="o">*</span> <span class="nv">Numbers</span><span class="err">:</span> <span class="err">`</span><span class="nv">40</span><span class="err">`</span><span class="p">,</span> <span class="err">`</span><span class="nv">30.123</span><span class="err">`</span>
+<span class="o">*</span> <span class="nv">Arrays</span><span class="err">:</span> <span class="err">`</span><span class="p">[</span><span class="nv">1</span><span class="p">,</span> <span class="nv">2</span><span class="p">,</span> <span class="s2">"array"</span><span class="p">]</span><span class="err">`</span>
+<span class="o">*</span> <span class="nv">Dicts</span><span class="err">:</span> <span class="err">`{</span> <span class="nv">one</span><span class="err">:</span> <span class="nv">1</span><span class="p">,</span> <span class="nv">two</span><span class="err">:</span> <span class="nv">2</span> <span class="err">}`</span>
+<span class="o">*</span> <span class="nv">Boolean</span><span class="err">:</span> <span class="err">`</span><span class="kp">true</span><span class="err">`</span><span class="p">,</span> <span class="err">`</span><span class="kp">false</span><span class="err">`</span>
+
+<span class="err">###</span> <span class="err">运算</span> <span class="p">(</span><span class="nv">Math</span><span class="p">)</span>
+
+<span class="nv">Nunjucks</span> <span class="err">支持运算</span> <span class="p">(</span><span class="err">但尽量少用，把逻辑放在代码中</span><span class="p">)</span><span class="err">，可使用以下操作符：</span>
+
+<span class="o">*</span> <span class="nv">Addition</span><span class="err">:</span> <span class="err">`</span><span class="o">+</span><span class="err">`</span>
+<span class="o">*</span> <span class="nv">Subtraction</span><span class="err">:</span> <span class="err">`</span><span class="o">-</span><span class="err">`</span>
+<span class="o">*</span> <span class="nv">Division</span><span class="err">:</span> <span class="err">`</span><span class="o">/</span><span class="err">`</span>
+<span class="o">*</span> <span class="nv">Division</span> <span class="ow">and</span> <span class="nv">integer</span> <span class="nv">truncation</span><span class="err">:</span> <span class="err">`</span><span class="o">//</span><span class="err">`</span>
+<span class="o">*</span> <span class="nv">Division</span> <span class="nv">remainder</span><span class="err">:</span> <span class="err">`%`</span>
+<span class="o">*</span> <span class="nv">Multiplication</span><span class="err">:</span> <span class="err">`</span><span class="o">*</span><span class="err">`</span>
+<span class="o">*</span> <span class="nv">Power</span><span class="err">:</span> <span class="err">`</span><span class="o">**</span><span class="err">`</span>
+
+<span class="err">可以如下使用：</span>
+
+<span class="err">```</span><span class="nv">jinja</span>
+<span class="err">{{</span> <span class="nv">2</span> <span class="o">+</span> <span class="nv">3</span> <span class="err">}}</span>       <span class="p">(</span><span class="nv">outputs</span> <span class="nv">5</span><span class="p">)</span>
+<span class="err">{{</span> <span class="nv">10</span><span class="o">/</span><span class="nv">5</span> <span class="err">}}</span>        <span class="p">(</span><span class="nv">outputs</span> <span class="nv">2</span><span class="p">)</span>
+<span class="err">{{</span> <span class="nv">numItems</span><span class="o">*</span><span class="nv">2</span> <span class="err">}}</span>
+</code></pre></div>
+<h3 id="comparisons">比较 (Comparisons)</h3>
+
+<ul>
+<li><code>==</code></li>
+<li><code>!=</code></li>
+<li><code>&gt;</code></li>
+<li><code>&gt;=</code></li>
+<li><code>&lt;</code></li>
+<li><code>&lt;=</code></li>
+</ul>
+
+<p>Examples:</p>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">if</span> <span class="nv">numUsers</span> <span class="o">&lt;</span> <span class="nv">5</span> <span class="cp">%}</span>...<span class="cp">{%</span> <span class="k">endif</span> <span class="cp">%}</span>
+<span class="cp">{%</span> <span class="k">if</span> <span class="nv">i</span> <span class="o">==</span> <span class="nv">0</span> <span class="cp">%}</span>...<span class="cp">{%</span> <span class="k">endif</span> <span class="cp">%}</span>
 </code></pre></div>
 <h3 id="logic">Logic</h3>
 
@@ -636,28 +682,28 @@ Right side!
 </ul>
 
 <p>Examples:</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">if</span> <span class="nv">users</span> <span class="k">and</span> <span class="nv">showUsers</span> <span class="cp">%}</span><span class="x">...</span><span class="cp">{%</span> <span class="k">endif</span> <span class="cp">%}</span><span class="x"></span>
-<span class="cp">{%</span> <span class="k">if</span> <span class="nv">i</span> <span class="o">==</span> <span class="m">0</span> <span class="k">and</span> <span class="k">not</span> <span class="nv">hideFirst</span> <span class="cp">%}</span><span class="x">...</span><span class="cp">{%</span> <span class="k">endif</span> <span class="cp">%}</span><span class="x"></span>
-<span class="cp">{%</span> <span class="k">if</span> <span class="o">(</span><span class="nv">x</span> <span class="o">&lt;</span> <span class="m">5</span> <span class="k">or</span> <span class="nv">y</span> <span class="o">&lt;</span> <span class="m">5</span><span class="o">)</span> <span class="k">and</span> <span class="nv">foo</span> <span class="cp">%}</span><span class="x">...</span><span class="cp">{%</span> <span class="k">endif</span> <span class="cp">%}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">if</span> <span class="nv">users</span> <span class="ow">and</span> <span class="nv">showUsers</span> <span class="cp">%}</span>...<span class="cp">{%</span> <span class="k">endif</span> <span class="cp">%}</span>
+<span class="cp">{%</span> <span class="k">if</span> <span class="nv">i</span> <span class="o">==</span> <span class="nv">0</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nv">hideFirst</span> <span class="cp">%}</span>...<span class="cp">{%</span> <span class="k">endif</span> <span class="cp">%}</span>
+<span class="cp">{%</span> <span class="k">if</span> <span class="p">(</span><span class="nv">x</span> <span class="o">&lt;</span> <span class="nv">5</span> <span class="ow">or</span> <span class="nv">y</span> <span class="o">&lt;</span> <span class="nv">5</span><span class="p">)</span> <span class="ow">and</span> <span class="nv">foo</span> <span class="cp">%}</span>...<span class="cp">{%</span> <span class="k">endif</span> <span class="cp">%}</span>
 </code></pre></div>
-<h3 id="if-表达式">If 表达式</h3>
+<h3 id="if">If 表达式</h3>
 
 <p>和 javascript 的三元运算符 (ternary operator) 一样，可使用 if 的内联表达式：</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="s2">&quot;true&quot;</span> <span class="k">if</span> <span class="nv">foo</span> <span class="k">else</span> <span class="s2">&quot;false&quot;</span> <span class="cp">}}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="s2">"true"</span> <span class="nv">if</span> <span class="nv">foo</span> <span class="nv">else</span> <span class="s2">"false"</span> <span class="cp">}}</span>
 </code></pre></div>
 <p>当 foo 为 true 的时候最终输出 &quot;true&quot; 否则为 &quot;false&quot;，对于获取默认值的时候非常有用：</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">baz</span><span class="o">(</span><span class="nv">foo</span> <span class="k">if</span> <span class="nv">foo</span> <span class="k">else</span> <span class="s2">&quot;default&quot;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">baz</span><span class="p">(</span><span class="nv">foo</span> <span class="nv">if</span> <span class="nv">foo</span> <span class="nv">else</span> <span class="s2">"default"</span><span class="p">)</span> <span class="cp">}}</span>
 </code></pre></div>
-<h3 id="函数调用-function-calls">函数调用 (Function Calls)</h3>
+<h3 id="function-calls">函数调用 (Function Calls)</h3>
 
 <p>如果你传入一个函数，则可以直接调用</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">foo</span><span class="o">(</span><span class="m">1</span><span class="o">,</span> <span class="m">2</span><span class="o">,</span> <span class="m">3</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">foo</span><span class="p">(</span><span class="nv">1</span><span class="p">,</span> <span class="nv">2</span><span class="p">,</span> <span class="nv">3</span><span class="p">)</span> <span class="cp">}}</span>
 </code></pre></div>
-<h3 id="正则表达式">正则表达式</h3>
+<h3 id=">正则表达式</h3>
 
 <p>你可以像在JavaScript中一样创建一个正则表达式:</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="o">/</span><span class="err">^</span><span class="nv">foo</span><span class="err">.</span><span class="o">*/</span> <span class="cp">}}</span><span class="x"></span>
-<span class="cp">{{</span> <span class="o">/</span><span class="nv">bar</span><span class="err">$</span><span class="o">/</span><span class="nv">g</span> <span class="cp">}}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="o">/</span><span class="err">^</span><span class="nv">foo.</span><span class="o">*/</span> <span class="cp">}}</span>
+<span class="cp">{{</span> <span class="o">/</span><span class="nv">bar</span><span class="err">$</span><span class="o">/</span><span class="nv">g</span> <span class="cp">}}</span>
 </code></pre></div>
 <p>正则表达式所支持的标志如下。查阅<a href="https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/RegExp">Regex on MDN</a>以获取更多信息。</p>
 
@@ -668,46 +714,46 @@ Right side!
 <li><code>y</code>: 粘性支持（sticky）</li>
 </ul>
 
-<h2 id="自动转义-autoescaping">自动转义 (Autoescaping)</h2>
+<h2 id="autoescaping">自动转义 (Autoescaping)</h2>
 
 <p>如果在环境变量中设置了 autoescaping，所有的输出都会自动转义，但可以使用 <code>safe</code> 过滤器，Nunjucks 就不会转义了。</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">foo</span> <span class="cp">}}</span><span class="x">           // &amp;lt;span%gt;</span>
-<span class="cp">{{</span> <span class="nv">foo</span> <span class="o">|</span> <span class="nf">safe</span> <span class="cp">}}</span><span class="x">    // &lt;span&gt;</span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">foo</span> <span class="cp">}}</span>           // <span class="ni">&amp;lt;</span>span%gt;
+<span class="cp">{{</span> <span class="nv">foo</span> <span class="err">|</span> <span class="nv">safe</span> <span class="cp">}}</span>    // <span class="nt">&lt;span&gt;</span>
 </code></pre></div>
 <p>如果未开启 autoescaping，所有的输出都会如实输出，但可以使用 <code>escape</code> 过滤器来转义。</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">foo</span> <span class="cp">}}</span><span class="x">           // &lt;span&gt;</span>
-<span class="cp">{{</span> <span class="nv">foo</span> <span class="o">|</span> <span class="nf">escape</span> <span class="cp">}}</span><span class="x">  // &amp;lt;span&amp;gt;</span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">foo</span> <span class="cp">}}</span>           // <span class="nt">&lt;span&gt;</span>
+<span class="cp">{{</span> <span class="nv">foo</span> <span class="err">|</span> <span class="nv">escape</span> <span class="cp">}}</span>  // <span class="ni">&amp;lt;</span>span<span class="ni">&amp;gt;</span>
 </code></pre></div>
-<h2 id="全局函数-global-functions">全局函数 (Global Functions)</h2>
+<h2 id="global-functions">全局函数 (Global Functions)</h2>
 
 <p>以下为一些内置的全局函数</p>
 
 <h3 id="range-start-stop-step">range([start], stop, [step])</h3>
 
 <p>如果你需要遍历固定范围的数字可以使用 <code>range</code>，<code>start</code> (默认为 0) 为起始数字，<code>stop</code> 为结束数字，<code>step</code> 为间隔 (默认为 1)。</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">for</span> <span class="nv">i</span> <span class="k">in</span> <span class="nv">range</span><span class="o">(</span><span class="m">0</span><span class="o">,</span> <span class="m">5</span><span class="o">)</span> -<span class="cp">%}</span><span class="x"></span>
-<span class="x">  </span><span class="cp">{{</span> <span class="nv">i</span> <span class="cp">}}</span><span class="x">,</span>
-<span class="cp">{%</span>- <span class="k">endfor</span> <span class="cp">%}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">for</span> <span class="nv">i</span> <span class="ow">in</span> <span class="nv">range</span><span class="p">(</span><span class="nv">0</span><span class="p">,</span> <span class="nv">5</span><span class="p">)</span> <span class="o">-</span><span class="cp">%}</span>
+  <span class="cp">{{</span> <span class="nv">i</span> <span class="cp">}}</span>,
+<span class="cp">{%</span><span class="o">-</span> <span class="k">endfor</span> <span class="cp">%}</span>
 </code></pre></div>
 <p>上面输出 <code>0,1,2,3,4</code>.</p>
 
 <h3 id="cycler-item1-item2-itemn">cycler(item1, item2, ...itemN)</h3>
 
 <p><code>cycler</code> 可以循环调用你指定的一系列的值。</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">set</span> <span class="nv">cls</span> <span class="o">=</span> <span class="nv">cycler</span><span class="o">(</span><span class="s2">&quot;odd&quot;</span><span class="o">,</span> <span class="s2">&quot;even&quot;</span><span class="o">)</span> <span class="cp">%}</span><span class="x"></span>
-<span class="cp">{%</span> <span class="k">for</span> <span class="nv">row</span> <span class="k">in</span> <span class="nv">rows</span> <span class="cp">%}</span><span class="x"></span>
-<span class="x">  &lt;div class=&quot;</span><span class="cp">{{</span> <span class="nv">cls.next</span><span class="o">()</span> <span class="cp">}}</span><span class="x">&quot;&gt;</span><span class="cp">{{</span> <span class="nv">row.name</span> <span class="cp">}}</span><span class="x">&lt;/div&gt;</span>
-<span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">set</span> <span class="nv">cls</span> <span class="err">=</span> <span class="nv">cycler</span><span class="p">(</span><span class="s2">"odd"</span><span class="p">,</span> <span class="s2">"even"</span><span class="p">)</span> <span class="cp">%}</span>
+<span class="cp">{%</span> <span class="k">for</span> <span class="nv">row</span> <span class="ow">in</span> <span class="nv">rows</span> <span class="cp">%}</span>
+  <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"</span><span class="cp">{{</span> <span class="nv">cls.next</span><span class="p">()</span> <span class="cp">}}</span><span class="s">"</span><span class="nt">&gt;</span><span class="cp">{{</span> <span class="nv">row.name</span> <span class="cp">}}</span><span class="nt">&lt;/div&gt;</span>
+<span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span>
 </code></pre></div>
 <p>上面的例子中奇数行的 class 为 &quot;odd&quot;，偶数行的 class 为 &quot;even&quot;。你可以使用<code>current</code>属性来获取当前项（在上面的例子中对应<code>cls.current</code>）。</p>
 
 <h3 id="joiner-separator">joiner([separator])</h3>
 
 <p>当合并多项的时候，希望在他们之间又分隔符 (像逗号)，但又不希望第一项也输出。<code>joiner</code> 将输出分割符 (默认为 &quot;,&quot;) 除了第一次调用。</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">set</span> <span class="nv">comma</span> <span class="o">=</span> <span class="nv">joiner</span><span class="o">()</span> <span class="cp">%}</span><span class="x"></span>
-<span class="cp">{%</span> <span class="k">for</span> <span class="nv">tag</span> <span class="k">in</span> <span class="nv">tags</span> -<span class="cp">%}</span><span class="x"></span>
-<span class="x">  </span><span class="cp">{{</span> <span class="nv">comma</span><span class="o">()</span> <span class="cp">}}</span><span class="x"> </span><span class="cp">{{</span> <span class="nv">tag</span> <span class="cp">}}</span><span class="x"></span>
-<span class="cp">{%</span>- <span class="k">endfor</span> <span class="cp">%}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">set</span> <span class="nv">comma</span> <span class="err">=</span> <span class="nv">joiner</span><span class="p">()</span> <span class="cp">%}</span>
+<span class="cp">{%</span> <span class="k">for</span> <span class="nv">tag</span> <span class="ow">in</span> <span class="nv">tags</span> <span class="o">-</span><span class="cp">%}</span>
+  <span class="cp">{{</span> <span class="nv">comma</span><span class="p">()</span> <span class="cp">}}</span> <span class="cp">{{</span> <span class="nv">tag</span> <span class="cp">}}</span>
+<span class="cp">{%</span><span class="o">-</span> <span class="k">endfor</span> <span class="cp">%}</span>
 </code></pre></div>
 <p>如果 <code>tags</code> 为 <code>[&quot;food&quot;, &quot;beer&quot;, &quot;dessert&quot;]</code>, 上面将输出 <code>food, beer, dessert</code>。</p>
 

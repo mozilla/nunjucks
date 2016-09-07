@@ -212,13 +212,13 @@ include recognition of the <code>.njk</code> extension.</p>
 
 <p>A variable looks up a value from the template context. If you wanted
 to simply display a variable, you would do:</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">username</span> <span class="cp">}}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">username</span> <span class="cp">}}</span>
 </code></pre></div>
 <p>This looks up <code>username</code> from the context and displays it. Variable
 names can have dots in them which lookup properties, just like
 javascript. You can also use the square bracket syntax.</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">foo.bar</span> <span class="cp">}}</span><span class="x"></span>
-<span class="cp">{{</span> <span class="nv">foo</span><span class="o">[</span><span class="s2">&quot;bar&quot;</span><span class="o">]</span> <span class="cp">}}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">foo.bar</span> <span class="cp">}}</span>
+<span class="cp">{{</span> <span class="nv">foo</span><span class="p">[</span><span class="s2">"bar"</span><span class="p">]</span> <span class="cp">}}</span>
 </code></pre></div>
 <p>These two forms to the exact same thing, just like javascript.</p>
 
@@ -231,9 +231,9 @@ foo.bar }}</code>, <code>{{ foo.bar.baz }}</code>.</p>
 
 <p>Filters are essentially functions that can be applied to variables.
 They are called with a pipe operator (<code>|</code>) and can take arguments.</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">foo</span> <span class="o">|</span> <span class="nf">title</span> <span class="cp">}}</span><span class="x"></span>
-<span class="cp">{{</span> <span class="nv">foo</span> <span class="o">|</span> <span class="nf">join</span><span class="o">(</span><span class="s2">&quot;,&quot;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
-<span class="cp">{{</span> <span class="nv">foo</span> <span class="o">|</span> <span class="nf">replace</span><span class="o">(</span><span class="s2">&quot;foo&quot;</span><span class="o">,</span> <span class="s2">&quot;bar&quot;</span><span class="o">)</span> <span class="o">|</span> <span class="nf">capitalize</span> <span class="cp">}}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">foo</span> <span class="err">|</span> <span class="nv">title</span> <span class="cp">}}</span>
+<span class="cp">{{</span> <span class="nv">foo</span> <span class="err">|</span> <span class="nv">join</span><span class="p">(</span><span class="s2">","</span><span class="p">)</span> <span class="cp">}}</span>
+<span class="cp">{{</span> <span class="nv">foo</span> <span class="err">|</span> <span class="nv">replace</span><span class="p">(</span><span class="s2">"foo"</span><span class="p">,</span> <span class="s2">"bar"</span><span class="p">)</span> <span class="err">|</span> <span class="nv">capitalize</span> <span class="cp">}}</span>
 </code></pre></div>
 <p>The third example shows how you can chain filters. It would display
 &quot;Bar&quot;, by first replacing &quot;foo&quot; with &quot;bar&quot; and then capitalizing it.</p>
@@ -249,48 +249,48 @@ writing a template, you can define &quot;blocks&quot; that child templates can
 override. The inheritance chain can be as long as you like.</p>
 
 <p>If we have a template <code>parent.html</code> that looks like this:</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">block</span> <span class="nv">header</span> <span class="cp">%}</span><span class="x"></span>
-<span class="x">This is the default content</span>
-<span class="cp">{%</span> <span class="k">endblock</span> <span class="cp">%}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">block</span> <span class="nv">header</span> <span class="cp">%}</span>
+This is the default content
+<span class="cp">{%</span> <span class="k">endblock</span> <span class="cp">%}</span>
 
-<span class="x">&lt;section class=&quot;left&quot;&gt;</span>
-<span class="x">  </span><span class="cp">{%</span> <span class="k">block</span> <span class="nv">left</span> <span class="cp">%}{%</span> <span class="k">endblock</span> <span class="cp">%}</span><span class="x"></span>
-<span class="x">&lt;/section&gt;</span>
+<span class="nt">&lt;section</span> <span class="na">class=</span><span class="s">"left"</span><span class="nt">&gt;</span>
+  <span class="cp">{%</span> <span class="k">block</span> <span class="nv">left</span> <span class="cp">%}{%</span> <span class="k">endblock</span> <span class="cp">%}</span>
+<span class="nt">&lt;/section&gt;</span>
 
-<span class="x">&lt;section class=&quot;right&quot;&gt;</span>
-<span class="x">  </span><span class="cp">{%</span> <span class="k">block</span> <span class="nv">right</span> <span class="cp">%}</span><span class="x"></span>
-<span class="x">  This is more content</span>
-<span class="x">  </span><span class="cp">{%</span> <span class="k">endblock</span> <span class="cp">%}</span><span class="x"></span>
-<span class="x">&lt;/section&gt;</span>
+<span class="nt">&lt;section</span> <span class="na">class=</span><span class="s">"right"</span><span class="nt">&gt;</span>
+  <span class="cp">{%</span> <span class="k">block</span> <span class="nv">right</span> <span class="cp">%}</span>
+  This is more content
+  <span class="cp">{%</span> <span class="k">endblock</span> <span class="cp">%}</span>
+<span class="nt">&lt;/section&gt;</span>
 </code></pre></div>
 <p>And we render this template:</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">extends</span> <span class="s2">&quot;parent.html&quot;</span> <span class="cp">%}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">extends</span> <span class="s2">"parent.html"</span> <span class="cp">%}</span>
 
-<span class="cp">{%</span> <span class="k">block</span> <span class="nv">left</span> <span class="cp">%}</span><span class="x"></span>
-<span class="x">This is the left side!</span>
-<span class="cp">{%</span> <span class="k">endblock</span> <span class="cp">%}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">block</span> <span class="nv">left</span> <span class="cp">%}</span>
+This is the left side!
+<span class="cp">{%</span> <span class="k">endblock</span> <span class="cp">%}</span>
 
-<span class="cp">{%</span> <span class="k">block</span> <span class="nv">right</span> <span class="cp">%}</span><span class="x"></span>
-<span class="x">This is the right side!</span>
-<span class="cp">{%</span> <span class="k">endblock</span> <span class="cp">%}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">block</span> <span class="nv">right</span> <span class="cp">%}</span>
+This is the right side!
+<span class="cp">{%</span> <span class="k">endblock</span> <span class="cp">%}</span>
 </code></pre></div>
 <p>The output would be:</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="x">This is the default content</span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja">This is the default content
 
-<span class="x">&lt;section class=&quot;left&quot;&gt;</span>
-<span class="x">  This is the left side!</span>
-<span class="x">&lt;/section&gt;</span>
+<span class="nt">&lt;section</span> <span class="na">class=</span><span class="s">"left"</span><span class="nt">&gt;</span>
+  This is the left side!
+<span class="nt">&lt;/section&gt;</span>
 
-<span class="x">&lt;section class=&quot;right&quot;&gt;</span>
-<span class="x">  This is the right side!</span>
-<span class="x">&lt;/section&gt;</span>
+<span class="nt">&lt;section</span> <span class="na">class=</span><span class="s">"right"</span><span class="nt">&gt;</span>
+  This is the right side!
+<span class="nt">&lt;/section&gt;</span>
 </code></pre></div>
 <p>You can store the template to inherit in a variable and use it by
 omitting quotes. This variable can contain a string that points to a
 template file, or it can contain a compiled Template object that has
 been added to the context. That way you can dynamically change which
 template is inherited when rendering by setting it in the context.</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">extends</span> <span class="nv">parentTemplate</span> <span class="cp">%}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">extends</span> <span class="nv">parentTemplate</span> <span class="cp">%}</span>
 </code></pre></div>
 <p>You leverage inheritance with the <a href="#extends"><code>extends</code></a> and
 <a href="#block"><code>block</code></a> tags. A more detailed explanation of inheritance can
@@ -301,13 +301,13 @@ docs</a>.</p>
 
 <p>You can render the contents of the parent block inside a child block
 by calling <code>super</code>. If in the child template from above you had:</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">block</span> <span class="nv">right</span> <span class="cp">%}</span><span class="x"></span>
-<span class="cp">{{</span> <span class="nb">super</span><span class="o">()</span> <span class="cp">}}</span><span class="x"></span>
-<span class="x">Right side!</span>
-<span class="cp">{%</span> <span class="k">endblock</span> <span class="cp">%}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">block</span> <span class="nv">right</span> <span class="cp">%}</span>
+<span class="cp">{{</span> <span class="nv">super</span><span class="p">()</span> <span class="cp">}}</span>
+Right side!
+<span class="cp">{%</span> <span class="k">endblock</span> <span class="cp">%}</span>
 </code></pre></div>
 <p>The output of the block would be:</p>
-<div class="highlight"><pre><code class="language-text" data-lang="text">This is more content
+<div class="highlight"><pre><code class="language-" data-lang="">This is more content
 Right side!
 </code></pre></div>
 <h2 id="tags">Tags</h2>
@@ -319,21 +319,21 @@ template. Nunjucks comes with several builtin, but <a href="api.html#custom-tags
 
 <p><code>if</code> tests a condition and lets you selectively display content. It behaves
 exactly as javascript&#39;s <code>if</code> behaves.</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">if</span> <span class="nv">variable</span> <span class="cp">%}</span><span class="x"></span>
-<span class="x">  It is true</span>
-<span class="cp">{%</span> <span class="k">endif</span> <span class="cp">%}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">if</span> <span class="nv">variable</span> <span class="cp">%}</span>
+  It is true
+<span class="cp">{%</span> <span class="k">endif</span> <span class="cp">%}</span>
 </code></pre></div>
 <p>If variable is defined and evaluates to true, &quot;It is true&quot; will be
 displayed. Otherwise, nothing will be.</p>
 
 <p>You can specify alternate conditions with <code>elif</code> and <code>else</code>:</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">if</span> <span class="nv">hungry</span> <span class="cp">%}</span><span class="x"></span>
-<span class="x">  I am hungry</span>
-<span class="cp">{%</span> <span class="k">elif</span> <span class="nv">tired</span> <span class="cp">%}</span><span class="x"></span>
-<span class="x">  I am tired</span>
-<span class="cp">{%</span> <span class="k">else</span> <span class="cp">%}</span><span class="x"></span>
-<span class="x">  I am good!</span>
-<span class="cp">{%</span> <span class="k">endif</span> <span class="cp">%}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">if</span> <span class="nv">hungry</span> <span class="cp">%}</span>
+  I am hungry
+<span class="cp">{%</span> <span class="nv">elif</span> <span class="nv">tired</span> <span class="cp">%}</span>
+  I am tired
+<span class="cp">{%</span> <span class="k">else</span> <span class="cp">%}</span>
+  I am good!
+<span class="cp">{%</span> <span class="k">endif</span> <span class="cp">%}</span>
 </code></pre></div>
 <p>You can also use if as an <a href="#if-expression">inline expression</a>.</p>
 
@@ -345,15 +345,15 @@ displayed. Otherwise, nothing will be.</p>
 <p>If you are using a custom template loader that is asynchronous, see
 <a href="#asynceach"><code>asyncEach</code></a>)</p>
 </blockquote>
-<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">items</span> <span class="o">=</span> <span class="p">[{</span> <span class="nx">title</span><span class="o">:</span> <span class="s2">&quot;foo&quot;</span><span class="p">,</span> <span class="nx">id</span><span class="o">:</span> <span class="mi">1</span> <span class="p">},</span> <span class="p">{</span> <span class="nx">title</span><span class="o">:</span> <span class="s2">&quot;bar&quot;</span><span class="p">,</span> <span class="nx">id</span><span class="o">:</span> <span class="mi">2</span><span class="p">}];</span>
-</code></pre></div><div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="x">&lt;h1&gt;Posts&lt;/h1&gt;</span>
-<span class="x">&lt;ul&gt;</span>
-<span class="cp">{%</span> <span class="k">for</span> <span class="nv">item</span> <span class="k">in</span> <span class="nv">items</span> <span class="cp">%}</span><span class="x"></span>
-<span class="x">  &lt;li&gt;</span><span class="cp">{{</span> <span class="nv">item.title</span> <span class="cp">}}</span><span class="x">&lt;/li&gt;</span>
-<span class="cp">{%</span> <span class="k">else</span> <span class="cp">%}</span><span class="x"></span>
-<span class="x">  &lt;li&gt;This would display if the &#39;item&#39; collection were empty&lt;/li&gt;</span>
-<span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span><span class="x"></span>
-<span class="x">&lt;/ul&gt;</span>
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">items</span> <span class="o">=</span> <span class="p">[{</span> <span class="na">title</span><span class="p">:</span> <span class="s2">"foo"</span><span class="p">,</span> <span class="na">id</span><span class="p">:</span> <span class="mi">1</span> <span class="p">},</span> <span class="p">{</span> <span class="na">title</span><span class="p">:</span> <span class="s2">"bar"</span><span class="p">,</span> <span class="na">id</span><span class="p">:</span> <span class="mi">2</span><span class="p">}];</span>
+</code></pre></div><div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="nt">&lt;h1&gt;</span>Posts<span class="nt">&lt;/h1&gt;</span>
+<span class="nt">&lt;ul&gt;</span>
+<span class="cp">{%</span> <span class="k">for</span> <span class="nv">item</span> <span class="ow">in</span> <span class="nv">items</span> <span class="cp">%}</span>
+  <span class="nt">&lt;li&gt;</span><span class="cp">{{</span> <span class="nv">item.title</span> <span class="cp">}}</span><span class="nt">&lt;/li&gt;</span>
+<span class="cp">{%</span> <span class="k">else</span> <span class="cp">%}</span>
+  <span class="nt">&lt;li&gt;</span>This would display if the 'item' collection were empty<span class="nt">&lt;/li&gt;</span>
+<span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span>
+<span class="nt">&lt;/ul&gt;</span>
 </code></pre></div>
 <p>The above example lists all the posts using the <code>title</code> attribute of each item
 in the <code>items</code> array as the display value. If the <code>items</code> array were empty, the
@@ -361,22 +361,22 @@ contents of the optional <code>else</code> clause would instead be rendered.</p>
 
 <p>You can also iterate over objects/hashes:</p>
 <div class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">food</span> <span class="o">=</span> <span class="p">{</span>
-  <span class="s1">&#39;ketchup&#39;</span><span class="o">:</span> <span class="s1">&#39;5 tbsp&#39;</span><span class="p">,</span>
-  <span class="s1">&#39;mustard&#39;</span><span class="o">:</span> <span class="s1">&#39;1 tbsp&#39;</span><span class="p">,</span>
-  <span class="s1">&#39;pickle&#39;</span><span class="o">:</span> <span class="s1">&#39;0 tbsp&#39;</span>
+  <span class="s1">'ketchup'</span><span class="p">:</span> <span class="s1">'5 tbsp'</span><span class="p">,</span>
+  <span class="s1">'mustard'</span><span class="p">:</span> <span class="s1">'1 tbsp'</span><span class="p">,</span>
+  <span class="s1">'pickle'</span><span class="p">:</span> <span class="s1">'0 tbsp'</span>
 <span class="p">};</span>
-</code></pre></div><div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">for</span> <span class="nv">ingredient</span><span class="o">,</span> <span class="nv">amount</span> <span class="k">in</span> <span class="nv">food</span> <span class="cp">%}</span><span class="x"></span>
-<span class="x">  Use </span><span class="cp">{{</span> <span class="nv">amount</span> <span class="cp">}}</span><span class="x"> of </span><span class="cp">{{</span> <span class="nv">ingredient</span> <span class="cp">}}</span><span class="x"></span>
-<span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span><span class="x"></span>
+</code></pre></div><div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">for</span> <span class="nv">ingredient</span><span class="p">,</span> <span class="nv">amount</span> <span class="ow">in</span> <span class="nv">food</span> <span class="cp">%}</span>
+  Use <span class="cp">{{</span> <span class="nv">amount</span> <span class="cp">}}</span> of <span class="cp">{{</span> <span class="nv">ingredient</span> <span class="cp">}}</span>
+<span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span>
 </code></pre></div>
 <p>The <a href="http://jinja.pocoo.org/docs/templates/#dictsort"><code>dictsort</code></a> filter is
 available for sorting objects when iterating over them.</p>
 
 <p>Additionally, Nunjucks will unpack arrays into variables:</p>
 <div class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">points</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span> <span class="p">[</span><span class="mi">12</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">14</span><span class="p">]];</span>
-</code></pre></div><div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">for</span> <span class="nv">x</span><span class="o">,</span> <span class="nv">y</span><span class="o">,</span> <span class="nv">z</span> <span class="k">in</span> <span class="nv">points</span> <span class="cp">%}</span><span class="x"></span>
-<span class="x">  Point: </span><span class="cp">{{</span> <span class="nv">x</span> <span class="cp">}}</span><span class="x">, </span><span class="cp">{{</span> <span class="nv">y</span> <span class="cp">}}</span><span class="x">, </span><span class="cp">{{</span> <span class="nv">z</span> <span class="cp">}}</span><span class="x"></span>
-<span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span><span class="x"></span>
+</code></pre></div><div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">for</span> <span class="nv">x</span><span class="p">,</span> <span class="nv">y</span><span class="p">,</span> <span class="nv">z</span> <span class="ow">in</span> <span class="nv">points</span> <span class="cp">%}</span>
+  Point: <span class="cp">{{</span> <span class="nv">x</span> <span class="cp">}}</span>, <span class="cp">{{</span> <span class="nv">y</span> <span class="cp">}}</span>, <span class="cp">{{</span> <span class="nv">z</span> <span class="cp">}}</span>
+<span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span>
 </code></pre></div>
 <p>Inside loops, you have access to a few special variables:</p>
 
@@ -416,12 +416,12 @@ use <code>asyncEach</code> for iteration if you are loading templates
 asynchronously inside the loop.</p>
 <div class="highlight"><pre><code class="language-js" data-lang="js"><span class="c1">// If you are using a custom loader that is async, you need asyncEach</span>
 <span class="kd">var</span> <span class="nx">env</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">Environment</span><span class="p">(</span><span class="nx">AsyncLoaderFromDatabase</span><span class="p">,</span> <span class="nx">opts</span><span class="p">);</span>
-</code></pre></div><div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="x">&lt;h1&gt;Posts&lt;/h1&gt;</span>
-<span class="x">&lt;ul&gt;</span>
-<span class="cp">{%</span> <span class="k">asyncEach</span> <span class="nv">item</span> <span class="k">in</span> <span class="nv">items</span> <span class="cp">%}</span><span class="x"></span>
-<span class="x">  </span><span class="cp">{%</span> <span class="k">include</span> <span class="s2">&quot;item-template.html&quot;</span> <span class="cp">%}</span><span class="x"></span>
-<span class="cp">{%</span> <span class="k">endeach</span> <span class="cp">%}</span><span class="x"></span>
-<span class="x">&lt;/ul&gt;</span>
+</code></pre></div><div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="nt">&lt;h1&gt;</span>Posts<span class="nt">&lt;/h1&gt;</span>
+<span class="nt">&lt;ul&gt;</span>
+<span class="cp">{%</span> <span class="nv">asyncEach</span> <span class="nv">item</span> <span class="ow">in</span> <span class="nv">items</span> <span class="cp">%}</span>
+  <span class="cp">{%</span> <span class="k">include</span> <span class="s2">"item-template.html"</span> <span class="cp">%}</span>
+<span class="cp">{%</span> <span class="nv">endeach</span> <span class="cp">%}</span>
+<span class="nt">&lt;/ul&gt;</span>
 </code></pre></div>
 <h3 id="asyncall">asyncAll</h3>
 
@@ -438,12 +438,12 @@ Otherwise you should never use this.</p>
 <p>Let&#39;s say you created a filter named <code>lookup</code> that fetches some text
 from a database. You could then render multiple items in parallel with
 <code>asyncAll</code>:</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="x">&lt;h1&gt;Posts&lt;/h1&gt;</span>
-<span class="x">&lt;ul&gt;</span>
-<span class="cp">{%</span> <span class="k">asyncAll</span> <span class="nv">item</span> <span class="k">in</span> <span class="nv">items</span> <span class="cp">%}</span><span class="x"></span>
-<span class="x">  &lt;li&gt;</span><span class="cp">{{</span> <span class="nv">item.id</span> <span class="o">|</span> <span class="nf">lookup</span> <span class="cp">}}</span><span class="x">&lt;/li&gt;</span>
-<span class="cp">{%</span> <span class="k">endall</span> <span class="cp">%}</span><span class="x"></span>
-<span class="x">&lt;/ul&gt;</span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="nt">&lt;h1&gt;</span>Posts<span class="nt">&lt;/h1&gt;</span>
+<span class="nt">&lt;ul&gt;</span>
+<span class="cp">{%</span> <span class="nv">asyncAll</span> <span class="nv">item</span> <span class="ow">in</span> <span class="nv">items</span> <span class="cp">%}</span>
+  <span class="nt">&lt;li&gt;</span><span class="cp">{{</span> <span class="nv">item.id</span> <span class="err">|</span> <span class="nv">lookup</span> <span class="cp">}}</span><span class="nt">&lt;/li&gt;</span>
+<span class="cp">{%</span> <span class="nv">endall</span> <span class="cp">%}</span>
+<span class="nt">&lt;/ul&gt;</span>
 </code></pre></div>
 <p>If <code>lookup</code> is an asynchronous filter, it&#39;s probably doing something
 slow like fetching something from disk. <code>asyncAll</code> allows you reduce
@@ -455,16 +455,16 @@ all the items are done.</p>
 
 <p><code>macro</code> allows you to define reusable chunks of content. It is similar to a
 function in a programming language. Here&#39;s an example:</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">macro</span> <span class="nv">field</span><span class="o">(</span><span class="nv">name</span><span class="o">,</span> <span class="nv">value</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="o">,</span> <span class="nv">type</span><span class="o">=</span><span class="s1">&#39;text&#39;</span><span class="o">)</span> <span class="cp">%}</span><span class="x"></span>
-<span class="x">&lt;div class=&quot;field&quot;&gt;</span>
-<span class="x">  &lt;input type=&quot;</span><span class="cp">{{</span> <span class="nv">type</span> <span class="cp">}}</span><span class="x">&quot; name=&quot;</span><span class="cp">{{</span> <span class="nv">name</span> <span class="cp">}}</span><span class="x">&quot;</span>
-<span class="x">         value=&quot;</span><span class="cp">{{</span> <span class="nv">value</span> <span class="o">|</span> <span class="nf">escape</span> <span class="cp">}}</span><span class="x">&quot; /&gt;</span>
-<span class="x">&lt;/div&gt;</span>
-<span class="cp">{%</span> <span class="k">endmacro</span> <span class="cp">%}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">macro</span> <span class="nv">field</span><span class="p">(</span><span class="nv">name</span><span class="p">,</span> <span class="nv">value</span><span class="err">=</span><span class="s1">''</span><span class="p">,</span> <span class="nv">type</span><span class="err">=</span><span class="s1">'text'</span><span class="p">)</span> <span class="cp">%}</span>
+<span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"field"</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"</span><span class="cp">{{</span> <span class="nv">type</span> <span class="cp">}}</span><span class="s">"</span> <span class="na">name=</span><span class="s">"</span><span class="cp">{{</span> <span class="nv">name</span> <span class="cp">}}</span><span class="s">"</span>
+         <span class="na">value=</span><span class="s">"</span><span class="cp">{{</span> <span class="nv">value</span> <span class="err">|</span> <span class="nv">escape</span> <span class="cp">}}</span><span class="s">"</span> <span class="nt">/&gt;</span>
+<span class="nt">&lt;/div&gt;</span>
+<span class="cp">{%</span> <span class="k">endmacro</span> <span class="cp">%}</span>
 </code></pre></div>
 <p>Now <code>field</code> is available to be called like a normal function:</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">field</span><span class="o">(</span><span class="s1">&#39;user&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
-<span class="cp">{{</span> <span class="nv">field</span><span class="o">(</span><span class="s1">&#39;pass&#39;</span><span class="o">,</span> <span class="nv">type</span><span class="o">=</span><span class="s1">&#39;password&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">field</span><span class="p">(</span><span class="s1">'user'</span><span class="p">)</span> <span class="cp">}}</span>
+<span class="cp">{{</span> <span class="nv">field</span><span class="p">(</span><span class="s1">'pass'</span><span class="p">,</span> <span class="nv">type</span><span class="err">=</span><span class="s1">'password'</span><span class="p">)</span> <span class="cp">}}</span>
 </code></pre></div>
 <p>Keyword/default arguments are available. See
 <a href="#keyword-arguments">keyword arguments</a> for a more detailed explanation.</p>
@@ -480,14 +480,14 @@ function asynchronously. If you do this now, the behavior is undefined.</p>
 <h3 id="set">set</h3>
 
 <p><code>set</code> lets you create/modify a variable.</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">username</span> <span class="cp">}}</span><span class="x"></span>
-<span class="cp">{%</span> <span class="k">set</span> <span class="nv">username</span> <span class="o">=</span> <span class="s2">&quot;joe&quot;</span> <span class="cp">%}</span><span class="x"></span>
-<span class="cp">{{</span> <span class="nv">username</span> <span class="cp">}}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">username</span> <span class="cp">}}</span>
+<span class="cp">{%</span> <span class="k">set</span> <span class="nv">username</span> <span class="err">=</span> <span class="s2">"joe"</span> <span class="cp">%}</span>
+<span class="cp">{{</span> <span class="nv">username</span> <span class="cp">}}</span>
 </code></pre></div>
 <p>If <code>username</code> was initially &quot;james&#39;, this would print &quot;james joe&quot;.</p>
 
 <p>You can introduce new variables, and also set multiple at once:</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">set</span> <span class="nv">x</span><span class="o">,</span> <span class="nv">y</span><span class="o">,</span> <span class="nv">z</span> <span class="o">=</span> <span class="m">5</span> <span class="cp">%}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">set</span> <span class="nv">x</span><span class="p">,</span> <span class="nv">y</span><span class="p">,</span> <span class="nv">z</span> <span class="err">=</span> <span class="nv">5</span> <span class="cp">%}</span>
 </code></pre></div>
 <p>If <code>set</code> is used at the top-level, it changes the value of the global template
 context. If used inside scoped blocks like an include or a macro, it only
@@ -498,30 +498,30 @@ block assignments.  The syntax is similar to the standard <code>set</code>, exce
 the <code>=</code> is omitted, and everything until the <code>{% endset %}</code> is captured.</p>
 
 <p>This can be useful in some situations as an alternative for macros:</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">set</span> <span class="nv">standardModal</span> <span class="cp">%}</span><span class="x"></span>
-<span class="x">    </span><span class="cp">{%</span> <span class="k">include</span> <span class="s1">&#39;standardModalData.html&#39;</span> <span class="cp">%}</span><span class="x"></span>
-<span class="cp">{%</span> <span class="k">endset</span> <span class="cp">%}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">set</span> <span class="nv">standardModal</span> <span class="cp">%}</span>
+    <span class="cp">{%</span> <span class="k">include</span> <span class="s1">'standardModalData.html'</span> <span class="cp">%}</span>
+<span class="cp">{%</span> <span class="k">endset</span> <span class="cp">%}</span>
 
-<span class="x">&lt;div class=&quot;js-modal&quot; data-modal=&quot;</span><span class="cp">{{</span><span class="nv">standardModal</span> <span class="o">|</span> <span class="nf">e</span><span class="cp">}}</span><span class="x">&quot;&gt;</span>
+<span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"js-modal"</span> <span class="na">data-modal=</span><span class="s">"</span><span class="cp">{{</span><span class="nv">standardModal</span> <span class="err">|</span> <span class="nv">e</span><span class="cp">}}</span><span class="s">"</span><span class="nt">&gt;</span>
 </code></pre></div>
 <h3 id="extends">extends</h3>
 
 <p><code>extends</code> is used to specify template inheritance. The specified
 template is used as a base template. See <a href="#template-inheritance">Template
 Inheritance</a>.</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">extends</span> <span class="s2">&quot;base.html&quot;</span> <span class="cp">%}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">extends</span> <span class="s2">"base.html"</span> <span class="cp">%}</span>
 </code></pre></div>
 <p>You can store the template to inherit in a variable and use it by
 omitting quotes. This variable can contain a string that points to a
 template file, or it can contain a compiled Template object that has
 been added to the context. That way you can dynamically change which template is
 inherited when rendering by setting it in the context.</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">extends</span> <span class="nv">parentTemplate</span> <span class="cp">%}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">extends</span> <span class="nv">parentTemplate</span> <span class="cp">%}</span>
 </code></pre></div>
 <p>In fact, <code>extends</code> accepts any arbitrary expression, so you can pass
 anything into it, as long as that expression evaluates to a string or
 a compiled Template object:</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">extends</span> <span class="nv">name</span> <span class="o">+</span> <span class="s2">&quot;.html&quot;</span> <span class="cp">%}</span><span class="x">`.</span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">extends</span> <span class="nv">name</span> <span class="o">+</span> <span class="s2">".html"</span> <span class="cp">%}</span>`.
 </code></pre></div>
 <h3 id="block">block</h3>
 
@@ -529,21 +529,21 @@ a compiled Template object:</p>
 name. This is used by template inheritance. Base templates can specify
 blocks and child templates can override them with new content. See
 <a href="#template-inheritance">Template Inheritance</a>.</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">block</span> <span class="nv">css</span> <span class="cp">%}</span><span class="x"></span>
-<span class="x">&lt;link rel=&quot;stylesheet&quot; href=&quot;app.css&quot; /&gt;</span>
-<span class="cp">{%</span> <span class="k">endblock</span> <span class="cp">%}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">block</span> <span class="nv">css</span> <span class="cp">%}</span>
+<span class="nt">&lt;link</span> <span class="na">rel=</span><span class="s">"stylesheet"</span> <span class="na">href=</span><span class="s">"app.css"</span> <span class="nt">/&gt;</span>
+<span class="cp">{%</span> <span class="k">endblock</span> <span class="cp">%}</span>
 </code></pre></div>
 <p>You can even define blocks within looping:</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">for</span> <span class="nv">item</span> <span class="k">in</span> <span class="nv">items</span> <span class="cp">%}</span><span class="x"></span>
-<span class="cp">{%</span> <span class="k">block</span> <span class="nv">item</span> <span class="cp">%}{{</span> <span class="nv">item</span> <span class="cp">}}{%</span> <span class="k">endblock</span> <span class="cp">%}</span><span class="x"></span>
-<span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">for</span> <span class="nv">item</span> <span class="ow">in</span> <span class="nv">items</span> <span class="cp">%}</span>
+<span class="cp">{%</span> <span class="k">block</span> <span class="nv">item</span> <span class="cp">%}{{</span> <span class="nv">item</span> <span class="cp">}}{%</span> <span class="k">endblock</span> <span class="cp">%}</span>
+<span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span>
 </code></pre></div>
 <p>Child templates can override the <code>item</code> block and change how it is displayed:</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">extends</span> <span class="s2">&quot;item.html&quot;</span> <span class="cp">%}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">extends</span> <span class="s2">"item.html"</span> <span class="cp">%}</span>
 
-<span class="cp">{%</span> <span class="k">block</span> <span class="nv">item</span> <span class="cp">%}</span><span class="x"></span>
-<span class="x">The name of the item is: </span><span class="cp">{{</span> <span class="nv">item.name</span> <span class="cp">}}</span><span class="x"></span>
-<span class="cp">{%</span> <span class="k">endblock</span> <span class="cp">%}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">block</span> <span class="nv">item</span> <span class="cp">%}</span>
+The name of the item is: <span class="cp">{{</span> <span class="nv">item.name</span> <span class="cp">}}</span>
+<span class="cp">{%</span> <span class="k">endblock</span> <span class="cp">%}</span>
 </code></pre></div>
 <p>A special function <code>super</code> is available within blocks which will
 render the parent block&#39;s content. See <a href="#super">super</a>.</p>
@@ -552,12 +552,12 @@ render the parent block&#39;s content. See <a href="#super">super</a>.</p>
 
 <p><code>include</code> pulls in other templates in place. It&#39;s useful when you need to share
 smaller chunks across several templates that already inherit other templates.</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">include</span> <span class="s2">&quot;item.html&quot;</span> <span class="cp">%}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">include</span> <span class="s2">"item.html"</span> <span class="cp">%}</span>
 </code></pre></div>
 <p>You can even include templates in the middle of loops:</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">for</span> <span class="nv">item</span> <span class="k">in</span> <span class="nv">items</span> <span class="cp">%}</span><span class="x"></span>
-<span class="cp">{%</span> <span class="k">include</span> <span class="s2">&quot;item.html&quot;</span> <span class="cp">%}</span><span class="x"></span>
-<span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">for</span> <span class="nv">item</span> <span class="ow">in</span> <span class="nv">items</span> <span class="cp">%}</span>
+<span class="cp">{%</span> <span class="k">include</span> <span class="s2">"item.html"</span> <span class="cp">%}</span>
+<span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span>
 </code></pre></div>
 <p>This is especially useful for cutting up templates into pieces so that the
 browser-side environment can render the small chunks when it needs to change
@@ -569,7 +569,7 @@ object: <code>{% include name + &quot;.html&quot; %}</code>.</p>
 
 <p>It might be useful to not throw an error if a template does not exist. Use the
 <code>ignore missing</code> option to suppress such errors.</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">include</span> <span class="s2">&quot;missing.html&quot;</span> <span class="k">ignore missing</span> <span class="cp">%}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">include</span> <span class="s2">"missing.html"</span> <span class="k">ignore</span> <span class="k">missing</span> <span class="cp">%}</span>
 </code></pre></div>
 <p>Included templates can themselves <code>extend</code> another template (so you could have
 a set of related includes that all inherit a common structure). An included
@@ -589,36 +589,36 @@ from templates, allowing you to access them in a different template.</p>
 have access to any of the current template variables.</p>
 
 <p>Let&#39;s start with a template called <code>forms.html</code> that has the following in it:</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">macro</span> <span class="nv">field</span><span class="o">(</span><span class="nv">name</span><span class="o">,</span> <span class="nv">value</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="o">,</span> <span class="nv">type</span><span class="o">=</span><span class="s1">&#39;text&#39;</span><span class="o">)</span> <span class="cp">%}</span><span class="x"></span>
-<span class="x">&lt;div class=&quot;field&quot;&gt;</span>
-<span class="x">  &lt;input type=&quot;</span><span class="cp">{{</span> <span class="nv">type</span> <span class="cp">}}</span><span class="x">&quot; name=&quot;</span><span class="cp">{{</span> <span class="nv">name</span> <span class="cp">}}</span><span class="x">&quot;</span>
-<span class="x">         value=&quot;</span><span class="cp">{{</span> <span class="nv">value</span> <span class="o">|</span> <span class="nf">escape</span> <span class="cp">}}</span><span class="x">&quot; /&gt;</span>
-<span class="x">&lt;/div&gt;</span>
-<span class="cp">{%</span> <span class="k">endmacro</span> <span class="cp">%}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">macro</span> <span class="nv">field</span><span class="p">(</span><span class="nv">name</span><span class="p">,</span> <span class="nv">value</span><span class="err">=</span><span class="s1">''</span><span class="p">,</span> <span class="nv">type</span><span class="err">=</span><span class="s1">'text'</span><span class="p">)</span> <span class="cp">%}</span>
+<span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"field"</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"</span><span class="cp">{{</span> <span class="nv">type</span> <span class="cp">}}</span><span class="s">"</span> <span class="na">name=</span><span class="s">"</span><span class="cp">{{</span> <span class="nv">name</span> <span class="cp">}}</span><span class="s">"</span>
+         <span class="na">value=</span><span class="s">"</span><span class="cp">{{</span> <span class="nv">value</span> <span class="err">|</span> <span class="nv">escape</span> <span class="cp">}}</span><span class="s">"</span> <span class="nt">/&gt;</span>
+<span class="nt">&lt;/div&gt;</span>
+<span class="cp">{%</span> <span class="k">endmacro</span> <span class="cp">%}</span>
 
-<span class="cp">{%</span> <span class="k">macro</span> <span class="nv">label</span><span class="o">(</span><span class="nv">text</span><span class="o">)</span> <span class="cp">%}</span><span class="x"></span>
-<span class="x">&lt;div&gt;</span>
-<span class="x">  &lt;label&gt;</span><span class="cp">{{</span> <span class="nv">text</span> <span class="cp">}}</span><span class="x">&lt;/label&gt;</span>
-<span class="x">&lt;/div&gt;</span>
-<span class="cp">{%</span> <span class="k">endmacro</span> <span class="cp">%}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">macro</span> <span class="nv">label</span><span class="p">(</span><span class="nv">text</span><span class="p">)</span> <span class="cp">%}</span>
+<span class="nt">&lt;div&gt;</span>
+  <span class="nt">&lt;label&gt;</span><span class="cp">{{</span> <span class="nv">text</span> <span class="cp">}}</span><span class="nt">&lt;/label&gt;</span>
+<span class="nt">&lt;/div&gt;</span>
+<span class="cp">{%</span> <span class="k">endmacro</span> <span class="cp">%}</span>
 </code></pre></div>
 <p>We can import this template and bind all of its exported values to a variable
 so that we can use it:</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">import</span> <span class="s2">&quot;forms.html&quot;</span> <span class="k">as</span> <span class="nv">forms</span> <span class="cp">%}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">import</span> <span class="s2">"forms.html"</span> <span class="k">as</span> <span class="nv">forms</span> <span class="cp">%}</span>
 
-<span class="cp">{{</span> <span class="nv">forms.label</span><span class="o">(</span><span class="s1">&#39;Username&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
-<span class="cp">{{</span> <span class="nv">forms.field</span><span class="o">(</span><span class="s1">&#39;user&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
-<span class="cp">{{</span> <span class="nv">forms.label</span><span class="o">(</span><span class="s1">&#39;Password&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
-<span class="cp">{{</span> <span class="nv">forms.field</span><span class="o">(</span><span class="s1">&#39;pass&#39;</span><span class="o">,</span> <span class="nv">type</span><span class="o">=</span><span class="s1">&#39;password&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
+<span class="cp">{{</span> <span class="nv">forms.label</span><span class="p">(</span><span class="s1">'Username'</span><span class="p">)</span> <span class="cp">}}</span>
+<span class="cp">{{</span> <span class="nv">forms.field</span><span class="p">(</span><span class="s1">'user'</span><span class="p">)</span> <span class="cp">}}</span>
+<span class="cp">{{</span> <span class="nv">forms.label</span><span class="p">(</span><span class="s1">'Password'</span><span class="p">)</span> <span class="cp">}}</span>
+<span class="cp">{{</span> <span class="nv">forms.field</span><span class="p">(</span><span class="s1">'pass'</span><span class="p">,</span> <span class="nv">type</span><span class="err">=</span><span class="s1">'password'</span><span class="p">)</span> <span class="cp">}}</span>
 </code></pre></div>
 <p>You can also import specific values from a template into the current namespace
 with <code>from import</code>:</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">from</span> <span class="s2">&quot;forms.html&quot;</span> <span class="k">import</span> <span class="nv">field</span><span class="o">,</span> <span class="nv">label</span> <span class="k">as</span> <span class="nv">description</span> <span class="cp">%}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">from</span> <span class="s2">"forms.html"</span> <span class="k">import</span> <span class="nv">field</span><span class="p">,</span> <span class="nv">label</span> <span class="k">as</span> <span class="nv">description</span> <span class="cp">%}</span>
 
-<span class="cp">{{</span> <span class="nv">description</span><span class="o">(</span><span class="s1">&#39;Username&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
-<span class="cp">{{</span> <span class="nv">field</span><span class="o">(</span><span class="s1">&#39;user&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
-<span class="cp">{{</span> <span class="nv">description</span><span class="o">(</span><span class="s1">&#39;Password&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
-<span class="cp">{{</span> <span class="nv">field</span><span class="o">(</span><span class="s1">&#39;pass&#39;</span><span class="o">,</span> <span class="nv">type</span><span class="o">=</span><span class="s1">&#39;password&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
+<span class="cp">{{</span> <span class="nv">description</span><span class="p">(</span><span class="s1">'Username'</span><span class="p">)</span> <span class="cp">}}</span>
+<span class="cp">{{</span> <span class="nv">field</span><span class="p">(</span><span class="s1">'user'</span><span class="p">)</span> <span class="cp">}}</span>
+<span class="cp">{{</span> <span class="nv">description</span><span class="p">(</span><span class="s1">'Password'</span><span class="p">)</span> <span class="cp">}}</span>
+<span class="cp">{{</span> <span class="nv">field</span><span class="p">(</span><span class="s1">'pass'</span><span class="p">,</span> <span class="nv">type</span><span class="err">=</span><span class="s1">'password'</span><span class="p">)</span> <span class="cp">}}</span>
 </code></pre></div>
 <p><code>import</code> actually accepts any arbitrary expression, so you can pass anything
 into it, as long as the expression evaluates to a string or a compiled Template
@@ -627,6 +627,7 @@ object: <code>{% import name + &quot;.html&quot; as obj %}</code>.</p>
 <h3 id="raw">raw</h3>
 
 <p>If you want to output any of the special Nunjucks tags like <code>{{</code>, you can use
+a <code>{{</code>, you can use
 a <code>{% raw %}</code> block and anything inside of it will be output as plain text.</p>
 
 <h3 id="filter">filter</h3>
@@ -634,13 +635,13 @@ a <code>{% raw %}</code> block and anything inside of it will be output as plain
 <p>A <code>filter</code> block allows you to call a filter with the contents of the
 block. Instead passing a value with the <code>|</code> syntax, the render
 contents from the block will be passed.</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">filter</span> <span class="nf">title</span> <span class="cp">%}</span><span class="x"></span>
-<span class="x">may the force be with you</span>
-<span class="cp">{%</span> <span class="k">endfilter</span> <span class="cp">%}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">filter</span> <span class="nv">title</span> <span class="cp">%}</span>
+may the force be with you
+<span class="cp">{%</span> <span class="k">endfilter</span> <span class="cp">%}</span>
 
-<span class="cp">{%</span> <span class="k">filter</span> <span class="nf">replace</span><span class="o">(</span><span class="s2">&quot;force&quot;</span><span class="o">,</span> <span class="s2">&quot;forth&quot;</span><span class="o">)</span> <span class="cp">%}</span><span class="x"></span>
-<span class="x">may the force be with you</span>
-<span class="cp">{%</span> <span class="k">endfilter</span> <span class="cp">%}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">filter</span> <span class="nv">replace</span><span class="p">(</span><span class="s2">"force"</span><span class="p">,</span> <span class="s2">"forth"</span><span class="p">)</span> <span class="cp">%}</span>
+may the force be with you
+<span class="cp">{%</span> <span class="k">endfilter</span> <span class="cp">%}</span>
 </code></pre></div>
 <p>NOTE: You cannot do anything asynchronous inside these blocks.</p>
 
@@ -649,13 +650,13 @@ contents from the block will be passed.</p>
 <p>A <code>call</code> block enables you to call a macro with all the text inside the
 tag. This is helpful if you want to pass a lot of content into a macro. The
 content is available inside the macro as <code>caller()</code>.</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">macro</span> <span class="nv">add</span><span class="o">(</span><span class="nv">x</span><span class="o">,</span> <span class="nv">y</span><span class="o">)</span> <span class="cp">%}</span><span class="x"></span>
-<span class="cp">{{</span> <span class="nv">caller</span><span class="o">()</span> <span class="cp">}}</span><span class="x">: </span><span class="cp">{{</span> <span class="nv">x</span> <span class="o">+</span> <span class="nv">y</span> <span class="cp">}}</span><span class="x"></span>
-<span class="cp">{%</span> <span class="k">endmacro</span><span class="cp">%}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">macro</span> <span class="nv">add</span><span class="p">(</span><span class="nv">x</span><span class="p">,</span> <span class="nv">y</span><span class="p">)</span> <span class="cp">%}</span>
+<span class="cp">{{</span> <span class="nv">caller</span><span class="p">()</span> <span class="cp">}}</span>: <span class="cp">{{</span> <span class="nv">x</span> <span class="o">+</span> <span class="nv">y</span> <span class="cp">}}</span>
+<span class="cp">{%</span> <span class="k">endmacro</span><span class="cp">%}</span>
 
-<span class="cp">{%</span> <span class="k">call</span> <span class="nv">add</span><span class="o">(</span><span class="m">1</span><span class="o">,</span> <span class="m">2</span><span class="o">)</span> -<span class="cp">%}</span><span class="x"></span>
-<span class="x">The result is</span>
-<span class="cp">{%</span>- <span class="k">endcall</span> <span class="cp">%}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">call</span> <span class="nv">add</span><span class="p">(</span><span class="nv">1</span><span class="p">,</span> <span class="nv">2</span><span class="p">)</span> <span class="o">-</span><span class="cp">%}</span>
+The result is
+<span class="cp">{%</span><span class="o">-</span> <span class="k">endcall</span> <span class="cp">%}</span>
 </code></pre></div>
 <p>The above example would output &quot;The result is: 3&quot;.</p>
 
@@ -666,11 +667,11 @@ functions, filters, and macros. Nunjucks supports keyword arguments as well by
 introducing a new calling convention.</p>
 
 <p>Keyword arguments look like this:</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">foo</span><span class="o">(</span><span class="m">1</span><span class="o">,</span> <span class="m">2</span><span class="o">,</span> <span class="nv">bar</span><span class="o">=</span><span class="m">3</span><span class="o">,</span> <span class="nv">baz</span><span class="o">=</span><span class="m">4</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">foo</span><span class="p">(</span><span class="nv">1</span><span class="p">,</span> <span class="nv">2</span><span class="p">,</span> <span class="nv">bar</span><span class="err">=</span><span class="nv">3</span><span class="p">,</span> <span class="nv">baz</span><span class="err">=</span><span class="nv">4</span><span class="p">)</span> <span class="cp">}}</span>
 </code></pre></div>
 <p><code>bar</code> and <code>baz</code> are keyword arguments. Nunjucks converts them into a hash and
 passes it as the last argument. It&#39;s equivalent to this call in javascript:</p>
-<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">foo</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="p">{</span> <span class="nx">bar</span><span class="o">:</span> <span class="mi">3</span><span class="p">,</span> <span class="nx">baz</span><span class="o">:</span> <span class="mi">4</span><span class="p">})</span>
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">foo</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="p">{</span> <span class="na">bar</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="na">baz</span><span class="p">:</span> <span class="mi">4</span><span class="p">})</span>
 </code></pre></div>
 <p>Since this is a standard calling convention, it works for all functions and
 filters if they are written to expect them. <a href="api#Keyword-Arguments">Read more</a>
@@ -679,29 +680,29 @@ about this in the API section.</p>
 <p>Macros allow you to also use keyword arguments in the definition, which allows
 you to specify default values. Nunjucks automatically maps the keyword
 arguments to the ones defined with the macro.</p>
-<div class="highlight"><pre><code class="language-text" data-lang="text">{% macro foo(x, y, z=5, w=6) %}
-{{ x }}, {{ y }}, {{ z }}, {{ w}}
-{% endmacro %}
+<div class="highlight"><pre><code class="language-" data-lang=""><span class="p">{</span><span class="err">%</span><span class="w"> </span><span class="err">macro</span><span class="w"> </span><span class="err">foo(x,</span><span class="w"> </span><span class="err">y,</span><span class="w"> </span><span class="err">z=5,</span><span class="w"> </span><span class="err">w=6)</span><span class="w"> </span><span class="err">%</span><span class="p">}</span><span class="w">
+</span><span class="p">{</span><span class="err">{</span><span class="w"> </span><span class="err">x</span><span class="w"> </span><span class="p">}</span><span class="err">},</span><span class="w"> </span><span class="p">{</span><span class="err">{</span><span class="w"> </span><span class="err">y</span><span class="w"> </span><span class="p">}</span><span class="err">},</span><span class="w"> </span><span class="p">{</span><span class="err">{</span><span class="w"> </span><span class="err">z</span><span class="w"> </span><span class="p">}</span><span class="err">},</span><span class="w"> </span><span class="p">{</span><span class="err">{</span><span class="w"> </span><span class="err">w</span><span class="p">}</span><span class="err">}</span><span class="w">
+</span><span class="p">{</span><span class="err">%</span><span class="w"> </span><span class="err">endmacro</span><span class="w"> </span><span class="err">%</span><span class="p">}</span><span class="w">
 
-{{ foo(1, 2) }}        -&gt; 1, 2, 5, 6
-{{ foo(1, 2, w=10) }}  -&gt; 1, 2, 5, 10
-</code></pre></div>
+</span><span class="p">{</span><span class="err">{</span><span class="w"> </span><span class="err">foo(1,</span><span class="w"> </span><span class="err">2)</span><span class="w"> </span><span class="p">}</span><span class="err">}</span><span class="w">        </span><span class="err">-&gt;</span><span class="w"> </span><span class="mi">1</span><span class="err">,</span><span class="w"> </span><span class="mi">2</span><span class="err">,</span><span class="w"> </span><span class="mi">5</span><span class="err">,</span><span class="w"> </span><span class="mi">6</span><span class="w">
+</span><span class="p">{</span><span class="err">{</span><span class="w"> </span><span class="err">foo(1,</span><span class="w"> </span><span class="err">2,</span><span class="w"> </span><span class="err">w=10)</span><span class="w"> </span><span class="p">}</span><span class="err">}</span><span class="w">  </span><span class="err">-&gt;</span><span class="w"> </span><span class="mi">1</span><span class="err">,</span><span class="w"> </span><span class="mi">2</span><span class="err">,</span><span class="w"> </span><span class="mi">5</span><span class="err">,</span><span class="w"> </span><span class="mi">10</span><span class="w">
+</span></code></pre></div>
 <p>You can mix positional and keyword arguments with macros. For example, you can
 specify a positional argument as a keyword argument:</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">foo</span><span class="o">(</span><span class="m">20</span><span class="o">,</span> <span class="nv">y</span><span class="o">=</span><span class="m">21</span><span class="o">)</span> <span class="cp">}}</span><span class="x">     -&gt; 20, 21, 5, 6</span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">foo</span><span class="p">(</span><span class="nv">20</span><span class="p">,</span> <span class="nv">y</span><span class="err">=</span><span class="nv">21</span><span class="p">)</span> <span class="cp">}}</span>     -&gt; 20, 21, 5, 6
 </code></pre></div>
 <p>You can also simply pass a positional argument in place of a keyword argument:</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">foo</span><span class="o">(</span><span class="m">5</span><span class="o">,</span> <span class="m">6</span><span class="o">,</span> <span class="m">7</span><span class="o">,</span> <span class="m">8</span><span class="o">)</span> <span class="cp">}}</span><span class="x">   -&gt; 5, 6, 7, 8</span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">foo</span><span class="p">(</span><span class="nv">5</span><span class="p">,</span> <span class="nv">6</span><span class="p">,</span> <span class="nv">7</span><span class="p">,</span> <span class="nv">8</span><span class="p">)</span> <span class="cp">}}</span>   -&gt; 5, 6, 7, 8
 </code></pre></div>
 <p>In this way, you can &quot;skip&quot; positional arguments:</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">foo</span><span class="o">(</span><span class="m">8</span><span class="o">,</span> <span class="nv">z</span><span class="o">=</span><span class="m">7</span><span class="o">)</span> <span class="cp">}}</span><span class="x">      -&gt; 8, , 7, 6</span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">foo</span><span class="p">(</span><span class="nv">8</span><span class="p">,</span> <span class="nv">z</span><span class="err">=</span><span class="nv">7</span><span class="p">)</span> <span class="cp">}}</span>      -&gt; 8, , 7, 6
 </code></pre></div>
 <h2 id="comments">Comments</h2>
 
 <p>You can write comments using <code>{#</code> and <code>#}</code>. Comments are completely stripped
 out when rendering.</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="c">{# Loop through all the users #}</span><span class="x"></span>
-<span class="cp">{%</span> <span class="k">for</span> <span class="nv">user</span> <span class="k">in</span> <span class="nv">users</span> <span class="cp">%}</span><span class="x">...</span><span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="c">{# Loop through all the users #}</span>
+<span class="cp">{%</span> <span class="k">for</span> <span class="nv">user</span> <span class="ow">in</span> <span class="nv">users</span> <span class="cp">%}</span>...<span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span>
 </code></pre></div>
 <h2 id="whitespace-control">Whitespace Control</h2>
 
@@ -712,9 +713,9 @@ cleanly, which requires whitespace.</p>
 
 <p>You can tell the engine to strip all leading or trailing whitespace by adding a
 minus sign (<code>-</code>) to the start or end block tag.</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">for</span> <span class="nv">i</span> <span class="k">in</span> <span class="o">[</span><span class="m">1</span><span class="o">,</span><span class="m">2</span><span class="o">,</span><span class="m">3</span><span class="o">,</span><span class="m">4</span><span class="o">,</span><span class="m">5</span><span class="o">]</span> -<span class="cp">%}</span><span class="x"></span>
-<span class="x">  </span><span class="cp">{{</span> <span class="nv">i</span> <span class="cp">}}</span><span class="x"></span>
-<span class="cp">{%</span>- <span class="k">endfor</span> <span class="cp">%}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">for</span> <span class="nv">i</span> <span class="ow">in</span> <span class="p">[</span><span class="nv">1</span><span class="p">,</span><span class="nv">2</span><span class="p">,</span><span class="nv">3</span><span class="p">,</span><span class="nv">4</span><span class="p">,</span><span class="nv">5</span><span class="p">]</span> <span class="o">-</span><span class="cp">%}</span>
+  <span class="cp">{{</span> <span class="nv">i</span> <span class="cp">}}</span>
+<span class="cp">{%</span><span class="o">-</span> <span class="k">endfor</span> <span class="cp">%}</span>
 </code></pre></div>
 <p>The exact output of the above would be &quot;12345&quot;. The <code>-%}</code> strips the whitespace
 right after the tag, and the <code>{%-</code> strips the whitespace right before the tag.</p>
@@ -748,9 +749,9 @@ available:</p>
 </ul>
 
 <p>You can use them like this:</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="m">2</span> <span class="o">+</span> <span class="m">3</span> <span class="cp">}}</span><span class="x">       (outputs 5)</span>
-<span class="cp">{{</span> <span class="m">10</span><span class="o">/</span><span class="m">5</span> <span class="cp">}}</span><span class="x">        (outputs 2)</span>
-<span class="cp">{{</span> <span class="nv">numItems</span><span class="o">*</span><span class="m">2</span> <span class="cp">}}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">2</span> <span class="o">+</span> <span class="nv">3</span> <span class="cp">}}</span>       (outputs 5)
+<span class="cp">{{</span> <span class="nv">10</span><span class="o">/</span><span class="nv">5</span> <span class="cp">}}</span>        (outputs 2)
+<span class="cp">{{</span> <span class="nv">numItems</span><span class="o">*</span><span class="nv">2</span> <span class="cp">}}</span>
 </code></pre></div>
 <h3 id="comparisons">Comparisons</h3>
 
@@ -764,8 +765,53 @@ available:</p>
 </ul>
 
 <p>Examples:</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">if</span> <span class="nv">numUsers</span> <span class="o">&lt;</span> <span class="m">5</span> <span class="cp">%}</span><span class="x">...</span><span class="cp">{%</span> <span class="k">endif</span> <span class="cp">%}</span><span class="x"></span>
-<span class="cp">{%</span> <span class="k">if</span> <span class="nv">i</span> <span class="o">==</span> <span class="m">0</span> <span class="cp">%}</span><span class="x">...</span><span class="cp">{%</span> <span class="k">endif</span> <span class="cp">%}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span><span class="o">-</span><span class="err">`</span> <span class="nv">strips</span> <span class="nv">the</span> <span class="nv">whitespace</span> <span class="nv">right</span> <span class="nv">before</span> <span class="nv">the</span> <span class="nv">tag.</span>
+
+<span class="err">##</span> <span class="nv">Expressions</span>
+
+<span class="nv">You</span> <span class="nv">can</span> <span class="nv">use</span> <span class="nv">many</span> <span class="nv">types</span> <span class="nv">of</span> <span class="nv">literal</span> <span class="nv">expressions</span> <span class="nv">that</span> <span class="nv">you</span> <span class="nv">are</span> <span class="nv">used</span> <span class="nv">to</span> <span class="ow">in</span> <span class="nv">javascript.</span>
+
+<span class="o">*</span> <span class="nv">Strings</span><span class="err">:</span> <span class="err">`</span><span class="s2">"How are you?"</span><span class="err">`</span><span class="p">,</span> <span class="err">`</span><span class="s1">'How are you?'</span><span class="err">`</span>
+<span class="o">*</span> <span class="nv">Numbers</span><span class="err">:</span> <span class="err">`</span><span class="nv">40</span><span class="err">`</span><span class="p">,</span> <span class="err">`</span><span class="nv">30.123</span><span class="err">`</span>
+<span class="o">*</span> <span class="nv">Arrays</span><span class="err">:</span> <span class="err">`</span><span class="p">[</span><span class="nv">1</span><span class="p">,</span> <span class="nv">2</span><span class="p">,</span> <span class="s2">"array"</span><span class="p">]</span><span class="err">`</span>
+<span class="o">*</span> <span class="nv">Dicts</span><span class="err">:</span> <span class="err">`{</span> <span class="nv">one</span><span class="err">:</span> <span class="nv">1</span><span class="p">,</span> <span class="nv">two</span><span class="err">:</span> <span class="nv">2</span> <span class="err">}`</span>
+<span class="o">*</span> <span class="nv">Boolean</span><span class="err">:</span> <span class="err">`</span><span class="kp">true</span><span class="err">`</span><span class="p">,</span> <span class="err">`</span><span class="kp">false</span><span class="err">`</span>
+
+<span class="err">###</span> <span class="nv">Math</span>
+
+<span class="nv">Nunjucks</span> <span class="nv">allows</span> <span class="nv">you</span> <span class="nv">to</span> <span class="nv">operate</span> <span class="nv">on</span> <span class="nv">values</span> <span class="p">(</span><span class="nv">though</span> <span class="nv">it</span> <span class="nv">should</span> <span class="nv">be</span> <span class="nv">used</span> <span class="nv">sparingly</span><span class="p">,</span>
+<span class="k">as</span> <span class="nv">most</span> <span class="nv">of</span> <span class="nv">your</span> <span class="nv">logic</span> <span class="nv">should</span> <span class="nv">be</span> <span class="ow">in</span> <span class="nv">code</span><span class="p">)</span><span class="err">.</span> <span class="nv">The</span> <span class="nv">following</span> <span class="nv">operators</span> <span class="nv">are</span>
+<span class="nv">available</span><span class="err">:</span>
+
+<span class="o">*</span> <span class="nv">Addition</span><span class="err">:</span> <span class="err">`</span><span class="o">+</span><span class="err">`</span>
+<span class="o">*</span> <span class="nv">Subtraction</span><span class="err">:</span> <span class="err">`</span><span class="o">-</span><span class="err">`</span>
+<span class="o">*</span> <span class="nv">Division</span><span class="err">:</span> <span class="err">`</span><span class="o">/</span><span class="err">`</span>
+<span class="o">*</span> <span class="nv">Division</span> <span class="ow">and</span> <span class="nv">integer</span> <span class="nv">truncation</span><span class="err">:</span> <span class="err">`</span><span class="o">//</span><span class="err">`</span>
+<span class="o">*</span> <span class="nv">Division</span> <span class="nv">remainder</span><span class="err">:</span> <span class="err">`%`</span>
+<span class="o">*</span> <span class="nv">Multiplication</span><span class="err">:</span> <span class="err">`</span><span class="o">*</span><span class="err">`</span>
+<span class="o">*</span> <span class="nv">Power</span><span class="err">:</span> <span class="err">`</span><span class="o">**</span><span class="err">`</span>
+
+<span class="nv">You</span> <span class="nv">can</span> <span class="nv">use</span> <span class="nv">them</span> <span class="nv">like</span> <span class="nv">this</span><span class="err">:</span>
+
+<span class="err">```</span><span class="nv">jinja</span>
+<span class="err">{{</span> <span class="nv">2</span> <span class="o">+</span> <span class="nv">3</span> <span class="err">}}</span>       <span class="p">(</span><span class="nv">outputs</span> <span class="nv">5</span><span class="p">)</span>
+<span class="err">{{</span> <span class="nv">10</span><span class="o">/</span><span class="nv">5</span> <span class="err">}}</span>        <span class="p">(</span><span class="nv">outputs</span> <span class="nv">2</span><span class="p">)</span>
+<span class="err">{{</span> <span class="nv">numItems</span><span class="o">*</span><span class="nv">2</span> <span class="err">}}</span>
+</code></pre></div>
+<h3 id="comparisons">Comparisons</h3>
+
+<ul>
+<li><code>==</code></li>
+<li><code>!=</code></li>
+<li><code>&gt;</code></li>
+<li><code>&gt;=</code></li>
+<li><code>&lt;</code></li>
+<li><code>&lt;=</code></li>
+</ul>
+
+<p>Examples:</p>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">if</span> <span class="nv">numUsers</span> <span class="o">&lt;</span> <span class="nv">5</span> <span class="cp">%}</span>...<span class="cp">{%</span> <span class="k">endif</span> <span class="cp">%}</span>
+<span class="cp">{%</span> <span class="k">if</span> <span class="nv">i</span> <span class="o">==</span> <span class="nv">0</span> <span class="cp">%}</span>...<span class="cp">{%</span> <span class="k">endif</span> <span class="cp">%}</span>
 </code></pre></div>
 <h3 id="logic">Logic</h3>
 
@@ -777,32 +823,32 @@ available:</p>
 </ul>
 
 <p>Examples:</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">if</span> <span class="nv">users</span> <span class="k">and</span> <span class="nv">showUsers</span> <span class="cp">%}</span><span class="x">...</span><span class="cp">{%</span> <span class="k">endif</span> <span class="cp">%}</span><span class="x"></span>
-<span class="cp">{%</span> <span class="k">if</span> <span class="nv">i</span> <span class="o">==</span> <span class="m">0</span> <span class="k">and</span> <span class="k">not</span> <span class="nv">hideFirst</span> <span class="cp">%}</span><span class="x">...</span><span class="cp">{%</span> <span class="k">endif</span> <span class="cp">%}</span><span class="x"></span>
-<span class="cp">{%</span> <span class="k">if</span> <span class="o">(</span><span class="nv">x</span> <span class="o">&lt;</span> <span class="m">5</span> <span class="k">or</span> <span class="nv">y</span> <span class="o">&lt;</span> <span class="m">5</span><span class="o">)</span> <span class="k">and</span> <span class="nv">foo</span> <span class="cp">%}</span><span class="x">...</span><span class="cp">{%</span> <span class="k">endif</span> <span class="cp">%}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">if</span> <span class="nv">users</span> <span class="ow">and</span> <span class="nv">showUsers</span> <span class="cp">%}</span>...<span class="cp">{%</span> <span class="k">endif</span> <span class="cp">%}</span>
+<span class="cp">{%</span> <span class="k">if</span> <span class="nv">i</span> <span class="o">==</span> <span class="nv">0</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nv">hideFirst</span> <span class="cp">%}</span>...<span class="cp">{%</span> <span class="k">endif</span> <span class="cp">%}</span>
+<span class="cp">{%</span> <span class="k">if</span> <span class="p">(</span><span class="nv">x</span> <span class="o">&lt;</span> <span class="nv">5</span> <span class="ow">or</span> <span class="nv">y</span> <span class="o">&lt;</span> <span class="nv">5</span><span class="p">)</span> <span class="ow">and</span> <span class="nv">foo</span> <span class="cp">%}</span>...<span class="cp">{%</span> <span class="k">endif</span> <span class="cp">%}</span>
 </code></pre></div>
 <h3 id="if-expression">If Expression</h3>
 
 <p>Similar to javascript&#39;s ternary operator, you can use <code>if</code> as if it were an
 inline expression:</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="s2">&quot;true&quot;</span> <span class="k">if</span> <span class="nv">foo</span> <span class="k">else</span> <span class="s2">&quot;false&quot;</span> <span class="cp">}}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="s2">"true"</span> <span class="nv">if</span> <span class="nv">foo</span> <span class="nv">else</span> <span class="s2">"false"</span> <span class="cp">}}</span>
 </code></pre></div>
 <p>The above outputs the string &quot;true&quot; if foo is truthy, otherwise &quot;false&quot;. This
 is especially useful for default values like so:</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">baz</span><span class="o">(</span><span class="nv">foo</span> <span class="k">if</span> <span class="nv">foo</span> <span class="k">else</span> <span class="s2">&quot;default&quot;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">baz</span><span class="p">(</span><span class="nv">foo</span> <span class="nv">if</span> <span class="nv">foo</span> <span class="nv">else</span> <span class="s2">"default"</span><span class="p">)</span> <span class="cp">}}</span>
 </code></pre></div>
 <h3 id="function-calls">Function Calls</h3>
 
 <p>If you have passed a javascript method to your template, you can call it like
 normal.</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">foo</span><span class="o">(</span><span class="m">1</span><span class="o">,</span> <span class="m">2</span><span class="o">,</span> <span class="m">3</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">foo</span><span class="p">(</span><span class="nv">1</span><span class="p">,</span> <span class="nv">2</span><span class="p">,</span> <span class="nv">3</span><span class="p">)</span> <span class="cp">}}</span>
 </code></pre></div>
 <h3 id="regular-expressions">Regular Expressions</h3>
 
 <p>A regular expression can be created just like JavaScript:</p>
-<div class="highlight"><pre><code class="language-text" data-lang="text">{{ /^foo.*/ }}
-{{ /bar$/g }}
-</code></pre></div>
+<div class="highlight"><pre><code class="language-" data-lang=""><span class="p">{</span><span class="err">{</span><span class="w"> </span><span class="err">/^foo.*/</span><span class="w"> </span><span class="p">}</span><span class="err">}</span><span class="w">
+</span><span class="p">{</span><span class="err">{</span><span class="w"> </span><span class="err">/bar$/g</span><span class="w"> </span><span class="p">}</span><span class="err">}</span><span class="w">
+</span></code></pre></div>
 <p>The supported flags are the following. See
 <a href="https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/RegExp">Regex on MDN</a>
 for more information.</p>
@@ -819,13 +865,13 @@ for more information.</p>
 <p>If autoescaping is turned on in the environment, all output will automatically
 be escaped for safe output. To manually mark output as safe, use the <code>safe</code>
 filter. Nunjucks will not escape this output.</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">foo</span> <span class="cp">}}</span><span class="x">           // &amp;lt;span%gt;</span>
-<span class="cp">{{</span> <span class="nv">foo</span> <span class="o">|</span> <span class="nf">safe</span> <span class="cp">}}</span><span class="x">    // &lt;span&gt;</span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">foo</span> <span class="cp">}}</span>           // <span class="ni">&amp;lt;</span>span%gt;
+<span class="cp">{{</span> <span class="nv">foo</span> <span class="err">|</span> <span class="nv">safe</span> <span class="cp">}}</span>    // <span class="nt">&lt;span&gt;</span>
 </code></pre></div>
 <p>If autoescaping is turned off, all output will be rendered as it is. You can
 manually escape variables with the <code>escape</code> filter.</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">foo</span> <span class="cp">}}</span><span class="x">           // &lt;span&gt;</span>
-<span class="cp">{{</span> <span class="nv">foo</span> <span class="o">|</span> <span class="nf">escape</span> <span class="cp">}}</span><span class="x">  // &amp;lt;span&amp;gt;</span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">foo</span> <span class="cp">}}</span>           // <span class="nt">&lt;span&gt;</span>
+<span class="cp">{{</span> <span class="nv">foo</span> <span class="err">|</span> <span class="nv">escape</span> <span class="cp">}}</span>  // <span class="ni">&amp;lt;</span>span<span class="ni">&amp;gt;</span>
 </code></pre></div>
 <h2 id="global-functions">Global Functions</h2>
 
@@ -836,9 +882,9 @@ manually escape variables with the <code>escape</code> filter.</p>
 <p>If you need to iterate over a fixed set of numbers, <code>range</code> generates the set
 for you. The numbers begin at <code>start</code> (default 0) and increment by <code>step</code>
 (default 1) until it reaches <code>stop</code>, not including it.</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">for</span> <span class="nv">i</span> <span class="k">in</span> <span class="nv">range</span><span class="o">(</span><span class="m">0</span><span class="o">,</span> <span class="m">5</span><span class="o">)</span> -<span class="cp">%}</span><span class="x"></span>
-<span class="x">  </span><span class="cp">{{</span> <span class="nv">i</span> <span class="cp">}}</span><span class="x">,</span>
-<span class="cp">{%</span>- <span class="k">endfor</span> <span class="cp">%}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">for</span> <span class="nv">i</span> <span class="ow">in</span> <span class="nv">range</span><span class="p">(</span><span class="nv">0</span><span class="p">,</span> <span class="nv">5</span><span class="p">)</span> <span class="o">-</span><span class="cp">%}</span>
+  <span class="cp">{{</span> <span class="nv">i</span> <span class="cp">}}</span>,
+<span class="cp">{%</span><span class="o">-</span> <span class="k">endfor</span> <span class="cp">%}</span>
 </code></pre></div>
 <p>The above outputs <code>0,1,2,3,4</code>.</p>
 
@@ -846,10 +892,10 @@ for you. The numbers begin at <code>start</code> (default 0) and increment by <c
 
 <p>An easy way to rotate through several values is to use <code>cycler</code>, which takes
 any number of arguments and cycles through them.</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">set</span> <span class="nv">cls</span> <span class="o">=</span> <span class="nv">cycler</span><span class="o">(</span><span class="s2">&quot;odd&quot;</span><span class="o">,</span> <span class="s2">&quot;even&quot;</span><span class="o">)</span> <span class="cp">%}</span><span class="x"></span>
-<span class="cp">{%</span> <span class="k">for</span> <span class="nv">row</span> <span class="k">in</span> <span class="nv">rows</span> <span class="cp">%}</span><span class="x"></span>
-<span class="x">  &lt;div class=&quot;</span><span class="cp">{{</span> <span class="nv">cls.next</span><span class="o">()</span> <span class="cp">}}</span><span class="x">&quot;&gt;</span><span class="cp">{{</span> <span class="nv">row.name</span> <span class="cp">}}</span><span class="x">&lt;/div&gt;</span>
-<span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">set</span> <span class="nv">cls</span> <span class="err">=</span> <span class="nv">cycler</span><span class="p">(</span><span class="s2">"odd"</span><span class="p">,</span> <span class="s2">"even"</span><span class="p">)</span> <span class="cp">%}</span>
+<span class="cp">{%</span> <span class="k">for</span> <span class="nv">row</span> <span class="ow">in</span> <span class="nv">rows</span> <span class="cp">%}</span>
+  <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"</span><span class="cp">{{</span> <span class="nv">cls.next</span><span class="p">()</span> <span class="cp">}}</span><span class="s">"</span><span class="nt">&gt;</span><span class="cp">{{</span> <span class="nv">row.name</span> <span class="cp">}}</span><span class="nt">&lt;/div&gt;</span>
+<span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span>
 </code></pre></div>
 <p>In the above example, odd rows have the class &quot;odd&quot; and even rows have the
 class &quot;even&quot;. You can access the current item on the <code>current</code> property (in the
@@ -861,10 +907,10 @@ above example, <code>cls.current</code>).</p>
 something like a comma, but you don&#39;t want to output the separator for the
 first item. The <code>joiner</code> class will output <code>separator</code> (default &quot;,&quot;) whenever
 it is called except for the first time.</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">set</span> <span class="nv">comma</span> <span class="o">=</span> <span class="nv">joiner</span><span class="o">()</span> <span class="cp">%}</span><span class="x"></span>
-<span class="cp">{%</span> <span class="k">for</span> <span class="nv">tag</span> <span class="k">in</span> <span class="nv">tags</span> -<span class="cp">%}</span><span class="x"></span>
-<span class="x">  </span><span class="cp">{{</span> <span class="nv">comma</span><span class="o">()</span> <span class="cp">}}</span><span class="x"> </span><span class="cp">{{</span> <span class="nv">tag</span> <span class="cp">}}</span><span class="x"></span>
-<span class="cp">{%</span>- <span class="k">endfor</span> <span class="cp">%}</span><span class="x"></span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">set</span> <span class="nv">comma</span> <span class="err">=</span> <span class="nv">joiner</span><span class="p">()</span> <span class="cp">%}</span>
+<span class="cp">{%</span> <span class="k">for</span> <span class="nv">tag</span> <span class="ow">in</span> <span class="nv">tags</span> <span class="o">-</span><span class="cp">%}</span>
+  <span class="cp">{{</span> <span class="nv">comma</span><span class="p">()</span> <span class="cp">}}</span> <span class="cp">{{</span> <span class="nv">tag</span> <span class="cp">}}</span>
+<span class="cp">{%</span><span class="o">-</span> <span class="k">endfor</span> <span class="cp">%}</span>
 </code></pre></div>
 <p>If <code>tags</code> was <code>[&quot;food&quot;, &quot;beer&quot;, &quot;dessert&quot;]</code>, the above example would output <code>food, beer, dessert</code>.</p>
 

@@ -110,6 +110,15 @@
             finish(done);
         });
 
+        it('should work with non-string values', function(done) {
+            var res1 = render('{{ foo | escape }}', {foo: ['<html>']}, { autoescape: false });
+            expect(res1).to.be('&lt;html&gt;');
+
+            var res2 = render('{{ foo | escape }}', {foo: {toString: function() { return '<html>'; }}}, { autoescape: false });
+            expect(res2).to.be('&lt;html&gt;');
+            finish(done);
+        });
+
         it('should not escape safe strings with autoescape on', function(done) {
             var res1 = render('{{ "<html>" | safe | escape }}', {}, { autoescape: true });
             expect(res1).to.be('<html>');
