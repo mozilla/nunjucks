@@ -79,7 +79,7 @@
     <h1 id="prise-en-main">Prise en main</h1>
 
 <h2 id="lorsque-nous-utilisons-node">Lorsque nous utilisons Node ...</h2>
-<div class="highlight"><pre><code class="language-" data-lang="">$ npm install nunjucks
+<div class="highlight"><pre><code class="language-text" data-lang="text">$ npm install nunjucks
 </code></pre></div>
 <p>Une fois installé, utilisez simplement <code>require(&#39;nunjucks&#39;)</code> pour le charger.</p>
 
@@ -104,10 +104,10 @@ de s&#39;en servir en développement à condition de lancer la tâche <a href="h
 </ul>
 
 <p>Il suffit d&#39;inclure nunjucks avec une balise <code>script</code> dans la page :</p>
-<div class="highlight"><pre><code class="language-html" data-lang="html"><span class="nt">&lt;script </span><span class="na">src=</span><span class="s">"nunjucks.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
+<div class="highlight"><pre><code class="language-html" data-lang="html"><span class="nt">&lt;script </span><span class="na">src=</span><span class="s">&quot;nunjucks.js&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
 </code></pre></div>
 <p>ou le charger comme un module AMD :</p>
-<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">define</span><span class="p">([</span><span class="s1">'nunjucks'</span><span class="p">],</span> <span class="kd">function</span><span class="p">(</span><span class="nx">nunjucks</span><span class="p">)</span> <span class="p">{</span>
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">define</span><span class="p">([</span><span class="s1">&#39;nunjucks&#39;</span><span class="p">],</span> <span class="kd">function</span><span class="p">(</span><span class="nx">nunjucks</span><span class="p">)</span> <span class="p">{</span>
 <span class="p">});</span>
 </code></pre></div>
 <blockquote>
@@ -122,15 +122,15 @@ pour en savoir plus sur les configurations optimales côté client.</p>
 
 <p>Ceci est la façon la plus simple pour utiliser nunjucks. Tout d&#39;abord, définissez les indicateurs
 de configuration comme par exemple l&#39;auto-échappement puis faites le rendu d&#39;une chaîne :</p>
-<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">nunjucks</span><span class="p">.</span><span class="nx">configure</span><span class="p">({</span> <span class="na">autoescape</span><span class="p">:</span> <span class="kc">true</span> <span class="p">});</span>
-<span class="nx">nunjucks</span><span class="p">.</span><span class="nx">renderString</span><span class="p">(</span><span class="s1">'Hello {{ username }}'</span><span class="p">,</span> <span class="p">{</span> <span class="na">username</span><span class="p">:</span> <span class="s1">'James'</span> <span class="p">});</span>
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">nunjucks</span><span class="p">.</span><span class="nx">configure</span><span class="p">({</span> <span class="nx">autoescape</span><span class="o">:</span> <span class="kc">true</span> <span class="p">});</span>
+<span class="nx">nunjucks</span><span class="p">.</span><span class="nx">renderString</span><span class="p">(</span><span class="s1">&#39;Hello {{ username }}&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">username</span><span class="o">:</span> <span class="s1">&#39;James&#39;</span> <span class="p">});</span>
 </code></pre></div>
 <p>Généralement, vous n&#39;utiliserez pas <code>renderString</code>, au lieu de cela, vous devez écrire
 des templates dans des fichiers individuels et utiliser <code>render</code>. De cette façon, vous pouvez
 hériter et inclure des templates. Dans ce cas, vous devez dire à nunjucks
 où se trouvent ces fichiers templates avec le premier argument de <code>configure</code> :</p>
-<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">nunjucks</span><span class="p">.</span><span class="nx">configure</span><span class="p">(</span><span class="s1">'views'</span><span class="p">,</span> <span class="p">{</span> <span class="na">autoescape</span><span class="p">:</span> <span class="kc">true</span> <span class="p">});</span>
-<span class="nx">nunjucks</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="s1">'index.html'</span><span class="p">,</span> <span class="p">{</span> <span class="na">foo</span><span class="p">:</span> <span class="s1">'bar'</span> <span class="p">});</span>
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">nunjucks</span><span class="p">.</span><span class="nx">configure</span><span class="p">(</span><span class="s1">&#39;views&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">autoescape</span><span class="o">:</span> <span class="kc">true</span> <span class="p">});</span>
+<span class="nx">nunjucks</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="s1">&#39;index.html&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">foo</span><span class="o">:</span> <span class="s1">&#39;bar&#39;</span> <span class="p">});</span>
 </code></pre></div>
 <p>Dans node, <code>&#39;views&#39;</code> serait un chemin relatif par rapport au répertoire de travail
 actuel. Dans le navigateur, ce serait une URL relative et vous
@@ -139,13 +139,13 @@ voulez probablement qu&#39;elle soit absolue, telle que <code>&#39;/views&#39;</
 <p>En utilisant express ? Il suffit simplement de passer votre app express dans <code>configure</code> :</p>
 <div class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">app</span> <span class="o">=</span> <span class="nx">express</span><span class="p">();</span>
 
-<span class="nx">nunjucks</span><span class="p">.</span><span class="nx">configure</span><span class="p">(</span><span class="s1">'views'</span><span class="p">,</span> <span class="p">{</span>
-    <span class="na">autoescape</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
-    <span class="na">express</span><span class="p">:</span> <span class="nx">app</span>
+<span class="nx">nunjucks</span><span class="p">.</span><span class="nx">configure</span><span class="p">(</span><span class="s1">&#39;views&#39;</span><span class="p">,</span> <span class="p">{</span>
+    <span class="nx">autoescape</span><span class="o">:</span> <span class="kc">true</span><span class="p">,</span>
+    <span class="nx">express</span><span class="o">:</span> <span class="nx">app</span>
 <span class="p">});</span>
 
-<span class="nx">app</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">'/'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">req</span><span class="p">,</span> <span class="nx">res</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">res</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="s1">'index.html'</span><span class="p">);</span>
+<span class="nx">app</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">req</span><span class="p">,</span> <span class="nx">res</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">res</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="s1">&#39;index.html&#39;</span><span class="p">);</span>
 <span class="p">});</span>
 </code></pre></div>
 <p>L&#39;API ci-dessus fonctionne dans node et dans le navigateur (express est seulement
