@@ -155,7 +155,7 @@ Right side!
 
 The output of the block would be:
 
-```
+```html
 This is more content
 Right side!
 ```
@@ -616,7 +616,7 @@ Macros allow you to also use keyword arguments in the definition, which allows
 you to specify default values. Nunjucks automatically maps the keyword
 arguments to the ones defined with the macro.
 
-```
+```jinja
 {% macro foo(x, y, z=5, w=6) %}
 {{ x }}, {{ y }}, {{ z }}, {{ w}}
 {% endmacro %}
@@ -670,8 +670,18 @@ minus sign (`-`) to the start or end block tag.
 {%- endfor %}
 ```
 
-The exact output of the above would be "12345". The `-%}` strips the whitespace
-right after the tag, and the `{%-` strips the whitespace right before the tag.
+The exact output of the above would be "12345".
+The dash on the closing brace strips whitespace right after the tag.
+
+```jinja
+-%}
+```
+
+The dash on the opening brace strips the whitespace right before the tag.
+
+```jinja
+{%-
+```
 
 ## Expressions
 
@@ -718,7 +728,7 @@ You can use them like this:
 
 Examples:
 
-```jinja
+``` jinja
 {% if numUsers < 5 %}...{% endif %}
 {% if i == 0 %}...{% endif %}
 ```
@@ -743,14 +753,14 @@ Examples:
 Similar to javascript's ternary operator, you can use `if` as if it were an
 inline expression:
 
-```jinja
+``` jinja
 {{ "true" if foo else "false" }}
 ```
 
 The above outputs the string "true" if foo is truthy, otherwise "false". This
 is especially useful for default values like so:
 
-```jinja
+``` jinja
 {{ baz(foo if foo else "default") }}
 ```
 
@@ -759,7 +769,7 @@ is especially useful for default values like so:
 If you have passed a javascript method to your template, you can call it like
 normal.
 
-```jinja
+``` jinja
 {{ foo(1, 2, 3) }}
 ```
 
@@ -767,7 +777,7 @@ normal.
 
 A regular expression can be created just like JavaScript:
 
-```
+``` jinja
 {{ /^foo.*/ }}
 {{ /bar$/g }}
 ```
