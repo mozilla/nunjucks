@@ -89,7 +89,7 @@ et les options suivantes sont disponibles dans **opts** :
 * **noCache** *(par défaut : false)* ne jamais utiliser le cache et recompiler les templates à chaque fois (côté serveur)
 * **web** un objet pour la configuration du chargement des templates dans le navigateur :
   * **useCache** *(par défaut : false)* activera le cache et les templates ne verront jamais les mises à jour.
-  * **async** *(par défaut : false)* chargera les templates de manière asynchrone au lieu de façon synchrone.
+  * **async** *(par défaut : false)* chargera les templates de manière asynchrone au lieu de façon synchrone. (Nécessite l'utilisation de [l'API asynchrone](#support-asynchrone) pour le rendu).
 * **express** une app express que nunjucks doit installer
 * **tags:** *(par défaut : voir la syntaxe nunjucks)* définit la syntaxe pour
     les tags de nunjucks. Voir [Personnalisation de la Syntaxe](#personnalisation-de-la-syntaxe)
