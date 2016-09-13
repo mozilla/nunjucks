@@ -1,6 +1,12 @@
 Changelog
 =========
 
+2.5.1 (Sep 13 2016)
+----------------
+
+* Fix `undefined` and `null` behavior in escape and safe filter.
+  Merge of [#843](https://github.com/mozilla/nunjucks/pull/843).
+
 
 2.5.0 (Sep 7 2016)
 ----------------
