@@ -116,6 +116,10 @@
 
             var res2 = render('{{ foo | escape }}', {foo: {toString: function() { return '<html>'; }}}, { autoescape: false });
             expect(res2).to.be('&lt;html&gt;');
+
+            var res3 = render('{{ foo | escape }}', { foo: null }, { autoescape: false });
+            expect(res3).to.be('');
+
             finish(done);
         });
 

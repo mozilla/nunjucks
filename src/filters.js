@@ -119,10 +119,12 @@ var filters = {
         if(str instanceof r.SafeString) {
             return str;
         }
+        str = (str === null || str === undefined) ? '' : str;
         return r.markSafe(lib.escape(str.toString()));
     },
 
     safe: function(str) {
+        str = (str === null || str === undefined) ? '' : str;
         return r.markSafe(str);
     },
 
