@@ -14,13 +14,22 @@ Ceci est un aperçu des caractéristiques des templates disponibles dans Nunjuck
 > chose ici. Découvrez les différences
 > [ici](faq.html#puis-je-utiliser-les-mmes-modles-entre-nunjucks-et-jinja2-quelles-sont-les-diffrences).
 
-## File Extensions
+## Extensions de fichier
 
 Bien que vous soyez libre d'utiliser n'importe quelle extension de fichier pour vos
-fichiers de template Nunjucks, la communauté de Nunjucks a adopté `.njk`.
+fichiers de template Nunjucks, la communauté de Nunjucks a adopté `.njk`.  
 
 Si vous développez des outils ou des aides de syntaxe pour éditeur pour Nunjucks,
 veuillez inclure la reconnaissance de l'extension `.njk`.
+
+## Coloration syntaxique
+
+Des plugins sont disponibles pour les différents éditeurs pour prendre en charge la coloration syntaxique de `jinja` de Nunjucks.
+
+* atom <https://github.com/alohaas/language-nunjucks>
+* vim <https://github.com/niftylettuce/vim-jinja>
+* brackets <https://github.com/axelboc/nunjucks-brackets>
+* sublime <https://github.com/mogga/sublime-nunjucks/blob/master/Nunjucks.tmLanguage>
 
 ## Variables
 
@@ -63,7 +72,7 @@ Le troisième exemple montre comment vous pouvez enchaîner des filtres. Cela af
 
 Nunjucks est livré avec plusieurs
 [filtres intégrés](#filtres-intgrs) et vous pouvez aussi
-[ajouter vos propres filtres](api.html#filtres-personnaliss).
+[ajouter vos propres filtres](api.html#filtres-personnalis-s).
 
 ## L'héritage de template
 
@@ -170,8 +179,7 @@ exactement comme le `if` de javascript.
 Si `variable` est défini et évalué à `true`, "C'est vrai"
 s'affichera, sinon rien n'apparaitra.
 
-Vous pouvez spécifier des conditions alternatives avec `elif` (ou `elseif` qui est un simple alias de `elif`)
-et `else` :
+Vous pouvez spécifier des conditions alternatives avec `elif` et `else` :
 
 ```jinja
 {% if faim %}
@@ -543,7 +551,7 @@ Template compilé : `{% import name + ".html" as obj %}`.
 ### raw
 
 Si vous voulez afficher des balises spéciales de Nunjucks comme `{{`, vous pouvez utiliser
-`raw` et tout ce qui sera à l'intérieur de celui-ci sera afficher au format texte brut.
+un bloc `{% raw %}` et tout ce qui sera à l'intérieur de celui-ci sera affiché au format texte brut.
 
 ### filter
 
@@ -759,7 +767,7 @@ normalement.
 
 Une expression régulière peut être créée comme en JavaScript :
 
-```
+```jinja
 {{ /^foo.*/ }}
 {{ /bar$/g }}
 ```
@@ -884,41 +892,821 @@ utilisez le comportement par défaut.
 Appelle `JSON.stringify` sur un objet et déverse le résultat dans le
 template. C'est utile pour le débogage : `{{ foo | dump }}`.
 
-### Plus de filtres
+### abs
 
-* [abs](http://jinja.pocoo.org/docs/templates/#abs)
-* [batch](http://jinja.pocoo.org/docs/templates/#batch)
-* [capitalize](http://jinja.pocoo.org/docs/templates/#capitalize)
-* [center](http://jinja.pocoo.org/docs/templates/#center)
-* [dictsort](http://jinja.pocoo.org/docs/templates/#dictsort)
-* [escape](http://jinja.pocoo.org/docs/templates/#escape) (raccourci avec `e`)
-* [float](http://jinja.pocoo.org/docs/templates/#float)
-* [first](http://jinja.pocoo.org/docs/templates/#first)
-* [groupby](http://jinja.pocoo.org/docs/templates/#groupby)
-* [indent](http://jinja.pocoo.org/docs/templates/#indent)
-* [int](http://jinja.pocoo.org/docs/templates/#int)
-* [join](http://jinja.pocoo.org/docs/templates/#join)
-* [last](http://jinja.pocoo.org/docs/templates/#last)
-* [length](http://jinja.pocoo.org/docs/templates/#length)
-* [list](http://jinja.pocoo.org/docs/templates/#list)
-* [lower](http://jinja.pocoo.org/docs/templates/#lower)
-* [random](http://jinja.pocoo.org/docs/templates/#random)
-* [rejectattr](http://jinja.pocoo.org/docs/templates/#rejectattr) (seulement pour le formulaire avec un unique argument)
-* [replace](http://jinja.pocoo.org/docs/templates/#replace) (le premier argument peut prendre une expression régulière JS)
-* [reverse](http://jinja.pocoo.org/docs/templates/#reverse)
-* [round](http://jinja.pocoo.org/docs/templates/#round)
-* [safe](http://jinja.pocoo.org/docs/templates/#safe)
-* [selectattr](http://jinja.pocoo.org/docs/templates/#selectattr) (seulement pour le formulaire avec un unique argument)
-* [slice](http://jinja.pocoo.org/docs/templates/#slice)
-* [string](http://jinja.pocoo.org/docs/templates/#string)
-* [sum](http://jinja.pocoo.org/docs/dev/templates/#sum)
-* [title](http://jinja.pocoo.org/docs/templates/#title)
-* [trim](http://jinja.pocoo.org/docs/templates/#trim)
-* [truncate](http://jinja.pocoo.org/docs/templates/#truncate)
-* [upper](http://jinja.pocoo.org/docs/templates/#upper)
-* [urlize](http://jinja.pocoo.org/docs/templates/#urlize)
-* [urlencode](http://jinja.pocoo.org/docs/templates/#urlencode)
-* [wordcount](http://jinja.pocoo.org/docs/templates/#wordcount)
+Retourne la valeur absolue de l'argument :
+
+**Entrée**
+
+```jinja
+{{ -3|abs }}
+```
+
+**Sortie**
+
+```jinja
+3
+```
+
+### batch
+
+Retourne une liste de listes avec le numéro des éléments :
+
+**Entrée**
+
+```jinja
+{% set items = [1,2,3,4,5,6] %}
+{% for item in items | batch(2) %}
+    -{% for items in item %}
+       {{ items }}
+    {% endfor %}
+{% endfor %}
+```
+
+**Sortie**
+
+```jinja
+12-34-56
+```
+
+### capitalize
+
+Met la première lettre en majuscule et le reste en minuscule :
+
+**Entrée**
+
+```jinja
+{{ "Ceci Est Un Test" | capitalize }}
+```
+
+**Sortie**
+
+```jinja
+Ceci est un test
+```
+
+
+### center
+
+Centre la valeur dans un champ d'une largeur donnée :
+
+**Entrée**
+
+```jinja
+{{ "fooo" | center }}
+```
+
+**Sortie**
+
+```jinja
+fooo
+```
+
+### dictsort
+
+Tri un dictionnaire et rend des paires (clé, valeur) :
+
+```jinja
+{% set items = {
+    'e': 1,
+    'd': 2,
+    'c': 3,
+    'a': 4,
+    'f': 5,
+    'b': 6
+} %}
+{% for item in items | dictsort %}
+    {{ item[0] }}
+{% endfor %}
+```
+
+**Sortie**
+
+```jinja
+a b c d e f
+```
+
+### escape (aliased as e)
+
+Convertit les caractères &, <, >, â€˜, et â€ dans des chaines avec des séquences HTML sécurisées.
+Utilisez cette option si vous avez besoin d'afficher du texte qui pourraient contenir des caractères en HTML.
+Les résultats rendent la valeur comme une chaîne de balisage.
+
+**Entrée**
+
+```jinja
+{{ "<html>" | escape }}
+```
+
+**Sortie**
+
+```jinja
+&lt;html&gt;
+```
+
+### float
+
+Convertit une valeur en un nombre à virgule flottant. Si la conversion échoue, 0.0 est retourné.
+Cette valeur par défaut peut être modifiée en utilisant le premier paramètre.
+
+**Entrée**
+
+```jinja
+{{ "3.5" | float }}
+```
+
+**Sortie**
+
+```jinja
+3.5
+```
+
+### first
+
+Donne le premier élément dans un tableau :
+
+**Entrée**
+
+```jinja
+{% set items = [1,2,3] %}
+{{ items | first }}
+```
+
+**Sortie**
+
+```jinja
+1
+```
+
+### groupby
+
+Groupe une séquence d'objets par un attribut commun :
+
+**Entrée**
+
+```jinja
+{% set items = [
+        { name: 'james', type: 'green' },
+        { name: 'john', type: 'blue' },
+        { name: 'jim', type: 'blue' },
+        { name: 'jessie', type: 'green' }
+    ]
+%}
+
+{% for type, items in items | groupby("type") %}
+    <b>{{ type }}</b> :
+    {% for item in items %}
+        {{ item.name }}
+    {% endfor %}<br>
+{% endfor %}
+```
+
+**Sortie**
+
+```jinja
+green : james jessie
+blue : john jim
+```
+
+### indent
+
+Indente une chaîne en utilisant des espaces.
+Le comportement par défaut est de ne pas indenter la première ligne.
+Par défaut l'indentation est de 4 espaces.
+
+**Entrée**
+
+```jinja
+{{ "one\ntwo\nthree" | indent }}
+```
+
+**Sortie**
+
+```jinja
+one
+    two
+    three
+```
+
+Change l'indentation par défaut à 6 espaces :
+
+**Entrée**
+
+```jinja
+{{ "one\ntwo\nthree" | indent(6) }}
+```
+
+**Sortie**
+
+```jinja
+one
+      two
+      three
+```
+
+Change l'indentation par défaut à 6 espaces et indente la première ligne :
+
+**Entrée**
+
+```jinja
+{{ "one\ntwo\nthree" | indent(6, true) }}
+```
+
+**Sortie**
+
+```jinja
+      one
+      two
+      three
+```
+
+### int
+
+Convertit la valeur en un entier.
+Si la conversion échoue, cela retourne 0.
+
+**Entrée**
+
+```jinja
+{{ "3.5" | int }}
+```
+
+**Sortie**
+
+```jinja
+3
+```
+
+### join
+
+Retourne une chaine qui est la concaténation des chaines dans la séquence :
+
+**Entrée**
+
+```jinja
+{% set items =  [1, 2, 3] %}
+{{ items | join }}
+```
+
+**Sortie**
+
+```jinja
+123
+```
+
+Le séparateur entre les éléments est par défaut une chaine vide qui peut
+être définie avec un paramètre facultatif :
+
+**Entrée**
+
+```jinja
+{% set items = ['foo', 'bar', 'bear'] %}
+{{ items | join(",") }}
+```
+
+**Sortie**
+
+```jinja
+foo,bar,bear
+```
+
+Ce comportement est applicable aux tableaux :
+
+**Entrée**
+
+```jinja
+{% set items = [
+    { name: 'foo' },
+    { name: 'bar' },
+    { name: 'bear' }]
+%}
+
+{{ items | join(",", "name") }}
+```
+
+**Sortie**
+
+```jinja
+foo,bar,bear
+```
+
+### last
+
+Donne le dernier élément dans un tableau :
+
+**Entrée**
+
+```jinja
+{% set items = [1,2,3] %}
+{{ items | last }}
+```
+
+**Sortie**
+
+```jinja
+3
+```
+
+### length
+
+Retourne la longueur d'un tableau, d'une chaine ou le nombre de clés dans un objet :
+
+**Entrée**
+
+```jinja
+{{ [1,2,3] | length }}
+{{ "test" | length }}
+{{ {key: value} | length }}
+```
+
+**Sortie**
+
+```jinja
+3
+4
+1
+```
+
+
+### list
+
+Convertit la valeur en une liste.
+Si c'est une chaine, la liste retournée sera une liste de caractères.
+
+**Entrée**
+
+```jinja
+{% for i in "foobar" | list %}{{ i }},{% endfor %}
+```
+
+**Sortie**
+
+```jinja
+f,o,o,b,a,r,
+```
+
+### lower
+
+Convertit une chaine en minuscule :
+
+**Entrée**
+
+```jinja
+{{ "fOObAr" | lower }}
+```
+
+**Sortie**
+
+```jinja
+foobar
+```
+
+### random
+
+Selectionne une valeur aléatoire depuis un tableau.
+(Cela changera à chaque fois que la page est actualisée).
+
+**Entrée**
+
+```jinja
+{{ [1,2,3,4,5,6,7,8,9] | random }}
+```
+
+**Sortie**
+
+Une valeur aléatoire entre 1-9 (dont les bornes sont incluses).
+
+
+### rejectattr (uniquement pour le cas d'un unique argument)
+
+Filtre une suite d'objets, en appliquant un test sur l'attribut spécifié
+pour chaque objet et en rejetant les objets où le test réussit.
+
+Ceci est à l'opposé du filtre ```selectattr```.
+
+Si aucun test n'est spécifié, la valeur de l'attribut sera évaluée comme une valeur booléenne.
+
+**Entrée**
+
+```jinja
+{% set foods = [{tasty: true}, {tasty: false}, {tasty: true}]%}
+{{ foods | rejectattr("tasty") | length }}
+```
+
+**Sortie**
+
+```jinja
+1
+```
+
+### replace
+
+Remplace un élément par un autre. Le premier argument est l'élément à
+remplacer, le deuxième est la valeur de remplacement.
+
+**Entrée**
+
+```jinja
+{% set numbers = 123456 %}
+{{ numbers | replace("4", ".") }}
+```
+
+**Sortie**
+
+```jinja
+123.56
+```
+
+Pour insérer un élément avant et après une valeur, il faut ajouter des guillemets et
+cela mettra l'élément autour de la valeur :
+
+**Entrée**
+
+```jinja
+{% set lettres = aaabbbccc%}
+{{ "lettres" | replace("", ".") }}
+```
+
+**Sortie**
+
+```jinja
+.l.e.t.t.r.e.s.
+
+```
+
+Il possible de préciser le nombre de remplacement à effectuer (élément à remplacer,
+élément de remplacement, nombre de remplacement) :
+
+**Entrée**
+
+```jinja
+{% set letters = "aaabbbccc" %}
+{{ letters | replace("a", "x", 2) }}
+```
+Remarquez que dans ce cas, les guillemets sont nécessaires pour la liste.
+
+**Sortie**
+
+```jinja
+xxabbbccc
+```
+
+Il est possible de rechercher des modèles dans une liste pour les remplacer :
+
+**Entrée**
+
+```jinja
+{% set letters = "aaabbbccc" %}
+{{ letters | replace("ab", "x", 2) }}
+```
+
+**Sortie**
+
+```jinja
+aaxbbccc
+```
+
+### reverse
+
+Inverse une chaine :
+
+**Entrée**
+
+```jinja
+{{ "abcdef" | reverse }}
+```
+
+**Sortie**
+
+```jinja
+fedcba
+```
+
+Inverse un tableau :
+
+**Entrée**
+
+```jinja
+{% for i in [1, 2, 3, 4] | reverse %}
+    {{ i }}
+{% endfor %}
+```
+
+**Sortie**
+
+```jinja
+4 3 2 1
+```
+
+### round
+
+Arrondit un nombre :
+
+**Entrée**
+
+```jinja
+{{ 4.5 | round }}
+```
+
+**Sortie**
+
+```jinja
+5
+```
+
+Arrondit au nombre entier le plus proche (qui arrondit vers le bas) :
+
+**Entrée**
+
+```jinja
+{{ 4 | round(0, "floor")
+```
+
+**Sortie**
+
+```jinja
+4
+```
+
+Specifiez le nombre de décimales pour arrondir :
+
+**Entrée**
+
+```jinja
+{{ 4.12346 | round(4) }}
+```
+
+**Sortie**
+
+```jinja
+4.1235
+```
+
+### safe
+
+Marquez la valeur comme sûre, ce qui signifie que dans un environnement avec des échappements automatique,
+cela permet à cette variable de ne pas être échappée.
+
+**Entrée**
+
+```jinja
+{{ "foo http://www.example.com/ bar" | urlize | safe }}
+```
+
+**Sortie**
+
+```jinja
+foo <a href="http://www.example.com/">http://www.example.com/</a> bar
+```
+
+### selectattr (uniquement pour le cas d'un unique argument)
+
+Filtre une suite d'objets, en appliquant un test sur l'attribut spécifié
+pour chaque objet et en sélectionnant les objets où le test réussit.
+
+Ceci est à l'opposé du filtre ```rejectattr```.
+
+Si aucun test n'est spécifié, la valeur de l'attribut sera évaluée comme une valeur booléenne.
+
+**Entrée**
+
+```jinja
+{% set foods = [{tasty: true}, {tasty: false}, {tasty: true}]%}
+{{ foods | selectattr("tasty") | length }}
+```
+
+**Sortie**
+
+```jinja
+2
+```
+
+### slice
+
+Découpe un itérateur et retourne une liste de listes contenant ces éléments :
+
+**Entrée**
+
+```jinja
+{% set arr = [1,2,3,4,5,6,7,8,9] %}
+
+<div class="columwrapper">
+  {%- for items in arr | slice(3) %}
+    <ul class="column-{{ loop.index }}">
+    {%- for item in items %}
+      <li>{{ item }}</li>
+    {%- endfor %}
+    </ul>
+  {%- endfor %}
+</div>
+```
+
+**Sortie**
+
+```jinja
+<div class="columwrapper">
+    <ul class="column-1">
+      <li>1</li>
+      <li>2</li>
+      <li>3</li>
+    </ul>
+    <ul class="column-2">
+      <li>4</li>
+      <li>5</li>
+      <li>6</li>
+    </ul>
+    <ul class="column-3">
+      <li>7</li>
+      <li>8</li>
+      <li>9</li>
+    </ul>
+</div>
+```
+
+### string
+
+Convertit un objet en une chaine :
+
+**Entrée**
+
+```jinja
+{% set item = 1234 %}
+{% for i in item | string | list %}
+    {{ i }},
+{% endfor %}
+```
+
+**Sortie**
+
+```jinja
+1,2,3,4,
+```
+
+### sum
+
+Rend la somme des éléments dans le tableau :
+
+**Entrée**
+
+```jinja
+{% set items = [1,2,3] %}
+{{ items | sum }}
+```
+
+**Sortie**
+
+```jinja
+6
+```
+
+### title
+
+Met la première lettre de chaque mot en majuscule :
+
+**Entrée**
+
+```jinja
+{{ "foo bar baz" | title }}
+```
+
+**Sortie**
+
+```jinja
+Foo Bar Baz
+```
+
+### trim
+
+Enlève les espaces avant et après :
+
+**Entrée**
+
+```jinja
+{{ "  foo " | trim }}
+```
+
+**Sortie**
+
+```jinja
+foo
+```
+
+### truncate
+
+Retourne une copie tronquée de la chaîne. La longueur est spécifiée avec le premier
+paramètre qui est par défaut à 255. Si le second paramètre est à true, le filtre coupera
+le texte à la longueur demandée. Sinon, il enlèvera le dernier mot. Si le texte a
+été en fait tronqué, cela ajoutera un des points de suspension ("...").
+Un signe de suspension différent de "(...)" peut être spécifié en utilisant le troisième paramètre.
+
+Tronque 3 caractères :
+
+**Entrée**
+
+```jinja
+{{ "foo bar" | truncate(3) }}
+```
+
+**Sortie**
+
+```jinja
+foo(...)
+```
+
+Tronque 6 caractères et remplace "..." avec  "?" :
+
+**Entrée**
+
+```jinja
+{{ "foo bar baz" | truncate(6, true, "?") }}
+```
+
+**Sortie**
+
+```jinja
+foo ba ?
+```
+
+### upper
+
+Convertit la chaine en majuscules :
+
+**Entrée**
+
+```jinja
+{{ "foo" | upper }}
+```
+
+**Sortie**
+
+```jinja
+FOO
+```
+
+### urlencode
+
+Échappe les chaînes pour l'utiliser dans les URL, en utilisant l'encodage UTF-8.
+Il accepte à la fois les dictionnaires et les chaînes régulières ainsi que les iterables par paires.
+
+**Entrée**
+
+```jinja
+{{ "&" | urlencode }}
+```
+
+**Sortie**
+
+```jinja
+%26
+```
+
+### urlize
+
+Convertit les URL en texte brut dans des liens cliquables :
+
+**Entrée**
+
+```jinja
+{{ "foo http://www.example.com/ bar" | urlize | safe }}
+```
+
+**Sortie**
+
+```jinja
+foo <a href="http://www.example.com/">http://www.example.com/</a> bar
+```
+
+Tronque le texte de l'URL selon le nombre donné :
+
+**Entrée**
+
+```jinja
+{{ "http://mozilla.github.io/" | urlize(10, true) | safe }}
+```
+
+**Sortie**
+
+```jinja
+<a href="http://mozilla.github.io/">http://moz</a>
+```
+
+
+### wordcount
+
+Compte et rend le nombre de mot à l'intérieur d'une chaine :
+
+**Entrée**
+
+```
+{% set foo = "Hello World"%}
+{{ foo | wordcount }}
+```
+
+**Sortie**
+
+```
+2
+```
 
 Sinon, il est facile de lire le [code
 JavaScript](https://github.com/mozilla/nunjucks/blob/master/src/filters.js)
