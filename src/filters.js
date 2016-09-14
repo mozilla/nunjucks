@@ -124,8 +124,11 @@ var filters = {
     },
 
     safe: function(str) {
+        if (str instanceof r.SafeString) {
+            return str;
+        }
         str = (str === null || str === undefined) ? '' : str;
-        return r.markSafe(str);
+        return r.markSafe(str.toString());
     },
 
     first: function(arr) {
