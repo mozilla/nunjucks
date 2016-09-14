@@ -1313,20 +1313,28 @@
                 expect(res).to.be('');
             });
 
-            render('{{ foo | safe }}', { foo: null }, { autoescape: true }, function (err, res) {
-                expect(res).to.be('');
-            });
-
             render('{{ foo }}', { foo: ['<p>foo</p>']}, { autoescape: true }, function(err, res) {
                 expect(res).to.be('&lt;p&gt;foo&lt;/p&gt;');
+            });
+
+            render('{{ foo }}', { foo: { toString: function () { return '<p>foo</p>' } } }, { autoescape: true }, function (err, res) {
+                expect(res).to.be('&lt;p&gt;foo&lt;/p&gt;');
+            });
+
+            render('{{ foo | safe }}', { foo: null }, { autoescape: true }, function (err, res) {
+                expect(res).to.be('');
             });
 
             render('{{ foo | safe }}', { foo: '<p>foo</p>' }, { autoescape: true }, function (err, res) {
                 expect(res).to.be('<p>foo</p>');
             });
 
-            render('{{ foo }}', { foo: {toString: function() {return '<p>foo</p>'}}}, { autoescape: true }, function(err, res) {
-                expect(res).to.be('&lt;p&gt;foo&lt;/p&gt;');
+            render('{{ foo | safe }}', { foo: ['<p>foo</p>'] }, { autoescape: true }, function (err, res) {
+                expect(res).to.be('<p>foo</p>');
+            });
+
+            render('{{ foo | safe }}', { foo: { toString: function () { return '<p>foo</p>' } } }, { autoescape: true }, function (err, res) {
+                expect(res).to.be('<p>foo</p>');
             });
 
             finish(done);
