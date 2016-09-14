@@ -755,6 +755,12 @@ is especially useful for default values like so:
 {{ baz(foo if foo else "default") }}
 ```
 
+Unlike javascript's ternary operator, the `else` is optional:
+
+```jinja
+{{ "true" if foo }}
+```
+
 ### Function Calls
 
 If you have passed a javascript method to your template, you can call it like
