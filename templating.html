@@ -939,6 +939,9 @@ inline expression:</p>
 is especially useful for default values like so:</p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">baz</span><span class="o">(</span><span class="nv">foo</span> <span class="k">if</span> <span class="nv">foo</span> <span class="k">else</span> <span class="s2">&quot;default&quot;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
 </code></pre></div>
+<p>Unlike javascript&#39;s ternary operator, the <code>else</code> is optional:</p>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="s2">&quot;true&quot;</span> <span class="k">if</span> <span class="nv">foo</span> <span class="cp">}}</span><span class="x"></span>
+</code></pre></div>
 <h3 id="function-calls">Function Calls</h3>
 
 <p>If you have passed a javascript method to your template, you can call it like
