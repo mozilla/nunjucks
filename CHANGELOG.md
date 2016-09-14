@@ -27,6 +27,13 @@ Changelog
   macro. Merge of [#791](https://github.com/mozilla/nunjucks/pull/791).
 
 
+2.5.2 (Sep 14 2016)
+----------------
+
+* Call `.toString` in safe filter.
+  Merge of [#849](https://github.com/mozilla/nunjucks/pull/849).
+
+
 2.5.1 (Sep 13 2016)
 ----------------
 
