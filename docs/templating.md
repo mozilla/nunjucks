@@ -863,39 +863,7 @@ Nunjucks has ported most of jinja's filters, and has a few of its own.  We need
 to work on our own documentation for filters. Some of them are documented
 below, for the rest you can click through to jinja's site.
 
-### default(value, default, [boolean])
-
-(aliased as `d`)
-
-If `value` is strictly `undefined`, return `default`, otherwise `value`. If
-`boolean` is true, any JavaScript falsy value will return `default` (false, "",
-etc)
-
-**In version 2.0, this filter changed the default behavior of this
-  filter. Previously, it acted as if `boolean` was true by default, and any
-  falsy value would return `default`. In 2.0 the default is only an `undefined`
-  value returns `default`. You can get the old behavior by passing `true` to
-  `boolean`, or just use `value or default`.**
-
-### sort(arr, reverse, caseSens, attr)
-
-Sort `arr` with JavaScript's `arr.sort` function. If `reverse` is true, result
-will be reversed. Sort is case-insensitive by default, but setting `caseSens`
-to true makes it case-sensitive. If `attr` is passed, will compare `attr` from
-each item.
-
-### striptags (value, [preserve_linebreaks])
-
-Analog of jinja's
-[striptags](http://jinja.pocoo.org/docs/templates/#striptags). If
-`preserve_linebreaks` is false (default), strips SGML/XML tags and replaces
-adjacent whitespace with one space.  If `preserve_linebreaks` is true,
-normalizes whitespace, trying to preserve original linebreaks. Use second
-behavior if you want to pipe `{{ text | striptags | nl2br }}`. Use default one
-otherwise.
-
 ### abs
-
 Return the absolute value of the argument:
 
 **Input**
@@ -963,6 +931,20 @@ Center the value in a field of a given width:
 ```jinja
 fooo
 ```
+
+### default(value, default, [boolean])
+
+(aliased as `d`)
+
+If `value` is strictly `undefined`, return `default`, otherwise `value`. If
+`boolean` is true, any JavaScript falsy value will return `default` (false, "",
+etc)
+
+**In version 2.0, this filter changed the default behavior of this
+  filter. Previously, it acted as if `boolean` was true by default, and any
+  falsy value would return `default`. In 2.0 the default is only an `undefined`
+  value returns `default`. You can get the old behavior by passing `true` to
+  `boolean`, or just use `value or default`.**
 
 ### dictsort
 
@@ -1528,6 +1510,12 @@ Slice an iterator and return a list of lists containing those items:
     </ul>
 </div>
 ```
+### sort(arr, reverse, caseSens, attr)
+
+Sort `arr` with JavaScript's `arr.sort` function. If `reverse` is true, result
+will be reversed. Sort is case-insensitive by default, but setting `caseSens`
+to true makes it case-sensitive. If `attr` is passed, will compare `attr` from
+each item.
 
 ### string
 
@@ -1547,6 +1535,16 @@ Convert an object to a string:
 ```jinja
 1,2,3,4,
 ```
+
+### striptags (value, [preserve_linebreaks])
+
+Analog of jinja's
+[striptags](http://jinja.pocoo.org/docs/templates/#striptags). If
+`preserve_linebreaks` is false (default), strips SGML/XML tags and replaces
+adjacent whitespace with one space.  If `preserve_linebreaks` is true,
+normalizes whitespace, trying to preserve original linebreaks. Use second
+behavior if you want to pipe `{{ text | striptags | nl2br }}`. Use default one
+otherwise.
 
 ### sum
 
