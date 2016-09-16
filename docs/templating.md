@@ -894,11 +894,6 @@ normalizes whitespace, trying to preserve original linebreaks. Use second
 behavior if you want to pipe `{{ text | striptags | nl2br }}`. Use default one
 otherwise.
 
-### dump (object)
-
-Call `JSON.stringify` on an object and dump the result into the
-template. Useful for debugging: `{{ foo | dump }}`.
-
 ### abs
 
 Return the absolute value of the argument:
@@ -992,6 +987,10 @@ Sort a dict and yield (key, value) pairs:
 ```jinja
 a b c d e f
 ```
+### dump (object)
+
+Call `JSON.stringify` on an object and dump the result into the
+template. Useful for debugging: `{{ foo | dump }}`.
 
 ### escape (aliased as e)
 
@@ -1011,23 +1010,6 @@ Marks return value as markup string
 &lt;html&gt;
 ```
 
-### float
-
-Convert a value into a floating point number. If the conversion fails 0.0 is returned.
-This default can be overridden by using the first parameter.
-
-**Input**
-
-```jinja
-{{ "3.5" | float }}
-```
-
-**Output**
-
-```jinja
-3.5
-```
-
 ### first
 
 Get the first item in an array:
@@ -1043,6 +1025,23 @@ Get the first item in an array:
 
 ```jinja
 1
+```
+
+### float
+
+Convert a value into a floating point number. If the conversion fails 0.0 is returned.
+This default can be overridden by using the first parameter.
+
+**Input**
+
+```jinja
+{{ "3.5" | float }}
+```
+
+**Output**
+
+```jinja
+3.5
 ```
 
 ### groupby
