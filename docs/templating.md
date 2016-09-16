@@ -861,7 +861,7 @@ If `tags` was `["food", "beer", "dessert"]`, the above example would output `foo
 
 Nunjucks has ported most of jinja's filters, and has a few of its own.  We need
 to work on our own documentation for filters. Some of them are documented
-below, for the rest you can click through to jinja's site.
+below, for the rest you can click through to [jinja's site](http://jinja.pocoo.org/docs/dev/templates/#builtin-filters).
 
 ### default(value, default, [boolean])
 
