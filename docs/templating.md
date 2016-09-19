@@ -859,7 +859,7 @@ If `tags` was `["food", "beer", "dessert"]`, the above example would output `foo
 
 ## Builtin Filters
 
-Nunjucks has ported most of [jinja's filters](http://jinja.pocoo.org/docs/dev/templates/#builtin-filters), and has a few of its own.
+Nunjucks has ported most of [jinja's filters](http://jinja.pocoo.org/docs/dev/templates/#builtin-filters), and has a few of its own:
 
 ### default(value, default, [boolean])
 
