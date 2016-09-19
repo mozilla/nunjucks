@@ -87,10 +87,14 @@
         });
 
         it('dump', function(done) {
-            equal('{{ [{\'a\': 1}, {\'b\': 2 }] | dump }}', '[{&quot;a&quot;:1},{&quot;b&quot;:2}]');
-            equal('{{ [{\'a\': 1}, {\'b\': 2 }] | dump(2) }}',  '[\n  {\n    &quot;a&quot;: 1\n  },\n  {\n    &quot;b&quot;: 2\n  }\n]');
-            equal('{{ [{\'a\': 1}, {\'b\': 2 }] | dump(4) }}',  '[\n    {\n        &quot;a&quot;: 1\n    },\n    {\n        &quot;b&quot;: 2\n    }\n]');
-            equal('{{ [{\'a\': 1}, {\'b\': 2 }] | dump(\'\t\') }}',  '[\n\t{\n\t\t&quot;a&quot;: 1\n\t},\n\t{\n\t\t&quot;b&quot;: 2\n\t}\n]');
+            equal('{{ {"container":[{\'a\': true}, {\'b\': 2 }]} | dump }}',
+                '{&quot;container&quot;:[{&quot;a&quot;:true},{&quot;b&quot;:2}]}');
+            equal('{{ {"container":[{\'a\': true}, {\'b\': 2 }]} | dump(2) }}',
+                '{\n  &quot;container&quot;: [\n    {\n      &quot;a&quot;: true\n    },\n    {\n      &quot;b&quot;: 2\n    }\n  ]\n}');
+            equal('{{ {"container":[{\'a\': true}, {\'b\': 2 }]} | dump(4) }}',
+                '{\n    &quot;container&quot;: [\n        {\n            &quot;a&quot;: true\n        },\n        {\n            &quot;b&quot;: 2\n        }\n    ]\n}');
+            equal('{{ {"container":[{\'a\': true}, {\'b\': 2 }]} | dump(\'\t\') }}',
+                '{\n\t&quot;container&quot;: [\n\t\t{\n\t\t\t&quot;a&quot;: true\n\t\t},\n\t\t{\n\t\t\t&quot;b&quot;: 2\n\t\t}\n\t]\n}');
             finish(done);
         });
 
