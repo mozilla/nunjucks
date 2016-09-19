@@ -856,42 +856,6 @@ Nunjucks a porté la plupart des filtres de jinja, et il a ses propres filtres. 
 de travailler sur notre documentation pour les filtres. Certains d'entre eux sont documentés
 ci-dessous, pour le reste, vous pouvez cliquer sur le site de jinja.
 
-### default(value, default, [boolean])
-
-(raccourci avec `d`)
-
-Si `value` est strictement `undefined`, cela retourne `default`, sinon `value`. Si
-`boolean` est true, toute valeur JavaScript fausse retournera `default` (false, "",
-etc)
-
-**La version 2.0 a changé le comportement par défaut de ce filtre.
-  Auparavant, il agissait comme si `boolean` était à true par défaut et donc toute
-  valeur fausse retournait `default`. Dans la 2.0, le comportement par défaut retourne
-  `default` seulement pour une valeur `undefined`. Vous pouvez obtenir l'ancien
-  comportement en passant `true` à `boolean`, ou en utilisant simplement `value or default`.**
-
-### sort(arr, reverse, caseSens, attr)
-
-Tri `arr` avec la fonction `arr.sort` de JavaScript. Si `reverse` est à true, le résultat
-sera inversé. Le tri est insensible à la casse par défaut, mais en paramétrant `caseSens`
-à true, cela le rend sensible à la casse. Si `attr` est passé, cela permettra de comparer `attr` à
-chaque élément.
-
-### striptags (value, [preserve_linebreaks])
-
-C'est similaire à
-[striptags](http://jinja.pocoo.org/docs/templates/#striptags) de jinja. Si
-`preserve_linebreaks` est à false (par défaut), cela enlève les balises SGML/XML et remplace
-les espaces adjacents par un seul espace. Si `preserve_linebreaks` est à true,
-cela normalise les espaces, en essayant de préserver les sauts de lignes originaux. Utiliser le second
-comportement si vous voulez utiliser ceci `{{ text | striptags | nl2br }}`. Sinon
-utilisez le comportement par défaut.
-
-### dump (object)
-
-Appelle `JSON.stringify` sur un objet et déverse le résultat dans le
-template. C'est utile pour le débogage : `{{ foo | dump }}`.
-
 ### abs
 
 Retourne la valeur absolue de l'argument :
@@ -962,6 +926,20 @@ Centre la valeur dans un champ d'une largeur donnée :
 fooo
 ```
 
+### default(value, default, [boolean])
+
+(raccourci avec `d`)
+
+Si `value` est strictement `undefined`, cela retourne `default`, sinon `value`. Si
+`boolean` est true, toute valeur JavaScript fausse retournera `default` (false, "",
+etc)
+
+**La version 2.0 a changé le comportement par défaut de ce filtre.
+  Auparavant, il agissait comme si `boolean` était à true par défaut et donc toute
+  valeur fausse retournait `default`. Dans la 2.0, le comportement par défaut retourne
+  `default` seulement pour une valeur `undefined`. Vous pouvez obtenir l'ancien
+  comportement en passant `true` à `boolean`, ou en utilisant simplement `value or default`.**
+  
 ### dictsort
 
 Tri un dictionnaire et rend des paires (clé, valeur) :
@@ -985,6 +963,11 @@ Tri un dictionnaire et rend des paires (clé, valeur) :
 ```jinja
 a b c d e f
 ```
+
+### dump (object)
+
+Appelle `JSON.stringify` sur un objet et déverse le résultat dans le
+template. C'est utile pour le débogage : `{{ foo | dump }}`.
 
 ### escape (aliased as e)
 
@@ -1523,6 +1506,13 @@ Découpe un itérateur et retourne une liste de listes contenant ces éléments 
 </div>
 ```
 
+### sort(arr, reverse, caseSens, attr)
+
+Tri `arr` avec la fonction `arr.sort` de JavaScript. Si `reverse` est à true, le résultat
+sera inversé. Le tri est insensible à la casse par défaut, mais en paramétrant `caseSens`
+à true, cela le rend sensible à la casse. Si `attr` est passé, cela permettra de comparer `attr` à
+chaque élément.
+
 ### string
 
 Convertit un objet en une chaine :
@@ -1539,8 +1529,8 @@ Convertit un objet en une chaine :
 **Sortie**
 
 ```jinja
-1,2,3,4,
-```
+1,2,3,4,```
+
 
 ### sum
 
@@ -1558,6 +1548,16 @@ Rend la somme des éléments dans le tableau :
 ```jinja
 6
 ```
+
+### striptags (value, [preserve_linebreaks])
+
+C'est similaire à
+[striptags](http://jinja.pocoo.org/docs/templates/#striptags) de jinja. Si
+`preserve_linebreaks` est à false (par défaut), cela enlève les balises SGML/XML et remplace
+les espaces adjacents par un seul espace. Si `preserve_linebreaks` est à true,
+cela normalise les espaces, en essayant de préserver les sauts de lignes originaux. Utiliser le second
+comportement si vous voulez utiliser ceci `{{ text | striptags | nl2br }}`. Sinon
+utilisez le comportement par défaut.
 
 ### title
 
