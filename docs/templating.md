@@ -897,7 +897,43 @@ otherwise.
 ### dump (object)
 
 Call `JSON.stringify` on an object and dump the result into the
-template. Useful for debugging: `{{ foo | dump }}`.
+template. Useful for debugging: `{{ foo | dump }}`. 
+
+**Input**
+
+```jinja
+{% set items = [{'a':'1'},{'b':'2'}] %}
+{{  items | dump }}
+```
+
+**Output**
+
+```jinja
+[{'a' : '1'},{'b' : '2'}]
+```
+
+Dump provides the spaces parameter to add spaces or tabs to the resulting 
+values. This makes the results more readable.
+
+**Input**
+
+```jinja
+{% set items = [{'a':'1'},{'b':'2'}] %}
+{{ items | dump(4) }}
+```
+
+**Output**
+
+```jinja
+[    
+    {
+        'a' : '1'
+    },
+    {
+        'b' : '2'
+    }
+]
+```
 
 ### abs
 
