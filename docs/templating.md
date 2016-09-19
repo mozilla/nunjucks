@@ -970,22 +970,23 @@ Sort a dict and yield (key, value) pairs:
 ```jinja
 a b c d e f
 ```
-### dump (object)
+### dump
 
-Call `JSON.stringify` on an object and dump the result into the
-template. Useful for debugging: `{{ foo | dump }}`. 
+Call [`JSON.stringify`](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify) on an object and dump the result into the
+template. Useful for debugging: `{{ items | dump }}`. 
 
 **Input**
 
 ```jinja
-{% set items = [{'a':'1'},{'b':'2'}] %}
-{{  items | dump }}
+{% set items = ["a", 1, { b : true}] %}
+{{ items | dump }}
 ```
 
 **Output**
 
 ```jinja
-[{'a' : '1'},{'b' : '2'}]
+
+["a",1,{"b":true}]
 ```
 
 Dump provides the spaces parameter to add spaces or tabs to the resulting 
@@ -994,23 +995,39 @@ values. This makes the results more readable.
 **Input**
 
 ```jinja
-{% set items = [{'a':'1'},{'b':'2'}] %}
-{{ items | dump(4) }}
+{% set items = ["a", 1, { b : true}] %}
+{{ items | dump(2) }}
 ```
 
 **Output**
 
 ```jinja
-[    
-    {
-        'a' : '1'
-    },
-    {
-        'b' : '2'
-    }
+[
+  "a",
+  1,
+  {
+    "b": true
+  }
 ]
 ```
+**Input**
 
+```jinja
+{% set items = ["a", 1, { b : true}] %}
+{{ items | dump('\t') }}
+```
+
+**Output**
+
+```jinja
+[
+	"a",
+	1,
+	{
+		"b": true
+	}
+]
+```
 
 ### escape (aliased as e)
 
