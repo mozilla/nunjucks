@@ -859,9 +859,7 @@ If `tags` was `["food", "beer", "dessert"]`, the above example would output `foo
 
 ## Builtin Filters
 
-Nunjucks has ported most of jinja's filters, and has a few of its own.  We need
-to work on our own documentation for filters. Some of them are documented
-below, for the rest you can click through to jinja's site.
+Nunjucks has ported most of [jinja's filters](http://jinja.pocoo.org/docs/dev/templates/#builtin-filters), and has a few of its own:
 
 ### abs
 Return the absolute value of the argument:
