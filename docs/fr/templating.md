@@ -987,22 +987,6 @@ Les résultats rendent la valeur comme une chaîne de balisage.
 &lt;html&gt;
 ```
 
-### float
-
-Convertit une valeur en un nombre à virgule flottant. Si la conversion échoue, 0.0 est retourné.
-Cette valeur par défaut peut être modifiée en utilisant le premier paramètre.
-
-**Entrée**
-
-```jinja
-{{ "3.5" | float }}
-```
-
-**Sortie**
-
-```jinja
-3.5
-```
 
 ### first
 
@@ -1019,6 +1003,23 @@ Donne le premier élément dans un tableau :
 
 ```jinja
 1
+```
+
+### float
+
+Convertit une valeur en un nombre à virgule flottant. Si la conversion échoue, 0.0 est retourné.
+Cette valeur par défaut peut être modifiée en utilisant le premier paramètre.
+
+**Entrée**
+
+```jinja
+{{ "3.5" | float }}
+```
+
+**Sortie**
+
+```jinja
+3.5
 ```
 
 ### groupby
