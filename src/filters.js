@@ -111,8 +111,8 @@ var filters = {
         return array;
     },
 
-    dump: function(obj) {
-        return JSON.stringify(obj);
+    dump: function(obj, spaces) {
+        return JSON.stringify(obj, null, spaces);
     },
 
     escape: function(str) {
