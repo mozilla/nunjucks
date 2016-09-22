@@ -1,6 +1,4 @@
----
-layout: page
----
+{% extends "_layouts/page.html" %}
 
 <div class="content clearfix">
   <aside class="col-sm-3">
@@ -17,12 +15,10 @@ layout: page
 
     <div class="toc">
       <p><strong>{{ page.title }}</strong></p>
-      {% page_toc %}
     </div>
   </aside>
 
   <div class="col-sm-9 main">
-    <div class="locale btn-group">{{ page.url | locale_buttons: site.baseurl }}</div>
     {{ content }}
   </div>
 </div>

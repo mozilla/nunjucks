@@ -1,7 +1,0 @@
-encoding: utf-8
-markdown: redcarpet
-highlighter: pygments
-redcarpet:
-    extensions: [with_toc_data]
-
-baseurl: /
