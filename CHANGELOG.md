@@ -26,6 +26,9 @@ Changelog
 * Fix handling of macro arg with default value which shares a name with another
   macro. Merge of [#791](https://github.com/mozilla/nunjucks/pull/791).
 
+* Add `verbatim` as an alias of `raw` for compatibility with Twig.
+  Merge of [#874](https://github.com/mozilla/nunjucks/pull/874).
+
 
 2.5.2 (Sep 14 2016)
 ----------------

@@ -554,6 +554,11 @@ object: `{% import name + ".html" as obj %}`.
 If you want to output any of the special Nunjucks tags like `{{`, you can use
 a `{% raw %}` block and anything inside of it will be output as plain text.
 
+### verbatim
+
+`{% verbatim %}` has identical behavior as [`{% raw %}`](#raw). It is added for
+compatibility with the [Twig `verbatim` tag](http://twig.sensiolabs.org/doc/tags/verbatim.html).
+
 ### filter
 
 A `filter` block allows you to call a filter with the contents of the
