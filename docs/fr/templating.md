@@ -17,7 +17,7 @@ Ceci est un aperçu des caractéristiques des templates disponibles dans Nunjuck
 ## Extensions de fichier
 
 Bien que vous soyez libre d'utiliser n'importe quelle extension de fichier pour vos
-fichiers de template Nunjucks, la communauté de Nunjucks a adopté `.njk`.  
+fichiers de template Nunjucks, la communauté de Nunjucks a adopté `.njk`.
 
 Si vous développez des outils ou des aides de syntaxe pour éditeur pour Nunjucks,
 veuillez inclure la reconnaissance de l'extension `.njk`.
@@ -179,7 +179,8 @@ exactement comme le `if` de javascript.
 Si `variable` est défini et évalué à `true`, "C'est vrai"
 s'affichera, sinon rien n'apparaitra.
 
-Vous pouvez spécifier des conditions alternatives avec `elif` et `else` :
+Vous pouvez spécifier des conditions alternatives avec `elif` (ou `elseif`, qui est simplement un alias de `elif`)
+et `else` :
 
 ```jinja
 {% if faim %}
@@ -670,8 +671,8 @@ moins (`-`) sur le tag de début ou de fin..
 {%- endfor %}
 ```
 
-L'affichage exact de l'exemple du dessus sera "12345". Le `-%}` enlève les espaces à
-droite après le tag et le `{%-` enlève les espaces à gauche avant le tag.
+L'affichage exact de l'exemple du dessus sera "12345". Le `{%-` enlève les espaces à
+droite avant le tag et le `-%}` enlève les espaces à droite après le tag.
 
 ## Expressions
 
@@ -752,6 +753,12 @@ est particulièrement utile pour les valeurs par défaut comme celle-ci :
 
 ```jinja
 {{ baz(foo if foo else "default") }}
+```
+
+Contrairement à l'opérateur ternaire de javascript, le `else` est facultatif :
+
+```jinja
+{{ "true" if foo }}
 ```
 
 ### Appels de fonction
@@ -852,12 +859,9 @@ Si `tags` avait `["food", "beer", "dessert"]`, l'exemple ci-dessus afficherait `
 
 ## Filtres intégrés
 
-Nunjucks a porté la plupart des filtres de jinja, et il a ses propres filtres. Nous avons besoin
-de travailler sur notre documentation pour les filtres. Certains d'entre eux sont documentés
-ci-dessous, pour le reste, vous pouvez cliquer sur le site de jinja.
+Nunjucks a porté la plupart des [filtres de jinja](http://jinja.pocoo.org/docs/dev/templates/#builtin-filters), et il a ses propres filtres :
 
 ### abs
-
 Retourne la valeur absolue de l'argument :
 
 **Entrée**
@@ -939,7 +943,7 @@ etc)
   valeur fausse retournait `default`. Dans la 2.0, le comportement par défaut retourne
   `default` seulement pour une valeur `undefined`. Vous pouvez obtenir l'ancien
   comportement en passant `true` à `boolean`, ou en utilisant simplement `value or default`.**
-  
+
 ### dictsort
 
 Tri un dictionnaire et rend des paires (clé, valeur) :
@@ -963,7 +967,6 @@ Tri un dictionnaire et rend des paires (clé, valeur) :
 ```jinja
 a b c d e f
 ```
-
 ### dump (object)
 
 Appelle `JSON.stringify` sur un objet et déverse le résultat dans le
@@ -986,7 +989,6 @@ Les résultats rendent la valeur comme une chaîne de balisage.
 ```jinja
 &lt;html&gt;
 ```
-
 
 ### first
 
@@ -1530,8 +1532,18 @@ Convertit un objet en une chaine :
 **Sortie**
 
 ```jinja
-1,2,3,4,```
+1,2,3,4,
+```
 
+### striptags (value, [preserve_linebreaks])
+
+C'est similaire à
+[striptags](http://jinja.pocoo.org/docs/templates/#striptags) de jinja. Si
+`preserve_linebreaks` est à false (par défaut), cela enlève les balises SGML/XML et remplace
+les espaces adjacents par un seul espace. Si `preserve_linebreaks` est à true,
+cela normalise les espaces, en essayant de préserver les sauts de lignes originaux. Utiliser le second
+comportement si vous voulez utiliser ceci `{{ text | striptags | nl2br }}`. Sinon
+utilisez le comportement par défaut.
 
 ### sum
 
@@ -1549,16 +1561,6 @@ Rend la somme des éléments dans le tableau :
 ```jinja
 6
 ```
-
-### striptags (value, [preserve_linebreaks])
-
-C'est similaire à
-[striptags](http://jinja.pocoo.org/docs/templates/#striptags) de jinja. Si
-`preserve_linebreaks` est à false (par défaut), cela enlève les balises SGML/XML et remplace
-les espaces adjacents par un seul espace. Si `preserve_linebreaks` est à true,
-cela normalise les espaces, en essayant de préserver les sauts de lignes originaux. Utiliser le second
-comportement si vous voulez utiliser ceci `{{ text | striptags | nl2br }}`. Sinon
-utilisez le comportement par défaut.
 
 ### title
 
