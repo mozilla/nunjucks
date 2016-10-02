@@ -772,11 +772,13 @@ normal.
 
 ### Regular Expressions
 
-A regular expression can be created just like JavaScript:
+A regular expression can be created just like JavaScript, but needs to be prefixed with `r`:
 
 ```jinja
-{{ /^foo.*/ }}
-{{ /bar$/g }}
+{% set regExp = r/^foo.*/g %}
+{% if regExp.test('foo') %}
+  Foo in the house!
+{% endif %}
 ```
 
 The supported flags are the following. See
