@@ -1,8 +1,7 @@
 ---
-layout: subpage
 title: Templates
+pageid: templates
 ---
-{% raw %}
 
 # Templating
 
@@ -882,7 +881,7 @@ Return a list of lists with the given number of items:
 
 **Input**
 
-```jinja
+```twig
 {% set items = [1,2,3,4,5,6] %}
 {% for item in items | batch(2) %}
     -{% for items in item %}
@@ -1713,5 +1712,3 @@ Count and output the number of words in a string:
 Alternatively, it's easy to [read the JavaScript
 code](https://github.com/mozilla/nunjucks/blob/master/src/filters.js)
 that implements these filters.
-
-{% endraw %}

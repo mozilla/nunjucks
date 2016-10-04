@@ -1,8 +1,7 @@
 ---
-layout: subpage
 title: API
+pageid: api
 ---
-{% raw %}
 
 # API
 
@@ -22,8 +21,6 @@ extensions, customizing template loading, and more.
 If you don't need deep customization of the system, you can use this simple
 higher-level API for loading and rendering templates.
 
-{% endraw %}
-{% api %}
 render
 nunjucks.render(name, [context], [callback])
 
@@ -41,37 +38,27 @@ var res = nunjucks.render('foo.html', { username: 'James' });
 nunjucks.render('async.html', function(err, res) {
 });
 ```
-{% endapi %}
 
-{% api %}
 renderString
 nunjucks.renderString(str, context, [callback])
 
 Same as [`render`](#render), but renders a raw string instead of
 loading a template.
 
-{% raw %}
 ```js
 var res = nunjucks.renderString('Hello {{ username }}', { username: 'James' });
 ```
-{% endraw %}
-{% endapi %}
 
-{% api %}
 compile
 nunjucks.compile(str, [env], [path])
 
 Compile the given string into a reusable nunjucks Template object.
 
-{% raw %}
 ```js
 var template = nunjucks.compile('Hello {{ username }}');
 template.render({ username: 'James' });
 ```
-{% endraw %}
-{% endapi %}
 
-{% api %}
 configure
 nunjucks.configure([path], [opts]);
 
@@ -123,9 +110,6 @@ var env = nunjucks.configure('views');
 // do stuff with env
 ```
 
-{% endapi %}
-
-{% api %}
 installJinjaCompat
 nunjucks.installJinjaCompat()
 
@@ -138,8 +122,6 @@ This adds `True` and `False` which map to the JS `true` and `false`
 values, as well as augmenting arrays and objects with Python-style
 methods. [Check out the source](https://github.com/mozilla/nunjucks/blob/master/src/jinja-compat.js)
 to see everything it adds.
-{% endapi %}
-{% raw %}
 
 *That's it for the simple API! If you want total control over how
 templates are loaded, and more customization, you need to manually
@@ -156,8 +138,6 @@ you.
 You can manually handle it if you want, which allows you to specify
 custom template loaders.
 
-{% endraw %}
-{% api %}
 constructor
 new Environment([loaders], [opts])
 
@@ -194,9 +174,7 @@ var env = new nunjucks.Environment([new nunjucks.FileSystemLoader('views'),
 // the WebLoader is available if in the browser
 var env = new nunjucks.Environment(new nunjucks.WebLoader('/views'));
 ```
-{% endapi %}
 
-{% api %}
 render
 env.render(name, [context], [callback])
 
@@ -214,23 +192,16 @@ nunjucks.render('async.html', function(err, res) {
 });
 ```
 
-{% endapi %}
-
-{% api %}
 renderString
 env.renderString(src, [context], [callback])
 
 Same as [`render`](#render1), but renders a raw string instead of
 loading a template.
 
-{% raw %}
 ```js
 var res = nunjucks.renderString('Hello {{ username }}', { username: 'James' });
 ```
-{% endraw %}
-{% endapi %}
 
-{% api %}
 addFilter
 env.addFilter(name, func, [async])
 
@@ -239,15 +210,10 @@ invoked. If the filter needs to be async, **async** must be `true`
 (see [asynchronous support](#asynchronous-support)). Returns `env` for further method chaining. See
 [Custom Filters](#custom-filters).
 
-{% endapi %}
-
-{% api %}
 getFilter
 env.getFilter(name)
 Get the filter, which is just a function, named **name**.
-{% endapi %}
 
-{% api %}
 addExtension
 env.addExtension(name, ext)
 
@@ -255,42 +221,28 @@ Add the custom extension **ext** named **name**. **ext** is an object
 with a few specific methods that are called by the extension system. Returns `env` for further method chaining.
 See [Custom Tags](#custom-tags).
 
-{% endapi %}
-
-{% api %}
 removeExtension
 env.removeExtension(name)
 
 Remove a previously added custom extension named **name**.
 
-{% endapi %}
-
-{% api %}
 getExtension
 env.getExtension(name)
 Get an extension named **name**.
-{% endapi %}
 
-{% api %}
 hasExtension
 env.hasExtension(name)
 Return true if a custom extension named **name** has been added.
-{% endapi %}
 
-{% api %}
 addGlobal
 env.addGlobal(name, value)
 Add a global value that will be available to all templates. Note: this will overwrite any existing global called `name`.
 Returns `env` for further method chaining.
-{% endapi %}
 
-{% api %}
 getGlobal
 env.getGlobal(name)
 Get a global named **name**.
-{% endapi %}
 
-{% api %}
 getTemplate
 env.getTemplate(name, [eagerCompile], [callback])
 
@@ -309,9 +261,7 @@ var tmpl = env.getTemplate('page.html', true);
 env.getTemplate('from-async-loader.html', function(err, tmpl) {
 });
 ```
-{% endapi %}
 
-{% api %}
 express
 env.express(app)
 
@@ -328,9 +278,7 @@ app.get('/', function(req, res) {
     res.render('index.html');
 });
 ```
-{% endapi %}
 
-{% api %}
 opts.autoescape
 env.opts.autoescape
 
@@ -340,8 +288,6 @@ that do HTML manipulation. Normally you should simply return a
 SafeString (to be documented) if one was passed in, so the output will
 copy the safeness of the input, but this property is helpful in rare
 circumstances.
-{% endapi %}
-{% raw %}
 
 ## Template
 
@@ -351,8 +297,6 @@ you, but you can easily use it yourself. If you don't connect a
 template with an environment, you can't include or inherit any other
 templates.
 
-{% endraw %}
-{% api %}
 constructor
 new Template(src, [env], [path], [eagerCompile])
 
@@ -362,17 +306,12 @@ string **path** describing the location/path for debugging purposes,
 and a boolean **eagerCompile** which, if `true`, kicks off compilation
 immediately instead of waiting until the template is rendered.
 
-{% raw %}
 ```js
 var tmpl = new nunjucks.Template('Hello {{ username }}');
 
 tmpl.render({ username: "James" }); // -> "Hello James"
 ```
-{% endraw %}
 
-{% endapi %}
-
-{% api %}
 render
 tmpl.render(context, [callback])
 
@@ -381,8 +320,6 @@ Renders the template with the optional **context** hash. If
 result (see [asynchronous support](#asynchronous-support)), otherwise
 return the rendered string.
 
-{% endapi %}
-{% raw %}
 
 ## Loader
 
@@ -390,8 +327,6 @@ A loader is an object that takes a template name and loads it from a
 source, such as the filesystem or network. The following two builtin
 loaders exist, each for different contexts.
 
-{% endraw %}
-{% api %}
 FileSystemLoader
 new FileSystemLoader([searchPaths], [opts])
 
@@ -412,9 +347,6 @@ templates live, and it defaults to the current working directory.
 var env = new nunjucks.Environment(new nunjucks.FileSystemLoader('views'));
 ```
 
-{% endapi %}
-
-{% api %}
 WebLoader
 new WebLoader([baseURL], [opts])
 
@@ -441,8 +373,6 @@ production, this should always be the case. See
 // Load templates from /views
 var env = new nunjucks.Environment(new nunjucks.WebLoader('/views'))
 ```
-{% endapi %}
-{% raw %}
 
 ### Writing a Loader
 
@@ -624,8 +554,6 @@ it will get the extensions and filters from it. You should share the
 same `Environment` object between the client and server to keep
 everything in sync.
 
-{% endraw %}
-{% api %}
 precompile
 nunjucks.precompile(path, [opts])
 
@@ -658,16 +586,12 @@ env.addFilter('asyncFilter', function(val, cb) {
 
 nunjucks.precompile('/dir/to/views', { env: env });
 ```
-{% endapi %}
 
-{% api %}
 precompileString
 nunjucks.precompileString(str, [opts])
 
 Exactly the same as [`precompile`](#precompile), but compiles a raw string.
 
-{% endapi %}
-{% raw %}
 
 ## Asynchronous Support
 
@@ -977,5 +901,3 @@ this.run = function(context, url, body, errorBody, callback) {
 
 If you create anything interesting, make sure to
 [add it to the wiki!](https://github.com/mozilla/nunjucks/wiki/Custom-Tags)
-
-{% endraw %}

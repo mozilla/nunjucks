@@ -5,8 +5,8 @@ const renderMarkdown = require('../lib/markdown-to-html');
 const saveFile = require('../lib/save-file');
 const copyFile = require('../lib/copy-file');
 
-const baseDir = './docs/';
-const distDir = './docs/files/';
+const baseDir = 'docs/';
+const distDir = 'docs/files/';
 
 // setup nunjunks environment
 const renderer = new nunjucks.Environment(
@@ -40,11 +40,9 @@ copyAssets();
  * @return {Object}
  */
 function render(template) {
-	if (template.attributes.layout) {
-		return {
-			content: renderTemplate(template),
-			path: template.path.replace('.md', '.html').replace(baseDir, distDir)
-		}
+	return {
+		content: renderTemplate(template),
+		path: template.path.replace('.md', '.html').replace(baseDir, distDir)
 	}
 }
 
@@ -56,7 +54,7 @@ function renderTemplate(template) {
 				title: template.attributes.title
 			}
 		}, config);
-	return renderer.render(`_layouts/${template.attributes.layout}.html`, templateConfig);
+	return renderer.render(`_layouts/_subpage.html`, templateConfig);
 }
 
 function copyAssets() {

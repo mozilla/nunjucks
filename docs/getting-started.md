@@ -1,5 +1,5 @@
 ---
-layout: subpage
+title: Getting Started
 pageid: getting-started
 ---
 

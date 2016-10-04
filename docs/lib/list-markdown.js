@@ -1,6 +1,6 @@
 const glob = require('glob');
 
-const globConfig = '!(README.md)|**/*.md';
+const globConfig = '*.md';
 const basePath = 'docs/'
 
 module.exports = function listMarkdown() {

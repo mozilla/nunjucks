@@ -1,9 +1,7 @@
 ---
-layout: subpage
 title: FAQ
 pageid: faq
 ---
-{% raw %}
 
 # Questions Asked Frequently Enough
 
@@ -38,5 +36,3 @@ Additionally, there are few jinja2 features not implemented in nunjucks:
 * Line statements: `# for item in seq`
 
 Lastly, any custom Python filters and extensions will have to be written in JavaScript.
-
-{% endraw %}
