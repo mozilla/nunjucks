@@ -62,6 +62,7 @@ function renderTemplate(template) {
 
 function renderTOC(html) {
 	const headings = getHeadings(html);
+	const leveledHeadings = [];
 	// todo: create heading levels based for nested unordered list
 	return headings;
 }

@@ -16,7 +16,17 @@
 			<p><strong>{{ page.title }}</strong></p>
 			<ul>
 				{% for heading in toc %}
-					<li><a href="#{{heading.id}}">{{heading.html}}</a></li>
+					<li>
+						{% if heading.level == 2 %}
+							<ul><li><a href="#{{heading.id}}">{{heading.html}}</a></li></ul>
+						{% elseif heading.level == 3 %}
+							<ul><li><ul><li><a href="#{{heading.id}}">{{heading.html}}</a></li></ul></li></ul>
+						{% elseif heading.level == 4 %}
+							<ul><li><ul><li><ul><li><a href="#{{heading.id}}">{{heading.html}}</a></li></ul></li></ul></li></ul>
+						{% else %}
+							<a href="#{{heading.id}}">{{heading.html}}</a>
+						{% endif %}
+					</li>
 				{% endfor %}
 			</ul>
 		</div>
