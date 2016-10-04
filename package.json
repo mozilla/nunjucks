@@ -12,6 +12,7 @@
   "browser": "./browser/nunjucks.js",
   "devDependencies": {
     "bluebird": "^3.4.6",
+    "cheerio": "0.22.0",
     "expect.js": "*",
     "express": "4.x",
     "front-matter": "^2.1.0",

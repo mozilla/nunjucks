@@ -2,6 +2,7 @@ const nunjucks = require('../../index');
 const listMarkdownFiles = require('../lib/list-markdown');
 const templateMeta = require('../lib/template-metadata');
 const renderMarkdown = require('../lib/markdown-to-html');
+const getHeadings = require('../lib/get-headings');
 const saveFile = require('../lib/save-file');
 const copyFile = require('../lib/copy-file');
 
@@ -47,14 +48,22 @@ function render(template) {
 }
 
 function renderTemplate(template) {
+	const renderedMarkdown = renderMarkdown(template.body);
 	const templateConfig = Object.assign({},
 		{
-			content: renderMarkdown(template.body),
+			content: renderedMarkdown,
+			toc: renderTOC(renderedMarkdown),
 			page: {
 				title: template.attributes.title
 			}
 		}, config);
 	return renderer.render(`_layouts/_subpage.html`, templateConfig);
+}
+
+function renderTOC(html) {
+	const headings = getHeadings(html);
+	// todo: create heading levels based for nested unordered list
+	return headings;
 }
 
 function copyAssets() {

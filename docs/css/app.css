@@ -231,10 +231,6 @@ aside .pages ul {
     list-style: none;
 }
 
-.toc ul li a {
-    display: none;
-}
-
 .toc ul {
     color: #c0c0c0;
 }

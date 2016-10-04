@@ -14,6 +14,11 @@
 		</div>
 		<div class="toc">
 			<p><strong>{{ page.title }}</strong></p>
+			<ul>
+				{% for heading in toc %}
+					<li><a href="#{{heading.id}}">{{heading.html}}</a></li>
+				{% endfor %}
+			</ul>
 		</div>
 	</aside>
 	<div class="col-sm-9 main">

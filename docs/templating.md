@@ -205,7 +205,6 @@ var items = [{ title: "foo", id: 1 }, { title: "bar", id: 2}];
 ```
 
 ```jinja
-<h1>Posts</h1>
 <ul>
 {% for item in items %}
   <li>{{ item.title }}</li>
@@ -288,7 +287,6 @@ asynchronously inside the loop.
 var env = new nunjucks.Environment(AsyncLoaderFromDatabase, opts);
 ```
 ```jinja
-<h1>Posts</h1>
 <ul>
 {% asyncEach item in items %}
   {% include "item-template.html" %}
@@ -311,7 +309,6 @@ from a database. You could then render multiple items in parallel with
 `asyncAll`:
 
 ```jinja
-<h1>Posts</h1>
 <ul>
 {% asyncAll item in items %}
   <li>{{ item.id | lookup }}</li>
