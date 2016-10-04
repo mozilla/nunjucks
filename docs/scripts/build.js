@@ -1,14 +1,14 @@
-const listMarkdownFiles = require('./lib/list-markdown');
-const templateMeta = require('./lib/template-metadata');
-const renderMarkdown = require('./lib/markdown-to-html');
-const saveFile = require('./lib/save-file');
-const copyFile = require('./lib/copy-file');
+const nunjucks = require('../../index');
+const listMarkdownFiles = require('../lib/list-markdown');
+const templateMeta = require('../lib/template-metadata');
+const renderMarkdown = require('../lib/markdown-to-html');
+const saveFile = require('../lib/save-file');
+const copyFile = require('../lib/copy-file');
 
-const nunjucks = require('../index');
+const baseDir = './docs/';
+const distDir = './docs/files/';
 
-const baseDir = 'docs/';
-const distDir = 'docs/files/';
-
+// setup nunjunks environment
 const renderer = new nunjucks.Environment(
 	new nunjucks.FileSystemLoader(baseDir, {
 		noCache: true,
@@ -21,7 +21,7 @@ const config = {
 	site: {
 		baseurl: ''
 	}
-}
+};
 
 listMarkdownFiles()
 	.map(file => templateMeta(file))
@@ -30,8 +30,15 @@ listMarkdownFiles()
 
 saveFile(`${distDir}index.html`, renderer.render(`index.html`, config));
 
+// copy remaining assets required for the docs
 copyAssets();
 
+
+/**
+ * Returns object with markdown parsed to html and config to save the new file
+ * @param  {Object} template Meta information of the markdown after been parsed by front-matter
+ * @return {Object}
+ */
 function render(template) {
 	if (template.attributes.layout) {
 		return {
@@ -60,5 +67,4 @@ function copyAssets() {
 		// //temp until we remove bower dependecy
 		copyFile(`${baseDir}bower_components/`, `${distDir}bower_components/`)
 	]);
-
 }

@@ -34,7 +34,7 @@
     "lint": "jshint .",
     "test": "jshint . && istanbul cover ./node_modules/mocha/bin/_mocha -- -R dot tests",
     "browserfiles": "./bin/bundle",
-    "build:docs": "node docs/build.js"
+    "build:docs": "node docs/scripts/build.js"
   },
   "bin": {
     "nunjucks-precompile": "./bin/precompile"
