@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Nunjucks</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		<link rel="stylesheet" type="text/css" href="{{ site.baseurl }}bower_components/bootstrap/dist/css/bootstrap.min.css" />
+		<link rel="stylesheet" type="text/css" href="{{ site.baseurl }}css/highlight.css" />
+		<link rel="stylesheet" type="text/css" href="{{ site.baseurl }}css/app.css" />
+		<link rel="icon" type="image/png" href="{{ site.baseurl }}img/favicon.png" />
+	</head>
+	<body id="{{ page.pageid }}">
+		{% include "./navigation.html" %}
+		{% block body %}{% endblock %}
+		{% include "./footer.html" %}
+	</body>
+</html>
