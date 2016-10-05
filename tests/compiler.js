@@ -1623,6 +1623,11 @@
               ' hello'
             );
 
+            equal(
+                'Well, {{- \' hello, \' -}} my friend',
+                'Well, hello, my friend'
+            );
+
             finish(done);
         });
 
