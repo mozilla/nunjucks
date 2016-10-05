@@ -129,7 +129,14 @@ var Parser = Object.extend({
     },
 
     advanceAfterVariableEnd: function() {
-        if(!this.skip(lexer.TOKEN_VARIABLE_END)) {
+        var tok = this.nextToken();
+
+        if(tok && tok.type === lexer.TOKEN_VARIABLE_END) {
+            this.dropLeadingWhitespace = tok.value.charAt(
+                tok.value.length - this.tokens.tags.VARIABLE_END.length - 1
+            ) === '-';
+        } else {
+            this.pushToken(tok);
             this.fail('expected variable end');
         }
     },
@@ -1209,6 +1216,9 @@ var Parser = Object.extend({
                 if(nextToken &&
                     ((nextToken.type === lexer.TOKEN_BLOCK_START &&
                       nextVal.charAt(nextVal.length - 1) === '-') ||
+                    (nextToken.type === lexer.TOKEN_VARIABLE_START &&
+                      nextVal.charAt(this.tokens.tags.VARIABLE_START.length)
+                        === '-') ||
                     (nextToken.type === lexer.TOKEN_COMMENT &&
                       nextVal.charAt(this.tokens.tags.COMMENT_START.length)
                         === '-'))) {
@@ -1232,8 +1242,8 @@ var Parser = Object.extend({
             }
             else if(tok.type === lexer.TOKEN_VARIABLE_START) {
                 var e = this.parseExpression();
-                this.advanceAfterVariableEnd();
                 this.dropLeadingWhitespace = false;
+                this.advanceAfterVariableEnd();
                 buf.push(new nodes.Output(tok.lineno, tok.colno, [e]));
             }
             else if(tok.type === lexer.TOKEN_COMMENT) {
