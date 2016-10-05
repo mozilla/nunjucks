@@ -1215,7 +1215,7 @@ var Parser = Object.extend({
                     this.dropLeadingWhitespace = false;
                 }
 
-                // Same for the succeding block start token
+                // Same for the succeeding block start token
                 if(nextToken &&
                     ((nextToken.type === lexer.TOKEN_BLOCK_START &&
                       nextVal.charAt(nextVal.length - 1) === '-') ||
