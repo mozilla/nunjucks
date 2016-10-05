@@ -35,7 +35,7 @@ Plugins are available in various editors to support the `jinja` syntax highlight
 A variable looks up a value from the template context. If you wanted
 to simply display a variable, you would do:
 
-```jinja
+```html
 {{ username }}
 ```
 
@@ -43,7 +43,7 @@ This looks up `username` from the context and displays it. Variable
 names can have dots in them which lookup properties, just like
 javascript. You can also use the square bracket syntax.
 
-```jinja
+```html
 {{ foo.bar }}
 {{ foo["bar"] }}
 ```
@@ -60,7 +60,7 @@ foo.bar }}`, `{{ foo.bar.baz }}`.
 Filters are essentially functions that can be applied to variables.
 They are called with a pipe operator (`|`) and can take arguments.
 
-```jinja
+```html
 {{ foo | title }}
 {{ foo | join(",") }}
 {{ foo | replace("foo", "bar") | capitalize }}
@@ -81,7 +81,7 @@ can override. The inheritance chain can be as long as you like.
 
 If we have a template `parent.html` that looks like this:
 
-```jinja
+```html
 {% block header %}
 This is the default content
 {% endblock %}
@@ -99,7 +99,7 @@ This is the default content
 
 And we render this template:
 
-```jinja
+```html
 {% extends "parent.html" %}
 
 {% block left %}
@@ -113,7 +113,7 @@ This is the right side!
 
 The output would be:
 
-```jinja
+```html
 This is the default content
 
 <section class="left">
@@ -131,7 +131,7 @@ template file, or it can contain a compiled Template object that has
 been added to the context. That way you can dynamically change
 which template is inherited when rendering by setting it in the context.
 
-```jinja
+```html
 {% extends parentTemplate %}
 ```
 
@@ -145,7 +145,7 @@ docs](http://jinja.pocoo.org/docs/templates/#template-inheritance).
 You can render the contents of the parent block inside a child block
 by calling `super`. If in the child template from above you had:
 
-```jinja
+```html
 {% block right %}
 {{ super() }}
 Right side!
@@ -169,7 +169,7 @@ Nunjucks comes with several builtin, but [you can add your own](api.html#custom-
 `if` tests a condition and lets you selectively display content. It behaves
 exactly as javascript's `if` behaves.
 
-```jinja
+```html
 {% if variable %}
   It is true
 {% endif %}
@@ -181,7 +181,7 @@ displayed. Otherwise, nothing will be.
 You can specify alternate conditions with `elif` (or `elseif`, which is simply an alias of `elif`)
 and `else`:
 
-```jinja
+```html
 {% if hungry %}
   I am hungry
 {% elif tired %}
@@ -204,7 +204,7 @@ You can also use if as an [inline expression](#if-expression).
 var items = [{ title: "foo", id: 1 }, { title: "bar", id: 2}];
 ```
 
-```jinja
+```html
 <ul>
 {% for item in items %}
   <li>{{ item.title }}</li>
@@ -228,7 +228,7 @@ var food = {
 };
 ```
 
-```jinja
+```html
 {% for ingredient, amount in food %}
   Use {{ amount }} of {{ ingredient }}
 {% endfor %}
@@ -243,7 +243,7 @@ Additionally, Nunjucks will unpack arrays into variables:
 var points = [[0, 1, 2], [5, 6, 7], [12, 13, 14]];
 ```
 
-```jinja
+```html
 {% for x, y, z in points %}
   Point: {{ x }}, {{ y }}, {{ z }}
 {% endfor %}
@@ -286,7 +286,7 @@ asynchronously inside the loop.
 // If you are using a custom loader that is async, you need asyncEach
 var env = new nunjucks.Environment(AsyncLoaderFromDatabase, opts);
 ```
-```jinja
+```html
 <ul>
 {% asyncEach item in items %}
   {% include "item-template.html" %}
@@ -308,7 +308,7 @@ Let's say you created a filter named `lookup` that fetches some text
 from a database. You could then render multiple items in parallel with
 `asyncAll`:
 
-```jinja
+```html
 <ul>
 {% asyncAll item in items %}
   <li>{{ item.id | lookup }}</li>
@@ -327,7 +327,7 @@ all the items are done.
 `macro` allows you to define reusable chunks of content. It is similar to a
 function in a programming language. Here's an example:
 
-```jinja
+```html
 {% macro field(name, value='', type='text') %}
 <div class="field">
   <input type="{{ type }}" name="{{ name }}"
@@ -337,7 +337,7 @@ function in a programming language. Here's an example:
 ```
 Now `field` is available to be called like a normal function:
 
-```jinja
+```html
 {{ field('user') }}
 {{ field('pass', type='password') }}
 ```
@@ -357,7 +357,7 @@ function asynchronously. If you do this now, the behavior is undefined.
 
 `set` lets you create/modify a variable.
 
-```jinja
+```html
 {{ username }}
 {% set username = "joe" %}
 {{ username }}
@@ -367,7 +367,7 @@ If `username` was initially "james', this would print "james joe".
 
 You can introduce new variables, and also set multiple at once:
 
-```jinja
+```html
 {% set x, y, z = 5 %}
 ```
 
@@ -381,7 +381,7 @@ the `=` is omitted, and everything until the `{% endset %}` is captured.
 
 This can be useful in some situations as an alternative for macros:
 
-```jinja
+```html
 {% set standardModal %}
     {% include 'standardModalData.html' %}
 {% endset %}
@@ -395,7 +395,7 @@ This can be useful in some situations as an alternative for macros:
 template is used as a base template. See [Template
 Inheritance](#template-inheritance).
 
-```jinja
+```html
 {% extends "base.html" %}
 ```
 
@@ -405,7 +405,7 @@ template file, or it can contain a compiled Template object that has
 been added to the context. That way you can dynamically change which template is
 inherited when rendering by setting it in the context.
 
-```jinja
+```html
 {% extends parentTemplate %}
 ```
 
@@ -413,7 +413,7 @@ In fact, `extends` accepts any arbitrary expression, so you can pass
 anything into it, as long as that expression evaluates to a string or
 a compiled Template object:
 
-```jinja
+```html
 {% extends name + ".html" %}`.
 ```
 
@@ -424,7 +424,7 @@ name. This is used by template inheritance. Base templates can specify
 blocks and child templates can override them with new content. See
 [Template Inheritance](#template-inheritance).
 
-```jinja
+```html
 {% block css %}
 <link rel="stylesheet" href="app.css" />
 {% endblock %}
@@ -432,7 +432,7 @@ blocks and child templates can override them with new content. See
 
 You can even define blocks within looping:
 
-```jinja
+```html
 {% for item in items %}
 {% block item %}{{ item }}{% endblock %}
 {% endfor %}
@@ -440,7 +440,7 @@ You can even define blocks within looping:
 
 Child templates can override the `item` block and change how it is displayed:
 
-```jinja
+```html
 {% extends "item.html" %}
 
 {% block item %}
@@ -456,13 +456,13 @@ render the parent block's content. See [super](#super).
 `include` pulls in other templates in place. It's useful when you need to share
 smaller chunks across several templates that already inherit other templates.
 
-```jinja
+```html
 {% include "item.html" %}
 ```
 
 You can even include templates in the middle of loops:
 
-```jinja
+```html
 {% for item in items %}
 {% include "item.html" %}
 {% endfor %}
@@ -479,7 +479,7 @@ object: `{% include name + ".html" %}`.
 It might be useful to not throw an error if a template does not exist. Use the
 `ignore missing` option to suppress such errors.
 
-```jinja
+```html
 {% include "missing.html" ignore missing %}
 ```
 
@@ -502,7 +502,7 @@ have access to any of the current template variables.
 
 Let's start with a template called `forms.html` that has the following in it:
 
-```jinja
+```html
 {% macro field(name, value='', type='text') %}
 <div class="field">
   <input type="{{ type }}" name="{{ name }}"
@@ -520,7 +520,7 @@ Let's start with a template called `forms.html` that has the following in it:
 We can import this template and bind all of its exported values to a variable
 so that we can use it:
 
-```jinja
+```html
 {% import "forms.html" as forms %}
 
 {{ forms.label('Username') }}
@@ -532,7 +532,7 @@ so that we can use it:
 You can also import specific values from a template into the current namespace
 with `from import`:
 
-```jinja
+```html
 {% from "forms.html" import field, label as description %}
 
 {{ description('Username') }}
@@ -556,7 +556,7 @@ A `filter` block allows you to call a filter with the contents of the
 block. Instead passing a value with the `|` syntax, the render
 contents from the block will be passed.
 
-```jinja
+```html
 {% filter title %}
 may the force be with you
 {% endfilter %}
@@ -574,7 +574,7 @@ A `call` block enables you to call a macro with all the text inside the
 tag. This is helpful if you want to pass a lot of content into a macro. The
 content is available inside the macro as `caller()`.
 
-```jinja
+```html
 {% macro add(x, y) %}
 {{ caller() }}: {{ x + y }}
 {% endmacro%}
@@ -594,7 +594,7 @@ introducing a new calling convention.
 
 Keyword arguments look like this:
 
-```jinja
+```html
 {{ foo(1, 2, bar=3, baz=4) }}
 ```
 
@@ -625,19 +625,19 @@ arguments to the ones defined with the macro.
 You can mix positional and keyword arguments with macros. For example, you can
 specify a positional argument as a keyword argument:
 
-```jinja
+```html
 {{ foo(20, y=21) }}     -> 20, 21, 5, 6
 ```
 
 You can also simply pass a positional argument in place of a keyword argument:
 
-```jinja
+```html
 {{ foo(5, 6, 7, 8) }}   -> 5, 6, 7, 8
 ```
 
 In this way, you can "skip" positional arguments:
 
-```jinja
+```html
 {{ foo(8, z=7) }}      -> 8, , 7, 6
 ```
 
@@ -646,7 +646,7 @@ In this way, you can "skip" positional arguments:
 You can write comments using `{#` and `#}`. Comments are completely stripped
 out when rendering.
 
-```jinja
+```html
 {# Loop through all the users #}
 {% for user in users %}...{% endfor %}
 ```
@@ -661,7 +661,7 @@ cleanly, which requires whitespace.
 You can tell the engine to strip all leading or trailing whitespace by adding a
 minus sign (`-`) to the start or end block tag.
 
-```jinja
+```html
 {% for i in [1,2,3,4,5] -%}
   {{ i }}
 {%- endfor %}
@@ -696,7 +696,7 @@ available:
 
 You can use them like this:
 
-```jinja
+```html
 {{ 2 + 3 }}       (outputs 5)
 {{ 10/5 }}        (outputs 2)
 {{ numItems*2 }}
@@ -715,7 +715,7 @@ You can use them like this:
 
 Examples:
 
-```jinja
+```html
 {% if numUsers < 5 %}...{% endif %}
 {% if i == 0 %}...{% endif %}
 ```
@@ -729,7 +729,7 @@ Examples:
 
 Examples:
 
-```jinja
+```html
 {% if users and showUsers %}...{% endif %}
 {% if i == 0 and not hideFirst %}...{% endif %}
 {% if (x < 5 or y < 5) and foo %}...{% endif %}
@@ -740,20 +740,20 @@ Examples:
 Similar to javascript's ternary operator, you can use `if` as if it were an
 inline expression:
 
-```jinja
+```html
 {{ "true" if foo else "false" }}
 ```
 
 The above outputs the string "true" if foo is truthy, otherwise "false". This
 is especially useful for default values like so:
 
-```jinja
+```html
 {{ baz(foo if foo else "default") }}
 ```
 
 Unlike javascript's ternary operator, the `else` is optional:
 
-```jinja
+```html
 {{ "true" if foo }}
 ```
 
@@ -762,7 +762,7 @@ Unlike javascript's ternary operator, the `else` is optional:
 If you have passed a javascript method to your template, you can call it like
 normal.
 
-```jinja
+```html
 {{ foo(1, 2, 3) }}
 ```
 
@@ -770,7 +770,7 @@ normal.
 
 A regular expression can be created just like JavaScript:
 
-```jinja
+```html
 {{ /^foo.*/ }}
 {{ /bar$/g }}
 ```
@@ -790,7 +790,7 @@ If autoescaping is turned on in the environment, all output will automatically
 be escaped for safe output. To manually mark output as safe, use the `safe`
 filter. Nunjucks will not escape this output.
 
-```jinja
+```html
 {{ foo }}           // &lt;span%gt;
 {{ foo | safe }}    // <span>
 ```
@@ -798,7 +798,7 @@ filter. Nunjucks will not escape this output.
 If autoescaping is turned off, all output will be rendered as it is. You can
 manually escape variables with the `escape` filter.
 
-```jinja
+```html
 {{ foo }}           // <span>
 {{ foo | escape }}  // &lt;span&gt;
 ```
@@ -813,7 +813,7 @@ If you need to iterate over a fixed set of numbers, `range` generates the set
 for you. The numbers begin at `start` (default 0) and increment by `step`
 (default 1) until it reaches `stop`, not including it.
 
-```jinja
+```html
 {% for i in range(0, 5) -%}
   {{ i }},
 {%- endfor %}
@@ -826,7 +826,7 @@ The above outputs `0,1,2,3,4`.
 An easy way to rotate through several values is to use `cycler`, which takes
 any number of arguments and cycles through them.
 
-```jinja
+```html
 {% set cls = cycler("odd", "even") %}
 {% for row in rows %}
   <div class="{{ cls.next() }}">{{ row.name }}</div>
@@ -844,7 +844,7 @@ something like a comma, but you don't want to output the separator for the
 first item. The `joiner` class will output `separator` (default ",") whenever
 it is called except for the first time.
 
-```jinja
+```html
 {% set comma = joiner() %}
 {% for tag in tags -%}
   {{ comma() }} {{ tag }}
@@ -862,13 +862,13 @@ Return the absolute value of the argument:
 
 **Input**
 
-```jinja
+```html
 {{ -3|abs }}
 ```
 
 **Output**
 
-```jinja
+```html
 3
 ```
 
@@ -878,7 +878,7 @@ Return a list of lists with the given number of items:
 
 **Input**
 
-```twig
+```html
 {% set items = [1,2,3,4,5,6] %}
 {% for item in items | batch(2) %}
     -{% for items in item %}
@@ -889,7 +889,7 @@ Return a list of lists with the given number of items:
 
 **Output**
 
-```jinja
+```html
 12-34-56
 ```
 
@@ -899,13 +899,13 @@ Make the first letter uppercase, the rest lower case:
 
 **Input**
 
-```jinja
+```html
 {{ "This Is A Test" | capitalize }}
 ```
 
 **Output**
 
-```jinja
+```html
 This is a test
 ```
 
@@ -916,13 +916,13 @@ Center the value in a field of a given width:
 
 **Input**
 
-```jinja
+```html
 {{ "fooo" | center }}
 ```
 
 **Output**
 
-```jinja
+```html
 fooo
 ```
 
@@ -944,7 +944,7 @@ etc)
 
 Sort a dict and yield (key, value) pairs:
 
-```jinja
+```html
 {% set items = {
     'e': 1,
     'd': 2,
@@ -960,7 +960,7 @@ Sort a dict and yield (key, value) pairs:
 
 **Output**
 
-```jinja
+```html
 a b c d e f
 ```
 ### dump (object)
@@ -976,13 +976,13 @@ Marks return value as markup string
 
 **Input**
 
-```jinja
+```html
 {{ "<html>" | escape }}
 ```
 
 **Output**
 
-```jinja
+```html
 &lt;html&gt;
 ```
 
@@ -992,14 +992,14 @@ Get the first item in an array:
 
 **Input**
 
-```jinja
+```html
 {% set items = [1,2,3] %}
 {{ items | first }}
 ```
 
 **Output**
 
-```jinja
+```html
 1
 ```
 
@@ -1010,13 +1010,13 @@ This default can be overridden by using the first parameter.
 
 **Input**
 
-```jinja
+```html
 {{ "3.5" | float }}
 ```
 
 **Output**
 
-```jinja
+```html
 3.5
 ```
 
@@ -1026,7 +1026,7 @@ Group a sequence of objects by a common attribute:
 
 **Input**
 
-```jinja
+```html
 {% set items = [
         { name: 'james', type: 'green' },
         { name: 'john', type: 'blue' },
@@ -1045,7 +1045,7 @@ Group a sequence of objects by a common attribute:
 
 **Output**
 
-```jinja
+```html
 green : james jessie
 blue : john jim
 ```
@@ -1058,13 +1058,13 @@ Default indentation is 4 spaces.
 
 **Input**
 
-```jinja
+```html
 {{ "one\ntwo\nthree" | indent }}
 ```
 
 **Output**
 
-```jinja
+```html
 one
     two
     three
@@ -1074,13 +1074,13 @@ Change default indentation to 6 spaces:
 
 **Input**
 
-```jinja
+```html
 {{ "one\ntwo\nthree" | indent(6) }}
 ```
 
 **Output**
 
-```jinja
+```html
 one
       two
       three
@@ -1090,13 +1090,13 @@ Change default indentation to 6 spaces and indent the first line:
 
 **Input**
 
-```jinja
+```html
 {{ "one\ntwo\nthree" | indent(6, true) }}
 ```
 
 **Output**
 
-```jinja
+```html
       one
       two
       three
@@ -1109,13 +1109,13 @@ If the conversion fails 0 is returned.
 
 **Input**
 
-```jinja
+```html
 {{ "3.5" | int }}
 ```
 
 **Output**
 
-```jinja
+```html
 3
 ```
 
@@ -1125,14 +1125,14 @@ Return a string which is the concatenation of the strings in a sequence:
 
 **Input**
 
-```jinja
+```html
 {% set items =  [1, 2, 3] %}
 {{ items | join }}
 ```
 
 **Output**
 
-```jinja
+```html
 123
 ```
 
@@ -1141,14 +1141,14 @@ be defined with an optional parameter:
 
 **Input**
 
-```jinja
+```html
 {% set items = ['foo', 'bar', 'bear'] %}
 {{ items | join(",") }}
 ```
 
 **Output**
 
-```jinja
+```html
 foo,bar,bear
 ```
 
@@ -1156,7 +1156,7 @@ This  behaviour is applicable to arrays:
 
 **Input**
 
-```jinja
+```html
 {% set items = [
     { name: 'foo' },
     { name: 'bar' },
@@ -1168,7 +1168,7 @@ This  behaviour is applicable to arrays:
 
 **Output**
 
-```jinja
+```html
 foo,bar,bear
 ```
 
@@ -1178,14 +1178,14 @@ Get the last item in an array:
 
 **Input**
 
-```jinja
+```html
 {% set items = [1,2,3] %}
 {{ items | last }}
 ```
 
 **Output**
 
-```jinja
+```html
 3
 ```
 
@@ -1195,7 +1195,7 @@ Return the length of an array or string, or the number of keys in an object:
 
 **Input**
 
-```jinja
+```html
 {{ [1,2,3] | length }}
 {{ "test" | length }}
 {{ {key: value} | length }}
@@ -1203,7 +1203,7 @@ Return the length of an array or string, or the number of keys in an object:
 
 **Output**
 
-```jinja
+```html
 3
 4
 1
@@ -1217,13 +1217,13 @@ If it was a string the returned list will be a list of characters.
 
 **Input**
 
-```jinja
+```html
 {% for i in "foobar" | list %}{{ i }},{% endfor %}
 ```
 
 **Output**
 
-```jinja
+```html
 f,o,o,b,a,r,
 ```
 
@@ -1233,13 +1233,13 @@ Convert string to all lower case:
 
 **Input**
 
-```jinja
+```html
 {{ "fOObAr" | lower }}
 ```
 
 **Output**
 
-```jinja
+```html
 foobar
 ```
 
@@ -1250,7 +1250,7 @@ Select a random value from an array.
 
 **Input**
 
-```jinja
+```html
 {{ [1,2,3,4,5,6,7,8,9] | random }}
 ```
 
@@ -1270,14 +1270,14 @@ If no test is specified, the attribute’s value will be evaluated as a boolean.
 
 **Input**
 
-```jinja
+```html
 {% set foods = [{tasty: true}, {tasty: false}, {tasty: true}]%}
 {{ foods | rejectattr("tasty") | length }}
 ```
 
 **Output**
 
-```jinja
+```html
 1
 ```
 
@@ -1288,14 +1288,14 @@ replaced, the second item is the replaced value.
 
 **Input**
 
-```jinja
+```html
 {% set numbers = 123456 %}
 {{ numbers | replace("4", ".") }}
 ```
 
 **Output**
 
-```jinja
+```html
 123.56
 ```
 
@@ -1304,14 +1304,14 @@ and replacing them surrounding an item:
 
 **Input**
 
-```jinja
+```html
 {% set letters = aaabbbccc%}
 {{ "letters" | replace("", ".") }}
 ```
 
 **Output**
 
-```jinja
+```html
 .l.e.t.t.e.r.s.
 
 ```
@@ -1321,7 +1321,7 @@ item replacement, number to be replaced):
 
 **Input**
 
-```jinja
+```html
 {% set letters = "aaabbbccc" %}
 {{ letters | replace("a", "x", 2) }}
 ```
@@ -1329,7 +1329,7 @@ Note in this instance the required quote marks surrounding the list.
 
 **Output**
 
-```jinja
+```html
 xxabbbccc
 ```
 
@@ -1337,14 +1337,14 @@ It is possible to search for patterns in a list to replace:
 
 **Input**
 
-```jinja
+```html
 {% set letters = "aaabbbccc" %}
 {{ letters | replace("ab", "x", 2) }}
 ```
 
 **Output**
 
-```jinja
+```html
 aaxbbccc
 ```
 
@@ -1354,13 +1354,13 @@ Reverse a string:
 
 **Input**
 
-```jinja
+```html
 {{ "abcdef" | reverse }}
 ```
 
 **Output**
 
-```jinja
+```html
 fedcba
 ```
 
@@ -1368,7 +1368,7 @@ Reverse an array:
 
 **Input**
 
-```jinja
+```html
 {% for i in [1, 2, 3, 4] | reverse %}
     {{ i }}
 {% endfor %}
@@ -1376,7 +1376,7 @@ Reverse an array:
 
 **Output**
 
-```jinja
+```html
 4 3 2 1
 ```
 
@@ -1386,13 +1386,13 @@ Round a number:
 
 **Input**
 
-```jinja
+```html
 {{ 4.5 | round }}
 ```
 
 **Output**
 
-```jinja
+```html
 5
 ```
 
@@ -1400,13 +1400,13 @@ Round to the nearest whole number (which rounds down):
 
 **Input**
 
-```jinja
+```html
 {{ 4 | round(0, "floor")
 ```
 
 **Output**
 
-```jinja
+```html
 4
 ```
 
@@ -1414,13 +1414,13 @@ Specify the number of  digits to round:
 
 **Input**
 
-```jinja
+```html
 {{ 4.12346 | round(4) }}
 ```
 
 **Output**
 
-```jinja
+```html
 4.1235
 ```
 
@@ -1431,13 +1431,13 @@ escaping enabled this variable will not be escaped.
 
 **Input**
 
-```jinja
+```html
 {{ "foo http://www.example.com/ bar" | urlize | safe }}
 ```
 
 **Output**
 
-```jinja
+```html
 foo <a href="http://www.example.com/">http://www.example.com/</a> bar
 ```
 
@@ -1452,14 +1452,14 @@ If no test is specified, the attribute’s value will be evaluated as a boolean.
 
 **Input**
 
-```jinja
+```html
 {% set foods = [{tasty: true}, {tasty: false}, {tasty: true}]%}
 {{ foods | selectattr("tasty") | length }}
 ```
 
 **Output**
 
-```jinja
+```html
 2
 ```
 
@@ -1469,7 +1469,7 @@ Slice an iterator and return a list of lists containing those items:
 
 **Input**
 
-```jinja
+```html
 {% set arr = [1,2,3,4,5,6,7,8,9] %}
 
 <div class="columwrapper">
@@ -1485,7 +1485,7 @@ Slice an iterator and return a list of lists containing those items:
 
 **Output**
 
-```jinja
+```html
 <div class="columwrapper">
     <ul class="column-1">
       <li>1</li>
@@ -1517,7 +1517,7 @@ Convert an object to a string:
 
 **Input**
 
-```jinja
+```html
 {% set item = 1234 %}
 {% for i in item | string | list %}
     {{ i }},
@@ -1526,7 +1526,7 @@ Convert an object to a string:
 
 **Output**
 
-```jinja
+```html
 1,2,3,4,
 ```
 
@@ -1546,14 +1546,14 @@ Output the sum of items in the array:
 
 **Input**
 
-```jinja
+```html
 {% set items = [1,2,3] %}
 {{ items | sum }}
 ```
 
 **Output**
 
-```jinja
+```html
 6
 ```
 
@@ -1563,13 +1563,13 @@ Make the first letter of the string uppercase:
 
 **Input**
 
-```jinja
+```html
 {{ "foo bar baz" | title }}
 ```
 
 **Output**
 
-```jinja
+```html
 Foo Bar Baz
 ```
 
@@ -1579,13 +1579,13 @@ Strip leading and trailing whitespace:
 
 **Input**
 
-```jinja
+```html
 {{ "  foo " | trim }}
 ```
 
 **Output**
 
-```jinja
+```html
 foo
 ```
 
@@ -1601,13 +1601,13 @@ Truncate to 3 characters:
 
 **Input**
 
-```jinja
+```html
 {{ "foo bar" | truncate(3) }}
 ```
 
 **Output**
 
-```jinja
+```html
 foo(...)
 ```
 
@@ -1615,13 +1615,13 @@ Truncate to 6 characters and replace "..." with a  "?":
 
 **Input**
 
-```jinja
+```html
 {{ "foo bar baz" | truncate(6, true, "?") }}
 ```
 
 **Output**
 
-```jinja
+```html
 foo ba ?
 ```
 
@@ -1631,13 +1631,13 @@ Convert the string to upper case:
 
 **Input**
 
-```jinja
+```html
 {{ "foo" | upper }}
 ```
 
 **Output**
 
-```jinja
+```html
 FOO
 ```
 
@@ -1648,13 +1648,13 @@ Accepts both dictionaries and regular strings as well as pairwise iterables.
 
 **Input**
 
-```jinja
+```html
 {{ "&" | urlencode }}
 ```
 
 **Output**
 
-```jinja
+```html
 %26
 ```
 
@@ -1664,13 +1664,13 @@ Convert URLs in plain text into clickable links:
 
 **Input**
 
-```jinja
+```html
 {{ "foo http://www.example.com/ bar" | urlize | safe }}
 ```
 
 **Output**
 
-```jinja
+```html
 foo <a href="http://www.example.com/">http://www.example.com/</a> bar
 ```
 
@@ -1678,13 +1678,13 @@ Truncate URL text by a given number:
 
 **Input**
 
-```jinja
+```html
 {{ "http://mozilla.github.io/" | urlize(10, true) | safe }}
 ```
 
 **Output**
 
-```jinja
+```html
 <a href="http://mozilla.github.io/">http://moz</a>
 ```
 
