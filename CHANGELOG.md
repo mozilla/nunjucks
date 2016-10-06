@@ -26,6 +26,8 @@ Changelog
 * Fix handling of macro arg with default value which shares a name with another
   macro. Merge of [#791](https://github.com/mozilla/nunjucks/pull/791).
 
+* Add variables whitespace control.
+
 
 2.5.2 (Sep 14 2016)
 ----------------
