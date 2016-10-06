@@ -663,7 +663,7 @@ don't want the extra whitespace, but you still want to format the template
 cleanly, which requires whitespace.
 
 You can tell the engine to strip all leading or trailing whitespace by adding a
-minus sign (`-`) to the start or end block tag.
+minus sign (`-`) to the start or end block or a variable.
 
 ```jinja
 {% for i in [1,2,3,4,5] -%}
@@ -673,6 +673,9 @@ minus sign (`-`) to the start or end block tag.
 
 The exact output of the above would be "12345". The `{%-` strips the whitespace
 right before the tag, and `-%}` the strips the whitespace right after the tag.
+
+And the same is for variables: `{{-` will strip the whitespace before the variable,
+and `-}}` will strip the whitespace after the variable.
 
 ## Expressions
 
