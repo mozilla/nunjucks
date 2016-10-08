@@ -577,7 +577,7 @@ var Parser = Object.extend({
 
     parseRaw: function() {
         // Look for upcoming raw blocks (ignore all other kinds of blocks)
-        var rawBlockRegex = /([\s\S]*?){%\s*(raw|endraw)\s*(?=%})%}/;
+        var rawBlockRegex = new RegExp('([\\s\\S]*?)'+this.tokens.tags.BLOCK_START+'\\s*(raw|endraw)\\s*(?='+this.tokens.tags.BLOCK_END+')'+this.tokens.tags.BLOCK_END);
         var rawLevel = 1;
         var str = '';
         var matches = null;
