@@ -30,6 +30,7 @@ Des plugins sont disponibles pour les différents éditeurs pour prendre en char
 * vim <https://github.com/niftylettuce/vim-jinja>
 * brackets <https://github.com/axelboc/nunjucks-brackets>
 * sublime <https://github.com/mogga/sublime-nunjucks/blob/master/Nunjucks.tmLanguage>
+* emacs <http://web-mode.org>
 
 ## Variables
 
