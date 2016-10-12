@@ -30,6 +30,7 @@ Plugins are available in various editors to support the `jinja` syntax highlight
 * vim <https://github.com/niftylettuce/vim-jinja>
 * brackets <https://github.com/axelboc/nunjucks-brackets>
 * sublime <https://github.com/mogga/sublime-nunjucks/blob/master/Nunjucks.tmLanguage>
+* emacs <http://web-mode.org>
 
 ## Variables
 
@@ -971,7 +972,7 @@ a b c d e f
 ### dump
 
 Call [`JSON.stringify`](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify) on an object and dump the result into the
-template. Useful for debugging: `{{ items | dump }}`. 
+template. Useful for debugging: `{{ items | dump }}`.
 
 **Input**
 
@@ -987,7 +988,7 @@ template. Useful for debugging: `{{ items | dump }}`.
 ["a",1,{"b":true}]
 ```
 
-Dump provides the spaces parameter to add spaces or tabs to the resulting 
+Dump provides the spaces parameter to add spaces or tabs to the resulting
 values. This makes the results more readable.
 
 **Input**
