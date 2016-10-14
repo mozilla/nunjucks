@@ -612,7 +612,7 @@ asynchrones séparés par des virgules avec `-a`, tel que `-a foo,bar,baz`. Si v
 utilisez uniquement des filtres synchrones normaux, vous ne devez rien faire.
 
 Les extensions ne peuvent pas être spécifiées avec ce script. Vous devez utiliser
-l'API precompile ci-dessous si vous les utilisez.
+l'API précompile ci-dessous si vous les utilisez.
 
 ### API
 

@@ -863,6 +863,7 @@ Si `tags` avait `["food", "beer", "dessert"]`, l'exemple ci-dessus afficherait `
 Nunjucks a porté la plupart des [filtres de jinja](http://jinja.pocoo.org/docs/dev/templates/#builtin-filters), et il a ses propres filtres :
 
 ### abs
+
 Retourne la valeur absolue de l'argument :
 
 **Entrée**
@@ -968,11 +969,64 @@ Tri un dictionnaire et rend des paires (clé, valeur) :
 ```jinja
 a b c d e f
 ```
-### dump (object)
+### dump
 
-Appelle `JSON.stringify` sur un objet et déverse le résultat dans le
+Appelle [`JSON.stringify`](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify) sur un objet et déverse le résultat dans le
 template. C'est utile pour le débogage : `{{ foo | dump }}`.
 
+**Entrée**
+
+```jinja
+{% set items = ["a", 1, { b : true}] %}
+{{ items | dump }}
+```
+
+**Sortie**
+
+```jinja
+
+["a",1,{"b":true}]
+```
+
+Dump fournit un paramètre pour les espaces afin d'ajouter des espaces ou des tabulations aux valeurs
+retournées. Cela rend le résultat plus lisible.
+
+**Entrée**
+
+```jinja
+{% set items = ["a", 1, { b : true}] %}
+{{ items | dump(2) }}
+```
+
+**Sortie**
+
+```jinja
+[
+  "a",
+  1,
+  {
+    "b": true
+  }
+]
+```
+**Entrée**
+
+```jinja
+{% set items = ["a", 1, { b : true}] %}
+{{ items | dump('\t') }}
+```
+
+**Sortie**
+
+```jinja
+[
+	"a",
+	1,
+	{
+		"b": true
+	}
+]
+```
 ### escape (aliased as e)
 
 Convertit les caractères &, <, >, â€˜, et â€ dans des chaines avec des séquences HTML sécurisées.
@@ -1250,7 +1304,7 @@ foobar
 
 ### random
 
-Selectionne une valeur aléatoire depuis un tableau.
+Sélectionne une valeur aléatoire depuis un tableau.
 (Cela changera à chaque fois que la page est actualisée).
 
 **Entrée**
@@ -1415,7 +1469,7 @@ Arrondit au nombre entier le plus proche (qui arrondit vers le bas) :
 4
 ```
 
-Specifiez le nombre de décimales pour arrondir :
+Spécifiez le nombre de décimales pour arrondir :
 
 **Entrée**
 
