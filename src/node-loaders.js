@@ -4,7 +4,6 @@ var fs = require('fs');
 var path = require('path');
 var lib = require('./lib');
 var Loader = require('./loader');
-var chokidar = require('chokidar');
 var PrecompiledLoader = require('./precompiled-loader.js');
 
 // Node <0.7.1 compatibility
@@ -36,6 +35,7 @@ var FileSystemLoader = Loader.extend({
         if(opts.watch) {
             // Watch all the templates in the paths and fire an event when
             // they change
+            var chokidar = require('chokidar');
             var paths = this.searchPaths.filter(function(p) { return existsSync(p); });
             var watcher = chokidar.watch(paths);
             var _this = this;
