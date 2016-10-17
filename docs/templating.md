@@ -1315,7 +1315,7 @@ Replace new lines with `<br />` HTML elements:
 **Input**
 
 ```jinja
-{{ "foo\nbar" | nl2br }}
+{{ "foo\nbar" | striptags(true) | escape | nl2br }}
 ```
 
 **Output**
@@ -1618,8 +1618,8 @@ Analog of jinja's
 `preserve_linebreaks` is false (default), strips SGML/XML tags and replaces
 adjacent whitespace with one space.  If `preserve_linebreaks` is true,
 normalizes whitespace, trying to preserve original linebreaks. Use second
-behavior if you want to pipe `{{ text | striptags | nl2br }}`. Use default one
-otherwise.
+behavior if you want to pipe `{{ text | striptags(true) | escape | nl2br }}`.
+Use default one otherwise.
 
 ### sum
 
