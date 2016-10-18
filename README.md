@@ -23,13 +23,15 @@ Supported in all modern browsers. For IE8 support, use [es5-shim](https://github
 
 Run the tests with `npm test`.
 
-Watch `master` branch's tests running at http://mozilla.github.io/nunjucks/files/tests/browser/.
+Watch `master` branch's [tests running in the browser](https://mozilla.github.io/nunjucks/files/tests/browser/).
 
 ## Mailing List
 
 Join our mailing list and get help with and issues you have:
 https://groups.google.com/forum/?fromgroups#!forum/nunjucks
 
-## Contributors
+## Want to help?
 
-https://github.com/mozilla/nunjucks/graphs/contributors
+Contributions are always welcome! Before you submit an issue or pull request, please read our [contribution guidelines](CONTRIBUTING.md).
+
+[Contributors](https://github.com/mozilla/nunjucks/graphs/contributors)

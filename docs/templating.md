@@ -676,8 +676,8 @@ minus sign (`-`) to the start or end block tag.
 {%- endfor %}
 ```
 
-The exact output of the above would be "12345". The `-%}` strips the whitespace
-right after the tag, and the `{%-` strips the whitespace right before the tag.
+The exact output of the above would be "12345". The `{%-` strips the whitespace
+right before the tag, and `-%}` the strips the whitespace right after the tag.
 
 ## Expressions
 
