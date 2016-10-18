@@ -30,6 +30,9 @@ Changelog
   Merge of [#868](https://github.com/mozilla/nunjucks/pull/868). 
   Thanks Jesse Eikema
 
+* Add `verbatim` as an alias of `raw` for compatibility with Twig.
+  Merge of [#874](https://github.com/mozilla/nunjucks/pull/874).
+
 
 2.5.2 (Sep 14 2016)
 ----------------
