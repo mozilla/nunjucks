@@ -86,6 +86,18 @@
             finish(done);
         });
 
+        it('dump', function(done) {
+            equal('{{ [\'a\', 1, {b: true}] | dump  }}',
+                '[&quot;a&quot;,1,{&quot;b&quot;:true}]');
+            equal('{{ [\'a\', 1, {b: true}] | dump(2) }}',
+                '[\n  &quot;a&quot;,\n  1,\n  {\n    &quot;b&quot;: true\n  }\n]');
+            equal('{{ [\'a\', 1, {b: true}] | dump(4) }}',
+                '[\n    &quot;a&quot;,\n    1,\n    {\n        &quot;b&quot;: true\n    }\n]' );
+            equal('{{ [\'a\', 1, {b: true}] | dump(\'\t\') }}',
+                '[\n\t&quot;a&quot;,\n\t1,\n\t{\n\t\t&quot;b&quot;: true\n\t}\n]');
+            finish(done);
+        });
+
         it('escape', function(done) {
             var res = render('{{ "<html>" | escape }}', {}, { autoescape: false });
             expect(res).to.be('&lt;html&gt;');

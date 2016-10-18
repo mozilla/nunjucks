@@ -30,6 +30,7 @@ Plugins are available in various editors to support the `jinja` syntax highlight
 * vim <https://github.com/niftylettuce/vim-jinja>
 * brackets <https://github.com/axelboc/nunjucks-brackets>
 * sublime <https://github.com/mogga/sublime-nunjucks/blob/master/Nunjucks.tmLanguage>
+* emacs <http://web-mode.org>
 
 ## Variables
 
@@ -867,6 +868,7 @@ If `tags` was `["food", "beer", "dessert"]`, the above example would output `foo
 Nunjucks has ported most of [jinja's filters](http://jinja.pocoo.org/docs/dev/templates/#builtin-filters), and has a few of its own:
 
 ### abs
+
 Return the absolute value of the argument:
 
 **Input**
@@ -972,10 +974,64 @@ Sort a dict and yield (key, value) pairs:
 ```jinja
 a b c d e f
 ```
-### dump (object)
+### dump
 
-Call `JSON.stringify` on an object and dump the result into the
-template. Useful for debugging: `{{ foo | dump }}`.
+Call [`JSON.stringify`](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify) on an object and dump the result into the
+template. Useful for debugging: `{{ items | dump }}`.
+
+**Input**
+
+```jinja
+{% set items = ["a", 1, { b : true}] %}
+{{ items | dump }}
+```
+
+**Output**
+
+```jinja
+
+["a",1,{"b":true}]
+```
+
+Dump provides the spaces parameter to add spaces or tabs to the resulting
+values. This makes the results more readable.
+
+**Input**
+
+```jinja
+{% set items = ["a", 1, { b : true}] %}
+{{ items | dump(2) }}
+```
+
+**Output**
+
+```jinja
+[
+  "a",
+  1,
+  {
+    "b": true
+  }
+]
+```
+**Input**
+
+```jinja
+{% set items = ["a", 1, { b : true}] %}
+{{ items | dump('\t') }}
+```
+
+**Output**
+
+```jinja
+[
+	"a",
+	1,
+	{
+		"b": true
+	}
+]
+```
 
 ### escape (aliased as e)
 
