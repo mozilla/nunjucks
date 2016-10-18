@@ -580,7 +580,6 @@ var Parser = Object.extend({
         tagName = tagName || 'raw';
         var endTagName = 'end' + tagName;
         // Look for upcoming raw blocks (ignore all other kinds of blocks)
-        //var rawBlockRegex = /([\s\S]*?){%\s*(raw|endraw)\s*(?=%})%}/;
         var rawBlockRegex = new RegExp('([\\s\\S]*?){%\\s*(' + tagName + '|' + endTagName + ')\\s*(?=%})%}');
         var rawLevel = 1;
         var str = '';
