@@ -9,6 +9,7 @@ var builtin_filters = require('./filters');
 var builtin_loaders = require('./loaders');
 var runtime = require('./runtime');
 var globals = require('./globals');
+var Loader = require('./loader');
 var waterfall = require('a-sync-waterfall');
 var Frame = runtime.Frame;
 var Template;
@@ -326,6 +327,50 @@ var Environment = Obj.extend({
 
         var tmpl = new Template(src, this, opts.path);
         return tmpl.render(ctx, cb);
+    },
+
+    clone: function(opts) {
+        opts = opts || { express: true };
+
+        var defaultGlobals = lib.keys(globals());
+        var newLoaders = [];
+        var name;
+
+        lib.each(this.loaders, function(loader) {
+            newLoaders.push(lib.extend(new Loader(), loader));
+        });
+
+        var clone = new Environment(newLoaders, this.opts);
+
+        if(opts.express && this.opts.express) {
+            clone.express(this.opts.express);
+        }
+
+        for(name in this.filters) {
+            if(builtin_filters[name] !== undefined) {
+                continue;
+            }
+
+            clone.addFilter(
+                name,
+                this.filters[name],
+                lib.indexOf(this.asyncFilters, name) !== -1
+            );
+        }
+
+        for(name in this.globals) {
+            if(lib.indexOf(defaultGlobals, name) !== -1) {
+                continue;
+            }
+
+            clone.addGlobal(name, this.globals[name]);
+        }
+
+        for(name in this.extensions) {
+            clone.addExtension(name, this.extensions[name]);
+        }
+
+        return clone;
     },
 
     waterfall: waterfall
