@@ -1308,6 +1308,22 @@ Convert string to all lower case:
 foobar
 ```
 
+### nl2br
+
+Replace new lines with `<br />` HTML elements:
+
+**Input**
+
+```jinja
+{{ "foo\nbar" | nl2br }}
+```
+
+**Output**
+
+```jinja
+foo<br />\nbar
+```
+
 ### random
 
 Select a random value from an array.

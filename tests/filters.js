@@ -333,6 +333,18 @@
             finish(done);
         });
 
+        it('nl2br', function(done) {
+            equal('{{ null | nl2br }}', '');
+            equal('{{ undefined | nl2br }}', '');
+            equal('{{ nothing | nl2br }}', '');
+            equal('{{ str | nl2br }}', {str: r.markSafe('foo\rbar')}, 'foo<br />\nbar');
+            equal('{{ str | nl2br }}', {str: r.markSafe('foo\r\nbar')}, 'foo<br />\nbar');
+            equal('{{ str | nl2br }}', {str: r.markSafe('foo\nbar')}, 'foo<br />\nbar');
+            equal('{{ str | nl2br }}', {str: r.markSafe('foo\n\nbar')}, 'foo<br />\n<br />\nbar');
+            equal('{{ "foo\nbar" | nl2br }}', 'foo&lt;br /&gt;\nbar');
+            finish(done);
+        });
+
         it('random', function(done) {
             for(var i=0; i<100; i++) {
                 // jshint loopfunc: true

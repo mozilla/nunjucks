@@ -33,6 +33,9 @@ Changelog
 * Add `verbatim` as an alias of `raw` for compatibility with Twig.
   Merge of [#874](https://github.com/mozilla/nunjucks/pull/874).
 
+* Add new `nl2br` filter. Thanks Marc-Aurèle Darche
+
+
 
 2.5.2 (Sep 14 2016)
 ----------------
