@@ -337,7 +337,6 @@
             equal('{{ null | nl2br }}', '');
             equal('{{ undefined | nl2br }}', '');
             equal('{{ nothing | nl2br }}', '');
-            equal('{{ str | nl2br }}', {str: r.markSafe('foo\rbar')}, 'foo<br />\nbar');
             equal('{{ str | nl2br }}', {str: r.markSafe('foo\r\nbar')}, 'foo<br />\nbar');
             equal('{{ str | nl2br }}', {str: r.markSafe('foo\nbar')}, 'foo<br />\nbar');
             equal('{{ str | nl2br }}', {str: r.markSafe('foo\n\nbar')}, 'foo<br />\n<br />\nbar');

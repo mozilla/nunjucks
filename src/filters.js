@@ -232,10 +232,10 @@ var filters = {
     },
 
     nl2br: function(str) {
-        if ((str === null) || (str === undefined)) {
+        if (str === null || str === undefined) {
             return '';
         }
-        return r.copySafeness(str, str.replace(/\r\n|\r|\n/g, '<br />\n'));
+        return r.copySafeness(str, str.replace(/\r\n|\n/g, '<br />\n'));
     },
 
     random: function(arr) {
