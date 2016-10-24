@@ -1308,6 +1308,22 @@ Convert string to all lower case:
 foobar
 ```
 
+### nl2br
+
+Replace new lines with `<br />` HTML elements:
+
+**Input**
+
+```jinja
+{{ "foo\nbar" | striptags(true) | escape | nl2br }}
+```
+
+**Output**
+
+```jinja
+foo<br />\nbar
+```
+
 ### random
 
 Select a random value from an array.
@@ -1602,8 +1618,8 @@ Analog of jinja's
 `preserve_linebreaks` is false (default), strips SGML/XML tags and replaces
 adjacent whitespace with one space.  If `preserve_linebreaks` is true,
 normalizes whitespace, trying to preserve original linebreaks. Use second
-behavior if you want to pipe `{{ text | striptags | nl2br }}`. Use default one
-otherwise.
+behavior if you want to pipe `{{ text | striptags(true) | escape | nl2br }}`.
+Use default one otherwise.
 
 ### sum
 

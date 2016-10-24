@@ -231,6 +231,13 @@ var filters = {
         return str.toLowerCase();
     },
 
+    nl2br: function(str) {
+        if (str === null || str === undefined) {
+            return '';
+        }
+        return r.copySafeness(str, str.replace(/\r\n|\n/g, '<br />\n'));
+    },
+
     random: function(arr) {
         return arr[Math.floor(Math.random() * arr.length)];
     },
