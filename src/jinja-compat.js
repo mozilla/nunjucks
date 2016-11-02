@@ -34,6 +34,9 @@ function installCompat() {
       }
       return this.splice(index, 1);
     },
+    append: function(element) {
+        return this.push(element);
+    },
     remove: function(element) {
       for (var i = 0; i < this.length; i++) {
         if (this[i] === element) {
