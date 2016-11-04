@@ -304,7 +304,8 @@ var Environment = Obj.extend({
 
         this.getTemplate(name, function(err, tmpl) {
             if(err && cb) {
-                callbackAsap(cb, err);
+                // Synchronous Api, async behavior causing the response unable to set headers crashing the whole application
+                cb(err);
             }
             else if(err) {
                 throw err;
