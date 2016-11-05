@@ -2,7 +2,7 @@ Changelog
 =========
 
 
-3.x (unreleased)
+3.0.0 (Nov 5 2016)
 ----------------
 
 * Allow including many templates without reaching recursion limits. Merge of
