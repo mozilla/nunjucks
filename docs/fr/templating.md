@@ -555,6 +555,11 @@ Template compilé : `{% import name + ".html" as obj %}`.
 Si vous voulez afficher des balises spéciales de Nunjucks comme `{{`, vous pouvez utiliser
 un bloc `{% raw %}` et tout ce qui sera à l'intérieur de celui-ci sera affiché au format texte brut.
 
+### verbatim
+
+`{% verbatim %}` a le même comportement que [`{% raw %}`](#raw). Il a été ajouté pour
+être compatible avec la [balise `verbatim` de Twig](http://twig.sensiolabs.org/doc/tags/verbatim.html).
+
 ### filter
 
 Un bloc `filter` vous permet d'appeler un filtre avec le contenu de ce
