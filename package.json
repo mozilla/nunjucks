@@ -6,7 +6,6 @@
   "dependencies": {
     "a-sync-waterfall": "^1.0.0",
     "asap": "^2.0.3",
-    "chokidar": "^1.6.0",
     "yargs": "^3.32.0"
   },
   "browser": "./browser/nunjucks.js",
@@ -20,6 +19,9 @@
     "supertest": "*",
     "uglify-js": "*",
     "webpack": "^1.8.11"
+  },
+  "optionalDependencies": {
+    "chokidar": "^1.6.0"
   },
   "engines": {
     "node": "*"
