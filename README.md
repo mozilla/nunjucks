@@ -1,9 +1,9 @@
 # Nunjucks
 
-[Nunjucks](http://mozilla.github.io/nunjucks/) is a full featured
+[Nunjucks](https://mozilla.github.io/nunjucks/) is a full featured
 templating engine for javascript. It is heavily inspired by
 [jinja2](http://jinja.pocoo.org/). View the docs
-[here](http://mozilla.github.io/nunjucks/).
+[here](https://mozilla.github.io/nunjucks/).
 
 ## Installation
 
@@ -13,7 +13,7 @@ templating engine for javascript. It is heavily inspired by
 
 ## Documentation
 
-See [here](http://mozilla.github.io/nunjucks/).
+See [here](https://mozilla.github.io/nunjucks/).
 
 ## Browser Support
 
