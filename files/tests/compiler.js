@@ -267,6 +267,14 @@
             finish(done);
         });
 
+        it('should allow overriding var with none inside nested scope', function(done) {
+            equal('{% set var = "foo" %}' +
+                  '{% for i in [1] %}{% set var = none %}{{ var }}{% endfor %}',
+                 '');
+
+            finish(done);
+        });
+
         it('should compile asyncEach', function(done) {
             runLoopTests('asyncEach', 'endeach');
             finish(done);
@@ -612,6 +620,21 @@
             finish(done);
         });
 
+        it('should not leak variables set in nested scope within macro out to calling scope', function(done) {
+            equal('{% macro setFoo() %}' +
+                  '{% for y in [1] %}{% set x = "foo" %}{{ x }}{% endfor %}' +
+                  '{% endmacro %}' +
+                  '{% macro display() %}' +
+                  '{% set x = "bar" %}' +
+                  '{{ setFoo() }}' +
+                  '{{ x }}' +
+                  '{% endmacro %}' +
+                  '{{ display() }}',
+                  'foobar');
+
+            finish(done);
+        });
+
         it('should compile macros without leaking set to calling scope', function(done) {
             // This test checks that the issue #577 is resolved.
             // If the bug is not fixed, and set variables leak into the
@@ -632,6 +655,14 @@
                   '{{ foo(true) }}',
                   'foofoo');
 
+            finish(done);
+        });
+
+        it('should compile macros that cannot see variables in caller scope', function(done) {
+            equal('{% macro one(var) %}{{ two() }}{% endmacro %}' +
+                  '{% macro two() %}{{ var }}{% endmacro %}' +
+                  '{{ one("foo") }}',
+                  '');
             finish(done);
         });
 
@@ -871,9 +902,64 @@
             finish(done);
         });
 
+        it('should let super() see global vars from child template', function(done) {
+            equal('{% extends "base-show.njk" %}{% set var = "child" %}' +
+                  '{% block main %}{{ super() }}{% endblock %}',
+                  'child');
+
+            finish(done);
+        });
+
+        it('should not let super() see vars from child block', function(done) {
+            equal('{% extends "base-show.njk" %}' +
+                  '{% block main %}{% set var = "child" %}{{ super() }}{% endblock %}',
+                  '');
+
+            finish(done);
+        });
+
+        it('should let child templates access parent global scope', function(done) {
+            equal('{% extends "base-set.njk" %}' +
+                  '{% block main %}{{ var }}{% endblock %}',
+                  'parent');
+
+            finish(done);
+        });
+
+        it('should not let super() modify calling scope', function(done) {
+            equal('{% extends "base-set-inside-block.njk" %}' +
+                  '{% block main %}{{ super() }}{{ var }}{% endblock %}',
+                 '');
+
+            finish(done);
+        });
+
+        it('should not let child templates set vars in parent scope', function(done) {
+            equal('{% extends "base-set-and-show.njk" %}' +
+                  '{% block main %}{% set var = "child" %}{% endblock %}',
+                 'parent');
+
+            finish(done);
+        });
+
+        it('should render blocks in their own scope', function(done) {
+            equal('{% set var = "parent" %}' +
+                  '{% block main %}{% set var = "inner" %}{% endblock %}' +
+                  '{{ var }}',
+                  'parent');
+
+            finish(done);
+        });
+
         it('should include templates', function(done) {
             equal('hello world {% include "include.njk" %}',
                   'hello world FooInclude ');
+            finish(done);
+        });
+
+        it('should include 130 templates without call stack size exceed', function(done) {
+            equal('{% include "includeMany.njk" %}',
+                new Array(131).join('FooInclude \n'));
             finish(done);
         });
 
@@ -1536,6 +1622,69 @@
               '{% if true -%}{# comment #} {{"hello"}}{% endif %}',
               ' hello'
             );
+
+            finish(done);
+        });
+
+        it('should control expression whitespaces correctly', function(done) {
+            equal(
+                'Well, {{- \' hello, \' -}} my friend',
+                'Well, hello, my friend'
+            );
+
+            equal(' {{ 2 + 2 }} ', ' 4 ');
+
+            equal(' {{-2 + 2 }} ', '4 ');
+
+            equal(' {{ -2 + 2 }} ', ' 0 ');
+
+            equal(' {{ 2 + 2 -}} ', ' 4');
+
+            render(
+                ' {{ 2 + 2- }}',
+                {},
+                { noThrow: true },
+                function(err, res) {
+                    expect(res).to.be(undefined);
+                    expect(err).to.match(/unexpected token: }}/);
+                }
+            );
+
+            finish(done);
+        });
+
+        it('should get right value when macro parameter conflict with global macro name', function(done) {
+            render(
+                '{# macro1 and macro2 definition #}' +
+                '{% macro macro1() %}' +
+                '{% endmacro %}' +
+                '' +
+                '{% macro macro2(macro1="default") %}' +
+                '{{macro1}}' +
+                '{% endmacro %}' +
+                '' +
+                '{# calling macro2 #}' +
+                '{{macro2("this should be outputted") }}', {}, {}, function(err, res) {
+                    expect(res.trim()).to.eql('this should be outputted');
+            });
+
+            finish(done);
+        });
+
+        it('should get right value when macro include macro', function(done) {
+            render(
+                '{# macro1 and macro2 definition #}' +
+                '{% macro macro1() %} foo' +
+                '{% endmacro %}' +
+                '' +
+                '{% macro macro2(text="default") %}' +
+                '{{macro1()}}' +
+                '{% endmacro %}' +
+                '' +
+                '{# calling macro2 #}' +
+                '{{macro2("this should not be outputted") }}', {}, {}, function(err, res) {
+                    expect(res.trim()).to.eql('foo');
+            });
 
             finish(done);
         });

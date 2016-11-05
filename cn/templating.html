@@ -4,6 +4,7 @@
     <title>Nunjucks</title>
 
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" type="text/css"
           href="/nunjucks/bower_components/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/nunjucks/css/highlight.css" />
@@ -17,7 +18,7 @@
 
       <ul class="nav navbar-nav navbar-right pull-right">
         <li><a href="/nunjucks/#download" class="download">Download</a></li>
-        <li><a href="https://github.com/mozilla/nunjucks">Github</a></li>
+        <li><a href="https://github.com/mozilla/nunjucks">GitHub</a></li>
         <li class="dropdown">
           <a href="getting-started.html" data-toggle="dropdown">Docs</a>
 
@@ -161,7 +162,24 @@
 </ul>
 </li>
 <li>
-<a href="#builtin-filters">Builtin Filters</a>
+<a href="">内置的过滤器</a>
+<ul>
+<li>
+<a href="#default-value-default-boolean">default(value, default, [boolean])</a>
+</li>
+<li>
+<a href="#sort-arr-reverse-casesens-attr">sort(arr, reverse, caseSens, attr)</a>
+</li>
+<li>
+<a href="#striptags-value-preserve_linebreaks">striptags (value, [preserve_linebreaks])</a>
+</li>
+<li>
+<a href="#dump-object">dump (object)</a>
+</li>
+<li>
+<a href="">其他过滤器</a>
+</li>
+</ul>
 </li>
 </ul>
 </li>
@@ -768,43 +786,78 @@ Right side!
 </code></pre></div>
 <p>如果 <code>tags</code> 为 <code>[&quot;food&quot;, &quot;beer&quot;, &quot;dessert&quot;]</code>, 上面将输出 <code>food, beer, dessert</code>。</p>
 
-<h2 id="builtin-filters">Builtin Filters</h2>
+<h2 id=">内置的过滤器</h2>
 
-<p>Nunjucks 已经支持了大部分 jinja 的过滤器 (点击查看文档)。</p>
+<p>Nunjucks已经实现了jinja中的大部分过滤器，同时也新增了一些属于自己的过滤器。
+我们需要为这些过滤器编写文档。下面是一部分过滤器的文档，其他的你可以点击链接查看jinja上的文档。</p>
+
+<h3 id="default-value-default-boolean">default(value, default, [boolean])</h3>
+
+<p>(简写为 <code>d</code>)</p>
+
+<p>如果<code>value</code>全等于<code>undefined</code>则返回<code>default</code>，否则返回<code>value</code>。
+如果<code>boolean</code>为true，则会在<code>value</code>为JavaScript中的假值时（比如：false, &quot;&quot;等）返回<code>default</code>。</p>
+
+<p><strong>在2.0版本中，这个过滤器的默认表现与以前有所不同。在之前的版本中，它会把<code>boolean</code>的默认值
+  设置为true，所以传入任何假值都会返回<code>default</code>。在2.0中，默认只有值为<code>undefined</code>时会
+  返回<code>default</code>。如果你仍旧希望保持原来版本的表现的话，你可以给<code>boolean</code>传入<code>true</code>，或是
+  直接使用<code>value or default</code>。</strong></p>
+
+<h3 id="sort-arr-reverse-casesens-attr">sort(arr, reverse, caseSens, attr)</h3>
+
+<p>用JavaScript中的<code>arr.sort</code>函数排序<code>arr</code>。如果<code>reverse</code>为true，则会返回相反的
+排序结果。默认状态下排序不会区分大小写，但你可以将<code>caseSens</code>设置为true来让排序
+区分大小写。我们可以用<code>attr</code>来指定要比较的属性。</p>
+
+<h3 id="striptags-value-preserve_linebreaks">striptags (value, [preserve_linebreaks])</h3>
+
+<p>类似于jinja中的<a href="http://jinja.pocoo.org/docs/templates/#striptags">striptags</a>.
+如果<code>preserve_linebreaks</code>为false（同时也是默认值），则会移去SGML/XML标签并用一个空格符
+替换临近的、连续的空白符号。如果<code>preserve_linebreaks</code>为true，则会尝试保留临近的空白符号。
+如果你希望使用管道操作符进行类似于<code>{{ text | striptags | nl2br }}</code>这样的操作时，你就会
+需要用到后一种。否则你还是应该使用默认的用法。</p>
+
+<h3 id="dump-object">dump (object)</h3>
+
+<p>在一个对象上调用<code>JSON.stringify</code>，并将结果输出到模板上。这在调试时很有用：<code>{{ foo | dump }}</code>。</p>
+
+<h3 id=">其他过滤器</h3>
 
 <ul>
 <li><a href="http://jinja.pocoo.org/docs/templates/#abs">abs</a></li>
 <li><a href="http://jinja.pocoo.org/docs/templates/#batch">batch</a></li>
 <li><a href="http://jinja.pocoo.org/docs/templates/#capitalize">capitalize</a></li>
 <li><a href="http://jinja.pocoo.org/docs/templates/#center">center</a></li>
-<li><a href="http://jinja.pocoo.org/docs/templates/#default">default</a> (aliased as <code>d</code>)</li>
 <li><a href="http://jinja.pocoo.org/docs/templates/#dictsort">dictsort</a></li>
-<li><a href="http://jinja.pocoo.org/docs/templates/#escape">escape</a> (aliased as <code>e</code>)</li>
-<li><a href="http://jinja.pocoo.org/docs/templates/#safe">safe</a></li>
+<li><a href="http://jinja.pocoo.org/docs/templates/#escape">escape</a> (简写为<code>e</code>)</li>
+<li><a href="http://jinja.pocoo.org/docs/templates/#float">float</a></li>
 <li><a href="http://jinja.pocoo.org/docs/templates/#first">first</a></li>
 <li><a href="http://jinja.pocoo.org/docs/templates/#groupby">groupby</a></li>
 <li><a href="http://jinja.pocoo.org/docs/templates/#indent">indent</a></li>
+<li><a href="http://jinja.pocoo.org/docs/templates/#int">int</a></li>
 <li><a href="http://jinja.pocoo.org/docs/templates/#join">join</a></li>
 <li><a href="http://jinja.pocoo.org/docs/templates/#last">last</a></li>
 <li><a href="http://jinja.pocoo.org/docs/templates/#length">length</a></li>
 <li><a href="http://jinja.pocoo.org/docs/templates/#list">list</a></li>
 <li><a href="http://jinja.pocoo.org/docs/templates/#lower">lower</a></li>
 <li><a href="http://jinja.pocoo.org/docs/templates/#random">random</a></li>
-<li><a href="http://jinja.pocoo.org/docs/templates/#replace">replace</a></li>
+<li><a href="http://jinja.pocoo.org/docs/templates/#rejectattr">rejectattr</a> (只接受单个参数)</li>
+<li><a href="http://jinja.pocoo.org/docs/templates/#replace">replace</a> (第一个参数也可以接受
+JavaScript中的正则表达式)</li>
 <li><a href="http://jinja.pocoo.org/docs/templates/#reverse">reverse</a></li>
 <li><a href="http://jinja.pocoo.org/docs/templates/#round">round</a></li>
+<li><a href="http://jinja.pocoo.org/docs/templates/#safe">safe</a></li>
+<li><a href="http://jinja.pocoo.org/docs/templates/#selectattr">selectattr</a> (只接受单个参数)</li>
 <li><a href="http://jinja.pocoo.org/docs/templates/#slice">slice</a></li>
-<li><a href="http://jinja.pocoo.org/docs/templates/#sort">sort</a></li>
 <li><a href="http://jinja.pocoo.org/docs/templates/#string">string</a></li>
-<li><a href="http://jinja.pocoo.org/docs/templates/#striptags">striptags</a></li>
+<li><a href="http://jinja.pocoo.org/docs/dev/templates/#sum">sum</a></li>
 <li><a href="http://jinja.pocoo.org/docs/templates/#title">title</a></li>
 <li><a href="http://jinja.pocoo.org/docs/templates/#trim">trim</a></li>
 <li><a href="http://jinja.pocoo.org/docs/templates/#truncate">truncate</a></li>
 <li><a href="http://jinja.pocoo.org/docs/templates/#upper">upper</a></li>
 <li><a href="http://jinja.pocoo.org/docs/templates/#urlencode">urlencode</a></li>
+<li><a href="http://jinja.pocoo.org/docs/templates/#urlize">urlize</a></li>
 <li><a href="http://jinja.pocoo.org/docs/templates/#wordcount">wordcount</a></li>
-<li><a href="http://jinja.pocoo.org/docs/templates/#float">float</a></li>
-<li><a href="http://jinja.pocoo.org/docs/templates/#int">int</a></li>
 </ul>
 
 <p>你也可以直接<a href="https://github.com/mozilla/nunjucks/blob/master/src/filters.js">看代码</a>。</p>

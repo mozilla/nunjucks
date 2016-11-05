@@ -4,6 +4,7 @@
     <title>Nunjucks</title>
 
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" type="text/css"
           href="/nunjucks/bower_components/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/nunjucks/css/highlight.css" />
@@ -17,7 +18,7 @@
 
       <ul class="nav navbar-nav navbar-right pull-right">
         <li><a href="/nunjucks/#download" class="download">Download</a></li>
-        <li><a href="https://github.com/mozilla/nunjucks">Github</a></li>
+        <li><a href="https://github.com/mozilla/nunjucks">GitHub</a></li>
         <li class="dropdown">
           <a href="getting-started.html" data-toggle="dropdown">Docs</a>
 
@@ -107,6 +108,9 @@
 <a href="#raw">raw</a>
 </li>
 <li>
+<a href="#verbatim">verbatim</a>
+</li>
+<li>
 <a href="#filter">filter</a>
 </li>
 <li>
@@ -167,18 +171,6 @@
 <a href="#filtres-int-gr-s">Filtres intégrés</a>
 <ul>
 <li>
-<a href="#default-value-default-boolean">default(value, default, [boolean])</a>
-</li>
-<li>
-<a href="#sort-arr-reverse-casesens-attr">sort(arr, reverse, caseSens, attr)</a>
-</li>
-<li>
-<a href="#striptags-value-preserve_linebreaks">striptags (value, [preserve_linebreaks])</a>
-</li>
-<li>
-<a href="#dump-object">dump (object)</a>
-</li>
-<li>
 <a href="#abs">abs</a>
 </li>
 <li>
@@ -191,16 +183,22 @@
 <a href="#center">center</a>
 </li>
 <li>
+<a href="#default-value-default-boolean">default(value, default, [boolean])</a>
+</li>
+<li>
 <a href="#dictsort">dictsort</a>
+</li>
+<li>
+<a href="#dump">dump</a>
 </li>
 <li>
 <a href="#escape-aliased-as-e">escape (aliased as e)</a>
 </li>
 <li>
-<a href="#float">float</a>
+<a href="#first">first</a>
 </li>
 <li>
-<a href="#first">first</a>
+<a href="#float">float</a>
 </li>
 <li>
 <a href="#groupby">groupby</a>
@@ -251,7 +249,13 @@
 <a href="#slice">slice</a>
 </li>
 <li>
+<a href="#sort-arr-reverse-casesens-attr">sort(arr, reverse, caseSens, attr)</a>
+</li>
+<li>
 <a href="#string">string</a>
+</li>
+<li>
+<a href="#striptags-value-preserve_linebreaks">striptags (value, [preserve_linebreaks])</a>
 </li>
 <li>
 <a href="#sum">sum</a>
@@ -303,7 +307,7 @@ chose ici. Découvrez les différences
 <h2 id="extensions-de-fichier">Extensions de fichier</h2>
 
 <p>Bien que vous soyez libre d&#39;utiliser n&#39;importe quelle extension de fichier pour vos
-fichiers de template Nunjucks, la communauté de Nunjucks a adopté <code>.njk</code>.  </p>
+fichiers de template Nunjucks, la communauté de Nunjucks a adopté <code>.njk</code>.</p>
 
 <p>Si vous développez des outils ou des aides de syntaxe pour éditeur pour Nunjucks,
 veuillez inclure la reconnaissance de l&#39;extension <code>.njk</code>.</p>
@@ -317,6 +321,7 @@ veuillez inclure la reconnaissance de l&#39;extension <code>.njk</code>.</p>
 <li>vim <a href="https://github.com/niftylettuce/vim-jinja">https://github.com/niftylettuce/vim-jinja</a></li>
 <li>brackets <a href="https://github.com/axelboc/nunjucks-brackets">https://github.com/axelboc/nunjucks-brackets</a></li>
 <li>sublime <a href="https://github.com/mogga/sublime-nunjucks/blob/master/Nunjucks.tmLanguage">https://github.com/mogga/sublime-nunjucks/blob/master/Nunjucks.tmLanguage</a></li>
+<li>emacs <a href="http://web-mode.org">http://web-mode.org</a></li>
 </ul>
 
 <h2 id="variables">Variables</h2>
@@ -394,7 +399,7 @@ remplaceront. La chaîne d&#39;héritage peut être aussi longue que vous le sou
 
 <span class="x">&lt;section class=&quot;right&quot;&gt;</span>
 <span class="x">  C&#39;est la partie droite !</span>
-<span class="x">&lt;/section&gt;  </span>
+<span class="x">&lt;/section&gt;</span>
 </code></pre></div>
 <p>Vous pouvez stocker le template à hériter dans une variable et l&#39;utiliser en
 omettant les guillemets. Cette variable peut contenir un string qui pointe vers
@@ -428,24 +433,25 @@ Nunjucks est livré avec plusieurs tags intégrés, mais <a href="api.html#tags-
 
 <h3 id="if">if</h3>
 
-<p><code>if</code> teste une condition et vous permet d&#39;afficher de manière sélective le contenu. Il se comporte exactement comme le <code>if</code> de javascript.</p>
+<p><code>if</code> teste une condition et vous permet d&#39;afficher de manière sélective le contenu. Il se comporte
+exactement comme le <code>if</code> de javascript.</p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">if</span> <span class="nv">variable</span> <span class="cp">%}</span><span class="x"></span>
 <span class="x">  C&#39;est vrai</span>
 <span class="cp">{%</span> <span class="k">endif</span> <span class="cp">%}</span><span class="x"></span>
 </code></pre></div>
-<p>Si <code>variable</code> est défini et évalué à <code>true</code>, &quot;C&#39;est vrai&quot; s&#39;affichera, sinon rien n&#39;apparaitra.</p>
+<p>Si <code>variable</code> est défini et évalué à <code>true</code>, &quot;C&#39;est vrai&quot;
+s&#39;affichera, sinon rien n&#39;apparaitra.</p>
 
-<p>Vous pouvez spécifier des conditions alternatives avec <code>elif</code> (ou <code>elseif</code>) et <code>else</code> :
-<code>jinja
-{% if faim %}
-  J&#39;ai faim
-{% elif fatigue %}
-  Je suis fatigué
-{% else %}
-  Je suis bien !
-{% endif %}
-</code></p>
-
+<p>Vous pouvez spécifier des conditions alternatives avec <code>elif</code> (ou <code>elseif</code>, qui est simplement un alias de <code>elif</code>)
+et <code>else</code> :</p>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">if</span> <span class="nv">faim</span> <span class="cp">%}</span><span class="x"></span>
+<span class="x">  J&#39;ai faim</span>
+<span class="cp">{%</span> <span class="k">elif</span> <span class="nv">fatigue</span> <span class="cp">%}</span><span class="x"></span>
+<span class="x">  Je suis fatigué</span>
+<span class="cp">{%</span> <span class="k">else</span> <span class="cp">%}</span><span class="x"></span>
+<span class="x">  Je suis bien !</span>
+<span class="cp">{%</span> <span class="k">endif</span> <span class="cp">%}</span><span class="x"></span>
+</code></pre></div>
 <p>Vous pouvez également utiliser <code>if</code> comme une <a href="#expression-if">expression en ligne</a>.</p>
 
 <h3 id="for">for</h3>
@@ -466,7 +472,9 @@ Nunjucks est livré avec plusieurs tags intégrés, mais <a href="api.html#tags-
 <span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span><span class="x"></span>
 <span class="x">&lt;/ul&gt;</span>
 </code></pre></div>
-<p>L&#39;exemple ci-dessus liste tous les articles en utilisant l&#39;attribut <code>title</code> qui est affiché pour chaque élément dans le tableau <code>items</code>. Si le tableau <code>items</code> est vide, le contenu de la clause facultatif <code>else</code> sera rendu.</p>
+<p>L&#39;exemple ci-dessus liste tous les articles en utilisant l&#39;attribut <code>title</code> qui est affiché pour chaque élément
+dans le tableau <code>items</code>. Si le tableau <code>items</code> est vide, le contenu
+de la clause facultatif <code>else</code> sera rendu.</p>
 
 <p>Vous pouvez aussi itérez sur des objets/tables de hachage :</p>
 <div class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">food</span> <span class="o">=</span> <span class="p">{</span>
@@ -478,7 +486,8 @@ Nunjucks est livré avec plusieurs tags intégrés, mais <a href="api.html#tags-
 <span class="x">  Utilisez </span><span class="cp">{{</span> <span class="nv">amount</span> <span class="cp">}}</span><span class="x"> de </span><span class="cp">{{</span> <span class="nv">ingredient</span> <span class="cp">}}</span><span class="x"></span>
 <span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span><span class="x"></span>
 </code></pre></div>
-<p>Le filtre <a href="http://jinja.pocoo.org/docs/templates/#dictsort"><code>dictsort</code></a> est disponible pour trier les objets lors de leur itération (<em>nouveau depuis la 0.1.8</em>).</p>
+<p>Le filtre <a href="http://jinja.pocoo.org/docs/templates/#dictsort"><code>dictsort</code></a> est disponible
+pour trier les objets lors de leur itération.</p>
 
 <p>De plus, Nunjucks découpera les tableaux dans des variables :</p>
 <div class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">points</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span> <span class="p">[</span><span class="mi">12</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">14</span><span class="p">]];</span>
@@ -561,7 +570,8 @@ Le rendu du template reprend une fois que tous les éléments sont traités.</p>
 
 <h3 id="macro">macro</h3>
 
-<p><code>macro</code> vous permet de définir des morceaux de contenu réutilisables. C&#39;est semblable à une fonction dans un langage de programmation. Voici un exemple :</p>
+<p><code>macro</code> vous permet de définir des morceaux de contenu réutilisables. C&#39;est semblable à
+une fonction dans un langage de programmation. Voici un exemple :</p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">macro</span> <span class="nv">field</span><span class="o">(</span><span class="nv">name</span><span class="o">,</span> <span class="nv">value</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="o">,</span> <span class="nv">type</span><span class="o">=</span><span class="s1">&#39;text&#39;</span><span class="o">)</span> <span class="cp">%}</span><span class="x"></span>
 <span class="x">&lt;div class=&quot;field&quot;&gt;</span>
 <span class="x">  &lt;input type=&quot;</span><span class="cp">{{</span> <span class="nv">type</span> <span class="cp">}}</span><span class="x">&quot; name=&quot;</span><span class="cp">{{</span> <span class="nv">name</span> <span class="cp">}}</span><span class="x">&quot;</span>
@@ -573,11 +583,16 @@ Le rendu du template reprend une fois que tous les éléments sont traités.</p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">field</span><span class="o">(</span><span class="s1">&#39;user&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
 <span class="cp">{{</span> <span class="nv">field</span><span class="o">(</span><span class="s1">&#39;pass&#39;</span><span class="o">,</span> <span class="nv">type</span><span class="o">=</span><span class="s1">&#39;password&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
 </code></pre></div>
-<p>Les arguments par défaut et avec mots clefs sont disponibles. Regardez <a href="#arguments-avec-mots-clefs">arguments avec mots clefs</a> pour une explication plus détaillée.</p>
+<p>Les arguments par défaut et avec mots clefs sont disponibles. Regardez
+<a href="#arguments-avec-mots-clefs">arguments avec mots clefs</a> pour une explication plus détaillée.</p>
 
-<p>Vous pouvez importer (<a href="#import">import</a>) des macros à partir d&#39;autres templates, cela vous permet de les réutiliser librement à travers votre projet.</p>
+<p>Vous pouvez importer (<a href="#import">import</a>) des macros à partir d&#39;autres templates, cela vous permet
+de les réutiliser librement à travers votre projet.</p>
 
-<p><strong>Remarque importante</strong> : Si vous utilisez l&#39;API asynchrone, soyez conscient que vous ne pouvez rien faire d&#39;asynchrone à l&#39;intérieur des macros. Car les macros sont appelées comme des fonctions normales. Dans le futur, nous pourrions avoir un moyen d&#39;appeler une fonction de manière asynchrone. Si vous faites cela maintenant, le comportement est inconnu.</p>
+<p><strong>Remarque importante</strong> : Si vous utilisez l&#39;API asynchrone, soyez conscient que
+vous ne pouvez rien faire d&#39;asynchrone à l&#39;intérieur des macros. Car les macros
+sont appelées comme des fonctions normales. Dans le futur, nous pourrions avoir un moyen d&#39;appeler
+une fonction de manière asynchrone. Si vous faites cela maintenant, le comportement est inconnu.</p>
 
 <h3 id="set">set</h3>
 
@@ -591,11 +606,13 @@ Le rendu du template reprend une fois que tous les éléments sont traités.</p>
 <p>Vous pouvez inclure des nouvelles variables et en définir aussi plusieurs à la fois :</p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">set</span> <span class="nv">x</span><span class="o">,</span> <span class="nv">y</span><span class="o">,</span> <span class="nv">z</span> <span class="o">=</span> <span class="m">5</span> <span class="cp">%}</span><span class="x"></span>
 </code></pre></div>
-<p>Si <code>set</code> est utilisé au plus haut niveau, il modifie la valeur du contexte du template global. Si il est utilisé à l&#39;intérieur de la portée des blocs, comme <code>for</code>, <code>include</code> et d&#39;autres, cela modifie seulement dans cette portée.</p>
+<p>Si <code>set</code> est utilisé au plus haut niveau, il modifie la valeur du contexte du template
+global. Si il est utilisé à l&#39;intérieur de la portée des blocs, comme <code>for</code>, <code>include</code> et d&#39;autres, cela modifie
+seulement dans cette portée.</p>
 
-<p>Il est également possible de capter le contenu d&#39;un bloc dans une variable en utilisant l&#39;affectation de bloc.
-La syntaxe est similaire au standard <code>set</code>, sauf que le <code>=</code> est omis, et
-tout ce qui se trouve jusqu&#39;au <code>{% endset %}</code> est capturé.</p>
+<p>Il est également possible de capter le contenu d&#39;un bloc dans une variable en utilisant
+l&#39;affectation de bloc. La syntaxe est similaire au standard <code>set</code>, sauf que le
+<code>=</code> est omis, et tout ce qui se trouve jusqu&#39;au <code>{% endset %}</code> est capturé.</p>
 
 <p>Cela peut être utile dans certains cas, comme une alternative aux macros :</p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">set</span> <span class="nv">standardModal</span> <span class="cp">%}</span><span class="x"></span>
@@ -650,7 +667,8 @@ rendra le contenu du bloc parent. Regardez <a href="#super">super</a>.</p>
 
 <h3 id="include">include</h3>
 
-<p><code>include</code> récupère depuis d&#39;autres templates disponibles. C&#39;est utile lorsque vous avez besoin de partager des petits morceaux sur plusieurs templates qui héritent déjà d&#39;autres templates.</p>
+<p><code>include</code> récupère depuis d&#39;autres templates disponibles. C&#39;est utile lorsque vous avez besoin de partager des
+petits morceaux sur plusieurs templates qui héritent déjà d&#39;autres templates.</p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">include</span> <span class="s2">&quot;item.html&quot;</span> <span class="cp">%}</span><span class="x"></span>
 </code></pre></div>
 <p>Vous pouvez même inclure des templates à l&#39;intérieur des boucles :</p>
@@ -658,18 +676,34 @@ rendra le contenu du bloc parent. Regardez <a href="#super">super</a>.</p>
 <span class="cp">{%</span> <span class="k">include</span> <span class="s2">&quot;item.html&quot;</span> <span class="cp">%}</span><span class="x"></span>
 <span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span><span class="x"></span>
 </code></pre></div>
-<p>Ceci est particulièrement utile pour découper des templates en petits morceaux afin que l&#39;environnement du côté du navigateur puisse rendre les petits morceaux quand il est nécessaire de changer de page.</p>
+<p>Ceci est particulièrement utile pour découper des templates en petits morceaux afin que l&#39;environnement du
+côté du navigateur puisse rendre les petits morceaux quand il est nécessaire de changer
+de page.</p>
 
-<p><code>include</code> accepte n&#39;importe quelle expression arbitraire, donc vous pouvez y passer n&#39;importe quoi, aussi longtemps que cette expression correspond à un string ou un objet Template compilé : <code>{% include name + &quot;.html&quot; %}</code>.</p>
+<p><code>include</code> accepte n&#39;importe quelle expression arbitraire, donc vous pouvez y passer n&#39;importe quoi,
+aussi longtemps que cette expression correspond à un string ou un objet Template
+compilé : <code>{% include name + &quot;.html&quot; %}</code>.</p>
 
-<p>Dans certains cas, il peut être utile de ne pas générer une erreur quand un template n&#39;existe pas. Utilisez l&#39;option <code>ignore missing</code> pour supprimer ces erreurs.</p>
+<p>Dans certains cas, il peut être utile de ne pas générer une erreur quand un template n&#39;existe pas. Utilisez
+l&#39;option <code>ignore missing</code> pour supprimer ces erreurs.</p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">include</span> <span class="s2">&quot;missing.html&quot;</span> <span class="k">ignore missing</span> <span class="cp">%}</span><span class="x"></span>
 </code></pre></div>
+<p>Un template inclus peut lui même étendre (<code>extend</code>) un autre template (donc vous pourriez avoir
+un ensemble de template qui hérite tous d&#39;une structure commune). Un template
+inclus ne participe pas à la structure du bloc du template l&#39;incluant;
+il dispoose d&#39;un arbre d&#39;héritage et d&#39;un espace nommé totalement distinct. En d&#39;autres termes,
+un <code>include</code> <em>n&#39;</em> est <em>pas</em> un pré-processeur qui tire le code du template inclus
+dans le template, en l&#39;incluant avant de le rendre; au lieu de cela, il déclenche un rendu distinct
+du template inclus, et les résultats de ce rendu sont inclus.</p>
+
 <h3 id="import">import</h3>
 
-<p><code>import</code> charge un template différent et vous permet d&#39;accéder à ses valeurs exportées. Les macros et les affectations de haut niveau (faites avec <a href="#set"><code>set</code></a>) sont exportées depuis les templates, ceci vous permet donc d&#39;y accéder dans un template différent.</p>
+<p><code>import</code> charge un template différent et vous permet d&#39;accéder à ses valeurs
+exportées. Les macros et les affectations de haut niveau (faites avec <a href="#set"><code>set</code></a>) sont exportées
+depuis les templates, ceci vous permet donc d&#39;y accéder dans un template différent.</p>
 
-<p>Les templates importés sont traités sans le contexte actuel, ils n&#39;ont pas accès à toutes les variables du template actuel.</p>
+<p>Les templates importés sont traités sans le contexte actuel, ils n&#39;ont pas
+accès à toutes les variables du template actuel.</p>
 
 <p>Commençons par un template appelé <code>forms.html</code> qui contient ce qui suit :</p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">macro</span> <span class="nv">field</span><span class="o">(</span><span class="nv">name</span><span class="o">,</span> <span class="nv">value</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="o">,</span> <span class="nv">type</span><span class="o">=</span><span class="s1">&#39;text&#39;</span><span class="o">)</span> <span class="cp">%}</span><span class="x"></span>
@@ -685,7 +719,8 @@ rendra le contenu du bloc parent. Regardez <a href="#super">super</a>.</p>
 <span class="x">&lt;/div&gt;</span>
 <span class="cp">{%</span> <span class="k">endmacro</span> <span class="cp">%}</span><span class="x"></span>
 </code></pre></div>
-<p>Nous pouvons importer ce template et lier toutes ses valeurs exportées à une variable afin que nous puissions l&#39;utiliser :</p>
+<p>Nous pouvons importer ce template et lier toutes ses valeurs exportées à une variable
+afin que nous puissions l&#39;utiliser :</p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">import</span> <span class="s2">&quot;forms.html&quot;</span> <span class="k">as</span> <span class="nv">forms</span> <span class="cp">%}</span><span class="x"></span>
 
 <span class="cp">{{</span> <span class="nv">forms.label</span><span class="o">(</span><span class="s1">&#39;Username&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
@@ -693,7 +728,8 @@ rendra le contenu du bloc parent. Regardez <a href="#super">super</a>.</p>
 <span class="cp">{{</span> <span class="nv">forms.label</span><span class="o">(</span><span class="s1">&#39;Password&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
 <span class="cp">{{</span> <span class="nv">forms.field</span><span class="o">(</span><span class="s1">&#39;pass&#39;</span><span class="o">,</span> <span class="nv">type</span><span class="o">=</span><span class="s1">&#39;password&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
 </code></pre></div>
-<p>Vous pouvez aussi importer des valeurs depuis un template dans l&#39;espace de nommage actuel avec <code>from import</code> :</p>
+<p>Vous pouvez aussi importer des valeurs depuis un template dans l&#39;espace de nommage
+actuel avec <code>from import</code> :</p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">from</span> <span class="s2">&quot;forms.html&quot;</span> <span class="k">import</span> <span class="nv">field</span><span class="o">,</span> <span class="nv">label</span> <span class="k">as</span> <span class="nv">description</span> <span class="cp">%}</span><span class="x"></span>
 
 <span class="cp">{{</span> <span class="nv">description</span><span class="o">(</span><span class="s1">&#39;Username&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
@@ -701,13 +737,20 @@ rendra le contenu du bloc parent. Regardez <a href="#super">super</a>.</p>
 <span class="cp">{{</span> <span class="nv">description</span><span class="o">(</span><span class="s1">&#39;Password&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
 <span class="cp">{{</span> <span class="nv">field</span><span class="o">(</span><span class="s1">&#39;pass&#39;</span><span class="o">,</span> <span class="nv">type</span><span class="o">=</span><span class="s1">&#39;password&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
 </code></pre></div>
-<p><code>import</code> accepte n&#39;importe quelle expression arbitraire, donc vous pouvez y passer n&#39;importe quoi, aussi longtemps que cette expression correspond à un string ou un objet Template compilé : <code>{% import name + &quot;.html&quot; as obj %}</code>.</p>
+<p><code>import</code> accepte n&#39;importe quelle expression arbitraire, donc vous pouvez y passer
+n&#39;importe quoi, aussi longtemps que cette expression correspond à un string ou un objet
+Template compilé : <code>{% import name + &quot;.html&quot; as obj %}</code>.</p>
 
 <h3 id="raw">raw</h3>
 
 <p>Si vous voulez afficher des balises spéciales de Nunjucks comme <code>{{</code>, vous pouvez utiliser
 un bloc <code>{{</code>, vous pouvez utiliser
 un bloc <code>{% raw %}</code> et tout ce qui sera à l&#39;intérieur de celui-ci sera affiché au format texte brut.</p>
+
+<h3 id="verbatim">verbatim</h3>
+
+<p><code>{% verbatim %}</code> a le même comportement que <a href="#raw"><code>{% raw %}</code></a>. Il a été ajouté pour
+être compatible avec la <a href="http://twig.sensiolabs.org/doc/tags/verbatim.html">balise <code>verbatim</code> de Twig</a>.</p>
 
 <h3 id="filter">filter</h3>
 
@@ -726,7 +769,9 @@ du bloc sera passé.</p>
 
 <h3 id="call">call</h3>
 
-<p>Un bloc <code>call</code> vous permet d&#39;appeler une macro avec tout le texte à l&#39;intérieur de la balise. Ceci est utile si vous voulez passer beaucoup de contenu dans une macro. Le contenu est disponible à l&#39;intérieur de la macro telle que <code>caller()</code>.</p>
+<p>Un bloc <code>call</code> vous permet d&#39;appeler une macro avec tout le texte à l&#39;intérieur de
+la balise. Ceci est utile si vous voulez passer beaucoup de contenu dans une macro. Le
+contenu est disponible à l&#39;intérieur de la macro telle que <code>caller()</code>.</p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">macro</span> <span class="nv">add</span><span class="o">(</span><span class="nv">x</span><span class="o">,</span> <span class="nv">y</span><span class="o">)</span> <span class="cp">%}</span><span class="x"></span>
 <span class="cp">{{</span> <span class="nv">caller</span><span class="o">()</span> <span class="cp">}}</span><span class="x"> : </span><span class="cp">{{</span> <span class="nv">x</span> <span class="o">+</span> <span class="nv">y</span> <span class="cp">}}</span><span class="x"></span>
 <span class="cp">{%</span> <span class="k">endmacro</span><span class="cp">%}</span><span class="x"></span>
@@ -739,17 +784,24 @@ du bloc sera passé.</p>
 
 <h2 id="arguments-avec-mots-clefs">Arguments avec mots clefs</h2>
 
-<p>jinja2 utilise le support des arguments avec mots clefs de Python pour permettre de les utiliser dans les fonctions, les filtres et les macros. Nunjucks supporte bien les arguments avec mots clefs en introduisant une nouvelle convention d&#39;appel.</p>
+<p>jinja2 utilise le support des arguments avec mots clefs de Python pour permettre de les utiliser dans
+les fonctions, les filtres et les macros. Nunjucks supporte bien les arguments avec mots clefs en
+introduisant une nouvelle convention d&#39;appel.</p>
 
 <p>Les arguments avec mots clefs ressemblent à ceci :</p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">foo</span><span class="o">(</span><span class="m">1</span><span class="o">,</span> <span class="m">2</span><span class="o">,</span> <span class="nv">bar</span><span class="o">=</span><span class="m">3</span><span class="o">,</span> <span class="nv">baz</span><span class="o">=</span><span class="m">4</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
 </code></pre></div>
-<p><code>bar</code> et <code>baz</code> sont les arguments avec mots clefs. Nunjucks les convertit dans un hash et le passe comme dernier argument. C&#39;est équivalent à cet appel en javascript :</p>
+<p><code>bar</code> et <code>baz</code> sont les arguments avec mots clefs. Nunjucks les convertit dans un hash et le
+passe comme dernier argument. C&#39;est équivalent à cet appel en javascript :</p>
 <div class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">foo</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="p">{</span> <span class="nx">bar</span><span class="o">:</span> <span class="mi">3</span><span class="p">,</span> <span class="nx">baz</span><span class="o">:</span> <span class="mi">4</span><span class="p">})</span>
 </code></pre></div>
-<p>Puisqu&#39;il s&#39;agit d&#39;une convention d&#39;appel standard, ça marche pour toutes les fonctions et les filtres, s&#39;ils sont écrits pour les gérer. <a href="api.html#arguments-avec-mots-clefspar-dfaut">Lisez-en plus</a> dans la section de l&#39;API.</p>
+<p>Puisqu&#39;il s&#39;agit d&#39;une convention d&#39;appel standard, ça marche pour toutes les fonctions et les
+filtres, s&#39;ils sont écrits pour les gérer. <a href="api.html#arguments-avec-mots-clefspar-dfaut">Lisez-en plus</a>
+dans la section de l&#39;API.</p>
 
-<p>Les macros vous permettent d&#39;utiliser également des arguments avec mots clefs dans la définition, cela vous permet de définir des valeurs par défaut. Nunjucks fait correspondre automatiquement les arguments avec mots clefs à ceux définis dans la macro.</p>
+<p>Les macros vous permettent d&#39;utiliser également des arguments avec mots clefs dans la définition, cela vous permet
+de définir des valeurs par défaut. Nunjucks fait correspondre automatiquement les
+arguments avec mots clefs à ceux définis dans la macro.</p>
 <div class="highlight"><pre><code class="language-text" data-lang="text">{% macro foo(x, y, z=5, w=6) %}
 {{ x }}, {{ y }}, {{ z }}, {{ w}}
 {% endmacro %}
@@ -757,7 +809,8 @@ du bloc sera passé.</p>
 {{ foo(1, 2) }}        -&gt; 1, 2, 5, 6
 {{ foo(1, 2, w=10) }}  -&gt; 1, 2, 5, 10
 </code></pre></div>
-<p>Vous pouvez mélanger des arguments de position et des arguments avec mots clefs dans des macros. Par exemple, vous pouvez spécifier un argument de position comme un argument mot clef :</p>
+<p>Vous pouvez mélanger des arguments de position et des arguments avec mots clefs dans des macros. Par exemple, vous pouvez
+spécifier un argument de position comme un argument mot clef :</p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">foo</span><span class="o">(</span><span class="m">20</span><span class="o">,</span> <span class="nv">y</span><span class="o">=</span><span class="m">21</span><span class="o">)</span> <span class="cp">}}</span><span class="x">     -&gt; 20, 21, 5, 6</span>
 </code></pre></div>
 <p>Vous pouvez donc simplement passer un argument de position à la place d&#39;un argument mot clef :</p>
@@ -768,22 +821,26 @@ du bloc sera passé.</p>
 </code></pre></div>
 <h2 id="commentaires">Commentaires</h2>
 
-<p>Vous pouvez écrire des commentaires en utilisant <code>{#</code> et <code>#}</code>. Les commentaires sont complètement retirés lors du rendu.</p>
+<p>Vous pouvez écrire des commentaires en utilisant <code>{#</code> et <code>#}</code>. Les commentaires sont complètement retirés
+lors du rendu.</p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="c">{# Boucle pour tous les users #}</span><span class="x"></span>
 <span class="cp">{%</span> <span class="k">for</span> <span class="nv">user</span> <span class="k">in</span> <span class="nv">users</span> <span class="cp">%}</span><span class="x">...</span><span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span><span class="x"></span>
 </code></pre></div>
 <h2 id="contr-le-des-espaces">Contrôle des espaces</h2>
 
-<p><em>Introduit dans v0.1.8</em></p>
+<p>Normalement, le moteur de template affiche tout, à l&#39;exception des blocks verbeux de tag et
+de variable, avec tous les espaces qui se trouvent dans le fichier. Parfois, vous ne
+voulez pas les espaces supplémentaires, mais vous voulez continuer à formater le template
+proprement, ce qui nécessite des espaces.</p>
 
-<p>Normalement, le moteur de template affiche tout, à l&#39;exception des blocks verbeux de tag et de variable, avec tous les espaces qui se trouvent dans le fichier. Parfois, vous ne voulez pas les espaces supplémentaires, mais vous voulez continuer à formater le template proprement, ce qui nécessite des espaces.</p>
-
-<p>Vous pouvez dire au moteur d&#39;enlever les espaces de début et de fin en ajoutant le signe moins (<code>-</code>) sur le tag de début ou de fin..</p>
+<p>Vous pouvez dire au moteur d&#39;enlever les espaces de début et de fin en ajoutant le signe
+moins (<code>-</code>) sur le tag de début ou de fin..</p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">for</span> <span class="nv">i</span> <span class="k">in</span> <span class="o">[</span><span class="m">1</span><span class="o">,</span><span class="m">2</span><span class="o">,</span><span class="m">3</span><span class="o">,</span><span class="m">4</span><span class="o">,</span><span class="m">5</span><span class="o">]</span> -<span class="cp">%}</span><span class="x"></span>
 <span class="x">  </span><span class="cp">{{</span> <span class="nv">i</span> <span class="cp">}}</span><span class="x"></span>
 <span class="cp">{%</span>- <span class="k">endfor</span> <span class="cp">%}</span><span class="x"></span>
 </code></pre></div>
-<p>L&#39;affichage exact de l&#39;exemple du dessus sera &quot;12345&quot;. Le <code>-%}</code> enlève les espaces à droite après le tag et le <code>{%-</code> enlève les espaces à gauche avant le tag.</p>
+<p>L&#39;affichage exact de l&#39;exemple du dessus sera &quot;12345&quot;. Le <code>{%-</code> enlève les espaces à
+droite avant le tag et le <code>-%}</code> enlève les espaces à droite après le tag.</p>
 
 <h2 id="expressions">Expressions</h2>
 
@@ -799,7 +856,9 @@ du bloc sera passé.</p>
 
 <h3 id="math">Math</h3>
 
-<p>Nunjucks vous permet de faire des opérations sur des valeurs (bien que cela doit être utilisée avec parcimonie, car la plupart de votre logique doit être dans le code). Les opérateurs suivants sont disponibles :</p>
+<p>Nunjucks vous permet de faire des opérations sur des valeurs (bien que cela doit être utilisée avec parcimonie,
+car la plupart de votre logique doit être dans le code). Les opérateurs suivants sont
+disponibles :</p>
 
 <ul>
 <li>Addition : <code>+</code></li>
@@ -813,51 +872,6 @@ du bloc sera passé.</p>
 
 <p>Vous pouvez les utiliser ainsi :</p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="m">2</span> <span class="o">+</span> <span class="m">3</span> <span class="cp">}}</span><span class="x">       (affichage 5)</span>
-<span class="cp">{{</span> <span class="m">10</span><span class="o">/</span><span class="m">5</span> <span class="cp">}}</span><span class="x">        (affichage 2)</span>
-<span class="cp">{{</span> <span class="nv">numItems</span><span class="o">*</span><span class="m">2</span> <span class="cp">}}</span><span class="x"></span>
-</code></pre></div>
-<h3 id="comparaisons">Comparaisons</h3>
-
-<ul>
-<li><code>==</code></li>
-<li><code>===</code></li>
-<li><code>!=</code></li>
-<li><code>!==</code></li>
-<li><code>&gt;</code></li>
-<li><code>&gt;=</code></li>
-<li><code>&lt;</code></li>
-<li><code>&lt;=</code></li>
-</ul>
-
-<p>Exemples :</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="x">{%-` enlève les espaces à gauche avant le tag.</span>
-
-<span class="x">## Expressions</span>
-
-<span class="x">Vous pouvez utiliser plusieurs types d&#39;expressions littérales que vous avez l&#39;habitude d&#39;utiliser en javascript.</span>
-
-<span class="x">* Strings: `&quot;Comment ça va ?&quot;`, `&#39;Comment ça va ?&#39;`</span>
-<span class="x">* Numbers: `40`, `30.123`</span>
-<span class="x">* Arrays: `[1, 2, &quot;tableau&quot;]`</span>
-<span class="x">* Dicts: `{ un: 1, deux: 2 }`</span>
-<span class="x">* Boolean: `true`, `false`</span>
-
-<span class="x">### Math</span>
-
-<span class="x">Nunjucks vous permet de faire des opérations sur des valeurs (bien que cela doit être utilisée avec parcimonie, car la plupart de votre logique doit être dans le code). Les opérateurs suivants sont disponibles :</span>
-
-<span class="x">* Addition : `+`</span>
-<span class="x">* Soustraction : `-`</span>
-<span class="x">* Division : `/`</span>
-<span class="x">* Division arrondi à l&#39;entier : `//`</span>
-<span class="x">* Reste de division : `%`</span>
-<span class="x">* Multiplication : `*`</span>
-<span class="x">* Puissance : `**`</span>
-
-<span class="x">Vous pouvez les utiliser ainsi :</span>
-
-<span class="x">```jinja</span>
-<span class="cp">{{</span> <span class="m">2</span> <span class="o">+</span> <span class="m">3</span> <span class="cp">}}</span><span class="x">       (affichage 5)</span>
 <span class="cp">{{</span> <span class="m">10</span><span class="o">/</span><span class="m">5</span> <span class="cp">}}</span><span class="x">        (affichage 2)</span>
 <span class="cp">{{</span> <span class="nv">numItems</span><span class="o">*</span><span class="m">2</span> <span class="cp">}}</span><span class="x"></span>
 </code></pre></div>
@@ -894,15 +908,21 @@ du bloc sera passé.</p>
 </code></pre></div>
 <h3 id="expression-if">Expression If</h3>
 
-<p>Similaire aux opérateurs ternaires de javascript, vous pouvez utiliser <code>if</code> comme si c&#39;était une expression en ligne :</p>
+<p>Similaire aux opérateurs ternaires de javascript, vous pouvez utiliser <code>if</code> comme si c&#39;était une
+expression en ligne :</p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="s2">&quot;true&quot;</span> <span class="k">if</span> <span class="nv">foo</span> <span class="k">else</span> <span class="s2">&quot;false&quot;</span> <span class="cp">}}</span><span class="x"></span>
 </code></pre></div>
-<p>L&#39;affichage du dessus sera &quot;true&quot; si foo est vrai sinon &quot;false&quot;. Ceci est particulièrement utile pour les valeurs par défaut comme celle-ci :</p>
+<p>L&#39;affichage du dessus sera &quot;true&quot; si foo est vrai sinon &quot;false&quot;. Ceci
+est particulièrement utile pour les valeurs par défaut comme celle-ci :</p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">baz</span><span class="o">(</span><span class="nv">foo</span> <span class="k">if</span> <span class="nv">foo</span> <span class="k">else</span> <span class="s2">&quot;default&quot;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
+</code></pre></div>
+<p>Contrairement à l&#39;opérateur ternaire de javascript, le <code>else</code> est facultatif :</p>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="s2">&quot;true&quot;</span> <span class="k">if</span> <span class="nv">foo</span> <span class="cp">}}</span><span class="x"></span>
 </code></pre></div>
 <h3 id="appels-de-fonction">Appels de fonction</h3>
 
-<p>Si vous avez passé une méthode javascript à votre template, vous pouvez l&#39;appeler normalement.</p>
+<p>Si vous avez passé une méthode javascript à votre template, vous pouvez l&#39;appeler
+normalement.</p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">foo</span><span class="o">(</span><span class="m">1</span><span class="o">,</span> <span class="m">2</span><span class="o">,</span> <span class="m">3</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
 </code></pre></div>
 <h3 id="expressions-r-guli-res">Expressions régulières</h3>
@@ -911,7 +931,9 @@ du bloc sera passé.</p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="o">/</span><span class="err">^</span><span class="nv">foo</span><span class="err">.</span><span class="o">*/</span> <span class="cp">}}</span><span class="x"></span>
 <span class="cp">{{</span> <span class="o">/</span><span class="nv">bar</span><span class="err">$</span><span class="o">/</span><span class="nv">g</span> <span class="cp">}}</span><span class="x"></span>
 </code></pre></div>
-<p>Les flags supportés sont les suivants. Voir <a href="https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Objets_globaux/RegExp">Regex sur MDN</a> pour plus d&#39;informations.</p>
+<p>Les flags supportés sont les suivants. Voir
+<a href="https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Objets_globaux/RegExp">Regex sur MDN</a>
+pour plus d&#39;informations.</p>
 
 <ul>
 <li><code>g</code> : La correspondance est cherchée partout</li>
@@ -922,11 +944,14 @@ du bloc sera passé.</p>
 
 <h2 id="auto-chappement">Auto-échappement</h2>
 
-<p>Si autoescaping est activé dans l&#39;environnement, tout l&#39;affichage sera automatiquement échappé pour un affichage safe. Pour marquer manuellement un affichage à safe, utilisez le filtre <code>safe</code>. Nunjucks n&#39;échappera pas cet affichage.</p>
+<p>Si autoescaping est activé dans l&#39;environnement, tout l&#39;affichage sera automatiquement
+échappé pour un affichage safe. Pour marquer manuellement un affichage à safe, utilisez le
+filtre <code>safe</code>. Nunjucks n&#39;échappera pas cet affichage.</p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">foo</span> <span class="cp">}}</span><span class="x">           // &amp;lt;span%gt;</span>
 <span class="cp">{{</span> <span class="nv">foo</span> <span class="o">|</span> <span class="nf">safe</span> <span class="cp">}}</span><span class="x">    // &lt;span&gt;</span>
 </code></pre></div>
-<p>Si autoescaping n&#39;est pas activé, tout l&#39;affichage sera rendu tel quel. Vous pouvez manuellement échapper les variables avec le filtre <code>escape</code>.</p>
+<p>Si autoescaping n&#39;est pas activé, tout l&#39;affichage sera rendu tel quel. Vous pouvez
+manuellement échapper les variables avec le filtre <code>escape</code>.</p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">foo</span> <span class="cp">}}</span><span class="x">           // &lt;span&gt;</span>
 <span class="cp">{{</span> <span class="nv">foo</span> <span class="o">|</span> <span class="nf">escape</span> <span class="cp">}}</span><span class="x">  // &amp;lt;span&amp;gt;</span>
 </code></pre></div>
@@ -936,7 +961,9 @@ du bloc sera passé.</p>
 
 <h3 id="range-start-stop-step">range([start], stop, [step])</h3>
 
-<p>Si vous avez besoin d&#39;itérer sur un ensemble de numéros fixes, <code>range</code> génère cet ensemble pour vous. Les numéros commencent à <code>start</code> (0 par défaut) et s&#39;incrémente de <code>step</code> (par défaut 1) jusqu&#39;à ce qu&#39;il atteigne <code>stop</code>, qui n&#39;est pas inclus.</p>
+<p>Si vous avez besoin d&#39;itérer sur un ensemble de numéros fixes, <code>range</code> génère cet ensemble
+pour vous. Les numéros commencent à <code>start</code> (0 par défaut) et s&#39;incrémente de <code>step</code> (par défaut 1)
+jusqu&#39;à ce qu&#39;il atteigne <code>stop</code>, qui n&#39;est pas inclus.</p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">for</span> <span class="nv">i</span> <span class="k">in</span> <span class="nv">range</span><span class="o">(</span><span class="m">0</span><span class="o">,</span> <span class="m">5</span><span class="o">)</span> -<span class="cp">%}</span><span class="x"></span>
 <span class="x">  </span><span class="cp">{{</span> <span class="nv">i</span> <span class="cp">}}</span><span class="x">,</span>
 <span class="cp">{%</span>- <span class="k">endfor</span> <span class="cp">%}</span><span class="x"></span>
@@ -945,18 +972,23 @@ du bloc sera passé.</p>
 
 <h3 id="cycler-item1-item2-itemn">cycler(item1, item2, ...itemN)</h3>
 
-<p>Une façon simple de faire un cycle avec plusieurs valeurs est d&#39;utiliser <code>cycler</code>, qui prend un certain nombre d&#39;arguments et fait des cycles à travers eux.</p>
+<p>Une façon simple de faire un cycle avec plusieurs valeurs est d&#39;utiliser <code>cycler</code>, qui prend
+un certain nombre d&#39;arguments et fait des cycles à travers eux.</p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">set</span> <span class="nv">cls</span> <span class="o">=</span> <span class="nv">cycler</span><span class="o">(</span><span class="s2">&quot;odd&quot;</span><span class="o">,</span> <span class="s2">&quot;even&quot;</span><span class="o">)</span> <span class="cp">%}</span><span class="x"></span>
 <span class="cp">{%</span> <span class="k">for</span> <span class="nv">row</span> <span class="k">in</span> <span class="nv">rows</span> <span class="cp">%}</span><span class="x"></span>
 <span class="x">  &lt;div class=&quot;</span><span class="cp">{{</span> <span class="nv">cls.next</span><span class="o">()</span> <span class="cp">}}</span><span class="x">&quot;&gt;</span><span class="cp">{{</span> <span class="nv">row.name</span> <span class="cp">}}</span><span class="x">&lt;/div&gt;</span>
 <span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span><span class="x"></span>
 </code></pre></div>
-<p>Dans l&#39;exemple ci-dessus, les lignes impaires ont la classe &quot;odd&quot; et les lignes paires ont la classe &quot;even&quot;. Vous pouvez accéder à l&#39;élément en cours avec la propriété <code>current</code>
-(dans l&#39;exemple du dessus : <code>cls.current</code>).</p>
+<p>Dans l&#39;exemple ci-dessus, les lignes impaires ont la classe &quot;odd&quot; et les lignes paires ont la
+classe &quot;even&quot;. Vous pouvez accéder à l&#39;élément en cours avec la propriété <code>current</code> (dans
+l&#39;exemple du dessus : <code>cls.current</code>).</p>
 
 <h3 id="joiner-separator">joiner([separator])</h3>
 
-<p>En combinant plusieurs éléments, il est fréquent de vouloir les délimiter par quelque chose comme une virgule, mais vous ne voulez pas afficher le séparateur pour le premier élément. La classe <code>joiner</code> affichera le <code>separator</code> (par défaut &quot;,&quot;) chaque fois qu&#39;elle sera appelée sauf pour la première fois.</p>
+<p>En combinant plusieurs éléments, il est fréquent de vouloir les délimiter par
+quelque chose comme une virgule, mais vous ne voulez pas afficher le séparateur pour le
+premier élément. La classe <code>joiner</code> affichera le <code>separator</code> (par défaut &quot;,&quot;) chaque fois qu&#39;elle
+sera appelée sauf pour la première fois.</p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">set</span> <span class="nv">comma</span> <span class="o">=</span> <span class="nv">joiner</span><span class="o">()</span> <span class="cp">%}</span><span class="x"></span>
 <span class="cp">{%</span> <span class="k">for</span> <span class="nv">tag</span> <span class="k">in</span> <span class="nv">tags</span> -<span class="cp">%}</span><span class="x"></span>
 <span class="x">  </span><span class="cp">{{</span> <span class="nv">comma</span><span class="o">()</span> <span class="cp">}}</span><span class="x"> </span><span class="cp">{{</span> <span class="nv">tag</span> <span class="cp">}}</span><span class="x"></span>
@@ -966,42 +998,7 @@ du bloc sera passé.</p>
 
 <h2 id="filtres-int-gr-s">Filtres intégrés</h2>
 
-<p>Nunjucks a porté la plupart des filtres de jinja, et il a ses propres filtres.
-Nous avons besoin de travailler sur notre documentation pour les filtres. Certains d&#39;entre eux
-sont documentés ci-dessous, pour le reste, vous pouvez cliquer sur le site de jinja.</p>
-
-<h3 id="default-value-default-boolean">default(value, default, [boolean])</h3>
-
-<p>(raccourci avec <code>d</code>)</p>
-
-<p>Si <code>value</code> est strictement <code>undefined</code>, cela retourne <code>default</code>, sinon
-<code>value</code>. Si <code>boolean</code> est true, toute valeur JavaScript fausse retournera
-<code>default</code> (false, &quot;&quot;, etc)</p>
-
-<p><strong>La version 2.0 a changé le comportement par défaut de ce filtre.
-  Auparavant, il agissait comme si <code>boolean</code> était à true par défaut et donc toute
-  valeur fausse retournait <code>default</code>. Dans la 2.0, le comportement par défaut retourne
-  <code>default</code> seulement pour une valeur <code>undefined</code>. Vous pouvez obtenir l&#39;ancien
-  comportement en passant <code>true</code> à <code>boolean</code>, ou en utilisant simplement <code>value or default</code>.</strong></p>
-
-<h3 id="sort-arr-reverse-casesens-attr">sort(arr, reverse, caseSens, attr)</h3>
-
-<p>Tri <code>arr</code> avec la fonction <code>arr.sort</code> de JavaScript. Si <code>reverse</code> est à
-true, le résultat sera inversé. Le tri est insensible à la casse par défaut,
-mais en paramétrant <code>caseSens</code> à true, cela le rend sensible à la casse. Si <code>attr</code> est
-passé, cela permettra de comparer <code>attr</code> à chaque élément.</p>
-
-<h3 id="striptags-value-preserve_linebreaks">striptags (value, [preserve_linebreaks])</h3>
-
-<p>C&#39;est similaire à <a href="http://jinja.pocoo.org/docs/templates/#striptags">striptags</a> de jinja. Si <code>preserve_linebreaks</code> est à false (par défaut),
-cela enlève les balises SGML/XML et remplace les espaces adjacents par un seul espace.
-Si <code>preserve_linebreaks</code> est à true, cela normalise les espaces, en essayant de préserver les
-sauts de lignes originaux. Utiliser le second comportement si vous voulez utiliser ceci
-<code>{{ text | striptags | nl2br }}</code>. Sinon utilisez le comportement par défaut.</p>
-
-<h3 id="dump-object">dump (object)</h3>
-
-<p>Appelle <code>JSON.stringify</code> sur un objet et déverse le résultat dans le template. C&#39;est utile pour le débogage : <code>{{ foo | dump }}</code>.</p>
+<p>Nunjucks a porté la plupart des <a href="http://jinja.pocoo.org/docs/dev/templates/#builtin-filters">filtres de jinja</a>, et il a ses propres filtres :</p>
 
 <h3 id="abs">abs</h3>
 
@@ -1048,6 +1045,20 @@ sauts de lignes originaux. Utiliser le second comportement si vous voulez utilis
 <p><strong>Sortie</strong></p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="x">fooo</span>
 </code></pre></div>
+<h3 id="default-value-default-boolean">default(value, default, [boolean])</h3>
+
+<p>(raccourci avec <code>d</code>)</p>
+
+<p>Si <code>value</code> est strictement <code>undefined</code>, cela retourne <code>default</code>, sinon <code>value</code>. Si
+<code>boolean</code> est true, toute valeur JavaScript fausse retournera <code>default</code> (false, &quot;&quot;,
+etc)</p>
+
+<p><strong>La version 2.0 a changé le comportement par défaut de ce filtre.
+  Auparavant, il agissait comme si <code>boolean</code> était à true par défaut et donc toute
+  valeur fausse retournait <code>default</code>. Dans la 2.0, le comportement par défaut retourne
+  <code>default</code> seulement pour une valeur <code>undefined</code>. Vous pouvez obtenir l&#39;ancien
+  comportement en passant <code>true</code> à <code>boolean</code>, ou en utilisant simplement <code>value or default</code>.</strong></p>
+
 <h3 id="dictsort">dictsort</h3>
 
 <p>Tri un dictionnaire et rend des paires (clé, valeur) :</p>
@@ -1066,6 +1077,47 @@ sauts de lignes originaux. Utiliser le second comportement si vous voulez utilis
 <p><strong>Sortie</strong></p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="x">a b c d e f</span>
 </code></pre></div>
+<h3 id="dump">dump</h3>
+
+<p>Appelle <a href="https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify"><code>JSON.stringify</code></a> sur un objet et déverse le résultat dans le
+template. C&#39;est utile pour le débogage : <code>{{ foo | dump }}</code>.</p>
+
+<p><strong>Entrée</strong></p>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">set</span> <span class="nv">items</span> <span class="o">=</span> <span class="o">[</span><span class="s2">&quot;a&quot;</span><span class="o">,</span> <span class="m">1</span><span class="o">,</span> <span class="o">{</span> <span class="nv">b</span> <span class="o">:</span> <span class="kp">true</span><span class="o">}]</span> <span class="cp">%}</span><span class="x"></span>
+<span class="cp">{{</span> <span class="nv">items</span> <span class="o">|</span> <span class="nf">dump</span> <span class="cp">}}</span><span class="x"></span>
+</code></pre></div>
+<p><strong>Sortie</strong></p>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="x">[&quot;a&quot;,1,{&quot;b&quot;:true}]</span>
+</code></pre></div>
+<p>Dump fournit un paramètre pour les espaces afin d&#39;ajouter des espaces ou des tabulations aux valeurs
+retournées. Cela rend le résultat plus lisible.</p>
+
+<p><strong>Entrée</strong></p>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">set</span> <span class="nv">items</span> <span class="o">=</span> <span class="o">[</span><span class="s2">&quot;a&quot;</span><span class="o">,</span> <span class="m">1</span><span class="o">,</span> <span class="o">{</span> <span class="nv">b</span> <span class="o">:</span> <span class="kp">true</span><span class="o">}]</span> <span class="cp">%}</span><span class="x"></span>
+<span class="cp">{{</span> <span class="nv">items</span> <span class="o">|</span> <span class="nf">dump</span><span class="o">(</span><span class="m">2</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
+</code></pre></div>
+<p><strong>Sortie</strong></p>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="x">[</span>
+<span class="x">  &quot;a&quot;,</span>
+<span class="x">  1,</span>
+<span class="x">  {</span>
+<span class="x">    &quot;b&quot;: true</span>
+<span class="x">  }</span>
+<span class="x">]</span>
+</code></pre></div>
+<p><strong>Entrée</strong></p>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">set</span> <span class="nv">items</span> <span class="o">=</span> <span class="o">[</span><span class="s2">&quot;a&quot;</span><span class="o">,</span> <span class="m">1</span><span class="o">,</span> <span class="o">{</span> <span class="nv">b</span> <span class="o">:</span> <span class="kp">true</span><span class="o">}]</span> <span class="cp">%}</span><span class="x"></span>
+<span class="cp">{{</span> <span class="nv">items</span> <span class="o">|</span> <span class="nf">dump</span><span class="o">(</span><span class="s1">&#39;\t&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
+</code></pre></div>
+<p><strong>Sortie</strong></p>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="x">[</span>
+<span class="x">    &quot;a&quot;,</span>
+<span class="x">    1,</span>
+<span class="x">    {</span>
+<span class="x">        &quot;b&quot;: true</span>
+<span class="x">    }</span>
+<span class="x">]</span>
+</code></pre></div>
 <h3 id="escape-aliased-as-e">escape (aliased as e)</h3>
 
 <p>Convertit les caractères &amp;, &lt;, &gt;, â€˜, et â€ dans des chaines avec des séquences HTML sécurisées.
@@ -1078,17 +1130,6 @@ Les résultats rendent la valeur comme une chaîne de balisage.</p>
 <p><strong>Sortie</strong></p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="x">&amp;lt;html&amp;gt;</span>
 </code></pre></div>
-<h3 id="float">float</h3>
-
-<p>Convertit une valeur en un nombre à virgule flottant. Si la conversion échoue, 0.0 est retourné.
-Cette valeur par défaut peut être modifiée en utilisant le premier paramètre.</p>
-
-<p><strong>Entrée</strong></p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="s2">&quot;3.5&quot;</span> <span class="o">|</span> <span class="nf">float</span> <span class="cp">}}</span><span class="x"></span>
-</code></pre></div>
-<p><strong>Sortie</strong></p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="x">3.5</span>
-</code></pre></div>
 <h3 id="first">first</h3>
 
 <p>Donne le premier élément dans un tableau :</p>
@@ -1099,6 +1140,17 @@ Cette valeur par défaut peut être modifiée en utilisant le premier paramètre
 </code></pre></div>
 <p><strong>Sortie</strong></p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="x">1</span>
+</code></pre></div>
+<h3 id="float">float</h3>
+
+<p>Convertit une valeur en un nombre à virgule flottant. Si la conversion échoue, 0.0 est retourné.
+Cette valeur par défaut peut être modifiée en utilisant le premier paramètre.</p>
+
+<p><strong>Entrée</strong></p>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="s2">&quot;3.5&quot;</span> <span class="o">|</span> <span class="nf">float</span> <span class="cp">}}</span><span class="x"></span>
+</code></pre></div>
+<p><strong>Sortie</strong></p>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="x">3.5</span>
 </code></pre></div>
 <h3 id="groupby">groupby</h3>
 
@@ -1252,7 +1304,7 @@ Si c&#39;est une chaine, la liste retournée sera une liste de caractères.</p>
 </code></pre></div>
 <h3 id="random">random</h3>
 
-<p>Selectionne une valeur aléatoire depuis un tableau.
+<p>Sélectionne une valeur aléatoire depuis un tableau.
 (Cela changera à chaque fois que la page est actualisée).</p>
 
 <p><strong>Entrée</strong></p>
@@ -1359,7 +1411,7 @@ cela mettra l&#39;élément autour de la valeur :</p>
 <p><strong>Sortie</strong></p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="x">4</span>
 </code></pre></div>
-<p>Specifiez le nombre de décimales pour arrondir :</p>
+<p>Spécifiez le nombre de décimales pour arrondir :</p>
 
 <p><strong>Entrée</strong></p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="m">4.12346</span> <span class="o">|</span> <span class="nf">round</span><span class="o">(</span><span class="m">4</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
@@ -1430,6 +1482,13 @@ pour chaque objet et en sélectionnant les objets où le test réussit.</p>
 <span class="x">    &lt;/ul&gt;</span>
 <span class="x">&lt;/div&gt;</span>
 </code></pre></div>
+<h3 id="sort-arr-reverse-casesens-attr">sort(arr, reverse, caseSens, attr)</h3>
+
+<p>Tri <code>arr</code> avec la fonction <code>arr.sort</code> de JavaScript. Si <code>reverse</code> est à true, le résultat
+sera inversé. Le tri est insensible à la casse par défaut, mais en paramétrant <code>caseSens</code>
+à true, cela le rend sensible à la casse. Si <code>attr</code> est passé, cela permettra de comparer <code>attr</code> à
+chaque élément.</p>
+
 <h3 id="string">string</h3>
 
 <p>Convertit un objet en une chaine :</p>
@@ -1443,6 +1502,16 @@ pour chaque objet et en sélectionnant les objets où le test réussit.</p>
 <p><strong>Sortie</strong></p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="x">1,2,3,4,</span>
 </code></pre></div>
+<h3 id="striptags-value-preserve_linebreaks">striptags (value, [preserve_linebreaks])</h3>
+
+<p>C&#39;est similaire à
+<a href="http://jinja.pocoo.org/docs/templates/#striptags">striptags</a> de jinja. Si
+<code>preserve_linebreaks</code> est à false (par défaut), cela enlève les balises SGML/XML et remplace
+les espaces adjacents par un seul espace. Si <code>preserve_linebreaks</code> est à true,
+cela normalise les espaces, en essayant de préserver les sauts de lignes originaux. Utiliser le second
+comportement si vous voulez utiliser ceci <code>{{ text | striptags | nl2br }}</code>. Sinon
+utilisez le comportement par défaut.</p>
+
 <h3 id="sum">sum</h3>
 
 <p>Rend la somme des éléments dans le tableau :</p>

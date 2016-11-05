@@ -4,6 +4,7 @@
     <title>Nunjucks</title>
 
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" type="text/css"
           href="/nunjucks/bower_components/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/nunjucks/css/highlight.css" />
@@ -17,7 +18,7 @@
 
       <ul class="nav navbar-nav navbar-right pull-right">
         <li><a href="/nunjucks/#download" class="download">Download</a></li>
-        <li><a href="https://github.com/mozilla/nunjucks">Github</a></li>
+        <li><a href="https://github.com/mozilla/nunjucks">GitHub</a></li>
         <li class="dropdown">
           <a href="getting-started.html" data-toggle="dropdown">Docs</a>
 
@@ -52,6 +53,9 @@
 <ul>
 <li>
 <a href="#file-extensions">File Extensions</a>
+</li>
+<li>
+<a href="#syntax-highlighting">Syntax Highlighting</a>
 </li>
 <li>
 <a href="#variables">Variables</a>
@@ -102,6 +106,9 @@
 </li>
 <li>
 <a href="#raw">raw</a>
+</li>
+<li>
+<a href="#verbatim">verbatim</a>
 </li>
 <li>
 <a href="#filter">filter</a>
@@ -164,18 +171,6 @@
 <a href="#builtin-filters">Builtin Filters</a>
 <ul>
 <li>
-<a href="#default-value-default-boolean">default(value, default, [boolean])</a>
-</li>
-<li>
-<a href="#sort-arr-reverse-casesens-attr">sort(arr, reverse, caseSens, attr)</a>
-</li>
-<li>
-<a href="#striptags-value-preserve_linebreaks">striptags (value, [preserve_linebreaks])</a>
-</li>
-<li>
-<a href="#dump-object">dump (object)</a>
-</li>
-<li>
 <a href="#abs">abs</a>
 </li>
 <li>
@@ -188,16 +183,22 @@
 <a href="#center">center</a>
 </li>
 <li>
+<a href="#default-value-default-boolean">default(value, default, [boolean])</a>
+</li>
+<li>
 <a href="#dictsort">dictsort</a>
+</li>
+<li>
+<a href="#dump">dump</a>
 </li>
 <li>
 <a href="#escape-aliased-as-e">escape (aliased as e)</a>
 </li>
 <li>
-<a href="#float">float</a>
+<a href="#first">first</a>
 </li>
 <li>
-<a href="#first">first</a>
+<a href="#float">float</a>
 </li>
 <li>
 <a href="#groupby">groupby</a>
@@ -224,6 +225,9 @@
 <a href="#lower">lower</a>
 </li>
 <li>
+<a href="#nl2br">nl2br</a>
+</li>
+<li>
 <a href="#random">random</a>
 </li>
 <li>
@@ -248,7 +252,13 @@
 <a href="#slice">slice</a>
 </li>
 <li>
+<a href="#sort-arr-reverse-casesens-attr">sort(arr, reverse, caseSens, attr)</a>
+</li>
+<li>
 <a href="#string">string</a>
+</li>
+<li>
+<a href="#striptags-value-preserve_linebreaks">striptags (value, [preserve_linebreaks])</a>
 </li>
 <li>
 <a href="#sum">sum</a>
@@ -304,6 +314,18 @@ Nunjucks template files, the Nunjucks community has adopted  <code>.njk</code>.<
 
 <p>If you are developing tools or editor syntax helpers for Nunjucks, please
 include recognition of the <code>.njk</code> extension.</p>
+
+<h2 id="syntax-highlighting">Syntax Highlighting</h2>
+
+<p>Plugins are available in various editors to support the <code>jinja</code> syntax highlighting of Nunjucks.</p>
+
+<ul>
+<li>atom <a href="https://github.com/alohaas/language-nunjucks">https://github.com/alohaas/language-nunjucks</a></li>
+<li>vim <a href="https://github.com/niftylettuce/vim-jinja">https://github.com/niftylettuce/vim-jinja</a></li>
+<li>brackets <a href="https://github.com/axelboc/nunjucks-brackets">https://github.com/axelboc/nunjucks-brackets</a></li>
+<li>sublime <a href="https://github.com/mogga/sublime-nunjucks/blob/master/Nunjucks.tmLanguage">https://github.com/mogga/sublime-nunjucks/blob/master/Nunjucks.tmLanguage</a></li>
+<li>emacs <a href="http://web-mode.org">http://web-mode.org</a></li>
+</ul>
 
 <h2 id="variables">Variables</h2>
 
@@ -728,6 +750,11 @@ object: <code>{% import name + &quot;.html&quot; as obj %}</code>.</p>
 a <code>{{</code>, you can use
 a <code>{% raw %}</code> block and anything inside of it will be output as plain text.</p>
 
+<h3 id="verbatim">verbatim</h3>
+
+<p><code>{% verbatim %}</code> has identical behavior as <a href="#raw"><code>{% raw %}</code></a>. It is added for
+compatibility with the <a href="http://twig.sensiolabs.org/doc/tags/verbatim.html">Twig <code>verbatim</code> tag</a>.</p>
+
 <h3 id="filter">filter</h3>
 
 <p>A <code>filter</code> block allows you to call a filter with the contents of the
@@ -810,13 +837,16 @@ don&#39;t want the extra whitespace, but you still want to format the template
 cleanly, which requires whitespace.</p>
 
 <p>You can tell the engine to strip all leading or trailing whitespace by adding a
-minus sign (<code>-</code>) to the start or end block tag.</p>
+minus sign (<code>-</code>) to the start or end block or a variable.</p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">for</span> <span class="nv">i</span> <span class="k">in</span> <span class="o">[</span><span class="m">1</span><span class="o">,</span><span class="m">2</span><span class="o">,</span><span class="m">3</span><span class="o">,</span><span class="m">4</span><span class="o">,</span><span class="m">5</span><span class="o">]</span> -<span class="cp">%}</span><span class="x"></span>
 <span class="x">  </span><span class="cp">{{</span> <span class="nv">i</span> <span class="cp">}}</span><span class="x"></span>
 <span class="cp">{%</span>- <span class="k">endfor</span> <span class="cp">%}</span><span class="x"></span>
 </code></pre></div>
-<p>The exact output of the above would be &quot;12345&quot;. The <code>-%}</code> strips the whitespace
-right after the tag, and the <code>{%-</code> strips the whitespace right before the tag.</p>
+<p>The exact output of the above would be &quot;12345&quot;. The <code>{%-</code> strips the whitespace
+right before the tag, and <code>-%}</code> the strips the whitespace right after the tag.</p>
+
+<p>And the same is for variables: <code>{{-</code> will strip the whitespace before the variable,
+and <code>-}}</code> will strip the whitespace after the variable.</p>
 
 <h2 id="expressions">Expressions</h2>
 
@@ -848,53 +878,6 @@ available:</p>
 
 <p>You can use them like this:</p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="m">2</span> <span class="o">+</span> <span class="m">3</span> <span class="cp">}}</span><span class="x">       (outputs 5)</span>
-<span class="cp">{{</span> <span class="m">10</span><span class="o">/</span><span class="m">5</span> <span class="cp">}}</span><span class="x">        (outputs 2)</span>
-<span class="cp">{{</span> <span class="nv">numItems</span><span class="o">*</span><span class="m">2</span> <span class="cp">}}</span><span class="x"></span>
-</code></pre></div>
-<h3 id="comparisons">Comparisons</h3>
-
-<ul>
-<li><code>==</code></li>
-<li><code>===</code></li>
-<li><code>!=</code></li>
-<li><code>!==</code></li>
-<li><code>&gt;</code></li>
-<li><code>&gt;=</code></li>
-<li><code>&lt;</code></li>
-<li><code>&lt;=</code></li>
-</ul>
-
-<p>Examples:</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="x">{%-` strips the whitespace right before the tag.</span>
-
-<span class="x">## Expressions</span>
-
-<span class="x">You can use many types of literal expressions that you are used to in javascript.</span>
-
-<span class="x">* Strings: `&quot;How are you?&quot;`, `&#39;How are you?&#39;`</span>
-<span class="x">* Numbers: `40`, `30.123`</span>
-<span class="x">* Arrays: `[1, 2, &quot;array&quot;]`</span>
-<span class="x">* Dicts: `{ one: 1, two: 2 }`</span>
-<span class="x">* Boolean: `true`, `false`</span>
-
-<span class="x">### Math</span>
-
-<span class="x">Nunjucks allows you to operate on values (though it should be used sparingly,</span>
-<span class="x">as most of your logic should be in code). The following operators are</span>
-<span class="x">available:</span>
-
-<span class="x">* Addition: `+`</span>
-<span class="x">* Subtraction: `-`</span>
-<span class="x">* Division: `/`</span>
-<span class="x">* Division and integer truncation: `//`</span>
-<span class="x">* Division remainder: `%`</span>
-<span class="x">* Multiplication: `*`</span>
-<span class="x">* Power: `**`</span>
-
-<span class="x">You can use them like this:</span>
-
-<span class="x">```jinja</span>
-<span class="cp">{{</span> <span class="m">2</span> <span class="o">+</span> <span class="m">3</span> <span class="cp">}}</span><span class="x">       (outputs 5)</span>
 <span class="cp">{{</span> <span class="m">10</span><span class="o">/</span><span class="m">5</span> <span class="cp">}}</span><span class="x">        (outputs 2)</span>
 <span class="cp">{{</span> <span class="nv">numItems</span><span class="o">*</span><span class="m">2</span> <span class="cp">}}</span><span class="x"></span>
 </code></pre></div>
@@ -950,9 +933,11 @@ normal.</p>
 </code></pre></div>
 <h3 id="regular-expressions">Regular Expressions</h3>
 
-<p>A regular expression can be created just like JavaScript:</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="o">/</span><span class="err">^</span><span class="nv">foo</span><span class="err">.</span><span class="o">*/</span> <span class="cp">}}</span><span class="x"></span>
-<span class="cp">{{</span> <span class="o">/</span><span class="nv">bar</span><span class="err">$</span><span class="o">/</span><span class="nv">g</span> <span class="cp">}}</span><span class="x"></span>
+<p>A regular expression can be created just like JavaScript, but needs to be prefixed with <code>r</code>:</p>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">set</span> <span class="nv">regExp</span> <span class="o">=</span> <span class="nv">r</span><span class="o">/</span><span class="p">^</span><span class="nv">foo</span><span class="p">.</span><span class="o">*/</span><span class="nv">g</span> <span class="cp">%}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">if</span> <span class="nv">regExp.test</span><span class="o">(</span><span class="s1">&#39;foo&#39;</span><span class="o">)</span> <span class="cp">%}</span><span class="x"></span>
+<span class="x">  Foo in the house!</span>
+<span class="cp">{%</span> <span class="k">endif</span> <span class="cp">%}</span><span class="x"></span>
 </code></pre></div>
 <p>The supported flags are the following. See
 <a href="https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/RegExp">Regex on MDN</a>
@@ -1021,45 +1006,7 @@ it is called except for the first time.</p>
 
 <h2 id="builtin-filters">Builtin Filters</h2>
 
-<p>Nunjucks has ported most of jinja&#39;s filters, and has a few of its own.  We need
-to work on our own documentation for filters. Some of them are documented
-below, for the rest you can click through to jinja&#39;s site.</p>
-
-<h3 id="default-value-default-boolean">default(value, default, [boolean])</h3>
-
-<p>(aliased as <code>d</code>)</p>
-
-<p>If <code>value</code> is strictly <code>undefined</code>, return <code>default</code>, otherwise <code>value</code>. If
-<code>boolean</code> is true, any JavaScript falsy value will return <code>default</code> (false, &quot;&quot;,
-etc)</p>
-
-<p><strong>In version 2.0, this filter changed the default behavior of this
-  filter. Previously, it acted as if <code>boolean</code> was true by default, and any
-  falsy value would return <code>default</code>. In 2.0 the default is only an <code>undefined</code>
-  value returns <code>default</code>. You can get the old behavior by passing <code>true</code> to
-  <code>boolean</code>, or just use <code>value or default</code>.</strong></p>
-
-<h3 id="sort-arr-reverse-casesens-attr">sort(arr, reverse, caseSens, attr)</h3>
-
-<p>Sort <code>arr</code> with JavaScript&#39;s <code>arr.sort</code> function. If <code>reverse</code> is true, result
-will be reversed. Sort is case-insensitive by default, but setting <code>caseSens</code>
-to true makes it case-sensitive. If <code>attr</code> is passed, will compare <code>attr</code> from
-each item.</p>
-
-<h3 id="striptags-value-preserve_linebreaks">striptags (value, [preserve_linebreaks])</h3>
-
-<p>Analog of jinja&#39;s
-<a href="http://jinja.pocoo.org/docs/templates/#striptags">striptags</a>. If
-<code>preserve_linebreaks</code> is false (default), strips SGML/XML tags and replaces
-adjacent whitespace with one space.  If <code>preserve_linebreaks</code> is true,
-normalizes whitespace, trying to preserve original linebreaks. Use second
-behavior if you want to pipe <code>{{ text | striptags | nl2br }}</code>. Use default one
-otherwise.</p>
-
-<h3 id="dump-object">dump (object)</h3>
-
-<p>Call <code>JSON.stringify</code> on an object and dump the result into the
-template. Useful for debugging: <code>{{ foo | dump }}</code>.</p>
+<p>Nunjucks has ported most of <a href="http://jinja.pocoo.org/docs/dev/templates/#builtin-filters">jinja&#39;s filters</a>, and has a few of its own:</p>
 
 <h3 id="abs">abs</h3>
 
@@ -1106,6 +1053,20 @@ template. Useful for debugging: <code>{{ foo | dump }}</code>.</p>
 <p><strong>Output</strong></p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="x">fooo</span>
 </code></pre></div>
+<h3 id="default-value-default-boolean">default(value, default, [boolean])</h3>
+
+<p>(aliased as <code>d</code>)</p>
+
+<p>If <code>value</code> is strictly <code>undefined</code>, return <code>default</code>, otherwise <code>value</code>. If
+<code>boolean</code> is true, any JavaScript falsy value will return <code>default</code> (false, &quot;&quot;,
+etc)</p>
+
+<p><strong>In version 2.0, this filter changed the default behavior of this
+  filter. Previously, it acted as if <code>boolean</code> was true by default, and any
+  falsy value would return <code>default</code>. In 2.0 the default is only an <code>undefined</code>
+  value returns <code>default</code>. You can get the old behavior by passing <code>true</code> to
+  <code>boolean</code>, or just use <code>value or default</code>.</strong></p>
+
 <h3 id="dictsort">dictsort</h3>
 
 <p>Sort a dict and yield (key, value) pairs:</p>
@@ -1124,6 +1085,47 @@ template. Useful for debugging: <code>{{ foo | dump }}</code>.</p>
 <p><strong>Output</strong></p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="x">a b c d e f</span>
 </code></pre></div>
+<h3 id="dump">dump</h3>
+
+<p>Call <a href="https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify"><code>JSON.stringify</code></a> on an object and dump the result into the
+template. Useful for debugging: <code>{{ items | dump }}</code>.</p>
+
+<p><strong>Input</strong></p>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">set</span> <span class="nv">items</span> <span class="o">=</span> <span class="o">[</span><span class="s2">&quot;a&quot;</span><span class="o">,</span> <span class="m">1</span><span class="o">,</span> <span class="o">{</span> <span class="nv">b</span> <span class="o">:</span> <span class="kp">true</span><span class="o">}]</span> <span class="cp">%}</span><span class="x"></span>
+<span class="cp">{{</span> <span class="nv">items</span> <span class="o">|</span> <span class="nf">dump</span> <span class="cp">}}</span><span class="x"></span>
+</code></pre></div>
+<p><strong>Output</strong></p>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="x">[&quot;a&quot;,1,{&quot;b&quot;:true}]</span>
+</code></pre></div>
+<p>Dump provides the spaces parameter to add spaces or tabs to the resulting
+values. This makes the results more readable.</p>
+
+<p><strong>Input</strong></p>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">set</span> <span class="nv">items</span> <span class="o">=</span> <span class="o">[</span><span class="s2">&quot;a&quot;</span><span class="o">,</span> <span class="m">1</span><span class="o">,</span> <span class="o">{</span> <span class="nv">b</span> <span class="o">:</span> <span class="kp">true</span><span class="o">}]</span> <span class="cp">%}</span><span class="x"></span>
+<span class="cp">{{</span> <span class="nv">items</span> <span class="o">|</span> <span class="nf">dump</span><span class="o">(</span><span class="m">2</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
+</code></pre></div>
+<p><strong>Output</strong></p>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="x">[</span>
+<span class="x">  &quot;a&quot;,</span>
+<span class="x">  1,</span>
+<span class="x">  {</span>
+<span class="x">    &quot;b&quot;: true</span>
+<span class="x">  }</span>
+<span class="x">]</span>
+</code></pre></div>
+<p><strong>Input</strong></p>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">set</span> <span class="nv">items</span> <span class="o">=</span> <span class="o">[</span><span class="s2">&quot;a&quot;</span><span class="o">,</span> <span class="m">1</span><span class="o">,</span> <span class="o">{</span> <span class="nv">b</span> <span class="o">:</span> <span class="kp">true</span><span class="o">}]</span> <span class="cp">%}</span><span class="x"></span>
+<span class="cp">{{</span> <span class="nv">items</span> <span class="o">|</span> <span class="nf">dump</span><span class="o">(</span><span class="s1">&#39;\t&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
+</code></pre></div>
+<p><strong>Output</strong></p>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="x">[</span>
+<span class="x">    &quot;a&quot;,</span>
+<span class="x">    1,</span>
+<span class="x">    {</span>
+<span class="x">        &quot;b&quot;: true</span>
+<span class="x">    }</span>
+<span class="x">]</span>
+</code></pre></div>
 <h3 id="escape-aliased-as-e">escape (aliased as e)</h3>
 
 <p>Convert the characters &amp;, &lt;, &gt;, ‘, and ” in strings to HTML-safe sequences.
@@ -1136,17 +1138,6 @@ Marks return value as markup string</p>
 <p><strong>Output</strong></p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="x">&amp;lt;html&amp;gt;</span>
 </code></pre></div>
-<h3 id="float">float</h3>
-
-<p>Convert a value into a floating point number. If the conversion fails 0.0 is returned.
-This default can be overridden by using the first parameter.</p>
-
-<p><strong>Input</strong></p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="s2">&quot;3.5&quot;</span> <span class="o">|</span> <span class="nf">float</span> <span class="cp">}}</span><span class="x"></span>
-</code></pre></div>
-<p><strong>Output</strong></p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="x">3.5</span>
-</code></pre></div>
 <h3 id="first">first</h3>
 
 <p>Get the first item in an array:</p>
@@ -1157,6 +1148,17 @@ This default can be overridden by using the first parameter.</p>
 </code></pre></div>
 <p><strong>Output</strong></p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="x">1</span>
+</code></pre></div>
+<h3 id="float">float</h3>
+
+<p>Convert a value into a floating point number. If the conversion fails 0.0 is returned.
+This default can be overridden by using the first parameter.</p>
+
+<p><strong>Input</strong></p>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="s2">&quot;3.5&quot;</span> <span class="o">|</span> <span class="nf">float</span> <span class="cp">}}</span><span class="x"></span>
+</code></pre></div>
+<p><strong>Output</strong></p>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="x">3.5</span>
 </code></pre></div>
 <h3 id="groupby">groupby</h3>
 
@@ -1307,6 +1309,16 @@ If it was a string the returned list will be a list of characters.</p>
 </code></pre></div>
 <p><strong>Output</strong></p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="x">foobar</span>
+</code></pre></div>
+<h3 id="nl2br">nl2br</h3>
+
+<p>Replace new lines with <code>&lt;br /&gt;</code> HTML elements:</p>
+
+<p><strong>Input</strong></p>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="s2">&quot;foo\nbar&quot;</span> <span class="o">|</span> <span class="nf">striptags</span><span class="o">(</span><span class="kp">true</span><span class="o">)</span> <span class="o">|</span> <span class="nf">escape</span> <span class="o">|</span> <span class="nf">nl2br</span> <span class="cp">}}</span><span class="x"></span>
+</code></pre></div>
+<p><strong>Output</strong></p>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="x">foo&lt;br /&gt;\nbar</span>
 </code></pre></div>
 <h3 id="random">random</h3>
 
@@ -1488,6 +1500,13 @@ of each object, and only selecting the objects with the test succeeding.</p>
 <span class="x">    &lt;/ul&gt;</span>
 <span class="x">&lt;/div&gt;</span>
 </code></pre></div>
+<h3 id="sort-arr-reverse-casesens-attr">sort(arr, reverse, caseSens, attr)</h3>
+
+<p>Sort <code>arr</code> with JavaScript&#39;s <code>arr.sort</code> function. If <code>reverse</code> is true, result
+will be reversed. Sort is case-insensitive by default, but setting <code>caseSens</code>
+to true makes it case-sensitive. If <code>attr</code> is passed, will compare <code>attr</code> from
+each item.</p>
+
 <h3 id="string">string</h3>
 
 <p>Convert an object to a string:</p>
@@ -1501,6 +1520,16 @@ of each object, and only selecting the objects with the test succeeding.</p>
 <p><strong>Output</strong></p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="x">1,2,3,4,</span>
 </code></pre></div>
+<h3 id="striptags-value-preserve_linebreaks">striptags (value, [preserve_linebreaks])</h3>
+
+<p>Analog of jinja&#39;s
+<a href="http://jinja.pocoo.org/docs/templates/#striptags">striptags</a>. If
+<code>preserve_linebreaks</code> is false (default), strips SGML/XML tags and replaces
+adjacent whitespace with one space.  If <code>preserve_linebreaks</code> is true,
+normalizes whitespace, trying to preserve original linebreaks. Use second
+behavior if you want to pipe <code>{{ text | striptags(true) | escape | nl2br }}</code>.
+Use default one otherwise.</p>
+
 <h3 id="sum">sum</h3>
 
 <p>Output the sum of items in the array:</p>

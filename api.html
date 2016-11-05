@@ -4,6 +4,7 @@
     <title>Nunjucks</title>
 
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" type="text/css"
           href="/nunjucks/bower_components/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/nunjucks/css/highlight.css" />
@@ -17,7 +18,7 @@
 
       <ul class="nav navbar-nav navbar-right pull-right">
         <li><a href="/nunjucks/#download" class="download">Download</a></li>
-        <li><a href="https://github.com/mozilla/nunjucks">Github</a></li>
+        <li><a href="https://github.com/mozilla/nunjucks">GitHub</a></li>
         <li class="dropdown">
           <a href="getting-started.html" data-toggle="dropdown">Docs</a>
 
@@ -289,7 +290,7 @@ escaped automatically. See <a href="#autoescaping">Autoescaping</a></li>
 <li><strong>throwOnUndefined</strong> <em>(default: false)</em> throw errors when outputting a null/undefined value</li>
 <li><strong>trimBlocks</strong> <em>(default: false)</em> automatically remove trailing newlines from a block/tag</li>
 <li><strong>lstripBlocks</strong> <em>(default: false)</em> automatically remove leading whitespace from a block/tag</li>
-<li><strong>watch</strong> <em>(default: false)</em> reload templates when they are changed (server-side)</li>
+<li><strong>watch</strong> <em>(default: false)</em> reload templates when they are changed (server-side). To use watch, make sure optional dependency <em>chokidar</em> is installed.</li>
 <li><strong>noCache</strong> <em>(default: false)</em> never use a cache and recompile templates each time (server-side)</li>
 <li><strong>web</strong> an object for configuring loading templates in the browser:
 
@@ -585,7 +586,7 @@ templates live, and it defaults to the current working directory.</p>
 <p><strong>opts</strong> is an object with the following optional properties:</p>
 
 <ul>
-<li><strong>watch</strong> - if <code>true</code>, the system will automatically update templates
+<li><strong>watch</strong> - if <code>true</code>, the system will automatically update templates. To use watch, make sure optional dependency <em>chokidar</em> is installed.
 when they are changed on the filesystem</li>
 <li><strong>noCache</strong> - if <code>true</code>, the system will avoid using a cache and templates
 will be recompiled every single time</li>

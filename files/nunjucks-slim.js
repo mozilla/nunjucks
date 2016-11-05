@@ -1,4 +1,4 @@
-/*! Browser bundle of nunjucks 2.5.2 (slim, only works with precompiled templates) */
+/*! Browser bundle of nunjucks 3.0.0 (slim, only works with precompiled templates) */
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
 		module.exports = factory();
@@ -59,7 +59,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var lib = __webpack_require__(1);
 	var env = __webpack_require__(2);
-	var Loader = __webpack_require__(11);
+	var Loader = __webpack_require__(14);
 	var loaders = __webpack_require__(3);
 	var precompile = __webpack_require__(3);
 
@@ -79,7 +79,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports.lib = lib;
 	module.exports.nodes = __webpack_require__(3);
 
-	module.exports.installJinjaCompat = __webpack_require__(12);
+	module.exports.installJinjaCompat = __webpack_require__(15);
 
 	// A single instance of an environment, since this is so commonly used
 
@@ -463,12 +463,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	var builtin_loaders = __webpack_require__(3);
 	var runtime = __webpack_require__(8);
 	var globals = __webpack_require__(9);
+	var waterfall = __webpack_require__(10);
 	var Frame = runtime.Frame;
 	var Template;
 
 	// Unconditionally load in this loader, even if no other ones are
 	// included (possible in the slim browser build)
-	builtin_loaders.PrecompiledLoader = __webpack_require__(10);
+	builtin_loaders.PrecompiledLoader = __webpack_require__(13);
 
 	// If the user is using the async API, *always* call it
 	// asynchronously even if the template was synchronous.
@@ -779,7 +780,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        var tmpl = new Template(src, this, opts.path);
 	        return tmpl.render(ctx, cb);
-	    }
+	    },
+
+	    waterfall: waterfall
 	});
 
 	var Context = Obj.extend({
@@ -1536,8 +1539,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return array;
 	    },
 
-	    dump: function(obj) {
-	        return JSON.stringify(obj);
+	    dump: function(obj, spaces) {
+	        return JSON.stringify(obj, null, spaces);
 	    },
 
 	    escape: function(str) {
@@ -1654,6 +1657,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    lower: function(str) {
 	        str = normalize(str, '');
 	        return str.toLowerCase();
+	    },
+
+	    nl2br: function(str) {
+	        if (str === null || str === undefined) {
+	            return '';
+	        }
+	        return r.copySafeness(str, str.replace(/\r\n|\n/g, '<br />\n'));
 	    },
 
 	    random: function(arr) {
@@ -2061,7 +2071,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    get: function(name) {
 	        var val = this.variables[name];
-	        if(val !== undefined && val !== null) {
+	        if(val !== undefined) {
 	            return val;
 	        }
 	        return null;
@@ -2070,7 +2080,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    lookup: function(name) {
 	        var p = this.parent;
 	        var val = this.variables[name];
-	        if(val !== undefined && val !== null) {
+	        if(val !== undefined) {
 	            return val;
 	        }
 	        return p && p.lookup(name);
@@ -2079,7 +2089,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    resolve: function(name, forWrite) {
 	        var p = (forWrite && this.isolateWrites) ? undefined : this.parent;
 	        var val = this.variables[name];
-	        if(val !== undefined && val !== null) {
+	        if(val !== undefined) {
 	            return this;
 	        }
 	        return p && p.resolve(name);
@@ -2267,7 +2277,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function contextOrFrameLookup(context, frame, name) {
 	    var val = frame.lookup(name);
-	    return (val !== undefined && val !== null) ?
+	    return (val !== undefined) ?
 	        val :
 	        context.lookup(name);
 	}
@@ -2468,9 +2478,278 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
+	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(setImmediate, process) {// MIT license (by Elan Shanker).
+	(function(globals) {
+	  'use strict';
+
+	  var executeSync = function(){
+	    var args = Array.prototype.slice.call(arguments);
+	    if (typeof args[0] === 'function'){
+	      args[0].apply(null, args.splice(1));
+	    }
+	  };
+
+	  var executeAsync = function(fn){
+	    if (typeof setImmediate === 'function') {
+	      setImmediate(fn);
+	    } else if (typeof process !== 'undefined' && process.nextTick) {
+	      process.nextTick(fn);
+	    } else {
+	      setTimeout(fn, 0);
+	    }
+	  };
+
+	  var makeIterator = function (tasks) {
+	    var makeCallback = function (index) {
+	      var fn = function () {
+	        if (tasks.length) {
+	          tasks[index].apply(null, arguments);
+	        }
+	        return fn.next();
+	      };
+	      fn.next = function () {
+	        return (index < tasks.length - 1) ? makeCallback(index + 1): null;
+	      };
+	      return fn;
+	    };
+	    return makeCallback(0);
+	  };
+	  
+	  var _isArray = Array.isArray || function(maybeArray){
+	    return Object.prototype.toString.call(maybeArray) === '[object Array]';
+	  };
+
+	  var waterfall = function (tasks, callback, forceAsync) {
+	    var nextTick = forceAsync ? executeAsync : executeSync;
+	    callback = callback || function () {};
+	    if (!_isArray(tasks)) {
+	      var err = new Error('First argument to waterfall must be an array of functions');
+	      return callback(err);
+	    }
+	    if (!tasks.length) {
+	      return callback();
+	    }
+	    var wrapIterator = function (iterator) {
+	      return function (err) {
+	        if (err) {
+	          callback.apply(null, arguments);
+	          callback = function () {};
+	        } else {
+	          var args = Array.prototype.slice.call(arguments, 1);
+	          var next = iterator.next();
+	          if (next) {
+	            args.push(wrapIterator(next));
+	          } else {
+	            args.push(callback);
+	          }
+	          nextTick(function () {
+	            iterator.apply(null, args);
+	          });
+	        }
+	      };
+	    };
+	    wrapIterator(makeIterator(tasks))();
+	  };
+
+	  if (true) {
+	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_RESULT__ = function () {
+	      return waterfall;
+	    }.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__)); // RequireJS
+	  } else if (typeof module !== 'undefined' && module.exports) {
+	    module.exports = waterfall; // CommonJS
+	  } else {
+	    globals.waterfall = waterfall; // <script>
+	  }
+	})(this);
+
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11).setImmediate, __webpack_require__(3)))
+
+/***/ },
+/* 11 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(setImmediate, clearImmediate) {var nextTick = __webpack_require__(12).nextTick;
+	var apply = Function.prototype.apply;
+	var slice = Array.prototype.slice;
+	var immediateIds = {};
+	var nextImmediateId = 0;
+
+	// DOM APIs, for completeness
+
+	exports.setTimeout = function() {
+	  return new Timeout(apply.call(setTimeout, window, arguments), clearTimeout);
+	};
+	exports.setInterval = function() {
+	  return new Timeout(apply.call(setInterval, window, arguments), clearInterval);
+	};
+	exports.clearTimeout =
+	exports.clearInterval = function(timeout) { timeout.close(); };
+
+	function Timeout(id, clearFn) {
+	  this._id = id;
+	  this._clearFn = clearFn;
+	}
+	Timeout.prototype.unref = Timeout.prototype.ref = function() {};
+	Timeout.prototype.close = function() {
+	  this._clearFn.call(window, this._id);
+	};
+
+	// Does not start the time, just sets up the members needed.
+	exports.enroll = function(item, msecs) {
+	  clearTimeout(item._idleTimeoutId);
+	  item._idleTimeout = msecs;
+	};
+
+	exports.unenroll = function(item) {
+	  clearTimeout(item._idleTimeoutId);
+	  item._idleTimeout = -1;
+	};
+
+	exports._unrefActive = exports.active = function(item) {
+	  clearTimeout(item._idleTimeoutId);
+
+	  var msecs = item._idleTimeout;
+	  if (msecs >= 0) {
+	    item._idleTimeoutId = setTimeout(function onTimeout() {
+	      if (item._onTimeout)
+	        item._onTimeout();
+	    }, msecs);
+	  }
+	};
+
+	// That's not how node.js implements it but the exposed api is the same.
+	exports.setImmediate = typeof setImmediate === "function" ? setImmediate : function(fn) {
+	  var id = nextImmediateId++;
+	  var args = arguments.length < 2 ? false : slice.call(arguments, 1);
+
+	  immediateIds[id] = true;
+
+	  nextTick(function onNextTick() {
+	    if (immediateIds[id]) {
+	      // fn.call() is faster so we optimize for the common use-case
+	      // @see http://jsperf.com/call-apply-segu
+	      if (args) {
+	        fn.apply(null, args);
+	      } else {
+	        fn.call(null);
+	      }
+	      // Prevent ids from leaking
+	      exports.clearImmediate(id);
+	    }
+	  });
+
+	  return id;
+	};
+
+	exports.clearImmediate = typeof clearImmediate === "function" ? clearImmediate : function(id) {
+	  delete immediateIds[id];
+	};
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11).setImmediate, __webpack_require__(11).clearImmediate))
+
+/***/ },
+/* 12 */
+/***/ function(module, exports) {
+
+	// shim for using process in browser
+
+	var process = module.exports = {};
+	var queue = [];
+	var draining = false;
+	var currentQueue;
+	var queueIndex = -1;
+
+	function cleanUpNextTick() {
+	    draining = false;
+	    if (currentQueue.length) {
+	        queue = currentQueue.concat(queue);
+	    } else {
+	        queueIndex = -1;
+	    }
+	    if (queue.length) {
+	        drainQueue();
+	    }
+	}
+
+	function drainQueue() {
+	    if (draining) {
+	        return;
+	    }
+	    var timeout = setTimeout(cleanUpNextTick);
+	    draining = true;
+
+	    var len = queue.length;
+	    while(len) {
+	        currentQueue = queue;
+	        queue = [];
+	        while (++queueIndex < len) {
+	            if (currentQueue) {
+	                currentQueue[queueIndex].run();
+	            }
+	        }
+	        queueIndex = -1;
+	        len = queue.length;
+	    }
+	    currentQueue = null;
+	    draining = false;
+	    clearTimeout(timeout);
+	}
+
+	process.nextTick = function (fun) {
+	    var args = new Array(arguments.length - 1);
+	    if (arguments.length > 1) {
+	        for (var i = 1; i < arguments.length; i++) {
+	            args[i - 1] = arguments[i];
+	        }
+	    }
+	    queue.push(new Item(fun, args));
+	    if (queue.length === 1 && !draining) {
+	        setTimeout(drainQueue, 0);
+	    }
+	};
+
+	// v8 likes predictible objects
+	function Item(fun, array) {
+	    this.fun = fun;
+	    this.array = array;
+	}
+	Item.prototype.run = function () {
+	    this.fun.apply(null, this.array);
+	};
+	process.title = 'browser';
+	process.browser = true;
+	process.env = {};
+	process.argv = [];
+	process.version = ''; // empty string to avoid regexp issues
+	process.versions = {};
+
+	function noop() {}
+
+	process.on = noop;
+	process.addListener = noop;
+	process.once = noop;
+	process.off = noop;
+	process.removeListener = noop;
+	process.removeAllListeners = noop;
+	process.emit = noop;
+
+	process.binding = function (name) {
+	    throw new Error('process.binding is not supported');
+	};
+
+	process.cwd = function () { return '/' };
+	process.chdir = function (dir) {
+	    throw new Error('process.chdir is not supported');
+	};
+	process.umask = function() { return 0; };
+
+
+/***/ },
+/* 13 */
+/***/ function(module, exports, __webpack_require__) {
+
 	'use strict';
 
-	var Loader = __webpack_require__(11);
+	var Loader = __webpack_require__(14);
 
 	var PrecompiledLoader = Loader.extend({
 	    init: function(compiledTemplates) {
@@ -2493,7 +2772,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 11 */
+/* 14 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2532,7 +2811,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 12 */
+/* 15 */
 /***/ function(module, exports) {
 
 	function installCompat() {
@@ -2570,6 +2849,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        throw new Error('KeyError');
 	      }
 	      return this.splice(index, 1);
+	    },
+	    append: function(element) {
+	        return this.push(element);
 	    },
 	    remove: function(element) {
 	      for (var i = 0; i < this.length; i++) {

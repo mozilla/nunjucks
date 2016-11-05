@@ -499,6 +499,69 @@
                    [nodes.Output, [nodes.TemplateData, '\n']]]);
         });
 
+        it('should parse verbatim', function() {
+            isAST(parser.parse('{% verbatim %}hello {{ {% %} }}{% endverbatim %}'),
+                [nodes.Root,
+                    [nodes.Output,
+                        [nodes.TemplateData, 'hello {{ {% %} }}']]]);
+        });
+
+        it('should parse verbatim with broken variables', function() {
+            isAST(parser.parse('{% verbatim %}{{ x }{% endverbatim %}'),
+                [nodes.Root,
+                    [nodes.Output,
+                        [nodes.TemplateData, '{{ x }']]]);
+        });
+
+        it('should parse verbatim with broken blocks', function() {
+            isAST(parser.parse('{% verbatim %}{% if i_am_stupid }Still do your job well{% endverbatim %}'),
+                [nodes.Root,
+                    [nodes.Output,
+                        [nodes.TemplateData, '{% if i_am_stupid }Still do your job well']]]);
+        });
+
+        it('should parse verbatim with pure text', function() {
+            isAST(parser.parse('{% verbatim %}abc{% endverbatim %}'),
+                [nodes.Root,
+                    [nodes.Output,
+                        [nodes.TemplateData, 'abc']]]);
+        });
+
+
+        it('should parse verbatim with verbatim blocks', function() {
+            isAST(parser.parse('{% verbatim %}{% verbatim %}{{ x }{% endverbatim %}{% endverbatim %}'),
+                [nodes.Root,
+                    [nodes.Output,
+                        [nodes.TemplateData, '{% verbatim %}{{ x }{% endverbatim %}']]]);
+        });
+
+        it('should parse verbatim with comment blocks', function() {
+            isAST(parser.parse('{% verbatim %}{# test {% endverbatim %}'),
+                [nodes.Root,
+                    [nodes.Output,
+                        [nodes.TemplateData, '{# test ']]]);
+        });
+
+        it('should parse multiple verbatim blocks', function() {
+            isAST(parser.parse('{% verbatim %}{{ var }}{% endverbatim %}{{ var }}{% verbatim %}{{ var }}{% endverbatim %}'),
+                [nodes.Root,
+                    [nodes.Output, [nodes.TemplateData, '{{ var }}']],
+                    [nodes.Output, [nodes.Symbol, 'var']],
+                    [nodes.Output, [nodes.TemplateData, '{{ var }}']]]);
+        });
+
+        it('should parse multiline multiple verbatim blocks', function() {
+            isAST(parser.parse('\n{% verbatim %}{{ var }}{% endverbatim %}\n{{ var }}\n{% verbatim %}{{ var }}{% endverbatim %}\n'),
+                [nodes.Root,
+                    [nodes.Output, [nodes.TemplateData, '\n']],
+                    [nodes.Output, [nodes.TemplateData, '{{ var }}']],
+                    [nodes.Output, [nodes.TemplateData, '\n']],
+                    [nodes.Output, [nodes.Symbol, 'var']],
+                    [nodes.Output, [nodes.TemplateData, '\n']],
+                    [nodes.Output, [nodes.TemplateData, '{{ var }}']],
+                    [nodes.Output, [nodes.TemplateData, '\n']]]);
+        });
+
         it('should parse keyword and non-keyword arguments', function() {
             isAST(parser.parse('{{ foo("bar", falalalala, baz="foobar") }}'),
                   [nodes.Root,
