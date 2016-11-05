@@ -123,7 +123,8 @@ Tokenizer.prototype.nextToken = function() {
             }
             return token(TOKEN_BLOCK_END, tok, lineno, colno);
         }
-        else if((tok = this._extractString(this.tags.VARIABLE_END))) {
+        else if((tok = this._extractString(this.tags.VARIABLE_END)) ||
+                (tok = this._extractString('-' + this.tags.VARIABLE_END))) {
             // Special check for variable end tag (see above)
             this.in_code = false;
             return token(TOKEN_VARIABLE_END, tok, lineno, colno);
@@ -240,7 +241,8 @@ Tokenizer.prototype.nextToken = function() {
             this.in_code = true;
             return token(TOKEN_BLOCK_START, tok, lineno, colno);
         }
-        else if((tok = this._extractString(this.tags.VARIABLE_START))) {
+        else if((tok = this._extractString(this.tags.VARIABLE_START + '-')) ||
+                (tok = this._extractString(this.tags.VARIABLE_START))) {
             this.in_code = true;
             return token(TOKEN_VARIABLE_START, tok, lineno, colno);
         }

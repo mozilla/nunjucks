@@ -1626,6 +1626,33 @@
             finish(done);
         });
 
+        it('should control expression whitespaces correctly', function(done) {
+            equal(
+                'Well, {{- \' hello, \' -}} my friend',
+                'Well, hello, my friend'
+            );
+
+            equal(' {{ 2 + 2 }} ', ' 4 ');
+
+            equal(' {{-2 + 2 }} ', '4 ');
+
+            equal(' {{ -2 + 2 }} ', ' 0 ');
+
+            equal(' {{ 2 + 2 -}} ', ' 4');
+
+            render(
+                ' {{ 2 + 2- }}',
+                {},
+                { noThrow: true },
+                function(err, res) {
+                    expect(res).to.be(undefined);
+                    expect(err).to.match(/unexpected token: }}/);
+                }
+            );
+
+            finish(done);
+        });
+
         it('should get right value when macro parameter conflict with global macro name', function(done) {
             render(
                 '{# macro1 and macro2 definition #}' +

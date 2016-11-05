@@ -38,6 +38,7 @@ Changelog
 * Add support for python's `list.append` with Jinja compat enabled. Thanks
   Conor Flannigan.
 
+* Add variables whitespace control.
 
 
 2.5.2 (Sep 14 2016)
