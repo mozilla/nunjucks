@@ -85,7 +85,7 @@ et les options suivantes sont disponibles dans **opts** :
 * **throwOnUndefined** *(par défaut : false)* lève des erreurs quand le résultat a une valeur null/undefined
 * **trimBlocks** *(par défaut : false)* supprime automatiquement les sauts de lignes de fin de block/tag
 * **lstripBlocks** *(par défaut : false)* supprime automatiquement les espaces de début de block/tag
-* **watch** *(par défaut : false)* recharge les templates quand ils ont été changés (côté serveur)
+* **watch** *(par défaut : false)* recharge les templates quand ils ont été changés (côté serveur). Pour utiliser watch, veuillez vérifier que la dépendance optionnelle *chokidar* soit installée.
 * **noCache** *(par défaut : false)* ne jamais utiliser le cache et recompiler les templates à chaque fois (côté serveur)
 * **web** un objet pour la configuration du chargement des templates dans le navigateur :
   * **useCache** *(par défaut : false)* activera le cache et les templates ne verront jamais les mises à jour.
@@ -402,7 +402,7 @@ tous les templates et il est par défaut dans le répertoire de travail courant.
 
 **opts** est un objet avec les propriétés optionnelles suivantes :
 
-* **watch** - si `true`, le système mettra à jour automatiquement les templates
+* **watch** - si `true`, le système mettra à jour automatiquement les templates. Pour utiliser watch, veuillez vérifier que la dépendance optionnelle *chokidar* soit installée.
   quand ils sont modifiés sur le système de fichiers
 * **noCache** - si `true`, le système évitera l'utilisation d'un cache et les
   templates seront recompilés à chaque fois
