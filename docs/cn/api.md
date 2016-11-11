@@ -45,8 +45,8 @@ var res = nunjucks.renderString('Hello {{ username }}', { username: 'James' });
 {% endapi %}
 
 {% api %}
-configure
-nunjucks.configure([path], [opts]);
+compile
+nunjucks.compile(str, [env], [path]);
 
 将给定的字符串编译成可重复使用的nunjucks模板对象。
 
