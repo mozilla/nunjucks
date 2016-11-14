@@ -11,9 +11,7 @@ function normalize(value, defaultValue) {
 }
 
 var filters = {
-    abs: function(n) {
-        return Math.abs(n);
-    },
+    abs: Math.abs,
 
     batch: function(arr, linecount, fill_with) {
         var i;
