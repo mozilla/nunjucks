@@ -709,6 +709,22 @@
             finish(done);
         });
 
+        it('should allow call block to access vars set in parent macro', function(done) {
+            equal('{% macro child() %}' +
+                  '{{ caller() }}' +
+                  '{% endmacro %}' +
+                  '{% macro parent() %}' +
+                  '{% set x = "bar" %}' +
+                  '{% call child() %}' +
+                  '{{ x }}' +
+                  '{% endcall %}' +
+                  '{% endmacro %}' +
+                  '{{ parent() }}',
+                  'bar');
+
+            finish(done);
+        });
+
         it('should import templates', function(done) {
             equal('{% import "import.njk" as imp %}' +
                   '{{ imp.foo() }} {{ imp.bar }}',
