@@ -695,6 +695,20 @@
             finish(done);
         });
 
+        it('should allow child macro to access vars set in parent macro', function(done) {
+            equal('{% macro parent() %}' +
+                  '{% set x = "bar" %}' +
+                  '{% macro child() %}' +
+                  '{{ x }}' +
+                  '{% endmacro %}' +
+                  '{{ child() }}' +
+                  '{% endmacro %}' +
+                  '{{ parent() }}',
+                  'bar');
+
+            finish(done);
+        });
+
         it('should import templates', function(done) {
             equal('{% import "import.njk" as imp %}' +
                   '{{ imp.foo() }} {{ imp.bar }}',
