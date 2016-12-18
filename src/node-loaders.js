@@ -6,9 +6,6 @@ var lib = require('./lib');
 var Loader = require('./loader');
 var PrecompiledLoader = require('./precompiled-loader.js');
 
-// Node <0.7.1 compatibility
-var existsSync = fs.existsSync || path.existsSync;
-
 var FileSystemLoader = Loader.extend({
     init: function(searchPaths, opts) {
         if(typeof opts === 'boolean') {
@@ -36,7 +33,7 @@ var FileSystemLoader = Loader.extend({
             // Watch all the templates in the paths and fire an event when
             // they change
             var chokidar = require('chokidar');
-            var paths = this.searchPaths.filter(function(p) { return existsSync(p); });
+            var paths = this.searchPaths.filter(fs.existsSync);
             var watcher = chokidar.watch(paths);
             var _this = this;
             watcher.on('all', function(event, fullname) {
@@ -61,7 +58,7 @@ var FileSystemLoader = Loader.extend({
 
             // Only allow the current directory and anything
             // underneath it to be searched
-            if(p.indexOf(basePath) === 0 && existsSync(p)) {
+            if(p.indexOf(basePath) === 0 && fs.existsSync(p)) {
                 fullpath = p;
                 break;
             }
