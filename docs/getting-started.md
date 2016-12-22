@@ -34,7 +34,7 @@ which only works with precompiled templates.
 
 Simply include nunjucks with a `script` tag on the page:
 
-```html
+```nunjucks
 <script src="nunjucks.js"></script>
 ```
 

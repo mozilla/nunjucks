@@ -1,13 +1,9 @@
-module.exports = renderCode;
-
 const prism = require('prismjs');
-prism.languages.html = require('./prism-twig'); // use twig (same syntax as nunjucks) as default formatter for html code
+require('prismjs/components/prism-twig'); // adds `twig` to global `prism.languages` instance
 
-function renderCode(code, language) {
-	if (prism.languages.hasOwnProperty(language)) {
-		code = prism.highlight(code, prism.languages[language]);
-		return `<pre class="language-${language}"><code>${code}</code></pre>`;
-	} else {
-		return `<pre class="language-unknown"><code>${code}</code></pre>`;
-	}
-}
+module.exports = (code, language) => {
+	if (language === 'nunjucks' || language === 'njk' || language === 'jinja') { language = 'twig' };
+    language = (prism.languages.hasOwnProperty(language)) ? language : 'markup';
+    const formattedCode = prism.highlight(code, prism.languages[language]);
+    return `<pre class="language-${language}"><code>${formattedCode}</code></pre>`;
+};

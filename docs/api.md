@@ -705,7 +705,7 @@ This adds a filter `shorten` which returns the first `count`
 characters in a string, with `count` defaulting to 5. Here is how it
 is used:
 
-```html
+```nunjucks
 {# Show the first 5 characters #}
 A message for you: {{ message|shorten }}
 
@@ -731,7 +731,7 @@ env.addFilter('foo', function(num, x, y, kwargs) {
 
 The template can use it like this:
 
-```html
+```nunjucks
 {{ 5 | foo(1, 2) }}          -> 15
 {{ 5 | foo(1, 2, bar=3) }}   -> 8
 ```
@@ -876,7 +876,7 @@ env.addExtension('RemoteExtension', new RemoteExtension());
 
 Use it like this:
 
-```html
+```nunjucks
 {% remote "/stuff" %}
   This content will be replaced with the content from /stuff
 {% error %}

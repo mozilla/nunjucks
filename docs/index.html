@@ -1,7 +1,7 @@
 {% extends "_layouts/_base.html" %}
 
 {% block body %}
-
+{% raw %}
 <div class="banner">
   <div class="banner-screen">
     <h1>Nunjucks</h1>
@@ -75,20 +75,19 @@
     </div>
 
     <div class="col-sm-6">
-      <pre>{% raw %}{% <span>extends</span> "base.html" %}
+      <pre class="language-html"><code><span class="token tag" ><span class="token ld"><span class="token punctuation" >{%</span> <span class="token keyword" >extends</span></span> <span class="token string" ><span class="token punctuation" >"</span>base.html<span class="token punctuation" >"</span></span> <span class="token rd" ><span class="token punctuation" >%}</span></span></span>
 
-{% <span>block</span> header %}
-&lt;h1&gt;{{ title }}&lt;/h1&gt;
-{% <span>endblock</span> %}
+<span class="token tag" ><span class="token ld" ><span class="token punctuation" >{%</span> <span class="token keyword" >block</span></span> <span class="token property" >header</span> <span class="token rd" ><span class="token punctuation" >%}</span></span></span>
+<span class="token other" ><span class="token tag" ><span class="token tag" ><span class="token punctuation" >&lt;</span>h1</span><span class="token punctuation" >></span></span></span><span class="token tag" ><span class="token ld" ><span class="token punctuation" >{{</span></span> <span class="token property" >title</span> <span class="token rd" ><span class="token punctuation" >}}</span></span></span><span class="token other" ><span class="token tag" ><span class="token tag" ><span class="token punctuation" >&lt;/</span>h1</span><span class="token punctuation" >></span></span></span>
+<span class="token tag" ><span class="token ld" ><span class="token punctuation" >{%</span> <span class="token keyword" >endblock</span></span> <span class="token rd" ><span class="token punctuation" >%}</span></span></span>
 
-{% <span>block</span> content %}
-&lt;ul&gt;
-  {% <span>for</span> name, item in items %}
-  &lt;li&gt;{{ name }}: {{ item }}&lt;/li&gt;
-  {% <span>endfor</span> %}
-&lt;/ul&gt;
-{% <span>endblock</span> %}{% endraw %}
-      </pre>
+<span class="token tag" ><span class="token ld" ><span class="token punctuation" >{%</span> <span class="token keyword" >block</span></span> <span class="token property" >content</span> <span class="token rd" ><span class="token punctuation" >%}</span></span></span>
+<span class="token other" ><span class="token tag" ><span class="token tag" ><span class="token punctuation" >&lt;</span>ul</span><span class="token punctuation" >></span></span></span>
+  <span class="token tag" ><span class="token ld" ><span class="token punctuation" >{%</span> <span class="token keyword" >for</span></span> <span class="token property" >name</span><span class="token punctuation" >,</span> <span class="token property" >item</span> <span class="token operator" >in</span> <span class="token property" >items</span> <span class="token rd" ><span class="token punctuation" >%}</span></span></span>
+  <span class="token other" ><span class="token tag" ><span class="token tag" ><span class="token punctuation" >&lt;</span>li</span><span class="token punctuation" >></span></span></span><span class="token tag" ><span class="token ld" ><span class="token punctuation" >{{</span></span> <span class="token property" >name</span> <span class="token rd" ><span class="token punctuation" >}}</span></span></span><span class="token other" >:</span> <span class="token tag" ><span class="token ld" ><span class="token punctuation" >{{</span></span> <span class="token property" >item</span> <span class="token rd" ><span class="token punctuation" >}}</span></span></span><span class="token other" ><span class="token tag" ><span class="token tag" ><span class="token punctuation" >&lt;/</span>li</span><span class="token punctuation" >></span></span></span>
+  <span class="token tag" ><span class="token ld" ><span class="token punctuation" >{%</span> <span class="token keyword" >endfor</span></span> <span class="token rd" ><span class="token punctuation" >%}</span></span></span>
+<span class="token other" ><span class="token tag" ><span class="token tag" ><span class="token punctuation" >&lt;/</span>ul</span><span class="token punctuation" >></span></span></span>
+<span class="token tag" ><span class="token ld" ><span class="token punctuation" >{%</span> <span class="token keyword" >endblock</span></span> <span class="token rd" ><span class="token punctuation" >%}</span></span></span></code></pre>
     </div>
   </section>
 
@@ -197,7 +196,6 @@
     <em><a href="https://github.com/search?q=nunjucks&ref=simplesearch&type=Code">And many, many more...</a></em>
   </section>
 
-  {% raw %}
   <section class="examples">
     <h3>More Examples</h3>
 
@@ -207,9 +205,9 @@
         even create your own.
       </div>
       <div class="col-sm-6">
-        <pre>{{ foo | title }}
-{{ foo | join(",") }}
-{{ foo | replace("foo", "bar") | capitalize }}</pre>
+        <pre class="language-html"><code><span class="token tag" ><span class="token ld" ><span class="token punctuation" >{{</span></span> <span class="token property" >foo</span> <span class="token operator" >|</span> <span class="token property" >title</span> <span class="token rd" ><span class="token punctuation" >}}</span></span></span>
+<span class="token tag" ><span class="token ld" ><span class="token punctuation" >{{</span></span> <span class="token property" >foo</span> <span class="token operator" >|</span> <span class="token property" >join</span><span class="token punctuation" >(</span><span class="token string" ><span class="token punctuation" >"</span>,<span class="token punctuation" >"</span></span><span class="token punctuation" >)</span> <span class="token rd" ><span class="token punctuation" >}}</span></span></span>
+<span class="token tag" ><span class="token ld" ><span class="token punctuation" >{{</span></span> <span class="token property" >foo</span> <span class="token operator" >|</span> <span class="token property" >replace</span><span class="token punctuation" >(</span><span class="token string" ><span class="token punctuation" >"</span>foo<span class="token punctuation" >"</span></span><span class="token punctuation" >,</span> <span class="token string" ><span class="token punctuation" >"</span>bar<span class="token punctuation" >"</span></span><span class="token punctuation" >)</span> <span class="token operator" >|</span> <span class="token property" >capitalize</span> <span class="token rd" ><span class="token punctuation" >}}</span></span></span></code></pre>
       </div>
     </div>
 
@@ -219,8 +217,8 @@
       </div>
 
       <div class="col-sm-6">
-        <pre>{{ foo(1, 2, bar=3, baz=4) }}
-{{ bar | transform(level=2) }}</pre>
+        <pre class="language-html"><code><span class="token tag" ><span class="token ld" ><span class="token punctuation" >{{</span></span> <span class="token property" >foo</span><span class="token punctuation" >(</span><span class="token number" >1</span><span class="token punctuation" >,</span> <span class="token number" >2</span><span class="token punctuation" >,</span> <span class="token property" >bar</span><span class="token operator" >=</span><span class="token number" >3</span><span class="token punctuation" >,</span> <span class="token property" >baz</span><span class="token operator" >=</span><span class="token number" >4</span><span class="token punctuation" >)</span> <span class="token rd" ><span class="token punctuation" >}}</span></span></span>
+<span class="token tag" ><span class="token ld" ><span class="token punctuation" >{{</span></span> <span class="token property" >bar</span> <span class="token operator" >|</span> <span class="token property" >transform</span><span class="token punctuation" >(</span><span class="token property" >level</span><span class="token operator" >=</span><span class="token number" >2</span><span class="token punctuation" >)</span> <span class="token rd" ><span class="token punctuation" >}}</span></span></span></code></pre>
       </div>
     </div>
 
@@ -231,16 +229,16 @@
       </div>
 
       <div class="col-sm-6">
-        <pre>{% <span>extends</span> &quot;base.html&quot; %}
+        <pre class="language-html"><code><span class="token tag" ><span class="token ld" ><span class="token punctuation" >{%</span> <span class="token keyword" >extends</span></span> <span class="token string" ><span class="token punctuation" >"</span>base.html<span class="token punctuation" >"</span></span> <span class="token rd" ><span class="token punctuation" >%}</span></span></span>
 
-{% <span>block</span> header %}
-&lt;h3&gt;{{ subtitle }}&lt;/h3&gt;
-{% <span>endblock</span> %}
+<span class="token tag" ><span class="token ld" ><span class="token punctuation" >{%</span> <span class="token keyword" >block</span></span> <span class="token property" >header</span> <span class="token rd" ><span class="token punctuation" >%}</span></span></span>
+<span class="token other" ><span class="token tag" ><span class="token tag" ><span class="token punctuation" >&lt;</span>h3</span><span class="token punctuation" >></span></span></span><span class="token tag" ><span class="token ld" ><span class="token punctuation" >{{</span></span> <span class="token property" >subtitle</span> <span class="token rd" ><span class="token punctuation" >}}</span></span></span><span class="token other" ><span class="token tag" ><span class="token tag" ><span class="token punctuation" >&lt;/</span>h3</span><span class="token punctuation" >></span></span></span>
+<span class="token tag" ><span class="token ld" ><span class="token punctuation" >{%</span> <span class="token keyword" >endblock</span></span> <span class="token rd" ><span class="token punctuation" >%}</span></span></span>
 
-{% <span>block</span> content %}
-&lt;h1&gt;{{ page.title }}&lt;/h1&gt;
-&lt;p&gt;{{ page.content }}&lt;/p&gt;
-{% <span>endblock</span> %}</pre>
+<span class="token tag" ><span class="token ld" ><span class="token punctuation" >{%</span> <span class="token keyword" >block</span></span> <span class="token property" >content</span> <span class="token rd" ><span class="token punctuation" >%}</span></span></span>
+<span class="token other" ><span class="token tag" ><span class="token tag" ><span class="token punctuation" >&lt;</span>h1</span><span class="token punctuation" >></span></span></span><span class="token tag" ><span class="token ld" ><span class="token punctuation" >{{</span></span> <span class="token property" >page</span><span class="token punctuation" >.</span><span class="token property" >title</span> <span class="token rd" ><span class="token punctuation" >}}</span></span></span><span class="token other" ><span class="token tag" ><span class="token tag" ><span class="token punctuation" >&lt;/</span>h1</span><span class="token punctuation" >></span></span>
+<span class="token tag" ><span class="token tag" ><span class="token punctuation" >&lt;</span>p</span><span class="token punctuation" >></span></span></span><span class="token tag" ><span class="token ld" ><span class="token punctuation" >{{</span></span> <span class="token property" >page</span><span class="token punctuation" >.</span><span class="token property" >content</span> <span class="token rd" ><span class="token punctuation" >}}</span></span></span><span class="token other" ><span class="token tag" ><span class="token tag" ><span class="token punctuation" >&lt;/</span>p</span><span class="token punctuation" >></span></span></span>
+<span class="token tag" ><span class="token ld" ><span class="token punctuation" >{%</span> <span class="token keyword" >endblock</span></span> <span class="token rd" ><span class="token punctuation" >%}</span></span></span></code></pre>
       </div>
     </div>
 
@@ -253,12 +251,12 @@
         assuming <code>lookup</code> is asynchronous.
       </div>
       <div class="col-sm-6">
-        <pre>&lt;h1&gt;Posts&lt;/h1&gt;
-&lt;ul&gt;
-{% <span>asyncAll</span> item in items %}
-  &lt;li&gt;{{ item.id | lookup }}&lt;/li&gt;
-{% <span>endall</span> %}
-&lt;/ul&gt;</pre>
+        <pre class="language-html"><code><span class="token other" ><span class="token tag" ><span class="token tag" ><span class="token punctuation" >&lt;</span>h1</span><span class="token punctuation" >></span></span>Posts<span class="token tag" ><span class="token tag" ><span class="token punctuation" >&lt;/</span>h1</span><span class="token punctuation" >></span></span>
+<span class="token tag" ><span class="token tag" ><span class="token punctuation" >&lt;</span>ul</span><span class="token punctuation" >></span></span></span>
+<span class="token tag" ><span class="token ld" ><span class="token punctuation" >{%</span> <span class="token keyword" >asyncAll</span></span> <span class="token property" >item</span> <span class="token operator" >in</span> <span class="token property" >items</span> <span class="token rd" ><span class="token punctuation" >%}</span></span></span>
+  <span class="token other" ><span class="token tag" ><span class="token tag" ><span class="token punctuation" >&lt;</span>li</span><span class="token punctuation" >></span></span></span><span class="token tag" ><span class="token ld" ><span class="token punctuation" >{{</span></span> <span class="token property" >item</span><span class="token punctuation" >.</span><span class="token property" >id</span> <span class="token operator" >|</span> <span class="token property" >lookup</span> <span class="token rd" ><span class="token punctuation" >}}</span></span></span><span class="token other" ><span class="token tag" ><span class="token tag" ><span class="token punctuation" >&lt;/</span>li</span><span class="token punctuation" >></span></span></span>
+<span class="token tag" ><span class="token ld" ><span class="token punctuation" >{%</span> <span class="token keyword" >endall</span></span> <span class="token rd" ><span class="token punctuation" >%}</span></span></span>
+<span class="token other" ><span class="token tag" ><span class="token tag" ><span class="token punctuation" >&lt;/</span>ul</span><span class="token punctuation" >></span></span></span></code></pre>
       </div>
     </div>
 
@@ -270,8 +268,7 @@
       <button class="btn btn-lg btn-success">Getting Started &rarr;</button>
     </a>
   </section>
-
-
-  {% endraw %}
 </div>
+
+{% endraw %}
 {% endblock %}

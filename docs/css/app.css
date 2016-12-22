@@ -157,15 +157,6 @@ nav a.logo, nav a.logo:visited, nav a.logo:active, nav a.logo:hover {
     margin: .5em 0;
 }
 
-.main {
-    /* float: right; */
-    /* width: 75%; */
-}
-
-/* .navbar-default ul.nav li.dropdown-menu a, */
-/* .navbar-default ul.nav li.dropdown-menu a:visited { */
-/* } */
-
 ul.nav li.dropdown:hover > ul.dropdown-menu {
     display: block;
 }
@@ -186,13 +177,6 @@ ul.nav li.dropdown:hover > ul.dropdown-menu {
 
 .navbar-default li.dropdown ul.dropdown-menu a:hover {
     background-color: #f0f0f0;
-}
-
-aside {
-    /* float: left; */
-    /* width: 20%; */
-    /* margin-top: 5em; */
-    /* margin-left: -.5em; */
 }
 
 .affix {
@@ -226,25 +210,22 @@ aside .pages ul {
     list-style: circle;
 }
 
-.toc ul li {
-    padding: 0;
-    list-style: none;
-}
-
 .toc ul {
     color: #c0c0c0;
 }
 
-.toc ul li ul li {
+.item-level-1 {
     list-style: circle;
 }
 
-.toc ul li ul li ul li {
+.item-level-2 {
     list-style: square;
+    margin-left: 1em;
 }
 
-.toc ul li ul li ul li ul li {
-    list-style: lower-roman;
+.item-level-3 {
+    list-style: disc;
+    margin-left: 2em;
 }
 
 .toc ul li ul li a {
