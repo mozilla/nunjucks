@@ -782,7 +782,7 @@ Cela ajoute un filtre `shorten` qui renvoie les `count` premiers
 caractères dans une chaîne, où `count` est par défaut à 5. Voici comment
 il est utilisé :
 
-```jinja
+```nunjucks
 {# Affiche les 5 premiers caractères #}
 Un message pour vous : {{ message|shorten }}
 
@@ -808,7 +808,7 @@ env.addFilter('foo', function(num, x, y, kwargs) {
 
 Le template peut l'utiliser ainsi :
 
-```jinja
+```nunjucks
 {{ 5 | foo(1, 2) }}          -> 15
 {{ 5 | foo(1, 2, bar=3) }}   -> 8
 ```
@@ -952,7 +952,7 @@ env.addExtension('RemoteExtension', new RemoteExtension());
 
 Utilisez-le ainsi :
 
-```jinja
+```nunjucks
 {% remote "/stuff" %}
   Ce contenu sera remplacé par le contenu de /stuff
 {% error %}

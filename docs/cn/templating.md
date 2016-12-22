@@ -21,13 +21,13 @@ title: Templates
 
 变量会从模板上下文获取，如果你想显示一个变量可以：
 
-```jinja
+```nunjucks
 {{ username }}
 ```
 
 会从上下文查找 `username` 然后显示，可以像 javascript 一样获取变量的属性 (可使用点操作符或者中括号操作符)：
 
-```jinja
+```nunjucks
 {{ foo.bar }}
 {{ foo["bar"] }}
 ```
@@ -39,7 +39,7 @@ foo.bar }}`, `{{ foo.bar.baz }}` 也不显示)。
 
 过滤器是一些可以执行变量的函数，通过管道操作符 (`|`) 调用，并可接受参数。
 
-```jinja
+```nunjucks
 {{ foo | title }}
 {{ foo | join(",") }}
 {{ foo | replace("foo", "bar") | capitalize }}
@@ -55,7 +55,7 @@ Nunjucks 提供了一些[内置的过滤器](#内置的过滤器)，你也可以
 
 如果有一个叫做 `parent.html` 的模板，如下所示：
 
-```jinja
+```nunjucks
 {% block header %}
 This is the default content
 {% endblock %}
@@ -73,7 +73,7 @@ This is the default content
 
 然后再写一个模板继承他
 
-```jinja
+```nunjucks
 {% extends "parent.html" %}
 
 {% block left %}
@@ -87,7 +87,7 @@ This is the right side!
 
 以下为渲染结果
 
-```jinja
+```nunjucks
 This is the default content
 
 <section class="left">
@@ -101,7 +101,7 @@ This is the default content
 
 你可以将继承的模板设为一个变量，这样就可以动态指定继承的模板。这个变量既可以是个指向模板文件的字符串，也可以是个模板编译后所生成的对象(需要添加上下文环境)。因此你可以通过设置上下文变量，从而在渲染时动态地改变所要继承的模板。
 
-```jinja
+```nunjucks
 {% extends parentTemplate %}
 ```
 
@@ -111,7 +111,7 @@ This is the default content
 
 你可以通过调用`super`从而将父级区块中的内容渲染到子区块中。如果在前面的例子中你的子模板是这样的：
 
-```jinja
+```nunjucks
 {% block right %}
 {{ super() }}
 Right side!
@@ -133,7 +133,7 @@ Right side!
 
 `if` 为分支语句，与 javascript 中的 `if` 类似。
 
-```jinja
+```nunjucks
 {% if variable %}
   It is true
 {% endif %}
@@ -141,7 +141,7 @@ Right side!
 
 如果 `variable` 定义了并且为 true _(译者注：这里并非布尔值，和 javascript 的处理是一样的)_ 则会显示 "It is true"，否则什么也不显示。
 
-```jinja
+```nunjucks
 {% if hungry %}
   I am hungry
 {% elif tired %}
@@ -163,7 +163,7 @@ Right side!
 var items = [{ title: "foo", id: 1 }, { title: "bar", id: 2}];
 ```
 
-```jinja
+```nunjucks
 <h1>Posts</h1>
 <ul>
 {% for item in items %}
@@ -186,7 +186,7 @@ var food = {
 };
 ```
 
-```jinja
+```nunjucks
 {% for ingredient, amount in food %}
   Use {{ amount }} of {{ ingredient }}
 {% endfor %}
@@ -200,7 +200,7 @@ var food = {
 var points = [[0, 1, 2], [5, 6, 7], [12, 13, 14]];
 ```
 
-```jinja
+```nunjucks
 {% for x, y, z in points %}
   Point: {{ x }}, {{ y }}, {{ z }}
 {% endfor %}
@@ -230,7 +230,7 @@ var points = [[0, 1, 2], [5, 6, 7], [12, 13, 14]];
 // If you are using a custom loader that is async, you need asyncEach
 var env = new nunjucks.Environment(AsyncLoaderFromDatabase, opts);
 ```
-```jinja
+```nunjucks
 <h1>Posts</h1>
 <ul>
 {% asyncEach item in items %}
@@ -247,7 +247,7 @@ var env = new nunjucks.Environment(AsyncLoaderFromDatabase, opts);
 
 如果你写了一个 `lookup` 的过滤器用来从数据库获取一些文本，使用 `asyncAll` 可以并行渲染。
 
-```jinja
+```nunjucks
 <h1>Posts</h1>
 <ul>
 {% asyncAll item in items %}
@@ -262,7 +262,7 @@ var env = new nunjucks.Environment(AsyncLoaderFromDatabase, opts);
 
 宏 (`macro`) 可以定义可复用的内容，类似与编程语言中的函数，看下面的示例：
 
-```jinja
+```nunjucks
 {% macro field(name, value='', type='text') %}
 <div class="field">
   <input type="{{ type }}" name="{{ name }}"
@@ -273,7 +273,7 @@ var env = new nunjucks.Environment(AsyncLoaderFromDatabase, opts);
 
 现在 `field` 可以当作函数一样使用了：
 
-```jinja
+```nunjucks
 {{ field('user') }}
 {{ field('pass', type='password') }}
 ```
@@ -288,7 +288,7 @@ var env = new nunjucks.Environment(AsyncLoaderFromDatabase, opts);
 
 `set` 可以设置和修改变量。
 
-```jinja
+```nunjucks
 {{ username }}
 {% set username = "joe" %}
 {{ username }}
@@ -298,7 +298,7 @@ var env = new nunjucks.Environment(AsyncLoaderFromDatabase, opts);
 
 可以设置新的变量，并一起赋值。
 
-```jinja
+```nunjucks
 {% set x, y, z = 5 %}
 ```
 
@@ -310,7 +310,7 @@ var env = new nunjucks.Environment(AsyncLoaderFromDatabase, opts);
 
 在某些情境下，你可以用这种语法来替代宏：
 
-```jinja
+```nunjucks
 {% set standardModal %}
     {% include 'standardModalData.html' %}
 {% endset %}
@@ -322,19 +322,19 @@ var env = new nunjucks.Environment(AsyncLoaderFromDatabase, opts);
 
 `extends` 用来指定模板继承，被指定的模板为父级模板，查看[模板继承](#模板继承)。
 
-```jinja
+```nunjucks
 {% extends "base.html" %}
 ```
 
 你可以将继承的模板设为一个变量，这样就可以动态指定继承的模板。这个变量既可以是个指向模板文件的字符串，也可以是个模板编译后所生成的对象(需要添加上下文环境)。因此你可以通过设置上下文变量，从而在渲染时动态地改变所要继承的模板。
 
-```jinja
+```nunjucks
 {% extends parentTemplate %}
 ```
 
 `extends`也可以接受任意表达式，只要它最终返回一个字符串或是模板所编译成的对象：
 
-```jinja
+```nunjucks
 {% extends name + ".html" %}`.
 ```
 
@@ -342,7 +342,7 @@ var env = new nunjucks.Environment(AsyncLoaderFromDatabase, opts);
 
 区块(`block`) 定义了模板片段并标识一个名字，在模板继承中使用。父级模板可指定一个区块，子模板覆盖这个区块，查看[模板继承](#模板继承)。
 
-```jinja
+```nunjucks
 {% block css %}
 <link rel="stylesheet" href="app.css" />
 {% endblock %}
@@ -350,7 +350,7 @@ var env = new nunjucks.Environment(AsyncLoaderFromDatabase, opts);
 
 可以在循环中定义区块
 
-```jinja
+```nunjucks
 {% for item in items %}
 {% block item %}{{ item }}{% endblock %}
 {% endfor %}
@@ -358,7 +358,7 @@ var env = new nunjucks.Environment(AsyncLoaderFromDatabase, opts);
 
 子模板可以覆盖 `item` 区块并改变里面的内容。
 
-```jinja
+```nunjucks
 {% extends "item.html" %}
 
 {% block item %}
@@ -372,13 +372,13 @@ The name of the item is: {{ item.name }}
 
 `include` 可引入其他的模板，可以在多模板之间共享一些小模板，如果某个模板已使用了继承那么 `include` 将会非常有用。
 
-```jinja
+```nunjucks
 {% include "item.html" %}
 ```
 
 可在循环中引入模板
 
-```jinja
+```nunjucks
 {% for item in items %}
 {% include "item.html" %}
 {% endfor %}
@@ -390,7 +390,7 @@ The name of the item is: {{ item.name }}
 
 在某些情况下，我们可能希望在模板文件不存在时不要抛出异常。对于这类情况，我们可以使用`ignore missing`来略过这些异常：
 
-```jinja
+```nunjucks
 {% include "missing.html" ignore missing %}
 ```
 
@@ -407,7 +407,7 @@ The name of the item is: {{ item.name }}
 
 创建一个叫 `forms.html` 如下所示
 
-```jinja
+```nunjucks
 {% macro field(name, value='', type='text') %}
 <div class="field">
   <input type="{{ type }}" name="{{ name }}"
@@ -425,7 +425,7 @@ The name of the item is: {{ item.name }}
 我们可以 import 这个模板并将模板的输出绑定到变量 `forms` 上，然后就可以使用这个变量了：
 
 
-```jinja
+```nunjucks
 {% import "forms.html" as forms %}
 
 {{ forms.label('Username') }}
@@ -436,7 +436,7 @@ The name of the item is: {{ item.name }}
 
 也可以使用 `from import` 从模板中 import 指定的值到当前的命名空间：
 
-```jinja
+```nunjucks
 {% from "forms.html" import input, label as description %}
 
 {{ description('Username') }}
@@ -455,7 +455,7 @@ The name of the item is: {{ item.name }}
 
 `filter`区块允许我们使用区块中的内容来调用过滤器。不同于使用`|`语法，它会将区块渲染出的内容传递给过滤器。
 
-```jinja
+```nunjucks
 {% filter title %}
 may the force be with you
 {% endfilter %}
@@ -471,7 +471,7 @@ may the force be with you
 
 `call`区块允许你使用标签之间的内容来调用一个宏。这在你需要给宏传入大量内容时是十分有用的。在宏中，你可以通过`caller()`来获取这些内容。
 
-```jinja
+```nunjucks
 {% macro add(x, y) %}
 {{ caller() }}: {{ x + y }}
 {% endmacro%}
@@ -489,7 +489,7 @@ jinja2 使用 Python 的关键字参数，支持函数，过滤器和宏。Nunju
 
 关键字参数如下：
 
-```jinja
+```nunjucks
 {{ foo(1, 2, bar=3, baz=4) }}
 ```
 
@@ -503,7 +503,7 @@ foo(1, 2, { bar: 3, baz: 4})
 
 定义宏的时候也可以使用关键字参数，定义参数值时可设置默认值。Nunjucks 会自动将关键字参数与宏里定义的值做匹配。
 
-```jinja
+```nunjucks
 {% macro foo(x, y, z=5, w=6) %}
 {{ x }}, {{ y }}, {{ z }}, {{ w}}
 {% endmacro %}
@@ -514,19 +514,19 @@ foo(1, 2, { bar: 3, baz: 4})
 
 在宏中还可以混合使用位置参数 (positional arguments) 和关键字参数。如示例，你可以将位置参数用作关键字参数：
 
-```jinja
+```nunjucks
 {{ foo(20, y=21) }}     -> 20, 21, 5, 6
 ```
 
 你还可以用位置参数来替换关键字参数：
 
-```jinja
+```nunjucks
 {{ foo(5, 6, 7, 8) }}   -> 5, 6, 7, 8
 ```
 
 如下示例，你可以跳过 ("skip") 位置参数：
 
-```jinja
+```nunjucks
 {{ foo(8, z=7) }}      -> 8, , 7, 6
 ```
 
@@ -534,7 +534,7 @@ foo(1, 2, { bar: 3, baz: 4})
 
 你可以使用 `{#` and `#}` 来写注释，渲染时将会去除所有的注释。
 
-```jinja
+```nunjucks
 {# Loop through all the users #}
 {% for user in users %}...{% endfor %}
 ```
@@ -545,7 +545,7 @@ foo(1, 2, { bar: 3, baz: 4})
 
 你可以在开始和结束区块 (start or end block tag) 添加 (`-`) 来去除前面和后面的空白字符。
 
-```jinja
+```nunjucks
 {% for i in [1,2,3,4,5] -%}
   {{ i }}
 {%- endfor %}
@@ -577,7 +577,7 @@ Nunjucks 支持运算 (但尽量少用，把逻辑放在代码中)，可使用�
 
 可以如下使用：
 
-```jinja
+```nunjucks
 {{ 2 + 3 }}       (outputs 5)
 {{ 10/5 }}        (outputs 2)
 {{ numItems*2 }}
@@ -596,7 +596,7 @@ Nunjucks 支持运算 (但尽量少用，把逻辑放在代码中)，可使用�
 
 Examples:
 
-```jinja
+```nunjucks
 {% if numUsers < 5 %}...{% endif %}
 {% if i == 0 %}...{% endif %}
 ```
@@ -610,7 +610,7 @@ Examples:
 
 Examples:
 
-```jinja
+```nunjucks
 {% if users and showUsers %}...{% endif %}
 {% if i == 0 and not hideFirst %}...{% endif %}
 {% if (x < 5 or y < 5) and foo %}...{% endif %}
@@ -620,13 +620,13 @@ Examples:
 
 和 javascript 的三元运算符 (ternary operator) 一样，可使用 if 的内联表达式：
 
-```jinja
+```nunjucks
 {{ "true" if foo else "false" }}
 ```
 
 当 foo 为 true 的时候最终输出 "true" 否则为 "false"，对于获取默认值的时候非常有用：
 
-```jinja
+```nunjucks
 {{ baz(foo if foo else "default") }}
 ```
 
@@ -634,7 +634,7 @@ Examples:
 
 如果你传入一个函数，则可以直接调用
 
-```jinja
+```nunjucks
 {{ foo(1, 2, 3) }}
 ```
 
@@ -642,7 +642,7 @@ Examples:
 
 你可以像在JavaScript中一样创建一个正则表达式:
 
-```jinja
+```nunjucks
 {{ /^foo.*/ }}
 {{ /bar$/g }}
 ```
@@ -658,14 +658,14 @@ Examples:
 
 如果在环境变量中设置了 autoescaping，所有的输出都会自动转义，但可以使用 `safe` 过滤器，Nunjucks 就不会转义了。
 
-```jinja
+```nunjucks
 {{ foo }}           // &lt;span%gt;
 {{ foo | safe }}    // <span>
 ```
 
 如果未开启 autoescaping，所有的输出都会如实输出，但可以使用 `escape` 过滤器来转义。
 
-```jinja
+```nunjucks
 {{ foo }}           // <span>
 {{ foo | escape }}  // &lt;span&gt;
 ```
@@ -678,7 +678,7 @@ Examples:
 
 如果你需要遍历固定范围的数字可以使用 `range`，`start` (默认为 0) 为起始数字，`stop` 为结束数字，`step` 为间隔 (默认为 1)。
 
-```jinja
+```nunjucks
 {% for i in range(0, 5) -%}
   {{ i }},
 {%- endfor %}
@@ -690,7 +690,7 @@ Examples:
 
 `cycler` 可以循环调用你指定的一系列的值。
 
-```jinja
+```nunjucks
 {% set cls = cycler("odd", "even") %}
 {% for row in rows %}
   <div class="{{ cls.next() }}">{{ row.name }}</div>
@@ -703,7 +703,7 @@ Examples:
 
 当合并多项的时候，希望在他们之间又分隔符 (像逗号)，但又不希望第一项也输出。`joiner` 将输出分割符 (默认为 ",") 除了第一次调用。
 
-```jinja
+```nunjucks
 {% set comma = joiner() %}
 {% for tag in tags -%}
   {{ comma() }} {{ tag }}

@@ -36,7 +36,7 @@ Des plugins sont disponibles pour les différents éditeurs pour prendre en char
 Une variable remplace une valeur dans le contexte du template. Si vous souhaitez
 simplement afficher une variable, vous devez faire :
 
-```jinja
+```nunjucks
 {{ username }}
 ```
 
@@ -44,7 +44,7 @@ Ceci recherche `username` depuis le contexte et l'affiche. Les noms des
 variables peuvent posséder des points qui sont des propriétés, tout comme
 javascript. Vous pouvez également utiliser la syntaxe des crochets.
 
-```jinja
+```nunjucks
 {{ foo.bar }}
 {{ foo["bar"] }}
 ```
@@ -61,7 +61,7 @@ foo.bar }}`, `{{ foo.bar.baz }}`.
 Les filtres sont essentiellement des fonctions qui peuvent être appliquées aux variables.
 Ils sont appelés avec le caractère "pipe" (`|`) et peuvent prendre des arguments.
 
-```jinja
+```nunjucks
 {{ foo | title }}
 {{ foo | join(",") }}
 {{ foo | replace("foo", "bar") | capitalize }}
@@ -82,7 +82,7 @@ remplaceront. La chaîne d'héritage peut être aussi longue que vous le souhait
 
 Si nous avons un template `parent.html` qui ressemble à ceci :
 
-```jinja
+```nunjucks
 {% block header %}
 C'est le contenu par défaut
 {% endblock %}
@@ -100,7 +100,7 @@ C'est le contenu par défaut
 
 Et nous rendons ce template :
 
-```jinja
+```nunjucks
 {% extends "parent.html" %}
 
 {% block left %}
@@ -114,7 +114,7 @@ C'est la partie droite !
 
 Nous aurons en sortie :
 
-```jinja
+```nunjucks
 C'est le contenu par défaut
 
 <section class="left">
@@ -132,7 +132,7 @@ un fichier template ou peut contenir un objet Template compilé qui a été ajou
 au contexte. De cette façon, vous pouvez modifier dynamiquement le
 template à hériter lors du rendu en le plaçant dans le contexte.
 
-```jinja
+```nunjucks
 {% extends parentTemplate %}
 ```
 
@@ -146,7 +146,7 @@ jinja2](http://jinja.pocoo.org/docs/templates/#template-inheritance).
 Vous pouvez rendre les contenus du bloc parent à l'intérieur d'un bloc enfant
 en appelant `super`. Si dans le modèle de l'enfant ci-dessus, vous avez :
 
-```jinja
+```nunjucks
 {% block right %}
 {{ super() }}
 Partie droite !
@@ -170,7 +170,7 @@ Nunjucks est livré avec plusieurs tags intégrés, mais [vous pouvez ajouter vo
 `if` teste une condition et vous permet d'afficher de manière sélective le contenu. Il se comporte
 exactement comme le `if` de javascript.
 
-```jinja
+```nunjucks
 {% if variable %}
   C'est vrai
 {% endif %}
@@ -181,7 +181,7 @@ s'affichera, sinon rien n'apparaitra.
 
 Vous pouvez spécifier des conditions alternatives avec `elif` et `else` :
 
-```jinja
+```nunjucks
 {% if faim %}
   J'ai faim
 {% elif fatigue %}
@@ -204,7 +204,7 @@ Vous pouvez également utiliser `if` comme une [expression en ligne](#expression
 var items = [{ title: "foo", id: 1 }, { title: "bar", id: 2}];
 ```
 
-```jinja
+```nunjucks
 <h1>Articles</h1>
 <ul>
 {% for item in items %}
@@ -229,7 +229,7 @@ var food = {
 };
 ```
 
-```jinja
+```nunjucks
 {% for ingredient, amount in food %}
   Utilisez {{ amount }} de {{ ingredient }}
 {% endfor %}
@@ -244,7 +244,7 @@ De plus, Nunjucks découpera les tableaux dans des variables :
 var points = [[0, 1, 2], [5, 6, 7], [12, 13, 14]];
 ```
 
-```jinja
+```nunjucks
 {% for x, y, z in points %}
   Point: {{ x }}, {{ y }}, {{ z }}
 {% endfor %}
@@ -287,7 +287,7 @@ devez utiliser `asyncEach` pour itérer si vous chargez des templates de façon 
 // Si vous utilisez un chargeur personnalisé qui est asynchrone, vous avez besoin de asyncEach
 var env = new nunjucks.Environment(AsyncLoaderFromDatabase, opts);
 ```
-```jinja
+```nunjucks
 <h1>Articles</h1>
 <ul>
 {% asyncEach item in items %}
@@ -310,7 +310,7 @@ Disons que vous avez créé un filtre nommé `lookup` qui récupère un peu de t
 à partir d'une base de données. Vous pouvez donc rendre plusieurs éléments
 en parallèle avec `asyncAll` :
 
-```jinja
+```nunjucks
 <h1>Articles</h1>
 <ul>
 {% asyncAll item in items %}
@@ -330,7 +330,7 @@ Le rendu du template reprend une fois que tous les éléments sont traités.
 `macro` vous permet de définir des morceaux de contenu réutilisables. C'est semblable à
 une fonction dans un langage de programmation. Voici un exemple :
 
-```jinja
+```nunjucks
 {% macro field(name, value='', type='text') %}
 <div class="field">
   <input type="{{ type }}" name="{{ name }}"
@@ -340,7 +340,7 @@ une fonction dans un langage de programmation. Voici un exemple :
 ```
 Maintenant `field` est disponible, il peut être appelé comme une fonction normale :
 
-```jinja
+```nunjucks
 {{ field('user') }}
 {{ field('pass', type='password') }}
 ```
@@ -360,7 +360,7 @@ une fonction de manière asynchrone. Si vous faites cela maintenant, le comporte
 
 `set` vous permet de créer/modifier une variable.
 
-```jinja
+```nunjucks
 {{ username }}
 {% set username = "joe" %}
 {{ username }}
@@ -370,7 +370,7 @@ Si `username` avait initialement la valeur "james", cela affichera "james joe".
 
 Vous pouvez inclure des nouvelles variables et en définir aussi plusieurs à la fois :
 
-```jinja
+```nunjucks
 {% set x, y, z = 5 %}
 ```
 
@@ -384,7 +384,7 @@ l'affectation de bloc. La syntaxe est similaire au standard `set`, sauf que le
 
 Cela peut être utile dans certains cas, comme une alternative aux macros :
 
-```jinja
+```nunjucks
 {% set standardModal %}
     {% include 'standardModalData.html' %}
 {% endset %}
@@ -398,7 +398,7 @@ Cela peut être utile dans certains cas, comme une alternative aux macros :
 spécifié est utilisé comme template de base. Regardez [l'héritage
 de template](#l39hritage-de-template).
 
-```jinja
+```nunjucks
 {% extends "base.html" %}
 ```
 
@@ -408,7 +408,7 @@ un fichier template ou peut contenir un objet Template compilé qui a été ajou
 au contexte. De cette façon, vous pouvez modifier dynamiquement le
 template à hériter lors du rendu en le plaçant dans le contexte.
 
-```jinja
+```nunjucks
 {% extends parentTemplate %}
 ```
 
@@ -416,7 +416,7 @@ En fait, `extends` accepte n'importe quelle expression arbitraire, donc vous
 pouvez y passer n'importe quoi, aussi longtemps que cette expression correspond
 à un string ou un objet Template compilé :
 
-```jinja
+```nunjucks
 {% extends name + ".html" %}`.
 ```
 
@@ -427,7 +427,7 @@ nom. C'est utilisé par l'héritage de template. Les templates de base peuvent d
 des blocs, ainsi des templates enfants peuvent les remplacer avec du nouveau contenu. Regardez
 [l'héritage de template](#l39hritage-de-template).
 
-```jinja
+```nunjucks
 {% block css %}
 <link rel="stylesheet" href="app.css" />
 {% endblock %}
@@ -435,7 +435,7 @@ des blocs, ainsi des templates enfants peuvent les remplacer avec du nouveau con
 
 Vous pouvez même définir des blocs dans une boucle :
 
-```jinja
+```nunjucks
 {% for item in items %}
 {% block item %}{{ item }}{% endblock %}
 {% endfor %}
@@ -443,7 +443,7 @@ Vous pouvez même définir des blocs dans une boucle :
 
 Les templates enfants peuvent remplacer le bloc `item` et changer la façon dont il est affiché :
 
-```jinja
+```nunjucks
 {% extends "item.html" %}
 
 {% block item %}
@@ -459,13 +459,13 @@ rendra le contenu du bloc parent. Regardez [super](#super).
 `include` récupère depuis d'autres templates disponibles. C'est utile lorsque vous avez besoin de partager des
 petits morceaux sur plusieurs templates qui héritent déjà d'autres templates.
 
-```jinja
+```nunjucks
 {% include "item.html" %}
 ```
 
 Vous pouvez même inclure des templates à l'intérieur des boucles :
 
-```jinja
+```nunjucks
 {% for item in items %}
 {% include "item.html" %}
 {% endfor %}
@@ -482,7 +482,7 @@ compilé : `{% include name + ".html" %}`.
 Dans certains cas, il peut être utile de ne pas générer une erreur quand un template n'existe pas. Utilisez
 l'option `ignore missing` pour supprimer ces erreurs.
 
-```jinja
+```nunjucks
 {% include "missing.html" ignore missing %}
 ```
 
@@ -505,7 +505,7 @@ accès à toutes les variables du template actuel.
 
 Commençons par un template appelé `forms.html` qui contient ce qui suit :
 
-```jinja
+```nunjucks
 {% macro field(name, value='', type='text') %}
 <div class="field">
   <input type="{{ type }}" name="{{ name }}"
@@ -523,7 +523,7 @@ Commençons par un template appelé `forms.html` qui contient ce qui suit :
 Nous pouvons importer ce template et lier toutes ses valeurs exportées à une variable
 afin que nous puissions l'utiliser :
 
-```jinja
+```nunjucks
 {% import "forms.html" as forms %}
 
 {{ forms.label('Username') }}
@@ -535,7 +535,7 @@ afin que nous puissions l'utiliser :
 Vous pouvez aussi importer des valeurs depuis un template dans l'espace de nommage
 actuel avec `from import` :
 
-```jinja
+```nunjucks
 {% from "forms.html" import field, label as description %}
 
 {{ description('Username') }}
@@ -559,7 +559,7 @@ Un bloc `filter` vous permet d'appeler un filtre avec le contenu de ce
 bloc. Au lieu de passer une valeur avec la syntaxe `|`, le contenu
 du bloc sera passé.
 
-```jinja
+```nunjucks
 {% filter title %}
 que la force soit avec toi
 {% endfilter %}
@@ -577,7 +577,7 @@ Un bloc `call` vous permet d'appeler une macro avec tout le texte à l'intérieu
 la balise. Ceci est utile si vous voulez passer beaucoup de contenu dans une macro. Le
 contenu est disponible à l'intérieur de la macro telle que `caller()`.
 
-```jinja
+```nunjucks
 {% macro add(x, y) %}
 {{ caller() }} : {{ x + y }}
 {% endmacro%}
@@ -597,7 +597,7 @@ introduisant une nouvelle convention d'appel.
 
 Les arguments avec mots clefs ressemblent à ceci :
 
-```jinja
+```nunjucks
 {{ foo(1, 2, bar=3, baz=4) }}
 ```
 
@@ -628,19 +628,19 @@ arguments avec mots clefs à ceux définis dans la macro.
 Vous pouvez mélanger des arguments de position et des arguments avec mots clefs dans des macros. Par exemple, vous pouvez
 spécifier un argument de position comme un argument mot clef :
 
-```jinja
+```nunjucks
 {{ foo(20, y=21) }}     -> 20, 21, 5, 6
 ```
 
 Vous pouvez donc simplement passer un argument de position à la place d'un argument mot clef :
 
-```jinja
+```nunjucks
 {{ foo(5, 6, 7, 8) }}   -> 5, 6, 7, 8
 ```
 
 De cette façon, vous pouvez «sauter» les arguments de position :
 
-```jinja
+```nunjucks
 {{ foo(8, z=7) }}      -> 8, , 7, 6
 ```
 
@@ -649,7 +649,7 @@ De cette façon, vous pouvez «sauter» les arguments de position :
 Vous pouvez écrire des commentaires en utilisant `{#` et `#}`. Les commentaires sont complètement retirés
 lors du rendu.
 
-```jinja
+```nunjucks
 {# Boucle pour tous les users #}
 {% for user in users %}...{% endfor %}
 ```
@@ -664,7 +664,7 @@ proprement, ce qui nécessite des espaces.
 Vous pouvez dire au moteur d'enlever les espaces de début et de fin en ajoutant le signe
 moins (`-`) sur le tag de début ou de fin..
 
-```jinja
+```nunjucks
 {% for i in [1,2,3,4,5] -%}
   {{ i }}
 {%- endfor %}
@@ -699,7 +699,7 @@ disponibles :
 
 Vous pouvez les utiliser ainsi :
 
-```jinja
+```nunjucks
 {{ 2 + 3 }}       (affichage 5)
 {{ 10/5 }}        (affichage 2)
 {{ numItems*2 }}
@@ -718,7 +718,7 @@ Vous pouvez les utiliser ainsi :
 
 Exemples :
 
-```jinja
+```nunjucks
 {% if numUsers < 5 %}...{% endif %}
 {% if i == 0 %}...{% endif %}
 ```
@@ -732,7 +732,7 @@ Exemples :
 
 Exemples :
 
-```jinja
+```nunjucks
 {% if users and showUsers %}...{% endif %}
 {% if i == 0 and not hideFirst %}...{% endif %}
 {% if (x < 5 or y < 5) and foo %}...{% endif %}
@@ -743,14 +743,14 @@ Exemples :
 Similaire aux opérateurs ternaires de javascript, vous pouvez utiliser `if` comme si c'était une
 expression en ligne :
 
-```jinja
+```nunjucks
 {{ "true" if foo else "false" }}
 ```
 
 L'affichage du dessus sera "true" si foo est vrai sinon "false". Ceci
 est particulièrement utile pour les valeurs par défaut comme celle-ci :
 
-```jinja
+```nunjucks
 {{ baz(foo if foo else "default") }}
 ```
 
@@ -759,7 +759,7 @@ est particulièrement utile pour les valeurs par défaut comme celle-ci :
 Si vous avez passé une méthode javascript à votre template, vous pouvez l'appeler
 normalement.
 
-```jinja
+```nunjucks
 {{ foo(1, 2, 3) }}
 ```
 
@@ -767,7 +767,7 @@ normalement.
 
 Une expression régulière peut être créée comme en JavaScript :
 
-```jinja
+```nunjucks
 {{ /^foo.*/ }}
 {{ /bar$/g }}
 ```
@@ -787,7 +787,7 @@ Si autoescaping est activé dans l'environnement, tout l'affichage sera automati
 échappé pour un affichage safe. Pour marquer manuellement un affichage à safe, utilisez le
 filtre `safe`. Nunjucks n'échappera pas cet affichage.
 
-```jinja
+```nunjucks
 {{ foo }}           // &lt;span%gt;
 {{ foo | safe }}    // <span>
 ```
@@ -795,7 +795,7 @@ filtre `safe`. Nunjucks n'échappera pas cet affichage.
 Si autoescaping n'est pas activé, tout l'affichage sera rendu tel quel. Vous pouvez
 manuellement échapper les variables avec le filtre `escape`.
 
-```jinja
+```nunjucks
 {{ foo }}           // <span>
 {{ foo | escape }}  // &lt;span&gt;
 ```
@@ -810,7 +810,7 @@ Si vous avez besoin d'itérer sur un ensemble de numéros fixes, `range` génèr
 pour vous. Les numéros commencent à `start` (0 par défaut) et s'incrémente de `step` (par défaut 1)
 jusqu'à ce qu'il atteigne `stop`, qui n'est pas inclus.
 
-```jinja
+```nunjucks
 {% for i in range(0, 5) -%}
   {{ i }},
 {%- endfor %}
@@ -823,7 +823,7 @@ L'affichage ci-dessus est `0,1,2,3,4`.
 Une façon simple de faire un cycle avec plusieurs valeurs est d'utiliser `cycler`, qui prend
 un certain nombre d'arguments et fait des cycles à travers eux.
 
-```jinja
+```nunjucks
 {% set cls = cycler("odd", "even") %}
 {% for row in rows %}
   <div class="{{ cls.next() }}">{{ row.name }}</div>
@@ -841,7 +841,7 @@ quelque chose comme une virgule, mais vous ne voulez pas afficher le séparateur
 premier élément. La classe `joiner` affichera le `separator` (par défaut ",") chaque fois qu'elle
 sera appelée sauf pour la première fois.
 
-```jinja
+```nunjucks
 {% set comma = joiner() %}
 {% for tag in tags -%}
   {{ comma() }} {{ tag }}
@@ -862,13 +862,13 @@ Retourne la valeur absolue de l'argument :
 
 **Entrée**
 
-```jinja
+```nunjucks
 {{ -3|abs }}
 ```
 
 **Sortie**
 
-```jinja
+```nunjucks
 3
 ```
 
@@ -878,7 +878,7 @@ Retourne une liste de listes avec le numéro des éléments :
 
 **Entrée**
 
-```jinja
+```nunjucks
 {% set items = [1,2,3,4,5,6] %}
 {% for item in items | batch(2) %}
     -{% for items in item %}
@@ -889,7 +889,7 @@ Retourne une liste de listes avec le numéro des éléments :
 
 **Sortie**
 
-```jinja
+```nunjucks
 12-34-56
 ```
 
@@ -899,13 +899,13 @@ Met la première lettre en majuscule et le reste en minuscule :
 
 **Entrée**
 
-```jinja
+```nunjucks
 {{ "Ceci Est Un Test" | capitalize }}
 ```
 
 **Sortie**
 
-```jinja
+```nunjucks
 Ceci est un test
 ```
 
@@ -916,13 +916,13 @@ Centre la valeur dans un champ d'une largeur donnée :
 
 **Entrée**
 
-```jinja
+```nunjucks
 {{ "fooo" | center }}
 ```
 
 **Sortie**
 
-```jinja
+```nunjucks
 fooo
 ```
 
@@ -944,7 +944,7 @@ etc)
 
 Tri un dictionnaire et rend des paires (clé, valeur) :
 
-```jinja
+```nunjucks
 {% set items = {
     'e': 1,
     'd': 2,
@@ -960,7 +960,7 @@ Tri un dictionnaire et rend des paires (clé, valeur) :
 
 **Sortie**
 
-```jinja
+```nunjucks
 a b c d e f
 ```
 
@@ -977,13 +977,13 @@ Les résultats rendent la valeur comme une chaîne de balisage.
 
 **Entrée**
 
-```jinja
+```nunjucks
 {{ "<html>" | escape }}
 ```
 
 **Sortie**
 
-```jinja
+```nunjucks
 &lt;html&gt;
 ```
 
@@ -994,14 +994,14 @@ Donne le premier élément dans un tableau :
 
 **Entrée**
 
-```jinja
+```nunjucks
 {% set items = [1,2,3] %}
 {{ items | first }}
 ```
 
 **Sortie**
 
-```jinja
+```nunjucks
 1
 ```
 
@@ -1012,13 +1012,13 @@ Cette valeur par défaut peut être modifiée en utilisant le premier paramètre
 
 **Entrée**
 
-```jinja
+```nunjucks
 {{ "3.5" | float }}
 ```
 
 **Sortie**
 
-```jinja
+```nunjucks
 3.5
 ```
 
@@ -1028,7 +1028,7 @@ Groupe une séquence d'objets par un attribut commun :
 
 **Entrée**
 
-```jinja
+```nunjucks
 {% set items = [
         { name: 'james', type: 'green' },
         { name: 'john', type: 'blue' },
@@ -1047,7 +1047,7 @@ Groupe une séquence d'objets par un attribut commun :
 
 **Sortie**
 
-```jinja
+```nunjucks
 green : james jessie
 blue : john jim
 ```
@@ -1060,13 +1060,13 @@ Par défaut l'indentation est de 4 espaces.
 
 **Entrée**
 
-```jinja
+```nunjucks
 {{ "one\ntwo\nthree" | indent }}
 ```
 
 **Sortie**
 
-```jinja
+```nunjucks
 one
     two
     three
@@ -1076,13 +1076,13 @@ Change l'indentation par défaut à 6 espaces :
 
 **Entrée**
 
-```jinja
+```nunjucks
 {{ "one\ntwo\nthree" | indent(6) }}
 ```
 
 **Sortie**
 
-```jinja
+```nunjucks
 one
       two
       three
@@ -1092,13 +1092,13 @@ Change l'indentation par défaut à 6 espaces et indente la première ligne :
 
 **Entrée**
 
-```jinja
+```nunjucks
 {{ "one\ntwo\nthree" | indent(6, true) }}
 ```
 
 **Sortie**
 
-```jinja
+```nunjucks
       one
       two
       three
@@ -1111,13 +1111,13 @@ Si la conversion échoue, cela retourne 0.
 
 **Entrée**
 
-```jinja
+```nunjucks
 {{ "3.5" | int }}
 ```
 
 **Sortie**
 
-```jinja
+```nunjucks
 3
 ```
 
@@ -1127,14 +1127,14 @@ Retourne une chaine qui est la concaténation des chaines dans la séquence :
 
 **Entrée**
 
-```jinja
+```nunjucks
 {% set items =  [1, 2, 3] %}
 {{ items | join }}
 ```
 
 **Sortie**
 
-```jinja
+```nunjucks
 123
 ```
 
@@ -1143,14 +1143,14 @@ Le séparateur entre les éléments est par défaut une chaine vide qui peut
 
 **Entrée**
 
-```jinja
+```nunjucks
 {% set items = ['foo', 'bar', 'bear'] %}
 {{ items | join(",") }}
 ```
 
 **Sortie**
 
-```jinja
+```nunjucks
 foo,bar,bear
 ```
 
@@ -1158,7 +1158,7 @@ Ce comportement est applicable aux tableaux :
 
 **Entrée**
 
-```jinja
+```nunjucks
 {% set items = [
     { name: 'foo' },
     { name: 'bar' },
@@ -1170,7 +1170,7 @@ Ce comportement est applicable aux tableaux :
 
 **Sortie**
 
-```jinja
+```nunjucks
 foo,bar,bear
 ```
 
@@ -1180,14 +1180,14 @@ Donne le dernier élément dans un tableau :
 
 **Entrée**
 
-```jinja
+```nunjucks
 {% set items = [1,2,3] %}
 {{ items | last }}
 ```
 
 **Sortie**
 
-```jinja
+```nunjucks
 3
 ```
 
@@ -1197,7 +1197,7 @@ Retourne la longueur d'un tableau, d'une chaine ou le nombre de clés dans un ob
 
 **Entrée**
 
-```jinja
+```nunjucks
 {{ [1,2,3] | length }}
 {{ "test" | length }}
 {{ {key: value} | length }}
@@ -1205,7 +1205,7 @@ Retourne la longueur d'un tableau, d'une chaine ou le nombre de clés dans un ob
 
 **Sortie**
 
-```jinja
+```nunjucks
 3
 4
 1
@@ -1219,13 +1219,13 @@ Si c'est une chaine, la liste retournée sera une liste de caractères.
 
 **Entrée**
 
-```jinja
+```nunjucks
 {% for i in "foobar" | list %}{{ i }},{% endfor %}
 ```
 
 **Sortie**
 
-```jinja
+```nunjucks
 f,o,o,b,a,r,
 ```
 
@@ -1235,13 +1235,13 @@ Convertit une chaine en minuscule :
 
 **Entrée**
 
-```jinja
+```nunjucks
 {{ "fOObAr" | lower }}
 ```
 
 **Sortie**
 
-```jinja
+```nunjucks
 foobar
 ```
 
@@ -1252,7 +1252,7 @@ Selectionne une valeur aléatoire depuis un tableau.
 
 **Entrée**
 
-```jinja
+```nunjucks
 {{ [1,2,3,4,5,6,7,8,9] | random }}
 ```
 
@@ -1272,14 +1272,14 @@ Si aucun test n'est spécifié, la valeur de l'attribut sera évaluée comme une
 
 **Entrée**
 
-```jinja
+```nunjucks
 {% set foods = [{tasty: true}, {tasty: false}, {tasty: true}]%}
 {{ foods | rejectattr("tasty") | length }}
 ```
 
 **Sortie**
 
-```jinja
+```nunjucks
 1
 ```
 
@@ -1290,14 +1290,14 @@ remplacer, le deuxième est la valeur de remplacement.
 
 **Entrée**
 
-```jinja
+```nunjucks
 {% set numbers = 123456 %}
 {{ numbers | replace("4", ".") }}
 ```
 
 **Sortie**
 
-```jinja
+```nunjucks
 123.56
 ```
 
@@ -1306,14 +1306,14 @@ cela mettra l'élément autour de la valeur :
 
 **Entrée**
 
-```jinja
+```nunjucks
 {% set lettres = aaabbbccc%}
 {{ "lettres" | replace("", ".") }}
 ```
 
 **Sortie**
 
-```jinja
+```nunjucks
 .l.e.t.t.r.e.s.
 
 ```
@@ -1323,7 +1323,7 @@ Il possible de préciser le nombre de remplacement à effectuer (élément à re
 
 **Entrée**
 
-```jinja
+```nunjucks
 {% set letters = "aaabbbccc" %}
 {{ letters | replace("a", "x", 2) }}
 ```
@@ -1331,7 +1331,7 @@ Remarquez que dans ce cas, les guillemets sont nécessaires pour la liste.
 
 **Sortie**
 
-```jinja
+```nunjucks
 xxabbbccc
 ```
 
@@ -1339,14 +1339,14 @@ Il est possible de rechercher des modèles dans une liste pour les remplacer :
 
 **Entrée**
 
-```jinja
+```nunjucks
 {% set letters = "aaabbbccc" %}
 {{ letters | replace("ab", "x", 2) }}
 ```
 
 **Sortie**
 
-```jinja
+```nunjucks
 aaxbbccc
 ```
 
@@ -1356,13 +1356,13 @@ Inverse une chaine :
 
 **Entrée**
 
-```jinja
+```nunjucks
 {{ "abcdef" | reverse }}
 ```
 
 **Sortie**
 
-```jinja
+```nunjucks
 fedcba
 ```
 
@@ -1370,7 +1370,7 @@ Inverse un tableau :
 
 **Entrée**
 
-```jinja
+```nunjucks
 {% for i in [1, 2, 3, 4] | reverse %}
     {{ i }}
 {% endfor %}
@@ -1378,7 +1378,7 @@ Inverse un tableau :
 
 **Sortie**
 
-```jinja
+```nunjucks
 4 3 2 1
 ```
 
@@ -1388,13 +1388,13 @@ Arrondit un nombre :
 
 **Entrée**
 
-```jinja
+```nunjucks
 {{ 4.5 | round }}
 ```
 
 **Sortie**
 
-```jinja
+```nunjucks
 5
 ```
 
@@ -1402,13 +1402,13 @@ Arrondit au nombre entier le plus proche (qui arrondit vers le bas) :
 
 **Entrée**
 
-```jinja
+```nunjucks
 {{ 4 | round(0, "floor")
 ```
 
 **Sortie**
 
-```jinja
+```nunjucks
 4
 ```
 
@@ -1416,13 +1416,13 @@ Specifiez le nombre de décimales pour arrondir :
 
 **Entrée**
 
-```jinja
+```nunjucks
 {{ 4.12346 | round(4) }}
 ```
 
 **Sortie**
 
-```jinja
+```nunjucks
 4.1235
 ```
 
@@ -1433,13 +1433,13 @@ cela permet à cette variable de ne pas être échappée.
 
 **Entrée**
 
-```jinja
+```nunjucks
 {{ "foo http://www.example.com/ bar" | urlize | safe }}
 ```
 
 **Sortie**
 
-```jinja
+```nunjucks
 foo <a href="http://www.example.com/">http://www.example.com/</a> bar
 ```
 
@@ -1454,14 +1454,14 @@ Si aucun test n'est spécifié, la valeur de l'attribut sera évaluée comme une
 
 **Entrée**
 
-```jinja
+```nunjucks
 {% set foods = [{tasty: true}, {tasty: false}, {tasty: true}]%}
 {{ foods | selectattr("tasty") | length }}
 ```
 
 **Sortie**
 
-```jinja
+```nunjucks
 2
 ```
 
@@ -1471,7 +1471,7 @@ Découpe un itérateur et retourne une liste de listes contenant ces éléments 
 
 **Entrée**
 
-```jinja
+```nunjucks
 {% set arr = [1,2,3,4,5,6,7,8,9] %}
 
 <div class="columwrapper">
@@ -1487,7 +1487,7 @@ Découpe un itérateur et retourne une liste de listes contenant ces éléments 
 
 **Sortie**
 
-```jinja
+```nunjucks
 <div class="columwrapper">
     <ul class="column-1">
       <li>1</li>
@@ -1520,7 +1520,7 @@ Convertit un objet en une chaine :
 
 **Entrée**
 
-```jinja
+```nunjucks
 {% set item = 1234 %}
 {% for i in item | string | list %}
     {{ i }},
@@ -1529,7 +1529,7 @@ Convertit un objet en une chaine :
 
 **Sortie**
 
-```jinja
+```nunjucks
 1,2,3,4,```
 
 
@@ -1539,14 +1539,14 @@ Rend la somme des éléments dans le tableau :
 
 **Entrée**
 
-```jinja
+```nunjucks
 {% set items = [1,2,3] %}
 {{ items | sum }}
 ```
 
 **Sortie**
 
-```jinja
+```nunjucks
 6
 ```
 
@@ -1566,13 +1566,13 @@ Met la première lettre de chaque mot en majuscule :
 
 **Entrée**
 
-```jinja
+```nunjucks
 {{ "foo bar baz" | title }}
 ```
 
 **Sortie**
 
-```jinja
+```nunjucks
 Foo Bar Baz
 ```
 
@@ -1582,13 +1582,13 @@ Enlève les espaces avant et après :
 
 **Entrée**
 
-```jinja
+```nunjucks
 {{ "  foo " | trim }}
 ```
 
 **Sortie**
 
-```jinja
+```nunjucks
 foo
 ```
 
@@ -1604,13 +1604,13 @@ Tronque 3 caractères :
 
 **Entrée**
 
-```jinja
+```nunjucks
 {{ "foo bar" | truncate(3) }}
 ```
 
 **Sortie**
 
-```jinja
+```nunjucks
 foo(...)
 ```
 
@@ -1618,13 +1618,13 @@ Tronque 6 caractères et remplace "..." avec  "?" :
 
 **Entrée**
 
-```jinja
+```nunjucks
 {{ "foo bar baz" | truncate(6, true, "?") }}
 ```
 
 **Sortie**
 
-```jinja
+```nunjucks
 foo ba ?
 ```
 
@@ -1634,13 +1634,13 @@ Convertit la chaine en majuscules :
 
 **Entrée**
 
-```jinja
+```nunjucks
 {{ "foo" | upper }}
 ```
 
 **Sortie**
 
-```jinja
+```nunjucks
 FOO
 ```
 
@@ -1651,13 +1651,13 @@ Il accepte à la fois les dictionnaires et les chaînes régulières ainsi que l
 
 **Entrée**
 
-```jinja
+```nunjucks
 {{ "&" | urlencode }}
 ```
 
 **Sortie**
 
-```jinja
+```nunjucks
 %26
 ```
 
@@ -1667,13 +1667,13 @@ Convertit les URL en texte brut dans des liens cliquables :
 
 **Entrée**
 
-```jinja
+```nunjucks
 {{ "foo http://www.example.com/ bar" | urlize | safe }}
 ```
 
 **Sortie**
 
-```jinja
+```nunjucks
 foo <a href="http://www.example.com/">http://www.example.com/</a> bar
 ```
 
@@ -1681,13 +1681,13 @@ Tronque le texte de l'URL selon le nombre donné :
 
 **Entrée**
 
-```jinja
+```nunjucks
 {{ "http://mozilla.github.io/" | urlize(10, true) | safe }}
 ```
 
 **Sortie**
 
-```jinja
+```nunjucks
 <a href="http://mozilla.github.io/">http://moz</a>
 ```
 
