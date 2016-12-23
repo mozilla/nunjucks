@@ -2,7 +2,6 @@
 layout: subpage
 title: Templates
 ---
-{% raw %}
 
 # Templating
 

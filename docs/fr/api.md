@@ -2,7 +2,6 @@
 layout: subpage
 title: API
 ---
-{% raw %}
 
 # API
 
@@ -22,10 +21,10 @@ des extensions, la personnalisation du chargement des templates et plus encore.
   Si vous n'avez pas besoin d'une personnalisation en profondeur du système, vous pouvez utiliser
   l'API simplifiée de haut niveau pour le chargement et le rendu des templates.
 
-{% endraw %}
-{% api %}
-render
+### render
+```js
 nunjucks.render(name, [context], [callback])
+```
 
 Rend le template nommé **name** avec le hash du **context**. Si
 **callback** est fourni, il sera appelé quand cela sera terminé avec une
@@ -41,39 +40,33 @@ var res = nunjucks.render('foo.html', { username: 'James' });
 nunjucks.render('async.html', function(err, res) {
 });
 ```
-{% endapi %}
-
-{% api %}
-renderString
+### renderString
+```js
 nunjucks.renderString(str, context, [callback])
+```
 
 Identique à [`render`](#render), mais rend une chaîne de caractère brute au lieu
 de charger un template.
 
-{% raw %}
 ```js
 var res = nunjucks.renderString('Hello {{ username }}', { username: 'James' });
 ```
-{% endraw %}
-{% endapi %}
 
-{% api %}
-compile
+### compile
+```js
 nunjucks.compile(str, [env], [path])
-
+```
 Compile la chaîne donnée dans un objet Template de nunjucks qui est réutilisable.
 
-{% raw %}
 ```js
 var template = nunjucks.compile('Hello {{ username }}');
 template.render({ username: 'James' });
 ```
-{% endraw %}
-{% endapi %}
 
-{% api %}
-configure
+### configure
+```js
 nunjucks.configure([path], [opts]);
+```
 
 Dites à nunjucks que vos templates sont dans le **path** (chemin) et activez ou désactivez une
 fonctionnalité avec le hash **opts**. Vous pouvez fournir les deux arguments ou l'un
@@ -123,11 +116,10 @@ var env = nunjucks.configure('views');
 // faire quelque chose avec env
 ```
 
-{% endapi %}
-
-{% api %}
-installJinjaCompat
+### installJinjaCompat
+```js
 nunjucks.installJinjaCompat()
+```
 
 Cela installe un support expérimental pour une compatibilité plus cohérente avec
 Jinja en ajoutant les APIs Pythonic à l'environnement. Bien que nunjucks
@@ -138,8 +130,7 @@ Cela ajoute `True` et `False` qui correspond aux valeurs `true` et `false`
 de JS, ainsi cela se rapproche des tableaux et des objets pour les méthodes avec un style
 Python. [Vérifiez la source](https://github.com/mozilla/nunjucks/blob/master/src/jinja-compat.js)
 pour voir tout ce qu'il ajoute.
-{% endapi %}
-{% raw %}
+
 
 *Voilà pour l'API simplifiée ! Si vous voulez un contrôle total sur la façon dont
 les templates sont chargés, et plus de personnalisation, vous devez configurer manuellement
@@ -156,10 +147,10 @@ pour vous.
 Si vous voulez, vous pouvez le gérer manuellement, cela vous permet de spécifier
 des chargeurs de templates personnalisés.
 
-{% endraw %}
-{% api %}
-constructor
+### constructor
+```js
 new Environment([loaders], [opts])
+```
 
 Le constructeur prend une liste de **loaders** (chargeurs) et un hash de
 paramètres de configuration **opts**. Si **loaders** est null, sa valeur par
@@ -194,12 +185,11 @@ var env = new nunjucks.Environment([new nunjucks.FileSystemLoader('views'),
 // Le WebLoader est disponible si on est dans le navigateur
 var env = new nunjucks.Environment(new nunjucks.WebLoader('/views'));
 ```
-{% endapi %}
 
-{% api %}
-render
+### render
+```js
 env.render(name, [context], [callback])
-
+```
 Rend le template nommé **name** avec le hash facultatif **context**. Si
 **callback** est fourni, il est appelé lorsque c'est terminé avec toutes
 les erreurs et le résultat (voir le [support asynchrone](#support-asynchrone)),
@@ -214,85 +204,84 @@ nunjucks.render('async.html', function(err, res) {
 });
 ```
 
-{% endapi %}
-
-{% api %}
-renderString
+### renderString
+```js
 env.renderString(src, [context], [callback])
-
+```
 Identique à [`render`](#render1), mais rend une chaîne de caractère brute au lieu
 de charger un template.
 
-{% raw %}
 ```js
 var res = nunjucks.renderString('Hello {{ username }}', { username: 'James' });
 ```
-{% endraw %}
-{% endapi %}
 
-{% api %}
-addFilter
+### addFilter
+```js
 env.addFilter(name, func, [async])
+```
 
 Ajoute un filtre personnalisé nommé **name** qui appelle **func** à chaque fois
 qu'il est appelé. Si le filtre doit être asynchrone, **async** doit être à `true`
 (voir le [support asynchrone](#support-asynchrone)). Retourne `env` pour chaîner d'autres méthodes. Voir
 [Filtres personnalisés](#filtres-personnaliss).
 
-{% endapi %}
-
-{% api %}
-getFilter
+### getFilter
+```js
 env.getFilter(name)
-Récupère le filtre, qui est juste une fonction, nommé **name**.
-{% endapi %}
+```
 
-{% api %}
-addExtension
+Récupère le filtre, qui est juste une fonction, nommé **name**.
+
+### addExtension
+```js
 env.addExtension(name, ext)
+```
 
 Ajoute l'extension personnalisée **ext** nommée **name**. **ext** est un objet
 avec quelques méthodes spécifiques qui sont appelés par le système d'extension. Retourne `env` pour chaîner d'autres méthodes.
 Voir les [Tags personnalisés](#tags-personnaliss).
 
-{% endapi %}
 
-{% api %}
-removeExtension
+### removeExtension
+```js
 env.removeExtension(name)
+```
 
 Supprime une extension personnalisée nommée **name** ajoutée précédemment.
 
-{% endapi %}
 
-{% api %}
-getExtension
+### getExtension
+```js
 env.getExtension(name)
+```
+
 Récupère une extension nommée **name**.
-{% endapi %}
 
-{% api %}
-hasExtension
+### hasExtension
+```js
 env.hasExtension(name)
+```
+
 Retourne true si une extension personnalisée nommée **name** a été ajoutée.
-{% endapi %}
 
-{% api %}
-addGlobal
+### addGlobal
+```js
 env.addGlobal(name, value)
+```
 Ajoute une valeur globale qui sera disponible pour tous les templates. Remarque : ceci écrasera toute valeur globale nommée `name`.
+
 Retourne `env` pour chaîner d'autres méthodes.
-{% endapi %}
 
-{% api %}
-getGlobal
+### getGlobal
+```js
 env.getGlobal(name)
+```
 Retourne une valeur globale nommée **name**.
-{% endapi %}
 
-{% api %}
-getTemplate
+### getTemplate
+```js
 env.getTemplate(name, [eagerCompile], [callback])
+```
 
 Récupère le template nommé **name**. Si **eagerCompile** est à `true`,
 ça le compile maintenant au lieu de le rendre. Si **callback** est fourni, il
@@ -309,11 +298,11 @@ var tmpl = env.getTemplate('page.html', true);
 env.getTemplate('from-async-loader.html', function(err, tmpl) {
 });
 ```
-{% endapi %}
 
-{% api %}
-express
+### express
+```js
 env.express(app)
+```
 
 Installe nunjucks comme moteur de rendu pour l'**app** express. Après
 avoir fait cela, vous pouvez utiliser express normalement. Remarquez que vous pouvez le
@@ -328,11 +317,11 @@ app.get('/', function(req, res) {
     res.render('index.html');
 });
 ```
-{% endapi %}
 
-{% api %}
-opts.autoescape
+### opts.autoescape
+```js
 env.opts.autoescape
+```
 
 Vous pouvez utiliser cette propriété booléenne pour voir si autoescaping est activé
 ou non globalement. Cela peut être utile lors de la création de filtres avancés qui
@@ -340,8 +329,7 @@ manipule du HTML. Normalement, vous devriez tout simplement retournez une
 chaîne sécurisée (pour être documenté) si l'on passe dedans, afin que la sortie soit
 une  copie sécurisée de l'entrée, mais cette propriété est utile dans
 de rares circonstances.
-{% endapi %}
-{% raw %}
+
 
 ## Template
 
@@ -351,10 +339,11 @@ mais vous pouvez facilement l'utiliser vous-même. Si vous ne connectez pas un
 template avec un environnement, vous ne pouvez pas l'inclure ou l'hériter
 à d'autres templates.
 
-{% endraw %}
-{% api %}
-constructor
+
+### constructor
+```js
 new Template(src, [env], [path], [eagerCompile])
+```
 
 Le constructeur prend une chaîne de template **src**, une instance
 facultative `Environment` **env** à utiliser pour le chargement des autres templates, une
@@ -362,27 +351,22 @@ chaîne **path** décrivant l'emplacement/chemin afin de déboguer et
 un booléen **eagerCompile** qui, s'il est à `true`, débutera la compilation
 immédiatement au lieu d'attendre que le modèle soit rendu.
 
-{% raw %}
 ```js
 var tmpl = new nunjucks.Template('Hello {{ username }}');
 
 tmpl.render({ username: "James" }); // -> "Hello James"
 ```
-{% endraw %}
 
-{% endapi %}
-
-{% api %}
-render
+### render
+```js
 tmpl.render(context, [callback])
+```
 
 Rend le template avec le hash facultatif **context**. Si
 **callback** est fourni, il l'appelle quand cela sera terminé avec les erreurs et le
 résultat (Voir le [support asynchrone](#support-asynchrone)), sinon il
 retourne la chaîne rendu.
 
-{% endapi %}
-{% raw %}
 
 ## Chargeur
 
@@ -390,10 +374,10 @@ Un chargeur est un objet qui prend un nom de template et le charge à partir d'u
 source, comme le système de fichiers ou le réseau. Les deux chargeurs intégrés
 suivants existent, chacun pour des contextes différents.
 
-{% endraw %}
-{% api %}
-FileSystemLoader
+### FileSystemLoader
+```js
 new FileSystemLoader([searchPaths], [opts])
+```
 
 Ceci est uniquement disponible sur node. Il chargera les templates depuis
 le système de fichiers, en utilisant le tableau **searchPaths** comme chemins
@@ -412,11 +396,10 @@ tous les templates et il est par défaut dans le répertoire de travail courant.
 var env = new nunjucks.Environment(new nunjucks.FileSystemLoader('views'));
 ```
 
-{% endapi %}
-
-{% api %}
-WebLoader
+### WebLoader
+```js
 new WebLoader([baseURL], [opts])
+```
 
 Ceci est uniquement disponible dans le navigateur. **baseURL** est l'URL pour charger
 les templates (cela doit être sur le même domaine) et il est par défaut le
@@ -441,8 +424,6 @@ production, cela devrait toujours être le cas. Voir
 // Charge les templates depuis /views
 var env = new nunjucks.Environment(new nunjucks.WebLoader('/views'))
 ```
-{% endapi %}
-{% raw %}
 
 ### Écriture d'un chargeur
 
@@ -624,10 +605,10 @@ dans le précompilateur et cela récupérera les extensions et les filtres. Vous
 partager le même objet `Environment` entre le client et le serveur pour
 que tout reste synchronisé.
 
-{% endraw %}
-{% api %}
-precompile
+#### precompile
+```js
 nunjucks.precompile(path, [opts])
+```
 
 Précompile un fichier ou un répertoire depuis **path**. **opts** est un hash avec les options suivantes :
 
@@ -658,17 +639,16 @@ env.addFilter('asyncFilter', function(val, cb) {
 
 nunjucks.precompile('/dir/to/views', { env: env });
 ```
-{% endapi %}
 
-{% api %}
-precompileString
+
+#### precompileString
+
+```js
 nunjucks.precompileString(str, [opts])
-
+```
 
 Exactement le même que [`precompile`](#precompile), mais il compile une chaîne brute.
 
-{% endapi %}
-{% raw %}
 
 ## Support Asynchrone
 
@@ -977,5 +957,3 @@ this.run = function(context, url, body, errorBody, callback) {
 
 Si vous créez quelque chose d'intéressant, veuillez l'
 [ajouter au wiki !](https://github.com/mozilla/nunjucks/wiki/Custom-Tags)
-
-{% endraw %}

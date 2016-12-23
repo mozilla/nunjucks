@@ -21,8 +21,10 @@ extensions, customizing template loading, and more.
 If you don't need deep customization of the system, you can use this simple
 higher-level API for loading and rendering templates.
 
-render
+### render
+```js
 nunjucks.render(name, [context], [callback])
+```
 
 Renders the template named **name** with the **context** hash. If
 **callback** is provided, it will be called when done with any
@@ -39,8 +41,10 @@ nunjucks.render('async.html', function(err, res) {
 });
 ```
 
-renderString
+### renderString
+```js
 nunjucks.renderString(str, context, [callback])
+```
 
 Same as [`render`](#render), but renders a raw string instead of
 loading a template.
@@ -49,8 +53,10 @@ loading a template.
 var res = nunjucks.renderString('Hello {{ username }}', { username: 'James' });
 ```
 
-compile
+### compile
+```js
 nunjucks.compile(str, [env], [path])
+```
 
 Compile the given string into a reusable nunjucks Template object.
 
@@ -59,8 +65,10 @@ var template = nunjucks.compile('Hello {{ username }}');
 template.render({ username: 'James' });
 ```
 
-configure
+### configure
+```js
 nunjucks.configure([path], [opts]);
+```
 
 Tell nunjucks that your templates live at **path** and flip any
 feature on or off with the **opts** hash. You can provide both
@@ -110,8 +118,10 @@ var env = nunjucks.configure('views');
 // do stuff with env
 ```
 
-installJinjaCompat
+### installJinjaCompat
+```js
 nunjucks.installJinjaCompat()
+```
 
 This installs experimental support for more consistent Jinja
 compatibility by adding Pythonic APIs to the environment. While
@@ -138,9 +148,10 @@ you.
 You can manually handle it if you want, which allows you to specify
 custom template loaders.
 
-constructor
+### constructor
+```js
 new Environment([loaders], [opts])
-
+```
 The constructor takes a list of **loaders** and a hash of
 configuration parameters as **opts**. If **loaders** is null, it
 defaults to loading from the current directory or URL. You can pass a
@@ -175,9 +186,10 @@ var env = new nunjucks.Environment([new nunjucks.FileSystemLoader('views'),
 var env = new nunjucks.Environment(new nunjucks.WebLoader('/views'));
 ```
 
-render
+### render
+```js
 env.render(name, [context], [callback])
-
+```
 Render the template named **name** with the optional **context** hash.
 If **callback** is supplied, call it when done with any errors and the
 result (see [asynchronous support](#asynchronous-support)), otherwise
@@ -192,8 +204,10 @@ nunjucks.render('async.html', function(err, res) {
 });
 ```
 
-renderString
+### renderString
+```js
 env.renderString(src, [context], [callback])
+```
 
 Same as [`render`](#render1), but renders a raw string instead of
 loading a template.
@@ -202,49 +216,69 @@ loading a template.
 var res = nunjucks.renderString('Hello {{ username }}', { username: 'James' });
 ```
 
-addFilter
+### addFilter
+```js
 env.addFilter(name, func, [async])
-
+```
 Add a custom filter named **name** which calls **func** whenever
 invoked. If the filter needs to be async, **async** must be `true`
 (see [asynchronous support](#asynchronous-support)). Returns `env` for further method chaining. See
 [Custom Filters](#custom-filters).
 
-getFilter
+### getFilter
+```js
 env.getFilter(name)
+```
 Get the filter, which is just a function, named **name**.
 
-addExtension
+### addExtension
+```js
 env.addExtension(name, ext)
+```
 
 Add the custom extension **ext** named **name**. **ext** is an object
 with a few specific methods that are called by the extension system. Returns `env` for further method chaining.
 See [Custom Tags](#custom-tags).
 
-removeExtension
+### removeExtension
+```js
 env.removeExtension(name)
+```
 
 Remove a previously added custom extension named **name**.
 
-getExtension
+### getExtension
+```js
 env.getExtension(name)
+```
 Get an extension named **name**.
 
-hasExtension
+### hasExtension
+```js
 env.hasExtension(name)
+```
+
 Return true if a custom extension named **name** has been added.
 
-addGlobal
+### addGlobal
+
+```js
 env.addGlobal(name, value)
+```
+
 Add a global value that will be available to all templates. Note: this will overwrite any existing global called `name`.
 Returns `env` for further method chaining.
 
-getGlobal
+### getGlobal
+```js
 env.getGlobal(name)
+```
 Get a global named **name**.
 
-getTemplate
+### getTemplate
+```js
 env.getTemplate(name, [eagerCompile], [callback])
+```
 
 Retrieve the template named **name**. If **eagerCompile** is `true`,
 compile it now instead of on render. If **callback** is supplied, call
@@ -262,8 +296,11 @@ env.getTemplate('from-async-loader.html', function(err, tmpl) {
 });
 ```
 
-express
+### express
+
+```js
 env.express(app)
+```
 
 Install nunjucks as the rendering engine for the express **app**.
 After doing this, you can use express normally. Note that you can do
@@ -279,8 +316,10 @@ app.get('/', function(req, res) {
 });
 ```
 
-opts.autoescape
+### opts.autoescape
+```js
 env.opts.autoescape
+```
 
 You can use this boolean property to see if autoescaping is turned on
 globally or not. This may be helpful in creating advanced filtering
@@ -297,8 +336,10 @@ you, but you can easily use it yourself. If you don't connect a
 template with an environment, you can't include or inherit any other
 templates.
 
-constructor
+### constructor
+```js
 new Template(src, [env], [path], [eagerCompile])
+```
 
 The constructor takes a template string **src**, an optional
 `Environment` instance **env** to use for loading other templates, a
@@ -312,9 +353,10 @@ var tmpl = new nunjucks.Template('Hello {{ username }}');
 tmpl.render({ username: "James" }); // -> "Hello James"
 ```
 
-render
+### render
+```js
 tmpl.render(context, [callback])
-
+```
 Renders the template with the optional **context** hash. If
 **callback** is supplied, call it when done with any errors and the
 result (see [asynchronous support](#asynchronous-support)), otherwise
@@ -327,8 +369,10 @@ A loader is an object that takes a template name and loads it from a
 source, such as the filesystem or network. The following two builtin
 loaders exist, each for different contexts.
 
-FileSystemLoader
+### FileSystemLoader
+```js
 new FileSystemLoader([searchPaths], [opts])
+```
 
 This is only available to node. It will load templates from the
 filesystem, using the **searchPaths** array as paths to look for
@@ -347,8 +391,10 @@ templates live, and it defaults to the current working directory.
 var env = new nunjucks.Environment(new nunjucks.FileSystemLoader('views'));
 ```
 
-WebLoader
+### WebLoader
+```js
 new WebLoader([baseURL], [opts])
+```
 
 This is only available in the browser. **baseURL** is the URL to load
 templates from (must be the same domain), and it defaults to the

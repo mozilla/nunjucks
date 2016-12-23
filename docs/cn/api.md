@@ -2,8 +2,6 @@
 layout: subpage
 title: API
 ---
-{% raw %}
-
 # API
 
 Nunjucks 的 API 包括渲染模板，添加过滤器和扩展，自定义模板加载器等等。
@@ -14,8 +12,6 @@ Nunjucks 的 API 包括渲染模板，添加过滤器和扩展，自定义模板
 
 如果你不需要深度定制，可以直接使用初级(higher-level) api 来加载和渲染模板。
 
-{% endraw %}
-{% api %}
 render
 nunjucks.render(name, [context], [callback])
 
@@ -29,38 +25,36 @@ var res = nunjucks.render('foo.html', { username: 'James' });
 nunjucks.render('async.html', function(err, res) {
 });
 ```
-{% endapi %}
 
-{% api %}
-renderString
+### renderString
+```js
 nunjucks.renderString(str, context, [callback])
+```
 
 与 [`render`](#render) 类似，只是渲染一个字符串而不是渲染加载的模板。
 
-{% raw %}
+
 ```js
 var res = nunjucks.renderString('Hello {{ username }}', { username: 'James' });
 ```
-{% endraw %}
-{% endapi %}
 
-{% api %}
-configure
+### configure
+
+```js
 nunjucks.configure([path], [opts]);
+```
 
 将给定的字符串编译成可重复使用的nunjucks模板对象。
 
-{% raw %}
 ```js
 var template = nunjucks.compile('Hello {{ username }}');
 template.render({ username: 'James' });
 ```
-{% endraw %}
-{% endapi %}
 
-{% api %}
-configure
+### configure
+```js
 nunjucks.configure([path], [opts]);
+```
 
 传入 **path** 指定存放模板的目录，**opts** 可让某些功能开启或关闭，这两个变量都是可选的。**path** 的默认值为当前的工作目录，**opts** 提供以下功能：
 
@@ -98,17 +92,13 @@ var env = nunjucks.configure('views');
 // do stuff with env
 ```
 
-{% endapi %}
-
-{% api %}
-installJinjaCompat
+### installJinjaCompat
+```js
 nunjucks.installJinjaCompat()
-
+```
 这个方法为了与 Jinja 更好的兼容，增加了一些适配 Python 的 API。但是 nunjucks 不是为了完全兼容 Jinja/Pyhton，这只为了帮助使用者查看。
 
 增加了 `True` 和 `False`，与 js 的 `true` 和 `false` 相对应。并增加 Array 和 Object 使之适配 Python 风格的。[查看源码](https://github.com/mozilla/nunjucks/blob/master/src/jinja-compat.js)能看到所有功能。
-{% endapi %}
-{% raw %}
 
 就是这么简单，如果希望自己定义模板加载等更多的个性化设置，那么可以继续往下看。
 
@@ -118,8 +108,6 @@ nunjucks.installJinjaCompat()
 
 你可以根据需要来定制，比如定制模板加载。
 
-{% endraw %}
-{% api %}
 constructor
 new Environment([loaders], [opts])
 
@@ -142,9 +130,6 @@ var env = new nunjucks.Environment([new nunjucks.FileSystemLoader('views'),
 // the WebLoader is available if in the browser
 var env = new nunjucks.Environment(new nunjucks.WebLoader('/views'));
 ```
-{% endapi %}
-
-{% api %}
 render
 env.render(name, [context], [callback])
 
@@ -159,85 +144,70 @@ nunjucks.render('async.html', function(err, res) {
 });
 ```
 
-{% endapi %}
-
-{% api %}
-renderString
+### renderString
+```js
 env.renderString(src, [context], [callback])
-
+```
 和 [`render`](#render) 相同，只是渲染一个字符串而不是加载的模块。
 
-{% raw %}
 ```js
 var res = nunjucks.renderString('Hello {{ username }}', { username: 'James' });
 ```
-{% endraw %}
-{% endapi %}
-
-{% api %}
-addFilter
+### addFilter
+```js
 env.addFilter(name, func, [async])
-
+```
 添加名为 **name** 的自定义过滤器，**func** 为调用的函数，如果过滤器需要异步的，**async** 应该为 `true` （查看 [asynchronous support](#asynchronous-support))。查看 [Custom Filters](#custom-filters)。
 
-{% endapi %}
-
-{% api %}
-getFilter
+### getFilter
+```js
 env.getFilter(name)
+```
 
 获取过滤器，传入名字返回一个函数。
 
-{% endapi %}
-
-{% api %}
-addExtension
+### addExtension
+```js
 env.addExtension(name, ext)
-
+```
 添加一个名为 **name** 的扩展，**ext** 为一个对象，并存在几个指定的方法供系统调用，查看 [Custom Tags](#custom-tags)。
 
-{% endapi %}
-
-{% api %}
-removeExtension
+### removeExtension
+```js
 env.removeExtension(name)
-
+```
 删除之前添加的扩展 **name**。
 
-{% endapi %}
-
-{% api %}
-getExtension
+### getExtension
+```js
 env.getExtension(name)
+```
 
 获取扩展，传入名字返回一个函数。
 
-{% endapi %}
-
-{% api %}
-hasExtension
+### hasExtension
+```js
 env.hasExtension(name)
-
+```
 如果 **name** 扩展已经被添加，那返回 true。
-{% endapi %}
 
-{% api %}
-addGlobal
+### addGlobal
+```js
 env.addGlobal(name, value)
+```
 
 添加一个全局变量，可以在所有模板使用。注意：这个会覆盖已有的 `name` 变量。
-{% endapi %}
-
-{% api %}
-getGlobal
+### getGlobal
+```js
 env.getGlobal(name)
+```
 
 返回一个名为 **name** 的全局变量。
-{% endapi %}
 
-{% api %}
-getTemplate
+### getTemplate
+```js
 env.getTemplate(name, [eagerCompile], [callback])
+```
 
 获取一个名为 **name** 的模板。如果 **eagerCompile** 为 `true`，模板会立即编译而不是在渲染的时候再编译。如果 **callback** 存在会被调用，参数为错误和模板，否则会直接返回。如果使用异步加载器，则必须使用异步的 api，内置的加载器不需要。查看 [asynchronous support](#asynchronous-support) 和 [loaders](#loader)。
 
@@ -249,11 +219,11 @@ var tmpl = env.getTemplate('page.html', true);
 env.getTemplate('from-async-loader.html', function(err, tmpl) {
 });
 ```
-{% endapi %}
 
-{% api %}
-express
+### express
+```js
 env.express(app)
+```
 
 使用 nunjucks 作为 express 的模板引擎，调用后可正常使用 express。你也可以调用 [`configure`](#configure)，将 app 作为 express 参数传入。
 
@@ -265,47 +235,36 @@ app.get('/', function(req, res) {
     res.render('index.html');
 });
 ```
-{% endapi %}
 
-{% api %}
-opts.autoescape
+### opts.autoescape
+```js
 env.opts.autoescape
+```
 
 你可以通过这个配置控制是否全局开启模板转义，这对于创建高级过滤（如 html 操作）非常有用。
 正常情况你可以返回 SafeString，输出保持和输入一致不做任何处理，但这只在很少场景下有用。
-{% endapi %}
-{% raw %}
 
 ## Template
 
 `Template` 是一个模板编译后的对象，然后进行渲染。通常情况下，`Environment` 已经帮你处理了，但你也可以自己进行处理。
 如果使用 `Template` 渲染模板时未指定 `Environment`，那么这个模板不支持包含 (include) 和继承 (inherit) 其他模板。
 
-{% endraw %}
-{% api %}
 constructor
 new Template(src, [env], [path], [eagerCompile])
 
 实例化 `Template` 时需要四个参数，**src** 为模板的字符串，`Environment` 的实例 **env**（可选）用来加载其他模板，**path** 为一个路径，在调试中使用，如果 **eagerCompile** 为 `true`，模板会立即编译而不是在渲染的时候再编译。
 
-{% raw %}
 ```js
 var tmpl = new nunjucks.Template('Hello {{ username }}');
 
 tmpl.render({ username: "James" }); // -> "Hello James"
 ```
-{% endraw %}
 
-{% endapi %}
-
-{% api %}
-render
+### render
+```js
 tmpl.render(context, [callback])
-
+```
 渲染模板，**context** 为数据，如果 **callback** 存在会在渲染完成后调用，参数为错误和结果 (查看 [asynchronous support](#asynchronous-support))，否则直接返回。
-
-{% endapi %}
-{% raw %}
 
 ## Loader
 
@@ -314,10 +273,10 @@ A loader is an object that takes a template name and loads it from a
 source, such as the filesystem or network. The following two builtin
 loaders exist, each for different contexts.
 
-{% endraw %}
-{% api %}
-FileSystemLoader
+### FileSystemLoader
+```js
 new FileSystemLoader([searchPaths], [opt])
+```
 
 只在 node 端可用，他可从文件系统中加载模板，**searchPaths** 为查找模板的路径，可以是一个也可以是多个，默认为当前的工作目录。
 
@@ -331,12 +290,10 @@ new FileSystemLoader([searchPaths], [opt])
 var env = new nunjucks.Environment(new nunjucks.FileSystemLoader('views'));
 ```
 
-{% endapi %}
-
-{% api %}
-WebLoader
+### WebLoader
+```js
 new WebLoader([baseURL], [opts])
-
+```
 只在浏览器端可用，通过 **baseURL**（必须为同域）加载模板，默认为当前相对目录。
 
 **opt** 为一个对象，包含如下属性：
@@ -351,8 +308,6 @@ new WebLoader([baseURL], [opts])
 // Load templates from /views
 var env = new nunjucks.Environment(new nunjucks.WebLoader('/views'))
 ```
-{% endapi %}
-{% raw %}
 
 ### Writing a Loader
 
@@ -473,8 +428,6 @@ $ nunjucks-precompile views/about.html >> templates.js
 
 如果你希望通过代码来预编译模板，nunjucks 也提供了 api，特别是在使用扩展和异步过滤器的时候需要使用这些 api。可以将 `Environment` 的实例传给预编译器，其中将包括扩展和过滤器。你需要在客户端和服务器使用同一个 `Environment` 对象保证同步。
 
-{% endraw %}
-{% api %}
 precompile
 nunjucks.precompile(path, [opts])
 
@@ -505,16 +458,12 @@ env.addFilter('asyncFilter', function(val, cb) {
 
 nunjucks.precompile('/dir/to/views', { env: env });
 ```
-{% endapi %}
 
-{% api %}
 precompileString
 nunjucks.precompileString(str, [opts])
 
 和 [`precompile`](#precompile) 相同，只是编译字符串。
 
-{% endapi %}
-{% raw %}
 
 ## Asynchronous Support
 
@@ -748,4 +697,3 @@ this.run = function(context, url, body, errorBody, callback) {
 如果你做了些有趣的东西的话，请记得把他们
 [添加到wiki中!](https://github.com/mozilla/nunjucks/wiki/Custom-Tags)
 
-{% endraw %}

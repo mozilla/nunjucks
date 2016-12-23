@@ -3,7 +3,6 @@ layout: subpage
 title: FAQ
 pageid: faq
 ---
-{% raw %}
 
 # Questions posées fréquemment
 
@@ -38,5 +37,3 @@ En plus, il y a quelques fonctionnalités de jinja2 qui ne sont pas implémenté
 * Les commentaires de lignes : `# for item in seq`
 
 Enfin, tous les filtres et les extensions de Python personnalisés devront être écrits en JavaScript.
-
-{% endraw %}

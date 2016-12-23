@@ -1,9 +1,7 @@
 ---
 layout: subpage
 title: FAQ
-pageid: faq
 ---
-{% raw %}
 
 # 常见问题
 
@@ -31,5 +29,3 @@ Nunjucks 支持与 Jinja 兼容，查看 [installJinjaCompat](/api.html#installj
 * 行语句： `# for item in seq`
 
 最后，自定义的 python 过滤器和扩展需要用 Javascript 重写。
-
-{% endraw %}
