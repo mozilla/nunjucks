@@ -6,6 +6,7 @@ var requestAnimFrame = (window.requestAnimationFrame ||
                         });
 
 $(function() {
+    
     if($('body').attr('id') != 'home') {
         return;
     }

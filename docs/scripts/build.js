@@ -29,7 +29,7 @@ listMarkdownFiles()
 	.map(templateMeta => render(templateMeta))
 	.map(template => saveFile(`${template.path}`, template.content));
 
-saveFile(`${distDir}index.html`, renderer.render(`index.html`, config));
+saveFile(`${distDir}index.html`, renderer.render(`index.html`, Object.assign({}, { page: { pageid: 'home' } }, config) ));
 
 // copy remaining assets required for the docs
 copyAssets();
@@ -54,6 +54,7 @@ function renderTemplate(template) {
 			content: renderedMarkdown,
 			toc: renderTOC(renderedMarkdown),
 			page: {
+				pageid: template.attributes.pageid || 'home',
 				title: template.attributes.title
 			}
 		}, config);
