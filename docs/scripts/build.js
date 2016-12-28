@@ -18,18 +18,12 @@ const renderer = new nunjucks.Environment(
 	{autoescape: false}
 );
 
-const config = {
-	site: {
-		baseurl: ''
-	}
-};
-
 listMarkdownFiles()
 	.map(file => templateMeta(file))
 	.map(templateMeta => render(templateMeta))
 	.map(template => saveFile(`${template.path}`, template.content));
 
-saveFile(`${distDir}index.html`, renderer.render(`index.html`, Object.assign({}, { page: { pageid: 'home' } }, config) ));
+saveFile(`${distDir}index.html`, renderer.render(`index.html`, { page: { pageid: 'home' } } ));
 
 // copy remaining assets required for the docs
 copyAssets();
@@ -49,15 +43,15 @@ function render(template) {
 
 function renderTemplate(template) {
 	const renderedMarkdown = renderMarkdown(template.body);
-	const templateConfig = Object.assign({},
-		{
+	const templateConfig = {
 			content: renderedMarkdown,
 			toc: renderTOC(renderedMarkdown),
+			baseUrl: template.relativePath,
 			page: {
 				pageid: template.attributes.pageid || 'home',
 				title: template.attributes.title
 			}
-		}, config);
+		};
 	return renderer.render(`_layouts/_subpage.html`, templateConfig);
 }
 
