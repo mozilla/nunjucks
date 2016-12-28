@@ -1,5 +1,4 @@
 ---
-layout: subpage
 title: FAQ
 pageid: faq
 ---

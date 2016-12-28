@@ -1,6 +1,6 @@
 ---
-layout: subpage
 title: Templates
+pageid: templating
 ---
 
 # 模板

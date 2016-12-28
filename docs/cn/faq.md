@@ -1,6 +1,6 @@
 ---
-layout: subpage
 title: FAQ
+pageid: faq
 ---
 
 # 常见问题

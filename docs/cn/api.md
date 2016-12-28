@@ -1,6 +1,6 @@
 ---
-layout: subpage
 title: API
+pageid: api
 ---
 # API
 

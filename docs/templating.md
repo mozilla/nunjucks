@@ -1,6 +1,6 @@
 ---
 title: Templates
-pageid: templates
+pageid: templating
 ---
 
 # Templating
