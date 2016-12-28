@@ -1,6 +1,7 @@
 ---
 title: FAQ
 pageid: faq
+lang: fr
 ---
 
 # Questions posées fréquemment

@@ -1,6 +1,7 @@
 ---
 title: FAQ
 pageid: faq
+lang: cn
 ---
 
 # 常见问题

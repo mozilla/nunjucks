@@ -4,12 +4,12 @@
 		<li><a href="{{ baseUrl }}/#download" class="download">Download</a></li>
 		<li><a href="https://github.com/mozilla/nunjucks">Github</a></li>
 		<li class="dropdown">
-			<a href="{{ baseUrl }}/getting-started.html" data-toggle="dropdown">Docs</a>
+			<a href="{{ baseUrl }}{% if page.lang %}/{{ page.lang }}{% endif %}/getting-started.html" data-toggle="dropdown">Docs</a>
 			<ul class="dropdown-menu">
-				<li><a href="{{ baseUrl }}/getting-started.html">Getting Started</a></li>
-				<li><a href="{{ baseUrl }}/templating.html">Templating</a></li>
-				<li><a href="{{ baseUrl }}/api.html">API</a></li>
-				<li><a href="{{ baseUrl }}/faq.html">FAQ</a></li>
+				<li><a href="{{ baseUrl }}{% if page.lang %}/{{ page.lang }}{% endif %}/getting-started.html">Getting Started</a></li>
+				<li><a href="{{ baseUrl }}{% if page.lang %}/{{ page.lang }}{% endif %}/templating.html">Templating</a></li>
+				<li><a href="{{ baseUrl }}{% if page.lang %}/{{ page.lang }}{% endif %}/api.html">API</a></li>
+				<li><a href="{{ baseUrl }}{% if page.lang %}/{{ page.lang }}{% endif %}/faq.html">FAQ</a></li>
 			</ul>
 		</li>
 	</ul>

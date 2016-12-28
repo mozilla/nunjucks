@@ -1,6 +1,7 @@
 ---
 title: API
 pageid: api
+lang: fr
 ---
 
 # API

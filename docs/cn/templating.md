@@ -1,6 +1,7 @@
 ---
 title: Templates
 pageid: templating
+lang: cn
 ---
 
 # 模板

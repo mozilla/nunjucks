@@ -1,6 +1,7 @@
 ---
 title: Getting Started
 pageid: getting-started
+lang: fr
 ---
 
 # Prise en main

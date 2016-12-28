@@ -49,7 +49,8 @@ function renderTemplate(template) {
 			baseUrl: template.relativePath,
 			page: {
 				pageid: template.attributes.pageid || 'home',
-				title: template.attributes.title
+				title: template.attributes.title,
+				lang: template.attributes.lang
 			}
 		};
 	return renderer.render(`_layouts/_subpage.html`, templateConfig);
