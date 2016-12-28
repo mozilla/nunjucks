@@ -66,6 +66,7 @@ function copyAssets() {
 		copyFile(`${baseDir}js/`, `${distDir}js/`),
 		copyFile(`${baseDir}css/`, `${distDir}css/`),
 		copyFile(`${baseDir}img/`, `${distDir}img/`),
+		copyFile(`browser/`, `${distDir}files/`),
 		// //temp until we remove bower dependecy
 		copyFile(`${baseDir}bower_components/`, `${distDir}bower_components/`)
 	]);
