@@ -80,7 +80,7 @@ directory, and the following options are available in **opts**:
 * **throwOnUndefined** *(default: false)* throw errors when outputting a null/undefined value
 * **trimBlocks** *(default: false)* automatically remove trailing newlines from a block/tag
 * **lstripBlocks** *(default: false)* automatically remove leading whitespace from a block/tag
-* **watch** *(default: false)* reload templates when they are changed (server-side)
+* **watch** *(default: false)* reload templates when they are changed (server-side). To use watch, make sure optional dependency *chokidar* is installed.
 * **noCache** *(default: false)* never use a cache and recompile templates each time (server-side)
 * **web** an object for configuring loading templates in the browser:
   * **useCache** *(default: false)* will enable cache and templates will never see updates.
@@ -381,7 +381,7 @@ templates live, and it defaults to the current working directory.
 
 **opts** is an object with the following optional properties:
 
-* **watch** - if `true`, the system will automatically update templates
+* **watch** - if `true`, the system will automatically update templates. To use watch, make sure optional dependency *chokidar* is installed.
   when they are changed on the filesystem
 * **noCache** - if `true`, the system will avoid using a cache and templates
   will be recompiled every single time

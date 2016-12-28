@@ -16,7 +16,7 @@ Ceci est un aperçu des caractéristiques des templates disponibles dans Nunjuck
 ## Extensions de fichier
 
 Bien que vous soyez libre d'utiliser n'importe quelle extension de fichier pour vos
-fichiers de template Nunjucks, la communauté de Nunjucks a adopté `.njk`.  
+fichiers de template Nunjucks, la communauté de Nunjucks a adopté `.njk`.
 
 Si vous développez des outils ou des aides de syntaxe pour éditeur pour Nunjucks,
 veuillez inclure la reconnaissance de l'extension `.njk`.
@@ -29,6 +29,7 @@ Des plugins sont disponibles pour les différents éditeurs pour prendre en char
 * vim <https://github.com/niftylettuce/vim-jinja>
 * brackets <https://github.com/axelboc/nunjucks-brackets>
 * sublime <https://github.com/mogga/sublime-nunjucks/blob/master/Nunjucks.tmLanguage>
+* emacs <http://web-mode.org>
 
 ## Variables
 
@@ -178,7 +179,8 @@ exactement comme le `if` de javascript.
 Si `variable` est défini et évalué à `true`, "C'est vrai"
 s'affichera, sinon rien n'apparaitra.
 
-Vous pouvez spécifier des conditions alternatives avec `elif` et `else` :
+Vous pouvez spécifier des conditions alternatives avec `elif` (ou `elseif`, qui est simplement un alias de `elif`)
+et `else` :
 
 ```nunjucks
 {% if faim %}
@@ -552,6 +554,11 @@ Template compilé : `{% import name + ".html" as obj %}`.
 Si vous voulez afficher des balises spéciales de Nunjucks comme `{{`, vous pouvez utiliser
 un bloc `{% raw %}` et tout ce qui sera à l'intérieur de celui-ci sera affiché au format texte brut.
 
+### verbatim
+
+`{% verbatim %}` a le même comportement que [`{% raw %}`](#raw). Il a été ajouté pour
+être compatible avec la [balise `verbatim` de Twig](http://twig.sensiolabs.org/doc/tags/verbatim.html).
+
 ### filter
 
 Un bloc `filter` vous permet d'appeler un filtre avec le contenu de ce
@@ -669,8 +676,8 @@ moins (`-`) sur le tag de début ou de fin..
 {%- endfor %}
 ```
 
-L'affichage exact de l'exemple du dessus sera "12345". Le `-%}` enlève les espaces à
-droite après le tag et le `{%-` enlève les espaces à gauche avant le tag.
+L'affichage exact de l'exemple du dessus sera "12345". Le `{%-` enlève les espaces à
+droite avant le tag et le `-%}` enlève les espaces à droite après le tag.
 
 ## Expressions
 
@@ -751,6 +758,12 @@ est particulièrement utile pour les valeurs par défaut comme celle-ci :
 
 ```nunjucks
 {{ baz(foo if foo else "default") }}
+```
+
+Contrairement à l'opérateur ternaire de javascript, le `else` est facultatif :
+
+```nunjucks
+{{ "true" if foo }}
 ```
 
 ### Appels de fonction
@@ -851,9 +864,7 @@ Si `tags` avait `["food", "beer", "dessert"]`, l'exemple ci-dessus afficherait `
 
 ## Filtres intégrés
 
-Nunjucks a porté la plupart des filtres de jinja, et il a ses propres filtres. Nous avons besoin
-de travailler sur notre documentation pour les filtres. Certains d'entre eux sont documentés
-ci-dessous, pour le reste, vous pouvez cliquer sur le site de jinja.
+Nunjucks a porté la plupart des [filtres de jinja](http://jinja.pocoo.org/docs/dev/templates/#builtin-filters), et il a ses propres filtres :
 
 ### abs
 
@@ -938,7 +949,7 @@ etc)
   valeur fausse retournait `default`. Dans la 2.0, le comportement par défaut retourne
   `default` seulement pour une valeur `undefined`. Vous pouvez obtenir l'ancien
   comportement en passant `true` à `boolean`, ou en utilisant simplement `value or default`.**
-  
+
 ### dictsort
 
 Tri un dictionnaire et rend des paires (clé, valeur) :
@@ -962,12 +973,64 @@ Tri un dictionnaire et rend des paires (clé, valeur) :
 ```nunjucks
 a b c d e f
 ```
+### dump
 
-### dump (object)
-
-Appelle `JSON.stringify` sur un objet et déverse le résultat dans le
+Appelle [`JSON.stringify`](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify) sur un objet et déverse le résultat dans le
 template. C'est utile pour le débogage : `{{ foo | dump }}`.
 
+**Entrée**
+
+```nunjucks
+{% set items = ["a", 1, { b : true}] %}
+{{ items | dump }}
+```
+
+**Sortie**
+
+```nunjucks
+
+["a",1,{"b":true}]
+```
+
+Dump fournit un paramètre pour les espaces afin d'ajouter des espaces ou des tabulations aux valeurs
+retournées. Cela rend le résultat plus lisible.
+
+**Entrée**
+
+```nunjucks
+{% set items = ["a", 1, { b : true}] %}
+{{ items | dump(2) }}
+```
+
+**Sortie**
+
+```nunjucks
+[
+  "a",
+  1,
+  {
+    "b": true
+  }
+]
+```
+**Entrée**
+
+```nunjucks
+{% set items = ["a", 1, { b : true}] %}
+{{ items | dump('\t') }}
+```
+
+**Sortie**
+
+```nunjucks
+[
+	"a",
+	1,
+	{
+		"b": true
+	}
+]
+```
 ### escape (aliased as e)
 
 Convertit les caractères &, <, >, â€˜, et â€ dans des chaines avec des séquences HTML sécurisées.
@@ -985,7 +1048,6 @@ Les résultats rendent la valeur comme une chaîne de balisage.
 ```nunjucks
 &lt;html&gt;
 ```
-
 
 ### first
 
@@ -1246,7 +1308,7 @@ foobar
 
 ### random
 
-Selectionne une valeur aléatoire depuis un tableau.
+Sélectionne une valeur aléatoire depuis un tableau.
 (Cela changera à chaque fois que la page est actualisée).
 
 **Entrée**
@@ -1411,7 +1473,7 @@ Arrondit au nombre entier le plus proche (qui arrondit vers le bas) :
 4
 ```
 
-Specifiez le nombre de décimales pour arrondir :
+Spécifiez le nombre de décimales pour arrondir :
 
 **Entrée**
 
@@ -1529,8 +1591,18 @@ Convertit un objet en une chaine :
 **Sortie**
 
 ```nunjucks
-1,2,3,4,```
+1,2,3,4,
+```
 
+### striptags (value, [preserve_linebreaks])
+
+C'est similaire à
+[striptags](http://jinja.pocoo.org/docs/templates/#striptags) de jinja. Si
+`preserve_linebreaks` est à false (par défaut), cela enlève les balises SGML/XML et remplace
+les espaces adjacents par un seul espace. Si `preserve_linebreaks` est à true,
+cela normalise les espaces, en essayant de préserver les sauts de lignes originaux. Utiliser le second
+comportement si vous voulez utiliser ceci `{{ text | striptags | nl2br }}`. Sinon
+utilisez le comportement par défaut.
 
 ### sum
 
@@ -1548,16 +1620,6 @@ Rend la somme des éléments dans le tableau :
 ```nunjucks
 6
 ```
-
-### striptags (value, [preserve_linebreaks])
-
-C'est similaire à
-[striptags](http://jinja.pocoo.org/docs/templates/#striptags) de jinja. Si
-`preserve_linebreaks` est à false (par défaut), cela enlève les balises SGML/XML et remplace
-les espaces adjacents par un seul espace. Si `preserve_linebreaks` est à true,
-cela normalise les espaces, en essayant de préserver les sauts de lignes originaux. Utiliser le second
-comportement si vous voulez utiliser ceci `{{ text | striptags | nl2br }}`. Sinon
-utilisez le comportement par défaut.
 
 ### title
 

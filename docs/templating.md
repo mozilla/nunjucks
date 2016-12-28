@@ -29,6 +29,7 @@ Plugins are available in various editors to support the `jinja` syntax highlight
 * vim <https://github.com/niftylettuce/vim-jinja>
 * brackets <https://github.com/axelboc/nunjucks-brackets>
 * sublime <https://github.com/mogga/sublime-nunjucks/blob/master/Nunjucks.tmLanguage>
+* emacs <http://web-mode.org>
 
 ## Variables
 
@@ -550,6 +551,11 @@ object: `{% import name + ".html" as obj %}`.
 If you want to output any of the special Nunjucks tags like `{{`, you can use
 a `{% raw %}` block and anything inside of it will be output as plain text.
 
+### verbatim
+
+`{% verbatim %}` has identical behavior as [`{% raw %}`](#raw). It is added for
+compatibility with the [Twig `verbatim` tag](http://twig.sensiolabs.org/doc/tags/verbatim.html).
+
 ### filter
 
 A `filter` block allows you to call a filter with the contents of the
@@ -659,7 +665,7 @@ don't want the extra whitespace, but you still want to format the template
 cleanly, which requires whitespace.
 
 You can tell the engine to strip all leading or trailing whitespace by adding a
-minus sign (`-`) to the start or end block tag.
+minus sign (`-`) to the start or end block or a variable.
 
 ```nunjucks
 {% for i in [1,2,3,4,5] -%}
@@ -667,8 +673,11 @@ minus sign (`-`) to the start or end block tag.
 {%- endfor %}
 ```
 
-The exact output of the above would be "12345". The `-%}` strips the whitespace
-right after the tag, and the `{%-` strips the whitespace right before the tag.
+The exact output of the above would be "12345". The `{%-` strips the whitespace
+right before the tag, and `-%}` the strips the whitespace right after the tag.
+
+And the same is for variables: `{{-` will strip the whitespace before the variable,
+and `-}}` will strip the whitespace after the variable.
 
 ## Expressions
 
@@ -768,11 +777,13 @@ normal.
 
 ### Regular Expressions
 
-A regular expression can be created just like JavaScript:
+A regular expression can be created just like JavaScript, but needs to be prefixed with `r`:
 
 ```nunjucks
-{{ /^foo.*/ }}
-{{ /bar$/g }}
+{% set regExp = r/^foo.*/g %}
+{% if regExp.test('foo') %}
+  Foo in the house!
+{% endif %}
 ```
 
 The supported flags are the following. See
@@ -858,6 +869,7 @@ If `tags` was `["food", "beer", "dessert"]`, the above example would output `foo
 Nunjucks has ported most of [jinja's filters](http://jinja.pocoo.org/docs/dev/templates/#builtin-filters), and has a few of its own:
 
 ### abs
+
 Return the absolute value of the argument:
 
 **Input**
@@ -963,10 +975,65 @@ Sort a dict and yield (key, value) pairs:
 ```nunjucks
 a b c d e f
 ```
-### dump (object)
 
-Call `JSON.stringify` on an object and dump the result into the
-template. Useful for debugging: `{{ foo | dump }}`.
+### dump
+
+Call [`JSON.stringify`](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify) on an object and dump the result into the
+template. Useful for debugging: `{{ items | dump }}`.
+
+**Input**
+
+```nunjucks
+{% set items = ["a", 1, { b : true}] %}
+{{ items | dump }}
+```
+
+**Output**
+
+```nunjucks
+
+["a",1,{"b":true}]
+```
+
+Dump provides the spaces parameter to add spaces or tabs to the resulting
+values. This makes the results more readable.
+
+**Input**
+
+```nunjucks
+{% set items = ["a", 1, { b : true}] %}
+{{ items | dump(2) }}
+```
+
+**Output**
+
+```nunjucks
+[
+  "a",
+  1,
+  {
+    "b": true
+  }
+]
+```
+**Input**
+
+```nunjucks
+{% set items = ["a", 1, { b : true}] %}
+{{ items | dump('\t') }}
+```
+
+**Output**
+
+```nunjucks
+[
+	"a",
+	1,
+	{
+		"b": true
+	}
+]
+```
 
 ### escape (aliased as e)
 
@@ -1241,6 +1308,22 @@ Convert string to all lower case:
 
 ```nunjucks
 foobar
+```
+
+### nl2br
+
+Replace new lines with `<br />` HTML elements:
+
+**Input**
+
+```nunjucks
+{{ "foo\nbar" | striptags(true) | escape | nl2br }}
+```
+
+**Output**
+
+```nunjucks
+foo<br />\nbar
 ```
 
 ### random
@@ -1537,8 +1620,8 @@ Analog of jinja's
 `preserve_linebreaks` is false (default), strips SGML/XML tags and replaces
 adjacent whitespace with one space.  If `preserve_linebreaks` is true,
 normalizes whitespace, trying to preserve original linebreaks. Use second
-behavior if you want to pipe `{{ text | striptags | nl2br }}`. Use default one
-otherwise.
+behavior if you want to pipe `{{ text | striptags(true) | escape | nl2br }}`.
+Use default one otherwise.
 
 ### sum
 

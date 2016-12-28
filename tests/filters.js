@@ -86,6 +86,18 @@
             finish(done);
         });
 
+        it('dump', function(done) {
+            equal('{{ [\'a\', 1, {b: true}] | dump  }}',
+                '[&quot;a&quot;,1,{&quot;b&quot;:true}]');
+            equal('{{ [\'a\', 1, {b: true}] | dump(2) }}',
+                '[\n  &quot;a&quot;,\n  1,\n  {\n    &quot;b&quot;: true\n  }\n]');
+            equal('{{ [\'a\', 1, {b: true}] | dump(4) }}',
+                '[\n    &quot;a&quot;,\n    1,\n    {\n        &quot;b&quot;: true\n    }\n]' );
+            equal('{{ [\'a\', 1, {b: true}] | dump(\'\t\') }}',
+                '[\n\t&quot;a&quot;,\n\t1,\n\t{\n\t\t&quot;b&quot;: true\n\t}\n]');
+            finish(done);
+        });
+
         it('escape', function(done) {
             var res = render('{{ "<html>" | escape }}', {}, { autoescape: false });
             expect(res).to.be('&lt;html&gt;');
@@ -318,6 +330,17 @@
             equal('{{ null | lower }}', '');
             equal('{{ undefined | lower }}', '');
             equal('{{ nothing | lower }}', '');
+            finish(done);
+        });
+
+        it('nl2br', function(done) {
+            equal('{{ null | nl2br }}', '');
+            equal('{{ undefined | nl2br }}', '');
+            equal('{{ nothing | nl2br }}', '');
+            equal('{{ str | nl2br }}', {str: r.markSafe('foo\r\nbar')}, 'foo<br />\nbar');
+            equal('{{ str | nl2br }}', {str: r.markSafe('foo\nbar')}, 'foo<br />\nbar');
+            equal('{{ str | nl2br }}', {str: r.markSafe('foo\n\nbar')}, 'foo<br />\n<br />\nbar');
+            equal('{{ "foo\nbar" | nl2br }}', 'foo&lt;br /&gt;\nbar');
             finish(done);
         });
 

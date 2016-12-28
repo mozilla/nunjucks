@@ -11,9 +11,7 @@ function normalize(value, defaultValue) {
 }
 
 var filters = {
-    abs: function(n) {
-        return Math.abs(n);
-    },
+    abs: Math.abs,
 
     batch: function(arr, linecount, fill_with) {
         var i;
@@ -111,8 +109,8 @@ var filters = {
         return array;
     },
 
-    dump: function(obj) {
-        return JSON.stringify(obj);
+    dump: function(obj, spaces) {
+        return JSON.stringify(obj, null, spaces);
     },
 
     escape: function(str) {
@@ -229,6 +227,13 @@ var filters = {
     lower: function(str) {
         str = normalize(str, '');
         return str.toLowerCase();
+    },
+
+    nl2br: function(str) {
+        if (str === null || str === undefined) {
+            return '';
+        }
+        return r.copySafeness(str, str.replace(/\r\n|\n/g, '<br />\n'));
     },
 
     random: function(arr) {

@@ -129,7 +129,14 @@ var Parser = Object.extend({
     },
 
     advanceAfterVariableEnd: function() {
-        if(!this.skip(lexer.TOKEN_VARIABLE_END)) {
+        var tok = this.nextToken();
+
+        if(tok && tok.type === lexer.TOKEN_VARIABLE_END) {
+            this.dropLeadingWhitespace = tok.value.charAt(
+                tok.value.length - this.tokens.tags.VARIABLE_END.length - 1
+            ) === '-';
+        } else {
+            this.pushToken(tok);
             this.fail('expected variable end');
         }
     },
@@ -544,6 +551,7 @@ var Parser = Object.extend({
 
         switch(tok.value) {
         case 'raw': return this.parseRaw();
+        case 'verbatim': return this.parseRaw('verbatim');
         case 'if':
         case 'ifAsync':
             return this.parseIf();
@@ -575,9 +583,11 @@ var Parser = Object.extend({
         return node;
     },
 
-    parseRaw: function() {
+    parseRaw: function(tagName) {
+        tagName = tagName || 'raw';
+        var endTagName = 'end' + tagName;
         // Look for upcoming raw blocks (ignore all other kinds of blocks)
-        var rawBlockRegex = /([\s\S]*?){%\s*(raw|endraw)\s*(?=%})%}/;
+        var rawBlockRegex = new RegExp('([\\s\\S]*?){%\\s*(' + tagName + '|' + endTagName + ')\\s*(?=%})%}');
         var rawLevel = 1;
         var str = '';
         var matches = null;
@@ -594,9 +604,9 @@ var Parser = Object.extend({
             var blockName = matches[2];
 
             // Adjust rawlevel
-            if(blockName === 'raw') {
+            if(blockName === tagName) {
                 rawLevel += 1;
-            } else if(blockName === 'endraw') {
+            } else if(blockName === endTagName) {
                 rawLevel -= 1;
             }
 
@@ -1205,10 +1215,13 @@ var Parser = Object.extend({
                     this.dropLeadingWhitespace = false;
                 }
 
-                // Same for the succeding block start token
+                // Same for the succeeding block start token
                 if(nextToken &&
                     ((nextToken.type === lexer.TOKEN_BLOCK_START &&
                       nextVal.charAt(nextVal.length - 1) === '-') ||
+                    (nextToken.type === lexer.TOKEN_VARIABLE_START &&
+                      nextVal.charAt(this.tokens.tags.VARIABLE_START.length)
+                        === '-') ||
                     (nextToken.type === lexer.TOKEN_COMMENT &&
                       nextVal.charAt(this.tokens.tags.COMMENT_START.length)
                         === '-'))) {
@@ -1232,8 +1245,8 @@ var Parser = Object.extend({
             }
             else if(tok.type === lexer.TOKEN_VARIABLE_START) {
                 var e = this.parseExpression();
-                this.advanceAfterVariableEnd();
                 this.dropLeadingWhitespace = false;
+                this.advanceAfterVariableEnd();
                 buf.push(new nodes.Output(tok.lineno, tok.colno, [e]));
             }
             else if(tok.type === lexer.TOKEN_COMMENT) {
