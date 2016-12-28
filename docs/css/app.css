@@ -340,14 +340,6 @@ section.examples p.ending {
     font-size: 1.2em;
 }
 
-pre {
-    background-color: #fafafa;
-}
-
-#home pre span {
-    color: rgb(30, 150, 50);
-}
-
 section.whos-using h4 {
     font-size: 1.5em;
     margin-bottom: 2em;
