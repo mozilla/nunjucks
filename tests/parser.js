@@ -286,6 +286,12 @@
                                  'water{% endif %}?');
             expect(n.children[1].typename).to.be('If');
 
+            n = parser.parse('{% if "some string".length > 10 %}stuff{% endif %}');
+            expect(n.children[0].typename).to.be('If');
+
+            n = parser.parse('{% if 1.618.toFixed(2) == "1.62" %}stuff{% endif %}');
+            expect(n.children[0].typename).to.be('If');
+
             n = parser.parse('{% block foo %}stuff{% endblock %}');
             expect(n.children[0].typename).to.be('Block');
 
