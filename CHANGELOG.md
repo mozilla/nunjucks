@@ -5,6 +5,8 @@ Changelog
 master (unreleased)
 ----------------
 
+* Fix handling of static strings attributes and methods, which partially covers
+ths issue [#791](https://github.com/mozilla/nunjucks/issues/937).
 
 3.0.0 (Nov 5 2016)
 ----------------

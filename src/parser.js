@@ -965,6 +965,10 @@ var Parser = Object.extend({
 
         if(val !== undefined) {
             node = new nodes.Literal(tok.lineno, tok.colno, val);
+
+            if(!noPostfix) {
+                node = this.parsePostfix(node);
+            }
         }
         else if(tok.type === lexer.TOKEN_SYMBOL) {
             node = new nodes.Symbol(tok.lineno, tok.colno, tok.value);
