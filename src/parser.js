@@ -968,16 +968,16 @@ var Parser = Object.extend({
         }
         else if(tok.type === lexer.TOKEN_SYMBOL) {
             node = new nodes.Symbol(tok.lineno, tok.colno, tok.value);
-
-            if(!noPostfix) {
-                node = this.parsePostfix(node);
-            }
         }
         else {
             // See if it's an aggregate type, we need to push the
             // current delimiter token back on
             this.pushToken(tok);
             node = this.parseAggregate();
+        }
+
+        if(!noPostfix) {
+            node = this.parsePostfix(node);
         }
 
         if(node) {
