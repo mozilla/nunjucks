@@ -475,7 +475,7 @@ var MyLoader = nunjucks.Loader.extend({
         // setup a process which watches templates here
         // and call `this.emit('update', name)` when a template
         // is changed
-    }
+    },
 
     getSource: function(name) {
         // load the template
