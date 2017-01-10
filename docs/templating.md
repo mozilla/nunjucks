@@ -1058,19 +1058,24 @@ Marks return value as markup string
 
 ### first
 
-Get the first item in an array:
+Get the first item in an array or the first letter if it's a string:
 
 **Input**
 
 ```jinja
 {% set items = [1,2,3] %}
 {{ items | first }}
+
+{% set word = 'abc' %}
+{{ word | first }}
 ```
 
 **Output**
 
 ```jinja
 1
+
+a
 ```
 
 ### float
@@ -1244,19 +1249,24 @@ foo,bar,bear
 
 ### last
 
-Get the last item in an array:
+Get the last item in an array or the last letter if it's a string:
 
 **Input**
 
 ```jinja
 {% set items = [1,2,3] %}
 {{ items | last }}
+
+{% set word = 'abc' %}
+{{ word | last }}
 ```
 
 **Output**
 
 ```jinja
 3
+
+c
 ```
 
 ### length
