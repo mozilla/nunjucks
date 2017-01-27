@@ -697,14 +697,17 @@
 
         it('should allow child macro to access vars set in parent macro', function(done) {
             equal('{% macro parent() %}' +
-                  '{% set x = "bar" %}' +
+                  '{% set x = "foo" %}' +
+                  '{% set y = "bar" %}' +
                   '{% macro child() %}' +
+                  '{% set y = "foo" %}' +
                   '{{ x }}' +
                   '{% endmacro %}' +
                   '{{ child() }}' +
+                  '{{ y }}' +
                   '{% endmacro %}' +
                   '{{ parent() }}',
-                  'bar');
+                  'foobar');
 
             finish(done);
         });
@@ -714,13 +717,16 @@
                   '{{ caller() }}' +
                   '{% endmacro %}' +
                   '{% macro parent() %}' +
-                  '{% set x = "bar" %}' +
+                  '{% set x = "foo" %}' +
+                  '{% set y = "bar" %}' +
                   '{% call child() %}' +
+                  '{% set y = "foo" %}' +
                   '{{ x }}' +
                   '{% endcall %}' +
+                  '{{ y }}' +
                   '{% endmacro %}' +
                   '{{ parent() }}',
-                  'bar');
+                  'foobar');
 
             finish(done);
         });
