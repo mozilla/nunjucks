@@ -3,6 +3,13 @@ This is a jekyll site that generates the docs for
 [nunjucks](https://github.com/mozilla/nunjucks). If you find a bug
 in the docs, please file an issue, or even better, fork it and fix it!
 
+Requirements:
+
+- gem install jekyll
+- gem install redcarpet
+- gem install rb-pygmentsk
+
+
 Run `make` to publish and look it at locally.
 
 Run `make prod` to publish the production version, and then push the
