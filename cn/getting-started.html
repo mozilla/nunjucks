@@ -77,18 +77,18 @@
 
   <div class="col-sm-9 main">
     <div class="locale btn-group"><a href="/nunjucks/getting-started.html" class="btn btn-default">English</a><a href="/nunjucks/cn/getting-started.html" class="btn btn-success">中文</a><a href="/nunjucks/fr/getting-started.html" class="btn btn-default">Français</a></div>
-    <h1 id=">快速上手</h1>
+    <h1 id="">快速上手</h1>
 
 <h2 id="node">Node 端使用</h2>
 <div class="highlight"><pre><code class="language-text" data-lang="text">$ npm install nunjucks
 </code></pre></div>
 <p>下载后可直接 <code>require(&#39;nunjucks&#39;)</code> 使用</p>
 
-<h2 id=">浏览器端使用</h2>
+<h2 id="">浏览器端使用</h2>
 
 <p>可直接使用 <a href="files/nunjucks.js">nunjucks.js</a> (<a href="files/nunjucks.min.js">min</a>)，如果针对编译后的模板可使用 <a href="files/nunjucks-slim.js">nunjucks-slim.js</a> (<a href="files/nunjucks-slim.min.js">min</a>)。</p>
 
-<h3 id=">你应该使用哪个文件</h3>
+<h3 id="">你应该使用哪个文件</h3>
 
 <ul>
 <li><p><strong>nunjucks.js</strong> 可用于动态加载模板，当模板变化时重新加载，也可以用于预编译后的模板。包含编译器，所以会比较大 (20K min/gzipped)。如果你刚接触 nunjucks 可使用这个文件，如果你不在意大小也可以在生产环境使用。</p></li>
@@ -107,7 +107,7 @@
 </a>或<a href="https://github.com/sindresorhus/gulp-nunjucks">gulp</a>，可在 <a href="api.html#browser-usage">浏览器使用</a> 查看客户端优化的配置。</p>
 </blockquote>
 
-<h2 id=">使用说明</h2>
+<h2 id="">使用说明</h2>
 
 <p>这是最简单使用 nunjucks 的方式，首先设置配置项(如 autoescaping)，然后渲染一个字符串：</p>
 <div class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">nunjucks</span><span class="p">.</span><span class="nx">configure</span><span class="p">({</span> <span class="nx">autoescape</span><span class="o">:</span> <span class="kc">true</span> <span class="p">});</span>
@@ -136,7 +136,7 @@ directory) 的路径。在浏览器端则为一个相对的 url，最好指定�
 
 <p>如果你在浏览器上使用<a href="api.html#precompiling">编译后</a>的模板的话，你不需要额外做其他的事情系统也能够理解它们。这使得我们可以轻松地在开发环境和生产环境上使用同一份代码，并在生产环境上只使用已经编译过的模板。</p>
 
-<h2 id=">更多信息</h2>
+<h2 id="">更多信息</h2>
 
 <p>这只是冰山一角，可继续查看 <a href="api.html">API</a> 文档和<a href="templating.html">模板语言</a>。</p>
 
