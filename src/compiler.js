@@ -838,6 +838,12 @@ var Compiler = Object.extend({
             'var callerFrame = frame;',
             'frame = ' + ((keepFrame) ? 'frame.push(true);' : 'new runtime.Frame();'),
             'kwargs = kwargs || {};',
+            // Expose kwargs variable in the context like Jinja2 macros.
+            'var kwargs_variable = Object.assign({}, kwargs);',
+            'delete kwargs_variable.__keywords;',
+            'delete kwargs_variable.caller;',
+            'frame.set("kwargs", kwargs_variable);',
+            // Expose caller variable in the context like Jinja2 macros.
             'if (kwargs.hasOwnProperty("caller")) {',
             'frame.set("caller", kwargs.caller); }'
         );
