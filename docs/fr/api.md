@@ -135,8 +135,9 @@ ne visent pas une compatibilité complète de Jinja/Python, cela pourra
 aider les utilisateurs qui le recherchent au plus juste.
 
 Cela ajoute `True` et `False` qui correspond aux valeurs `true` et `false`
-de JS, ainsi cela se rapproche des tableaux et des objets pour les méthodes avec un style
-Python. [Vérifiez la source](https://github.com/mozilla/nunjucks/blob/master/src/jinja-compat.js)
+de JS. En plus, cela se rapproche des tableaux et des objets pour les méthodes
+avec un style Python et permet également l'utilisation de la syntaxe "slice" Python.
+[Vérifiez la source](https://github.com/mozilla/nunjucks/blob/master/src/jinja-compat.js)
 pour voir tout ce qu'il ajoute.
 {% endapi %}
 {% raw %}

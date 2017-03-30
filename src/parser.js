@@ -1294,5 +1294,6 @@ module.exports = {
             p.extensions = extensions;
         }
         return p.parseAsRoot();
-    }
+    },
+    Parser: Parser
 };
