@@ -1,3 +1,7 @@
+**Nunjucks is currently lacking an active maintainer. Issues and pull requests
+will not be reviewed or merged, unfortunately. If you are interested in 
+picking up nunjucks maintenance, file an issue and mention @carljm.**
+
 # Nunjucks
 
 [Nunjucks](https://mozilla.github.io/nunjucks/) is a full featured
