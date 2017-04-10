@@ -1021,6 +1021,19 @@
             finish(done);
         });
 
+        it('should include meaningful stack trace when dev options is set true', function(done) {
+            render(
+                '{% include "missing.html" %}',
+                {},
+                { noThrow: true },
+                function(err) {
+                    expect(err.stack.split('\n')[2]).to.match(/at createTemplate/);
+                }
+            );
+
+            finish(done);
+        });
+
         it('should fail silently on missing templates if requested', function(done) {
             equal('hello world {% include "missing.njk" ignore missing %}',
                   'hello world ');
