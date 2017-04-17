@@ -178,7 +178,9 @@ function copySafeness(dest, target) {
     if(dest instanceof SafeString) {
         return new SafeString(target);
     }
-    return target.toString();
+    var type = typeof target;
+    return type !== 'undefined' && type !== 'null' ?
+        target.toString() : '';
 }
 
 function markSafe(val) {
