@@ -22,7 +22,7 @@ Nunjucks has the following purpose:
 
 Notes:
 
-* We don't aim for parity of language specific syntax like Python's splice notation `{{ foo[start:end:step] }}`.
+* We don't aim for parity of all language specific syntax.
 * We don't aim for parity of language specific filters like [Twig's PHP date format](http://twig.sensiolabs.org/doc/functions/date.html).
 
 Issues and pull requests contributing to this purpose have the best chance to make it into Nunjucks.

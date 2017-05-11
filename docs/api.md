@@ -135,8 +135,9 @@ nunjucks does not aim for complete Jinja/Python compatibility, this
 might help users seeking just that.
 
 This adds `True` and `False` which map to the JS `true` and `false`
-values, as well as augmenting arrays and objects with Python-style
-methods. [Check out the source](https://github.com/mozilla/nunjucks/blob/master/src/jinja-compat.js)
+values, allows use of Python slice syntax, and augments arrays and
+objects with Python-style methods.
+[Check out the source](https://github.com/mozilla/nunjucks/blob/master/src/jinja-compat.js)
 to see everything it adds.
 {% endapi %}
 {% raw %}

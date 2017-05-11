@@ -7,6 +7,8 @@ master (unreleased)
 
 * Fix handling methods and attributes of static arrays, objects and primitives.
   Solves the issue [#937](https://github.com/mozilla/nunjucks/issues/937)
+* Add support for python-style array slices with Jinja compat enabled. Thanks
+  Frankie Dintino.
 
 3.0.0 (Nov 5 2016)
 ----------------
