@@ -1153,6 +1153,18 @@
                   ''
                   );
 
+            /**
+             * Capture blocks inside macros were printing to the main buffer instead of
+             * the temporary one, see https://github.com/mozilla/nunjucks/issues/914.
+             **/
+            equal('{%- macro foo(bar) -%}'+
+                  '{%- set test -%}foo{%- endset -%}'+
+                  '{{ bar }}{{ test }}'+
+                  '{%- endmacro -%}'+
+                  '{{ foo("bar") }}',
+                  'barfoo'
+                  );
+
             equal('{% set block_content %}test string{% endset %}'+
                   '{{ block_content }}',
                   'test string'
