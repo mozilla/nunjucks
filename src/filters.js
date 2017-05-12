@@ -159,6 +159,10 @@ var filters = {
         return r.copySafeness(str, res);
     },
 
+    isEmpty: function(obj) {
+        return Object.keys(obj).length === 0;
+    },
+
     join: function(arr, del, attr) {
         del = del || '';
 
