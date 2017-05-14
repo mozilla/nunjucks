@@ -28,6 +28,12 @@
             finish(done);
         });
 
+        it('absolutize', function(done) {
+            equal('{{"/examples"|absolutize("http://example.com")}}', 'http://example.com/examples');
+            equal('{{"http://anotherexample.com/stuff"|absolutize("http://example.com")}}', 'http://anotherexample.com/stuff');
+            finish(done);
+        });
+
         it('batch', function(done) {
             equal('{% for a in [1,2,3,4,5,6]|batch(2) %}' +
                   '-{% for b in a %}' +

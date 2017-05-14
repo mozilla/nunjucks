@@ -2,6 +2,7 @@
 
 var lib = require('./lib');
 var r = require('./runtime');
+url = require('url');
 
 function normalize(value, defaultValue) {
     if(value === null || value === undefined || value === false) {
@@ -12,6 +13,10 @@ function normalize(value, defaultValue) {
 
 var filters = {
     abs: Math.abs,
+
+    absolutize: function(str, base) {
+        return url.resolve(base, str);
+    },
 
     batch: function(arr, linecount, fill_with) {
         var i;
