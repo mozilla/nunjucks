@@ -1487,7 +1487,7 @@ Round to the nearest whole number (which rounds down):
 **Input**
 
 ```jinja
-{{ 4 | round(0, "floor")
+{{ 4 | round(0, "floor") }}
 ```
 
 **Output**
