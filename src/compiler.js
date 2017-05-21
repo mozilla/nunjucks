@@ -1059,6 +1059,10 @@ var Compiler = Object.extend({
     },
 
     compileCapture: function(node, frame) {
+        // we need to temporarily override the current buffer id as 'output'
+        // so the set block writes to the capture output instead of the buffer
+        var buffer = this.buffer;
+        this.buffer = 'output';
         this.emitLine('(function() {');
         this.emitLine('var output = "";');
         this.withScopedSyntax(function () {
@@ -1066,6 +1070,8 @@ var Compiler = Object.extend({
         });
         this.emitLine('return output;');
         this.emitLine('})()');
+        // and of course, revert back to the old buffer id
+        this.buffer = buffer;
     },
 
     compileOutput: function(node, frame) {
