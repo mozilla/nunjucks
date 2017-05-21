@@ -669,7 +669,7 @@ voulez pas les espaces supplémentaires, mais vous voulez continuer à formater 
 proprement, ce qui nécessite des espaces.
 
 Vous pouvez dire au moteur d'enlever les espaces de début et de fin en ajoutant le signe
-moins (`-`) sur le tag de début ou de fin..
+moins (`-`) sur le tag de début ou de fin d'un bloc ou d'une variable.
 
 ```jinja
 {% for i in [1,2,3,4,5] -%}
@@ -679,6 +679,9 @@ moins (`-`) sur le tag de début ou de fin..
 
 L'affichage exact de l'exemple du dessus sera "12345". Le `{%-` enlève les espaces à
 droite avant le tag et le `-%}` enlève les espaces à droite après le tag.
+
+C'est la même chose pour les variables: `{{-` enlève les espaces avant la variable,
+et `-}}` enlève les espaces après la variable.
 
 ## Expressions
 
@@ -778,11 +781,13 @@ normalement.
 
 ### Expressions régulières
 
-Une expression régulière peut être créée comme en JavaScript :
+Une expression régulière peut être créée comme en JavaScript, mais elle a besoin d'être précédée par `r` :
 
 ```jinja
-{{ /^foo.*/ }}
-{{ /bar$/g }}
+{% set regExp = r/^foo.*/g %}
+{% if regExp.test('foo') %}
+  Foo dans la maison !
+{% endif %}
 ```
 
 Les flags supportés sont les suivants. Voir
@@ -1032,6 +1037,7 @@ retournées. Cela rend le résultat plus lisible.
 	}
 ]
 ```
+
 ### escape (aliased as e)
 
 Convertit les caractères &, <, >, â€˜, et â€ dans des chaines avec des séquences HTML sécurisées.
@@ -1307,6 +1313,22 @@ Convertit une chaine en minuscule :
 foobar
 ```
 
+### nl2br
+
+Remplace les nouvelles lignes par des éléments HTML `<br />` :
+
+**Entrée**
+
+```jinja
+{{ "foo\nbar" | striptags(true) | escape | nl2br }}
+```
+
+**Sortie**
+
+```jinja
+foo<br />\nbar
+```
+
 ### random
 
 Sélectionne une valeur aléatoire depuis un tableau.
@@ -1568,7 +1590,6 @@ Découpe un itérateur et retourne une liste de listes contenant ces éléments 
     </ul>
 </div>
 ```
-
 ### sort(arr, reverse, caseSens, attr)
 
 Tri `arr` avec la fonction `arr.sort` de JavaScript. Si `reverse` est à true, le résultat
@@ -1602,8 +1623,8 @@ C'est similaire à
 `preserve_linebreaks` est à false (par défaut), cela enlève les balises SGML/XML et remplace
 les espaces adjacents par un seul espace. Si `preserve_linebreaks` est à true,
 cela normalise les espaces, en essayant de préserver les sauts de lignes originaux. Utiliser le second
-comportement si vous voulez utiliser ceci `{{ text | striptags | nl2br }}`. Sinon
-utilisez le comportement par défaut.
+comportement si vous voulez utiliser ceci `{{ text | striptags(true) | escape | nl2br }}`.
+Sinon utilisez le comportement par défaut.
 
 ### sum
 
