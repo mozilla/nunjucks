@@ -795,10 +795,11 @@ var Compiler = Object.extend({
         this._compileAsyncLoop(node, frame, true);
     },
 
-    _compileMacro: function(node) {
+    _compileMacro: function(node, frame) {
         var args = [];
         var kwargs = null;
         var funcId = 'macro_' + this.tmpid();
+        var keepFrame = (frame !== undefined);
 
         // Type check the definition of the args
         lib.each(node.args.children, function(arg, i) {
@@ -824,14 +825,18 @@ var Compiler = Object.extend({
         // arguments so support setting positional args with keywords
         // args and passing keyword args as positional args
         // (essentially default values). See runtime.js.
-        var frame = new Frame();
+        if (keepFrame) {
+            frame = frame.push(true);
+        } else {
+            frame = new Frame();
+        }
         this.emitLines(
             'var ' + funcId + ' = runtime.makeMacro(',
             '[' + argNames.join(', ') + '], ',
             '[' + kwargNames.join(', ') + '], ',
             'function (' + realNames.join(', ') + ') {',
             'var callerFrame = frame;',
-            'frame = new runtime.Frame();',
+            'frame = ' + ((keepFrame) ? 'frame.push(true);' : 'new runtime.Frame();'),
             'kwargs = kwargs || {};',
             'if (kwargs.hasOwnProperty("caller")) {',
             'frame.set("caller", kwargs.caller); }'
@@ -865,7 +870,7 @@ var Compiler = Object.extend({
           this.compile(node.body, frame);
         });
 
-        this.emitLine('frame = callerFrame;');
+        this.emitLine('frame = ' + ((keepFrame) ? 'frame.pop();' : 'callerFrame;'));
         this.emitLine('return new runtime.SafeString(' + bufferId + ');');
         this.emitLine('});');
         this.popBufferId();
@@ -874,7 +879,7 @@ var Compiler = Object.extend({
     },
 
     compileMacro: function(node, frame) {
-        var funcId = this._compileMacro(node, frame);
+        var funcId = this._compileMacro(node);
 
         // Expose the macro to the templates
         var name = node.name.value;
