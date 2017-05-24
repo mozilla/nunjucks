@@ -10,6 +10,7 @@
         expect = require('expect.js');
     }
     else {
+        nunjucks = window.nunjucks;
         Loader = nunjucks.WebLoader;
         templatesPath = '../templates';
         expect = window.expect;
