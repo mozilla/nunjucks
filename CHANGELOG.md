@@ -2,13 +2,28 @@ Changelog
 =========
 
 
-master (unreleased)
-----------------
+3.0.1 (May 24 2017)
+-------------------
 
 * Fix handling methods and attributes of static arrays, objects and primitives.
   Solves the issue [#937](https://github.com/mozilla/nunjucks/issues/937)
-* Add support for python-style array slices with Jinja compat enabled. Thanks
-  Frankie Dintino.
+
+* Add support for python-style array slices with Jinja compat enabled.
+  Fixes [#188](https://github.com/mozilla/nunjucks/issues/188); merge of
+  [#976](https://github.com/mozilla/nunjucks/pull/976).
+
+* Fix call blocks having access to their parent scope. Fixes
+  [#906](https://github.com/mozilla/nunjucks/issues/906); merge of
+  [#994](https://github.com/mozilla/nunjucks/pull/994).
+
+* Fix a bug that caused capturing block tags (e.g. set/endset,
+  filter/endfilter) to write to the global buffer rather than capturing
+  their contents. Fixes
+  [#914](https://github.com/mozilla/nunjucks/issues/914) and
+  [#972](https://github.com/mozilla/nunjucks/issues/972); merge of
+  [#990](https://github.com/mozilla/nunjucks/pull/990). Thanks [Noah
+  Lange](@noahlange).
+
 
 3.0.0 (Nov 5 2016)
 ----------------
