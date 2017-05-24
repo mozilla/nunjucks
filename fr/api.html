@@ -290,7 +290,7 @@ et les options suivantes sont disponibles dans <strong>opts</strong> :</p>
 <li><strong>throwOnUndefined</strong> <em>(par défaut : false)</em> lève des erreurs quand le résultat a une valeur null/undefined</li>
 <li><strong>trimBlocks</strong> <em>(par défaut : false)</em> supprime automatiquement les sauts de lignes de fin de block/tag</li>
 <li><strong>lstripBlocks</strong> <em>(par défaut : false)</em> supprime automatiquement les espaces de début de block/tag</li>
-<li><strong>watch</strong> <em>(par défaut : false)</em> recharge les templates quand ils ont été changés (côté serveur)</li>
+<li><strong>watch</strong> <em>(par défaut : false)</em> recharge les templates quand ils ont été changés (côté serveur). Pour utiliser watch, veuillez vérifier que la dépendance optionnelle <em>chokidar</em> soit installée.</li>
 <li><strong>noCache</strong> <em>(par défaut : false)</em> ne jamais utiliser le cache et recompiler les templates à chaque fois (côté serveur)</li>
 <li><strong>web</strong> un objet pour la configuration du chargement des templates dans le navigateur :
 
@@ -341,8 +341,9 @@ ne visent pas une compatibilité complète de Jinja/Python, cela pourra
 aider les utilisateurs qui le recherchent au plus juste.</p>
 
 <p>Cela ajoute <code>True</code> et <code>False</code> qui correspond aux valeurs <code>true</code> et <code>false</code>
-de JS, ainsi cela se rapproche des tableaux et des objets pour les méthodes avec un style
-Python. <a href="https://github.com/mozilla/nunjucks/blob/master/src/jinja-compat.js">Vérifiez la source</a>
+de JS. En plus, cela se rapproche des tableaux et des objets pour les méthodes
+avec un style Python et permet également l&#39;utilisation de la syntaxe &quot;slice&quot; Python.
+<a href="https://github.com/mozilla/nunjucks/blob/master/src/jinja-compat.js">Vérifiez la source</a>
 pour voir tout ce qu&#39;il ajoute.</p>
 </div>
 
@@ -586,7 +587,7 @@ tous les templates et il est par défaut dans le répertoire de travail courant.
 <p><strong>opts</strong> est un objet avec les propriétés optionnelles suivantes :</p>
 
 <ul>
-<li><strong>watch</strong> - si <code>true</code>, le système mettra à jour automatiquement les templates
+<li><strong>watch</strong> - si <code>true</code>, le système mettra à jour automatiquement les templates. Pour utiliser watch, veuillez vérifier que la dépendance optionnelle <em>chokidar</em> soit installée.
 quand ils sont modifiés sur le système de fichiers</li>
 <li><strong>noCache</strong> - si <code>true</code>, le système évitera l&#39;utilisation d&#39;un cache et les
 templates seront recompilés à chaque fois</li>
@@ -625,7 +626,7 @@ production, cela devrait toujours être le cas. Voir
 </code></pre></div>
 </div>
 
-<h3 id="criture-d-39-un-chargeur">Écriture d&#39;un chargeur</h3>
+<h3 id="criture-dun-chargeur">Écriture d&#39;un chargeur</h3>
 
 <p>Vous pouvez écrire des chargeurs pour des utilisations plus complexes comme la récupération à partir d&#39;une base de données.
 Si vous voulez faire cela, il suffit de créer un objet qui a une méthode
@@ -651,7 +652,7 @@ déclencher des événements. Vous avez besoin de l&#39;appeler ainsi</p>
         <span class="c1">// configure un processus qui regarde ici les templates</span>
         <span class="c1">// et appelle `this.emit(&#39;update&#39;, name)` lorsqu&#39;un template</span>
         <span class="c1">// est modifié</span>
-    <span class="p">}</span>
+    <span class="p">},</span>
 
     <span class="nx">getSource</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
         <span class="c1">// charge le template</span>

@@ -49,19 +49,19 @@
       <p><strong>Templates</strong></p>
       <ul>
 <li>
-<a href="">模板</a>
+<a href="#part-6542c9dca76">模板</a>
 <ul>
 <li>
-<a href="">文件扩展名</a>
+<a href="#part-d0678dc0cc4cc122">文件扩展名</a>
 </li>
 <li>
-<a href="">变量</a>
+<a href="#part-654287f5790">变量</a>
 </li>
 <li>
-<a href="">过滤器</a>
+<a href="#part-37871b6860f08be">过滤器</a>
 </li>
 <li>
-<a href="">模板继承</a>
+<a href="#part-2cf2ea1f8614528d">模板继承</a>
 <ul>
 <li>
 <a href="#super">super</a>
@@ -69,7 +69,7 @@
 </ul>
 </li>
 <li>
-<a href="">标签</a>
+<a href="#part-6542bfecae4">标签</a>
 <ul>
 <li>
 <a href="#if">if</a>
@@ -113,16 +113,16 @@
 </ul>
 </li>
 <li>
-<a href="">关键字参数</a>
+<a href="#part-9d9c663eba1f6097">关键字参数</a>
 </li>
 <li>
-<a href="">注释</a>
+<a href="#part-6542d68b860">注释</a>
 </li>
 <li>
-<a href="">空白字符控制</a>
+<a href="#part-861ece9d8e5ce60c">空白字符控制</a>
 </li>
 <li>
-<a href="">表达式</a>
+<a href="#part-3787096c788cc4a">表达式</a>
 <ul>
 <li>
 <a href="#math">运算 (Math)</a>
@@ -140,7 +140,7 @@
 <a href="#function-calls">函数调用 (Function Calls)</a>
 </li>
 <li>
-<a href="">正则表达式</a>
+<a href="#part-f8640494c1eb9d66">正则表达式</a>
 </li>
 </ul>
 </li>
@@ -162,7 +162,7 @@
 </ul>
 </li>
 <li>
-<a href="">内置的过滤器</a>
+<a href="#part-cda1d805a3577fa5">内置的过滤器</a>
 <ul>
 <li>
 <a href="#default-value-default-boolean">default(value, default, [boolean])</a>
@@ -177,7 +177,7 @@
 <a href="#dump-object">dump (object)</a>
 </li>
 <li>
-<a href="">其他过滤器</a>
+<a href="#part-e05b7664d3942ab3">其他过滤器</a>
 </li>
 </ul>
 </li>
@@ -190,7 +190,7 @@
 
   <div class="col-sm-9 main">
     <div class="locale btn-group"><a href="/nunjucks/templating.html" class="btn btn-default">English</a><a href="/nunjucks/cn/templating.html" class="btn btn-success">中文</a><a href="/nunjucks/fr/templating.html" class="btn btn-default">Français</a></div>
-    <h1 id=">模板</h1>
+    <h1 id="part-6542c9dca76">模板</h1>
 
 <p>这里包括 Nunjuck 所有可用的功能。</p>
 
@@ -199,13 +199,13 @@
 <a href="http://jinja.pocoo.org/docs/">jinja2</a> 的 javascript 的实现，所以如果此文档有什么缺失，你可以直接查看 <a href="http://jinja.pocoo.org/docs/templates/">jinja2 的文档</a>，不过两者之间还存在一些<a href="http://mozilla.github.io/nunjucks/cn/faq.html">差异</a>。</p>
 </blockquote>
 
-<h2 id=">文件扩展名</h2>
+<h2 id="part-d0678dc0cc4cc122">文件扩展名</h2>
 
 <p>虽然你可以用任意扩展名来命名你的Nunjucks模版或文件，但Nunjucks社区还是推荐使用<code>.njk</code>。</p>
 
 <p>如果你在给Nunjucks开发工具或是编辑器上的语法插件时，请记得使用<code>.njk</code>扩展名。</p>
 
-<h2 id=">变量</h2>
+<h2 id="part-654287f5790">变量</h2>
 
 <p>变量会从模板上下文获取，如果你想显示一个变量可以：</p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">username</span> <span class="cp">}}</span><span class="x"></span>
@@ -217,7 +217,7 @@
 <p>如果变量的值为 <code>undefined</code> 或 <code>null</code> 将不显示，引用到 undefined 或 null 对象也是如此 (如 <code>foo</code> 为 undefined，<code>{{ foo }}</code>, <code>{{
 foo.bar }}</code>, <code>{{ foo.bar.baz }}</code> 也不显示)。</p>
 
-<h2 id=">过滤器</h2>
+<h2 id="part-37871b6860f08be">过滤器</h2>
 
 <p>过滤器是一些可以执行变量的函数，通过管道操作符 (<code>|</code>) 调用，并可接受参数。</p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">foo</span> <span class="o">|</span> <span class="nf">title</span> <span class="cp">}}</span><span class="x"></span>
@@ -228,7 +228,7 @@ foo.bar }}</code>, <code>{{ foo.bar.baz }}</code> 也不显示)。</p>
 
 <p>Nunjucks 提供了一些<a href="#%E5%86%85%E7%BD%AE%E7%9A%84%E8%BF%87%E6%BB%A4%E5%99%A8">内置的过滤器</a>，你也可以<a href="api#custom-filters">自定义过滤器</a>。</p>
 
-<h2 id=">模板继承</h2>
+<h2 id="part-2cf2ea1f8614528d">模板继承</h2>
 
 <p>模板继承可以达到模板复用的效果，当写一个模板的时候可以定义 &quot;blocks&quot;，子模板可以覆盖他，同时支持多层继承。</p>
 
@@ -286,7 +286,7 @@ foo.bar }}</code>, <code>{{ foo.bar.baz }}</code> 也不显示)。</p>
 <div class="highlight"><pre><code class="language-text" data-lang="text">This is more content
 Right side!
 </code></pre></div>
-<h2 id=">标签</h2>
+<h2 id="part-6542bfecae4">标签</h2>
 
 <p>标签是一些特殊的区块，它们可以对模板执行一些操作。Nunjucks 包含一些内置的标签，你也可以<a href="api.html#custom-tags">自定义</a>。</p>
 
@@ -562,7 +562,7 @@ Right side!
 </code></pre></div>
 <p>上面的例子将会输出&quot;The result is: 3&quot;。</p>
 
-<h2 id=">关键字参数</h2>
+<h2 id="part-9d9c663eba1f6097">关键字参数</h2>
 
 <p>jinja2 使用 Python 的关键字参数，支持函数，过滤器和宏。Nunjucks 会通过一个调用转换 (calling convention) 来支持。</p>
 
@@ -591,13 +591,13 @@ Right side!
 <p>如下示例，你可以跳过 (&quot;skip&quot;) 位置参数：</p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">foo</span><span class="o">(</span><span class="m">8</span><span class="o">,</span> <span class="nv">z</span><span class="o">=</span><span class="m">7</span><span class="o">)</span> <span class="cp">}}</span><span class="x">      -&gt; 8, , 7, 6</span>
 </code></pre></div>
-<h2 id=">注释</h2>
+<h2 id="part-6542d68b860">注释</h2>
 
 <p>你可以使用 <code>{#</code> and <code>#}</code> 来写注释，渲染时将会去除所有的注释。</p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="c">{# Loop through all the users #}</span><span class="x"></span>
 <span class="cp">{%</span> <span class="k">for</span> <span class="nv">user</span> <span class="k">in</span> <span class="nv">users</span> <span class="cp">%}</span><span class="x">...</span><span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span><span class="x"></span>
 </code></pre></div>
-<h2 id=">空白字符控制</h2>
+<h2 id="part-861ece9d8e5ce60c">空白字符控制</h2>
 
 <p>模板在正常情况会将变量 (variable) 和标签区块 (tag blocks) 周围的空白字符完全输出。有时，你不想输出一些额外的空白字符，但代码又需要一些空白字符来显得整洁。</p>
 
@@ -608,7 +608,7 @@ Right side!
 </code></pre></div>
 <p>上面准确的输出为 &quot;12345&quot;，<code>-%}</code> 会去除标签右侧的空白字符，<code>{%-</code> 会去除标签之前的空白字符。</p>
 
-<h2 id=">表达式</h2>
+<h2 id="part-3787096c788cc4a">表达式</h2>
 
 <p>你可以使用和 javascript 一样的字面量。</p>
 
@@ -728,7 +728,7 @@ Right side!
 <p>如果你传入一个函数，则可以直接调用</p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="nv">foo</span><span class="o">(</span><span class="m">1</span><span class="o">,</span> <span class="m">2</span><span class="o">,</span> <span class="m">3</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
 </code></pre></div>
-<h3 id=">正则表达式</h3>
+<h3 id="part-f8640494c1eb9d66">正则表达式</h3>
 
 <p>你可以像在JavaScript中一样创建一个正则表达式:</p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="o">/</span><span class="err">^</span><span class="nv">foo</span><span class="err">.</span><span class="o">*/</span> <span class="cp">}}</span><span class="x"></span>
@@ -786,7 +786,7 @@ Right side!
 </code></pre></div>
 <p>如果 <code>tags</code> 为 <code>[&quot;food&quot;, &quot;beer&quot;, &quot;dessert&quot;]</code>, 上面将输出 <code>food, beer, dessert</code>。</p>
 
-<h2 id=">内置的过滤器</h2>
+<h2 id="part-cda1d805a3577fa5">内置的过滤器</h2>
 
 <p>Nunjucks已经实现了jinja中的大部分过滤器，同时也新增了一些属于自己的过滤器。
 我们需要为这些过滤器编写文档。下面是一部分过滤器的文档，其他的你可以点击链接查看jinja上的文档。</p>
@@ -821,7 +821,7 @@ Right side!
 
 <p>在一个对象上调用<code>JSON.stringify</code>，并将结果输出到模板上。这在调试时很有用：<code>{{ foo | dump }}</code>。</p>
 
-<h3 id=">其他过滤器</h3>
+<h3 id="part-e05b7664d3942ab3">其他过滤器</h3>
 
 <ul>
 <li><a href="http://jinja.pocoo.org/docs/templates/#abs">abs</a></li>

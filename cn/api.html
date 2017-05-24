@@ -61,7 +61,7 @@
 <a href="#renderstring">renderString</a>
 </li>
 <li>
-<a href="#configure">configure</a>
+<a href="#compile">compile</a>
 </li>
 <li>
 <a href="#configure">configure</a>
@@ -253,9 +253,9 @@
 </code></pre></div>
 </div>
 
-<h3 id="configure">configure</h3>
+<h3 id="compile">compile</h3>
 
-<div class="api-sig"><code>nunjucks.configure([path], [opts]);</code></div>
+<div class="api-sig"><code>nunjucks.compile(str, [env], [path]);</code></div>
 
 <div class="api-desc"><p>将给定的字符串编译成可重复使用的nunjucks模板对象。</p>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="kd">var</span> <span class="nx">template</span> <span class="o">=</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">compile</span><span class="p">(</span><span class="s1">&#39;Hello {{ username }}&#39;</span><span class="p">);</span>

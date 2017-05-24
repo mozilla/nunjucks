@@ -341,8 +341,9 @@ nunjucks does not aim for complete Jinja/Python compatibility, this
 might help users seeking just that.</p>
 
 <p>This adds <code>True</code> and <code>False</code> which map to the JS <code>true</code> and <code>false</code>
-values, as well as augmenting arrays and objects with Python-style
-methods. <a href="https://github.com/mozilla/nunjucks/blob/master/src/jinja-compat.js">Check out the source</a>
+values, allows use of Python slice syntax, and augments arrays and
+objects with Python-style methods.
+<a href="https://github.com/mozilla/nunjucks/blob/master/src/jinja-compat.js">Check out the source</a>
 to see everything it adds.</p>
 </div>
 
@@ -651,7 +652,7 @@ can fire events. You need to call it</p>
         <span class="c1">// setup a process which watches templates here</span>
         <span class="c1">// and call `this.emit(&#39;update&#39;, name)` when a template</span>
         <span class="c1">// is changed</span>
-    <span class="p">}</span>
+    <span class="p">},</span>
 
     <span class="nx">getSource</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
         <span class="c1">// load the template</span>

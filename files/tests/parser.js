@@ -299,6 +299,28 @@
             expect(n.children[0].typename).to.be('Include');
         });
 
+        it('should accept attributes and methods of static arrays, objects and primitives', function() {
+            expect(function () {
+                parser.parse('{{ ([1, 2, 3]).indexOf(1) }}');
+            }).to.not.throwException();
+
+            expect(function () {
+                parser.parse('{{ [1, 2, 3].length }}');
+            }).to.not.throwException();
+
+            expect(function () {
+                parser.parse('{{ "Some String".replace("S", "$") }}');
+            }).to.not.throwException();
+
+            expect(function () {
+                parser.parse('{{ ({ name : "Khalid" }).name }}');
+            }).to.not.throwException();
+
+            expect(function () {
+                parser.parse('{{ 1.618.toFixed(2) }}');
+            }).to.not.throwException();
+        });
+
         it('should parse include tags', function() {
 
             var n = parser.parse('{% include "test.njk" %}');

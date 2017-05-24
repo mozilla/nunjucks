@@ -225,6 +225,9 @@
 <a href="#lower">lower</a>
 </li>
 <li>
+<a href="#nl2br">nl2br</a>
+</li>
+<li>
 <a href="#random">random</a>
 </li>
 <li>
@@ -358,7 +361,7 @@ Ils sont appelés avec le caractère &quot;pipe&quot; (<code>|</code>) et peuven
 <a href="#filtres-intgrs">filtres intégrés</a> et vous pouvez aussi
 <a href="api.html#filtres-personnalis-s">ajouter vos propres filtres</a>.</p>
 
-<h2 id="l-39-h-ritage-de-template">L&#39;héritage de template</h2>
+<h2 id="lh-ritage-de-template">L&#39;héritage de template</h2>
 
 <p>L&#39;héritage de template est moyen qui facilite la réutilisation des templates. Lors
 de l&#39;écriture d&#39;un template, vous pouvez définir des &quot;blocs&quot; que des templates enfants
@@ -834,13 +837,16 @@ voulez pas les espaces supplémentaires, mais vous voulez continuer à formater 
 proprement, ce qui nécessite des espaces.</p>
 
 <p>Vous pouvez dire au moteur d&#39;enlever les espaces de début et de fin en ajoutant le signe
-moins (<code>-</code>) sur le tag de début ou de fin..</p>
+moins (<code>-</code>) sur le tag de début ou de fin d&#39;un bloc ou d&#39;une variable.</p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">for</span> <span class="nv">i</span> <span class="k">in</span> <span class="o">[</span><span class="m">1</span><span class="o">,</span><span class="m">2</span><span class="o">,</span><span class="m">3</span><span class="o">,</span><span class="m">4</span><span class="o">,</span><span class="m">5</span><span class="o">]</span> -<span class="cp">%}</span><span class="x"></span>
 <span class="x">  </span><span class="cp">{{</span> <span class="nv">i</span> <span class="cp">}}</span><span class="x"></span>
 <span class="cp">{%</span>- <span class="k">endfor</span> <span class="cp">%}</span><span class="x"></span>
 </code></pre></div>
 <p>L&#39;affichage exact de l&#39;exemple du dessus sera &quot;12345&quot;. Le <code>{%-</code> enlève les espaces à
 droite avant le tag et le <code>-%}</code> enlève les espaces à droite après le tag.</p>
+
+<p>C&#39;est la même chose pour les variables: <code>{{-</code> enlève les espaces avant la variable,
+et <code>-}}</code> enlève les espaces après la variable.</p>
 
 <h2 id="expressions">Expressions</h2>
 
@@ -927,9 +933,11 @@ normalement.</p>
 </code></pre></div>
 <h3 id="expressions-r-guli-res">Expressions régulières</h3>
 
-<p>Une expression régulière peut être créée comme en JavaScript :</p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="o">/</span><span class="err">^</span><span class="nv">foo</span><span class="err">.</span><span class="o">*/</span> <span class="cp">}}</span><span class="x"></span>
-<span class="cp">{{</span> <span class="o">/</span><span class="nv">bar</span><span class="err">$</span><span class="o">/</span><span class="nv">g</span> <span class="cp">}}</span><span class="x"></span>
+<p>Une expression régulière peut être créée comme en JavaScript, mais elle a besoin d&#39;être précédée par <code>r</code> :</p>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">set</span> <span class="nv">regExp</span> <span class="o">=</span> <span class="nv">r</span><span class="o">/</span><span class="p">^</span><span class="nv">foo</span><span class="p">.</span><span class="o">*/</span><span class="nv">g</span> <span class="cp">%}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">if</span> <span class="nv">regExp.test</span><span class="o">(</span><span class="s1">&#39;foo&#39;</span><span class="o">)</span> <span class="cp">%}</span><span class="x"></span>
+<span class="x">  Foo dans la maison !</span>
+<span class="cp">{%</span> <span class="k">endif</span> <span class="cp">%}</span><span class="x"></span>
 </code></pre></div>
 <p>Les flags supportés sont les suivants. Voir
 <a href="https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Objets_globaux/RegExp">Regex sur MDN</a>
@@ -1302,6 +1310,16 @@ Si c&#39;est une chaine, la liste retournée sera une liste de caractères.</p>
 <p><strong>Sortie</strong></p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="x">foobar</span>
 </code></pre></div>
+<h3 id="nl2br">nl2br</h3>
+
+<p>Remplace les nouvelles lignes par des éléments HTML <code>&lt;br /&gt;</code> :</p>
+
+<p><strong>Entrée</strong></p>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="s2">&quot;foo\nbar&quot;</span> <span class="o">|</span> <span class="nf">striptags</span><span class="o">(</span><span class="kp">true</span><span class="o">)</span> <span class="o">|</span> <span class="nf">escape</span> <span class="o">|</span> <span class="nf">nl2br</span> <span class="cp">}}</span><span class="x"></span>
+</code></pre></div>
+<p><strong>Sortie</strong></p>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="x">foo&lt;br /&gt;\nbar</span>
+</code></pre></div>
 <h3 id="random">random</h3>
 
 <p>Sélectionne une valeur aléatoire depuis un tableau.
@@ -1314,7 +1332,7 @@ Si c&#39;est une chaine, la liste retournée sera une liste de caractères.</p>
 
 <p>Une valeur aléatoire entre 1-9 (dont les bornes sont incluses).</p>
 
-<h3 id="rejectattr-uniquement-pour-le-cas-d-39-un-unique-argument">rejectattr (uniquement pour le cas d&#39;un unique argument)</h3>
+<h3 id="rejectattr-uniquement-pour-le-cas-dun-unique-argument">rejectattr (uniquement pour le cas d&#39;un unique argument)</h3>
 
 <p>Filtre une suite d&#39;objets, en appliquant un test sur l&#39;attribut spécifié
 pour chaque objet et en rejetant les objets où le test réussit.</p>
@@ -1430,7 +1448,7 @@ cela permet à cette variable de ne pas être échappée.</p>
 <p><strong>Sortie</strong></p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="x">foo &lt;a href=&quot;http://www.example.com/&quot;&gt;http://www.example.com/&lt;/a&gt; bar</span>
 </code></pre></div>
-<h3 id="selectattr-uniquement-pour-le-cas-d-39-un-unique-argument">selectattr (uniquement pour le cas d&#39;un unique argument)</h3>
+<h3 id="selectattr-uniquement-pour-le-cas-dun-unique-argument">selectattr (uniquement pour le cas d&#39;un unique argument)</h3>
 
 <p>Filtre une suite d&#39;objets, en appliquant un test sur l&#39;attribut spécifié
 pour chaque objet et en sélectionnant les objets où le test réussit.</p>
@@ -1509,8 +1527,8 @@ chaque élément.</p>
 <code>preserve_linebreaks</code> est à false (par défaut), cela enlève les balises SGML/XML et remplace
 les espaces adjacents par un seul espace. Si <code>preserve_linebreaks</code> est à true,
 cela normalise les espaces, en essayant de préserver les sauts de lignes originaux. Utiliser le second
-comportement si vous voulez utiliser ceci <code>{{ text | striptags | nl2br }}</code>. Sinon
-utilisez le comportement par défaut.</p>
+comportement si vous voulez utiliser ceci <code>{{ text | striptags(true) | escape | nl2br }}</code>.
+Sinon utilisez le comportement par défaut.</p>
 
 <h3 id="sum">sum</h3>
 

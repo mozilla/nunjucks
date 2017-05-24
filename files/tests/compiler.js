@@ -1153,6 +1153,18 @@
                   ''
                   );
 
+            /**
+             * Capture blocks inside macros were printing to the main buffer instead of
+             * the temporary one, see https://github.com/mozilla/nunjucks/issues/914.
+             **/
+            equal('{%- macro foo(bar) -%}'+
+                  '{%- set test -%}foo{%- endset -%}'+
+                  '{{ bar }}{{ test }}'+
+                  '{%- endmacro -%}'+
+                  '{{ foo("bar") }}',
+                  'barfoo'
+                  );
+
             equal('{% set block_content %}test string{% endset %}'+
                   '{{ block_content }}',
                   'test string'
@@ -1688,5 +1700,43 @@
 
             finish(done);
         });
+
+        it('should allow access to outer scope in call blocks', function(done) {
+            render(
+                '{% macro inside() %}' +
+                '{{ caller() }}' +
+                '{% endmacro %}' +
+                '{% macro outside(var) %}' +
+                '{{ var }}\n' +
+                '{% call inside() %}' +
+                '{{ var }}' +
+                '{% endcall %}' +
+                '{% endmacro %}' +
+                '{{ outside("foobar") }}', {}, {}, function(err, res) {
+                    expect(res.trim()).to.eql('foobar\nfoobar');
+            });
+
+            finish(done);
+        });
+
+        it('should not leak scope from call blocks to parent', function(done) {
+            render(
+                '{% set var = "expected" %}' +
+                '{% macro inside() %}' +
+                '{% set var = "incorrect-value" %}' +
+                '{{ caller() }}' +
+                '{% endmacro %}' +
+                '{% macro outside() %}' +
+                '{% call inside() %}' +
+                '{% endcall %}' +
+                '{% endmacro %}' +
+                '{{ outside() }}' +
+                '{{ var }}', {}, {}, function(err, res) {
+                    expect(res.trim()).to.eql('expected');
+            });
+
+            finish(done);
+        });
+
     });
 })();

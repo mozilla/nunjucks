@@ -1,4 +1,4 @@
-/*! Browser bundle of nunjucks 3.0.0  */
+/*! Browser bundle of nunjucks 3.0.1  */
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
 		module.exports = factory();
@@ -53,14 +53,14 @@ return /******/ (function(modules) { // webpackBootstrap
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	var lib = __webpack_require__(1);
 	var env = __webpack_require__(2);
-	var Loader = __webpack_require__(15);
-	var loaders = __webpack_require__(14);
+	var Loader = __webpack_require__(16);
+	var loaders = __webpack_require__(15);
 	var precompile = __webpack_require__(3);
 
 	module.exports = {};
@@ -75,11 +75,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports.compiler = __webpack_require__(7);
 	module.exports.parser = __webpack_require__(8);
 	module.exports.lexer = __webpack_require__(9);
-	module.exports.runtime = __webpack_require__(12);
+	module.exports.runtime = __webpack_require__(13);
 	module.exports.lib = lib;
 	module.exports.nodes = __webpack_require__(10);
 
-	module.exports.installJinjaCompat = __webpack_require__(21);
+	module.exports.installJinjaCompat = __webpack_require__(22);
 
 	// A single instance of an environment, since this is so commonly used
 
@@ -143,9 +143,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 
-/***/ },
+/***/ }),
 /* 1 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	'use strict';
 
@@ -448,9 +448,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 
-/***/ },
+/***/ }),
 /* 2 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 
@@ -459,17 +459,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	var lib = __webpack_require__(1);
 	var Obj = __webpack_require__(6);
 	var compiler = __webpack_require__(7);
-	var builtin_filters = __webpack_require__(13);
-	var builtin_loaders = __webpack_require__(14);
-	var runtime = __webpack_require__(12);
-	var globals = __webpack_require__(17);
-	var waterfall = __webpack_require__(18);
+	var builtin_filters = __webpack_require__(14);
+	var builtin_loaders = __webpack_require__(15);
+	var runtime = __webpack_require__(13);
+	var globals = __webpack_require__(18);
+	var waterfall = __webpack_require__(19);
 	var Frame = runtime.Frame;
 	var Template;
 
 	// Unconditionally load in this loader, even if no other ones are
 	// included (possible in the slim browser build)
-	builtin_loaders.PrecompiledLoader = __webpack_require__(16);
+	builtin_loaders.PrecompiledLoader = __webpack_require__(17);
 
 	// If the user is using the async API, *always* call it
 	// asynchronously even if the template was synchronous.
@@ -1047,15 +1047,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 
-/***/ },
+/***/ }),
 /* 3 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	
 
-/***/ },
+/***/ }),
 /* 4 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
 
@@ -1125,9 +1125,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 
-/***/ },
+/***/ }),
 /* 5 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {"use strict";
 
@@ -1207,9 +1207,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	// Safari 6 and 6.1 for desktop, iPad, and iPhone are the only browsers that
 	// have WebKitMutationObserver but not un-prefixed MutationObserver.
-	// Must use `global` instead of `window` to work in both frames and web
+	// Must use `global` or `self` instead of `window` to work in both frames and web
 	// workers. `global` is a provision of Browserify, Mr, Mrs, or Mop.
-	var BrowserMutationObserver = global.MutationObserver || global.WebKitMutationObserver;
+
+	/* globals self */
+	var scope = typeof global !== "undefined" ? global : self;
+	var BrowserMutationObserver = scope.MutationObserver || scope.WebKitMutationObserver;
 
 	// MutationObservers are desirable because they have high priority and work
 	// reliably everywhere they are implemented.
@@ -1352,9 +1355,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
-/***/ },
+/***/ }),
 /* 6 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	'use strict';
 
@@ -1422,19 +1425,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = extend(Object, 'Object', {});
 
 
-/***/ },
+/***/ }),
 /* 7 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	var lib = __webpack_require__(1);
 	var parser = __webpack_require__(8);
-	var transformer = __webpack_require__(11);
+	var transformer = __webpack_require__(12);
 	var nodes = __webpack_require__(10);
 	// jshint -W079
 	var Object = __webpack_require__(6);
-	var Frame = __webpack_require__(12).Frame;
+	var Frame = __webpack_require__(13).Frame;
 
 	// These are all the same for now, but shouldn't be passed straight
 	// through
@@ -2223,10 +2226,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this._compileAsyncLoop(node, frame, true);
 	    },
 
-	    _compileMacro: function(node) {
+	    _compileMacro: function(node, frame) {
 	        var args = [];
 	        var kwargs = null;
 	        var funcId = 'macro_' + this.tmpid();
+	        var keepFrame = (frame !== undefined);
 
 	        // Type check the definition of the args
 	        lib.each(node.args.children, function(arg, i) {
@@ -2252,14 +2256,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	        // arguments so support setting positional args with keywords
 	        // args and passing keyword args as positional args
 	        // (essentially default values). See runtime.js.
-	        var frame = new Frame();
+	        if (keepFrame) {
+	            frame = frame.push(true);
+	        } else {
+	            frame = new Frame();
+	        }
 	        this.emitLines(
 	            'var ' + funcId + ' = runtime.makeMacro(',
 	            '[' + argNames.join(', ') + '], ',
 	            '[' + kwargNames.join(', ') + '], ',
 	            'function (' + realNames.join(', ') + ') {',
 	            'var callerFrame = frame;',
-	            'frame = new runtime.Frame();',
+	            'frame = ' + ((keepFrame) ? 'frame.push(true);' : 'new runtime.Frame();'),
 	            'kwargs = kwargs || {};',
 	            'if (kwargs.hasOwnProperty("caller")) {',
 	            'frame.set("caller", kwargs.caller); }'
@@ -2293,7 +2301,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	          this.compile(node.body, frame);
 	        });
 
-	        this.emitLine('frame = callerFrame;');
+	        this.emitLine('frame = ' + ((keepFrame) ? 'frame.pop();' : 'callerFrame;'));
 	        this.emitLine('return new runtime.SafeString(' + bufferId + ');');
 	        this.emitLine('});');
 	        this.popBufferId();
@@ -2302,7 +2310,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    },
 
 	    compileMacro: function(node, frame) {
-	        var funcId = this._compileMacro(node, frame);
+	        var funcId = this._compileMacro(node);
 
 	        // Expose the macro to the templates
 	        var name = node.name.value;
@@ -2487,6 +2495,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    },
 
 	    compileCapture: function(node, frame) {
+	        // we need to temporarily override the current buffer id as 'output'
+	        // so the set block writes to the capture output instead of the buffer
+	        var buffer = this.buffer;
+	        this.buffer = 'output';
 	        this.emitLine('(function() {');
 	        this.emitLine('var output = "";');
 	        this.withScopedSyntax(function () {
@@ -2494,6 +2506,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        });
 	        this.emitLine('return output;');
 	        this.emitLine('})()');
+	        // and of course, revert back to the old buffer id
+	        this.buffer = buffer;
 	    },
 
 	    compileOutput: function(node, frame) {
@@ -2624,9 +2638,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 
-/***/ },
+/***/ }),
 /* 8 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 
@@ -3598,16 +3612,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	        else if(tok.type === lexer.TOKEN_SYMBOL) {
 	            node = new nodes.Symbol(tok.lineno, tok.colno, tok.value);
-
-	            if(!noPostfix) {
-	                node = this.parsePostfix(node);
-	            }
 	        }
 	        else {
 	            // See if it's an aggregate type, we need to push the
 	            // current delimiter token back on
 	            this.pushToken(tok);
 	            node = this.parseAggregate();
+	        }
+
+	        if(!noPostfix) {
+	            node = this.parsePostfix(node);
 	        }
 
 	        if(node) {
@@ -3924,13 +3938,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	            p.extensions = extensions;
 	        }
 	        return p.parseAsRoot();
-	    }
+	    },
+	    Parser: Parser
 	};
 
 
-/***/ },
+/***/ }),
 /* 9 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 
@@ -4456,9 +4471,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 
-/***/ },
+/***/ }),
 /* 10 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
 
@@ -4764,11 +4779,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	    printNodes: printNodes
 	};
 
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(3)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
-/***/ },
+/***/ }),
 /* 11 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports) {
+
+	
+
+/***/ }),
+/* 12 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 
@@ -5011,9 +5032,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 
-/***/ },
-/* 12 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 13 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 
@@ -5379,14 +5400,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 
-/***/ },
-/* 13 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 14 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	var lib = __webpack_require__(1);
-	var r = __webpack_require__(12);
+	var r = __webpack_require__(13);
 
 	function normalize(value, defaultValue) {
 	    if(value === null || value === undefined || value === false) {
@@ -5396,9 +5417,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	var filters = {
-	    abs: function(n) {
-	        return Math.abs(n);
-	    },
+	    abs: Math.abs,
 
 	    batch: function(arr, linecount, fill_with) {
 	        var i;
@@ -5978,14 +5997,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = filters;
 
 
-/***/ },
-/* 14 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 15 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var Loader = __webpack_require__(15);
-	var PrecompiledLoader = __webpack_require__(16);
+	var Loader = __webpack_require__(16);
+	var PrecompiledLoader = __webpack_require__(17);
 
 	var WebLoader = Loader.extend({
 	    init: function(baseURL, opts) {
@@ -6080,9 +6099,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 
-/***/ },
-/* 15 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 16 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 
@@ -6119,13 +6138,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = Loader;
 
 
-/***/ },
-/* 16 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 17 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var Loader = __webpack_require__(15);
+	var Loader = __webpack_require__(16);
 
 	var PrecompiledLoader = Loader.extend({
 	    init: function(compiledTemplates) {
@@ -6147,9 +6166,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = PrecompiledLoader;
 
 
-/***/ },
-/* 17 */
-/***/ function(module, exports) {
+/***/ }),
+/* 18 */
+/***/ (function(module, exports) {
 
 	'use strict';
 
@@ -6232,9 +6251,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = globals;
 
 
-/***/ },
-/* 18 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 19 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(setImmediate, process) {// MIT license (by Elan Shanker).
 	(function(globals) {
@@ -6320,17 +6339,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	})(this);
 
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(19).setImmediate, __webpack_require__(3)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(20).setImmediate, __webpack_require__(11)))
 
-/***/ },
-/* 19 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 20 */
+/***/ (function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function(setImmediate, clearImmediate) {var nextTick = __webpack_require__(20).nextTick;
 	var apply = Function.prototype.apply;
-	var slice = Array.prototype.slice;
-	var immediateIds = {};
-	var nextImmediateId = 0;
 
 	// DOM APIs, for completeness
 
@@ -6341,7 +6356,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return new Timeout(apply.call(setInterval, window, arguments), clearInterval);
 	};
 	exports.clearTimeout =
-	exports.clearInterval = function(timeout) { timeout.close(); };
+	exports.clearInterval = function(timeout) {
+	  if (timeout) {
+	    timeout.close();
+	  }
+	};
 
 	function Timeout(id, clearFn) {
 	  this._id = id;
@@ -6375,298 +6394,516 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	};
 
-	// That's not how node.js implements it but the exposed api is the same.
-	exports.setImmediate = typeof setImmediate === "function" ? setImmediate : function(fn) {
-	  var id = nextImmediateId++;
-	  var args = arguments.length < 2 ? false : slice.call(arguments, 1);
+	// setimmediate attaches itself to the global object
+	__webpack_require__(21);
+	exports.setImmediate = setImmediate;
+	exports.clearImmediate = clearImmediate;
 
-	  immediateIds[id] = true;
 
-	  nextTick(function onNextTick() {
-	    if (immediateIds[id]) {
-	      // fn.call() is faster so we optimize for the common use-case
-	      // @see http://jsperf.com/call-apply-segu
-	      if (args) {
-	        fn.apply(null, args);
-	      } else {
-	        fn.call(null);
-	      }
-	      // Prevent ids from leaking
-	      exports.clearImmediate(id);
-	    }
-	  });
+/***/ }),
+/* 21 */
+/***/ (function(module, exports, __webpack_require__) {
 
-	  return id;
-	};
+	/* WEBPACK VAR INJECTION */(function(global, process) {(function (global, undefined) {
+	    "use strict";
 
-	exports.clearImmediate = typeof clearImmediate === "function" ? clearImmediate : function(id) {
-	  delete immediateIds[id];
-	};
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(19).setImmediate, __webpack_require__(19).clearImmediate))
-
-/***/ },
-/* 20 */
-/***/ function(module, exports) {
-
-	// shim for using process in browser
-
-	var process = module.exports = {};
-	var queue = [];
-	var draining = false;
-	var currentQueue;
-	var queueIndex = -1;
-
-	function cleanUpNextTick() {
-	    draining = false;
-	    if (currentQueue.length) {
-	        queue = currentQueue.concat(queue);
-	    } else {
-	        queueIndex = -1;
-	    }
-	    if (queue.length) {
-	        drainQueue();
-	    }
-	}
-
-	function drainQueue() {
-	    if (draining) {
+	    if (global.setImmediate) {
 	        return;
 	    }
-	    var timeout = setTimeout(cleanUpNextTick);
-	    draining = true;
 
-	    var len = queue.length;
-	    while(len) {
-	        currentQueue = queue;
-	        queue = [];
-	        while (++queueIndex < len) {
-	            if (currentQueue) {
-	                currentQueue[queueIndex].run();
+	    var nextHandle = 1; // Spec says greater than zero
+	    var tasksByHandle = {};
+	    var currentlyRunningATask = false;
+	    var doc = global.document;
+	    var registerImmediate;
+
+	    function setImmediate(callback) {
+	      // Callback can either be a function or a string
+	      if (typeof callback !== "function") {
+	        callback = new Function("" + callback);
+	      }
+	      // Copy function arguments
+	      var args = new Array(arguments.length - 1);
+	      for (var i = 0; i < args.length; i++) {
+	          args[i] = arguments[i + 1];
+	      }
+	      // Store and register the task
+	      var task = { callback: callback, args: args };
+	      tasksByHandle[nextHandle] = task;
+	      registerImmediate(nextHandle);
+	      return nextHandle++;
+	    }
+
+	    function clearImmediate(handle) {
+	        delete tasksByHandle[handle];
+	    }
+
+	    function run(task) {
+	        var callback = task.callback;
+	        var args = task.args;
+	        switch (args.length) {
+	        case 0:
+	            callback();
+	            break;
+	        case 1:
+	            callback(args[0]);
+	            break;
+	        case 2:
+	            callback(args[0], args[1]);
+	            break;
+	        case 3:
+	            callback(args[0], args[1], args[2]);
+	            break;
+	        default:
+	            callback.apply(undefined, args);
+	            break;
+	        }
+	    }
+
+	    function runIfPresent(handle) {
+	        // From the spec: "Wait until any invocations of this algorithm started before this one have completed."
+	        // So if we're currently running a task, we'll need to delay this invocation.
+	        if (currentlyRunningATask) {
+	            // Delay by doing a setTimeout. setImmediate was tried instead, but in Firefox 7 it generated a
+	            // "too much recursion" error.
+	            setTimeout(runIfPresent, 0, handle);
+	        } else {
+	            var task = tasksByHandle[handle];
+	            if (task) {
+	                currentlyRunningATask = true;
+	                try {
+	                    run(task);
+	                } finally {
+	                    clearImmediate(handle);
+	                    currentlyRunningATask = false;
+	                }
 	            }
 	        }
-	        queueIndex = -1;
-	        len = queue.length;
 	    }
-	    currentQueue = null;
-	    draining = false;
-	    clearTimeout(timeout);
-	}
 
-	process.nextTick = function (fun) {
-	    var args = new Array(arguments.length - 1);
-	    if (arguments.length > 1) {
-	        for (var i = 1; i < arguments.length; i++) {
-	            args[i - 1] = arguments[i];
+	    function installNextTickImplementation() {
+	        registerImmediate = function(handle) {
+	            process.nextTick(function () { runIfPresent(handle); });
+	        };
+	    }
+
+	    function canUsePostMessage() {
+	        // The test against `importScripts` prevents this implementation from being installed inside a web worker,
+	        // where `global.postMessage` means something completely different and can't be used for this purpose.
+	        if (global.postMessage && !global.importScripts) {
+	            var postMessageIsAsynchronous = true;
+	            var oldOnMessage = global.onmessage;
+	            global.onmessage = function() {
+	                postMessageIsAsynchronous = false;
+	            };
+	            global.postMessage("", "*");
+	            global.onmessage = oldOnMessage;
+	            return postMessageIsAsynchronous;
 	        }
 	    }
-	    queue.push(new Item(fun, args));
-	    if (queue.length === 1 && !draining) {
-	        setTimeout(drainQueue, 0);
+
+	    function installPostMessageImplementation() {
+	        // Installs an event handler on `global` for the `message` event: see
+	        // * https://developer.mozilla.org/en/DOM/window.postMessage
+	        // * http://www.whatwg.org/specs/web-apps/current-work/multipage/comms.html#crossDocumentMessages
+
+	        var messagePrefix = "setImmediate$" + Math.random() + "$";
+	        var onGlobalMessage = function(event) {
+	            if (event.source === global &&
+	                typeof event.data === "string" &&
+	                event.data.indexOf(messagePrefix) === 0) {
+	                runIfPresent(+event.data.slice(messagePrefix.length));
+	            }
+	        };
+
+	        if (global.addEventListener) {
+	            global.addEventListener("message", onGlobalMessage, false);
+	        } else {
+	            global.attachEvent("onmessage", onGlobalMessage);
+	        }
+
+	        registerImmediate = function(handle) {
+	            global.postMessage(messagePrefix + handle, "*");
+	        };
 	    }
-	};
 
-	// v8 likes predictible objects
-	function Item(fun, array) {
-	    this.fun = fun;
-	    this.array = array;
-	}
-	Item.prototype.run = function () {
-	    this.fun.apply(null, this.array);
-	};
-	process.title = 'browser';
-	process.browser = true;
-	process.env = {};
-	process.argv = [];
-	process.version = ''; // empty string to avoid regexp issues
-	process.versions = {};
+	    function installMessageChannelImplementation() {
+	        var channel = new MessageChannel();
+	        channel.port1.onmessage = function(event) {
+	            var handle = event.data;
+	            runIfPresent(handle);
+	        };
 
-	function noop() {}
+	        registerImmediate = function(handle) {
+	            channel.port2.postMessage(handle);
+	        };
+	    }
 
-	process.on = noop;
-	process.addListener = noop;
-	process.once = noop;
-	process.off = noop;
-	process.removeListener = noop;
-	process.removeAllListeners = noop;
-	process.emit = noop;
+	    function installReadyStateChangeImplementation() {
+	        var html = doc.documentElement;
+	        registerImmediate = function(handle) {
+	            // Create a <script> element; its readystatechange event will be fired asynchronously once it is inserted
+	            // into the document. Do so, thus queuing up the task. Remember to clean up once it's been called.
+	            var script = doc.createElement("script");
+	            script.onreadystatechange = function () {
+	                runIfPresent(handle);
+	                script.onreadystatechange = null;
+	                html.removeChild(script);
+	                script = null;
+	            };
+	            html.appendChild(script);
+	        };
+	    }
 
-	process.binding = function (name) {
-	    throw new Error('process.binding is not supported');
-	};
+	    function installSetTimeoutImplementation() {
+	        registerImmediate = function(handle) {
+	            setTimeout(runIfPresent, 0, handle);
+	        };
+	    }
 
-	process.cwd = function () { return '/' };
-	process.chdir = function (dir) {
-	    throw new Error('process.chdir is not supported');
-	};
-	process.umask = function() { return 0; };
+	    // If supported, we should attach to the prototype of global, since that is where setTimeout et al. live.
+	    var attachTo = Object.getPrototypeOf && Object.getPrototypeOf(global);
+	    attachTo = attachTo && attachTo.setTimeout ? attachTo : global;
 
+	    // Don't get fooled by e.g. browserify environments.
+	    if ({}.toString.call(global.process) === "[object process]") {
+	        // For Node.js before 0.9
+	        installNextTickImplementation();
 
-/***/ },
-/* 21 */
-/***/ function(module, exports) {
+	    } else if (canUsePostMessage()) {
+	        // For non-IE10 modern browsers
+	        installPostMessageImplementation();
+
+	    } else if (global.MessageChannel) {
+	        // For web workers, where supported
+	        installMessageChannelImplementation();
+
+	    } else if (doc && "onreadystatechange" in doc.createElement("script")) {
+	        // For IE 6–8
+	        installReadyStateChangeImplementation();
+
+	    } else {
+	        // For older browsers
+	        installSetTimeoutImplementation();
+	    }
+
+	    attachTo.setImmediate = setImmediate;
+	    attachTo.clearImmediate = clearImmediate;
+	}(typeof self === "undefined" ? typeof global === "undefined" ? this : global : self));
+
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }()), __webpack_require__(11)))
+
+/***/ }),
+/* 22 */
+/***/ (function(module, exports) {
 
 	function installCompat() {
-	  'use strict';
+	    'use strict';
 
-	  // This must be called like `nunjucks.installCompat` so that `this`
-	  // references the nunjucks instance
-	  var runtime = this.runtime; // jshint ignore:line
-	  var lib = this.lib; // jshint ignore:line
+	    // This must be called like `nunjucks.installCompat` so that `this`
+	    // references the nunjucks instance
+	    var runtime = this.runtime; // jshint ignore:line
+	    var lib = this.lib; // jshint ignore:line
+	    var Compiler = this.compiler.Compiler; // jshint ignore:line
+	    var Parser = this.parser.Parser; // jshint ignore:line
+	    var nodes = this.nodes; // jshint ignore:line
+	    var lexer = this.lexer; // jshint ignore:line
 
-	  var orig_contextOrFrameLookup = runtime.contextOrFrameLookup;
-	  runtime.contextOrFrameLookup = function(context, frame, key) {
-	    var val = orig_contextOrFrameLookup.apply(this, arguments);
-	    if (val === undefined) {
-	      switch (key) {
-	      case 'True':
-	        return true;
-	      case 'False':
-	        return false;
-	      case 'None':
-	        return null;
-	      }
+	    var orig_contextOrFrameLookup = runtime.contextOrFrameLookup;
+	    var orig_Compiler_assertType = Compiler.prototype.assertType;
+	    var orig_Parser_parseAggregate = Parser.prototype.parseAggregate;
+	    var orig_memberLookup = runtime.memberLookup;
+
+	    function uninstall() {
+	        runtime.contextOrFrameLookup = orig_contextOrFrameLookup;
+	        Compiler.prototype.assertType = orig_Compiler_assertType;
+	        Parser.prototype.parseAggregate = orig_Parser_parseAggregate;
+	        runtime.memberLookup = orig_memberLookup;
 	    }
 
-	    return val;
-	  };
-
-	  var orig_memberLookup = runtime.memberLookup;
-	  var ARRAY_MEMBERS = {
-	    pop: function(index) {
-	      if (index === undefined) {
-	        return this.pop();
-	      }
-	      if (index >= this.length || index < 0) {
-	        throw new Error('KeyError');
-	      }
-	      return this.splice(index, 1);
-	    },
-	    append: function(element) {
-	        return this.push(element);
-	    },
-	    remove: function(element) {
-	      for (var i = 0; i < this.length; i++) {
-	        if (this[i] === element) {
-	          return this.splice(i, 1);
+	    runtime.contextOrFrameLookup = function(context, frame, key) {
+	        var val = orig_contextOrFrameLookup.apply(this, arguments);
+	        if (val === undefined) {
+	            switch (key) {
+	            case 'True':
+	                return true;
+	            case 'False':
+	                return false;
+	            case 'None':
+	                return null;
+	            }
 	        }
-	      }
-	      throw new Error('ValueError');
-	    },
-	    count: function(element) {
-	      var count = 0;
-	      for (var i = 0; i < this.length; i++) {
-	        if (this[i] === element) {
-	          count++;
+
+	        return val;
+	    };
+
+	    var Slice = nodes.Node.extend('Slice', {
+	        fields: ['start', 'stop', 'step'],
+	        init: function(lineno, colno, start, stop, step) {
+	            start = start || new nodes.Literal(lineno, colno, null);
+	            stop = stop || new nodes.Literal(lineno, colno, null);
+	            step = step || new nodes.Literal(lineno, colno, 1);
+	            this.parent(lineno, colno, start, stop, step);
 	        }
-	      }
-	      return count;
-	    },
-	    index: function(element) {
-	      var i;
-	      if ((i = this.indexOf(element)) === -1) {
-	        throw new Error('ValueError');
-	      }
-	      return i;
-	    },
-	    find: function(element) {
-	      return this.indexOf(element);
-	    },
-	    insert: function(index, elem) {
-	      return this.splice(index, 0, elem);
-	    }
-	  };
-	  var OBJECT_MEMBERS = {
-	    items: function() {
-	      var ret = [];
-	      for(var k in this) {
-	        ret.push([k, this[k]]);
-	      }
-	      return ret;
-	    },
-	    values: function() {
-	      var ret = [];
-	      for(var k in this) {
-	        ret.push(this[k]);
-	      }
-	      return ret;
-	    },
-	    keys: function() {
-	      var ret = [];
-	      for(var k in this) {
-	        ret.push(k);
-	      }
-	      return ret;
-	    },
-	    get: function(key, def) {
-	      var output = this[key];
-	      if (output === undefined) {
-	        output = def;
-	      }
-	      return output;
-	    },
-	    has_key: function(key) {
-	      return this.hasOwnProperty(key);
-	    },
-	    pop: function(key, def) {
-	      var output = this[key];
-	      if (output === undefined && def !== undefined) {
-	        output = def;
-	      } else if (output === undefined) {
-	        throw new Error('KeyError');
-	      } else {
-	        delete this[key];
-	      }
-	      return output;
-	    },
-	    popitem: function() {
-	      for (var k in this) {
-	        // Return the first object pair.
-	        var val = this[k];
-	        delete this[k];
-	        return [k, val];
-	      }
-	      throw new Error('KeyError');
-	    },
-	    setdefault: function(key, def) {
-	      if (key in this) {
-	        return this[key];
-	      }
-	      if (def === undefined) {
-	        def = null;
-	      }
-	      return this[key] = def;
-	    },
-	    update: function(kwargs) {
-	      for (var k in kwargs) {
-	        this[k] = kwargs[k];
-	      }
-	      return null;  // Always returns None
-	    }
-	  };
-	  OBJECT_MEMBERS.iteritems = OBJECT_MEMBERS.items;
-	  OBJECT_MEMBERS.itervalues = OBJECT_MEMBERS.values;
-	  OBJECT_MEMBERS.iterkeys = OBJECT_MEMBERS.keys;
-	  runtime.memberLookup = function(obj, val, autoescape) { // jshint ignore:line
-	    obj = obj || {};
+	    });
 
-	    // If the object is an object, return any of the methods that Python would
-	    // otherwise provide.
-	    if (lib.isArray(obj) && ARRAY_MEMBERS.hasOwnProperty(val)) {
-	      return function() {return ARRAY_MEMBERS[val].apply(obj, arguments);};
+	    Compiler.prototype.assertType = function(node) {
+	        if (node instanceof Slice) {
+	            return;
+	        }
+	        return orig_Compiler_assertType.apply(this, arguments);
+	    };
+	    Compiler.prototype.compileSlice = function(node, frame) {
+	        this.emit('(');
+	        this._compileExpression(node.start, frame);
+	        this.emit('),(');
+	        this._compileExpression(node.stop, frame);
+	        this.emit('),(');
+	        this._compileExpression(node.step, frame);
+	        this.emit(')');
+	    };
+
+	    function getTokensState(tokens) {
+	        return {
+	            index: tokens.index,
+	            lineno: tokens.lineno,
+	            colno: tokens.colno
+	        };
 	    }
 
-	    if (lib.isObject(obj) && OBJECT_MEMBERS.hasOwnProperty(val)) {
-	      return function() {return OBJECT_MEMBERS[val].apply(obj, arguments);};
+	    Parser.prototype.parseAggregate = function() {
+	        var self = this;
+	        var origState = getTokensState(this.tokens);
+	        // Set back one accounting for opening bracket/parens
+	        origState.colno--;
+	        origState.index--;
+	        try {
+	            return orig_Parser_parseAggregate.apply(this);
+	        } catch(e) {
+	            var errState = getTokensState(this.tokens);
+	            var rethrow = function() {
+	                lib.extend(self.tokens, errState);
+	                return e;
+	            };
+
+	            // Reset to state before original parseAggregate called
+	            lib.extend(this.tokens, origState);
+	            this.peeked = false;
+
+	            var tok = this.peekToken();
+	            if (tok.type !== lexer.TOKEN_LEFT_BRACKET) {
+	                throw rethrow();
+	            } else {
+	                this.nextToken();
+	            }
+
+	            var node = new Slice(tok.lineno, tok.colno);
+
+	            // If we don't encounter a colon while parsing, this is not a slice,
+	            // so re-raise the original exception.
+	            var isSlice = false;
+
+	            for (var i = 0; i <= node.fields.length; i++) {
+	                if (this.skip(lexer.TOKEN_RIGHT_BRACKET)) {
+	                    break;
+	                }
+	                if (i === node.fields.length) {
+	                    if (isSlice) {
+	                        this.fail('parseSlice: too many slice components', tok.lineno, tok.colno);
+	                    } else {
+	                        break;
+	                    }
+	                }
+	                if (this.skip(lexer.TOKEN_COLON)) {
+	                    isSlice = true;
+	                } else {
+	                    var field = node.fields[i];
+	                    node[field] = this.parseExpression();
+	                    isSlice = this.skip(lexer.TOKEN_COLON) || isSlice;
+	                }
+	            }
+	            if (!isSlice) {
+	                throw rethrow();
+	            }
+	            return new nodes.Array(tok.lineno, tok.colno, [node]);
+	        }
+	    };
+
+	    function sliceLookup(obj, start, stop, step) {
+	        obj = obj || [];
+	        if (start === null) {
+	            start = (step < 0) ? (obj.length - 1) : 0;
+	        }
+	        if (stop === null) {
+	            stop = (step < 0) ? -1 : obj.length;
+	        } else {
+	            if (stop < 0) {
+	                stop += obj.length;
+	            }
+	        }
+
+	        if (start < 0) {
+	            start += obj.length;
+	        }
+
+	        var results = [];
+
+	        for (var i = start; ; i += step) {
+	            if (i < 0 || i > obj.length) {
+	                break;
+	            }
+	            if (step > 0 && i >= stop) {
+	                break;
+	            }
+	            if (step < 0 && i <= stop) {
+	                break;
+	            }
+	            results.push(runtime.memberLookup(obj, i));
+	        }
+	        return results;
 	    }
 
-	    return orig_memberLookup.apply(this, arguments);
-	  };
+	    var ARRAY_MEMBERS = {
+	        pop: function(index) {
+	            if (index === undefined) {
+	                return this.pop();
+	            }
+	            if (index >= this.length || index < 0) {
+	                throw new Error('KeyError');
+	            }
+	            return this.splice(index, 1);
+	        },
+	        append: function(element) {
+	                return this.push(element);
+	        },
+	        remove: function(element) {
+	            for (var i = 0; i < this.length; i++) {
+	                if (this[i] === element) {
+	                    return this.splice(i, 1);
+	                }
+	            }
+	            throw new Error('ValueError');
+	        },
+	        count: function(element) {
+	            var count = 0;
+	            for (var i = 0; i < this.length; i++) {
+	                if (this[i] === element) {
+	                    count++;
+	                }
+	            }
+	            return count;
+	        },
+	        index: function(element) {
+	            var i;
+	            if ((i = this.indexOf(element)) === -1) {
+	                throw new Error('ValueError');
+	            }
+	            return i;
+	        },
+	        find: function(element) {
+	            return this.indexOf(element);
+	        },
+	        insert: function(index, elem) {
+	            return this.splice(index, 0, elem);
+	        }
+	    };
+	    var OBJECT_MEMBERS = {
+	        items: function() {
+	            var ret = [];
+	            for(var k in this) {
+	                ret.push([k, this[k]]);
+	            }
+	            return ret;
+	        },
+	        values: function() {
+	            var ret = [];
+	            for(var k in this) {
+	                ret.push(this[k]);
+	            }
+	            return ret;
+	        },
+	        keys: function() {
+	            var ret = [];
+	            for(var k in this) {
+	                ret.push(k);
+	            }
+	            return ret;
+	        },
+	        get: function(key, def) {
+	            var output = this[key];
+	            if (output === undefined) {
+	                output = def;
+	            }
+	            return output;
+	        },
+	        has_key: function(key) {
+	            return this.hasOwnProperty(key);
+	        },
+	        pop: function(key, def) {
+	            var output = this[key];
+	            if (output === undefined && def !== undefined) {
+	                output = def;
+	            } else if (output === undefined) {
+	                throw new Error('KeyError');
+	            } else {
+	                delete this[key];
+	            }
+	            return output;
+	        },
+	        popitem: function() {
+	            for (var k in this) {
+	                // Return the first object pair.
+	                var val = this[k];
+	                delete this[k];
+	                return [k, val];
+	            }
+	            throw new Error('KeyError');
+	        },
+	        setdefault: function(key, def) {
+	            if (key in this) {
+	                return this[key];
+	            }
+	            if (def === undefined) {
+	                def = null;
+	            }
+	            return this[key] = def;
+	        },
+	        update: function(kwargs) {
+	            for (var k in kwargs) {
+	                this[k] = kwargs[k];
+	            }
+	            return null;    // Always returns None
+	        }
+	    };
+	    OBJECT_MEMBERS.iteritems = OBJECT_MEMBERS.items;
+	    OBJECT_MEMBERS.itervalues = OBJECT_MEMBERS.values;
+	    OBJECT_MEMBERS.iterkeys = OBJECT_MEMBERS.keys;
+	    runtime.memberLookup = function(obj, val, autoescape) { // jshint ignore:line
+	        if (arguments.length === 4) {
+	            return sliceLookup.apply(this, arguments);
+	        }
+	        obj = obj || {};
+
+	        // If the object is an object, return any of the methods that Python would
+	        // otherwise provide.
+	        if (lib.isArray(obj) && ARRAY_MEMBERS.hasOwnProperty(val)) {
+	            return function() {return ARRAY_MEMBERS[val].apply(obj, arguments);};
+	        }
+
+	        if (lib.isObject(obj) && OBJECT_MEMBERS.hasOwnProperty(val)) {
+	            return function() {return OBJECT_MEMBERS[val].apply(obj, arguments);};
+	        }
+
+	        return orig_memberLookup.apply(this, arguments);
+	    };
+
+	    return uninstall;
 	}
 
 	module.exports = installCompat;
 
 
-/***/ }
+/***/ })
 /******/ ])
 });
 ;
