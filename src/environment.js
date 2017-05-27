@@ -12,6 +12,9 @@ var globals = require('./globals');
 var waterfall = require('a-sync-waterfall');
 var Frame = runtime.Frame;
 var Template;
+// Set the root for global variables (precompiled templates export to this)
+var root = typeof window === 'object' ? window : GLOBAL;
+
 
 // Unconditionally load in this loader, even if no other ones are
 // included (possible in the slim browser build)
@@ -64,9 +67,9 @@ var Environment = Obj.extend({
         // It's easy to use precompiled templates: just include them
         // before you configure nunjucks and this will automatically
         // pick it up and use it
-        if(process.env.IS_BROWSER && window.nunjucksPrecompiled) {
+        if(root.nunjucksPrecompiled) {
             this.loaders.unshift(
-                new builtin_loaders.PrecompiledLoader(window.nunjucksPrecompiled)
+                new builtin_loaders.PrecompiledLoader(root.nunjucksPrecompiled)
             );
         }
 
