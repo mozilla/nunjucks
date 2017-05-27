@@ -495,6 +495,10 @@ var filters = {
         return r.copySafeness(orig, input);
     },
 
+    typeof: function(x) {
+        return typeof x;
+    },
+
     upper: function(str) {
         str = normalize(str, '');
         return str.toUpperCase();
