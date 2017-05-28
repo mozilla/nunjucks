@@ -119,8 +119,15 @@ var Environment = Obj.extend({
         return !!this.extensions[name];
     },
 
-    addGlobal: function(name, value) {
-        this.globals[name] = value;
+    addGlobal: function(name, value, async) {
+        var newValue = value;
+        if (typeof value === "function" && async) {
+            newValue = function () {
+                var argsAsArray = Array.prototype.slice.call(arguments);
+                return value.bind.apply(value, [null].concat(argsAsArray))
+            }
+        }
+        this.globals[name] = newValue;
         return this;
     },
 

@@ -581,6 +581,9 @@ var filters = {
     'int': function(val, def) {
         var res = parseInt(val, 10);
         return isNaN(res) ? def : res;
+    },
+    'async' : function (func,cb) {
+        func(cb);
     }
 };
 
