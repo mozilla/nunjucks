@@ -76,5 +76,18 @@
 
             finish(done);
         });
+
+        it('should skip invoking constructors and render blank output', function(done) {
+            render('{{ a.constructor.__proto__.constructor(\'return "fail"\')() }}',
+                   {},
+                   { noThrow: true },
+                   function(err, res) {
+                       expect(err).to.equal(null);
+                       expect(typeof res).to.be('string');
+                       expect(res).to.be('');
+                   });
+
+            finish(done);
+        });
     });
 })();

@@ -227,6 +227,12 @@ function ensureDefined(val, lineno, colno) {
 function memberLookup(obj, val) {
     obj = obj || {};
 
+    if (val == '__proto__' || val == 'constructor') {
+        return function() {
+            return function() {};
+        }
+    }
+
     if(typeof obj[val] === 'function') {
         return function() {
             return obj[val].apply(obj, arguments);
