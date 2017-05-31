@@ -581,11 +581,33 @@ var filters = {
     'int': function(val, def) {
         var res = parseInt(val, 10);
         return isNaN(res) ? def : res;
+    },
+
+    contains: function(container, item) {
+        if (container instanceof Array) {
+            for (var index = 0; index < container.length; index++) {
+                if (container[index] === item) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        if (typeof container === 'object') {
+            return container[item] !== undefined;
+        }
+
+        if (typeof container === 'string') {
+            return container.indexOf(item) !== -1;
+        }
+
+        throw new lib.TemplateError('contains filter: container is not understood');
     }
 };
 
 // Aliases
 filters.d = filters['default'];
 filters.e = filters.escape;
+filters.has = filters.contains;
 
 module.exports = filters;
