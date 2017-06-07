@@ -80,7 +80,7 @@
     <h1 id="part-2cbe29476c51dc1c">快速上手</h1>
 
 <h2 id="node">Node 端使用</h2>
-<div class="highlight"><pre><code class="language-text" data-lang="text">$ npm install nunjucks
+<div class="highlight"><pre><code class="language-text" data-lang="text"><span></span>$ npm install nunjucks
 </code></pre></div>
 <p>下载后可直接 <code>require(&#39;nunjucks&#39;)</code> 使用</p>
 
@@ -96,10 +96,10 @@
 </ul>
 
 <p>直接用 <code>script</code> 引入文件：</p>
-<div class="highlight"><pre><code class="language-html" data-lang="html"><span class="nt">&lt;script </span><span class="na">src=</span><span class="s">&quot;nunjucks.js&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
+<div class="highlight"><pre><code class="language-html" data-lang="html"><span></span><span class="p">&lt;</span><span class="nt">script</span> <span class="na">src</span><span class="o">=</span><span class="s">&quot;nunjucks.js&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
 </code></pre></div>
 <p>或者可以作为一个 AMD 模块加载：</p>
-<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">define</span><span class="p">([</span><span class="s1">&#39;nunjucks&#39;</span><span class="p">],</span> <span class="kd">function</span><span class="p">(</span><span class="nx">nunjucks</span><span class="p">)</span> <span class="p">{</span>
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span></span><span class="nx">define</span><span class="p">([</span><span class="s1">&#39;nunjucks&#39;</span><span class="p">],</span> <span class="kd">function</span><span class="p">(</span><span class="nx">nunjucks</span><span class="p">)</span> <span class="p">{</span>
 <span class="p">});</span>
 </code></pre></div>
 <blockquote>
@@ -110,18 +110,18 @@
 <h2 id="part-2c030205cb391cff">使用说明</h2>
 
 <p>这是最简单使用 nunjucks 的方式，首先设置配置项(如 autoescaping)，然后渲染一个字符串：</p>
-<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">nunjucks</span><span class="p">.</span><span class="nx">configure</span><span class="p">({</span> <span class="nx">autoescape</span><span class="o">:</span> <span class="kc">true</span> <span class="p">});</span>
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span></span><span class="nx">nunjucks</span><span class="p">.</span><span class="nx">configure</span><span class="p">({</span> <span class="nx">autoescape</span><span class="o">:</span> <span class="kc">true</span> <span class="p">});</span>
 <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">renderString</span><span class="p">(</span><span class="s1">&#39;Hello {{ username }}&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">username</span><span class="o">:</span> <span class="s1">&#39;James&#39;</span> <span class="p">});</span>
 </code></pre></div>
 <p><code>renderString</code> 并不常用，而是使用 <code>render</code> 来直接渲染文件，这种方式支持继承(extends)和包含(include)模板。使用之前需要配置文件的路径：</p>
-<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">nunjucks</span><span class="p">.</span><span class="nx">configure</span><span class="p">(</span><span class="s1">&#39;views&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">autoescape</span><span class="o">:</span> <span class="kc">true</span> <span class="p">});</span>
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span></span><span class="nx">nunjucks</span><span class="p">.</span><span class="nx">configure</span><span class="p">(</span><span class="s1">&#39;views&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">autoescape</span><span class="o">:</span> <span class="kc">true</span> <span class="p">});</span>
 <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="s1">&#39;index.html&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">foo</span><span class="o">:</span> <span class="s1">&#39;bar&#39;</span> <span class="p">});</span>
 </code></pre></div>
 <p>在 node 端，<code>&#39;views&#39;</code> 为相对于当前工作目录 (working
 directory) 的路径。在浏览器端则为一个相对的 url，最好指定为绝对路径 (如 <code>&#39;/views&#39;</code>)。</p>
 
 <p>如果使用 express 可直接传入 <code>configure</code>：</p>
-<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">app</span> <span class="o">=</span> <span class="nx">express</span><span class="p">();</span>
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span></span><span class="kd">var</span> <span class="nx">app</span> <span class="o">=</span> <span class="nx">express</span><span class="p">();</span>
 
 <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">configure</span><span class="p">(</span><span class="s1">&#39;views&#39;</span><span class="p">,</span> <span class="p">{</span>
     <span class="nx">autoescape</span><span class="o">:</span> <span class="kc">true</span><span class="p">,</span>
