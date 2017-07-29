@@ -277,7 +277,7 @@ exports.keys = function(obj) {
     else {
         var keys = [];
         for(var k in obj) {
-            if(obj.hasOwnProperty(k)) {
+            if(Object.prototype.hasOwnProperty.call(obj, k)) {
                 keys.push(k);
             }
         }

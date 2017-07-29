@@ -513,7 +513,7 @@ var filters = {
             } else {
                 parts = [];
                 for (var k in obj) {
-                    if (obj.hasOwnProperty(k)) {
+                    if (Object.prototype.hasOwnProperty.call(obj, k)) {
                         parts.push(enc(k) + '=' + enc(obj[k]));
                     }
                 }

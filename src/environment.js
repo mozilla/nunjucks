@@ -339,7 +339,7 @@ var Context = Obj.extend({
         // Make a duplicate of ctx
         this.ctx = {};
         for(var k in ctx) {
-            if(ctx.hasOwnProperty(k)) {
+            if(Object.prototype.hasOwnProperty.call(ctx, k)) {
                 this.ctx[k] = ctx[k];
             }
         }
