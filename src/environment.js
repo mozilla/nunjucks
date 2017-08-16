@@ -324,7 +324,7 @@ var Environment = Obj.extend({
         }
         opts = opts || {};
 
-        var tmpl = new Template(src, this, opts.path);
+        var tmpl = new Template(src, this, opts.path || ('Source:' + src));
         return tmpl.render(ctx, cb);
     },
 
