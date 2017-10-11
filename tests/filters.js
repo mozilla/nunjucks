@@ -586,6 +586,15 @@
             finish(done);
         });
 
+        it('urlencode - object without prototype', function(done) {
+          var obj = Object.create(null);
+          obj['1'] = 2;
+          obj['&1'] = '&2';
+          
+          equal('{{ obj | urlencode | safe }}', { obj: obj}, '1=2&%261=%262');
+          finish(done);
+        });
+
         it('urlize', function(done) {
             // from jinja test suite:
             // https://github.com/mitsuhiko/jinja2/blob/8db47916de0e888dd8664b2511e220ab5ecf5c15/jinja2/testsuite/filters.py#L236-L239

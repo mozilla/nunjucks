@@ -5,6 +5,8 @@ Changelog
 master (unreleased)
 -------------------
 
+* Support objects created with Object.create(null). fixes [#468](https://github.com/mozilla/nunjucks/issues/468)
+  
 
 3.0.1 (May 24 2017)
 -------------------

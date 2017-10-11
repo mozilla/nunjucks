@@ -838,7 +838,7 @@ var Compiler = Object.extend({
             'var callerFrame = frame;',
             'frame = ' + ((keepFrame) ? 'frame.push(true);' : 'new runtime.Frame();'),
             'kwargs = kwargs || {};',
-            'if (kwargs.hasOwnProperty("caller")) {',
+            'if (Object.prototype.hasOwnProperty.call(kwargs, "caller")) {',
             'frame.set("caller", kwargs.caller); }'
         );
 
@@ -856,7 +856,7 @@ var Compiler = Object.extend({
             lib.each(kwargs.children, function(pair) {
                 var name = pair.key.value;
                 this.emit('frame.set("' + name + '", ' +
-                          'kwargs.hasOwnProperty("' + name + '") ? ' +
+                          'Object.prototype.hasOwnProperty.call(kwargs, "' + name + '") ? ' +
                           'kwargs["' + name + '"] : ');
                 this._compileExpression(pair.value, frame);
                 this.emitLine(');');
@@ -954,7 +954,7 @@ var Compiler = Object.extend({
                 alias = name;
             }
 
-            this.emitLine('if(' + importedId + '.hasOwnProperty("' + name + '")) {');
+            this.emitLine('if(Object.prototype.hasOwnProperty.call(' + importedId + ', "' + name + '")) {');
             this.emitLine('var ' + id + ' = ' + importedId + '.' + name + ';');
             this.emitLine('} else {');
             this.emitLine('cb(new Error("cannot import \'' + name + '\'")); return;');

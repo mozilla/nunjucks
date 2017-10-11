@@ -53,6 +53,22 @@
             finish(done);
         });
 
+        it('should compile references - object without prototype', function(done) {
+          var context = Object.create(null);
+          context.foo = Object.create(null);
+          context.foo.bar = 'baz';
+          
+          equal('{{ foo.bar }}',
+            context,
+            'baz');
+
+          equal('{{ foo["bar"] }}',
+            context,
+            'baz');
+
+          finish(done);
+        });
+
         it('should fail silently on undefined values', function(done) {
             equal('{{ foo }}', '');
             equal('{{ foo.bar }}', '');
