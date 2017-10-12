@@ -1487,7 +1487,7 @@ Arrondit au nombre entier le plus proche (qui arrondit vers le bas) :
 **Entrée**
 
 ```jinja
-{{ 4 | round(0, "floor")
+{{ 4 | round(0, "floor") }}
 ```
 
 **Sortie**
