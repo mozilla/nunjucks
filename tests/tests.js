@@ -24,6 +24,13 @@
       expect(callable).to.be('true');
       expect(uncallable).to.be('true');
     });
+    
+    it('defined should detect definedness', function() {
+      expect(render('{{ foo is defined }}')).to.be('false');
+      expect(render('{{ foo is not defined }}')).to.be('true');
+      expect(render('{{ foo is defined }}', { foo: null })).to.be('true');
+      expect(render('{{ foo is not defined }}', { foo: null })).to.be('false');
+    });
 
     it('undefined should detect undefinedness', function() {
       expect(render('{{ foo is undefined }}')).to.be('true');
@@ -99,11 +106,32 @@
       expect(fourNotGreaterThanTwo).to.be('false');
     });
 
+    it('ge should detect whether or not a value is greater than or equal to another', function() {
+      var fiveGreaterThanEqualToFive = render('{{ "5" is ge(5) }}');
+      var fourNotGreaterThanEqualToTwo = render('{{ 4 is not ge(2) }}');
+      expect(fiveGreaterThanEqualToFive).to.be('true');
+      expect(fourNotGreaterThanEqualToTwo).to.be('false');
+    });
+
     it('lessthan than should detect whether or not a value is less than another', function() {
       var fiveLessThanFour = render('{{ "5" is lessthan(4) }}');
       var fourNotLessThanTwo = render('{{ 4 is not lessthan(2) }}');
       expect(fiveLessThanFour).to.be('false');
       expect(fourNotLessThanTwo).to.be('true');
+    });
+    
+    it('le should detect whether or not a value is less than or equal to another', function() {
+      var fiveLessThanEqualToFive = render('{{ "5" is le(5) }}');
+      var fourNotLessThanEqualToTwo = render('{{ 4 is not le(2) }}');
+      expect(fiveLessThanEqualToFive).to.be('true');
+      expect(fourNotLessThanEqualToTwo).to.be('true');
+    });
+
+    it('ne should detect whether or not a value is not equal to another', function() {
+      var five = render('{{ 5 is ne(5) }}');
+      var four = render('{{ 4 is not ne(2) }}');
+      expect(five).to.be('false');
+      expect(four).to.be('false');
     });
 
     it('iterable should detect whether or not a value is iterable', function() {
@@ -112,7 +140,6 @@
       var arrayIsNotIterable = render('{{ arr is not iterable }}', { arr: [] });
       var mapIsIterable = render('{{ map is iterable }}', { map: new Map() });
       var setIsNotIterable = render('{{ set is not iterable }}', { set: new Set() });
-      console.info(generatorIsIterable, arrayIsNotIterable, mapIsIterable, setIsNotIterable);
       expect(generatorIsIterable).to.be('true');
       expect(arrayIsNotIterable).to.be('false');
       expect(mapIsIterable).to.be('true');
@@ -132,18 +159,18 @@
       expect(num).to.be('false');
       expect(str).to.be('true');
     });
-
-    it('sameas should detect reference equality', function() {
-      var obj = {};
-      var same = render('{{ obj1 is sameas(obj2) }}', { obj1: obj, obj2: obj });
-      expect(same).to.be('true');
-    });
     
     it('equalto should detect value equality', function() {
       var same = render('{{ 1 is equalto(2) }}');
       var notSame = render('{{ 2 is not equalto(2) }}');
       expect(same).to.be('false');
       expect(notSame).to.be('false');
+    });
+    
+    it('sameas should alias to equalto', function() {
+      var obj = {};
+      var same = render('{{ obj1 is sameas(obj2) }}', { obj1: obj, obj2: obj });
+      expect(same).to.be('true');
     });
     
     it('lower should detect whether or not a string is lowercased', function() {
