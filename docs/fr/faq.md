@@ -9,7 +9,8 @@ pageid: faq
 
 ## Puis-je utiliser nunjucks dans node et dans le navigateur/côté client ?
 
-Oui.
+Oui. Nunjucks supporte tous les navigateurs modernes et les versions de Node.js
+[même supportées par la fondation Node.js](https://github.com/nodejs/Release#release-schedule1).
 
 ## Puis-je utiliser les mêmes modèles entre nunjucks et Jinja2? Quelles sont les différences ?
 

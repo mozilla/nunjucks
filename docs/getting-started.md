@@ -13,6 +13,10 @@ $ npm install nunjucks
 
 Once installed, simply use `require('nunjucks')` to load it.
 
+Nunjucks supports all modern browsers and any version of Node.js
+[currently supported by the Node.js Foundation](https://github.com/nodejs/Release#release-schedule1).
+This includes the most recent version and all versions still in maintenance.
+
 ## When in the Browser...
 
 Grab [nunjucks.js](files/nunjucks.js) ([min](files/nunjucks.min.js)) for the full library, or

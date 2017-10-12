@@ -9,7 +9,8 @@ pageid: faq
 
 ## Can I use nunjucks in node and the browser/client-side?
 
-Yes.
+Yes. Nunjucks supports all modern browsers and any version of Node.js
+[currently supported by the Node.js Foundation](https://github.com/nodejs/Release#release-schedule1).
 
 ## Can I use the same templates between nunjucks and jinja2? What are the differences?
 
