@@ -447,6 +447,11 @@
                     bar: 15 },
                   'yes');
 
+            equal('{{ "yes" if 1 is odd else "no"  }}', 'yes');
+            equal('{{ "yes" if 2 is even else "no"  }}', 'yes');
+            equal('{{ "yes" if 2 is odd else "no"  }}', 'no');
+            equal('{{ "yes" if 1 is even else "no"  }}', 'no');
+
             equal('{% if 1 in [1, 2] %}yes{% endif %}', 'yes');
             equal('{% if 1 in [2, 3] %}yes{% endif %}', '');
             equal('{% if 1 not in [1, 2] %}yes{% endif %}', '');

@@ -741,7 +741,7 @@ var Parser = Object.extend({
     },
 
     parseIn: function() {
-      var node = this.parseCompare();
+      var node = this.parseIs();
       while(1) {
         // check if the next token is 'not'
         var tok = this.nextToken();
@@ -750,7 +750,7 @@ var Parser = Object.extend({
         // if it wasn't 'not', put it back
         if (!invert) { this.pushToken(tok); }
         if (this.skipSymbol('in')) {
-          var node2 = this.parseCompare();
+          var node2 = this.parseIs();
           node = new nodes.In(node.lineno,
                               node.colno,
                               node,
@@ -767,6 +767,27 @@ var Parser = Object.extend({
           break;
         }
       }
+      return node;
+    },
+
+    // I put this right after "in" in the operator precedence stack. That can
+    // obviously be changed to be closer to Jinja.
+    parseIs: function() {
+      var node = this.parseCompare();
+      // look for an is
+      if (this.skipSymbol('is')) {
+        // look for a not
+        var not = this.skipSymbol('not');
+        // get the next node
+        var node2 = this.parseCompare();
+        // create an Is node using the next node and the info from our Is node.
+        node = new nodes.Is(node.lineno, node.colno, node, node2);
+        // if we have a Not, create a Not node from our Is node.
+        if (not) {
+          node = new nodes.Not(node.lineno, node.colno, node);
+        }
+      }
+      // return the node.
       return node;
     },
 

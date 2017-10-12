@@ -373,6 +373,23 @@ var Compiler = Object.extend({
       this.emit(')');
     },
 
+    compileIs: function(node, frame) {
+      // first, we need to try to get the name of the test function, if it's a
+      // callable (i.e., has args) and not a symbol.
+      var right = node.right.name
+        ? node.right.name.value
+        // otherwise go with the symbol value
+        : node.right.value;
+      this.emit('env.getTest("' + right + '").call(context, ');
+      this.compile(node.left, frame);
+      // compile the arguments for the callable if they exist
+      if (node.right.args) {
+        this.emit(',');
+        this.compile(node.right.args, frame);
+      }
+      this.emit(') === true');
+    },
+
     compileOr: binOpEmitter(' || '),
     compileAnd: binOpEmitter(' && '),
     compileAdd: binOpEmitter(' + '),

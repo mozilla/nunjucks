@@ -238,6 +238,21 @@
                      [nodes.In,
                       [nodes.Symbol, 'x'],
                       [nodes.Symbol, 'y']]]]]);
+                      
+            isAST(parser.parse('{{ x is callable }}'),
+              [nodes.Root,
+                [nodes.Output,
+                  [nodes.Is,
+                    [nodes.Symbol, 'x'],
+                    [nodes.Symbol, 'callable']]]]);
+
+            isAST(parser.parse('{{ x is not callable }}'),
+              [nodes.Root,
+                [nodes.Output,
+                  [nodes.Not,
+                    [nodes.Is,
+                      [nodes.Symbol, 'x'],
+                      [nodes.Symbol, 'callable']]]]]);
         });
 
         it('should parse tilde', function(){
