@@ -116,6 +116,20 @@
             finish(done);
         });
 
+        it('should compile switch statements', function() {
+            // standard switches
+            var tpl1 = '{% switch foo %}{% case "bar" %}BAR{% case "baz" %}BAZ{% default %}NEITHER FOO NOR BAR{% endswitch %}';
+            // test no-default switches
+            var tpl2 = '{% switch foo %}{% case "bar" %}BAR{% case "baz" %}BAZ{% endswitch %}';
+            // test fall-through cases
+            var tpl3 = '{% switch foo %}{% case "bar" %}{% case "baz" %}BAR{% endswitch %}';
+            equal(tpl1, 'NEITHER FOO NOR BAR');
+            equal(tpl1, { foo: 'bar' }, 'BAR');
+            equal(tpl1, { foo: 'baz' }, 'BAZ');
+            equal(tpl2, '');
+            equal(tpl3, { foo: 'baz' }, 'BAR');
+        });
+
         it('should compile if blocks', function(done) {
             var tmpl = ('Give me some {% if hungry %}pizza' +
                         '{% else %}water{% endif %}');

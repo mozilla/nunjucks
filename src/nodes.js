@@ -119,6 +119,8 @@ var TemplateRef = Node.extend('TemplateRef', { fields: ['template'] });
 var Extends = TemplateRef.extend('Extends');
 var Include = Node.extend('Include', { fields: ['template', 'ignoreMissing'] });
 var Set = Node.extend('Set', { fields: ['targets', 'value'] });
+var Switch = Node.extend('Switch', { fields: [ 'expr', 'cases', 'default' ]});
+var Case = Node.extend('Case', { fields: ['cond', 'body'] });
 var Output = NodeList.extend('Output');
 var Capture = Node.extend('Capture', { fields: ['body'] });
 var TemplateData = Literal.extend('TemplateData');
@@ -277,6 +279,8 @@ module.exports = {
     Extends: Extends,
     Include: Include,
     Set: Set,
+    Switch: Switch,
+    Case: Case,
     LookupVal: LookupVal,
     BinOp: BinOp,
     In: In,
