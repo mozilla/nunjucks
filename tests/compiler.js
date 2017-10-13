@@ -127,6 +127,7 @@
             equal(tpl1, { foo: 'bar' }, 'BAR');
             equal(tpl1, { foo: 'baz' }, 'BAZ');
             equal(tpl2, '');
+            equal(tpl3, { foo: 'bar' }, 'BAR');
             equal(tpl3, { foo: 'baz' }, 'BAR');
         });
 

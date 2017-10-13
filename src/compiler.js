@@ -565,7 +565,10 @@ var Compiler = Object.extend({
             this.compile(c.cond, frame);
             this.emit(': ');
             this.compile(c.body, frame);
-            this.emitLine('break;');
+            // preserve fall-throughs
+            if (c.body.children.length) {
+                this.emitLine('break;');
+            }
         }
         if (node.default) {
             this.emit('default:');
