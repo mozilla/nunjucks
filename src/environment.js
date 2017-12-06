@@ -7,6 +7,7 @@ var Obj = require('./object');
 var compiler = require('./compiler');
 var builtin_filters = require('./filters');
 var builtin_loaders = require('./loaders');
+var builtin_tests = require('./tests');
 var runtime = require('./runtime');
 var globals = require('./globals');
 var waterfall = require('a-sync-waterfall');
@@ -74,12 +75,16 @@ var Environment = Obj.extend({
 
         this.globals = globals();
         this.filters = {};
+        this.tests = {};
         this.asyncFilters = [];
         this.extensions = {};
         this.extensionsList = [];
 
         for(var name in builtin_filters) {
             this.addFilter(name, builtin_filters[name]);
+        }
+        for(var test in builtin_tests) {
+            this.addTest(test, builtin_tests[test]);
         }
     },
 
@@ -146,6 +151,18 @@ var Environment = Obj.extend({
             throw new Error('filter not found: ' + name);
         }
         return this.filters[name];
+    },
+    
+    addTest: function(name, func) {
+        this.tests[name] = func;
+        return this;
+    },
+    
+    getTest: function(name) {
+        if(!this.tests[name]) {
+            throw new Error('test not found: ' + name);
+        }
+        return this.tests[name];
     },
 
     resolveTemplate: function(loader, parentName, filename) {
