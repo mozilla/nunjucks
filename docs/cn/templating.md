@@ -429,9 +429,9 @@ The name of the item is: {{ item.name }}
 {% import "forms.html" as forms %}
 
 {{ forms.label('Username') }}
-{{ forms.input('user') }}
+{{ forms.field('user') }}
 {{ forms.label('Password') }}
-{{ forms.input('pass', type='password') }}
+{{ forms.field('pass', type='password') }}
 ```
 
 也可以使用 `from import` 从模板中 import 指定的值到当前的命名空间：
