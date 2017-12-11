@@ -9,13 +9,17 @@ title: API
 The API for nunjucks covers rendering templates, adding filters and
 extensions, customizing template loading, and more.
 
-**Warning**: nunjucks does not sandbox execution so it is potentially
-  unsafe to run user-defined templates. On the server, you may expose
-  attack vectors for accessing sensitive data. On the client, you may
-  expose cross-site scripting vulnerabilities (see [this
-  issue](https://github.com/mozilla/nunjucks-docs/issues/17) for more
-  information).
+## User-Defined Templates Warning
 
+  nunjucks does not sandbox execution so **it is not safe to run
+  user-defined templates or inject user-defined content into template
+  definitions**. On the server, you can expose attack vectors for
+  accessing sensitive data and remote code execution. On the client,
+  you can expose cross-site scripting vulnerabilities even for
+  precompiled templates (which can be mitigated with a strong
+  [CSP](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy)). See
+  [this issue](https://github.com/mozilla/nunjucks-docs/issues/17) for
+  more information.
 
 ## Simple API
 
@@ -33,6 +37,9 @@ possible error as the first argument and the result as the second.
 Otherwise, the result is returned from `render` and errors are thrown.
 See [asynchronous support](#asynchronous-support) for more info.
 
+See the warning about **not allowing [users to define their own
+templates](#user-defined-templates-warning).**
+
 ```js
 var res = nunjucks.render('foo.html');
 
@@ -49,6 +56,10 @@ nunjucks.renderString(str, context, [callback])
 
 Same as [`render`](#render), but renders a raw string instead of
 loading a template.
+
+The same warning about **not allowing [users to define their own
+templates](#user-defined-templates-warning)** applies.
+
 
 {% raw %}
 ```js

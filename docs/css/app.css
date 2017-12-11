@@ -446,6 +446,15 @@ section.whos-using .user {
     font-size: 1.5em;
 }
 
+#user-defined-templates-warning {
+    color: #FFA500;
+}
+#user-defined-templates-warning + p {
+    background-color: #FFFDF1;
+    border-left: medium solid #FFA500;
+    padding: 0.5em 1em;
+}
+
 .api-sig {
     margin-top: -1.25em;
     font-size: .95em;
