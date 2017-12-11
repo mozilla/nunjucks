@@ -535,6 +535,74 @@ var Parser = Object.extend({
 
         return node;
     },
+    
+    parseSwitch: function() {
+        /*
+         * Store the tag names in variables in case someone ever wants to
+         * customize this.
+         */
+        var switchStart = 'switch';
+        var switchEnd = 'endswitch';
+        var caseStart = 'case';
+        var caseDefault = 'default';
+
+        // Get the switch tag.
+        var tag = this.peekToken();
+
+        // fail early if we get some unexpected tag.
+        if (
+            !this.skipSymbol(switchStart)
+            && !this.skipSymbol(caseStart)
+            && !this.skipSymbol(caseDefault)
+        ) {
+            this.fail('parseSwitch: expected "switch," "case" or "default"', tag.lineno, tag.colno);
+        }
+
+        // parse the switch expression
+        var expr = this.parseExpression();
+        
+        // advance until a start of a case, a default case or an endswitch.
+        this.advanceAfterBlockEnd(switchStart);
+        this.parseUntilBlocks(caseStart, caseDefault, switchEnd);
+
+        // this is the first case. it could also be an endswitch, we'll check.
+        var tok = this.peekToken();
+
+        // create new variables for our cases and default case.
+        var cases = [];
+        var defaultCase;
+
+        // while we're dealing with new cases nodes...
+        do {
+            // skip the start symbol and get the case expression
+            this.skipSymbol(caseStart);
+            var cond = this.parseExpression();
+            this.advanceAfterBlockEnd(switchStart);
+            // get the body of the case node and add it to the array of cases.
+            var body = this.parseUntilBlocks(caseStart, caseDefault, switchEnd);
+            cases.push(new nodes.Case(tok.line, tok.col, cond, body));
+            // get our next case
+            tok = this.peekToken();
+        } while (tok && tok.value === caseStart);
+      
+        // we either have a default case or a switch end.
+        switch (tok.value) {
+            case caseDefault:
+                this.advanceAfterBlockEnd();
+                defaultCase = this.parseUntilBlocks(switchEnd);
+                this.advanceAfterBlockEnd();
+                break;
+            case switchEnd:
+                this.advanceAfterBlockEnd();
+                break;
+            default:
+                // otherwise bail because EOF
+                this.fail('parseSwitch: expected "case," "default" or "endswitch," got EOF.');
+        }
+
+        // and return the switch node.
+        return new nodes.Switch(tag.lineno, tag.colno, expr, cases, defaultCase);
+    },
 
     parseStatement: function () {
         var tok = this.peekToken();
@@ -568,6 +636,7 @@ var Parser = Object.extend({
         case 'import': return this.parseImport();
         case 'from': return this.parseFrom();
         case 'filter': return this.parseFilterStatement();
+        case 'switch': return this.parseSwitch();
         default:
             if (this.extensions.length) {
                 for (var i = 0; i < this.extensions.length; i++) {

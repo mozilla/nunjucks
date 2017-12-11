@@ -572,6 +572,28 @@ var Compiler = Object.extend({
         }, this);
     },
 
+    compileSwitch: function(node, frame) {
+        this.emit('switch (');
+        this.compile(node.expr, frame);
+        this.emit(') {');
+        for (var i = 0; i < node.cases.length; i += 1) {
+            var c = node.cases[i];
+            this.emit('case ');
+            this.compile(c.cond, frame);
+            this.emit(': ');
+            this.compile(c.body, frame);
+            // preserve fall-throughs
+            if (c.body.children.length) {
+                this.emitLine('break;');
+            }
+        }
+        if (node.default) {
+            this.emit('default:');
+            this.compile(node.default, frame);
+        }
+        this.emit('}');
+    },
+
     compileIf: function(node, frame, async) {
         this.emit('if(');
         this._compileExpression(node.cond, frame);
