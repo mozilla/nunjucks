@@ -231,9 +231,9 @@ exports.iterable = function(value) {
 exports.mapping = function(value) {
   // only maps and object hashes
   var bool = value !== null
-      && value !== undefined
-      && typeof value === 'object'
-      && !Array.isArray(value);
+    && value !== undefined
+    && typeof value === 'object'
+    && !Array.isArray(value);
   if (Set) {
     return bool && !(value instanceof Set);
   } else {

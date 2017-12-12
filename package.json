@@ -10,10 +10,10 @@
   },
   "browser": "./browser/nunjucks.js",
   "devDependencies": {
+    "eslint": "^4.13.0",
     "expect.js": "*",
     "express": "4.x",
     "istanbul": "0.3.x",
-    "jshint": "2.8.x",
     "mocha": "*",
     "node-libs-browser": "^0.4.3",
     "supertest": "*",
@@ -27,8 +27,8 @@
     "node": "*"
   },
   "scripts": {
-    "lint": "jshint .",
-    "test": "jshint . && istanbul cover ./node_modules/mocha/bin/_mocha -- -R dot tests",
+    "lint": "eslint .",
+    "test": "eslint . && istanbul cover ./node_modules/mocha/bin/_mocha -- -R dot tests",
     "browserfiles": "./bin/bundle"
   },
   "bin": {

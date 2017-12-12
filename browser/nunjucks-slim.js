@@ -169,9 +169,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var exports = module.exports = {};
 
 	exports.prettifyError = function(path, withInternals, err) {
-	    // jshint -W022
-	    // http://jslinterrors.com/do-not-assign-to-the-exception-parameter
-	    if (!err.Update) {
+    if (!err.Update) {
 	        // not one of ours, cast it
 	        err = new exports.TemplateError(err);
 	    }
@@ -1369,7 +1367,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    F.prototype = cls.prototype;
 	    var prototype = new F();
 
-	    // jshint undef: false
 	    var fnTest = /xyz/.test(function(){ xyz; }) ? /\bparent\b/ : /.*/;
 	    props = props || {};
 
@@ -1380,8 +1377,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if(typeof parent === 'function' &&
 	           typeof src === 'function' &&
 	           fnTest.test(src)) {
-	            /*jshint -W083 */
-	            prototype[k] = (function (src, parent) {
+               prototype[k] = (function (src, parent) {
 	                return function() {
 	                    // Save the current parent method
 	                    var tmp = this.parent;
@@ -2272,7 +2268,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        throw new Error('Unable to call `' + name + '`, which is not a function');
 	    }
 
-	    // jshint validthis: true
 	    return obj.apply(context, args);
 	}
 
@@ -2345,7 +2340,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	                case 3: func(item[0], item[1], item[2], i, len, done); break;
 	                default:
 	                    item.push(i, done);
-	                    // jshint validthis: true
 	                    func.apply(this, item);
 	                }
 	            }
@@ -2899,12 +2893,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    // This must be called like `nunjucks.installCompat` so that `this`
 	    // references the nunjucks instance
-	    var runtime = this.runtime; // jshint ignore:line
-	    var lib = this.lib; // jshint ignore:line
-	    var Compiler = this.compiler.Compiler; // jshint ignore:line
-	    var Parser = this.parser.Parser; // jshint ignore:line
-	    var nodes = this.nodes; // jshint ignore:line
-	    var lexer = this.lexer; // jshint ignore:line
+	    var runtime = this.runtime;
+	    var lib = this.lib;
+	    var Compiler = this.compiler.Compiler;
+	    var Parser = this.parser.Parser;
+	    var nodes = this.nodes;
+	    var lexer = this.lexer;
 
 	    var orig_contextOrFrameLookup = runtime.contextOrFrameLookup;
 	    var orig_Compiler_assertType = Compiler.prototype.assertType;
@@ -3175,7 +3169,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    OBJECT_MEMBERS.iteritems = OBJECT_MEMBERS.items;
 	    OBJECT_MEMBERS.itervalues = OBJECT_MEMBERS.values;
 	    OBJECT_MEMBERS.iterkeys = OBJECT_MEMBERS.keys;
-	    runtime.memberLookup = function(obj, val, autoescape) { // jshint ignore:line
+	    runtime.memberLookup = function(obj, val, autoescape) {
 	        if (arguments.length === 4) {
 	            return sliceLookup.apply(this, arguments);
 	        }

@@ -169,9 +169,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var exports = module.exports = {};
 
 	exports.prettifyError = function(path, withInternals, err) {
-	    // jshint -W022
-	    // http://jslinterrors.com/do-not-assign-to-the-exception-parameter
-	    if (!err.Update) {
+    if (!err.Update) {
 	        // not one of ours, cast it
 	        err = new exports.TemplateError(err);
 	    }
@@ -1369,7 +1367,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    F.prototype = cls.prototype;
 	    var prototype = new F();
 
-	    // jshint undef: false
 	    var fnTest = /xyz/.test(function(){ xyz; }) ? /\bparent\b/ : /.*/;
 	    props = props || {};
 
@@ -1380,8 +1377,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if(typeof parent === 'function' &&
 	           typeof src === 'function' &&
 	           fnTest.test(src)) {
-	            /*jshint -W083 */
-	            prototype[k] = (function (src, parent) {
+               prototype[k] = (function (src, parent) {
 	                return function() {
 	                    // Save the current parent method
 	                    var tmp = this.parent;

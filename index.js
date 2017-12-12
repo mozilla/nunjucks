@@ -28,59 +28,58 @@ module.exports.installJinjaCompat = require('./src/jinja-compat.js');
 
 var e;
 module.exports.configure = function(templatesPath, opts) {
-    opts = opts || {};
-    if(lib.isObject(templatesPath)) {
-        opts = templatesPath;
-        templatesPath = null;
-    }
+  opts = opts || {};
+  if (lib.isObject(templatesPath)) {
+    opts = templatesPath;
+    templatesPath = null;
+  }
 
-    var TemplateLoader;
-    if(loaders.FileSystemLoader) {
-        TemplateLoader = new loaders.FileSystemLoader(templatesPath, {
-            watch: opts.watch,
-            noCache: opts.noCache
-        });
-    }
-    else if(loaders.WebLoader) {
-        TemplateLoader = new loaders.WebLoader(templatesPath, {
-            useCache: opts.web && opts.web.useCache,
-            async: opts.web && opts.web.async
-        });
-    }
+  var TemplateLoader;
+  if (loaders.FileSystemLoader) {
+    TemplateLoader = new loaders.FileSystemLoader(templatesPath, {
+      watch: opts.watch,
+      noCache: opts.noCache
+    });
+  } else if (loaders.WebLoader) {
+    TemplateLoader = new loaders.WebLoader(templatesPath, {
+      useCache: opts.web && opts.web.useCache,
+      async: opts.web && opts.web.async
+    });
+  }
 
-    e = new env.Environment(TemplateLoader, opts);
+  e = new env.Environment(TemplateLoader, opts);
 
-    if(opts && opts.express) {
-        e.express(opts.express);
-    }
+  if (opts && opts.express) {
+    e.express(opts.express);
+  }
 
-    return e;
+  return e;
 };
 
 module.exports.compile = function(src, env, path, eagerCompile) {
-    if(!e) {
-        module.exports.configure();
-    }
-    return new module.exports.Template(src, env, path, eagerCompile);
+  if (!e) {
+    module.exports.configure();
+  }
+  return new module.exports.Template(src, env, path, eagerCompile);
 };
 
 module.exports.render = function(name, ctx, cb) {
-    if(!e) {
-        module.exports.configure();
-    }
+  if (!e) {
+    module.exports.configure();
+  }
 
-    return e.render(name, ctx, cb);
+  return e.render(name, ctx, cb);
 };
 
 module.exports.renderString = function(src, ctx, cb) {
-    if(!e) {
-        module.exports.configure();
-    }
+  if (!e) {
+    module.exports.configure();
+  }
 
-    return e.renderString(src, ctx, cb);
+  return e.renderString(src, ctx, cb);
 };
 
-if(precompile) {
-    module.exports.precompile = precompile.precompile;
-    module.exports.precompileString = precompile.precompileString;
+if (precompile) {
+  module.exports.precompile = precompile.precompile;
+  module.exports.precompileString = precompile.precompileString;
 }
