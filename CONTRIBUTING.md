@@ -28,7 +28,7 @@ Issues and pull requests contributing to this purpose have the best chance to ma
 ## Questions?
 
 Please DO NOT ask "how do I?" or usage questions via GitHub issues. Instead,
-use the [https://groups.google.com/forum/#!forum/nunjucks](mailing list).
+use the [mailing list](https://groups.google.com/forum/#!forum/nunjucks).
 
 
 ## Submitting Issues
