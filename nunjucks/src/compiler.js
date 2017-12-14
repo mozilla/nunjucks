@@ -662,6 +662,7 @@ class Compiler extends Obj {
     this.emitLine(';');
 
     this.emit(`if(${arr}) {`);
+    this.emitLine(arr + ' = runtime.fromIterator(' + arr + ');');
 
     // If multiple names are passed, we need to bind them
     // appropriately
@@ -754,9 +755,9 @@ class Compiler extends Obj {
 
     this.emitLine('frame = frame.push();');
 
-    this.emit('var ' + arr + ' = ');
+    this.emit('var ' + arr + ' = runtime.fromIterator(');
     this._compileExpression(node.arr, frame);
-    this.emitLine(';');
+    this.emitLine(');');
 
     if (node.name instanceof nodes.Array) {
       const arrayLen = node.name.children.length;

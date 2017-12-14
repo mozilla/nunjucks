@@ -1,6 +1,11 @@
 'use strict';
 
 var lib = require('./lib');
+var arrayFrom = Array.from;
+var supportsIterators = (
+  typeof Symbol === 'function' && Symbol.iterator && typeof arrayFrom === 'function'
+);
+
 
 // Frames keep track of scoping both at compile-time and run-time so
 // we know how to access variables. Block tags can introduce special
@@ -342,6 +347,16 @@ function asyncAll(arr, dimen, func, cb) {
   }
 }
 
+function fromIterator(arr) {
+  if (arr == null || lib.isArray(arr)) {
+    return arr;
+  } else if (supportsIterators && Symbol.iterator in arr) {
+    return arrayFrom(arr);
+  } else {
+    return arr;
+  }
+}
+
 module.exports = {
   Frame: Frame,
   makeMacro: makeMacro,
@@ -360,5 +375,6 @@ module.exports = {
   markSafe: markSafe,
   asyncEach: asyncEach,
   asyncAll: asyncAll,
-  inOperator: lib.inOperator
+  inOperator: lib.inOperator,
+  fromIterator: fromIterator
 };

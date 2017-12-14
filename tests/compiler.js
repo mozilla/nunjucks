@@ -475,6 +475,42 @@
             },
             'showing test\nshowing 1\nshowing 2\nshowing 3\n');
         });
+        /* global Set */
+        it('should work with Set builtin', function() {
+          if (typeof Set === 'undefined') {
+            this.skip();
+          } else {
+            equal('{% ' + block + ' i in set %}{{ i }}{% ' + end + ' %}',
+              { set: new Set([1, 2, 3, 4, 5]) },
+              '12345');
+
+            equal('{% ' + block + ' i in set %}{{ i }}{% else %}empty{% ' + end + ' %}',
+              { set: new Set([1, 2, 3, 4, 5]) },
+              '12345');
+
+            equal('{% ' + block + ' i in set %}{{ i }}{% else %}empty{% ' + end + ' %}',
+              { set: new Set() },
+              'empty');
+          }
+        });
+        /* global Map */
+        it('should work with Map builtin', function() {
+          if (typeof Map === 'undefined') {
+            this.skip();
+          } else {
+            equal('{% ' + block + ' k, v in map %}[{{ k }},{{ v }}]{% ' + end + ' %}',
+              { map: new Map([[1, 2], [3, 4], [5, 6]]) },
+              '[1,2][3,4][5,6]');
+
+            equal('{% ' + block + ' k, v in map %}[{{ k }},{{ v }}]{% else %}empty{% ' + end + ' %}',
+              { map: new Map([[1, 2], [3, 4], [5, 6]]) },
+              '[1,2][3,4][5,6]');
+
+            equal('{% ' + block + ' k, v in map %}[{{ k }},{{ v }}]{% else %}empty{% ' + end + ' %}',
+              { map: new Map() },
+              'empty');
+          }
+        });
       });
     }
 
