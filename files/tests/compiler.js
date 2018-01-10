@@ -53,6 +53,22 @@
             finish(done);
         });
 
+        it('should compile references - object without prototype', function(done) {
+          var context = Object.create(null);
+          context.foo = Object.create(null);
+          context.foo.bar = 'baz';
+          
+          equal('{{ foo.bar }}',
+            context,
+            'baz');
+
+          equal('{{ foo["bar"] }}',
+            context,
+            'baz');
+
+          finish(done);
+        });
+
         it('should fail silently on undefined values', function(done) {
             equal('{{ foo }}', '');
             equal('{{ foo.bar }}', '');
@@ -98,6 +114,21 @@
             }, 'hello');
 
             finish(done);
+        });
+
+        it('should compile switch statements', function() {
+            // standard switches
+            var tpl1 = '{% switch foo %}{% case "bar" %}BAR{% case "baz" %}BAZ{% default %}NEITHER FOO NOR BAR{% endswitch %}';
+            // test no-default switches
+            var tpl2 = '{% switch foo %}{% case "bar" %}BAR{% case "baz" %}BAZ{% endswitch %}';
+            // test fall-through cases
+            var tpl3 = '{% switch foo %}{% case "bar" %}{% case "baz" %}BAR{% endswitch %}';
+            equal(tpl1, 'NEITHER FOO NOR BAR');
+            equal(tpl1, { foo: 'bar' }, 'BAR');
+            equal(tpl1, { foo: 'baz' }, 'BAZ');
+            equal(tpl2, '');
+            equal(tpl3, { foo: 'bar' }, 'BAR');
+            equal(tpl3, { foo: 'baz' }, 'BAR');
         });
 
         it('should compile if blocks', function(done) {
@@ -430,6 +461,11 @@
                   { foo: function(n) { return n - 1; },
                     bar: 15 },
                   'yes');
+
+            equal('{{ "yes" if 1 is odd else "no"  }}', 'yes');
+            equal('{{ "yes" if 2 is even else "no"  }}', 'yes');
+            equal('{{ "yes" if 2 is odd else "no"  }}', 'no');
+            equal('{{ "yes" if 1 is even else "no"  }}', 'no');
 
             equal('{% if 1 in [1, 2] %}yes{% endif %}', 'yes');
             equal('{% if 1 in [2, 3] %}yes{% endif %}', '');

@@ -70,7 +70,8 @@
 
 <h2 id="can-i-use-nunjucks-in-node-and-the-browser-client-side">Can I use nunjucks in node and the browser/client-side?</h2>
 
-<p>Yes.</p>
+<p>Yes. Nunjucks supports all modern browsers and any version of Node.js
+<a href="https://github.com/nodejs/Release#release-schedule1">currently supported by the Node.js Foundation</a>.</p>
 
 <h2 id="can-i-use-the-same-templates-between-nunjucks-and-jinja2-what-are-the-differences">Can I use the same templates between nunjucks and jinja2? What are the differences?</h2>
 
@@ -96,7 +97,11 @@ templating environment to help with Jinja compatibility. See
 <li><code>for</code> does not support <code>if not</code> and <code>else</code></li>
 <li><code>if i is divisibleby(3)</code>-style conditionals</li>
 <li>Named block end tags: <code>{% endblock content %}</code></li>
-<li>Sandboxed mode</li>
+<li>Sandboxed mode
+
+<ul>
+<li>Note: this makes it <strong>unsuitable for applications requiring <a href="api.html#user-defined-templates-warning">user-defined templates</a></strong></li>
+</ul></li>
 <li>Line statements: <code># for item in seq</code></li>
 </ul>
 

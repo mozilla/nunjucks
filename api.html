@@ -52,6 +52,9 @@
 <a href="#api">API</a>
 <ul>
 <li>
+<a href="#user-defined-templates-warning">User-Defined Templates Warning</a>
+</li>
+<li>
 <a href="#simple-api">Simple API</a>
 <ul>
 <li>
@@ -225,12 +228,17 @@
 <p>The API for nunjucks covers rendering templates, adding filters and
 extensions, customizing template loading, and more.</p>
 
-<p><strong>Warning</strong>: nunjucks does not sandbox execution so it is potentially
-  unsafe to run user-defined templates. On the server, you may expose
-  attack vectors for accessing sensitive data. On the client, you may
-  expose cross-site scripting vulnerabilities (see <a href="https://github.com/mozilla/nunjucks-docs/issues/17">this
-  issue</a> for more
-  information).</p>
+<h2 id="user-defined-templates-warning">User-Defined Templates Warning</h2>
+
+<p>nunjucks does not sandbox execution so <strong>it is not safe to run
+  user-defined templates or inject user-defined content into template
+  definitions</strong>. On the server, you can expose attack vectors for
+  accessing sensitive data and remote code execution. On the client,
+  you can expose cross-site scripting vulnerabilities even for
+  precompiled templates (which can be mitigated with a strong
+  <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy">CSP</a>). See
+  <a href="https://github.com/mozilla/nunjucks-docs/issues/17">this issue</a> for
+  more information.</p>
 
 <h2 id="simple-api">Simple API</h2>
 
@@ -246,6 +254,9 @@ higher-level API for loading and rendering templates.</p>
 possible error as the first argument and the result as the second.
 Otherwise, the result is returned from <code>render</code> and errors are thrown.
 See <a href="#asynchronous-support">asynchronous support</a> for more info.</p>
+
+<p>See the warning about <strong>not allowing <a href="#user-defined-templates-warning">users to define their own
+templates</a>.</strong></p>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="kd">var</span> <span class="nx">res</span> <span class="o">=</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="s1">&#39;foo.html&#39;</span><span class="p">);</span>
 
 <span class="kd">var</span> <span class="nx">res</span> <span class="o">=</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="s1">&#39;foo.html&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">username</span><span class="o">:</span> <span class="s1">&#39;James&#39;</span> <span class="p">});</span>
@@ -261,6 +272,9 @@ See <a href="#asynchronous-support">asynchronous support</a> for more info.</p>
 
 <div class="api-desc"><p>Same as <a href="#render"><code>render</code></a>, but renders a raw string instead of
 loading a template.</p>
+
+<p>The same warning about <strong>not allowing <a href="#user-defined-templates-warning">users to define their own
+templates</a></strong> applies.</p>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="kd">var</span> <span class="nx">res</span> <span class="o">=</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">renderString</span><span class="p">(</span><span class="s1">&#39;Hello {{ username }}&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">username</span><span class="o">:</span> <span class="s1">&#39;James&#39;</span> <span class="p">});</span>
 </code></pre></div>
 </div>

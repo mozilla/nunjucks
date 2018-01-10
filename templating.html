@@ -52,6 +52,9 @@
 <a href="#templating">Templating</a>
 <ul>
 <li>
+<a href="#user-defined-templates-warning">User-Defined Templates Warning</a>
+</li>
+<li>
 <a href="#file-extensions">File Extensions</a>
 </li>
 <li>
@@ -306,6 +309,18 @@
 lacking here. Read about the differences
 <a href="http://mozilla.github.io/nunjucks/faq.html#can-i-use-the-same-templates-between-nunjucks-and-jinja2-what-are-the-differences">here</a>.</p>
 </blockquote>
+
+<h2 id="user-defined-templates-warning">User-Defined Templates Warning</h2>
+
+<p>nunjucks does not sandbox execution so <strong>it is not safe to run
+  user-defined templates or inject user-defined content into template
+  definitions</strong>. On the server, you can expose attack vectors for
+  accessing sensitive data and remote code execution. On the client,
+  you can expose cross-site scripting vulnerabilities even for
+  precompiled templates (which can be mitigated with a strong
+  <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy">CSP</a>). See
+  <a href="https://github.com/mozilla/nunjucks-docs/issues/17">this issue</a> for
+  more information.</p>
 
 <h2 id="file-extensions">File Extensions</h2>
 
@@ -1140,14 +1155,19 @@ Marks return value as markup string</p>
 </code></pre></div>
 <h3 id="first">first</h3>
 
-<p>Get the first item in an array:</p>
+<p>Get the first item in an array or the first letter if it&#39;s a string:</p>
 
 <p><strong>Input</strong></p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">set</span> <span class="nv">items</span> <span class="o">=</span> <span class="o">[</span><span class="m">1</span><span class="o">,</span><span class="m">2</span><span class="o">,</span><span class="m">3</span><span class="o">]</span> <span class="cp">%}</span><span class="x"></span>
 <span class="cp">{{</span> <span class="nv">items</span> <span class="o">|</span> <span class="nf">first</span> <span class="cp">}}</span><span class="x"></span>
+
+<span class="cp">{%</span> <span class="k">set</span> <span class="nv">word</span> <span class="o">=</span> <span class="s1">&#39;abc&#39;</span> <span class="cp">%}</span><span class="x"></span>
+<span class="cp">{{</span> <span class="nv">word</span> <span class="o">|</span> <span class="nf">first</span> <span class="cp">}}</span><span class="x"></span>
 </code></pre></div>
 <p><strong>Output</strong></p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="x">1</span>
+
+<span class="x">a</span>
 </code></pre></div>
 <h3 id="float">float</h3>
 
@@ -1266,14 +1286,19 @@ be defined with an optional parameter:</p>
 </code></pre></div>
 <h3 id="last">last</h3>
 
-<p>Get the last item in an array:</p>
+<p>Get the last item in an array or the last letter if it&#39;s a string:</p>
 
 <p><strong>Input</strong></p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">set</span> <span class="nv">items</span> <span class="o">=</span> <span class="o">[</span><span class="m">1</span><span class="o">,</span><span class="m">2</span><span class="o">,</span><span class="m">3</span><span class="o">]</span> <span class="cp">%}</span><span class="x"></span>
 <span class="cp">{{</span> <span class="nv">items</span> <span class="o">|</span> <span class="nf">last</span> <span class="cp">}}</span><span class="x"></span>
+
+<span class="cp">{%</span> <span class="k">set</span> <span class="nv">word</span> <span class="o">=</span> <span class="s1">&#39;abc&#39;</span> <span class="cp">%}</span><span class="x"></span>
+<span class="cp">{{</span> <span class="nv">word</span> <span class="o">|</span> <span class="nf">last</span> <span class="cp">}}</span><span class="x"></span>
 </code></pre></div>
 <p><strong>Output</strong></p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="x">3</span>
+
+<span class="x">c</span>
 </code></pre></div>
 <h3 id="length">length</h3>
 

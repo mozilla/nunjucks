@@ -238,6 +238,21 @@
                      [nodes.In,
                       [nodes.Symbol, 'x'],
                       [nodes.Symbol, 'y']]]]]);
+                      
+            isAST(parser.parse('{{ x is callable }}'),
+              [nodes.Root,
+                [nodes.Output,
+                  [nodes.Is,
+                    [nodes.Symbol, 'x'],
+                    [nodes.Symbol, 'callable']]]]);
+
+            isAST(parser.parse('{{ x is not callable }}'),
+              [nodes.Root,
+                [nodes.Output,
+                  [nodes.Not,
+                    [nodes.Is,
+                      [nodes.Symbol, 'x'],
+                      [nodes.Symbol, 'callable']]]]]);
         });
 
         it('should parse tilde', function(){
@@ -584,6 +599,27 @@
                     [nodes.Output, [nodes.TemplateData, '\n']]]);
         });
 
+        it('should parse switch statements', function() {
+            var tpl = '{% switch foo %}{% case "bar" %}BAR{% case "baz" %}BAZ{% default %}NEITHER FOO NOR BAR{% endswitch %}';
+            isAST(parser.parse(tpl),
+                [nodes.Root,
+                 [nodes.Switch,
+                  [nodes.Symbol, 'foo'],
+                   [[ nodes.Case,
+                     [nodes.Literal, 'bar'],
+                     [nodes.NodeList,
+                      [nodes.Output,
+                       [nodes.TemplateData, 'BAR']]]],
+                    [nodes.Case,
+                     [nodes.Literal, 'baz'],
+                      [nodes.NodeList,
+                       [nodes.Output,
+                        [nodes.TemplateData, 'BAZ']]]]],
+                 [nodes.NodeList,
+                  [ nodes.Output,
+                   [nodes.TemplateData, 'NEITHER FOO NOR BAR']]]]]);
+        });
+
         it('should parse keyword and non-keyword arguments', function() {
             isAST(parser.parse('{{ foo("bar", falalalala, baz="foobar") }}'),
                   [nodes.Root,
@@ -656,7 +692,7 @@
                   [nodes.Root,
                    [nodes.If,
                     [nodes.Symbol, 'x'],
-                    [nodes.NodeList,
+                [nodes.NodeList,
                      [nodes.Output,
                       [nodes.TemplateData, '\n  hi \n']]]]]);
 

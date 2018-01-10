@@ -52,6 +52,9 @@
 <a href="#getting-started">Getting Started</a>
 <ul>
 <li>
+<a href="#user-defined-templates-warning">User-Defined Templates Warning</a>
+</li>
+<li>
 <a href="#when-using-node">When Using Node...</a>
 </li>
 <li>
@@ -79,10 +82,26 @@
     <div class="locale btn-group"><a href="/nunjucks/getting-started.html" class="btn btn-success">English</a><a href="/nunjucks/cn/getting-started.html" class="btn btn-default">中文</a><a href="/nunjucks/fr/getting-started.html" class="btn btn-default">Français</a></div>
     <h1 id="getting-started">Getting Started</h1>
 
+<h2 id="user-defined-templates-warning">User-Defined Templates Warning</h2>
+
+<p>nunjucks does not sandbox execution so <strong>it is not safe to run
+  user-defined templates or inject user-defined content into template
+  definitions</strong>. On the server, you can expose attack vectors for
+  accessing sensitive data and remote code execution. On the client,
+  you can expose cross-site scripting vulnerabilities even for
+  precompiled templates (which can be mitigated with a strong
+  <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy">CSP</a>). See
+  <a href="https://github.com/mozilla/nunjucks-docs/issues/17">this issue</a> for
+  more information.</p>
+
 <h2 id="when-using-node">When Using Node...</h2>
 <div class="highlight"><pre><code class="language-text" data-lang="text">$ npm install nunjucks
 </code></pre></div>
 <p>Once installed, simply use <code>require(&#39;nunjucks&#39;)</code> to load it.</p>
+
+<p>Nunjucks supports all modern browsers and any version of Node.js
+<a href="https://github.com/nodejs/Release#release-schedule1">currently supported by the Node.js Foundation</a>.
+This includes the most recent version and all versions still in maintenance.</p>
 
 <h2 id="when-in-the-browser">When in the Browser...</h2>
 

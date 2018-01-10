@@ -1,4 +1,4 @@
-/*! Browser bundle of nunjucks 3.0.1 (slim, only works with precompiled templates) */
+/*! Browser bundle of nunjucks 3.0.2-dev.1 (slim, only works with precompiled templates) */
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
 		module.exports = factory();
@@ -59,7 +59,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var lib = __webpack_require__(1);
 	var env = __webpack_require__(2);
-	var Loader = __webpack_require__(15);
+	var Loader = __webpack_require__(16);
 	var loaders = __webpack_require__(3);
 	var precompile = __webpack_require__(3);
 
@@ -79,7 +79,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports.lib = lib;
 	module.exports.nodes = __webpack_require__(3);
 
-	module.exports.installJinjaCompat = __webpack_require__(16);
+	module.exports.installJinjaCompat = __webpack_require__(17);
 
 	// A single instance of an environment, since this is so commonly used
 
@@ -426,7 +426,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    else {
 	        var keys = [];
 	        for(var k in obj) {
-	            if(obj.hasOwnProperty(k)) {
+	            if(Object.prototype.hasOwnProperty.call(obj, k)) {
 	                keys.push(k);
 	            }
 	        }
@@ -461,15 +461,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	var compiler = __webpack_require__(3);
 	var builtin_filters = __webpack_require__(7);
 	var builtin_loaders = __webpack_require__(3);
+	var builtin_tests = __webpack_require__(9);
 	var runtime = __webpack_require__(8);
-	var globals = __webpack_require__(9);
-	var waterfall = __webpack_require__(10);
+	var globals = __webpack_require__(10);
+	var waterfall = __webpack_require__(11);
 	var Frame = runtime.Frame;
 	var Template;
 
 	// Unconditionally load in this loader, even if no other ones are
 	// included (possible in the slim browser build)
-	builtin_loaders.PrecompiledLoader = __webpack_require__(14);
+	builtin_loaders.PrecompiledLoader = __webpack_require__(15);
 
 	// If the user is using the async API, *always* call it
 	// asynchronously even if the template was synchronous.
@@ -528,12 +529,16 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        this.globals = globals();
 	        this.filters = {};
+	        this.tests = {};
 	        this.asyncFilters = [];
 	        this.extensions = {};
 	        this.extensionsList = [];
 
 	        for(var name in builtin_filters) {
 	            this.addFilter(name, builtin_filters[name]);
+	        }
+	        for(var test in builtin_tests) {
+	            this.addTest(test, builtin_tests[test]);
 	        }
 	    },
 
@@ -600,6 +605,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	            throw new Error('filter not found: ' + name);
 	        }
 	        return this.filters[name];
+	    },
+	    
+	    addTest: function(name, func) {
+	        this.tests[name] = func;
+	        return this;
+	    },
+	    
+	    getTest: function(name) {
+	        if(!this.tests[name]) {
+	            throw new Error('test not found: ' + name);
+	        }
+	        return this.tests[name];
 	    },
 
 	    resolveTemplate: function(loader, parentName, filename) {
@@ -793,7 +810,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        // Make a duplicate of ctx
 	        this.ctx = {};
 	        for(var k in ctx) {
-	            if(ctx.hasOwnProperty(k)) {
+	            if(Object.prototype.hasOwnProperty.call(ctx, k)) {
 	                this.ctx[k] = ctx[k];
 	            }
 	        }
@@ -1944,7 +1961,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            } else {
 	                parts = [];
 	                for (var k in obj) {
-	                    if (obj.hasOwnProperty(k)) {
+	                    if (Object.prototype.hasOwnProperty.call(obj, k)) {
 	                        parts.push(enc(k) + '=' + enc(obj[k]));
 	                    }
 	                }
@@ -2154,11 +2171,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return obj;
 	}
 
+	function isKeywordArgs(obj) {
+	  return obj && Object.prototype.hasOwnProperty.call(obj, '__keywords');
+	}
+
 	function getKeywordArgs(args) {
 	    var len = args.length;
 	    if(len) {
 	        var lastArg = args[len - 1];
-	        if(lastArg && lastArg.hasOwnProperty('__keywords')) {
+	        if(isKeywordArgs(lastArg)) {
 	            return lastArg;
 	        }
 	    }
@@ -2172,7 +2193,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    var lastArg = args[len - 1];
-	    if(lastArg && lastArg.hasOwnProperty('__keywords')) {
+	    if(isKeywordArgs(lastArg)) {
 	        return len - 1;
 	    }
 	    else {
@@ -2392,6 +2413,253 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ }),
 /* 9 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var SafeString = __webpack_require__(8).SafeString;
+
+	/**
+	 * Returns `true` if the object is a function, otherwise `false`.
+	 * @param { any } value
+	 * @returns { boolean }
+	 */
+	exports.callable = function(value) {
+	  return typeof value === 'function';
+	};
+
+	/**
+	 * Returns `true` if the object is strictly not `undefined`.
+	 * @param { any } value
+	 * @returns { boolean }
+	 */
+	exports.defined = function(value) {
+	  return value !== undefined;
+	};
+
+	/**
+	 * Returns `true` if the operand (one) is divisble by the test's argument
+	 * (two).
+	 * @param { number } one
+	 * @param { number } two
+	 * @returns { boolean }
+	 */
+	exports.divisibleby = function(one, two) {
+	  return (one % two) === 0;
+	};
+
+	/**
+	 * Returns true if the string has been escaped (i.e., is a SafeString).
+	 * @param { any } value
+	 * @returns { boolean }
+	 */
+	exports.escaped = function(value) {
+	  return value instanceof SafeString;
+	};
+
+	/**
+	 * Returns `true` if the arguments are strictly equal.
+	 * @param { any } one
+	 * @param { any } two
+	 */
+	exports.equalto = function(one, two) {
+	  return one === two;
+	};
+
+	// Aliases
+	exports.eq = exports.equalto;
+	exports.sameas = exports.equalto;
+
+	/**
+	 * Returns `true` if the value is evenly divisible by 2.
+	 * @param { number } value
+	 * @returns { boolean }
+	 */
+	exports.even = function(value) {
+	  return value % 2 === 0;
+	};
+
+	/**
+	 * Returns `true` if the value is falsy - if I recall correctly, '', 0, false,
+	 * undefined, NaN or null. I don't know if we should stick to the default JS
+	 * behavior or attempt to replicate what Python believes should be falsy (i.e.,
+	 * empty arrays, empty dicts, not 0...).
+	 * @param { any } value
+	 * @returns { boolean }
+	 */
+	exports.falsy = function(value) {
+	  return !value;
+	};
+
+	/**
+	 * Returns `true` if the operand (one) is greater or equal to the test's
+	 * argument (two).
+	 * @param { number } one
+	 * @param { number } two
+	 * @returns { boolean }
+	 */
+	exports.ge = function(one, two) {
+	  return one >= two;
+	};
+
+	/**
+	 * Returns `true` if the operand (one) is greater than the test's argument
+	 * (two).
+	 * @param { number } one
+	 * @param { number } two
+	 * @returns { boolean }
+	 */
+	exports.greaterthan = function(one, two) {
+	  return one > two;
+	};
+
+	// alias
+	exports.gt = exports.greaterthan;
+
+	/**
+	 * Returns `true` if the operand (one) is less than or equal to the test's
+	 * argument (two).
+	 * @param { number } one
+	 * @param { number } two
+	 * @returns { boolean }
+	 */
+	exports.le = function(one, two) {
+	  return one <= two;
+	};
+
+	/**
+	 * Returns `true` if the operand (one) is less than the test's passed argument
+	 * (two).
+	 * @param { number } one
+	 * @param { number } two
+	 * @returns { boolean }
+	 */
+	exports.lessthan = function(one, two) {
+	  return one < two;
+	};
+
+	// alias
+	exports.lt = exports.lessthan;
+
+	/**
+	 * Returns `true` if the string is lowercased.
+	 * @param { string } value
+	 * @returns { boolean }
+	 */
+	exports.lower = function(value) {
+	  return value.toLowerCase() === value;
+	};
+
+	/**
+	 * Returns `true` if the operand (one) is less than or equal to the test's
+	 * argument (two).
+	 * @param { number } one
+	 * @param { number } two
+	 * @returns { boolean }
+	 */
+	exports.ne = function(one, two) {
+	  return one !== two;
+	};
+
+	/**
+	 * Returns true if the value is strictly equal to `null`.
+	 * @param { any }
+	 * @returns { boolean }
+	 */
+	exports.null = function(value) {
+	  return value === null;
+	};
+
+	/**
+	 * Returns true if value is a number.
+	 * @param { any }
+	 * @returns { boolean }
+	 */
+	exports.number = function(value) {
+	  return typeof value === 'number';
+	};
+
+	/**
+	 * Returns `true` if the value is *not* evenly divisible by 2.
+	 * @param { number } value
+	 * @returns { boolean }
+	 */
+	exports.odd = function(value) {
+	  return value % 2 === 1;
+	};
+
+	/**
+	 * Returns `true` if the value is a string, `false` if not.
+	 * @param { any } value
+	 * @returns { boolean }
+	 */
+	exports.string = function(value) {
+	  return typeof value === 'string';
+	};
+
+	/**
+	 * Returns `true` if the value is not in the list of things considered falsy:
+	 * '', null, undefined, 0, NaN and false.
+	 * @param { any } value
+	 * @returns { boolean }
+	 */
+	exports.truthy = function(value) {
+	  return !!value;
+	};
+
+	/**
+	 * Returns `true` if the value is undefined.
+	 * @param { any } value
+	 * @returns { boolean }
+	 */
+	exports.undefined = function(value) {
+	  return value === undefined;
+	};
+
+	/**
+	 * Returns `true` if the string is uppercased.
+	 * @param { string } value
+	 * @returns { boolean }
+	 */
+	exports.upper = function(value) {
+	  return value.toUpperCase() === value;
+	};
+
+	/**
+	 * If ES6 features are available, returns `true` if the value implements the
+	 * `Symbol.iterator` method. If not, it's a string or Array.
+	 * @param { any } value
+	 * @returns { boolean }
+	 */
+	exports.iterable = function(value) {
+	  if (Symbol) {
+	    return !!value[Symbol.iterator];
+	  } else {
+	    return Array.isArray(value) || typeof value === 'string';
+	  }
+	};
+
+	/**
+	 * If ES6 features are available, returns `true` if the value is an object hash
+	 * or an ES6 Map. Otherwise just return if it's an object hash.
+	 * @param { any } value
+	 * @returns { boolean }
+	 */
+	exports.mapping = function(value) {
+	  // only maps and object hashes
+	  var bool = value !== null
+	      && value !== undefined
+	      && typeof value === 'object'
+	      && !Array.isArray(value);
+	  if (Set) {
+	    return bool && !(value instanceof Set);
+	  } else {
+	    return bool;
+	  }
+	};
+
+/***/ }),
+/* 10 */
 /***/ (function(module, exports) {
 
 	'use strict';
@@ -2476,7 +2744,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 10 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(setImmediate, process) {// MIT license (by Elan Shanker).
@@ -2563,10 +2831,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	})(this);
 
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11).setImmediate, __webpack_require__(13)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(12).setImmediate, __webpack_require__(14)))
 
 /***/ }),
-/* 11 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var apply = Function.prototype.apply;
@@ -2619,13 +2887,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 	// setimmediate attaches itself to the global object
-	__webpack_require__(12);
+	__webpack_require__(13);
 	exports.setImmediate = setImmediate;
 	exports.clearImmediate = clearImmediate;
 
 
 /***/ }),
-/* 12 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global, process) {(function (global, undefined) {
@@ -2815,21 +3083,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	    attachTo.clearImmediate = clearImmediate;
 	}(typeof self === "undefined" ? typeof global === "undefined" ? this : global : self));
 
-	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }()), __webpack_require__(13)))
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }()), __webpack_require__(14)))
 
 /***/ }),
-/* 13 */
+/* 14 */
 /***/ (function(module, exports) {
 
 	
 
 /***/ }),
-/* 14 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var Loader = __webpack_require__(15);
+	var Loader = __webpack_require__(16);
 
 	var PrecompiledLoader = Loader.extend({
 	    init: function(compiledTemplates) {
@@ -2852,7 +3120,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 15 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2891,7 +3159,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 16 */
+/* 17 */
 /***/ (function(module, exports) {
 
 	function installCompat() {

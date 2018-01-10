@@ -1,4 +1,4 @@
-/*! Browser bundle of nunjucks 3.0.1  */
+/*! Browser bundle of nunjucks 3.0.2-dev.1  */
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
 		module.exports = factory();
@@ -79,7 +79,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports.lib = lib;
 	module.exports.nodes = __webpack_require__(10);
 
-	module.exports.installJinjaCompat = __webpack_require__(22);
+	module.exports.installJinjaCompat = __webpack_require__(23);
 
 	// A single instance of an environment, since this is so commonly used
 
@@ -426,7 +426,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    else {
 	        var keys = [];
 	        for(var k in obj) {
-	            if(obj.hasOwnProperty(k)) {
+	            if(Object.prototype.hasOwnProperty.call(obj, k)) {
 	                keys.push(k);
 	            }
 	        }
@@ -461,9 +461,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	var compiler = __webpack_require__(7);
 	var builtin_filters = __webpack_require__(14);
 	var builtin_loaders = __webpack_require__(15);
+	var builtin_tests = __webpack_require__(18);
 	var runtime = __webpack_require__(13);
-	var globals = __webpack_require__(18);
-	var waterfall = __webpack_require__(19);
+	var globals = __webpack_require__(19);
+	var waterfall = __webpack_require__(20);
 	var Frame = runtime.Frame;
 	var Template;
 
@@ -528,12 +529,16 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        this.globals = globals();
 	        this.filters = {};
+	        this.tests = {};
 	        this.asyncFilters = [];
 	        this.extensions = {};
 	        this.extensionsList = [];
 
 	        for(var name in builtin_filters) {
 	            this.addFilter(name, builtin_filters[name]);
+	        }
+	        for(var test in builtin_tests) {
+	            this.addTest(test, builtin_tests[test]);
 	        }
 	    },
 
@@ -600,6 +605,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	            throw new Error('filter not found: ' + name);
 	        }
 	        return this.filters[name];
+	    },
+	    
+	    addTest: function(name, func) {
+	        this.tests[name] = func;
+	        return this;
+	    },
+	    
+	    getTest: function(name) {
+	        if(!this.tests[name]) {
+	            throw new Error('test not found: ' + name);
+	        }
+	        return this.tests[name];
 	    },
 
 	    resolveTemplate: function(loader, parentName, filename) {
@@ -793,7 +810,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        // Make a duplicate of ctx
 	        this.ctx = {};
 	        for(var k in ctx) {
-	            if(ctx.hasOwnProperty(k)) {
+	            if(Object.prototype.hasOwnProperty.call(ctx, k)) {
 	                this.ctx[k] = ctx[k];
 	            }
 	        }
@@ -1804,6 +1821,23 @@ return /******/ (function(modules) { // webpackBootstrap
 	      this.emit(')');
 	    },
 
+	    compileIs: function(node, frame) {
+	      // first, we need to try to get the name of the test function, if it's a
+	      // callable (i.e., has args) and not a symbol.
+	      var right = node.right.name
+	        ? node.right.name.value
+	        // otherwise go with the symbol value
+	        : node.right.value;
+	      this.emit('env.getTest("' + right + '").call(context, ');
+	      this.compile(node.left, frame);
+	      // compile the arguments for the callable if they exist
+	      if (node.right.args) {
+	        this.emit(',');
+	        this.compile(node.right.args, frame);
+	      }
+	      this.emit(') === true');
+	    },
+
 	    compileOr: binOpEmitter(' || '),
 	    compileAnd: binOpEmitter(' && '),
 	    compileAdd: binOpEmitter(' + '),
@@ -1984,6 +2018,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	                this.emitLine('}');
 	            }
 	        }, this);
+	    },
+
+	    compileSwitch: function(node, frame) {
+	        this.emit('switch (');
+	        this.compile(node.expr, frame);
+	        this.emit(') {');
+	        for (var i = 0; i < node.cases.length; i += 1) {
+	            var c = node.cases[i];
+	            this.emit('case ');
+	            this.compile(c.cond, frame);
+	            this.emit(': ');
+	            this.compile(c.body, frame);
+	            // preserve fall-throughs
+	            if (c.body.children.length) {
+	                this.emitLine('break;');
+	            }
+	        }
+	        if (node.default) {
+	            this.emit('default:');
+	            this.compile(node.default, frame);
+	        }
+	        this.emit('}');
 	    },
 
 	    compileIf: function(node, frame, async) {
@@ -2269,7 +2325,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            'var callerFrame = frame;',
 	            'frame = ' + ((keepFrame) ? 'frame.push(true);' : 'new runtime.Frame();'),
 	            'kwargs = kwargs || {};',
-	            'if (kwargs.hasOwnProperty("caller")) {',
+	            'if (Object.prototype.hasOwnProperty.call(kwargs, "caller")) {',
 	            'frame.set("caller", kwargs.caller); }'
 	        );
 
@@ -2287,7 +2343,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            lib.each(kwargs.children, function(pair) {
 	                var name = pair.key.value;
 	                this.emit('frame.set("' + name + '", ' +
-	                          'kwargs.hasOwnProperty("' + name + '") ? ' +
+	                          'Object.prototype.hasOwnProperty.call(kwargs, "' + name + '") ? ' +
 	                          'kwargs["' + name + '"] : ');
 	                this._compileExpression(pair.value, frame);
 	                this.emitLine(');');
@@ -2385,7 +2441,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                alias = name;
 	            }
 
-	            this.emitLine('if(' + importedId + '.hasOwnProperty("' + name + '")) {');
+	            this.emitLine('if(Object.prototype.hasOwnProperty.call(' + importedId + ', "' + name + '")) {');
 	            this.emitLine('var ' + id + ' = ' + importedId + '.' + name + ';');
 	            this.emitLine('} else {');
 	            this.emitLine('cb(new Error("cannot import \'' + name + '\'")); return;');
@@ -3179,6 +3235,74 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        return node;
 	    },
+	    
+	    parseSwitch: function() {
+	        /*
+	         * Store the tag names in variables in case someone ever wants to
+	         * customize this.
+	         */
+	        var switchStart = 'switch';
+	        var switchEnd = 'endswitch';
+	        var caseStart = 'case';
+	        var caseDefault = 'default';
+
+	        // Get the switch tag.
+	        var tag = this.peekToken();
+
+	        // fail early if we get some unexpected tag.
+	        if (
+	            !this.skipSymbol(switchStart)
+	            && !this.skipSymbol(caseStart)
+	            && !this.skipSymbol(caseDefault)
+	        ) {
+	            this.fail('parseSwitch: expected "switch," "case" or "default"', tag.lineno, tag.colno);
+	        }
+
+	        // parse the switch expression
+	        var expr = this.parseExpression();
+	        
+	        // advance until a start of a case, a default case or an endswitch.
+	        this.advanceAfterBlockEnd(switchStart);
+	        this.parseUntilBlocks(caseStart, caseDefault, switchEnd);
+
+	        // this is the first case. it could also be an endswitch, we'll check.
+	        var tok = this.peekToken();
+
+	        // create new variables for our cases and default case.
+	        var cases = [];
+	        var defaultCase;
+
+	        // while we're dealing with new cases nodes...
+	        do {
+	            // skip the start symbol and get the case expression
+	            this.skipSymbol(caseStart);
+	            var cond = this.parseExpression();
+	            this.advanceAfterBlockEnd(switchStart);
+	            // get the body of the case node and add it to the array of cases.
+	            var body = this.parseUntilBlocks(caseStart, caseDefault, switchEnd);
+	            cases.push(new nodes.Case(tok.line, tok.col, cond, body));
+	            // get our next case
+	            tok = this.peekToken();
+	        } while (tok && tok.value === caseStart);
+	      
+	        // we either have a default case or a switch end.
+	        switch (tok.value) {
+	            case caseDefault:
+	                this.advanceAfterBlockEnd();
+	                defaultCase = this.parseUntilBlocks(switchEnd);
+	                this.advanceAfterBlockEnd();
+	                break;
+	            case switchEnd:
+	                this.advanceAfterBlockEnd();
+	                break;
+	            default:
+	                // otherwise bail because EOF
+	                this.fail('parseSwitch: expected "case," "default" or "endswitch," got EOF.');
+	        }
+
+	        // and return the switch node.
+	        return new nodes.Switch(tag.lineno, tag.colno, expr, cases, defaultCase);
+	    },
 
 	    parseStatement: function () {
 	        var tok = this.peekToken();
@@ -3212,6 +3336,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        case 'import': return this.parseImport();
 	        case 'from': return this.parseFrom();
 	        case 'filter': return this.parseFilterStatement();
+	        case 'switch': return this.parseSwitch();
 	        default:
 	            if (this.extensions.length) {
 	                for (var i = 0; i < this.extensions.length; i++) {
@@ -3385,7 +3510,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    },
 
 	    parseIn: function() {
-	      var node = this.parseCompare();
+	      var node = this.parseIs();
 	      while(1) {
 	        // check if the next token is 'not'
 	        var tok = this.nextToken();
@@ -3394,7 +3519,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        // if it wasn't 'not', put it back
 	        if (!invert) { this.pushToken(tok); }
 	        if (this.skipSymbol('in')) {
-	          var node2 = this.parseCompare();
+	          var node2 = this.parseIs();
 	          node = new nodes.In(node.lineno,
 	                              node.colno,
 	                              node,
@@ -3411,6 +3536,27 @@ return /******/ (function(modules) { // webpackBootstrap
 	          break;
 	        }
 	      }
+	      return node;
+	    },
+
+	    // I put this right after "in" in the operator precedence stack. That can
+	    // obviously be changed to be closer to Jinja.
+	    parseIs: function() {
+	      var node = this.parseCompare();
+	      // look for an is
+	      if (this.skipSymbol('is')) {
+	        // look for a not
+	        var not = this.skipSymbol('not');
+	        // get the next node
+	        var node2 = this.parseCompare();
+	        // create an Is node using the next node and the info from our Is node.
+	        node = new nodes.Is(node.lineno, node.colno, node, node2);
+	        // if we have a Not, create a Not node from our Is node.
+	        if (not) {
+	          node = new nodes.Not(node.lineno, node.colno, node);
+	        }
+	      }
+	      // return the node.
 	      return node;
 	    },
 
@@ -4165,6 +4311,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	            else if(tok === 'none') {
 	                return token(TOKEN_NONE, tok, lineno, colno);
 	            }
+	            /*
+	             * Added to make the test `null is null` evaluate truthily.
+	             * Otherwise, Nunjucks will look up null in the context and
+	             * return `undefined`, which is not what we want. This *may* have
+	             * consequences is someone is using null in their templates as a
+	             * variable.
+	             */
+	            else if(tok === 'null') {
+	                return token(TOKEN_NONE, tok, lineno, colno);
+	            }
 	            else if(tok) {
 	                return token(TOKEN_SYMBOL, tok, lineno, colno);
 	            }
@@ -4596,12 +4752,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	var Extends = TemplateRef.extend('Extends');
 	var Include = Node.extend('Include', { fields: ['template', 'ignoreMissing'] });
 	var Set = Node.extend('Set', { fields: ['targets', 'value'] });
+	var Switch = Node.extend('Switch', { fields: [ 'expr', 'cases', 'default' ]});
+	var Case = Node.extend('Case', { fields: ['cond', 'body'] });
 	var Output = NodeList.extend('Output');
 	var Capture = Node.extend('Capture', { fields: ['body'] });
 	var TemplateData = Literal.extend('TemplateData');
 	var UnaryOp = Node.extend('UnaryOp', { fields: ['target'] });
 	var BinOp = Node.extend('BinOp', { fields: ['left', 'right'] });
 	var In = BinOp.extend('In');
+	var Is = BinOp.extend('Is');
 	var Or = BinOp.extend('Or');
 	var And = BinOp.extend('And');
 	var Not = UnaryOp.extend('Not');
@@ -4754,9 +4913,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    Extends: Extends,
 	    Include: Include,
 	    Set: Set,
+	    Switch: Switch,
+	    Case: Case,
 	    LookupVal: LookupVal,
 	    BinOp: BinOp,
 	    In: In,
+	    Is: Is,
 	    Or: Or,
 	    And: And,
 	    Not: Not,
@@ -5164,11 +5326,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return obj;
 	}
 
+	function isKeywordArgs(obj) {
+	  return obj && Object.prototype.hasOwnProperty.call(obj, '__keywords');
+	}
+
 	function getKeywordArgs(args) {
 	    var len = args.length;
 	    if(len) {
 	        var lastArg = args[len - 1];
-	        if(lastArg && lastArg.hasOwnProperty('__keywords')) {
+	        if(isKeywordArgs(lastArg)) {
 	            return lastArg;
 	        }
 	    }
@@ -5182,7 +5348,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    var lastArg = args[len - 1];
-	    if(lastArg && lastArg.hasOwnProperty('__keywords')) {
+	    if(isKeywordArgs(lastArg)) {
 	        return len - 1;
 	    }
 	    else {
@@ -5919,7 +6085,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            } else {
 	                parts = [];
 	                for (var k in obj) {
-	                    if (obj.hasOwnProperty(k)) {
+	                    if (Object.prototype.hasOwnProperty.call(obj, k)) {
 	                        parts.push(enc(k) + '=' + enc(obj[k]));
 	                    }
 	                }
@@ -6168,6 +6334,253 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ }),
 /* 18 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var SafeString = __webpack_require__(13).SafeString;
+
+	/**
+	 * Returns `true` if the object is a function, otherwise `false`.
+	 * @param { any } value
+	 * @returns { boolean }
+	 */
+	exports.callable = function(value) {
+	  return typeof value === 'function';
+	};
+
+	/**
+	 * Returns `true` if the object is strictly not `undefined`.
+	 * @param { any } value
+	 * @returns { boolean }
+	 */
+	exports.defined = function(value) {
+	  return value !== undefined;
+	};
+
+	/**
+	 * Returns `true` if the operand (one) is divisble by the test's argument
+	 * (two).
+	 * @param { number } one
+	 * @param { number } two
+	 * @returns { boolean }
+	 */
+	exports.divisibleby = function(one, two) {
+	  return (one % two) === 0;
+	};
+
+	/**
+	 * Returns true if the string has been escaped (i.e., is a SafeString).
+	 * @param { any } value
+	 * @returns { boolean }
+	 */
+	exports.escaped = function(value) {
+	  return value instanceof SafeString;
+	};
+
+	/**
+	 * Returns `true` if the arguments are strictly equal.
+	 * @param { any } one
+	 * @param { any } two
+	 */
+	exports.equalto = function(one, two) {
+	  return one === two;
+	};
+
+	// Aliases
+	exports.eq = exports.equalto;
+	exports.sameas = exports.equalto;
+
+	/**
+	 * Returns `true` if the value is evenly divisible by 2.
+	 * @param { number } value
+	 * @returns { boolean }
+	 */
+	exports.even = function(value) {
+	  return value % 2 === 0;
+	};
+
+	/**
+	 * Returns `true` if the value is falsy - if I recall correctly, '', 0, false,
+	 * undefined, NaN or null. I don't know if we should stick to the default JS
+	 * behavior or attempt to replicate what Python believes should be falsy (i.e.,
+	 * empty arrays, empty dicts, not 0...).
+	 * @param { any } value
+	 * @returns { boolean }
+	 */
+	exports.falsy = function(value) {
+	  return !value;
+	};
+
+	/**
+	 * Returns `true` if the operand (one) is greater or equal to the test's
+	 * argument (two).
+	 * @param { number } one
+	 * @param { number } two
+	 * @returns { boolean }
+	 */
+	exports.ge = function(one, two) {
+	  return one >= two;
+	};
+
+	/**
+	 * Returns `true` if the operand (one) is greater than the test's argument
+	 * (two).
+	 * @param { number } one
+	 * @param { number } two
+	 * @returns { boolean }
+	 */
+	exports.greaterthan = function(one, two) {
+	  return one > two;
+	};
+
+	// alias
+	exports.gt = exports.greaterthan;
+
+	/**
+	 * Returns `true` if the operand (one) is less than or equal to the test's
+	 * argument (two).
+	 * @param { number } one
+	 * @param { number } two
+	 * @returns { boolean }
+	 */
+	exports.le = function(one, two) {
+	  return one <= two;
+	};
+
+	/**
+	 * Returns `true` if the operand (one) is less than the test's passed argument
+	 * (two).
+	 * @param { number } one
+	 * @param { number } two
+	 * @returns { boolean }
+	 */
+	exports.lessthan = function(one, two) {
+	  return one < two;
+	};
+
+	// alias
+	exports.lt = exports.lessthan;
+
+	/**
+	 * Returns `true` if the string is lowercased.
+	 * @param { string } value
+	 * @returns { boolean }
+	 */
+	exports.lower = function(value) {
+	  return value.toLowerCase() === value;
+	};
+
+	/**
+	 * Returns `true` if the operand (one) is less than or equal to the test's
+	 * argument (two).
+	 * @param { number } one
+	 * @param { number } two
+	 * @returns { boolean }
+	 */
+	exports.ne = function(one, two) {
+	  return one !== two;
+	};
+
+	/**
+	 * Returns true if the value is strictly equal to `null`.
+	 * @param { any }
+	 * @returns { boolean }
+	 */
+	exports.null = function(value) {
+	  return value === null;
+	};
+
+	/**
+	 * Returns true if value is a number.
+	 * @param { any }
+	 * @returns { boolean }
+	 */
+	exports.number = function(value) {
+	  return typeof value === 'number';
+	};
+
+	/**
+	 * Returns `true` if the value is *not* evenly divisible by 2.
+	 * @param { number } value
+	 * @returns { boolean }
+	 */
+	exports.odd = function(value) {
+	  return value % 2 === 1;
+	};
+
+	/**
+	 * Returns `true` if the value is a string, `false` if not.
+	 * @param { any } value
+	 * @returns { boolean }
+	 */
+	exports.string = function(value) {
+	  return typeof value === 'string';
+	};
+
+	/**
+	 * Returns `true` if the value is not in the list of things considered falsy:
+	 * '', null, undefined, 0, NaN and false.
+	 * @param { any } value
+	 * @returns { boolean }
+	 */
+	exports.truthy = function(value) {
+	  return !!value;
+	};
+
+	/**
+	 * Returns `true` if the value is undefined.
+	 * @param { any } value
+	 * @returns { boolean }
+	 */
+	exports.undefined = function(value) {
+	  return value === undefined;
+	};
+
+	/**
+	 * Returns `true` if the string is uppercased.
+	 * @param { string } value
+	 * @returns { boolean }
+	 */
+	exports.upper = function(value) {
+	  return value.toUpperCase() === value;
+	};
+
+	/**
+	 * If ES6 features are available, returns `true` if the value implements the
+	 * `Symbol.iterator` method. If not, it's a string or Array.
+	 * @param { any } value
+	 * @returns { boolean }
+	 */
+	exports.iterable = function(value) {
+	  if (Symbol) {
+	    return !!value[Symbol.iterator];
+	  } else {
+	    return Array.isArray(value) || typeof value === 'string';
+	  }
+	};
+
+	/**
+	 * If ES6 features are available, returns `true` if the value is an object hash
+	 * or an ES6 Map. Otherwise just return if it's an object hash.
+	 * @param { any } value
+	 * @returns { boolean }
+	 */
+	exports.mapping = function(value) {
+	  // only maps and object hashes
+	  var bool = value !== null
+	      && value !== undefined
+	      && typeof value === 'object'
+	      && !Array.isArray(value);
+	  if (Set) {
+	    return bool && !(value instanceof Set);
+	  } else {
+	    return bool;
+	  }
+	};
+
+/***/ }),
+/* 19 */
 /***/ (function(module, exports) {
 
 	'use strict';
@@ -6252,7 +6665,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 19 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(setImmediate, process) {// MIT license (by Elan Shanker).
@@ -6339,10 +6752,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	})(this);
 
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(20).setImmediate, __webpack_require__(11)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(21).setImmediate, __webpack_require__(11)))
 
 /***/ }),
-/* 20 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var apply = Function.prototype.apply;
@@ -6395,13 +6808,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 	// setimmediate attaches itself to the global object
-	__webpack_require__(21);
+	__webpack_require__(22);
 	exports.setImmediate = setImmediate;
 	exports.clearImmediate = clearImmediate;
 
 
 /***/ }),
-/* 21 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global, process) {(function (global, undefined) {
@@ -6594,7 +7007,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }()), __webpack_require__(11)))
 
 /***/ }),
-/* 22 */
+/* 23 */
 /***/ (function(module, exports) {
 
 	function installCompat() {
