@@ -5,8 +5,11 @@ Changelog
 master (unreleased)
 -------------------
 
+* Fix calling render callback twice when a conditional import throws an error.
+  Solves [#1029](https://github.com/mozilla/nunjucks/issues/1029)
+
 * Support objects created with Object.create(null). fixes [#468](https://github.com/mozilla/nunjucks/issues/468)
-  
+
 
 3.0.1 (May 24 2017)
 -------------------

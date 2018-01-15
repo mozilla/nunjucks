@@ -152,12 +152,12 @@ var Environment = Obj.extend({
         }
         return this.filters[name];
     },
-    
+
     addTest: function(name, func) {
         this.tests[name] = func;
         return this;
     },
-    
+
     getTest: function(name) {
         if(!this.tests[name]) {
             throw new Error('test not found: ' + name);
@@ -495,6 +495,7 @@ Template = Obj.extend({
         var frame = parentFrame ? parentFrame.push(true) : new Frame();
         frame.topLevel = true;
         var syncResult = null;
+        var didError = false;
 
         _this.rootRenderFunc(
             _this.env,
@@ -502,8 +503,13 @@ Template = Obj.extend({
             frame || new Frame(),
             runtime,
             function(err, res) {
+                if (didError) {
+                    // prevent multiple calls to cb
+                    return;
+                }
                 if(err) {
                     err = lib.prettifyError(_this.path, _this.env.opts.dev, err);
+                    didError = true;
                 }
 
                 if(cb) {

@@ -44,6 +44,17 @@
             expect(util.normEOL(test.render())).to.be('Test1\nTest2');
         });
 
+        it('should only call the callback once when conditional import fails', function(done) {
+            var env = new Environment(new Loader(templatesPath));
+            var called = 0;
+            env.render('broken-conditional-include.njk',
+              function() {
+                expect(++called).to.be(1);
+              }
+            );
+            setTimeout(done, 0);
+        });
+
         it('should handle correctly relative paths in renderString', function() {
             var env = new Environment(new Loader(templatesPath));
             expect(env.renderString('{% extends "./relative/test1.njk" %}{% block block1 %}Test3{% endblock %}', {}, {
