@@ -50,7 +50,7 @@ function runtests() {
       return getStaticServer().then((args) => {
         server = args[0];
         var port = args[1];
-        var promises = ['index'].map(
+        var promises = ['index', 'slim'].map(
           f => (() => mochaPhantom(`http://localhost:${port}/tests/browser/${f}.html`)));
         return promiseSequence(promises).then(() => {
           server.close();

@@ -19,7 +19,13 @@ function match(filename, patterns) {
 function precompileString(str, opts) {
   opts = opts || {};
   opts.isString = true;
-  return precompile(str, opts);
+  var env = opts.env || new Environment([]);
+  var wrapper = opts.wrapper || precompileGlobal;
+
+  if (!opts.name) {
+    throw new Error('the "name" option is required when compiling a string');
+  }
+  return wrapper([_precompile(str, opts.name, env)], opts);
 }
 
 function precompile(input, opts) {
@@ -40,6 +46,10 @@ function precompile(input, opts) {
   opts = opts || {};
   var env = opts.env || new Environment([]);
   var wrapper = opts.wrapper || precompileGlobal;
+
+  if (opts.isString) {
+    return precompileString(input, opts);
+  }
 
   var pathStats = fs.existsSync(input) && fs.statSync(input);
   var precompiled = [];
@@ -64,18 +74,7 @@ function precompile(input, opts) {
     }
   }
 
-  if (opts.isString) {
-    if (!opts.name) {
-      throw new Error('the "name" option is required when ' +
-        'compiling a string');
-    }
-
-    precompiled.push(_precompile(
-      input,
-      opts.name,
-      env
-    ));
-  } else if (pathStats.isFile()) {
+  if (pathStats.isFile()) {
     precompiled.push(_precompile(
       fs.readFileSync(input, 'utf-8'),
       opts.name || input,

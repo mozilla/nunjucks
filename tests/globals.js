@@ -3,22 +3,16 @@
 
   var expect,
     util,
-    Environment,
-    Loader,
-    templatesPath;
+    Environment;
 
   if (typeof require !== 'undefined') {
     expect = require('expect.js');
     util = require('./util');
     Environment = require('../nunjucks/src/environment').Environment;
-    Loader = require('../nunjucks/src/node-loaders').FileSystemLoader;
-    templatesPath = 'tests/templates';
   } else {
     expect = window.expect;
     util = window.util;
     Environment = nunjucks.Environment;
-    Loader = nunjucks.WebLoader;
-    templatesPath = '../templates';
   }
 
   var equal = util.equal;
@@ -81,7 +75,7 @@
     });
 
     it('should allow addition of globals', function(done) {
-      var env = new Environment(new Loader(templatesPath));
+      var env = new Environment();
 
       env.addGlobal('hello', function(arg1) {
         return 'Hello ' + arg1;
@@ -93,7 +87,7 @@
     });
 
     it('should allow chaining of globals', function(done) {
-      var env = new Environment(new Loader(templatesPath));
+      var env = new Environment();
 
       env.addGlobal('hello', function(arg1) {
         return 'Hello ' + arg1;
@@ -108,7 +102,7 @@
     });
 
     it('should allow getting of globals', function(done) {
-      var env = new Environment(new Loader(templatesPath));
+      var env = new Environment();
       var hello = function(arg1) {
         return 'Hello ' + arg1;
       };
@@ -121,7 +115,7 @@
     });
 
     it('should allow getting boolean globals', function(done) {
-      var env = new Environment(new Loader(templatesPath));
+      var env = new Environment();
       var hello = false;
 
       env.addGlobal('hello', hello);
@@ -132,7 +126,7 @@
     });
 
     it('should fail on getting non-existent global', function(done) {
-      var env = new Environment(new Loader(templatesPath));
+      var env = new Environment();
 
       // Using this format instead of .withArgs since env.getGlobal uses 'this'
       expect(function() {
@@ -143,7 +137,7 @@
     });
 
     it('should pass context as this to global functions', function(done) {
-      var env = new Environment(new Loader(templatesPath));
+      var env = new Environment();
 
       env.addGlobal('hello', function() {
         return 'Hello ' + this.lookup('user');
@@ -156,11 +150,11 @@
     });
 
     it('should be exclusive to each environment', function(done) {
-      var env = new Environment(new Loader(templatesPath));
+      var env = new Environment();
       var env2;
 
       env.addGlobal('hello', 'konichiwa');
-      env2 = new Environment(new Loader(templatesPath));
+      env2 = new Environment();
 
       // Using this format instead of .withArgs since env2.getGlobal uses 'this'
       expect(function() {
@@ -171,7 +165,7 @@
     });
 
     it('should return errors from globals', function(done) {
-      var env = new Environment(new Loader(templatesPath));
+      var env = new Environment();
 
       env.addGlobal('err', function() {
         throw new Error('Global error');

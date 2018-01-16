@@ -92,18 +92,20 @@
       expect(fourNotOdd).to.be('true');
     });
 
-    it('mapping should detect Maps or hashes', function() {
-      var map1 = new Map();
-      var map2 = {};
-      var mapOneIsMapping = render('{{ map is mapping }}', {
-        map: map1
+    if (typeof Map === 'object') {
+      it('mapping should detect Maps or hashes', function() {
+        var map1 = new Map();
+        var map2 = {};
+        var mapOneIsMapping = render('{{ map is mapping }}', {
+          map: map1
+        });
+        var mapTwoIsMapping = render('{{ map is mapping }}', {
+          map: map2
+        });
+        expect(mapOneIsMapping).to.be('true');
+        expect(mapTwoIsMapping).to.be('true');
       });
-      var mapTwoIsMapping = render('{{ map is mapping }}', {
-        map: map2
-      });
-      expect(mapOneIsMapping).to.be('true');
-      expect(mapTwoIsMapping).to.be('true');
-    });
+    }
 
     it('falsy should detect whether or not a value is falsy', function() {
       var zero = render('{{ 0 is falsy }}');
@@ -154,10 +156,13 @@
       expect(four).to.be('false');
     });
 
-    it('iterable should detect whether or not a value is iterable', function() {
-      var iterable = (function* iterable() {
-        yield true;
-      }());
+    it('iterable should detect whether or not a value is iterable', function(done) {
+      var iterable;
+      try {
+        iterable = eval('(function* iterable() { yield true; })()');
+      } catch (e) {
+        return done();  // Browser does not support generators
+      }
       var generatorIsIterable = render('{{ fn is iterable }}', {
         fn: iterable
       });
@@ -174,6 +179,7 @@
       expect(arrayIsNotIterable).to.be('false');
       expect(mapIsIterable).to.be('true');
       expect(setIsNotIterable).to.be('false');
+      return done();
     });
 
     it('number should detect whether a value is numeric', function() {

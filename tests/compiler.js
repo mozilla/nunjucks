@@ -20,6 +20,7 @@
   var render = util.render;
   var equal = util.equal;
   var finish = util.finish;
+  var isSlim = util.isSlim;
 
   describe('compiler', function() {
     it('should compile templates', function(done) {
@@ -960,29 +961,6 @@
       finish(done);
     });
 
-    it('should import template objects', function(done) {
-      var tmpl = new Template('{% macro foo() %}Inside a macro{% endmacro %}' +
-        '{% set bar = "BAZ" %}');
-
-      equal(
-        '{% import tmpl as imp %}' +
-        '{{ imp.foo() }} {{ imp.bar }}',
-        {
-          tmpl: tmpl
-        },
-        'Inside a macro BAZ');
-
-      equal(
-        '{% from tmpl import foo as baz, bar %}' +
-        '{{ bar }} {{ baz() }}',
-        {
-          tmpl: tmpl
-        },
-        'BAZ Inside a macro');
-
-      finish(done);
-    });
-
     it('should import templates with context', function(done) {
       equal(
         '{% set bar = "BAR" %}' +
@@ -1086,28 +1064,6 @@
         function() {
           expect(count).to.be(0);
         });
-
-      finish(done);
-    });
-
-    it('should inherit template objects', function(done) {
-      var tmpl = new Template('Foo{% block block1 %}Bar{% endblock %}' +
-        '{% block block2 %}Baz{% endblock %}Whizzle');
-
-      equal('hola {% extends tmpl %} fizzle mumble',
-        {
-          tmpl: tmpl
-        },
-        'FooBarBazWhizzle');
-
-      equal(
-        '{% extends tmpl %}' +
-        '{% block block1 %}BAR{% endblock %}' +
-        '{% block block2 %}BAZ{% endblock %}',
-        {
-          tmpl: tmpl
-        },
-        'FooBARBAZWhizzle');
 
       finish(done);
     });
@@ -1288,19 +1244,6 @@
           data: {
             tmpl: 'include.njk'
           }
-        },
-        'hello world FooInclude thedude');
-
-      finish(done);
-    });
-
-    it('should include template objects', function(done) {
-      var tmpl = new Template('FooInclude {{ name }}');
-
-      equal('hello world {% include tmpl %}',
-        {
-          name: 'thedude',
-          tmpl: tmpl
         },
         'hello world FooInclude thedude');
 
@@ -1971,36 +1914,6 @@
       finish(done);
     });
 
-    describe('the filter tag', function() {
-
-      it('should apply the title filter to the body', function(done) {
-        equal('{% filter title %}may the force be with you{% endfilter %}',
-          'May The Force Be With You');
-        finish(done);
-      });
-
-      it('should apply the replace filter to the body', function(done) {
-
-        equal('{% filter replace("force", "forth") %}may the force be with you{% endfilter %}',
-          'may the forth be with you');
-        finish(done);
-      });
-
-      it('should work with variables in the body', function(done) {
-        equal('{% set foo = "force" %}{% filter replace("force", "forth") %}may the {{ foo }} be with you{% endfilter %}',
-          'may the forth be with you');
-        finish(done);
-      });
-
-      it('should work with blocks in the body', function(done) {
-        equal(
-          '{% extends "filter-block.html" %}' +
-          '{% block block1 %}force{% endblock %}',
-          'may the forth be with you\n');
-        finish(done);
-      });
-    });
-
     it('should throw an error when including a file that calls an undefined macro', function(done) {
       render(
         '{% include "undefined-macro.njk" %}',
@@ -2086,18 +1999,6 @@
 
       equal(' {{ 2 + 2 -}} ', ' 4');
 
-      render(
-        ' {{ 2 + 2- }}',
-        {},
-        {
-          noThrow: true
-        },
-        function(err, res) {
-          expect(res).to.be(undefined);
-          expect(err).to.match(/unexpected token: }}/);
-        }
-      );
-
       finish(done);
     });
 
@@ -2174,5 +2075,110 @@
       finish(done);
     });
 
+
+    if (!isSlim) {
+      it('should import template objects', function(done) {
+        var tmpl = new Template('{% macro foo() %}Inside a macro{% endmacro %}' +
+          '{% set bar = "BAZ" %}');
+
+        equal(
+          '{% import tmpl as imp %}' +
+          '{{ imp.foo() }} {{ imp.bar }}',
+          {
+            tmpl: tmpl
+          },
+          'Inside a macro BAZ');
+
+        equal(
+          '{% from tmpl import foo as baz, bar %}' +
+          '{{ bar }} {{ baz() }}',
+          {
+            tmpl: tmpl
+          },
+          'BAZ Inside a macro');
+
+        finish(done);
+      });
+
+      it('should inherit template objects', function(done) {
+        var tmpl = new Template('Foo{% block block1 %}Bar{% endblock %}' +
+          '{% block block2 %}Baz{% endblock %}Whizzle');
+
+        equal('hola {% extends tmpl %} fizzle mumble',
+          {
+            tmpl: tmpl
+          },
+          'FooBarBazWhizzle');
+
+        equal(
+          '{% extends tmpl %}' +
+          '{% block block1 %}BAR{% endblock %}' +
+          '{% block block2 %}BAZ{% endblock %}',
+          {
+            tmpl: tmpl
+          },
+          'FooBARBAZWhizzle');
+
+        finish(done);
+      });
+
+      it('should include template objects', function(done) {
+        var tmpl = new Template('FooInclude {{ name }}');
+
+        equal('hello world {% include tmpl %}',
+          {
+            name: 'thedude',
+            tmpl: tmpl
+          },
+          'hello world FooInclude thedude');
+
+        finish(done);
+      });
+
+      it('should throw an error when invalid expression whitespaces are used', function(done) {
+        render(
+          ' {{ 2 + 2- }}',
+          {},
+          {
+            noThrow: true
+          },
+          function(err, res) {
+            expect(res).to.be(undefined);
+            expect(err).to.match(/unexpected token: }}/);
+          }
+        );
+
+        finish(done);
+      });
+    }
+  });
+
+  describe('the filter tag', function() {
+    it('should apply the title filter to the body', function(done) {
+      equal('{% filter title %}may the force be with you{% endfilter %}',
+        'May The Force Be With You');
+      finish(done);
+    });
+
+    it('should apply the replace filter to the body', function(done) {
+
+      equal('{% filter replace("force", "forth") %}may the force be with you{% endfilter %}',
+        'may the forth be with you');
+      finish(done);
+    });
+
+    it('should work with variables in the body', function(done) {
+      equal('{% set foo = "force" %}{% filter replace("force", "forth") %}may the {{ foo }} be with you{% endfilter %}',
+        'may the forth be with you');
+      finish(done);
+    });
+
+    it('should work with blocks in the body', function(done) {
+      equal(
+        '{% extends "filter-block.html" %}' +
+        '{% block block1 %}force{% endblock %}',
+        'may the forth be with you\n');
+      finish(done);
+    });
   });
 })();
