@@ -238,8 +238,18 @@ var Environment = Obj.extend({
               info.loader.cache[name] = tmpl;
             }
           } else {
-            tmpl = new Template('', _this,
-              '', eagerCompile);
+            tmpl = new Template({
+              type: 'code',
+              obj: {
+                root: function root(env, context, frame, runtime, cb) {
+                  try {
+                    cb(null, '');
+                  } catch (e) {
+                    cb(runtime.handleError(e, null, null));
+                  }
+                }
+              }
+            }, _this, '', eagerCompile);
           }
 
           if (cb) {
