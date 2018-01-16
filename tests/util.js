@@ -8,8 +8,8 @@
     templatesPath,
     expect;
 
-  if (typeof require !== 'undefined') {
-    nunjucks = require('../index.js');
+  if (typeof window === 'undefined') {
+    nunjucks = require('../nunjucks/index.js');
     Loader = nunjucks.FileSystemLoader;
     templatesPath = 'tests/templates';
     expect = require('expect.js');

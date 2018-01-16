@@ -14,10 +14,6 @@ var waterfall = require('a-sync-waterfall');
 var Frame = runtime.Frame;
 var Template;
 
-// Unconditionally load in this loader, even if no other ones are
-// included (possible in the slim browser build)
-builtin_loaders.PrecompiledLoader = require('./precompiled-loader');
-
 // If the user is using the async API, *always* call it
 // asynchronously even if the template was synchronous.
 function callbackAsap(cb, err, res) {
@@ -65,7 +61,7 @@ var Environment = Obj.extend({
     // It's easy to use precompiled templates: just include them
     // before you configure nunjucks and this will automatically
     // pick it up and use it
-    if (process.env.IS_BROWSER && window.nunjucksPrecompiled) {
+    if (typeof window !== 'undefined' && window.nunjucksPrecompiled) {
       this.loaders.unshift(
         new builtin_loaders.PrecompiledLoader(window.nunjucksPrecompiled)
       );

@@ -9,7 +9,7 @@
   if (typeof require !== 'undefined') {
     expect = require('expect.js');
     util = require('./util');
-    Template = require('../src/environment').Template;
+    Template = require('../nunjucks/src/environment').Template;
     fs = require('fs');
   } else {
     expect = window.expect;

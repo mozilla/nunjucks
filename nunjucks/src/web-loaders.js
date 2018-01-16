@@ -1,7 +1,7 @@
 'use strict';
 
 var Loader = require('./loader');
-var PrecompiledLoader = require('./precompiled-loader.js');
+var {PrecompiledLoader} = require('./precompiled-loader.js');
 
 var WebLoader = Loader.extend({
   init: function(baseURL, opts) {

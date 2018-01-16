@@ -4,8 +4,7 @@ var lib = require('./lib');
 var parser = require('./parser');
 var transformer = require('./transformer');
 var nodes = require('./nodes');
-// jshint -W079
-var Object = require('./object');
+var Obj = require('./object');
 var Frame = require('./runtime').Frame;
 
 // These are all the same for now, but shouldn't be passed straight
@@ -30,7 +29,7 @@ function binOpEmitter(str) {
   };
 }
 
-var Compiler = Object.extend({
+var Compiler = Obj.extend({
   init: function(templateName, throwOnUndefined) {
     this.templateName = templateName;
     this.codebuf = [];

@@ -2,7 +2,7 @@
 
 var lib = require('./lib');
 // jshint -W079
-var Object = require('./object');
+const Obj = require('./object');
 
 function traverseAndCheck(obj, type, results) {
   if (obj instanceof type) {
@@ -14,7 +14,7 @@ function traverseAndCheck(obj, type, results) {
   }
 }
 
-var Node = Object.extend('Node', {
+var Node = Obj.extend('Node', {
   init: function(lineno, colno) {
     this.lineno = lineno;
     this.colno = colno;

@@ -3,3 +3,10 @@ coverage
 .#*
 docs/_site
 docs/files
+/src/
+/index.js
+/index.js.map
+/tests/browser/nunjucks*
+.nyc_output
+/browser
+/tests/browser/precompiled-templates.js

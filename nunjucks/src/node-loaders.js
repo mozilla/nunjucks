@@ -5,7 +5,7 @@ var fs = require('fs');
 var path = require('path');
 var lib = require('./lib');
 var Loader = require('./loader');
-var PrecompiledLoader = require('./precompiled-loader.js');
+var {PrecompiledLoader} = require('./precompiled-loader.js');
 
 var FileSystemLoader = Loader.extend({
   init: function(searchPaths, opts) {

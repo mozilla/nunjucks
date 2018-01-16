@@ -2,10 +2,10 @@
 
 var lexer = require('./lexer');
 var nodes = require('./nodes');
-var Object = require('./object');
+var Obj = require('./object');
 var lib = require('./lib');
 
-var Parser = Object.extend({
+var Parser = Obj.extend({
   init: function(tokens) {
     this.tokens = tokens;
     this.peeked = null;

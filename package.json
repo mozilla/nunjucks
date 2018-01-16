@@ -6,19 +6,50 @@
   "dependencies": {
     "a-sync-waterfall": "^1.0.0",
     "asap": "^2.0.3",
+    "postinstall-build": "^5.0.1",
     "yargs": "^3.32.0"
   },
   "browser": "./browser/nunjucks.js",
   "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.0",
+    "babel-loader": "^7.1.2",
+    "babel-plugin-istanbul": "^4.1.5",
+    "babel-plugin-module-resolver": "3.0.0-beta.5",
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "babel-preset-env": "^1.6.1",
+    "babel-register": "^6.26.0",
+    "babel-runtime": "^6.26.0",
+    "connect": "^3.6.5",
+    "cross-env": "^5.1.3",
     "eslint": "^4.13.0",
     "expect.js": "*",
     "express": "4.x",
-    "istanbul": "0.3.x",
+    "get-port": "^3.2.0",
     "mocha": "*",
-    "node-libs-browser": "^0.4.3",
+    "mocha-phantomjs-core": "^2.1.2",
+    "mocha-phantomjs-istanbul": "0.0.2",
+    "node-libs-browser": "^0.7.0",
+    "nyc": "^11.4.1",
+    "phantomjs-prebuilt": "^2.1.16",
+    "serve-static": "^1.13.1",
     "supertest": "*",
-    "uglify-js": "*",
-    "webpack": "^1.8.11"
+    "uglify-js": "^2.8.29",
+    "uglifyjs-webpack-plugin": "^1.1.6",
+    "webpack": "^3.10.0"
+  },
+  "buildDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.0",
+    "babel-loader": "^7.1.2",
+    "babel-plugin-module-resolver": "3.0.0-beta.5",
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "babel-preset-env": "^1.6.1",
+    "babel-runtime": "^6.26.0",
+    "node-libs-browser": "^0.7.0",
+    "uglify-js": "^2.8.29",
+    "uglifyjs-webpack-plugin": "^1.1.6",
+    "webpack": "^3.10.0"
   },
   "optionalDependencies": {
     "chokidar": "^1.6.0"
@@ -27,14 +58,26 @@
     "node": "*"
   },
   "scripts": {
-    "lint": "eslint .",
-    "test": "eslint . && istanbul cover ./node_modules/mocha/bin/_mocha -- -R dot tests",
-    "browserfiles": "./bin/bundle"
+    "babel": "babel nunjucks --out-dir .",
+    "bundle": "node scripts/bundle.js",
+    "build": "npm run babel && npm run bundle",
+    "mocha": "mocha -R spec tests",
+    "instrument": "cross-env NODE_ENV=test scripts/bundle.js",
+    "lint": "eslint nunjucks scripts tests",
+    "postinstall": "postinstall-build src",
+    "test": "npm run lint && npm run instrument && cross-env NODE_ENV=test scripts/testrunner.js"
   },
   "bin": {
     "nunjucks-precompile": "./bin/precompile"
   },
   "main": "index",
+  "nyc": {
+    "require": [
+      "babel-register"
+    ],
+    "sourceMap": false,
+    "instrument": false
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/mozilla/nunjucks.git"

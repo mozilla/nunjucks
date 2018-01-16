@@ -21,4 +21,6 @@ var PrecompiledLoader = Loader.extend({
   }
 });
 
-module.exports = PrecompiledLoader;
+module.exports = {
+  PrecompiledLoader: PrecompiledLoader,
+};
