@@ -5,7 +5,7 @@ process.env.NODE_ENV = 'test';
 
 var nyc = new NYC({
   exclude: ['*.min.js', 'scripts/**', 'tests/**'],
-  reporter: ['text', 'html'],
+  reporter: ['text', 'html', 'lcovonly'],
   showProcessTree: true
 });
 nyc.reset();

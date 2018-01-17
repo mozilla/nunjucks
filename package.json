@@ -61,6 +61,7 @@
     "babel": "babel nunjucks --out-dir .",
     "bundle": "node scripts/bundle.js",
     "build": "npm run babel && npm run bundle",
+    "codecov": "codecov",
     "mocha": "mocha -R spec tests",
     "instrument": "cross-env NODE_ENV=test scripts/bundle.js",
     "lint": "eslint nunjucks scripts tests",
