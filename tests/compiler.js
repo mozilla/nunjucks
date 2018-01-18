@@ -1108,6 +1108,103 @@
             finish(done);
         });
 
+        it('should embed templates', function(done) {
+          equal('hello world {% embed "include.njk" %}{% endembed %}',
+            'hello world FooInclude ');
+          finish(done);
+        });
+
+        it('should embed templates with context', function(done) {
+          equal('hello world {% embed "include.njk" %} {% endembed %}',
+            { name: 'james' },
+            'hello world FooInclude james');
+          finish(done);
+        });
+
+        it('should embed templates that can see embedding scope, but not write to it', function(done) {
+          equal('{% set var = 1 %}{% embed "include-set.njk" %}{% endembed %}{{ var }}', '12\n1');
+          finish(done);
+        });
+
+        it('should embed templates dynamically', function(done) {
+          equal('hello world {% embed tmpl %} {% endembed %}',
+            { name: 'thedude', tmpl: 'include.njk' },
+            'hello world FooInclude thedude');
+          finish(done);
+        });
+
+        it('should embed templates dynamically based on a set var', function(done) {
+          equal('hello world {% set tmpl = "include.njk" %}{% embed tmpl %}{% endembed %}',
+            { name: 'thedude' },
+            'hello world FooInclude thedude');
+          finish(done);
+        });
+
+        it('should embed templates dynamically based on an object attr', function(done) {
+          equal('hello world {% embed data.tmpl %}{% endembed %}',
+            { name: 'thedude', data: {tmpl: 'include.njk'} },
+            'hello world FooInclude thedude');
+
+          finish(done);
+        });
+
+        it('should embed template objects', function(done) {
+          var tmpl = new Template('FooEmbed {{ name }}');
+
+          equal('hello world {% embed tmpl %}{% endembed %}',
+            { name: 'thedude', tmpl: tmpl },
+            'hello world FooEmbed thedude');
+
+          finish(done);
+        });
+
+        it('should throw an error when embedding a file that does not exist', function(done) {
+          render(
+            '{% embed "missing.njk" %}{% endembed %}',
+            {},
+            { noThrow: true },
+            function(err, res) {
+              expect(res).to.be(undefined);
+              expect(err).to.match(/template not found: missing.njk/);
+            }
+          );
+          finish(done);
+        });
+
+        it('should have access to "loop" inside an embed', function(done) {
+          equal('{% for item in [1,2,3] %}{% embed "include-in-loop.njk" %}{% endembed %}{% endfor %}',
+            '1,0,true\n2,1,false\n3,2,false\n');
+
+          equal('{% for k,v in items %}{% embed "include-in-loop.njk" %}{% endembed %}{% endfor %}',
+            {items: {'a': 'A', 'b': 'B'}},
+            '1,0,true\n2,1,false\n');
+
+          finish(done);
+        });
+
+        it('should make embeds inherit scope', function(done) {
+          equal('{% for item in [1,2] %}' +
+            '{% embed "item.njk" %}{% endembed %}' +
+            '{% endfor %}',
+            'showing 1showing 2');
+          finish(done);
+        });
+
+        it('should override embedded blocks', function(done) {
+          equal('{% embed "base.njk" %}{% block block1 %}BAR{% endblock %}{% endembed %}',
+            'FooBARBazFizzle');
+          finish(done);
+        });
+
+        it('should compile block-set wrapping an embedded block', function(done) {
+          equal('{% embed "base-set-wraps-block.njk" %}' +
+            '{% block somevar %}foo{% endblock %}' +
+            '{% endembed %}',
+            'foo\n'
+          );
+          finish(done);
+        });
+
         it('should compile a set block', function(done) {
             equal('{% set username = "foo" %}{{ username }}',
                   { username: 'james' },

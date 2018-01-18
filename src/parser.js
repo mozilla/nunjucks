@@ -451,6 +451,30 @@ var Parser = Object.extend({
         return node;
     },
 
+    parseEmbed: function() {
+        var tag = this.peekToken();
+        if(!this.skipSymbol('embed')) {
+            this.fail('parseEmbed: expected embed', tag.lineno, tag.colno);
+        }
+
+        var args = this.parseSignature(true, true).children;
+        this.advanceAfterBlockEnd(tag.value);
+
+        var node = new nodes.Embed(tag.lineno, tag.colno);
+        node.template = args[0];
+        node.contextVar = null;
+
+        if (args.length === 2) {
+          node.contextVar = args[1];
+        }
+
+        node.body = this.parseUntilBlocks('endembed');
+
+        this.advanceAfterBlockEnd();
+
+        return node;
+    },
+
     parseIf: function() {
         var tag = this.peekToken();
         var node;
@@ -630,6 +654,7 @@ var Parser = Object.extend({
         case 'block': return this.parseBlock();
         case 'extends': return this.parseExtends();
         case 'include': return this.parseInclude();
+        case 'embed': return this.parseEmbed();
         case 'set': return this.parseSet();
         case 'macro': return this.parseMacro();
         case 'call': return this.parseCall();

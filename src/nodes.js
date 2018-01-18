@@ -118,6 +118,7 @@ var Super = Node.extend('Super', { fields: ['blockName', 'symbol'] });
 var TemplateRef = Node.extend('TemplateRef', { fields: ['template'] });
 var Extends = TemplateRef.extend('Extends');
 var Include = Node.extend('Include', { fields: ['template', 'ignoreMissing'] });
+var Embed = Node.extend('Embed', { fields: ['template'] });
 var Set = Node.extend('Set', { fields: ['targets', 'value'] });
 var Switch = Node.extend('Switch', { fields: [ 'expr', 'cases', 'default' ]});
 var Case = Node.extend('Case', { fields: ['cond', 'body'] });
@@ -279,6 +280,7 @@ module.exports = {
     Super: Super,
     Extends: Extends,
     Include: Include,
+    Embed: Embed,
     Set: Set,
     Switch: Switch,
     Case: Case,
