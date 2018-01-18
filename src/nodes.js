@@ -1,6 +1,7 @@
 'use strict';
 
 var lib = require('./lib');
+var util = require('util');
 // jshint -W079
 var Object = require('./object');
 
@@ -11,6 +12,12 @@ function traverseAndCheck(obj, type, results) {
 
     if(obj instanceof Node) {
         obj.findAll(type, results);
+    }
+
+    if(util.isArray(obj)) {
+        lib.each(obj, function(arg, i) {
+            traverseAndCheck(obj[i], type, results);
+        });
     }
 }
 

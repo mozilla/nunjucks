@@ -1425,6 +1425,36 @@
             finish(done);
         });
 
+        it('should allow blocks in custom tag', function(done) {
+            function testExtension() {
+                // jshint validthis: true
+                this.tags = ['test'];
+
+                this.parse = function(parser, nodes) {
+                    parser.advanceAfterBlockEnd();
+
+                    var content = parser.parseUntilBlocks('endtest');
+                    var tag = new nodes.CallExtension(this, 'run', null, [content]);
+                    parser.advanceAfterBlockEnd();
+
+                    return tag;
+                };
+
+                this.run = function(context, content) {
+                    // Reverse the string
+                    return content();
+                };
+            }
+
+            var opts = { extensions: { 'testExtension': new testExtension() }};
+            render('{% extends "block-inside-custom-tag.njk" %}' +
+                '{% block hello%}{{ super() }}, world!{% endblock %}', null, opts, function(err, res) {
+                expect(res).to.be('hello, world!\n');
+            });
+
+            finish(done);
+        });
+
         it('should autoescape by default', function(done) {
             equal('{{ foo }}', { foo: '"\'<>&'}, '&quot;&#39;&lt;&gt;&amp;');
             finish(done);
