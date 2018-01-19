@@ -122,6 +122,7 @@ var Set = Node.extend('Set', { fields: ['targets', 'value'] });
 var Switch = Node.extend('Switch', { fields: [ 'expr', 'cases', 'default' ]});
 var Case = Node.extend('Case', { fields: ['cond', 'body'] });
 var Output = NodeList.extend('Output');
+var VariableBlock = Output.extend('VariableBlock');
 var Capture = Node.extend('Capture', { fields: ['body'] });
 var TemplateData = Literal.extend('TemplateData');
 var UnaryOp = Node.extend('UnaryOp', { fields: ['target'] });
@@ -259,6 +260,7 @@ module.exports = {
     Pair: Pair,
     Dict: Dict,
     Output: Output,
+    VariableBlock: VariableBlock,
     Capture: Capture,
     TemplateData: TemplateData,
     If: If,

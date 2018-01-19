@@ -128,54 +128,54 @@
         it('should parse basic types', function() {
             isAST(parser.parse('{{ 1 }}'),
                   [nodes.Root,
-                   [nodes.Output,
+                   [nodes.VariableBlock,
                     [nodes.Literal, 1]]]);
 
             isAST(parser.parse('{{ 4.567 }}'),
                   [nodes.Root,
-                   [nodes.Output,
+                   [nodes.VariableBlock,
                     [nodes.Literal, 4.567]]]);
 
             isAST(parser.parse('{{ "foo" }}'),
                   [nodes.Root,
-                   [nodes.Output,
+                   [nodes.VariableBlock,
                     [nodes.Literal, 'foo']]]);
 
             isAST(parser.parse('{{ \'foo\' }}'),
                   [nodes.Root,
-                   [nodes.Output,
+                   [nodes.VariableBlock,
                     [nodes.Literal, 'foo']]]);
 
             isAST(parser.parse('{{ true }}'),
                   [nodes.Root,
-                   [nodes.Output,
+                   [nodes.VariableBlock,
                     [nodes.Literal, true]]]);
 
             isAST(parser.parse('{{ false }}'),
                   [nodes.Root,
-                   [nodes.Output,
+                   [nodes.VariableBlock,
                     [nodes.Literal, false]]]);
 
             isAST(parser.parse('{{ none }}'),
                   [nodes.Root,
-                   [nodes.Output,
+                   [nodes.VariableBlock,
                     [nodes.Literal, null]]]);
 
             isAST(parser.parse('{{ foo }}'),
                   [nodes.Root,
-                   [nodes.Output,
+                   [nodes.VariableBlock,
                     [nodes.Symbol, 'foo']]]);
 
             isAST(parser.parse('{{ r/23/gi }}'),
                   [nodes.Root,
-                   [nodes.Output,
+                   [nodes.VariableBlock,
                      [nodes.Literal, new RegExp('23', 'gi')]]]);
         });
 
         it('should parse aggregate types', function() {
             isAST(parser.parse('{{ [1,2,3] }}'),
                   [nodes.Root,
-                   [nodes.Output,
+                   [nodes.VariableBlock,
                     [nodes.Array,
                      [nodes.Literal, 1],
                      [nodes.Literal, 2],
@@ -183,7 +183,7 @@
 
             isAST(parser.parse('{{ (1,2,3) }}'),
                   [nodes.Root,
-                   [nodes.Output,
+                   [nodes.VariableBlock,
                     [nodes.Group,
                      [nodes.Literal, 1],
                      [nodes.Literal, 2],
@@ -191,7 +191,7 @@
 
             isAST(parser.parse('{{ {foo: 1, \'two\': 2} }}'),
                   [nodes.Root,
-                   [nodes.Output,
+                   [nodes.VariableBlock,
                     [nodes.Dict,
                      [nodes.Pair,
                       [nodes.Symbol, 'foo'],
@@ -205,35 +205,35 @@
             isAST(parser.parse('hello {{ foo }}, how are you'),
                   [nodes.Root,
                    [nodes.Output, [nodes.TemplateData, 'hello ']],
-                   [nodes.Output, [nodes.Symbol, 'foo']],
+                   [nodes.VariableBlock, [nodes.Symbol, 'foo']],
                    [nodes.Output, [nodes.TemplateData, ', how are you']]]);
         });
 
         it('should parse operators', function() {
             isAST(parser.parse('{{ x == y }}'),
                   [nodes.Root,
-                   [nodes.Output,
+                   [nodes.VariableBlock,
                     [nodes.Compare,
                      [nodes.Symbol, 'x'],
                      [[nodes.CompareOperand, [nodes.Symbol, 'y'], '==']]]]]);
 
             isAST(parser.parse('{{ x or y }}'),
                   [nodes.Root,
-                   [nodes.Output,
+                   [nodes.VariableBlock,
                     [nodes.Or,
                      [nodes.Symbol, 'x'],
                      [nodes.Symbol, 'y']]]]);
 
             isAST(parser.parse('{{ x in y }}'),
                   [nodes.Root,
-                   [nodes.Output,
+                   [nodes.VariableBlock,
                     [nodes.In,
                      [nodes.Symbol, 'x'],
                      [nodes.Symbol, 'y']]]]);
 
             isAST(parser.parse('{{ x not in y }}'),
                   [nodes.Root,
-                   [nodes.Output,
+                   [nodes.VariableBlock,
                     [nodes.Not,
                      [nodes.In,
                       [nodes.Symbol, 'x'],
@@ -241,14 +241,14 @@
                       
             isAST(parser.parse('{{ x is callable }}'),
               [nodes.Root,
-                [nodes.Output,
+                [nodes.VariableBlock,
                   [nodes.Is,
                     [nodes.Symbol, 'x'],
                     [nodes.Symbol, 'callable']]]]);
 
             isAST(parser.parse('{{ x is not callable }}'),
               [nodes.Root,
-                [nodes.Output,
+                [nodes.VariableBlock,
                   [nodes.Not,
                     [nodes.Is,
                       [nodes.Symbol, 'x'],
@@ -258,7 +258,7 @@
         it('should parse tilde', function(){
             isAST(parser.parse('{{ 2 ~ 3 }}'),
               [nodes.Root,
-               [nodes.Output,
+               [nodes.VariableBlock,
                 [nodes.Concat,
                   [nodes.Literal, 2],
                   [nodes.Literal, 3]
@@ -269,7 +269,7 @@
         it('should parse operators with correct precedence', function() {
             isAST(parser.parse('{{ x in y and z }}'),
                   [nodes.Root,
-                   [nodes.Output,
+                   [nodes.VariableBlock,
                     [nodes.And,
                      [nodes.In,
                       [nodes.Symbol, 'x'],
@@ -278,7 +278,7 @@
 
             isAST(parser.parse('{{ x not in y or z }}'),
                   [nodes.Root,
-                   [nodes.Output,
+                   [nodes.VariableBlock,
                     [nodes.Or,
                      [nodes.Not,
                       [nodes.In,
@@ -288,7 +288,7 @@
 
             isAST(parser.parse('{{ x or y and z }}'),
                   [nodes.Root,
-                   [nodes.Output,
+                   [nodes.VariableBlock,
                     [nodes.Or,
                      [nodes.Symbol, 'x'],
                      [nodes.And,
@@ -357,7 +357,7 @@
                    [nodes.Literal, 2]],
                   [nodes.Symbol, 'x'],
                   [nodes.NodeList,
-                   [nodes.Output,
+                   [nodes.VariableBlock,
                     [nodes.Symbol, 'x']]]]]);
 
         });
@@ -369,7 +369,7 @@
                   [nodes.Array],
                   [nodes.Symbol, 'x'],
                   [nodes.NodeList,
-                   [nodes.Output,
+                   [nodes.VariableBlock,
                     [nodes.Symbol, 'x']]],
                   [nodes.NodeList,
                    [nodes.Output,
@@ -380,7 +380,7 @@
         it('should parse filters', function() {
             isAST(parser.parse('{{ foo | bar }}'),
                   [nodes.Root,
-                   [nodes.Output,
+                   [nodes.VariableBlock,
                     [nodes.Filter,
                      [nodes.Symbol, 'bar'],
                      [nodes.NodeList,
@@ -388,7 +388,7 @@
 
             isAST(parser.parse('{{ foo | bar | baz }}'),
                   [nodes.Root,
-                   [nodes.Output,
+                   [nodes.VariableBlock,
                     [nodes.Filter,
                      [nodes.Symbol, 'baz'],
                      [nodes.NodeList,
@@ -399,7 +399,7 @@
 
             isAST(parser.parse('{{ foo | bar(3) }}'),
                   [nodes.Root,
-                   [nodes.Output,
+                   [nodes.VariableBlock,
                     [nodes.Filter,
                      [nodes.Symbol, 'bar'],
                      [nodes.NodeList,
@@ -469,7 +469,7 @@
                          [nodes.NodeList,
                           [nodes.Output,
                            [nodes.TemplateData, 'This is ']],
-                          [nodes.Output,
+                          [nodes.VariableBlock,
                            [nodes.Symbol, 'i']]]]]]]]]]);
         });
 
@@ -520,7 +520,7 @@
             isAST(parser.parse('{% raw %}{{ var }}{% endraw %}{{ var }}{% raw %}{{ var }}{% endraw %}'),
                   [nodes.Root,
                    [nodes.Output, [nodes.TemplateData, '{{ var }}']],
-                   [nodes.Output, [nodes.Symbol, 'var']],
+                   [nodes.VariableBlock, [nodes.Symbol, 'var']],
                    [nodes.Output, [nodes.TemplateData, '{{ var }}']]]);
         });
 
@@ -530,7 +530,7 @@
                    [nodes.Output, [nodes.TemplateData, '\n']],
                    [nodes.Output, [nodes.TemplateData, '{{ var }}']],
                    [nodes.Output, [nodes.TemplateData, '\n']],
-                   [nodes.Output, [nodes.Symbol, 'var']],
+                   [nodes.VariableBlock, [nodes.Symbol, 'var']],
                    [nodes.Output, [nodes.TemplateData, '\n']],
                    [nodes.Output, [nodes.TemplateData, '{{ var }}']],
                    [nodes.Output, [nodes.TemplateData, '\n']]]);
@@ -583,7 +583,7 @@
             isAST(parser.parse('{% verbatim %}{{ var }}{% endverbatim %}{{ var }}{% verbatim %}{{ var }}{% endverbatim %}'),
                 [nodes.Root,
                     [nodes.Output, [nodes.TemplateData, '{{ var }}']],
-                    [nodes.Output, [nodes.Symbol, 'var']],
+                    [nodes.VariableBlock, [nodes.Symbol, 'var']],
                     [nodes.Output, [nodes.TemplateData, '{{ var }}']]]);
         });
 
@@ -593,7 +593,7 @@
                     [nodes.Output, [nodes.TemplateData, '\n']],
                     [nodes.Output, [nodes.TemplateData, '{{ var }}']],
                     [nodes.Output, [nodes.TemplateData, '\n']],
-                    [nodes.Output, [nodes.Symbol, 'var']],
+                    [nodes.VariableBlock, [nodes.Symbol, 'var']],
                     [nodes.Output, [nodes.TemplateData, '\n']],
                     [nodes.Output, [nodes.TemplateData, '{{ var }}']],
                     [nodes.Output, [nodes.TemplateData, '\n']]]);
@@ -623,7 +623,7 @@
         it('should parse keyword and non-keyword arguments', function() {
             isAST(parser.parse('{{ foo("bar", falalalala, baz="foobar") }}'),
                   [nodes.Root,
-                   [nodes.Output,
+                   [nodes.VariableBlock,
                     [nodes.FunCall,
                      [nodes.Symbol, 'foo'],
                      [nodes.NodeList,
@@ -779,12 +779,12 @@
                    [nodes.If,
                     [nodes.Symbol, 'x'],
                     [nodes.NodeList,
-                     [nodes.Output,
+                     [nodes.VariableBlock,
                       [nodes.Symbol, 'y']],
                      [nodes.Output,
                       // the value of TemplateData should be ' ' instead of ''
                       [nodes.TemplateData, ' ']],
-                     [nodes.Output,
+                     [nodes.VariableBlock,
                       [nodes.Symbol, 'z']]]]]);
 
             isAST(parser.parse('{% if x -%}{% if y %} {{z}}{% endif %}{% endif %}'),
@@ -798,7 +798,7 @@
                       [nodes.Output,
                         // the value of TemplateData should be ' ' instead of ''
                        [nodes.TemplateData, ' ']],
-                      [nodes.Output,
+                      [nodes.VariableBlock,
                        [nodes.Symbol, 'z']]
                       ]]]]]);
 
@@ -810,7 +810,7 @@
                     [nodes.Output,
                      // the value of TemplateData should be ' ' instead of ''
                      [nodes.TemplateData, ' ']],
-                    [nodes.Output,
+                    [nodes.VariableBlock,
                      [nodes.Symbol, 'z']]]]]);
 
         });
@@ -942,7 +942,7 @@
                   [nodes.Root,
                    [nodes.CallExtension, extensions[1], 'bar', null,
                     [1, [nodes.NodeList,
-                         [nodes.Output,
+                         [nodes.VariableBlock,
                           [nodes.Literal, 123]]]]]]);
 
             isAST(parser.parse('{% testargs(123, "abc", foo="bar") %}', extensions),
