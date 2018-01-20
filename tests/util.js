@@ -1,4 +1,6 @@
 (function() {
+  /* eslint-disable vars-on-top */
+
   'use strict';
 
   var nunjucks,
@@ -93,6 +95,7 @@
     return rand + '.njk';
   }
 
+  // eslint-disable-next-line consistent-return
   function render(str, ctx, opts, env, cb) {
     if (typeof ctx === 'function') {
       cb = ctx;
@@ -125,19 +128,25 @@
     var name;
     if (opts.filters) {
       for (name in opts.filters) {
-        e.addFilter(name, opts.filters[name]);
+        if (Object.prototype.hasOwnProperty.call(opts.filters, name)) {
+          e.addFilter(name, opts.filters[name]);
+        }
       }
     }
 
     if (opts.asyncFilters) {
       for (name in opts.asyncFilters) {
-        e.addFilter(name, opts.asyncFilters[name], true);
+        if (Object.prototype.hasOwnProperty.call(opts.asyncFilters, name)) {
+          e.addFilter(name, opts.asyncFilters[name], true);
+        }
       }
     }
 
     if (opts.extensions) {
       for (name in opts.extensions) {
-        e.addExtension(name, opts.extensions[name]);
+        if (Object.prototype.hasOwnProperty.call(opts.extensions, name)) {
+          e.addExtension(name, opts.extensions[name]);
+        }
       }
     }
 
@@ -149,7 +158,7 @@
         asFunction: true,
         env: e
       });
-      eval(precompileJs);
+      eval(precompileJs); // eslint-disable-line no-eval
     }
 
     ctx = ctx || {};
@@ -174,13 +183,13 @@
 
         try {
           cb(err, normEOL(res));
-        } catch (e) {
+        } catch (exc) {
           if (doneHandler) {
-            doneHandler(e);
+            doneHandler(exc);
             numAsyncs = 0;
             doneHandler = null;
           } else {
-            throw e;
+            throw exc;
           }
         }
 
@@ -210,4 +219,4 @@
       isSlim: isSlim
     };
   }
-})();
+}());

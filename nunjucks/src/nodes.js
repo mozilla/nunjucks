@@ -1,7 +1,5 @@
 'use strict';
 
-var lib = require('./lib');
-// jshint -W079
 const Obj = require('./object');
 
 function traverseAndCheck(obj, type, results) {
@@ -14,15 +12,12 @@ function traverseAndCheck(obj, type, results) {
   }
 }
 
-var Node = Obj.extend('Node', {
-  init: function(lineno, colno) {
+class Node extends Obj {
+  init(lineno, colno, ...args) {
     this.lineno = lineno;
     this.colno = colno;
 
-    var fields = this.fields;
-    for (var i = 0, l = fields.length; i < l; i++) {
-      var field = fields[i];
-
+    this.fields.forEach((field, i) => {
       // The first two args are line/col numbers, so offset by 2
       var val = arguments[i + 2];
 
@@ -33,223 +28,296 @@ var Node = Obj.extend('Node', {
       }
 
       this[field] = val;
-    }
-  },
+    });
+  }
 
-  findAll: function(type, results) {
+  findAll(type, results) {
     results = results || [];
 
-    var i,
-      l;
     if (this instanceof NodeList) {
-      var children = this.children;
-
-      for (i = 0, l = children.length; i < l; i++) {
-        traverseAndCheck(children[i], type, results);
-      }
+      this.children.forEach(child => traverseAndCheck(child, type, results));
     } else {
-      var fields = this.fields;
-
-      for (i = 0, l = fields.length; i < l; i++) {
-        traverseAndCheck(this[fields[i]], type, results);
-      }
+      this.fields.forEach(field => traverseAndCheck(this[field], type, results));
     }
 
     return results;
-  },
-
-  iterFields: function(func) {
-    lib.each(this.fields, function(field) {
-      func(this[field], field);
-    }, this);
   }
-});
+
+  iterFields(func) {
+    this.fields.forEach((field) => {
+      func(this[field], field);
+    });
+  }
+}
 
 // Abstract nodes
-var Value = Node.extend('Value', {
-  fields: ['value']
-});
+class Value extends Node {
+  get typename() { return 'Value'; }
+  get fields() {
+    return ['value'];
+  }
+}
 
 // Concrete nodes
-var NodeList = Node.extend('NodeList', {
-  fields: ['children'],
+class NodeList extends Node {
+  get typename() { return 'NodeList'; }
+  get fields() { return ['children']; }
 
-  init: function(lineno, colno, nodes) {
-    this.parent(lineno, colno, nodes || []);
-  },
+  init(lineno, colno, nodes) {
+    super.init(lineno, colno, nodes || []);
+  }
 
-  addChild: function(node) {
+  addChild(node) {
     this.children.push(node);
   }
-});
+}
 
-var Root = NodeList.extend('Root');
-var Literal = Value.extend('Literal');
-var Symbol = Value.extend('Symbol');
-var Group = NodeList.extend('Group');
-var Array = NodeList.extend('Array');
-var Pair = Node.extend('Pair', {
-  fields: ['key', 'value']
-});
-var Dict = NodeList.extend('Dict');
-var LookupVal = Node.extend('LookupVal', {
-  fields: ['target', 'val']
-});
-var If = Node.extend('If', {
-  fields: ['cond', 'body', 'else_']
-});
-var IfAsync = If.extend('IfAsync');
-var InlineIf = Node.extend('InlineIf', {
-  fields: ['cond', 'body', 'else_']
-});
-var For = Node.extend('For', {
-  fields: ['arr', 'name', 'body', 'else_']
-});
-var AsyncEach = For.extend('AsyncEach');
-var AsyncAll = For.extend('AsyncAll');
-var Macro = Node.extend('Macro', {
-  fields: ['name', 'args', 'body']
-});
-var Caller = Macro.extend('Caller');
-var Import = Node.extend('Import', {
-  fields: ['template', 'target', 'withContext']
-});
-var FromImport = Node.extend('FromImport', {
-  fields: ['template', 'names', 'withContext'],
-
-  init: function(lineno, colno, template, names, withContext) {
-    this.parent(lineno, colno,
-      template,
-      names || new NodeList(), withContext);
+class Root extends NodeList {
+  get typename() { return 'Root'; }
+}
+class Literal extends Value {
+  get typename() { return 'Literal'; }
+}
+class Symbol extends Value {
+  get typename() { return 'Symbol'; }
+}
+class Group extends NodeList {
+  get typename() { return 'Group'; }
+}
+class ArrayNode extends NodeList {
+  get typename() {
+    return 'Array';
   }
-});
-var FunCall = Node.extend('FunCall', {
-  fields: ['name', 'args']
-});
-var Filter = FunCall.extend('Filter');
-var FilterAsync = Filter.extend('FilterAsync', {
-  fields: ['name', 'args', 'symbol']
-});
-var KeywordArgs = Dict.extend('KeywordArgs');
-var Block = Node.extend('Block', {
-  fields: ['name', 'body']
-});
-var Super = Node.extend('Super', {
-  fields: ['blockName', 'symbol']
-});
-var TemplateRef = Node.extend('TemplateRef', {
-  fields: ['template']
-});
-var Extends = TemplateRef.extend('Extends');
-var Include = Node.extend('Include', {
-  fields: ['template', 'ignoreMissing']
-});
-var Set = Node.extend('Set', {
-  fields: ['targets', 'value']
-});
-var Switch = Node.extend('Switch', {
-  fields: ['expr', 'cases', 'default']
-});
-var Case = Node.extend('Case', {
-  fields: ['cond', 'body']
-});
-var Output = NodeList.extend('Output');
-var Capture = Node.extend('Capture', {
-  fields: ['body']
-});
-var TemplateData = Literal.extend('TemplateData');
-var UnaryOp = Node.extend('UnaryOp', {
-  fields: ['target']
-});
-var BinOp = Node.extend('BinOp', {
-  fields: ['left', 'right']
-});
-var In = BinOp.extend('In');
-var Is = BinOp.extend('Is');
-var Or = BinOp.extend('Or');
-var And = BinOp.extend('And');
-var Not = UnaryOp.extend('Not');
-var Add = BinOp.extend('Add');
-var Concat = BinOp.extend('Concat');
-var Sub = BinOp.extend('Sub');
-var Mul = BinOp.extend('Mul');
-var Div = BinOp.extend('Div');
-var FloorDiv = BinOp.extend('FloorDiv');
-var Mod = BinOp.extend('Mod');
-var Pow = BinOp.extend('Pow');
-var Neg = UnaryOp.extend('Neg');
-var Pos = UnaryOp.extend('Pos');
-var Compare = Node.extend('Compare', {
-  fields: ['expr', 'ops']
-});
-var CompareOperand = Node.extend('CompareOperand', {
-  fields: ['expr', 'type']
-});
+}
 
-var CallExtension = Node.extend('CallExtension', {
-  fields: ['extName', 'prop', 'args', 'contentArgs'],
+class Pair extends Node {
+  get typename() { return 'Pair'; }
+  get fields() { return ['key', 'value']; }
+}
 
-  init: function(ext, prop, args, contentArgs) {
+class Dict extends NodeList {
+  get typename() { return 'Dict'; }
+}
+class LookupVal extends Node {
+  get typename() { return 'LookupVal'; }
+  get fields() { return ['target', 'val']; }
+}
+class If extends Node {
+  get typename() { return 'If'; }
+  get fields() { return ['cond', 'body', 'else_']; }
+}
+class IfAsync extends If {
+  get typename() { return 'IfAsync'; }
+}
+class InlineIf extends Node {
+  get typename() { return 'InlineIf'; }
+  get fields() { return ['cond', 'body', 'else_']; }
+}
+class For extends Node {
+  get typename() { return 'For'; }
+  get fields() { return ['arr', 'name', 'body', 'else_']; }
+}
+class AsyncEach extends For {
+  get typename() { return 'AsyncEach'; }
+}
+class AsyncAll extends For {
+  get typename() { return 'AsyncAll'; }
+}
+class Macro extends Node {
+  get typename() { return 'Macro'; }
+  get fields() { return ['name', 'args', 'body']; }
+}
+class Caller extends Macro {
+  get typename() { return 'Caller'; }
+}
+class Import extends Node {
+  get typename() { return 'Import'; }
+  get fields() { return ['template', 'target', 'withContext']; }
+}
+class FromImport extends Node {
+  get typename() { return 'FromImport'; }
+  get fields() { return ['template', 'names', 'withContext']; }
+
+  init(lineno, colno, template, names, withContext) {
+    super.init(lineno, colno, template, names || new NodeList(), withContext);
+  }
+}
+class FunCall extends Node {
+  get typename() { return 'FunCall'; }
+  get fields() { return ['name', 'args']; }
+}
+class Filter extends FunCall {
+  get typename() { return 'Filter'; }
+}
+class FilterAsync extends Filter {
+  get typename() { return 'FilterAsync'; }
+  get fields() { return ['name', 'args', 'symbol']; }
+}
+class KeywordArgs extends Dict {
+  get typename() { return 'KeywordArgs'; }
+}
+class Block extends Node {
+  get typename() { return 'Block'; }
+  get fields() { return ['name', 'body']; }
+}
+class Super extends Node {
+  get typename() { return 'Super'; }
+  get fields() { return ['blockName', 'symbol']; }
+}
+class TemplateRef extends Node {
+  get typename() { return 'TemplateRef'; }
+  get fields() { return ['template']; }
+}
+class Extends extends TemplateRef {
+  get typename() { return 'Extends'; }
+}
+class Include extends Node {
+  get typename() { return 'Include'; }
+  get fields() { return ['template', 'ignoreMissing']; }
+}
+class Set extends Node {
+  get typename() { return 'Set'; }
+  get fields() { return ['targets', 'value']; }
+}
+class Switch extends Node {
+  get typename() { return 'Switch'; }
+  get fields() { return ['expr', 'cases', 'default']; }
+}
+class Case extends Node {
+  get typename() { return 'Case'; }
+  get fields() { return ['cond', 'body']; }
+}
+class Output extends NodeList {
+  get typename() { return 'Output'; }
+}
+class Capture extends Node {
+  get typename() { return 'Capture'; }
+  get fields() { return ['body']; }
+}
+class TemplateData extends Literal {
+  get typename() { return 'TemplateData'; }
+}
+class UnaryOp extends Node {
+  get typename() { return 'UnaryOp'; }
+  get fields() { return ['target']; }
+}
+class BinOp extends Node {
+  get typename() { return 'BinOp'; }
+  get fields() { return ['left', 'right']; }
+}
+class In extends BinOp {
+  get typename() { return 'In'; }
+}
+class Is extends BinOp {
+  get typename() { return 'Is'; }
+}
+class Or extends BinOp {
+  get typename() { return 'Or'; }
+}
+class And extends BinOp {
+  get typename() { return 'And'; }
+}
+class Not extends UnaryOp {
+  get typename() { return 'Not'; }
+}
+class Add extends BinOp {
+  get typename() { return 'Add'; }
+}
+class Concat extends BinOp {
+  get typename() { return 'Concat'; }
+}
+class Sub extends BinOp {
+  get typename() { return 'Sub'; }
+}
+class Mul extends BinOp {
+  get typename() { return 'Mul'; }
+}
+class Div extends BinOp {
+  get typename() { return 'Div'; }
+}
+class FloorDiv extends BinOp {
+  get typename() { return 'FloorDiv'; }
+}
+class Mod extends BinOp {
+  get typename() { return 'Mod'; }
+}
+class Pow extends BinOp {
+  get typename() { return 'Pow'; }
+}
+class Neg extends UnaryOp {
+  get typename() { return 'Neg'; }
+}
+class Pos extends UnaryOp {
+  get typename() { return 'Pos'; }
+}
+class Compare extends Node {
+  get typename() { return 'Compare'; }
+  get fields() { return ['expr', 'ops']; }
+}
+class CompareOperand extends Node {
+  get typename() { return 'CompareOperand'; }
+  get fields() { return ['expr', 'type']; }
+}
+
+class CallExtension extends Node {
+  get typename() { return 'CallExtension'; }
+  get fields() { return ['extName', 'prop', 'args', 'contentArgs']; }
+
+  init(ext, prop, args, contentArgs) {
+    super.init();
     this.extName = ext._name || ext;
     this.prop = prop;
     this.args = args || new NodeList();
     this.contentArgs = contentArgs || [];
     this.autoescape = ext.autoescape;
   }
-});
+}
 
-var CallExtensionAsync = CallExtension.extend('CallExtensionAsync');
+class CallExtensionAsync extends CallExtension {
+  get typename() { return 'CallExtensionAsync'; }
+}
+
+// This is hacky, but this is just a debugging function anyway
+function print(str, indent, inline) {
+  var lines = str.split('\n');
+
+  lines.forEach((line, i) => {
+    if (line && ((inline && i > 0) || !inline)) {
+      process.stdout.write((' ').repeat(indent));
+    }
+    const nl = (i === lines.length - 1) ? '' : '\n';
+    process.stdout.write(`${line}${nl}`);
+  });
+}
 
 // Print the AST in a nicely formatted tree format for debuggin
 function printNodes(node, indent) {
   indent = indent || 0;
 
-  // This is hacky, but this is just a debugging function anyway
-  function print(str, indent, inline) {
-    var lines = str.split('\n');
-
-    for (var i = 0; i < lines.length; i++) {
-      if (lines[i]) {
-        if ((inline && i > 0) || !inline) {
-          for (var j = 0; j < indent; j++) {
-            process.stdout.write(' ');
-          }
-        }
-      }
-
-      if (i === lines.length - 1) {
-        process.stdout.write(lines[i]);
-      } else {
-        process.stdout.write(lines[i] + '\n');
-      }
-    }
-  }
-
   print(node.typename + ': ', indent);
 
   if (node instanceof NodeList) {
     print('\n');
-    lib.each(node.children, function(n) {
+    node.children.forEach((n) => {
       printNodes(n, indent + 2);
     });
   } else if (node instanceof CallExtension) {
-    print(node.extName + '.' + node.prop);
-    print('\n');
+    print(`${node.extName}.${node.prop}\n`);
 
     if (node.args) {
       printNodes(node.args, indent + 2);
     }
 
     if (node.contentArgs) {
-      lib.each(node.contentArgs, function(n) {
+      node.contentArgs.forEach((n) => {
         printNodes(n, indent + 2);
       });
     }
   } else {
-    var nodes = null;
-    var props = null;
+    let nodes = null;
+    let props = null;
 
-    node.iterFields(function(val, field) {
+    node.iterFields((val, field) => {
       if (val instanceof Node) {
         nodes = nodes || {};
         nodes[field] = val;
@@ -266,11 +334,8 @@ function printNodes(node, indent) {
     }
 
     if (nodes) {
-      for (var k in nodes) {
-        printNodes(nodes[k], indent + 2);
-      }
+      Object.values(nodes).forEach(n => printNodes(n, indent + 2));
     }
-
   }
 }
 
@@ -290,7 +355,7 @@ module.exports = {
   Literal: Literal,
   Symbol: Symbol,
   Group: Group,
-  Array: Array,
+  Array: ArrayNode,
   Pair: Pair,
   Dict: Dict,
   Output: Output,

@@ -13,13 +13,13 @@ var escapeMap = {
 
 var escapeRegex = /[&"'<>]/g;
 
-var lookupEscape = function(ch) {
-  return escapeMap[ch];
-};
-
 var exports = module.exports = {};
 
-exports.prettifyError = function(path, withInternals, err) {
+function lookupEscape(ch) {
+  return escapeMap[ch];
+}
+
+function prettifyError(path, withInternals, err) {
   if (!err.Update) {
     // not one of ours, cast it
     err = new exports.TemplateError(err);
@@ -28,152 +28,204 @@ exports.prettifyError = function(path, withInternals, err) {
 
   // Unless they marked the dev flag, show them a trace from here
   if (!withInternals) {
-    var old = err;
+    const old = err;
     err = new Error(old.message);
     err.name = old.name;
   }
 
   return err;
-};
+}
 
-exports.TemplateError = function(message, lineno, colno) {
-  var err = this;
+exports.prettifyError = prettifyError;
 
-  if (message instanceof Error) { // for casting regular js errors
-    err = message;
-    message = message.name + ': ' + message.message;
+function TemplateError(message, lineno, colno) {
+  var err;
+  var cause;
 
-    try {
-      if (err.name = '') {}  // eslint-disable-line
-    } catch (e) {
-      // If we can't set the name of the error object in this
-      // environment, don't use it
-      err = this;
-    }
-  } else {
-    if (Error.captureStackTrace) {
-      Error.captureStackTrace(err);
-    }
+  if (message instanceof Error) {
+    cause = message;
+    message = `${cause.name}: ${cause.message}`;
   }
 
-  err.name = 'Template render error';
-  err.message = message;
+  if (Object.setPrototypeOf) {
+    err = new Error(message);
+    Object.setPrototypeOf(err, TemplateError.prototype);
+  } else {
+    err = this;
+    Object.defineProperty(err, 'message', {
+      enumerable: false,
+      writable: true,
+      value: message,
+    });
+  }
+
+  Object.defineProperty(err, 'name', {
+    value: 'Template render error',
+  });
+
+  if (Error.captureStackTrace) {
+    Error.captureStackTrace(err, this.constructor);
+  }
+
+  let getStack;
+
+  if (cause) {
+    const stackDescriptor = Object.getOwnPropertyDescriptor(cause, 'stack');
+    getStack = stackDescriptor && (stackDescriptor.get || (() => stackDescriptor.value));
+    if (!getStack) {
+      getStack = () => cause.stack;
+    }
+  } else {
+    const stack = (new Error(message)).stack;
+    getStack = (() => stack);
+  }
+
+  Object.defineProperty(err, 'stack', {
+    get: () => getStack.call(this),
+  });
+
+  Object.defineProperty(err, 'cause', {
+    value: cause
+  });
+
   err.lineno = lineno;
   err.colno = colno;
   err.firstUpdate = true;
 
-  err.Update = function(path) {
-    var message = '(' + (path || 'unknown path') + ')';
+  err.Update = (path) => {
+    let msg = '(' + (path || 'unknown path') + ')';
 
     // only show lineno + colno next to path of template
     // where error occurred
     if (this.firstUpdate) {
       if (this.lineno && this.colno) {
-        message += ' [Line ' + this.lineno + ', Column ' + this.colno + ']';
+        msg += ` [Line ${this.lineno}, Column ${this.colno}]`;
       } else if (this.lineno) {
-        message += ' [Line ' + this.lineno + ']';
+        msg += ` [Line ${this.lineno}]`;
       }
     }
 
-    message += '\n ';
+    msg += '\n ';
     if (this.firstUpdate) {
-      message += ' ';
+      msg += ' ';
     }
 
-    this.message = message + (this.message || '');
+    this.message = msg + (this.message || '');
     this.firstUpdate = false;
     return this;
   };
 
   return err;
-};
+}
 
-exports.TemplateError.prototype = Error.prototype;
 
-exports.escape = function(val) {
+if (Object.setPrototypeOf) {
+  Object.setPrototypeOf(TemplateError.prototype, Error.prototype);
+} else {
+  TemplateError.prototype = Object.create(Error.prototype, {
+    constructor: {
+      value: TemplateError,
+    },
+  });
+}
+
+exports.TemplateError = TemplateError;
+
+function escape(val) {
   return val.replace(escapeRegex, lookupEscape);
-};
+}
 
-exports.isFunction = function(obj) {
+exports.escape = escape;
+
+function isFunction(obj) {
   return ObjProto.toString.call(obj) === '[object Function]';
-};
+}
 
-exports.isArray = Array.isArray || function(obj) {
+exports.isFunction = isFunction;
+
+exports.isArray = Array.isArray || function isArray(obj) {
   return ObjProto.toString.call(obj) === '[object Array]';
 };
 
-exports.isString = function(obj) {
+function isString(obj) {
   return ObjProto.toString.call(obj) === '[object String]';
-};
+}
 
-exports.isObject = function(obj) {
+exports.isString = isString;
+
+function isObject(obj) {
   return ObjProto.toString.call(obj) === '[object Object]';
-};
+}
 
-exports.groupBy = function(obj, val) {
-  var result = {};
-  var iterator = exports.isFunction(val) ? val : function(obj) {
-    return obj[val];
-  };
-  for (var i = 0; i < obj.length; i++) {
-    var value = obj[i];
-    var key = iterator(value, i);
+exports.isObject = isObject;
+
+function groupBy(obj, val) {
+  const result = {};
+  const iterator = isFunction(val) ? val : (o) => o[val];
+  for (let i = 0; i < obj.length; i++) {
+    const value = obj[i];
+    const key = iterator(value, i);
     (result[key] || (result[key] = [])).push(value);
   }
   return result;
-};
+}
 
-exports.toArray = function(obj) {
+exports.groupBy = groupBy;
+
+function toArray(obj) {
   return Array.prototype.slice.call(obj);
-};
+}
 
-exports.without = function(array) {
-  var result = [];
+exports.toArray = toArray;
+
+function without(array) {
+  const result = [];
   if (!array) {
     return result;
   }
-  var index = -1,
-    length = array.length,
-    contains = exports.toArray(arguments).slice(1);
+  const length = array.length;
+  const contains = toArray(arguments).slice(1);
+  let index = -1;
 
   while (++index < length) {
-    if (exports.indexOf(contains, array[index]) === -1) {
+    if (indexOf(contains, array[index]) === -1) {
       result.push(array[index]);
     }
   }
   return result;
-};
+}
 
-exports.extend = function(obj, obj2) {
-  for (var k in obj2) {
-    obj[k] = obj2[k];
-  }
-  return obj;
-};
+exports.without = without;
 
-exports.repeat = function(char_, n) {
+exports.extend = Object.assign;
+
+function repeat(char_, n) {
   var str = '';
-  for (var i = 0; i < n; i++) {
+  for (let i = 0; i < n; i++) {
     str += char_;
   }
   return str;
-};
+}
 
-exports.each = function(obj, func, context) {
+exports.repeat = repeat;
+
+function each(obj, func, context) {
   if (obj == null) {
     return;
   }
 
-  if (ArrayProto.each && obj.each === ArrayProto.each) {
+  if (ArrayProto.forEach && obj.forEach === ArrayProto.forEach) {
     obj.forEach(func, context);
   } else if (obj.length === +obj.length) {
-    for (var i = 0, l = obj.length; i < l; i++) {
+    for (let i = 0, l = obj.length; i < l; i++) {
       func.call(context, obj[i], i, obj);
     }
   }
-};
+}
 
-exports.map = function(obj, func) {
+exports.each = each;
+
+function map(obj, func) {
   var results = [];
   if (obj == null) {
     return results;
@@ -183,7 +235,7 @@ exports.map = function(obj, func) {
     return obj.map(func);
   }
 
-  for (var i = 0; i < obj.length; i++) {
+  for (let i = 0; i < obj.length; i++) {
     results[results.length] = func(obj[i], i);
   }
 
@@ -192,10 +244,12 @@ exports.map = function(obj, func) {
   }
 
   return results;
-};
+}
 
-exports.asyncIter = function(arr, iter, cb) {
-  var i = -1;
+exports.map = map;
+
+function asyncIter(arr, iter, cb) {
+  let i = -1;
 
   function next() {
     i++;
@@ -208,16 +262,18 @@ exports.asyncIter = function(arr, iter, cb) {
   }
 
   next();
-};
+}
 
-exports.asyncFor = function(obj, iter, cb) {
-  var keys = exports.keys(obj);
-  var len = keys.length;
-  var i = -1;
+exports.asyncIter = asyncIter;
+
+function asyncFor(obj, iter, cb) {
+  const keys = Object.keys(obj || {});
+  const len = keys.length;
+  let i = -1;
 
   function next() {
     i++;
-    var k = keys[i];
+    const k = keys[i];
 
     if (i < len) {
       iter(k, obj[k], i, len, next);
@@ -227,67 +283,28 @@ exports.asyncFor = function(obj, iter, cb) {
   }
 
   next();
-};
-
-// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/indexOf#Polyfill
-exports.indexOf = Array.prototype.indexOf ?
-  function(arr, searchElement, fromIndex) {
-    return Array.prototype.indexOf.call(arr, searchElement, fromIndex);
-  } :
-  function(arr, searchElement, fromIndex) {
-    var length = this.length >>> 0; // Hack to convert object.length to a UInt32
-
-    fromIndex = +fromIndex || 0;
-
-    if (Math.abs(fromIndex) === Infinity) {
-      fromIndex = 0;
-    }
-
-    if (fromIndex < 0) {
-      fromIndex += length;
-      if (fromIndex < 0) {
-        fromIndex = 0;
-      }
-    }
-
-    for (; fromIndex < length; fromIndex++) {
-      if (arr[fromIndex] === searchElement) {
-        return fromIndex;
-      }
-    }
-
-    return -1;
-  };
-
-if (!Array.prototype.map) {
-  Array.prototype.map = function() {
-    throw new Error('map is unimplemented for this js engine');
-  };
 }
 
-exports.keys = function(obj) {
-  if (Object.prototype.keys) {
-    return obj.keys();
-  } else {
-    var keys = [];
-    for (var k in obj) {
-      if (Object.prototype.hasOwnProperty.call(obj, k)) {
-        keys.push(k);
-      }
-    }
-    return keys;
-  }
-};
+exports.asyncFor = asyncFor;
 
-exports.inOperator = function(key, val) {
+function indexOf(arr, searchElement, fromIndex) {
+  return Array.prototype.indexOf.call(arr, searchElement, fromIndex);
+}
+
+exports.indexOf = indexOf;
+
+exports.keys = Object.keys;
+
+function inOperator(key, val) {
   if (exports.isArray(val)) {
     return exports.indexOf(val, key) !== -1;
   } else if (exports.isObject(val)) {
     return key in val;
   } else if (exports.isString(val)) {
     return val.indexOf(key) !== -1;
-  } else {
-    throw new Error('Cannot use "in" operator to search for "'
-      + key + '" in unexpected types.');
   }
-};
+  throw new Error('Cannot use "in" operator to search for "'
+    + key + '" in unexpected types.');
+}
+
+exports.inOperator = inOperator;

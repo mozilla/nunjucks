@@ -2,60 +2,60 @@
 
 // A simple class system, more documentation to come
 
-function extend(cls, name, props) {
-  // This does that same thing as Object.create, but with support for IE8
-  var F = function() {};
-  F.prototype = cls.prototype;
-  var prototype = new F();
+function parentWrap(parent, prop) {
+  if (typeof parent !== 'function' || typeof prop !== 'function') {
+    return prop;
+  }
+  return function wrap() {
+    // Save the current parent method
+    const tmp = this.parent;
 
-  var fnTest = /xyz/.test(function() {
-    xyz;  // eslint-disable-line no-undef
-  }) ? /\bparent\b/ : /.*/;
+    // Set parent to the previous method, call, and restore
+    this.parent = parent;
+    const res = prop.apply(this, arguments);
+    this.parent = tmp;
+
+    return res;
+  };
+}
+
+function extendClass(cls, name, props) {
   props = props || {};
 
-  for (var k in props) {
-    var src = props[k];
-    var parent = prototype[k];
+  Object.keys(props).forEach(k => {
+    props[k] = parentWrap(cls.prototype[k], props[k]);
+  });
 
-    if (typeof parent === 'function' && typeof src === 'function' && fnTest.test(src)) {
-      prototype[k] = (function(src, parent) {
-        return function() {
-          // Save the current parent method
-          var tmp = this.parent;
-
-          // Set parent to the previous method, call, and restore
-          this.parent = parent;
-          var res = src.apply(this, arguments);
-          this.parent = tmp;
-
-          return res;
-        };
-      })(src, parent);
-    } else {
-      prototype[k] = src;
+  class subclass extends cls {
+    get typename() {
+      return name;
     }
   }
 
-  prototype.typename = name;
+  Object.assign(subclass.prototype, props);
 
-  var new_cls = function() {
-    if (prototype.init) {
-      prototype.init.apply(this, arguments);
-    }
-  };
+  return subclass;
+}
 
-  new_cls.prototype = prototype;
-  new_cls.prototype.constructor = new_cls;
+class Obj {
+  constructor(...args) {
+    // Unfortunately necessary for backwards compatibility
+    this.init(...args);
+  }
 
-  new_cls.extend = function(name, props) {
+  init() {}
+
+  get typename() {
+    return this.constructor.name;
+  }
+
+  static extend(name, props) {
     if (typeof name === 'object') {
       props = name;
       name = 'anonymous';
     }
-    return extend(new_cls, name, props);
-  };
-
-  return new_cls;
+    return extendClass(this, name, props);
+  }
 }
 
-module.exports = extend(Object, 'Object', {});
+module.exports = Obj;

@@ -1,19 +1,25 @@
 {
-  "plugins": [
-    ["transform-runtime", {
-      "polyfill": false,
-      "regenerator": true
-    }]
+  "presets": [
+    ["@babel/env", {
+      "loose": true,
+      "useBuiltIns": "usage",
+      "targets": {
+        "browsers": ["last 2 versions", "safari >= 7", "ie 9"],
+        "node": "4"
+      },
+      "exclude": [
+        "es6.map", "es6.set", "es6.function.name", "es6.symbol",
+        "es6.regexp.split", "es6.regexp.replace", "es6.regexp.match",
+        "es6.string.repeat", "es6.object.set-prototype-of", "es6.regexp.flags"
+      ]
+    }],
   ],
-  "presets": [["env", {
-    "targets": {
-      "browsers": ["last 2 versions", "safari >= 7", "ie 9"],
-      "node": "4"
-    }
-  }]],
   "env": {
     "test": {
-      "plugins": ["istanbul"]
+      "plugins": ["./scripts/lib/arrow-function-coverage-fix", "istanbul"]
     }
-  }
+  },
+  "ignore": [
+    "scripts/lib/arrow-function-coverage-fix.js"
+  ]
 }

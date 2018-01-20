@@ -1,10 +1,11 @@
 'use strict';
 
-var Loader = require('./loader');
-var {PrecompiledLoader} = require('./precompiled-loader.js');
+const Loader = require('./loader');
+const {PrecompiledLoader} = require('./precompiled-loader.js');
 
-var WebLoader = Loader.extend({
-  init: function(baseURL, opts) {
+class WebLoader extends Loader {
+  constructor(baseURL, opts) {
+    super();
     this.baseURL = baseURL || '.';
     opts = opts || {};
 
@@ -20,25 +21,23 @@ var WebLoader = Loader.extend({
     // sync ajax request, but that's ok because it should *only*
     // happen in development. PRECOMPILE YOUR TEMPLATES.
     this.async = !!opts.async;
-  },
+  }
 
-  resolve: function(from, to) { // eslint-disable-line
+  resolve(from, to) {
     throw new Error('relative templates not support in the browser yet');
-  },
+  }
 
-  getSource: function(name, cb) {
+  getSource(name, cb) {
     var useCache = this.useCache;
     var result;
-    this.fetch(this.baseURL + '/' + name, function(err, src) {
+    this.fetch(this.baseURL + '/' + name, (err, src) => {
       if (err) {
         if (cb) {
           cb(err.content);
+        } else if (err.status === 404) {
+          result = null;
         } else {
-          if (err.status === 404) {
-            result = null;
-          } else {
-            throw err.content;
-          }
+          throw err.content;
         }
       } else {
         result = {
@@ -56,21 +55,18 @@ var WebLoader = Loader.extend({
     // fetch above would actually run sync and we'll have a
     // result here
     return result;
-  },
+  }
 
-  fetch: function(url, cb) {
+  fetch(url, cb) {
     // Only in the browser please
-    var ajax;
-    var loading = true;
-
-    if (window.XMLHttpRequest) { // Mozilla, Safari, ...
-      ajax = new XMLHttpRequest();
-    } else if (window.ActiveXObject) { // IE 8 and older
-      /* global ActiveXObject */
-      ajax = new ActiveXObject('Microsoft.XMLHTTP');
+    if (typeof window === 'undefined') {
+      throw new Error('WebLoader can only by used in a browser');
     }
 
-    ajax.onreadystatechange = function() {
+    const ajax = new XMLHttpRequest();
+    let loading = true;
+
+    ajax.onreadystatechange = () => {
       if (ajax.readyState === 4 && loading) {
         loading = false;
         if (ajax.status === 0 || ajax.status === 200) {
@@ -90,7 +86,7 @@ var WebLoader = Loader.extend({
     ajax.open('GET', url, this.async);
     ajax.send();
   }
-});
+}
 
 module.exports = {
   WebLoader: WebLoader,

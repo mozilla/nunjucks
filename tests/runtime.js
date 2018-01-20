@@ -1,8 +1,7 @@
 (function() {
   'use strict';
 
-  var expect,
-    util;
+  var expect, util, finish, render;
 
   if (typeof require !== 'undefined') {
     expect = require('expect.js');
@@ -12,8 +11,8 @@
     util = window.util;
   }
 
-  var finish = util.finish;
-  var render = util.render;
+  finish = util.finish;
+  render = util.render;
 
   describe('runtime', function() {
     it('should report the failed function calls to symbols', function(done) {
@@ -112,4 +111,4 @@
       finish(done);
     });
   });
-})();
+}());

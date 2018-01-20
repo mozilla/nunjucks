@@ -1,26 +1,24 @@
 'use strict';
 
-var fs = require('fs');
-var path = require('path');
-var lib = require('./lib');
-var compiler = require('./compiler');
-var Environment = require('./environment').Environment;
-var precompileGlobal = require('./precompile-global');
+const fs = require('fs');
+const path = require('path');
+const {prettifyError} = require('./lib');
+const compiler = require('./compiler');
+const {Environment} = require('./environment');
+const precompileGlobal = require('./precompile-global');
 
 function match(filename, patterns) {
   if (!Array.isArray(patterns)) {
     return false;
   }
-  return patterns.some(function(pattern) {
-    return filename.match(pattern) !== null;
-  });
+  return patterns.some((pattern) => filename.match(pattern));
 }
 
 function precompileString(str, opts) {
   opts = opts || {};
   opts.isString = true;
-  var env = opts.env || new Environment([]);
-  var wrapper = opts.wrapper || precompileGlobal;
+  const env = opts.env || new Environment([]);
+  const wrapper = opts.wrapper || precompileGlobal;
 
   if (!opts.name) {
     throw new Error('the "name" option is required when compiling a string');
@@ -44,24 +42,22 @@ function precompile(input, opts) {
   //       A custom loader will be necessary to load your custom wrapper.
 
   opts = opts || {};
-  var env = opts.env || new Environment([]);
-  var wrapper = opts.wrapper || precompileGlobal;
+  const env = opts.env || new Environment([]);
+  const wrapper = opts.wrapper || precompileGlobal;
 
   if (opts.isString) {
     return precompileString(input, opts);
   }
 
-  var pathStats = fs.existsSync(input) && fs.statSync(input);
-  var precompiled = [];
-  var templates = [];
+  const pathStats = fs.existsSync(input) && fs.statSync(input);
+  const precompiled = [];
+  const templates = [];
 
   function addTemplates(dir) {
-    var files = fs.readdirSync(dir);
-
-    for (var i = 0; i < files.length; i++) {
-      var filepath = path.join(dir, files[i]);
-      var subpath = filepath.substr(path.join(input, '/').length);
-      var stat = fs.statSync(filepath);
+    fs.readdirSync(dir).forEach((file) => {
+      const filepath = path.join(dir, file);
+      let subpath = filepath.substr(path.join(input, '/').length);
+      const stat = fs.statSync(filepath);
 
       if (stat && stat.isDirectory()) {
         subpath += '/';
@@ -71,7 +67,7 @@ function precompile(input, opts) {
       } else if (match(subpath, opts.include)) {
         templates.push(filepath);
       }
-    }
+    });
   }
 
   if (pathStats.isFile()) {
@@ -83,8 +79,8 @@ function precompile(input, opts) {
   } else if (pathStats.isDirectory()) {
     addTemplates(input);
 
-    for (var i = 0; i < templates.length; i++) {
-      var name = templates[i].replace(path.join(input, '/'), '');
+    for (let i = 0; i < templates.length; i++) {
+      const name = templates[i].replace(path.join(input, '/'), '');
 
       try {
         precompiled.push(_precompile(
@@ -96,7 +92,7 @@ function precompile(input, opts) {
         if (opts.force) {
           // Don't stop generating the output if we're
           // forcing compilation.
-          console.error(e);  // eslint-disable-line no-console
+          console.error(e); // eslint-disable-line no-console
         } else {
           throw e;
         }
@@ -110,9 +106,9 @@ function precompile(input, opts) {
 function _precompile(str, name, env) {
   env = env || new Environment([]);
 
-  var asyncFilters = env.asyncFilters;
-  var extensions = env.extensionsList;
-  var template;
+  const asyncFilters = env.asyncFilters;
+  const extensions = env.extensionsList;
+  let template;
 
   name = name.replace(/\\/g, '/');
 
@@ -123,7 +119,7 @@ function _precompile(str, name, env) {
       name,
       env.opts);
   } catch (err) {
-    throw lib.prettifyError(name, false, err);
+    throw prettifyError(name, false, err);
   }
 
   return {

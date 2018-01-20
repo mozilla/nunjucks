@@ -1,23 +1,25 @@
 function installCompat() {
   'use strict';
 
+  /* eslint-disable camelcase */
+
   // This must be called like `nunjucks.installCompat` so that `this`
   // references the nunjucks instance
   var runtime = this.runtime;
   var lib = this.lib;
   // Handle slim case where these 'modules' are excluded from the built source
-  var Compiler = (this.compiler) ? this.compiler.Compiler : undefined;
-  var Parser = (this.parser) ? this.parser.Parser : undefined;
+  var Compiler = this.compiler.Compiler;
+  var Parser = this.parser.Parser;
   var nodes = this.nodes;
   var lexer = this.lexer;
 
   var orig_contextOrFrameLookup = runtime.contextOrFrameLookup;
   var orig_memberLookup = runtime.memberLookup;
   var orig_Compiler_assertType;
+  var orig_Parser_parseAggregate;
   if (Compiler) {
     orig_Compiler_assertType = Compiler.prototype.assertType;
   }
-  var orig_Parser_parseAggregate;
   if (Parser) {
     orig_Parser_parseAggregate = Parser.prototype.parseAggregate;
   }
@@ -33,20 +35,21 @@ function installCompat() {
     }
   }
 
-  runtime.contextOrFrameLookup = function(context, frame, key) {
+  runtime.contextOrFrameLookup = function contextOrFrameLookup(context, frame, key) {
     var val = orig_contextOrFrameLookup.apply(this, arguments);
-    if (val === undefined) {
-      switch (key) {
-        case 'True':
-          return true;
-        case 'False':
-          return false;
-        case 'None':
-          return null;
-      }
+    if (val !== undefined) {
+      return val;
     }
-
-    return val;
+    switch (key) {
+      case 'True':
+        return true;
+      case 'False':
+        return false;
+      case 'None':
+        return null;
+      default:
+        return undefined;
+    }
   };
 
   function getTokensState(tokens) {
@@ -57,10 +60,10 @@ function installCompat() {
     };
   }
 
-  if (nodes && Compiler && Parser) {  // i.e., not slim mode
-    var Slice = nodes.Node.extend('Slice', {
+  if (nodes && Compiler && Parser) { // i.e., not slim mode
+    const Slice = nodes.Node.extend('Slice', {
       fields: ['start', 'stop', 'step'],
-      init: function(lineno, colno, start, stop, step) {
+      init(lineno, colno, start, stop, step) {
         start = start || new nodes.Literal(lineno, colno, null);
         stop = stop || new nodes.Literal(lineno, colno, null);
         step = step || new nodes.Literal(lineno, colno, 1);
@@ -68,13 +71,13 @@ function installCompat() {
       }
     });
 
-    Compiler.prototype.assertType = function(node) {
+    Compiler.prototype.assertType = function assertType(node) {
       if (node instanceof Slice) {
         return;
       }
-      return orig_Compiler_assertType.apply(this, arguments);
+      orig_Compiler_assertType.apply(this, arguments);
     };
-    Compiler.prototype.compileSlice = function(node, frame) {
+    Compiler.prototype.compileSlice = function compileSlice(node, frame) {
       this.emit('(');
       this._compileExpression(node.start, frame);
       this.emit('),(');
@@ -84,8 +87,7 @@ function installCompat() {
       this.emit(')');
     };
 
-    Parser.prototype.parseAggregate = function() {
-      var self = this;
+    Parser.prototype.parseAggregate = function parseAggregate() {
       var origState = getTokensState(this.tokens);
       // Set back one accounting for opening bracket/parens
       origState.colno--;
@@ -93,9 +95,9 @@ function installCompat() {
       try {
         return orig_Parser_parseAggregate.apply(this);
       } catch (e) {
-        var errState = getTokensState(this.tokens);
-        var rethrow = function() {
-          lib.extend(self.tokens, errState);
+        const errState = getTokensState(this.tokens);
+        const rethrow = () => {
+          lib.extend(this.tokens, errState);
           return e;
         };
 
@@ -103,20 +105,20 @@ function installCompat() {
         lib.extend(this.tokens, origState);
         this.peeked = false;
 
-        var tok = this.peekToken();
+        const tok = this.peekToken();
         if (tok.type !== lexer.TOKEN_LEFT_BRACKET) {
           throw rethrow();
         } else {
           this.nextToken();
         }
 
-        var node = new Slice(tok.lineno, tok.colno);
+        const node = new Slice(tok.lineno, tok.colno);
 
         // If we don't encounter a colon while parsing, this is not a slice,
         // so re-raise the original exception.
-        var isSlice = false;
+        let isSlice = false;
 
-        for (var i = 0; i <= node.fields.length; i++) {
+        for (let i = 0; i <= node.fields.length; i++) {
           if (this.skip(lexer.TOKEN_RIGHT_BRACKET)) {
             break;
           }
@@ -130,7 +132,7 @@ function installCompat() {
           if (this.skip(lexer.TOKEN_COLON)) {
             isSlice = true;
           } else {
-            var field = node.fields[i];
+            const field = node.fields[i];
             node[field] = this.parseExpression();
             isSlice = this.skip(lexer.TOKEN_COLON) || isSlice;
           }
@@ -150,19 +152,17 @@ function installCompat() {
     }
     if (stop === null) {
       stop = (step < 0) ? -1 : obj.length;
-    } else {
-      if (stop < 0) {
-        stop += obj.length;
-      }
+    } else if (stop < 0) {
+      stop += obj.length;
     }
 
     if (start < 0) {
       start += obj.length;
     }
 
-    var results = [];
+    const results = [];
 
-    for (var i = start; ; i += step) {
+    for (let i = start; ; i += step) {
       if (i < 0 || i > obj.length) {
         break;
       }
@@ -177,8 +177,12 @@ function installCompat() {
     return results;
   }
 
-  var ARRAY_MEMBERS = {
-    pop: function(index) {
+  function hasOwnProp(obj, key) {
+    return Object.prototype.hasOwnProperty.call(obj, key);
+  }
+
+  const ARRAY_MEMBERS = {
+    pop(index) {
       if (index === undefined) {
         return this.pop();
       }
@@ -187,73 +191,61 @@ function installCompat() {
       }
       return this.splice(index, 1);
     },
-    append: function(element) {
+    append(element) {
       return this.push(element);
     },
-    remove: function(element) {
-      for (var i = 0; i < this.length; i++) {
+    remove(element) {
+      for (let i = 0; i < this.length; i++) {
         if (this[i] === element) {
           return this.splice(i, 1);
         }
       }
       throw new Error('ValueError');
     },
-    count: function(element) {
+    count(element) {
       var count = 0;
-      for (var i = 0; i < this.length; i++) {
+      for (let i = 0; i < this.length; i++) {
         if (this[i] === element) {
           count++;
         }
       }
       return count;
     },
-    index: function(element) {
+    index(element) {
       var i;
       if ((i = this.indexOf(element)) === -1) {
         throw new Error('ValueError');
       }
       return i;
     },
-    find: function(element) {
+    find(element) {
       return this.indexOf(element);
     },
-    insert: function(index, elem) {
+    insert(index, elem) {
       return this.splice(index, 0, elem);
     }
   };
-  var OBJECT_MEMBERS = {
-    items: function() {
-      var ret = [];
-      for (var k in this) {
-        ret.push([k, this[k]]);
-      }
-      return ret;
+  const OBJECT_MEMBERS = {
+    items() {
+      return Object.entries(this);
     },
-    values: function() {
-      var ret = [];
-      for (var k in this) {
-        ret.push(this[k]);
-      }
-      return ret;
+    values() {
+      return Object.values(this);
     },
-    keys: function() {
-      var ret = [];
-      for (var k in this) {
-        ret.push(k);
-      }
-      return ret;
+    keys() {
+      return Object.keys(this);
     },
-    get: function(key, def) {
+    get(key, def) {
       var output = this[key];
       if (output === undefined) {
         output = def;
       }
       return output;
     },
-    has_key: function(key) {
-      return this.hasOwnProperty(key);
+    has_key(key) {
+      return hasOwnProp(this, key);
     },
-    pop: function(key, def) {
+    pop(key, def) {
       var output = this[key];
       if (output === undefined && def !== undefined) {
         output = def;
@@ -264,35 +256,32 @@ function installCompat() {
       }
       return output;
     },
-    popitem: function() {
-      for (var k in this) {
-        // Return the first object pair.
-        var val = this[k];
-        delete this[k];
-        return [k, val];
+    popitem() {
+      const keys = Object.keys(this);
+      if (!keys.length) {
+        throw new Error('KeyError');
       }
-      throw new Error('KeyError');
+      const k = keys[0];
+      const val = this[k];
+      delete this[k];
+      return [k, val];
     },
-    setdefault: function(key, def) {
-      if (key in this) {
-        return this[key];
+    setdefault(key, def = null) {
+      if (!(key in this)) {
+        this[key] = def;
       }
-      if (def === undefined) {
-        def = null;
-      }
-      return this[key] = def;
+      return this[key];
     },
-    update: function(kwargs) {
-      for (var k in kwargs) {
-        this[k] = kwargs[k];
-      }
+    update(kwargs) {
+      Object.assign(this, kwargs);
       return null; // Always returns None
     }
   };
   OBJECT_MEMBERS.iteritems = OBJECT_MEMBERS.items;
   OBJECT_MEMBERS.itervalues = OBJECT_MEMBERS.values;
   OBJECT_MEMBERS.iterkeys = OBJECT_MEMBERS.keys;
-  runtime.memberLookup = function(obj, val, autoescape) { // eslint-disable-line
+
+  runtime.memberLookup = function memberLookup(obj, val, autoescape) {
     if (arguments.length === 4) {
       return sliceLookup.apply(this, arguments);
     }
@@ -300,16 +289,11 @@ function installCompat() {
 
     // If the object is an object, return any of the methods that Python would
     // otherwise provide.
-    if (lib.isArray(obj) && ARRAY_MEMBERS.hasOwnProperty(val)) {
-      return function() {
-        return ARRAY_MEMBERS[val].apply(obj, arguments);
-      };
+    if (lib.isArray(obj) && hasOwnProp(ARRAY_MEMBERS, val)) {
+      return ARRAY_MEMBERS[val].bind(obj);
     }
-
-    if (lib.isObject(obj) && OBJECT_MEMBERS.hasOwnProperty(val)) {
-      return function() {
-        return OBJECT_MEMBERS[val].apply(obj, arguments);
-      };
+    if (lib.isObject(obj) && hasOwnProp(OBJECT_MEMBERS, val)) {
+      return OBJECT_MEMBERS[val].bind(obj);
     }
 
     return orig_memberLookup.apply(this, arguments);

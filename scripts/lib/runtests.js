@@ -10,7 +10,8 @@ var promiseSequence = utils.promiseSequence;
 function mochaRun() {
   return new Promise((resolve, reject) => {
     try {
-      var proc = spawn(lookup('.bin/nyc', true), [
+      const proc = spawn(lookup('.bin/nyc', true), [
+        '--require', '@babel/register',
         '--exclude',
         'tests/**',
         '--silent',
@@ -18,7 +19,7 @@ function mochaRun() {
         lookup('.bin/mocha', true),
         '-R', 'spec',
         '-r', 'tests/setup',
-        '-r', 'babel-register',
+        '-r', '@babel/register',
         'tests'
       ], {
         cwd: path.join(__dirname, '../..'),
@@ -49,8 +50,8 @@ function runtests() {
     return mochaRun().then(() => {
       return getStaticServer().then((args) => {
         server = args[0];
-        var port = args[1];
-        var promises = ['index', 'slim'].map(
+        const port = args[1];
+        const promises = ['index', 'slim'].map(
           f => (() => mochaPhantom(`http://localhost:${port}/tests/browser/${f}.html`)));
         return promiseSequence(promises).then(() => {
           server.close();

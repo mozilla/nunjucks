@@ -1,14 +1,12 @@
 'use strict';
 
 function precompileGlobal(templates, opts) {
-  var out = '',
-    name,
-    template;
+  var out = '';
   opts = opts || {};
 
-  for (var i = 0; i < templates.length; i++) {
-    name = JSON.stringify(templates[i].name);
-    template = templates[i].template;
+  for (let i = 0; i < templates.length; i++) {
+    const name = JSON.stringify(templates[i].name);
+    const template = templates[i].template;
 
     out += '(function() {' +
       '(window.nunjucksPrecompiled = window.nunjucksPrecompiled || {})' +

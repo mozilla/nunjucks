@@ -2,6 +2,8 @@
   'use strict';
 
   var util;
+  var equal;
+  var finish;
 
   if (typeof require !== 'undefined') {
     util = require('./util');
@@ -9,8 +11,8 @@
     util = window.util;
   }
 
-  var equal = util.jinjaEqual;
-  var finish = util.finish;
+  equal = util.jinjaEqual;
+  finish = util.finish;
 
   describe('jinja-compat', function() {
     var arr = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
@@ -121,4 +123,4 @@
       finish(done);
     });
   });
-})();
+}());

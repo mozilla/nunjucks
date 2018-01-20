@@ -1,22 +1,21 @@
 'use strict';
 
 var lib = require('./lib');
-var Obj = require('./object');
 
 // Frames keep track of scoping both at compile-time and run-time so
 // we know how to access variables. Block tags can introduce special
 // variables, for example.
-var Frame = Obj.extend({
-  init: function(parent, isolateWrites) {
+class Frame {
+  constructor(parent, isolateWrites) {
     this.variables = {};
     this.parent = parent;
     this.topLevel = false;
     // if this is true, writes (set) should never propagate upwards past
     // this frame to its parent (though reads may).
     this.isolateWrites = isolateWrites;
-  },
+  }
 
-  set: function(name, val, resolveUp) {
+  set(name, val, resolveUp) {
     // Allow variables with dots by automatically creating the
     // nested structure
     var parts = name.split('.');
@@ -30,8 +29,8 @@ var Frame = Obj.extend({
       }
     }
 
-    for (var i = 0; i < parts.length - 1; i++) {
-      var id = parts[i];
+    for (let i = 0; i < parts.length - 1; i++) {
+      const id = parts[i];
 
       if (!obj[id]) {
         obj[id] = {};
@@ -40,68 +39,65 @@ var Frame = Obj.extend({
     }
 
     obj[parts[parts.length - 1]] = val;
-  },
+  }
 
-  get: function(name) {
+  get(name) {
     var val = this.variables[name];
     if (val !== undefined) {
       return val;
     }
     return null;
-  },
+  }
 
-  lookup: function(name) {
+  lookup(name) {
     var p = this.parent;
     var val = this.variables[name];
     if (val !== undefined) {
       return val;
     }
     return p && p.lookup(name);
-  },
+  }
 
-  resolve: function(name, forWrite) {
+  resolve(name, forWrite) {
     var p = (forWrite && this.isolateWrites) ? undefined : this.parent;
     var val = this.variables[name];
     if (val !== undefined) {
       return this;
     }
     return p && p.resolve(name);
-  },
+  }
 
-  push: function(isolateWrites) {
+  push(isolateWrites) {
     return new Frame(this, isolateWrites);
-  },
+  }
 
-  pop: function() {
+  pop() {
     return this.parent;
   }
-});
+}
 
 function makeMacro(argNames, kwargNames, func) {
-  return function() {
-    var argCount = numArgs(arguments);
+  return (...macroArgs) => {
+    var argCount = numArgs(macroArgs);
     var args;
-    var kwargs = getKeywordArgs(arguments);
-    var i;
+    var kwargs = getKeywordArgs(macroArgs);
 
     if (argCount > argNames.length) {
-      args = Array.prototype.slice.call(arguments, 0, argNames.length);
+      args = macroArgs.slice(0, argNames.length);
 
       // Positional arguments that should be passed in as
       // keyword arguments (essentially default values)
-      var vals = Array.prototype.slice.call(arguments, args.length, argCount);
-      for (i = 0; i < vals.length; i++) {
+      macroArgs.slice(args.length, argCount).forEach((val, i) => {
         if (i < kwargNames.length) {
-          kwargs[kwargNames[i]] = vals[i];
+          kwargs[kwargNames[i]] = val;
         }
-      }
-
+      });
       args.push(kwargs);
     } else if (argCount < argNames.length) {
-      args = Array.prototype.slice.call(arguments, 0, argCount);
+      args = macroArgs.slice(0, argCount);
 
-      for (i = argCount; i < argNames.length; i++) {
-        var arg = argNames[i];
+      for (let i = argCount; i < argNames.length; i++) {
+        const arg = argNames[i];
 
         // Keyword arguments that should be passed as
         // positional arguments, i.e. the caller explicitly
@@ -109,10 +105,9 @@ function makeMacro(argNames, kwargNames, func) {
         args.push(kwargs[arg]);
         delete kwargs[arg];
       }
-
       args.push(kwargs);
     } else {
-      args = arguments;
+      args = macroArgs;
     }
 
     return func.apply(this, args);
@@ -131,7 +126,7 @@ function isKeywordArgs(obj) {
 function getKeywordArgs(args) {
   var len = args.length;
   if (len) {
-    var lastArg = args[len - 1];
+    const lastArg = args[len - 1];
     if (isKeywordArgs(lastArg)) {
       return lastArg;
     }
@@ -145,7 +140,7 @@ function numArgs(args) {
     return 0;
   }
 
-  var lastArg = args[len - 1];
+  const lastArg = args[len - 1];
   if (isKeywordArgs(lastArg)) {
     return len - 1;
   } else {
@@ -172,10 +167,10 @@ SafeString.prototype = Object.create(String.prototype, {
     value: 0
   }
 });
-SafeString.prototype.valueOf = function() {
+SafeString.prototype.valueOf = function valueOf() {
   return this.val;
 };
-SafeString.prototype.toString = function() {
+SafeString.prototype.toString = function toString() {
   return this.val;
 };
 
@@ -194,7 +189,7 @@ function markSafe(val) {
   } else if (type !== 'function') {
     return val;
   } else {
-    return function() {
+    return function wrapSafe(args) {
       var ret = val.apply(this, arguments);
 
       if (typeof ret === 'string') {
@@ -228,12 +223,12 @@ function ensureDefined(val, lineno, colno) {
 }
 
 function memberLookup(obj, val) {
-  obj = obj || {};
+  if (obj === undefined || obj === null) {
+    return undefined;
+  }
 
   if (typeof obj[val] === 'function') {
-    return function() {
-      return obj[val].apply(obj, arguments);
-    };
+    return (...args) => obj[val].apply(obj, args);
   }
 
   return obj[val];
@@ -266,9 +261,9 @@ function handleError(error, lineno, colno) {
 
 function asyncEach(arr, dimen, iter, cb) {
   if (lib.isArray(arr)) {
-    var len = arr.length;
+    const len = arr.length;
 
-    lib.asyncIter(arr, function(item, i, next) {
+    lib.asyncIter(arr, function iterCallback(item, i, next) {
       switch (dimen) {
         case 1:
           iter(item, i, len, next);
@@ -285,7 +280,7 @@ function asyncEach(arr, dimen, iter, cb) {
       }
     }, cb);
   } else {
-    lib.asyncFor(arr, function(key, val, i, len, next) {
+    lib.asyncFor(arr, function iterCallback(key, val, i, len, next) {
       iter(key, val, i, len, next);
     }, cb);
   }
@@ -293,8 +288,7 @@ function asyncEach(arr, dimen, iter, cb) {
 
 function asyncAll(arr, dimen, func, cb) {
   var finished = 0;
-  var len,
-    i;
+  var len;
   var outputArr;
 
   function done(i, output) {
@@ -313,8 +307,8 @@ function asyncAll(arr, dimen, func, cb) {
     if (len === 0) {
       cb(null, '');
     } else {
-      for (i = 0; i < arr.length; i++) {
-        var item = arr[i];
+      for (let i = 0; i < arr.length; i++) {
+        const item = arr[i];
 
         switch (dimen) {
           case 1:
@@ -333,15 +327,15 @@ function asyncAll(arr, dimen, func, cb) {
       }
     }
   } else {
-    var keys = lib.keys(arr);
+    const keys = Object.keys(arr || {});
     len = keys.length;
     outputArr = new Array(len);
 
     if (len === 0) {
       cb(null, '');
     } else {
-      for (i = 0; i < keys.length; i++) {
-        var k = keys[i];
+      for (let i = 0; i < keys.length; i++) {
+        const k = keys[i];
         func(k, arr[k], i, len, done);
       }
     }

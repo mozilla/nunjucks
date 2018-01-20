@@ -11,9 +11,8 @@ function gensym() {
 // copy-on-write version of map
 function mapCOW(arr, func) {
   var res = null;
-
-  for (var i = 0; i < arr.length; i++) {
-    var item = func(arr[i]);
+  for (let i = 0; i < arr.length; i++) {
+    const item = func(arr[i]);
 
     if (item !== arr[i]) {
       if (!res) {
@@ -33,7 +32,7 @@ function walk(ast, func, depthFirst) {
   }
 
   if (!depthFirst) {
-    var astT = func(ast);
+    const astT = func(ast);
 
     if (astT && astT !== ast) {
       return astT;
@@ -41,39 +40,25 @@ function walk(ast, func, depthFirst) {
   }
 
   if (ast instanceof nodes.NodeList) {
-    var children = mapCOW(ast.children, function(node) {
-      return walk(node, func, depthFirst);
-    });
+    const children = mapCOW(ast.children, (node) => walk(node, func, depthFirst));
 
     if (children !== ast.children) {
       ast = new nodes[ast.typename](ast.lineno, ast.colno, children);
     }
   } else if (ast instanceof nodes.CallExtension) {
-    var args = walk(ast.args, func, depthFirst);
-
-    var contentArgs = mapCOW(ast.contentArgs, function(node) {
-      return walk(node, func, depthFirst);
-    });
+    const args = walk(ast.args, func, depthFirst);
+    const contentArgs = mapCOW(ast.contentArgs, (node) => walk(node, func, depthFirst));
 
     if (args !== ast.args || contentArgs !== ast.contentArgs) {
-      ast = new nodes[ast.typename](ast.extName,
-        ast.prop,
-        args,
-        contentArgs);
+      ast = new nodes[ast.typename](ast.extName, ast.prop, args, contentArgs);
     }
   } else {
-    var props = ast.fields.map(function(field) {
-      return ast[field];
-    });
-
-    var propsT = mapCOW(props, function(prop) {
-      return walk(prop, func, depthFirst);
-    });
+    const props = ast.fields.map((field) => ast[field]);
+    const propsT = mapCOW(props, (prop) => walk(prop, func, depthFirst));
 
     if (propsT !== props) {
       ast = new nodes[ast.typename](ast.lineno, ast.colno);
-
-      propsT.forEach(function(prop, i) {
+      propsT.forEach((prop, i) => {
         ast[ast.fields[i]] = prop;
       });
     }
@@ -89,23 +74,24 @@ function depthWalk(ast, func) {
 function _liftFilters(node, asyncFilters, prop) {
   var children = [];
 
-  var walked = depthWalk(prop ? node[prop] : node, function(node) {
-    if (node instanceof nodes.Block) {
-      return node;
-    } else if ((node instanceof nodes.Filter &&
-      lib.indexOf(asyncFilters, node.name.value) !== -1) ||
-      node instanceof nodes.CallExtensionAsync) {
-      var symbol = new nodes.Symbol(node.lineno,
-        node.colno,
+  var walked = depthWalk(prop ? node[prop] : node, (descNode) => {
+    let symbol;
+    if (descNode instanceof nodes.Block) {
+      return descNode;
+    } else if ((descNode instanceof nodes.Filter &&
+      lib.indexOf(asyncFilters, descNode.name.value) !== -1) ||
+      descNode instanceof nodes.CallExtensionAsync) {
+      symbol = new nodes.Symbol(descNode.lineno,
+        descNode.colno,
         gensym());
 
-      children.push(new nodes.FilterAsync(node.lineno,
-        node.colno,
-        node.name,
-        node.args,
+      children.push(new nodes.FilterAsync(descNode.lineno,
+        descNode.colno,
+        descNode.name,
+        descNode.args,
         symbol));
-      return symbol;
     }
+    return symbol;
   });
 
   if (prop) {
@@ -128,7 +114,7 @@ function _liftFilters(node, asyncFilters, prop) {
 }
 
 function liftFilters(ast, asyncFilters) {
-  return depthWalk(ast, function(node) {
+  return depthWalk(ast, (node) => {
     if (node instanceof nodes.Output) {
       return _liftFilters(node, asyncFilters);
     } else if (node instanceof nodes.Set) {
@@ -139,22 +125,23 @@ function liftFilters(ast, asyncFilters) {
       return _liftFilters(node, asyncFilters, 'cond');
     } else if (node instanceof nodes.CallExtension) {
       return _liftFilters(node, asyncFilters, 'args');
+    } else {
+      return undefined;
     }
   });
 }
 
 function liftSuper(ast) {
-  return walk(ast, function(blockNode) {
+  return walk(ast, (blockNode) => {
     if (!(blockNode instanceof nodes.Block)) {
       return;
     }
 
-    var hasSuper = false;
-    var symbol = gensym();
+    let hasSuper = false;
+    const symbol = gensym();
 
-    blockNode.body = walk(blockNode.body, function(node) {
-      if (node instanceof nodes.FunCall &&
-        node.name.value === 'super') {
+    blockNode.body = walk(blockNode.body, (node) => { // eslint-disable-line consistent-return
+      if (node instanceof nodes.FunCall && node.name.value === 'super') {
         hasSuper = true;
         return new nodes.Symbol(node.lineno, node.colno, symbol);
       }
@@ -169,23 +156,23 @@ function liftSuper(ast) {
 }
 
 function convertStatements(ast) {
-  return depthWalk(ast, function(node) {
-    if (!(node instanceof nodes.If) &&
-      !(node instanceof nodes.For)) {
-      return;
+  return depthWalk(ast, (node) => {
+    if (!(node instanceof nodes.If) && !(node instanceof nodes.For)) {
+      return undefined;
     }
 
-    var async = false;
-    walk(node, function(node) {
-      if (node instanceof nodes.FilterAsync ||
-        node instanceof nodes.IfAsync ||
-        node instanceof nodes.AsyncEach ||
-        node instanceof nodes.AsyncAll ||
-        node instanceof nodes.CallExtensionAsync) {
+    let async = false;
+    walk(node, (child) => {
+      if (child instanceof nodes.FilterAsync ||
+        child instanceof nodes.IfAsync ||
+        child instanceof nodes.AsyncEach ||
+        child instanceof nodes.AsyncAll ||
+        child instanceof nodes.CallExtensionAsync) {
         async = true;
         // Stop iterating by returning the node
-        return node;
+        return child;
       }
+      return undefined;
     });
 
     if (async) {
@@ -208,6 +195,7 @@ function convertStatements(ast) {
         );
       }
     }
+    return undefined;
   });
 }
 

@@ -1,9 +1,12 @@
 (function() {
   'use strict';
 
-  var expect,
-    util,
-    Environment;
+  var expect;
+  var util;
+  var Environment;
+  var equal;
+  var render;
+  var finish;
 
   if (typeof require !== 'undefined') {
     expect = require('expect.js');
@@ -15,9 +18,9 @@
     Environment = nunjucks.Environment;
   }
 
-  var equal = util.equal;
-  var render = util.render;
-  var finish = util.finish;
+  equal = util.equal;
+  render = util.render;
+  finish = util.finish;
 
   describe('global', function() {
     it('should have range', function(done) {
@@ -180,4 +183,4 @@
       finish(done);
     });
   });
-})();
+}());

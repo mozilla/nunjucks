@@ -21,6 +21,7 @@
   function _isAST(node1, node2) {
     // Compare ASTs
     // TODO: Clean this up (seriously, really)
+    /* eslint-disable vars-on-top */
 
     expect(node1.typename).to.be(node2.typename);
 
@@ -33,8 +34,8 @@
 
       expect(sig1).to.be(sig2);
 
-      for (var i = 0, l = node2.children.length; i < l; i++) {
-        _isAST(node1.children[i], node2.children[i]);
+      for (var n = 0, l = node2.children.length; n < l; n++) {
+        _isAST(node1.children[n], node2.children[n]);
       }
     } else {
       node2.iterFields(function(value, field) {
@@ -93,23 +94,23 @@
       return ast;
     }
 
-    var type = ast[0];
+    var Type = ast[0];
     // some nodes have fields (e.g. Compare.ops) which are plain arrays
-    if (type instanceof Array) {
+    if (Type instanceof Array) {
       return lib.map(ast, toNodes);
     }
     var F = function() {};
-    F.prototype = type.prototype;
+    F.prototype = Type.prototype;
 
     var dummy = new F();
 
     if (dummy instanceof nodes.NodeList) {
-      return new type(0, 0, lib.map(ast.slice(1), toNodes));
+      return new Type(0, 0, lib.map(ast.slice(1), toNodes));
     } else if (dummy instanceof nodes.CallExtension) {
-      return new type(ast[1], ast[2], ast[3] ? toNodes(ast[3]) : ast[3],
+      return new Type(ast[1], ast[2], ast[3] ? toNodes(ast[3]) : ast[3],
         lib.isArray(ast[4]) ? lib.map(ast[4], toNodes) : ast[4]);
     } else {
-      return new type(0, 0,
+      return new Type(0, 0,
         toNodes(ast[1]),
         toNodes(ast[2]),
         toNodes(ast[3]),
@@ -331,7 +332,6 @@
     });
 
     it('should parse include tags', function() {
-
       var n = parser.parse('{% include "test.njk" %}');
       expect(n.children[0].typename).to.be('Include');
 
@@ -353,7 +353,6 @@
             [nodes.NodeList,
               [nodes.Output,
                 [nodes.Symbol, 'x']]]]]);
-
     });
 
     it('should parse for loops with else', function() {
@@ -368,7 +367,6 @@
             [nodes.NodeList,
               [nodes.Output,
                 [nodes.TemplateData, 'empty']]]]]);
-
     });
 
     it('should parse filters', function() {
@@ -805,7 +803,6 @@
                 [nodes.TemplateData, ' ']],
               [nodes.Output,
                 [nodes.Symbol, 'z']]]]]);
-
     });
 
     it('should throw errors', function() {
@@ -863,9 +860,8 @@
     });
 
     it('should parse custom tags', function() {
-
-      function testtagExtension() {
-        // jshint validthis: true
+      function TestTagExtension() {
+        /* eslint-disable no-shadow */
         this.tags = ['testtag'];
 
         /* normally this is automatically done by Environment */
@@ -878,8 +874,8 @@
         };
       }
 
-      function testblocktagExtension() {
-        // jshint validthis: true
+      function TestBlockTagExtension() {
+        /* eslint-disable no-shadow */
         this.tags = ['testblocktag'];
         this._name = 'testblocktagExtension';
 
@@ -895,8 +891,8 @@
         };
       }
 
-      function testargsExtension() {
-        // jshint validthis: true
+      function TestArgsExtension() {
+        /* eslint-disable no-shadow */
         this.tags = ['testargs'];
         this._name = 'testargsExtension';
 
@@ -914,9 +910,9 @@
         };
       }
 
-      var extensions = [new testtagExtension(),
-        new testblocktagExtension(),
-        new testargsExtension()];
+      var extensions = [new TestTagExtension(),
+        new TestBlockTagExtension(),
+        new TestArgsExtension()];
 
       isAST(parser.parse('{% testtag %}', extensions),
         [nodes.Root,
@@ -955,4 +951,4 @@
           [nodes.CallExtension, extensions[2], 'biz', null]]);
     });
   });
-})();
+}());

@@ -1,13 +1,14 @@
 'use strict';
 
-var Loader = require('./loader');
+const Loader = require('./loader');
 
-var PrecompiledLoader = Loader.extend({
-  init: function(compiledTemplates) {
+class PrecompiledLoader extends Loader {
+  constructor(compiledTemplates) {
+    super();
     this.precompiled = compiledTemplates || {};
-  },
+  }
 
-  getSource: function(name) {
+  getSource(name) {
     if (this.precompiled[name]) {
       return {
         src: {
@@ -19,7 +20,7 @@ var PrecompiledLoader = Loader.extend({
     }
     return null;
   }
-});
+}
 
 module.exports = {
   PrecompiledLoader: PrecompiledLoader,

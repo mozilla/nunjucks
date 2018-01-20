@@ -5,12 +5,12 @@ function cycler(items) {
 
   return {
     current: null,
-    reset: function() {
+    reset() {
       index = -1;
       this.current = null;
     },
 
-    next: function() {
+    next() {
       index++;
       if (index >= items.length) {
         index = 0;
@@ -20,15 +20,14 @@ function cycler(items) {
       return this.current;
     },
   };
-
 }
 
 function joiner(sep) {
   sep = sep || ',';
-  var first = true;
+  let first = true;
 
-  return function() {
-    var val = first ? '' : sep;
+  return () => {
+    const val = first ? '' : sep;
     first = false;
     return val;
   };
@@ -39,7 +38,7 @@ function joiner(sep) {
 // uses it, they will each have their own copy.
 function globals() {
   return {
-    range: function(start, stop, step) {
+    range(start, stop, step) {
       if (typeof stop === 'undefined') {
         stop = start;
         start = 0;
@@ -48,28 +47,24 @@ function globals() {
         step = 1;
       }
 
-      var arr = [];
-      var i;
+      const arr = [];
       if (step > 0) {
-        for (i = start; i < stop; i += step) {
+        for (let i = start; i < stop; i += step) {
           arr.push(i);
         }
       } else {
-        for (i = start; i > stop; i += step) {
+        for (let i = start; i > stop; i += step) { // eslint-disable-line for-direction
           arr.push(i);
         }
       }
       return arr;
     },
 
-    // lipsum: function(n, html, min, max) {
-    // },
-
-    cycler: function() {
+    cycler() {
       return cycler(Array.prototype.slice.call(arguments));
     },
 
-    joiner: function(sep) {
+    joiner(sep) {
       return joiner(sep);
     }
   };

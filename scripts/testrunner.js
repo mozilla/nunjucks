@@ -1,32 +1,36 @@
 #!/usr/bin/env node
+
+'use strict';
+
 var NYC = require('nyc');
 
 process.env.NODE_ENV = 'test';
 
-var nyc = new NYC({
+const nyc = new NYC({
   exclude: ['*.min.js', 'scripts/**', 'tests/**'],
   reporter: ['text', 'html', 'lcovonly'],
   showProcessTree: true
 });
 nyc.reset();
 
-require('babel-register');
+require('@babel/register');
 
-var runtests = require('./lib/runtests');
-var precompileTestTemplates = require('./lib/precompile');
+const runtests = require('./lib/runtests');
+const precompileTestTemplates = require('./lib/precompile');
 
-var err;
+let err;
 
-precompileTestTemplates().then(function() {
-  return runtests();
-}).catch(function(e) {
-  err = e;
-  console.log(err);  // eslint-disable-line no-console
-}).then(function() {
-  nyc.writeCoverageFile();
-  nyc.report();
+precompileTestTemplates()
+  .then(() => runtests())
+  .catch((e) => {
+    err = e;
+    console.log(err); // eslint-disable-line no-console
+  })
+  .then(() => {
+    nyc.writeCoverageFile();
+    nyc.report();
 
-  if (err) {
-    process.exit(1);
-  }
-});
+    if (err) {
+      process.exit(1);
+    }
+  });

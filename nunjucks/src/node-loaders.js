@@ -1,14 +1,16 @@
-'use strict';
 /* eslint-disable no-console */
 
-var fs = require('fs');
-var path = require('path');
-var lib = require('./lib');
-var Loader = require('./loader');
-var {PrecompiledLoader} = require('./precompiled-loader.js');
+'use strict';
 
-var FileSystemLoader = Loader.extend({
-  init: function(searchPaths, opts) {
+const fs = require('fs');
+const path = require('path');
+const Loader = require('./loader');
+const {PrecompiledLoader} = require('./precompiled-loader.js');
+const chokidar = require('chokidar');
+
+class FileSystemLoader extends Loader {
+  constructor(searchPaths, opts) {
+    super();
     if (typeof opts === 'boolean') {
       console.log(
         '[nunjucks] Warning: you passed a boolean as the second ' +
@@ -22,7 +24,7 @@ var FileSystemLoader = Loader.extend({
     this.noCache = !!opts.noCache;
 
     if (searchPaths) {
-      searchPaths = lib.isArray(searchPaths) ? searchPaths : [searchPaths];
+      searchPaths = Array.isArray(searchPaths) ? searchPaths : [searchPaths];
       // For windows, convert to forward slashes
       this.searchPaths = searchPaths.map(path.normalize);
     } else {
@@ -32,29 +34,30 @@ var FileSystemLoader = Loader.extend({
     if (opts.watch) {
       // Watch all the templates in the paths and fire an event when
       // they change
-      var chokidar = require('chokidar');
-      var paths = this.searchPaths.filter(fs.existsSync);
-      var watcher = chokidar.watch(paths);
-      var _this = this;
-      watcher.on('all', function(event, fullname) {
+      if (!chokidar) {
+        throw new Error('watch requires chokidar to be installed');
+      }
+      const paths = this.searchPaths.filter(fs.existsSync);
+      const watcher = chokidar.watch(paths);
+      watcher.on('all', (event, fullname) => {
         fullname = path.resolve(fullname);
-        if (event === 'change' && fullname in _this.pathsToNames) {
-          _this.emit('update', _this.pathsToNames[fullname]);
+        if (event === 'change' && fullname in this.pathsToNames) {
+          this.emit('update', this.pathsToNames[fullname]);
         }
       });
-      watcher.on('error', function(error) {
+      watcher.on('error', (error) => {
         console.log('Watcher error: ' + error);
       });
     }
-  },
+  }
 
-  getSource: function(name) {
+  getSource(name) {
     var fullpath = null;
     var paths = this.searchPaths;
 
-    for (var i = 0; i < paths.length; i++) {
-      var basePath = path.resolve(paths[i]);
-      var p = path.resolve(paths[i], name);
+    for (let i = 0; i < paths.length; i++) {
+      const basePath = path.resolve(paths[i]);
+      const p = path.resolve(paths[i], name);
 
       // Only allow the current directory and anything
       // underneath it to be searched
@@ -76,7 +79,7 @@ var FileSystemLoader = Loader.extend({
       noCache: this.noCache
     };
   }
-});
+}
 
 module.exports = {
   FileSystemLoader: FileSystemLoader,

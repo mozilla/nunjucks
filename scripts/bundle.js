@@ -1,5 +1,9 @@
 #!/usr/bin/env node
+/* eslint-disable vars-on-top, func-names */
+
 'use strict';
+
+require('module-alias/register');
 
 var path = require('path');
 var webpack = require('webpack');
@@ -105,7 +109,7 @@ if (!TEST_ENV) {
 var promises = runConfigs.map(function(opts) {
   return function() {
     return runWebpack(opts).then(function(stats) {
-      console.log(stats);  // eslint-disable-line no-console
+      console.log(stats); // eslint-disable-line no-console
     });
   };
 });

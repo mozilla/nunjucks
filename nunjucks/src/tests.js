@@ -7,18 +7,22 @@ var SafeString = require('./runtime').SafeString;
  * @param { any } value
  * @returns { boolean }
  */
-exports.callable = function(value) {
+function callable(value) {
   return typeof value === 'function';
-};
+}
+
+exports.callable = callable;
 
 /**
  * Returns `true` if the object is strictly not `undefined`.
  * @param { any } value
  * @returns { boolean }
  */
-exports.defined = function(value) {
+function defined(value) {
   return value !== undefined;
-};
+}
+
+exports.defined = defined;
 
 /**
  * Returns `true` if the operand (one) is divisble by the test's argument
@@ -27,27 +31,33 @@ exports.defined = function(value) {
  * @param { number } two
  * @returns { boolean }
  */
-exports.divisibleby = function(one, two) {
+function divisibleby(one, two) {
   return (one % two) === 0;
-};
+}
+
+exports.divisibleby = divisibleby;
 
 /**
  * Returns true if the string has been escaped (i.e., is a SafeString).
  * @param { any } value
  * @returns { boolean }
  */
-exports.escaped = function(value) {
+function escaped(value) {
   return value instanceof SafeString;
-};
+}
+
+exports.escaped = escaped;
 
 /**
  * Returns `true` if the arguments are strictly equal.
  * @param { any } one
  * @param { any } two
  */
-exports.equalto = function(one, two) {
+function equalto(one, two) {
   return one === two;
-};
+}
+
+exports.equalto = equalto;
 
 // Aliases
 exports.eq = exports.equalto;
@@ -58,9 +68,11 @@ exports.sameas = exports.equalto;
  * @param { number } value
  * @returns { boolean }
  */
-exports.even = function(value) {
+function even(value) {
   return value % 2 === 0;
-};
+}
+
+exports.even = even;
 
 /**
  * Returns `true` if the value is falsy - if I recall correctly, '', 0, false,
@@ -70,9 +82,11 @@ exports.even = function(value) {
  * @param { any } value
  * @returns { boolean }
  */
-exports.falsy = function(value) {
+function falsy(value) {
   return !value;
-};
+}
+
+exports.falsy = falsy;
 
 /**
  * Returns `true` if the operand (one) is greater or equal to the test's
@@ -81,9 +95,11 @@ exports.falsy = function(value) {
  * @param { number } two
  * @returns { boolean }
  */
-exports.ge = function(one, two) {
+function ge(one, two) {
   return one >= two;
-};
+}
+
+exports.ge = ge;
 
 /**
  * Returns `true` if the operand (one) is greater than the test's argument
@@ -92,9 +108,11 @@ exports.ge = function(one, two) {
  * @param { number } two
  * @returns { boolean }
  */
-exports.greaterthan = function(one, two) {
+function greaterthan(one, two) {
   return one > two;
-};
+}
+
+exports.greaterthan = greaterthan;
 
 // alias
 exports.gt = exports.greaterthan;
@@ -106,9 +124,11 @@ exports.gt = exports.greaterthan;
  * @param { number } two
  * @returns { boolean }
  */
-exports.le = function(one, two) {
+function le(one, two) {
   return one <= two;
-};
+}
+
+exports.le = le;
 
 /**
  * Returns `true` if the operand (one) is less than the test's passed argument
@@ -117,9 +137,11 @@ exports.le = function(one, two) {
  * @param { number } two
  * @returns { boolean }
  */
-exports.lessthan = function(one, two) {
+function lessthan(one, two) {
   return one < two;
-};
+}
+
+exports.lessthan = lessthan;
 
 // alias
 exports.lt = exports.lessthan;
@@ -129,9 +151,11 @@ exports.lt = exports.lessthan;
  * @param { string } value
  * @returns { boolean }
  */
-exports.lower = function(value) {
+function lower(value) {
   return value.toLowerCase() === value;
-};
+}
+
+exports.lower = lower;
 
 /**
  * Returns `true` if the operand (one) is less than or equal to the test's
@@ -140,45 +164,55 @@ exports.lower = function(value) {
  * @param { number } two
  * @returns { boolean }
  */
-exports.ne = function(one, two) {
+function ne(one, two) {
   return one !== two;
-};
+}
+
+exports.ne = ne;
 
 /**
  * Returns true if the value is strictly equal to `null`.
  * @param { any }
  * @returns { boolean }
  */
-exports.null = function(value) {
+function nullTest(value) {
   return value === null;
-};
+}
+
+exports.null = nullTest;
 
 /**
  * Returns true if value is a number.
  * @param { any }
  * @returns { boolean }
  */
-exports.number = function(value) {
+function number(value) {
   return typeof value === 'number';
-};
+}
+
+exports.number = number;
 
 /**
  * Returns `true` if the value is *not* evenly divisible by 2.
  * @param { number } value
  * @returns { boolean }
  */
-exports.odd = function(value) {
+function odd(value) {
   return value % 2 === 1;
-};
+}
+
+exports.odd = odd;
 
 /**
  * Returns `true` if the value is a string, `false` if not.
  * @param { any } value
  * @returns { boolean }
  */
-exports.string = function(value) {
+function string(value) {
   return typeof value === 'string';
-};
+}
+
+exports.string = string;
 
 /**
  * Returns `true` if the value is not in the list of things considered falsy:
@@ -186,41 +220,53 @@ exports.string = function(value) {
  * @param { any } value
  * @returns { boolean }
  */
-exports.truthy = function(value) {
+function truthy(value) {
   return !!value;
-};
+}
+
+exports.truthy = truthy;
 
 /**
  * Returns `true` if the value is undefined.
  * @param { any } value
  * @returns { boolean }
  */
-exports.undefined = function(value) {
+function undefinedTest(value) {
   return value === undefined;
-};
+}
+
+exports.undefined = undefinedTest;
 
 /**
  * Returns `true` if the string is uppercased.
  * @param { string } value
  * @returns { boolean }
  */
-exports.upper = function(value) {
+function upper(value) {
   return value.toUpperCase() === value;
-};
+}
+
+exports.upper = upper;
 
 /**
  * If ES6 features are available, returns `true` if the value implements the
  * `Symbol.iterator` method. If not, it's a string or Array.
+ *
+ * Could potentially cause issues if a browser exists that has Set and Map but
+ * not Symbol.
+ *
  * @param { any } value
  * @returns { boolean }
  */
-exports.iterable = function(value) {
-  if (Symbol) {
+function iterable(value) {
+  if (typeof Symbol !== 'undefined') {
     return !!value[Symbol.iterator];
   } else {
     return Array.isArray(value) || typeof value === 'string';
   }
-};
+}
+
+exports.iterable = iterable;
 
 /**
  * If ES6 features are available, returns `true` if the value is an object hash
@@ -228,7 +274,7 @@ exports.iterable = function(value) {
  * @param { any } value
  * @returns { boolean }
  */
-exports.mapping = function(value) {
+function mapping(value) {
   // only maps and object hashes
   var bool = value !== null
     && value !== undefined
@@ -239,4 +285,6 @@ exports.mapping = function(value) {
   } else {
     return bool;
   }
-};
+}
+
+exports.mapping = mapping;

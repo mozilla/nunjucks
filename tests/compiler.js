@@ -1,10 +1,14 @@
 (function() {
   'use strict';
 
-  var expect,
-    util,
-    Template,
-    fs;
+  var expect;
+  var util;
+  var Template;
+  var fs;
+  var render;
+  var equal;
+  var finish;
+  var isSlim;
 
   if (typeof require !== 'undefined') {
     expect = require('expect.js');
@@ -17,10 +21,10 @@
     Template = nunjucks.Template;
   }
 
-  var render = util.render;
-  var equal = util.equal;
-  var finish = util.finish;
-  var isSlim = util.isSlim;
+  render = util.render;
+  equal = util.equal;
+  finish = util.finish;
+  isSlim = util.isSlim;
 
   describe('compiler', function() {
     it('should compile templates', function(done) {
@@ -211,7 +215,7 @@
       equal('{% if "pizza" in food %}yum{% endif %}',
         {
           food: {
-            'pizza': true
+            pizza: true
           }
         },
         'yum');
@@ -411,7 +415,7 @@
         },
         'showing fooshowing bar');
 
-      var res = render(
+      var res = render( // eslint-disable-line vars-on-top
         '{% set item = passed_var %}' +
         '{% include "item.njk" %}\n' +
         '{% ' + block + ' i in passed_iter %}' +
@@ -451,8 +455,11 @@
     });
 
     it('should compile async control', function(done) {
-      if (fs) {
-        var opts = {
+      var opts;
+      if (!fs) {
+        this.skip();
+      } else {
+        opts = {
           asyncFilters: {
             getContents: function(tmpl, cb) {
               fs.readFile(tmpl, cb);
@@ -637,21 +644,14 @@
       equal('{% if 1 not in [1, 2] %}yes{% endif %}', '');
       equal('{% if 1 not in [2, 3] %}yes{% endif %}', 'yes');
       equal('{% if "a" in vals %}yes{% endif %}',
-        {
-          'vals': ['a', 'b']
-        }, 'yes');
+        { vals: ['a', 'b'] },
+        'yes');
       equal('{% if "a" in obj %}yes{% endif %}',
-        {
-          'obj': {
-            a: true
-          }
-        }, 'yes');
+        { obj: { a: true } },
+        'yes');
       equal('{% if "a" in obj %}yes{% endif %}',
-        {
-          'obj': {
-            b: true
-          }
-        }, '');
+        { obj: { b: true } },
+        '');
       equal('{% if "foo" in "foobar" %}yes{% endif %}', 'yes');
 
       render(
@@ -1047,20 +1047,17 @@
         'FooBARBAZFizzle');
 
       equal('hola {% extends tmpl %} hizzle mumble',
-        {
-          tmpl: 'base.njk'
-        },
+        { tmpl: 'base.njk' },
         'FooBarBazFizzle');
 
+      finish(done);
+    });
+    it('should not call blocks not defined from template inheritance', function(done) {
       var count = 0;
       render(
         '{% extends "base.njk" %}' +
         '{% block notReal %}{{ foo() }}{% endblock %}',
-        {
-          foo: function() {
-            count++;
-          }
-        },
+        { foo: function() { count++; } },
         function() {
           expect(count).to.be(0);
         });
@@ -1289,8 +1286,8 @@
       equal('{% for k,v in items %}{% include "include-in-loop.njk" %}{% endfor %}',
         {
           items: {
-            'a': 'A',
-            'b': 'B'
+            a: 'A',
+            b: 'B'
           }
         },
         '1,0,true\n2,1,false\n');
@@ -1507,15 +1504,16 @@
     });
 
     it('should allow custom tag compilation', function(done) {
-      function testExtension() {
-        // jshint validthis: true
+      function TestExtension() {
         this.tags = ['test'];
 
         this.parse = function(parser, nodes) {
+          var content;
+          var tag;
           parser.advanceAfterBlockEnd();
 
-          var content = parser.parseUntilBlocks('endtest');
-          var tag = new nodes.CallExtension(this, 'run', null, [content]);
+          content = parser.parseUntilBlocks('endtest');
+          tag = new nodes.CallExtension(this, 'run', null, [content]);
           parser.advanceAfterBlockEnd();
 
           return tag;
@@ -1527,20 +1525,15 @@
         };
       }
 
-      var opts = {
-        extensions: {
-          'testExtension': new testExtension()
-        }
-      };
-      render('{% test %}123456789{% endtest %}', null, opts, function(err, res) {
-        expect(res).to.be('987654321');
-      });
+      equal('{% test %}123456789{% endtest %}', null,
+        { extensions: { TestExtension: new TestExtension() } },
+        '987654321');
 
       finish(done);
     });
 
     it('should allow custom tag compilation without content', function(done) {
-      function testExtension() {
+      function TestExtension() {
         // jshint validthis: true
         this.tags = ['test'];
 
@@ -1558,29 +1551,25 @@
         };
       }
 
-      var opts = {
-        extensions: {
-          'testExtension': new testExtension()
-        }
-      };
-      render('{% test "123456" %}', null, opts, function(err, res) {
-        expect(res).to.be('654321');
-      });
+      equal('{% test "123456" %}', null,
+        { extensions: { TestExtension: new TestExtension() } },
+        '654321');
 
       finish(done);
     });
 
     it('should allow complicated custom tag compilation', function(done) {
-      function testExtension() {
+      function TestExtension() {
         // jshint validthis: true
         this.tags = ['test'];
 
         /* normally this is automatically done by Environment */
-        this._name = 'testExtension';
+        this._name = TestExtension;
 
         this.parse = function(parser, nodes, lexer) {
-          var body,
-            intermediate = null;
+          var body;
+          var intermediate = null;
+
           parser.advanceAfterBlockEnd();
 
           body = parser.parseUntilBlocks('intermediate', 'endtest');
@@ -1605,37 +1594,31 @@
         };
       }
 
-      var opts = {
-        extensions: {
-          'testExtension': new testExtension()
-        }
-      };
+      equal('{% test %}abcdefg{% endtest %}', null,
+        { extensions: { TestExtension: new TestExtension() } },
+        'a,b,c,d,e,f,g');
 
-      render('{% test %}abcdefg{% endtest %}', null, opts, function(err, res) {
-        expect(res).to.be('a,b,c,d,e,f,g');
-      });
-
-      render('{% test %}abcdefg{% intermediate %}second half{% endtest %}',
+      equal('{% test %}abcdefg{% intermediate %}second half{% endtest %}',
         null,
-        opts,
-        function(err, res) {
-          expect(res).to.be('a,b,c,d,e,f,gflah dnoces');
-        });
+        { extensions: { TestExtension: new TestExtension() } },
+        'a,b,c,d,e,f,gflah dnoces');
 
       finish(done);
     });
 
     it('should allow custom tag with args compilation', function(done) {
-      function testExtension() {
+      var opts;
+
+      function TestExtension() {
         // jshint validthis: true
         this.tags = ['test'];
 
         /* normally this is automatically done by Environment */
-        this._name = 'testExtension';
+        this._name = TestExtension;
 
         this.parse = function(parser, nodes) {
-          var body,
-            args = null;
+          var body;
+          var args;
           var tok = parser.nextToken();
 
           // passing true makes it tolerate when no args exist
@@ -1649,6 +1632,7 @@
         };
 
         this.run = function(context, prefix, kwargs, body) {
+          var output;
           if (typeof prefix === 'function') {
             body = prefix;
             prefix = '';
@@ -1658,7 +1642,7 @@
             kwargs = {};
           }
 
-          var output = prefix + body().split('').reverse().join('');
+          output = prefix + body().split('').reverse().join('');
           if (kwargs.cutoff) {
             output = output.slice(0, kwargs.cutoff);
           }
@@ -1667,23 +1651,23 @@
         };
       }
 
-      var opts = {
+      opts = {
         extensions: {
-          'testExtension': new testExtension()
+          TestExtension: new TestExtension()
         }
       };
 
-      render('{% test %}foobar{% endtest %}', null, opts, function(err, res) {
-        expect(res).to.be('raboof');
-      });
+      equal(
+        '{% test %}foobar{% endtest %}', null, opts,
+        'raboof');
 
-      render('{% test("biz") %}foobar{% endtest %}', null, opts, function(err, res) {
-        expect(res).to.be('bizraboof');
-      });
+      equal(
+        '{% test("biz") %}foobar{% endtest %}', null, opts,
+        'bizraboof');
 
-      render('{% test("biz", cutoff=5) %}foobar{% endtest %}', null, opts, function(err, res) {
-        expect(res).to.be('bizra');
-      });
+      equal(
+        '{% test("biz", cutoff=5) %}foobar{% endtest %}', null, opts,
+        'bizra');
 
       finish(done);
     });
@@ -1696,105 +1680,73 @@
     });
 
     it('should autoescape if autoescape is on', function(done) {
-      render('{{ foo }}', {
-        foo: '"\'<>&'
-      }, {
-        autoescape: true
-      }, function(err, res) {
-        expect(res).to.be('&quot;&#39;&lt;&gt;&amp;');
-      });
+      equal(
+        '{{ foo }}',
+        { foo: '"\'<>&' },
+        { autoescape: true },
+        '&quot;&#39;&lt;&gt;&amp;');
 
-      render('{{ foo|reverse }}', {
-        foo: '"\'<>&'
-      }, {
-        autoescape: true
-      }, function(err, res) {
-        expect(res).to.be('&amp;&gt;&lt;&#39;&quot;');
-      });
+      equal('{{ foo|reverse }}',
+        { foo: '"\'<>&' },
+        { autoescape: true },
+        '&amp;&gt;&lt;&#39;&quot;');
 
-      render('{{ foo|reverse|safe }}', {
-        foo: '"\'<>&'
-      }, {
-        autoescape: true
-      }, function(err, res) {
-        expect(res).to.be('&><\'"');
-      });
+      equal(
+        '{{ foo|reverse|safe }}',
+        { foo: '"\'<>&' },
+        { autoescape: true },
+        '&><\'"');
 
-      render('{{ foo }}', {
-        foo: null
-      }, {
-        autoescape: true
-      }, function(err, res) {
-        expect(res).to.be('');
-      });
+      equal(
+        '{{ foo }}',
+        { foo: null },
+        { autoescape: true },
+        '');
 
-      render('{{ foo }}', {
-        foo: ['<p>foo</p>']
-      }, {
-        autoescape: true
-      }, function(err, res) {
-        expect(res).to.be('&lt;p&gt;foo&lt;/p&gt;');
-      });
+      equal(
+        '{{ foo }}',
+        { foo: ['<p>foo</p>'] },
+        { autoescape: true },
+        '&lt;p&gt;foo&lt;/p&gt;');
 
-      render('{{ foo }}', {
-        foo: {
-          toString: function() {
-            return '<p>foo</p>';
-          }
-        }
-      }, {
-        autoescape: true
-      }, function(err, res) {
-        expect(res).to.be('&lt;p&gt;foo&lt;/p&gt;');
-      });
+      equal(
+        '{{ foo }}',
+        { foo: { toString: function() { return '<p>foo</p>'; } } },
+        { autoescape: true },
+        '&lt;p&gt;foo&lt;/p&gt;');
 
-      render('{{ foo | safe }}', {
-        foo: null
-      }, {
-        autoescape: true
-      }, function(err, res) {
-        expect(res).to.be('');
-      });
+      equal('{{ foo | safe }}',
+        { foo: null },
+        { autoescape: true },
+        '');
 
-      render('{{ foo | safe }}', {
-        foo: '<p>foo</p>'
-      }, {
-        autoescape: true
-      }, function(err, res) {
-        expect(res).to.be('<p>foo</p>');
-      });
+      equal(
+        '{{ foo | safe }}',
+        { foo: '<p>foo</p>' },
+        { autoescape: true },
+        '<p>foo</p>');
 
-      render('{{ foo | safe }}', {
-        foo: ['<p>foo</p>']
-      }, {
-        autoescape: true
-      }, function(err, res) {
-        expect(res).to.be('<p>foo</p>');
-      });
+      equal(
+        '{{ foo | safe }}',
+        { foo: ['<p>foo</p>'] },
+        { autoescape: true },
+        '<p>foo</p>');
 
-      render('{{ foo | safe }}', {
-        foo: {
-          toString: function() {
-            return '<p>foo</p>';
-          }
-        }
-      }, {
-        autoescape: true
-      }, function(err, res) {
-        expect(res).to.be('<p>foo</p>');
-      });
+      equal(
+        '{{ foo | safe }}',
+        { foo: { toString: function() { return '<p>foo</p>'; } } },
+        { autoescape: true },
+        '<p>foo</p>');
 
       finish(done);
     });
 
     it('should not autoescape safe strings', function(done) {
-      render('{{ foo|safe }}', {
-        foo: '"\'<>&'
-      }, {
-        autoescape: true
-      }, function(err, res) {
-        expect(res).to.be('"\'<>&');
-      });
+      equal(
+        '{{ foo|safe }}',
+        { foo: '"\'<>&' },
+        { autoescape: true },
+        '"\'<>&');
 
       finish(done);
     });
@@ -1844,7 +1796,7 @@
     });
 
     it('should not autoescape when extension set false', function(done) {
-      function testExtension() {
+      function TestExtension() {
         // jshint validthis: true
         this.tags = ['test'];
 
@@ -1863,17 +1815,13 @@
         };
       }
 
-      var opts = {
-        extensions: {
-          'testExtension': new testExtension()
-        },
-        autoescape: true
-      };
-
       render(
         '{% test "123456" %}',
         null,
-        opts,
+        {
+          extensions: { TestExtension: new TestExtension() },
+          autoescape: true
+        },
         function(err, res) {
           expect(res).to.be('<b>Foo</b>');
         }
@@ -1885,13 +1833,10 @@
     it('should pass context as this to filters', function(done) {
       render(
         '{{ foo | hallo }}',
-        {
-          foo: 1,
-          bar: 2
-        },
+        { foo: 1, bar: 2 },
         {
           filters: {
-            'hallo': function(foo) {
+            hallo: function(foo) {
               return foo + this.lookup('bar');
             }
           }
@@ -1910,6 +1855,19 @@
 
       equal('{{ r/x/gi }}',
         '/x/gi');
+
+      finish(done);
+    });
+
+    it('should throw an error when {% call %} is passed an object that is not a function', function(done) {
+      render(
+        '{% call foo() %}{% endcall %}',
+        {foo: 'bar'},
+        {noThrow: true},
+        function(err, res) {
+          expect(res).to.be(undefined);
+          expect(err).to.match(/Unable to call `\w+`, which is not a function/);
+        });
 
       finish(done);
     });
@@ -1949,12 +1907,8 @@
     it('should throw an error when including a file that imports macro that calls an undefined macro', function(done) {
       render(
         '{% include "import-macro-call-undefined-macro.njk" %}',
-        {
-          'list': [1, 2, 3]
-        },
-        {
-          noThrow: true
-        },
+        { list: [1, 2, 3] },
+        { noThrow: true },
         function(err, res) {
           expect(res).to.be(undefined);
           expect(err).to.match(/Unable to call `\w+`, which is undefined or falsey/);
@@ -1968,19 +1922,16 @@
     it('should control whitespaces correctly', function(done) {
       equal(
         '{% if true -%}{{"hello"}} {{"world"}}{% endif %}',
-        'hello world'
-      );
+        'hello world');
 
       equal(
         '{% if true -%}{% if true %} {{"hello"}} {{"world"}}'
         + '{% endif %}{% endif %}',
-        ' hello world'
-      );
+        ' hello world');
 
       equal(
         '{% if true -%}{# comment #} {{"hello"}}{% endif %}',
-        ' hello'
-      );
+        ' hello');
 
       finish(done);
     });
@@ -2161,7 +2112,6 @@
     });
 
     it('should apply the replace filter to the body', function(done) {
-
       equal('{% filter replace("force", "forth") %}may the force be with you{% endfilter %}',
         'may the forth be with you');
       finish(done);
@@ -2181,4 +2131,4 @@
       finish(done);
     });
   });
-})();
+}());
