@@ -9,8 +9,6 @@ module.exports = {
   'env': {
     'node': true,
     'es6': true,
-    'mocha': true,
-    'browser': true,
   },
   "rules": {
     // The one assertion of personal preference: no spaces before parentheses
