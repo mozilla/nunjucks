@@ -1,8 +1,13 @@
-var nunjucks = require('../../index');
+/* eslint-disable func-names */
+
+'use strict';
+
+var path = require('path');
+var nunjucks = require('../..');
 var express = require('express');
 
 var app = express();
-nunjucks.configure('views', {
+nunjucks.configure(path.join(__dirname, 'views'), {
   autoescape: true,
   express: app,
   watch: true
@@ -18,13 +23,15 @@ app.use(function(req, res, next) {
 });
 
 app.get('/', function(req, res) {
-  res.render('index.njk', {
+  res.render('index.html', {
     username: 'James Long <strong>copyright</strong>'
   });
 });
 
 app.get('/about', function(req, res) {
-  res.render('about.njk');
+  res.render('about.html');
 });
 
-app.listen(4000);
+app.listen(4000, function() {
+  console.log('Express server running on http://localhost:4000');
+});

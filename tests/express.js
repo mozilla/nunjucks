@@ -6,10 +6,9 @@ var expect = require('expect.js');
 var request = require('supertest');
 var nunjucks = require('../nunjucks/index');
 
-var VIEWS = path.join(__dirname, 'express-sample', 'views');
+var VIEWS = path.join(__dirname, '../samples/express/views');
 
 describe('express', function() {
-
   var app;
   var env;
 
