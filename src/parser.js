@@ -1337,7 +1337,7 @@ var Parser = Object.extend({
                 var e = this.parseExpression();
                 this.dropLeadingWhitespace = false;
                 this.advanceAfterVariableEnd();
-                buf.push(new nodes.Output(tok.lineno, tok.colno, [e]));
+                buf.push(new nodes.VariableBlock(tok.lineno, tok.colno, [e]));
             }
             else if(tok.type === lexer.TOKEN_COMMENT) {
                 this.dropLeadingWhitespace = tok.value.charAt(

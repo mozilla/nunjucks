@@ -1144,6 +1144,10 @@ var Compiler = Object.extend({
         }
     },
 
+    compileVariableBlock: function(node, frame) {
+        this.compileOutput(node, frame);
+    },
+
     compileRoot: function(node, frame) {
         if(frame) {
             this.fail('compileRoot: root node can\'t have frame');
