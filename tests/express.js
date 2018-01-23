@@ -4,9 +4,9 @@ var path = require('path');
 var express = require('express');
 var expect = require('expect.js');
 var request = require('supertest');
-var nunjucks = require('../../');
+var nunjucks = require('../nunjucks/index');
 
-var VIEWS = path.join(__dirname, '..', 'express-sample', 'views');
+var VIEWS = path.join(__dirname, 'express-sample', 'views');
 
 describe('express', function() {
 
@@ -25,7 +25,7 @@ describe('express', function() {
 
   it('should render a view with extension', function(done) {
     app.get('/', function(req, res) {
-      res.render('about.njk');
+      res.render('about.html');
     });
     request(app)
       .get('/')
