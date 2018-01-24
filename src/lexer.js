@@ -50,6 +50,10 @@ function token(type, value, lineno, colno) {
 }
 
 function Tokenizer(str, opts) {
+    if (typeof str !== 'string') {
+      throw new lib.TemplateError(str + ' is not a valid template string.');
+    }
+    
     this.str = str;
     this.index = 0;
     this.len = str.length;

@@ -867,6 +867,10 @@
             expect(function() {
                 parser.parse('{% from "foo" import _bar %}');
             }).to.throwException(/names starting with an underscore cannot be imported/);
+
+            expect(function() {
+                parser.parse(undefined);
+            }).to.throwException(/undefined is not a valid template string/);
         });
 
         it('should parse custom tags', function() {
