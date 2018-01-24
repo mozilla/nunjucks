@@ -731,6 +731,42 @@
             finish(done);
         });
 
+        it('should allow child macro to access vars set in parent macro', function(done) {
+            equal('{% macro parent() %}' +
+                  '{% set x = "foo" %}' +
+                  '{% set y = "bar" %}' +
+                  '{% macro child() %}' +
+                  '{% set y = "foo" %}' +
+                  '{{ x }}' +
+                  '{% endmacro %}' +
+                  '{{ child() }}' +
+                  '{{ y }}' +
+                  '{% endmacro %}' +
+                  '{{ parent() }}',
+                  'foobar');
+
+            finish(done);
+        });
+
+        it('should allow call block to access vars set in parent macro', function(done) {
+            equal('{% macro child() %}' +
+                  '{{ caller() }}' +
+                  '{% endmacro %}' +
+                  '{% macro parent() %}' +
+                  '{% set x = "foo" %}' +
+                  '{% set y = "bar" %}' +
+                  '{% call child() %}' +
+                  '{% set y = "foo" %}' +
+                  '{{ x }}' +
+                  '{% endcall %}' +
+                  '{{ y }}' +
+                  '{% endmacro %}' +
+                  '{{ parent() }}',
+                  'foobar');
+
+            finish(done);
+        });
+
         it('should import templates', function(done) {
             equal('{% import "import.njk" as imp %}' +
                   '{{ imp.foo() }} {{ imp.bar }}',
