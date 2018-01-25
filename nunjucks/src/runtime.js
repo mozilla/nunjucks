@@ -275,7 +275,7 @@ function asyncEach(arr, dimen, iter, cb) {
           iter(item[0], item[1], item[2], i, len, next);
           break;
         default:
-          item.push(i, next);
+          item.push(i, len, next);
           iter.apply(this, item);
       }
     }, cb);
@@ -321,7 +321,7 @@ function asyncAll(arr, dimen, func, cb) {
             func(item[0], item[1], item[2], i, len, done);
             break;
           default:
-            item.push(i, done);
+            item.push(i, len, done);
             func.apply(this, item);
         }
       }
