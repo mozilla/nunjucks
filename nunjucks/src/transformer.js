@@ -184,7 +184,7 @@ function convertStatements(ast) {
           node.body,
           node.else_
         );
-      } else if (node instanceof nodes.For) {
+      } else if (node instanceof nodes.For && !(node instanceof nodes.AsyncAll)) {
         return new nodes.AsyncEach(
           node.lineno,
           node.colno,
