@@ -303,142 +303,184 @@
       finish(done);
     });
 
-    function runLoopTests(block, end) {
-      equal('{% ' + block + ' i in arr %}{{ i }}{% ' + end + ' %}',
-        {
-          arr: [1, 2, 3, 4, 5]
-        }, '12345');
+    function runLoopTests(block) {
+      var end = {
+        asyncAll: 'endall',
+        asyncEach: 'endeach',
+        for: 'endfor'
+      }[block];
 
-      equal('{% ' + block + ' i in arr %}{{ i }}{% else %}empty{% ' + end + ' %}',
-        {
-          arr: [1, 2, 3, 4, 5]
-        }, '12345');
-
-      equal('{% ' + block + ' i in arr %}{{ i }}{% else %}empty{% ' + end + ' %}',
-        {
-          arr: []
-        }, 'empty');
-
-      equal(
-        '{% ' + block + ' a, b, c in arr %}' +
-        '{{ a }},{{ b }},{{ c }}.{% ' + end + ' %}',
-        {
-          arr: [['x', 'y', 'z'], ['1', '2', '3']]
-        }, 'x,y,z.1,2,3.');
-
-      equal('{% ' + block + ' item in arr | batch(2) %}{{ item[0] }}{% ' + end + ' %}',
-        {
-          arr: ['a', 'b', 'c', 'd']
-        }, 'ac');
-
-      equal(
-        '{% ' + block + ' k, v in { one: 1, two: 2 } %}' +
-        '-{{ k }}:{{ v }}-{% ' + end + ' %}', '-one:1--two:2-');
-
-      equal('{% ' + block + ' i in [7,3,6] %}{{ loop.index }}{% ' + end + ' %}', '123');
-      equal('{% ' + block + ' i in [7,3,6] %}{{ loop.index0 }}{% ' + end + ' %}', '012');
-      equal('{% ' + block + ' i in [7,3,6] %}{{ loop.revindex }}{% ' + end + ' %}', '321');
-      equal('{% ' + block + ' i in [7,3,6] %}{{ loop.revindex0 }}{% ' + end + ' %}', '210');
-      equal('{% ' + block + ' i in [7,3,6] %}{% if loop.first %}{{ i }}{% endif %}{% ' + end + ' %}',
-        '7');
-      equal('{% ' + block + ' i in [7,3,6] %}{% if loop.last %}{{ i }}{% endif %}{% ' + end + ' %}',
-        '6');
-      equal('{% ' + block + ' i in [7,3,6] %}{{ loop.length }}{% ' + end + ' %}', '333');
-      equal('{% ' + block + ' i in foo %}{{ i }}{% ' + end + ' %}', '');
-      equal('{% ' + block + ' i in foo.bar %}{{ i }}{% ' + end + ' %}', {
-        foo: {}
-      }, '');
-      equal('{% ' + block + ' i in foo %}{{ i }}{% ' + end + ' %}', {
-        foo: null
-      }, '');
-
-      equal('{% ' + block + ' x, y in points %}[{{ x }},{{ y }}]{% ' + end + ' %}',
-        {
-          points: [[1, 2], [3, 4], [5, 6]]
-        },
-        '[1,2][3,4][5,6]');
-
-      equal(
-        '{% ' + block + ' a, b, c, d in arr %}[{{ a }},{{ b }},{{ c }},{{ d }}]{% ' + end + '%}',
-        { arr: [[1, 2, 3, 4], [5, 6, 7, 8]] },
-        '[1,2,3,4][5,6,7,8]');
-
-      equal('{% ' + block + ' x, y in points %}{{ loop.index }}{% ' + end + ' %}',
-        {
-          points: [[1, 2], [3, 4], [5, 6]]
-        },
-        '123');
-
-      equal('{% ' + block + ' x, y in points %}{{ loop.revindex }}{% ' + end + ' %}',
-        {
-          points: [[1, 2], [3, 4], [5, 6]]
-        },
-        '321');
-
-      equal('{% ' + block + ' k, v in items %}({{ k }},{{ v }}){% ' + end + ' %}',
-        {
-          items: {
-            foo: 1,
-            bar: 2
-          }
-        },
-        '(foo,1)(bar,2)');
-
-      equal('{% ' + block + ' k, v in items %}{{ loop.index }}{% ' + end + ' %}',
-        {
-          items: {
-            foo: 1,
-            bar: 2
-          }
-        },
-        '12');
-
-      equal('{% ' + block + ' k, v in items %}{{ loop.revindex }}{% ' + end + ' %}',
-        {
-          items: {
-            foo: 1,
-            bar: 2
-          }
-        },
-        '21');
-
-      equal('{% ' + block + ' k, v in items %}{{ loop.length }}{% ' + end + ' %}',
-        {
-          items: {
-            foo: 1,
-            bar: 2
-          }
-        },
-        '22');
-
-      equal('{% ' + block + ' item, v in items %}{% include "item.njk" %}{% ' + end + ' %}',
-        {
-          items: {
-            foo: 1,
-            bar: 2
-          }
-        },
-        'showing fooshowing bar');
-
-      var res = render( // eslint-disable-line vars-on-top
-        '{% set item = passed_var %}' +
-        '{% include "item.njk" %}\n' +
-        '{% ' + block + ' i in passed_iter %}' +
-        '{% set item = i %}' +
-        '{% include "item.njk" %}\n' +
-        '{% ' + end + ' %}',
-        {
-          passed_var: 'test',
-          passed_iter: ['1', '2', '3']
-        }
-      );
-      expect(res).to.be('showing test\nshowing 1\nshowing 2\nshowing 3\n');
+      describe('the ' + block + ' tag', function() {
+        it('should loop over simple arrays', function() {
+          equal(
+            '{% ' + block + ' i in arr %}{{ i }}{% ' + end + ' %}',
+            { arr: [1, 2, 3, 4, 5] },
+            '12345');
+        });
+        it('should loop normally with an {% else %} tag and non-empty array', function() {
+          equal(
+            '{% ' + block + ' i in arr %}{{ i }}{% else %}empty{% ' + end + ' %}',
+            { arr: [1, 2, 3, 4, 5] },
+            '12345');
+        });
+        it('should execute the {% else %} block when looping over an empty array', function() {
+          equal(
+            '{% ' + block + ' i in arr %}{{ i }}{% else %}empty{% ' + end + ' %}',
+            { arr: [] },
+            'empty');
+        });
+        it('should support destructured looping', function() {
+          equal(
+            '{% ' + block + ' a, b, c in arr %}' +
+            '{{ a }},{{ b }},{{ c }}.{% ' + end + ' %}',
+            { arr: [['x', 'y', 'z'], ['1', '2', '3']] },
+            'x,y,z.1,2,3.');
+        });
+        it('should do loop over key-values of a literal in-template Object', function() {
+          equal(
+            '{% ' + block + ' k, v in { one: 1, two: 2 } %}' +
+            '-{{ k }}:{{ v }}-{% ' + end + ' %}', '-one:1--two:2-');
+        });
+        it('should support loop.index', function() {
+          equal('{% ' + block + ' i in [7,3,6] %}{{ loop.index }}{% ' + end + ' %}', '123');
+        });
+        it('should support loop.index0', function() {
+          equal('{% ' + block + ' i in [7,3,6] %}{{ loop.index0 }}{% ' + end + ' %}', '012');
+        });
+        it('should support loop.revindex', function() {
+          equal('{% ' + block + ' i in [7,3,6] %}{{ loop.revindex }}{% ' + end + ' %}', '321');
+        });
+        it('should support loop.revindex0', function() {
+          equal('{% ' + block + ' i in [7,3,6] %}{{ loop.revindex0 }}{% ' + end + ' %}', '210');
+        });
+        it('should support loop.first', function() {
+          equal(
+            '{% ' + block + ' i in [7,3,6] %}' +
+            '{% if loop.first %}{{ i }}{% endif %}' +
+            '{% ' + end + ' %}',
+            '7');
+        });
+        it('should support loop.last', function() {
+          equal(
+            '{% ' + block + ' i in [7,3,6] %}' +
+            '{% if loop.last %}{{ i }}{% endif %}' +
+            '{% ' + end + ' %}',
+            '6');
+        });
+        it('should support loop.length', function() {
+          equal('{% ' + block + ' i in [7,3,6] %}{{ loop.length }}{% ' + end + ' %}', '333');
+        });
+        it('should fail silently when looping over an undefined variable', function() {
+          equal('{% ' + block + ' i in foo %}{{ i }}{% ' + end + ' %}', '');
+        });
+        it('should fail silently when looping over an undefined property', function() {
+          equal(
+            '{% ' + block + ' i in foo.bar %}{{ i }}{% ' + end + ' %}',
+            { foo: {} },
+            '');
+        });
+        // TODO: this behavior differs from jinja2
+        it('should fail silently when looping over a null variable', function() {
+          equal(
+            '{% ' + block + ' i in foo %}{{ i }}{% ' + end + ' %}',
+            { foo: null },
+            '');
+        });
+        it('should loop over two-dimensional arrays', function() {
+          equal('{% ' + block + ' x, y in points %}[{{ x }},{{ y }}]{% ' + end + ' %}',
+            { points: [[1, 2], [3, 4], [5, 6]] },
+            '[1,2][3,4][5,6]');
+        });
+        it('should loop over four-dimensional arrays', function() {
+          equal(
+            '{% ' + block + ' a, b, c, d in arr %}[{{ a }},{{ b }},{{ c }},{{ d }}]{% ' + end + '%}',
+            { arr: [[1, 2, 3, 4], [5, 6, 7, 8]] },
+            '[1,2,3,4][5,6,7,8]');
+        });
+        it('should support loop.index with two-dimensional loops', function() {
+          equal('{% ' + block + ' x, y in points %}{{ loop.index }}{% ' + end + ' %}',
+            {
+              points: [[1, 2], [3, 4], [5, 6]]
+            },
+            '123');
+        });
+        it('should support loop.revindex with two-dimensional loops', function() {
+          equal('{% ' + block + ' x, y in points %}{{ loop.revindex }}{% ' + end + ' %}',
+            {
+              points: [[1, 2], [3, 4], [5, 6]]
+            },
+            '321');
+        });
+        it('should support key-value looping over an Object variable', function() {
+          equal('{% ' + block + ' k, v in items %}({{ k }},{{ v }}){% ' + end + ' %}',
+            {
+              items: {
+                foo: 1,
+                bar: 2
+              }
+            },
+            '(foo,1)(bar,2)');
+        });
+        it('should support loop.index when looping over an Object\'s key-value pairs', function() {
+          equal('{% ' + block + ' k, v in items %}{{ loop.index }}{% ' + end + ' %}',
+            {
+              items: {
+                foo: 1,
+                bar: 2
+              }
+            },
+            '12');
+        });
+        it('should support loop.revindex when looping over an Object\'s key-value pairs', function() {
+          equal('{% ' + block + ' k, v in items %}{{ loop.revindex }}{% ' + end + ' %}',
+            {
+              items: {
+                foo: 1,
+                bar: 2
+              }
+            },
+            '21');
+        });
+        it('should support loop.length when looping over an Object\'s key-value pairs', function() {
+          equal('{% ' + block + ' k, v in items %}{{ loop.length }}{% ' + end + ' %}',
+            {
+              items: {
+                foo: 1,
+                bar: 2
+              }
+            },
+            '22');
+        });
+        it('should support include tags in the body of the loop', function() {
+          equal('{% ' + block + ' item, v in items %}{% include "item.njk" %}{% ' + end + ' %}',
+            {
+              items: {
+                foo: 1,
+                bar: 2
+              }
+            },
+            'showing fooshowing bar');
+        });
+        it('should work with {% set %} and {% include %} tags', function() {
+          equal(
+            '{% set item = passed_var %}' +
+            '{% include "item.njk" %}\n' +
+            '{% ' + block + ' i in passed_iter %}' +
+            '{% set item = i %}' +
+            '{% include "item.njk" %}\n' +
+            '{% ' + end + ' %}',
+            {
+              passed_var: 'test',
+              passed_iter: ['1', '2', '3']
+            },
+            'showing test\nshowing 1\nshowing 2\nshowing 3\n');
+        });
+      });
     }
 
-    it('should compile for blocks', function(done) {
-      runLoopTests('for', 'endfor');
-      finish(done);
-    });
+    runLoopTests('for');
+    runLoopTests('asyncEach');
+    runLoopTests('asyncAll');
 
     it('should allow overriding var with none inside nested scope', function(done) {
       equal(
@@ -446,16 +488,6 @@
         '{% for i in [1] %}{% set var = none %}{{ var }}{% endfor %}',
         '');
 
-      finish(done);
-    });
-
-    it('should compile asyncEach', function(done) {
-      runLoopTests('asyncEach', 'endeach');
-      finish(done);
-    });
-
-    it('should compile asyncAll', function(done) {
-      runLoopTests('asyncAll', 'endall');
       finish(done);
     });
 
