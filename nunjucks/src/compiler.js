@@ -67,13 +67,13 @@ class Compiler extends Obj {
     lines.forEach((line) => this._emitLine(line));
   }
 
-  _emitFuncBegin(name) {
+  _emitFuncBegin(node, name) {
     this.buffer = 'output';
     this._scopeClosers = '';
-    this._emitLine('function ' + name + '(env, context, frame, runtime, cb) {');
-    this._emitLine('var lineno = null;');
-    this._emitLine('var colno = null;');
-    this._emitLine('var ' + this.buffer + ' = "";');
+    this._emitLine(`function ${name}(env, context, frame, runtime, cb) {`);
+    this._emitLine(`var lineno = ${node.lineno};`);
+    this._emitLine(`var colno = ${node.colno};`);
+    this._emitLine(`var ${this.buffer} = "";`);
     this._emitLine('try {');
   }
 
@@ -1123,7 +1123,7 @@ class Compiler extends Obj {
 
     frame = new Frame();
 
-    this._emitFuncBegin('root');
+    this._emitFuncBegin(node, 'root');
     this._emitLine('var parentTemplate = null;');
     this._compileChildren(node, frame);
     this._emitLine('if(parentTemplate) {');
@@ -1147,7 +1147,7 @@ class Compiler extends Obj {
       }
       blockNames.push(name);
 
-      this._emitFuncBegin(`b_${name}`);
+      this._emitFuncBegin(block, `b_${name}`);
 
       const tmpFrame = new Frame();
       this._emitLine('var frame = frame.push(true);');
