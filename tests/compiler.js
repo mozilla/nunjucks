@@ -674,13 +674,27 @@
       finish(done);
     });
 
-    it('should compile operators', function(done) {
+    it('should compile basic arithmetic operators', function() {
       equal('{{ 3 + 4 - 5 * 6 / 10 }}', '4');
-      equal('{{ 4**5 }}', '1024');
-      equal('{{ 9//5 }}', '1');
-      equal('{{ 9%5 }}', '4');
-      equal('{{ -5 }}', '-5');
+    });
 
+    it('should compile the exponentiation (**) operator', function() {
+      equal('{{ 4**5 }}', '1024');
+    });
+
+    it('should compile the integer division (//) operator', function() {
+      equal('{{ 9//5 }}', '1');
+    });
+
+    it('should compile the modulus operator', function() {
+      equal('{{ 9%5 }}', '4');
+    });
+
+    it('should compile numeric negation operator', function() {
+      equal('{{ -5 }}', '-5');
+    });
+
+    it('should compile comparison operators', function() {
       equal('{% if 3 < 4 %}yes{% endif %}', 'yes');
       equal('{% if 3 > 4 %}yes{% endif %}', '');
       equal('{% if 9 >= 10 %}yes{% endif %}', '');
@@ -706,12 +720,16 @@
           bar: 15
         },
         'yes');
+    });
 
+    it('should compile python-style ternary operators', function() {
       equal('{{ "yes" if 1 is odd else "no"  }}', 'yes');
       equal('{{ "yes" if 2 is even else "no"  }}', 'yes');
       equal('{{ "yes" if 2 is odd else "no"  }}', 'no');
       equal('{{ "yes" if 1 is even else "no"  }}', 'no');
+    });
 
+    it('should compile the "in" operator for Arrays', function() {
       equal('{% if 1 in [1, 2] %}yes{% endif %}', 'yes');
       equal('{% if 1 in [2, 3] %}yes{% endif %}', '');
       equal('{% if 1 not in [1, 2] %}yes{% endif %}', '');
@@ -719,14 +737,22 @@
       equal('{% if "a" in vals %}yes{% endif %}',
         { vals: ['a', 'b'] },
         'yes');
+    });
+
+    it('should compile the "in" operator for objects', function() {
       equal('{% if "a" in obj %}yes{% endif %}',
         { obj: { a: true } },
         'yes');
       equal('{% if "a" in obj %}yes{% endif %}',
         { obj: { b: true } },
         '');
-      equal('{% if "foo" in "foobar" %}yes{% endif %}', 'yes');
+    });
 
+    it('should compile the "in" operator for strings', function() {
+      equal('{% if "foo" in "foobar" %}yes{% endif %}', 'yes');
+    });
+
+    it('should throw an error when using the "in" operator on unexpected types', function(done) {
       render(
         '{% if "a" in 1 %}yes{% endif %}',
         {},

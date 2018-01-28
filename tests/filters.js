@@ -223,15 +223,22 @@
       finish(done);
     });
 
-    it('float/int', function(done) {
+    it('float', function() {
       equal('{{ "3.5" | float }}', '3.5');
+      equal('{{ "0" | float }}', '0');
+    });
+
+    it('int', function() {
       equal('{{ "3.5" | int }}', '3');
       equal('{{ "0" | int }}', '0');
-      equal('{{ "0" | float }}', '0');
-      equal('{{ "bob" | int("cat") }}', 'cat');
-      equal('{{ "bob" | float("cat") }}', 'cat');
+    });
 
-      finish(done);
+    it('int (default value)', function() {
+      equal('{{ "bob" | int("cat") }}', 'cat');
+    });
+
+    it('float (default value)', function() {
+      equal('{{ "bob" | float("cat") }}', 'cat');
     });
 
     it('groupby', function(done) {
