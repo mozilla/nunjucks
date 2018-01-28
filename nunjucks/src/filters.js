@@ -14,6 +14,10 @@ function normalize(value, defaultValue) {
 
 exports.abs = Math.abs;
 
+function isNaN(num) {
+  return num !== num; // eslint-disable-line no-self-compare
+}
+
 function batch(arr, linecount, fillWith) {
   var i;
   var res = [];
@@ -210,7 +214,7 @@ function lengthFilter(val) {
     }
     if (lib.isObject(value) && !(value instanceof r.SafeString)) {
       // Objects (besides SafeStrings), non-primative Arrays
-      return Object.keys(value).length;
+      return lib.keys(value).length;
     }
     return value.length;
   }
@@ -223,8 +227,8 @@ function list(val) {
   if (lib.isString(val)) {
     return val.split('');
   } else if (lib.isObject(val)) {
-    return Object.entries(val || {}).map(([key, value]) => ({key, value}));
-  } else if (Array.isArray(val)) {
+    return lib._entries(val || {}).map(([key, value]) => ({key, value}));
+  } else if (lib.isArray(val)) {
     return val;
   } else {
     throw new lib.TemplateError('list filter: type not iterable');
@@ -340,7 +344,14 @@ function replace(str, old, new_, maxCount) {
 exports.replace = replace;
 
 function reverse(val) {
-  var arr = Array.from(val);
+  var arr;
+  if (lib.isString(val)) {
+    arr = list(val);
+  } else {
+    // Copy it
+    arr = lib.map(val, v => v);
+  }
+
   arr.reverse();
 
   if (lib.isString(val)) {
@@ -408,7 +419,7 @@ exports.sort = r.makeMacro(
   ['value', 'reverse', 'case_sensitive', 'attribute'], [],
   (arr, reversed, caseSens, attr) => {
     // Copy it
-    let array = Array.from(arr);
+    let array = lib.map(arr, v => v);
 
     array.sort((a, b) => {
       let x = (attr) ? a[attr] : a;
@@ -508,7 +519,7 @@ function urlencode(obj) {
   if (lib.isString(obj)) {
     return enc(obj);
   } else {
-    let keyvals = (Array.isArray(obj)) ? obj : Object.entries(obj);
+    let keyvals = (lib.isArray(obj)) ? obj : lib._entries(obj);
     return keyvals.map(([k, v]) => `${enc(k)}=${enc(v)}`).join('&');
   }
 }
@@ -525,7 +536,7 @@ const wwwRe = /^www\./;
 const tldRe = /\.(?:org|net|com)(?:\:|\/|$)/;
 
 function urlize(str, length, nofollow) {
-  if (Number.isNaN(length)) {
+  if (isNaN(length)) {
     length = Infinity;
   }
 
@@ -578,14 +589,14 @@ exports.wordcount = wordcount;
 
 function float(val, def) {
   var res = parseFloat(val);
-  return Number.isNaN(res) ? def : res;
+  return (isNaN(res)) ? def : res;
 }
 
 exports.float = float;
 
 function int(val, def) {
   var res = parseInt(val, 10);
-  return Number.isNaN(res) ? def : res;
+  return (isNaN(res)) ? def : res;
 }
 
 exports.int = int;

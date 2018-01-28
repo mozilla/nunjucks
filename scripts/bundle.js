@@ -9,6 +9,7 @@ var path = require('path');
 var webpack = require('webpack');
 var pjson = require('../package.json');
 var promiseSequence = require('./lib/utils').promiseSequence;
+var UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 var TEST_ENV = (process.env.NODE_ENV === 'test');
 
 var destDir = path.resolve(path.join(
@@ -38,7 +39,8 @@ function runWebpack(opts) {
           }
         },
         node: {
-          process: false
+          process: false,
+          setImmediate: false
         },
         module: {
           rules: [{
@@ -71,14 +73,28 @@ function runWebpack(opts) {
         plugins: [
           new webpack.BannerPlugin(
             'Browser bundle of nunjucks ' + pjson.version + ' ' + type
-          )
+          ),
+          new webpack.DefinePlugin({
+            'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'production'),
+            'process.env.BUILD_TYPE': JSON.stringify((opts.slim) ? 'SLIM' : 'STD'),
+          }),
         ]
       };
 
       if (opts.min) {
         config.plugins.push(
-          new webpack.optimize.UglifyJsPlugin({
-            sourceMap: true
+          new UglifyJsPlugin({
+            sourceMap: true,
+            uglifyOptions: {
+              mangle: {
+                properties: {
+                  regex: /^_[^_]/
+                }
+              },
+              compress: {
+                unsafe: true
+              }
+            }
           })
         );
       }
@@ -97,13 +113,14 @@ function runWebpack(opts) {
 }
 
 var runConfigs = [
-  {slim: false},
-  {slim: true}
+  {min: true, slim: false},
+  {min: true, slim: true}
 ];
 
 if (!TEST_ENV) {
-  runConfigs.push({min: true, slim: false});
-  runConfigs.push({min: true, slim: true});
+  runConfigs.unshift(
+    {min: false, slim: false},
+    {min: false, slim: true});
 }
 
 var promises = runConfigs.map(function(opts) {

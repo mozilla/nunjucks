@@ -2,7 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const {prettifyError} = require('./lib');
+const {_prettifyError} = require('./lib');
 const compiler = require('./compiler');
 const {Environment} = require('./environment');
 const precompileGlobal = require('./precompile-global');
@@ -119,7 +119,7 @@ function _precompile(str, name, env) {
       name,
       env.opts);
   } catch (err) {
-    throw prettifyError(name, false, err);
+    throw _prettifyError(name, false, err);
   }
 
   return {

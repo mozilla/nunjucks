@@ -89,7 +89,7 @@ class Tokenizer {
         return null;
       } else if (cur === '"' || cur === '\'') {
         // We've hit a string
-        return token(TOKEN_STRING, this.parseString(cur), lineno, colno);
+        return token(TOKEN_STRING, this._parseString(cur), lineno, colno);
       } else if ((tok = this._extract(whitespaceChars))) {
         // We hit some whitespace
         return token(TOKEN_WHITESPACE, tok, lineno, colno);
@@ -330,7 +330,7 @@ class Tokenizer {
     }
   }
 
-  parseString(delimiter) {
+  _parseString(delimiter) {
     this.forward();
 
     let str = '';

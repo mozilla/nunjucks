@@ -1,6 +1,7 @@
 'use strict';
 
 // A simple class system, more documentation to come
+const lib = require('./lib');
 
 function parentWrap(parent, prop) {
   if (typeof parent !== 'function' || typeof prop !== 'function') {
@@ -22,7 +23,7 @@ function parentWrap(parent, prop) {
 function extendClass(cls, name, props) {
   props = props || {};
 
-  Object.keys(props).forEach(k => {
+  lib.keys(props).forEach(k => {
     props[k] = parentWrap(cls.prototype[k], props[k]);
   });
 
@@ -32,7 +33,7 @@ function extendClass(cls, name, props) {
     }
   }
 
-  Object.assign(subclass.prototype, props);
+  lib._assign(subclass.prototype, props);
 
   return subclass;
 }

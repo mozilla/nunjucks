@@ -15,11 +15,17 @@ var escapeRegex = /[&"'<>]/g;
 
 var exports = module.exports = {};
 
+function hasOwnProp(obj, k) {
+  return ObjProto.hasOwnProperty.call(obj, k);
+}
+
+exports.hasOwnProp = hasOwnProp;
+
 function lookupEscape(ch) {
   return escapeMap[ch];
 }
 
-function prettifyError(path, withInternals, err) {
+function _prettifyError(path, withInternals, err) {
   if (!err.Update) {
     // not one of ours, cast it
     err = new exports.TemplateError(err);
@@ -36,7 +42,7 @@ function prettifyError(path, withInternals, err) {
   return err;
 }
 
-exports.prettifyError = prettifyError;
+exports._prettifyError = _prettifyError;
 
 function TemplateError(message, lineno, colno) {
   var err;
@@ -143,9 +149,11 @@ function isFunction(obj) {
 
 exports.isFunction = isFunction;
 
-exports.isArray = Array.isArray || function isArray(obj) {
+function isArray(obj) {
   return ObjProto.toString.call(obj) === '[object Array]';
-};
+}
+
+exports.isArray = isArray;
 
 function isString(obj) {
   return ObjProto.toString.call(obj) === '[object String]';
@@ -196,8 +204,6 @@ function without(array) {
 }
 
 exports.without = without;
-
-exports.extend = Object.assign;
 
 function repeat(char_, n) {
   var str = '';
@@ -267,7 +273,7 @@ function asyncIter(arr, iter, cb) {
 exports.asyncIter = asyncIter;
 
 function asyncFor(obj, iter, cb) {
-  const keys = Object.keys(obj || {});
+  const keys = keys_(obj || {});
   const len = keys.length;
   let i = -1;
 
@@ -288,20 +294,51 @@ function asyncFor(obj, iter, cb) {
 exports.asyncFor = asyncFor;
 
 function indexOf(arr, searchElement, fromIndex) {
-  return Array.prototype.indexOf.call(arr, searchElement, fromIndex);
+  return Array.prototype.indexOf.call(arr || [], searchElement, fromIndex);
 }
 
 exports.indexOf = indexOf;
 
-exports.keys = Object.keys;
+function keys_(obj) {
+  /* eslint-disable no-restricted-syntax */
+  const arr = [];
+  for (let k in obj) {
+    if (hasOwnProp(obj, k)) {
+      arr.push(k);
+    }
+  }
+  return arr;
+}
+
+exports.keys = keys_;
+
+function _entries(obj) {
+  return keys_(obj).map((k) => [k, obj[k]]);
+}
+
+exports._entries = _entries;
+
+function _values(obj) {
+  return keys_(obj).map((k) => obj[k]);
+}
+
+exports._values = _values;
+
+function extend(obj1, obj2) {
+  obj1 = obj1 || {};
+  keys_(obj2).forEach(k => {
+    obj1[k] = obj2[k];
+  });
+  return obj1;
+}
+
+exports._assign = exports.extend = extend;
 
 function inOperator(key, val) {
-  if (exports.isArray(val)) {
-    return exports.indexOf(val, key) !== -1;
-  } else if (exports.isObject(val)) {
-    return key in val;
-  } else if (exports.isString(val)) {
+  if (isArray(val) || isString(val)) {
     return val.indexOf(key) !== -1;
+  } else if (isObject(val)) {
+    return key in val;
   }
   throw new Error('Cannot use "in" operator to search for "'
     + key + '" in unexpected types.');

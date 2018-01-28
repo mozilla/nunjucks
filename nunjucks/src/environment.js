@@ -91,8 +91,8 @@ class Environment extends Obj {
     this.extensions = {};
     this.extensionsList = [];
 
-    Object.entries(filters).forEach(([name, filter]) => this.addFilter(name, filter));
-    Object.entries(tests).forEach(([name, test]) => this.addTest(name, test));
+    lib._entries(filters).forEach(([name, filter]) => this.addFilter(name, filter));
+    lib._entries(tests).forEach(([name, test]) => this.addTest(name, test));
   }
 
   initCache() {
@@ -108,7 +108,7 @@ class Environment extends Obj {
   }
 
   addExtension(name, extension) {
-    extension._name = name;
+    extension.__name = name;
     this.extensions[name] = extension;
     this.extensionsList.push(extension);
     return this;
@@ -202,9 +202,13 @@ class Environment extends Obj {
     } else if (typeof name !== 'string') {
       throw new Error('template names must be a string: ' + name);
     } else {
-      tmpl = this.loaders.find((loader) => {
-        return loader.cache[this.resolveTemplate(loader, parentName, name)];
-      });
+      for (let i = 0; i < this.loaders.length; i++) {
+        const loader = this.loaders[i];
+        tmpl = loader.cache[this.resolveTemplate(loader, parentName, name)];
+        if (tmpl) {
+          break;
+        }
+      }
     }
 
     if (tmpl) {
@@ -319,12 +323,14 @@ class Context extends Obj {
     this.env = env || new Environment();
 
     // Make a duplicate of ctx
-    this.ctx = Object.assign({}, ctx);
+    this.ctx = lib.extend({}, ctx);
 
     this.blocks = {};
     this.exported = [];
 
-    Object.entries(blocks).forEach(([name, block]) => this.addBlock(name, block));
+    lib.keys(blocks).forEach(name => {
+      this.addBlock(name, blocks[name]);
+    });
   }
 
   lookup(name) {
@@ -412,7 +418,7 @@ class Template extends Obj {
       try {
         this._compile();
       } catch (err) {
-        throw lib.prettifyError(this.path, this.env.opts.dev, err);
+        throw lib._prettifyError(this.path, this.env.opts.dev, err);
       }
     } else {
       this.compiled = false;
@@ -438,7 +444,7 @@ class Template extends Obj {
     try {
       this.compile();
     } catch (e) {
-      const err = lib.prettifyError(this.path, this.env.opts.dev, e);
+      const err = lib._prettifyError(this.path, this.env.opts.dev, e);
       if (cb) {
         return callbackAsap(cb, err);
       } else {
@@ -458,7 +464,7 @@ class Template extends Obj {
         return;
       }
       if (err) {
-        err = lib.prettifyError(this.path, this.env.opts.dev, err);
+        err = lib._prettifyError(this.path, this.env.opts.dev, err);
         didError = true;
       }
 
@@ -546,7 +552,7 @@ class Template extends Obj {
   _getBlocks(props) {
     var blocks = {};
 
-    Object.keys(props).forEach((k) => {
+    lib.keys(props).forEach((k) => {
       if (k.slice(0, 2) === 'b_') {
         blocks[k.slice(2)] = props[k];
       }

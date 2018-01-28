@@ -60,7 +60,7 @@ function installCompat() {
     };
   }
 
-  if (nodes && Compiler && Parser) { // i.e., not slim mode
+  if (process.env.BUILD_TYPE !== 'SLIM' && nodes && Compiler && Parser) { // i.e., not slim mode
     const Slice = nodes.Node.extend('Slice', {
       fields: ['start', 'stop', 'step'],
       init(lineno, colno, start, stop, step) {
@@ -78,13 +78,13 @@ function installCompat() {
       orig_Compiler_assertType.apply(this, arguments);
     };
     Compiler.prototype.compileSlice = function compileSlice(node, frame) {
-      this.emit('(');
+      this._emit('(');
       this._compileExpression(node.start, frame);
-      this.emit('),(');
+      this._emit('),(');
       this._compileExpression(node.stop, frame);
-      this.emit('),(');
+      this._emit('),(');
       this._compileExpression(node.step, frame);
-      this.emit(')');
+      this._emit(')');
     };
 
     Parser.prototype.parseAggregate = function parseAggregate() {
@@ -97,12 +97,12 @@ function installCompat() {
       } catch (e) {
         const errState = getTokensState(this.tokens);
         const rethrow = () => {
-          lib.extend(this.tokens, errState);
+          lib._assign(this.tokens, errState);
           return e;
         };
 
         // Reset to state before original parseAggregate called
-        lib.extend(this.tokens, origState);
+        lib._assign(this.tokens, origState);
         this.peeked = false;
 
         const tok = this.peekToken();
@@ -227,13 +227,13 @@ function installCompat() {
   };
   const OBJECT_MEMBERS = {
     items() {
-      return Object.entries(this);
+      return lib._entries(this);
     },
     values() {
-      return Object.values(this);
+      return lib._values(this);
     },
     keys() {
-      return Object.keys(this);
+      return lib.keys(this);
     },
     get(key, def) {
       var output = this[key];
@@ -257,7 +257,7 @@ function installCompat() {
       return output;
     },
     popitem() {
-      const keys = Object.keys(this);
+      const keys = lib.keys(this);
       if (!keys.length) {
         throw new Error('KeyError');
       }
@@ -273,7 +273,7 @@ function installCompat() {
       return this[key];
     },
     update(kwargs) {
-      Object.assign(this, kwargs);
+      lib._assign(this, kwargs);
       return null; // Always returns None
     }
   };

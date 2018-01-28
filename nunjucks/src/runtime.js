@@ -332,7 +332,7 @@ function asyncAll(arr, dimen, func, cb) {
       }
     }
   } else {
-    const keys = Object.keys(arr || {});
+    const keys = lib.keys(arr || {});
     len = keys.length;
     outputArr = new Array(len);
 
@@ -348,7 +348,7 @@ function asyncAll(arr, dimen, func, cb) {
 }
 
 function fromIterator(arr) {
-  if (arr == null || lib.isArray(arr)) {
+  if (typeof arr !== 'object' || arr === null || lib.isArray(arr)) {
     return arr;
   } else if (supportsIterators && Symbol.iterator in arr) {
     return arrayFrom(arr);
