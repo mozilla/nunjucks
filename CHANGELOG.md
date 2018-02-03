@@ -11,7 +11,7 @@ master (unreleased)
 * Support objects created with Object.create(null). fixes [#468](https://github.com/mozilla/nunjucks/issues/468)
 
 * Support ESNext iterators, using Array.from. Merge of
-  [#760](https://github.com/mozilla/nunjucks/pull/760)
+  [#1058](https://github.com/mozilla/nunjucks/pull/1058)
 
 3.0.1 (May 24 2017)
 -------------------
