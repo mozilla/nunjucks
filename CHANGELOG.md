@@ -10,6 +10,7 @@ master (unreleased)
 
 * Support objects created with Object.create(null). fixes [#468](https://github.com/mozilla/nunjucks/issues/468)
 
+* Fix non-inclusive language in documenation [#1063](https://github.com/mozilla/nunjucks/pull/1063)
 
 3.0.1 (May 24 2017)
 -------------------
