@@ -926,8 +926,9 @@ Return a list of lists with the given number of items:
 
 ```jinja
 {% set items = [1,2,3,4,5,6] %}
+{% set dash = joiner("-") %}
 {% for item in items | batch(2) %}
-    -{% for items in item %}
+    {{ dash() }} {% for items in item %}
        {{ items }}
     {% endfor %}
 {% endfor %}
