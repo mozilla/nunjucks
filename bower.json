@@ -1,6 +1,6 @@
 {
   "name": "nunjucks",
-  "main": "browser/nunjucks.min.js",
+  "main": "browser/nunjucks.js",
   "ignore": [
     "Makefile",
     "package.json",
