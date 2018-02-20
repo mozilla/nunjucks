@@ -2,8 +2,11 @@ Changelog
 =========
 
 
-master (unreleased)
+3.1.0 (Feb 19 2018)
 -------------------
+
+* Support nunjucks.installJinjaCompat() with slim build. Fixes
+  [#1019](https://github.com/mozilla/nunjucks/issues/1019)
 
 * Fix calling render callback twice when a conditional import throws an error.
   Solves [#1029](https://github.com/mozilla/nunjucks/issues/1029)
