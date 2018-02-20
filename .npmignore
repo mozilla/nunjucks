@@ -1,5 +1,8 @@
 node_modules
 coverage
+.nyc_output
 docs
 tests
 bench
+nunjucks
+scripts

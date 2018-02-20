@@ -7,8 +7,8 @@
 
   if (typeof require !== 'undefined') {
     expect = require('expect.js');
-    precompile = require('../src/precompile').precompile;
-    precompileString = require('../src/precompile').precompileString;
+    precompile = require('../nunjucks/src/precompile').precompile;
+    precompileString = require('../nunjucks/src/precompile').precompileString;
   } else {
     expect = window.expect;
     precompile = nunjucks.precompile;
@@ -50,4 +50,4 @@
       });
     });
   });
-})();
+}());

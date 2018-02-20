@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Mocha Tests (slim)</title>
+  <link rel="stylesheet" href="../../node_modules/mocha/mocha.css" />
+</head>
+<body>
+  <div id="mocha"></div>
+
+  <script src="../../node_modules/expect.js/index.js"></script>
+  <script src="../../node_modules/mocha/mocha.js"></script>
+  <script>
+    delete window.require;
+    typeof initMochaPhantomJS === 'function' && initMochaPhantomJS();
+    mocha.setup({
+      ui: 'bdd',
+      timeout: 10000
+    });
+  </script>
+
+  <!-- Load full nunjucks lib as window.nunjucksFull, so tests can run -->
+  <script src="nunjucks.min.js"></script>
+  <script type="text/javascript">
+    window.nunjucksFull = window.nunjucks;
+    window.nunjucks = undefined;
+  </script>
+  <script src="nunjucks-slim.min.js"></script>
+  <script src="../util.js"></script>
+  <script src="precompiled-templates.js"></script>
+  <script>
+    // Prefix all test suite titles with 'slim'
+    (function(originalDescribe) {
+      window.describe = window.suite = function describe(title, fn) {
+        originalDescribe('slim ' + title, fn);
+      };
+    })(window.describe || window.suite);
+
+    // Reset window.nunjucksPrecompiled so that it doesn't leak between tests
+    (function(precompiled) {
+      beforeEach(function(done) {
+        window.nunjucksPrecompiled = precompiled;
+        done();
+      });
+      afterEach(function(done) {
+        window.nunjucksPrecompiled = precompiled;
+        done();
+      });
+    })(window.nunjucksPrecompiled);
+  </script>
+
+  <script src="../compiler.js"></script>
+  <script src="../runtime.js"></script>
+  <script src="../filters.js"></script>
+  <script src="../globals.js"></script>
+  <script src="../jinja-compat.js"></script>
+  <script src="../tests.js"></script>
+
+  <script>
+    nunjucks.testing = true;
+    mocha.checkLeaks();
+    mocha.run();
+  </script>
+</body>
+</html>

@@ -1,16 +1,19 @@
 (function() {
   'use strict';
 
-  var expect,
-    util,
-    lib,
-    r;
+  var expect;
+  var util;
+  var lib;
+  var r;
+  var render;
+  var equal;
+  var finish;
 
   if (typeof require !== 'undefined') {
     expect = require('expect.js');
     util = require('./util');
-    lib = require('../src/lib');
-    r = require('../src/runtime');
+    lib = require('../nunjucks/src/lib');
+    r = require('../nunjucks/src/runtime');
   } else {
     expect = window.expect;
     util = window.util;
@@ -18,12 +21,11 @@
     r = nunjucks.runtime;
   }
 
-  var render = util.render;
-  var equal = util.equal;
-  var finish = util.finish;
+  render = util.render;
+  equal = util.equal;
+  finish = util.finish;
 
   describe('filter', function() {
-
     it('abs', function(done) {
       equal('{{ -3|abs }}', '3');
       equal('{{ -3.456|abs }}', '3.456');
@@ -93,7 +95,7 @@
       finish(done);
     });
 
-    it('dump', function(done) {
+    it('dump', function() {
       equal('{{ [\'a\', 1, {b: true}] | dump  }}',
         '[&quot;a&quot;,1,{&quot;b&quot;:true}]');
       equal('{{ [\'a\', 1, {b: true}] | dump(2) }}',
@@ -102,89 +104,69 @@
         '[\n    &quot;a&quot;,\n    1,\n    {\n        &quot;b&quot;: true\n    }\n]');
       equal('{{ [\'a\', 1, {b: true}] | dump(\'\t\') }}',
         '[\n\t&quot;a&quot;,\n\t1,\n\t{\n\t\t&quot;b&quot;: true\n\t}\n]');
-      finish(done);
     });
 
-    it('escape', function(done) {
-      var res = render('{{ "<html>" | escape }}', {}, {
-        autoescape: false
-      });
-      expect(res).to.be('&lt;html&gt;');
-      finish(done);
+    it('escape', function() {
+      equal(
+        '{{ "<html>" | escape }}', {},
+        { autoescape: false },
+        '&lt;html&gt;');
     });
 
-    it('escape skip safe', function(done) {
-      var res = render('{{ "<html>" | safe | escape }}', {}, {
-        autoescape: false
-      });
-      expect(res).to.be('<html>');
-      finish(done);
+    it('escape skip safe', function() {
+      equal('{{ "<html>" | safe | escape }}', {},
+        { autoescape: false },
+        '<html>');
     });
 
-    it('should not double escape strings', function(done) {
-      var res = render('{{ "<html>" | escape | escape }}', {}, {
-        autoescape: false
-      });
-      expect(res).to.be('&lt;html&gt;');
-      finish(done);
+    it('should not double escape strings', function() {
+      equal('{{ "<html>" | escape | escape }}', {},
+        { autoescape: false },
+        '&lt;html&gt;');
     });
 
-    it('should not double escape with autoescape on', function(done) {
-      var res = render('{% set val = "<html>" | escape %}{{ val }}', {}, {
-        autoescape: true
-      });
-      expect(res).to.be('&lt;html&gt;');
-      finish(done);
+    it('should not double escape with autoescape on', function() {
+      equal('{% set val = "<html>" | escape %}{{ val }}', {},
+        { autoescape: true },
+        '&lt;html&gt;');
     });
 
-    it('should work with non-string values', function(done) {
-      var res1 = render('{{ foo | escape }}', {
-        foo: ['<html>']
-      }, {
-        autoescape: false
-      });
-      expect(res1).to.be('&lt;html&gt;');
+    it('should work with non-string values', function() {
+      equal(
+        '{{ foo | escape }}',
+        { foo: ['<html>'] },
+        { autoescape: false },
+        '&lt;html&gt;');
 
-      var res2 = render('{{ foo | escape }}', {
-        foo: {
-          toString: function() {
-            return '<html>';
-          }
-        }
-      }, {
-        autoescape: false
-      });
-      expect(res2).to.be('&lt;html&gt;');
+      equal(
+        '{{ foo | escape }}',
+        { foo: { toString: function() { return '<html>'; } } },
+        { autoescape: false },
+        '&lt;html&gt;');
 
-      var res3 = render('{{ foo | escape }}', {
-        foo: null
-      }, {
-        autoescape: false
-      });
-      expect(res3).to.be('');
-
-      finish(done);
+      equal('{{ foo | escape }}',
+        { foo: null },
+        { autoescape: false },
+        '');
     });
 
-    it('should not escape safe strings with autoescape on', function(done) {
-      var res1 = render('{{ "<html>" | safe | escape }}', {}, {
-        autoescape: true
-      });
-      expect(res1).to.be('<html>');
+    it('should not escape safe strings with autoescape on', function() {
+      equal(
+        '{{ "<html>" | safe | escape }}', {},
+        { autoescape: true },
+        '<html>');
 
-      var res2 = render('{% set val = "<html>" | safe | e %}{{ val }}', {}, {
-        autoescape: true
-      });
-      expect(res2).to.be('<html>');
-      finish(done);
+      equal(
+        '{% set val = "<html>" | safe | e %}{{ val }}', {},
+        { autoescape: true },
+        '<html>');
     });
 
-    it('should keep strings escaped after they have been escaped', function(done) {
-      var res = render('{% set val = "<html>" | e | safe %}{{ val }}', {}, {
-        autoescape: false
-      });
-      expect(res).to.be('&lt;html&gt;');
-      finish(done);
+    it('should keep strings escaped after they have been escaped', function() {
+      equal(
+        '{% set val = "<html>" | e | safe %}{{ val }}', {},
+        { autoescape: false },
+        '&lt;html&gt;');
     });
 
     it('dictsort', function(done) {
@@ -199,12 +181,12 @@
         '{{ item[0] }}{% endfor %}',
         {
           items: {
-            'e': 1,
-            'd': 2,
-            'c': 3,
-            'a': 4,
-            'f': 5,
-            'b': 6
+            e: 1,
+            d: 2,
+            c: 3,
+            a: 4,
+            f: 5,
+            b: 6
           }
         },
         'abcdef');
@@ -213,10 +195,10 @@
       equal(
         '{% for item in items | dictsort(true) %}{{ item[0] }},{% endfor %}', {
           items: {
-            'ABC': 6,
-            'ABc': 5,
-            'Abc': 1,
-            'abc': 2
+            ABC: 6,
+            ABc: 5,
+            Abc: 1,
+            abc: 2
           }
         },
         'ABC,ABc,Abc,abc,');
@@ -225,10 +207,10 @@
       equal(
         '{% for item in items | dictsort(false, "value") %}{{ item[0] }}{% endfor %}', {
           items: {
-            'a': 6,
-            'b': 5,
-            'c': 1,
-            'd': 2
+            a: 6,
+            b: 5,
+            c: 1,
+            d: 2
           }
         },
         'cdba');
@@ -241,15 +223,22 @@
       finish(done);
     });
 
-    it('float/int', function(done) {
+    it('float', function() {
       equal('{{ "3.5" | float }}', '3.5');
+      equal('{{ "0" | float }}', '0');
+    });
+
+    it('int', function() {
       equal('{{ "3.5" | int }}', '3');
       equal('{{ "0" | int }}', '0');
-      equal('{{ "0" | float }}', '0');
-      equal('{{ "bob" | int("cat") }}', 'cat');
-      equal('{{ "bob" | float("cat") }}', 'cat');
+    });
 
-      finish(done);
+    it('int (default value)', function() {
+      equal('{{ "bob" | int("cat") }}', 'cat');
+    });
+
+    it('float (default value)', function() {
+      equal('{{ "bob" | float("cat") }}', 'cat');
     });
 
     it('groupby', function(done) {
@@ -344,70 +333,100 @@
       finish(done);
     });
 
-    it('length', function(done) {
-      equal('{{ [1,2,3] | length }}', '3');
-      equal('{{ blah|length }}', '0');
-      equal('{{ str | length }}', {
-        str: r.markSafe('blah')
-      }, '4');
-      equal('{{ str | length }}', {
-        str: 'blah'
-      }, '4');
-      equal('{{ str | length }}', {
-        str: new String('blah')
-      }, '4');
-      equal('{{ undefined | length }}', '0');
-      equal('{{ null | length }}', '0');
-      equal('{{ nothing | length }}', '0');
-      equal('{{ obj | length }}', {
-        obj: {}
-      }, '0');
-      equal('{{ obj | length }}', {
-        obj: {
-          key: 'value'
-        }
-      }, '1');
-      equal('{{ obj | length }}', {
-        obj: {
-          key: 'value',
-          length: 5
-        }
-      }, '2');
-      equal('{{ obj.length }}', {
-        obj: {
-          key: 'value',
-          length: 5
-        }
-      }, '5');
-      equal('{{ arr | length }}', {
-        arr: [0, 1]
-      }, '2');
-      equal('{{ arr | length }}', {
-        arr: [0,, 2]  // eslint-disable-line
-      }, '3');
-      equal('{{ arr | length }}', {
-        arr: new Array(0, 1)
-      }, '2');
-      var arr = new Array(0, 1);
-      arr.key = 'value';
-      equal('{{ arr | length }}', {
-        arr: arr
-      }, '2');
-      if (typeof Map === 'function') {
-        var map = new Map([['key1', 'value1'], ['key2', 'value2']]);
-        map.set('key3', 'value3');
-        equal('{{ map | length }}', {
-          map: map
-        }, '3');
-      }
-      if (typeof Set === 'function') {
-        var set = new Set(['value1']);
-        set.add('value2');
-        equal('{{ set | length }}', {
-          set: set
+    describe('the length filter', function suite() {
+      it('should return length of a list literal', function test() {
+        equal('{{ [1,2,3] | length }}', '3');
+      });
+      it('should output 0 for a missing context variable', function test() {
+        equal('{{ blah|length }}', '0');
+      });
+      it('should output string length for string variables', function test() {
+        equal('{{ str | length }}', {
+          str: 'blah'
+        }, '4');
+      });
+      it('should output string length for a SafeString variable', function test() {
+        equal('{{ str | length }}', {
+          str: r.markSafe('<blah>')
+        }, '6');
+      });
+      it('should output the correct length of a string created with new String()', function test() {
+        equal('{{ str | length }}', {
+          str: new String('blah') // eslint-disable-line no-new-wrappers
+        }, '4');
+      });
+      it('should output 0 for a literal "undefined"', function test() {
+        equal('{{ undefined | length }}', '0');
+      });
+      it('should output 0 for a literal "null"', function test() {
+        equal('{{ null | length }}', '0');
+      });
+      it('should output 0 for an Object with no properties', function test() {
+        equal('{{ obj | length }}', {
+          obj: {}
+        }, '0');
+      });
+      it('should output 1 for an Object with 1 property', function test() {
+        equal('{{ obj | length }}', {
+          obj: {
+            key: 'value'
+          }
+        }, '1');
+      });
+      it('should output the number of properties for a plain Object, not the value of its length property', function test() {
+        equal('{{ obj | length }}', {
+          obj: {
+            key: 'value',
+            length: 5
+          }
         }, '2');
-      }
-      finish(done);
+      });
+      it('should output the length of an array', function test() {
+        equal('{{ arr | length }}', {
+          arr: [0, 1]
+        }, '2');
+      });
+      it('should output the full length of a sparse array', function test() {
+        equal('{{ arr | length }}', {
+          arr: [0,, 2]  // eslint-disable-line
+        }, '3');
+      });
+      it('should output the length of an array created with "new Array"', function test() {
+        equal('{{ arr | length }}', {
+          arr: new Array(0, 1) // eslint-disable-line no-array-constructor
+        }, '2');
+      });
+      it('should output the length of an array created with "new Array" with user-defined properties', function test() {
+        var arr = new Array(0, 1); // eslint-disable-line no-array-constructor
+        arr.key = 'value';
+        equal('{{ arr | length }}', {
+          arr: arr
+        }, '2');
+      });
+      it('should output the length of a Map', function test() {
+        /* global Map */
+        var map;
+        if (typeof Map === 'undefined') {
+          this.skip();
+        } else {
+          map = new Map([['key1', 'value1'], ['key2', 'value2']]);
+          map.set('key3', 'value3');
+          equal('{{ map | length }}', {
+            map: map
+          }, '3');
+        }
+      });
+      it('should output the length of a Set', function test() {
+        /* global Set */
+        var set;
+        if (typeof Set === 'undefined') {
+          this.skip();
+        } else {
+          set = new Set(['value1']);
+          set.add('value2');
+          equal('{{ set | length }}', { set: set }, '2');
+        }
+      });
     });
 
     it('list', function(done) {
@@ -454,9 +473,10 @@
     });
 
     it('random', function(done) {
-      for (var i = 0; i < 100; i++) {
+      var i;
+      for (i = 0; i < 100; i++) {
         render('{{ [1,2,3,4,5,6,7,8,9] | random }}', function(err, res) {
-          var val = parseInt(res);
+          var val = parseInt(res, 10);
           expect(val).to.be.within(1, 9);
         });
       }
@@ -741,7 +761,7 @@
       }, '1=2&%261=%262');
       equal('{{ obj | urlencode | safe }}', {
         obj: {
-          '1': 2,
+          1: 2,
           '&1': '&2'
         }
       }, '1=2&%261=%262');
@@ -828,14 +848,14 @@
       equal('{{ "testuser@testuser.com" | urlize | safe }}',
         '<a href="mailto:testuser@testuser.com">testuser@testuser.com</a>');
 
-      //periods in the text
+      // periods in the text
       equal('{{ "foo." | urlize }}', 'foo.');
       equal('{{ "foo.foo" | urlize }}', 'foo.foo');
 
-      //markup in the text
+      // markup in the text
       equal('{{ "<b>what up</b>" | urlize | safe }}', '<b>what up</b>');
 
-      //breaklines and tabs in the text
+      // breaklines and tabs in the text
       equal('{{ "what\nup" | urlize | safe }}', 'what\nup');
       equal('{{ "what\tup" | urlize | safe }}', 'what\tup');
 
@@ -844,13 +864,14 @@
 
     it('wordcount', function(done) {
       equal('{{ "foo bar baz" | wordcount }}', '3');
-      equal('{{ str | wordcount }}', {
-        str: r.markSafe('foo bar baz')
-      }, '3');
+      equal(
+        '{{ str | wordcount }}',
+        { str: r.markSafe('foo bar baz') },
+        '3');
       equal('{{ null | wordcount }}', '');
       equal('{{ undefined | wordcount }}', '');
       equal('{{ nothing | wordcount }}', '');
       finish(done);
     });
   });
-})();
+}());

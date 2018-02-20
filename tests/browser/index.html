@@ -3,8 +3,15 @@
 <head>
   <meta charset="utf-8">
   <title>Mocha Tests</title>
-  <link rel="stylesheet" href="mocha.css" />
+  <link rel="stylesheet" href="../../node_modules/mocha/mocha.css" />
   <style type="text/css">
+    body {
+      font: 20px/1.5 "Helvetica Neue", Helvetica, Arial, sans-serif;
+      padding: 60px 50px;
+    }
+    #mocha {
+      margin: 0;
+    }
     div.note {
       font-size: .8em;
       width: 50%;
@@ -25,16 +32,18 @@
 
   <div id="mocha"></div>
 
-  <script src="expect.js"></script>
-  <script src="mocha.js"></script>
+  <script src="../../node_modules/expect.js/index.js"></script>
+  <script src="../../node_modules/mocha/mocha.js"></script>
   <script>
+    delete window.require;
+    typeof initMochaPhantomJS === 'function' && initMochaPhantomJS();
     mocha.setup({
       ui: 'bdd',
       timeout: 10000
     });
   </script>
 
-  <script src="../../browser/nunjucks.js"></script>
+  <script src="nunjucks.min.js"></script>
   <script src="../util.js"></script>
 
   <script src="../api.js"></script>

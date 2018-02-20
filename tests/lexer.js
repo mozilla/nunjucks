@@ -1,14 +1,14 @@
 (function() {
   'use strict';
 
-  var expect,
-    lib,
-    lexer;
+  var expect;
+  var lib;
+  var lexer;
 
   if (typeof require !== 'undefined') {
     expect = require('expect.js');
-    lib = require('../src/lib');
-    lexer = require('../src/lexer');
+    lib = require('../nunjucks/src/lib');
+    lexer = require('../nunjucks/src/lexer');
   } else {
     expect = window.expect;
     lib = nunjucks.lib;
@@ -16,9 +16,12 @@
   }
 
   function _hasTokens(ws, tokens, types) {
-    for (var i = 0; i < types.length; i++) {
-      var type = types[i];
-      var tok = tokens.nextToken();
+    var i;
+    var type;
+    var tok;
+    for (i = 0; i < types.length; i++) {
+      type = types[i];
+      tok = tokens.nextToken();
 
       if (!ws) {
         while (tok && tok.type === lexer.TOKEN_WHITESPACE) {
@@ -35,18 +38,18 @@
     }
   }
 
-  function hasTokens(tokens /*, types */ ) {
+  function hasTokens(tokens /* , types */) {
     return _hasTokens(false, tokens, lib.toArray(arguments).slice(1));
   }
 
-  function hasTokensWithWS(tokens /*, types */ ) {
+  function hasTokensWithWS(tokens /* , types */) {
     return _hasTokens(true, tokens, lib.toArray(arguments).slice(1));
   }
 
   describe('lexer', function() {
-    var tok,
-      tmpl,
-      tokens;
+    var tok;
+    var tmpl;
+    var tokens;
 
     it('should parse template data', function() {
       tok = lexer.lex('3').nextToken();
@@ -200,7 +203,7 @@
         lexer.TOKEN_STRING,
         lexer.TOKEN_REGEX,
         lexer.TOKEN_VARIABLE_END);
-    }),
+    });
 
     it('should parse function calls', function() {
       tokens = lexer.lex('{{ foo(bar) }}');
@@ -277,7 +280,7 @@
         lexer.TOKEN_PIPE,
         [lexer.TOKEN_SYMBOL, 'bar'],
         lexer.TOKEN_VARIABLE_END);
-    }),
+    });
 
     it('should parse operators', function() {
       hasTokens(lexer.lex('{{ 3+3-3*3/3 }}'),
@@ -318,7 +321,7 @@
         lexer.TOKEN_OPERATOR,
         lexer.TOKEN_INT,
         lexer.TOKEN_VARIABLE_END);
-    }),
+    });
 
     it('should parse comments', function() {
       tokens = lexer.lex('data data {# comment #} data');
@@ -326,7 +329,7 @@
         lexer.TOKEN_DATA,
         lexer.TOKEN_COMMENT,
         lexer.TOKEN_DATA);
-    }),
+    });
 
     it('should allow changing the variable start and end', function() {
       tokens = lexer.lex('data {= var =}', {
@@ -340,7 +343,7 @@
         lexer.TOKEN_VARIABLE_START,
         lexer.TOKEN_SYMBOL,
         lexer.TOKEN_VARIABLE_END);
-    }),
+    });
 
     it('should allow changing the block start and end', function() {
       tokens = lexer.lex('{= =}', {
@@ -352,7 +355,7 @@
       hasTokens(tokens,
         lexer.TOKEN_BLOCK_START,
         lexer.TOKEN_BLOCK_END);
-    }),
+    });
 
     it('should allow changing the variable start and end', function() {
       tokens = lexer.lex('data {= var =}', {
@@ -366,7 +369,7 @@
         lexer.TOKEN_VARIABLE_START,
         lexer.TOKEN_SYMBOL,
         lexer.TOKEN_VARIABLE_END);
-    }),
+    });
 
     it('should allow changing the comment start and end', function() {
       tokens = lexer.lex('<!-- A comment! -->', {
@@ -377,7 +380,7 @@
       });
       hasTokens(tokens,
         lexer.TOKEN_COMMENT);
-    }),
+    });
 
     /**
      * Test that this bug is fixed: https://github.com/mozilla/nunjucks/issues/235
@@ -434,4 +437,4 @@
         lexer.TOKEN_VARIABLE_END);
     });
   });
-})();
+}());
