@@ -252,6 +252,23 @@ var food = {
 The [`dictsort`](http://jinja.pocoo.org/docs/templates/#dictsort) filter is
 available for sorting objects when iterating over them.
 
+ES iterators are supported, like the new builtin Map and Set. But also
+anything implementing the iterator protocal.
+
+```js
+var fruits = new Map([
+  ["banana", "yellow"],
+  ["apple", "red"],
+  ["peach", "pink"]
+])
+```
+
+```jinja
+{% for fruit, color in fruits %}
+  Did you know that {{ fruit }} is {{ color }}?
+{% endfor %}
+```
+
 Additionally, Nunjucks will unpack arrays into variables:
 
 ```js

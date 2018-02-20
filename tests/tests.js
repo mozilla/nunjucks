@@ -1,42 +1,53 @@
 (function() {
   'use strict';
 
-  var expect, util, lib, r;
+  var expect, util, render, equal;
 
   if (typeof require !== 'undefined') {
-      expect = require('expect.js');
-      util = require('./util');
-      lib = require('../src/lib');
-      r = require('../src/runtime');
+    expect = require('expect.js');
+    util = require('./util');
   } else {
-      expect = window.expect;
-      util = window.util;
-      lib = nunjucks.lib;
-      r = nunjucks.runtime;
+    expect = window.expect;
+    util = window.util;
   }
 
-  var render = util.render;
-  
+  render = util.render;
+  equal = util.equal;
+
   describe('tests', function() {
     it('callable should detect callability', function() {
-      var callable = render('{{ foo is callable }}', { foo: function() { return '!!!' } });
-      var uncallable = render('{{ foo is not callable }}', { foo: '!!!' });
+      var callable = render('{{ foo is callable }}', {
+        foo: function() {
+          return '!!!';
+        }
+      });
+      var uncallable = render('{{ foo is not callable }}', {
+        foo: '!!!'
+      });
       expect(callable).to.be('true');
       expect(uncallable).to.be('true');
     });
-    
+
     it('defined should detect definedness', function() {
       expect(render('{{ foo is defined }}')).to.be('false');
       expect(render('{{ foo is not defined }}')).to.be('true');
-      expect(render('{{ foo is defined }}', { foo: null })).to.be('true');
-      expect(render('{{ foo is not defined }}', { foo: null })).to.be('false');
+      expect(render('{{ foo is defined }}', {
+        foo: null
+      })).to.be('true');
+      expect(render('{{ foo is not defined }}', {
+        foo: null
+      })).to.be('false');
     });
 
     it('undefined should detect undefinedness', function() {
       expect(render('{{ foo is undefined }}')).to.be('true');
       expect(render('{{ foo is not undefined }}')).to.be('false');
-      expect(render('{{ foo is undefined }}', { foo: null })).to.be('false');
-      expect(render('{{ foo is not undefined }}', { foo: null })).to.be('true');
+      expect(render('{{ foo is undefined }}', {
+        foo: null
+      })).to.be('false');
+      expect(render('{{ foo is not undefined }}', {
+        foo: null
+      })).to.be('true');
     });
 
     it('none/null should detect strictly null values', function() {
@@ -45,7 +56,9 @@
       expect(render('{{ none is none }}')).to.be('true');
       expect(render('{{ none is null }}')).to.be('true');
       expect(render('{{ foo is null }}')).to.be('false');
-      expect(render('{{ foo is not null }}', { foo: null })).to.be('false');
+      expect(render('{{ foo is not null }}', {
+        foo: null
+      })).to.be('false');
     });
 
     it('divisibleby should detect divisibility', function() {
@@ -54,10 +67,14 @@
       expect(divisible).to.be('true');
       expect(notDivisible).to.be('true');
     });
-    
+
     it('escaped should test whether or not something is escaped', function() {
-      var escaped = render('{{ (foo | safe) is escaped }}', { foo: 'foobarbaz' });
-      var notEscaped = render('{{ foo is escaped }}', { foo: 'foobarbaz' });
+      var escaped = render('{{ (foo | safe) is escaped }}', {
+        foo: 'foobarbaz'
+      });
+      var notEscaped = render('{{ foo is escaped }}', {
+        foo: 'foobarbaz'
+      });
       expect(escaped).to.be('true');
       expect(notEscaped).to.be('false');
     });
@@ -77,12 +94,22 @@
     });
 
     it('mapping should detect Maps or hashes', function() {
-      var map1 = new Map();
-      var map2 = {};
-      var mapOneIsMapping = render('{{ map is mapping }}', { map: map1 });
-      var mapTwoIsMapping = render('{{ map is mapping }}', { map: map2 });
-      expect(mapOneIsMapping).to.be('true');
-      expect(mapTwoIsMapping).to.be('true');
+      /* global Map */
+      var map1, map2, mapOneIsMapping, mapTwoIsMapping;
+      if (typeof Map === 'undefined') {
+        this.skip();
+      } else {
+        map1 = new Map();
+        map2 = {};
+        mapOneIsMapping = render('{{ map is mapping }}', {
+          map: map1
+        });
+        mapTwoIsMapping = render('{{ map is mapping }}', {
+          map: map2
+        });
+        expect(mapOneIsMapping).to.be('true');
+        expect(mapTwoIsMapping).to.be('true');
+      }
     });
 
     it('falsy should detect whether or not a value is falsy', function() {
@@ -91,7 +118,7 @@
       expect(zero).to.be('true');
       expect(pancakes).to.be('true');
     });
-  
+
     it('truthy should detect whether or not a value is truthy', function() {
       var nullTruthy = render('{{ null is truthy }}');
       var pancakesNotTruthy = render('{{ "pancakes" is not truthy }}');
@@ -119,7 +146,7 @@
       expect(fiveLessThanFour).to.be('false');
       expect(fourNotLessThanTwo).to.be('true');
     });
-    
+
     it('le should detect whether or not a value is less than or equal to another', function() {
       var fiveLessThanEqualToFive = render('{{ "5" is le(5) }}');
       var fourNotLessThanEqualToTwo = render('{{ 4 is not le(2) }}');
@@ -134,16 +161,38 @@
       expect(four).to.be('false');
     });
 
-    it('iterable should detect whether or not a value is iterable', function() {
-      var iterable = (function* iterable() { return true; }());
-      var generatorIsIterable = render('{{ fn is iterable }}', { fn: iterable });
-      var arrayIsNotIterable = render('{{ arr is not iterable }}', { arr: [] });
-      var mapIsIterable = render('{{ map is iterable }}', { map: new Map() });
-      var setIsNotIterable = render('{{ set is not iterable }}', { set: new Set() });
-      expect(generatorIsIterable).to.be('true');
-      expect(arrayIsNotIterable).to.be('false');
-      expect(mapIsIterable).to.be('true');
-      expect(setIsNotIterable).to.be('false');
+    it('iterable should detect that a generator is iterable', function(done) {
+      /* eslint-disable no-eval */
+      var iterable;
+      try {
+        iterable = eval('(function* iterable() { yield true; })()');
+      } catch (e) {
+        return this.skip(); // Browser does not support generators
+      }
+      equal('{{ fn is iterable }}', { fn: iterable }, 'true');
+      return done();
+    });
+
+    it('iterable should detect that an Array is not non-iterable', function() {
+      equal('{{ arr is not iterable }}', { arr: [] }, 'false');
+    });
+
+    it('iterable should detect that a Map is iterable', function() {
+      /* global Map */
+      if (typeof Map === 'undefined') {
+        this.skip();
+      } else {
+        equal('{{ map is iterable }}', { map: new Map() }, 'true');
+      }
+    });
+
+    it('iterable should detect that a Set is not non-iterable', function() {
+      /* global Set */
+      if (typeof Set === 'undefined') {
+        this.skip();
+      } else {
+        equal('{{ set is not iterable }}', { set: new Set() }, 'false');
+      }
     });
 
     it('number should detect whether a value is numeric', function() {
@@ -152,35 +201,38 @@
       expect(num).to.be('true');
       expect(str).to.be('false');
     });
-    
+
     it('string should detect whether a value is a string', function() {
       var num = render('{{ 5 is string }}');
       var str = render('{{ "42" is string }}');
       expect(num).to.be('false');
       expect(str).to.be('true');
     });
-    
+
     it('equalto should detect value equality', function() {
       var same = render('{{ 1 is equalto(2) }}');
       var notSame = render('{{ 2 is not equalto(2) }}');
       expect(same).to.be('false');
       expect(notSame).to.be('false');
     });
-    
+
     it('sameas should alias to equalto', function() {
       var obj = {};
-      var same = render('{{ obj1 is sameas(obj2) }}', { obj1: obj, obj2: obj });
+      var same = render('{{ obj1 is sameas(obj2) }}', {
+        obj1: obj,
+        obj2: obj
+      });
       expect(same).to.be('true');
     });
-    
+
     it('lower should detect whether or not a string is lowercased', function() {
       expect(render('{{ "foobar" is lower }}')).to.be('true');
       expect(render('{{ "Foobar" is lower }}')).to.be('false');
     });
-    
+
     it('upper should detect whether or not a string is uppercased', function() {
       expect(render('{{ "FOOBAR" is upper }}')).to.be('true');
       expect(render('{{ "Foobar" is upper }}')).to.be('false');
     });
   });
-})();
+}());
