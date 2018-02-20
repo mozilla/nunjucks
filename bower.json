@@ -6,7 +6,8 @@
     "package.json",
     "tests",
     "docs",
-    "index.js"
+    "index.js",
+    "nunjucks"
   ],
   "keywords": [
     "jinja",
