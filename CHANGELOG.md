@@ -4,6 +4,7 @@ Changelog
 master (unreleased)
 -------------------
 
+* Fix regression to make `chokidar` an optional dependency again.
 
 3.1.0 (Feb 19 2018)
 -------------------

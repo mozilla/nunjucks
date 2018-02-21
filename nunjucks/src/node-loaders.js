@@ -6,7 +6,10 @@ const fs = require('fs');
 const path = require('path');
 const Loader = require('./loader');
 const {PrecompiledLoader} = require('./precompiled-loader.js');
-const chokidar = require('chokidar');
+let chokidar;
+try {
+  chokidar = require('chokidar'); // eslint-disable-line global-require
+} catch (e) {} // eslint-disable-line no-empty
 
 class FileSystemLoader extends Loader {
   constructor(searchPaths, opts) {
