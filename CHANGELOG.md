@@ -5,6 +5,7 @@ master (unreleased)
 -------------------
 
 * Fix regression to make `chokidar` an optional dependency again.
+* Fix issue when running `npm install nunjucks` with the `--no-bin-links` flag
 
 3.1.0 (Feb 19 2018)
 -------------------

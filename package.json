@@ -71,7 +71,7 @@
     "codecov": "codecov",
     "mocha": "mocha -R spec tests",
     "lint": "eslint nunjucks scripts tests",
-    "postinstall": "postinstall-build src",
+    "postinstall": "node scripts/postinstall-build.js src",
     "test:instrument": "cross-env NODE_ENV=test scripts/bundle.js",
     "test:runner": "cross-env NODE_ENV=test scripts/testrunner.js",
     "test": "npm run lint && npm run test:instrument && npm run test:runner"
