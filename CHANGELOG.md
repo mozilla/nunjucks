@@ -6,6 +6,8 @@ master (unreleased)
 
 * Fix regression to make `chokidar` an optional dependency again.
 * Fix issue when running `npm install nunjucks` with the `--no-bin-links` flag
+* Fix regression that broke template caching. Fixes
+  [#1074](https://github.com/mozilla/nunjucks/issues/1074)
 
 3.1.0 (Feb 19 2018)
 -------------------

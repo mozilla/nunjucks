@@ -26,6 +26,7 @@
     "eslint-plugin-import": "^2.8.0",
     "expect.js": "*",
     "express": "4.x",
+    "fs-extra": "^5.0.0",
     "get-port": "^3.2.0",
     "mocha": "*",
     "mocha-phantomjs-core": "^2.1.2",

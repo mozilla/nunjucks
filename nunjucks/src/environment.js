@@ -233,17 +233,24 @@ class Environment extends Obj {
       if (err) {
         if (cb) {
           cb(err);
+          return;
         } else {
           throw err;
         }
+      }
+      let newTmpl;
+      if (!info) {
+        newTmpl = new Template(noopTmplSrc, this, '', eagerCompile);
       } else {
-        info = info || {src: noopTmplSrc, path: ''};
-        const newTmpl = new Template(info.src, this, info.path, eagerCompile);
-        if (cb) {
-          cb(null, newTmpl);
-        } else {
-          syncResult = newTmpl;
+        newTmpl = new Template(info.src, this, info.path, eagerCompile);
+        if (!info.noCache) {
+          info.loader.cache[name] = newTmpl;
         }
+      }
+      if (cb) {
+        cb(null, newTmpl);
+      } else {
+        syncResult = newTmpl;
       }
     };
 

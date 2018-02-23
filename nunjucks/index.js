@@ -59,6 +59,9 @@ module.exports = {
   nodes: nodes,
   installJinjaCompat: installJinjaCompat,
   configure: configure,
+  reset() {
+    e = undefined;
+  },
   compile(src, env, path, eagerCompile) {
     if (!e) {
       configure();
