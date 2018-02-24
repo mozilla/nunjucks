@@ -1,7 +1,7 @@
 {
   "name": "nunjucks",
   "description": "A powerful templating engine with inheritance, asynchronous control, and more (jinja2 inspired)",
-  "version": "3.1.2-dev.1",
+  "version": "3.1.2",
   "author": "James Long <longster@gmail.com>",
   "dependencies": {
     "a-sync-waterfall": "^1.0.0",
@@ -72,7 +72,7 @@
     "codecov": "codecov",
     "mocha": "mocha -R spec tests",
     "lint": "eslint nunjucks scripts tests",
-    "postinstall": "node scripts/postinstall-build.js src",
+    "postinstall": "node postinstall-build.js src",
     "test:instrument": "cross-env NODE_ENV=test scripts/bundle.js",
     "test:runner": "cross-env NODE_ENV=test scripts/testrunner.js",
     "test": "npm run lint && npm run test:instrument && npm run test:runner"
