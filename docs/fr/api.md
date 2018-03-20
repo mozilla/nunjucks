@@ -137,7 +137,7 @@ aider les utilisateurs qui le recherchent au plus juste.
 Cela ajoute `True` et `False` qui correspond aux valeurs `true` et `false`
 de JS. En plus, cela se rapproche des tableaux et des objets pour les méthodes
 avec un style Python et permet également l'utilisation de la syntaxe "slice" Python.
-[Vérifiez la source](https://github.com/mozilla/nunjucks/blob/master/src/jinja-compat.js)
+[Vérifiez la source](https://github.com/mozilla/nunjucks/blob/master/nunjucks/src/jinja-compat.js)
 pour voir tout ce qu'il ajoute.
 {% endapi %}
 {% raw %}
@@ -883,7 +883,7 @@ que vous aurez besoin d'utiliser :
 
 L'API de l'analyseur doit être plus documenté, mais pour l'instant lisez ce qui précède
 et vérifiez l'exemple ci-dessous. Vous pouvez également regarder le code
-[source](https://github.com/mozilla/nunjucks/blob/master/src/parser.js).
+[source](https://github.com/mozilla/nunjucks/blob/master/nunjucks/src/parser.js).
 
 L'utilisation la plus courante consiste à traiter à l'exécution le contenu
 de certains tags. C'est comme les filtres, mais sous stéroïdes car vous ne vous

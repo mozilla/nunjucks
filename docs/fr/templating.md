@@ -1793,7 +1793,7 @@ Compte et rend le nombre de mot à l'intérieur d'une chaine :
 ```
 
 Sinon, il est facile de lire le [code
-JavaScript](https://github.com/mozilla/nunjucks/blob/master/src/filters.js)
+JavaScript](https://github.com/mozilla/nunjucks/blob/master/nunjucks/src/filters.js)
 qui implémente ces filtres.
 
 {% endraw %}
