@@ -148,7 +148,7 @@ might help users seeking just that.
 This adds `True` and `False` which map to the JS `true` and `false`
 values, allows use of Python slice syntax, and augments arrays and
 objects with Python-style methods.
-[Check out the source](https://github.com/mozilla/nunjucks/blob/master/src/jinja-compat.js)
+[Check out the source](https://github.com/mozilla/nunjucks/blob/master/nunjucks/src/jinja-compat.js)
 to see everything it adds.
 {% endapi %}
 {% raw %}
@@ -894,7 +894,7 @@ you'll want to use:
 
 The parser API needs to be more documented, but for now read the above
 and check out the example below. You can also look at the
-[source](https://github.com/mozilla/nunjucks/blob/master/src/parser.js).
+[source](https://github.com/mozilla/nunjucks/blob/master/nunjucks/src/parser.js).
 
 The most common usage is to process the content within some tags at
 runtime. It's like filters, but on steroids because you aren't
