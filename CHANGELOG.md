@@ -1,6 +1,7 @@
 Changelog
 =========
 
+* Add `forceescape` filter. Fixes [#782](https://github.com/mozilla/nunjucks/issues/782)
 
 3.1.2 (Feb 23 2018)
 -------------------

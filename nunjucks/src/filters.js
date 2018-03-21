@@ -156,6 +156,13 @@ function first(arr) {
 
 exports.first = first;
 
+function forceescape(str) {
+  str = (str === null || str === undefined) ? '' : str;
+  return r.markSafe(lib.escape(str.toString()));
+}
+
+exports.forceescape = forceescape;
+
 function groupby(arr, attr) {
   return lib.groupBy(arr, attr);
 }
