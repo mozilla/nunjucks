@@ -1124,6 +1124,10 @@ This default can be overridden by using the first parameter.
 3.5
 ```
 
+### forceescape
+
+Enforce HTML escaping. This will probably double escape variables.
+
 ### groupby
 
 Group a sequence of objects by a common attribute:

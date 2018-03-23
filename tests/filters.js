@@ -228,6 +228,12 @@
       equal('{{ "0" | float }}', '0');
     });
 
+    it('forceescape', function(done) {
+      equal('{{ str | forceescape }}', { str: r.markSafe('<html>')}, '&lt;html&gt;');
+      equal('{{ "<html>" | safe | forceescape }}', '&lt;html&gt;');
+      finish(done);
+    });
+
     it('int', function() {
       equal('{{ "3.5" | int }}', '3');
       equal('{{ "0" | int }}', '0');
