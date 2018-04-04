@@ -204,6 +204,9 @@
 <a href="#float">float</a>
 </li>
 <li>
+<a href="#forceescape">forceescape</a>
+</li>
+<li>
 <a href="#groupby">groupby</a>
 </li>
 <li>
@@ -507,6 +510,17 @@ contents of the optional <code>else</code> clause would instead be rendered.</p>
 <p>The <a href="http://jinja.pocoo.org/docs/templates/#dictsort"><code>dictsort</code></a> filter is
 available for sorting objects when iterating over them.</p>
 
+<p>ES iterators are supported, like the new builtin Map and Set. But also
+anything implementing the iterator protocal.</p>
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">fruits</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Map</span><span class="p">([</span>
+  <span class="p">[</span><span class="s2">&quot;banana&quot;</span><span class="p">,</span> <span class="s2">&quot;yellow&quot;</span><span class="p">],</span>
+  <span class="p">[</span><span class="s2">&quot;apple&quot;</span><span class="p">,</span> <span class="s2">&quot;red&quot;</span><span class="p">],</span>
+  <span class="p">[</span><span class="s2">&quot;peach&quot;</span><span class="p">,</span> <span class="s2">&quot;pink&quot;</span><span class="p">]</span>
+<span class="p">])</span>
+</code></pre></div><div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">for</span> <span class="nv">fruit</span><span class="o">,</span> <span class="nv">color</span> <span class="k">in</span> <span class="nv">fruits</span> <span class="cp">%}</span><span class="x"></span>
+<span class="x">  Did you know that </span><span class="cp">{{</span> <span class="nv">fruit</span> <span class="cp">}}</span><span class="x"> is </span><span class="cp">{{</span> <span class="nv">color</span> <span class="cp">}}</span><span class="x">?</span>
+<span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span><span class="x"></span>
+</code></pre></div>
 <p>Additionally, Nunjucks will unpack arrays into variables:</p>
 <div class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">points</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span> <span class="p">[</span><span class="mi">12</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">14</span><span class="p">]];</span>
 </code></pre></div><div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">for</span> <span class="nv">x</span><span class="o">,</span> <span class="nv">y</span><span class="o">,</span> <span class="nv">z</span> <span class="k">in</span> <span class="nv">points</span> <span class="cp">%}</span><span class="x"></span>
@@ -1180,6 +1194,10 @@ This default can be overridden by using the first parameter.</p>
 <p><strong>Output</strong></p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="x">3.5</span>
 </code></pre></div>
+<h3 id="forceescape">forceescape</h3>
+
+<p>Enforce HTML escaping. This will probably double escape variables.</p>
+
 <h3 id="groupby">groupby</h3>
 
 <p>Group a sequence of objects by a common attribute:</p>
@@ -1660,7 +1678,7 @@ Accepts both dictionaries and regular strings as well as pairwise iterables.</p>
 <p><strong>Output</strong></p>
 <div class="highlight"><pre><code class="language-text" data-lang="text">2
 </code></pre></div>
-<p>Alternatively, it&#39;s easy to <a href="https://github.com/mozilla/nunjucks/blob/master/src/filters.js">read the JavaScript
+<p>Alternatively, it&#39;s easy to <a href="https://github.com/mozilla/nunjucks/blob/master/nunjucks/src/filters.js">read the JavaScript
 code</a>
 that implements these filters.</p>
 

@@ -55,6 +55,9 @@
 <a href="#can-i-use-nunjucks-in-node-and-the-browser-client-side">Can I use nunjucks in node and the browser/client-side?</a>
 </li>
 <li>
+<a href="#can-i-precompile-templates-for-server-side-use-node-express">Can I precompile templates for server-side use (Node/Express)?</a>
+</li>
+<li>
 <a href="#can-i-use-the-same-templates-between-nunjucks-and-jinja2-what-are-the-differences">Can I use the same templates between nunjucks and jinja2? What are the differences?</a>
 </li>
 </ul>
@@ -72,6 +75,15 @@
 
 <p>Yes. Nunjucks supports all modern browsers and any version of Node.js
 <a href="https://github.com/nodejs/Release#release-schedule1">currently supported by the Node.js Foundation</a>.</p>
+
+<h2 id="can-i-precompile-templates-for-server-side-use-node-express">Can I precompile templates for server-side use (Node/Express)?</h2>
+
+<p>No, precompiled templates are a browser/client-side optimization only. 
+It is not necessary to precompile on the server because templates are
+compiled then cached the first time they are individually loaded for rendering. 
+The compiled template will then remained cached in memory until the server restarts.</p>
+
+<p>You can choose never to cache by setting <a href="api.html#configure">configure</a>&#39;s <code>noCache</code> option to <code>true</code>.</p>
 
 <h2 id="can-i-use-the-same-templates-between-nunjucks-and-jinja2-what-are-the-differences">Can I use the same templates between nunjucks and jinja2? What are the differences?</h2>
 

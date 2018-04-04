@@ -313,7 +313,7 @@
 
 <div class="api-desc"><p>这个方法为了与 Jinja 更好的兼容，增加了一些适配 Python 的 API。但是 nunjucks 不是为了完全兼容 Jinja/Pyhton，这只为了帮助使用者查看。</p>
 
-<p>增加了 <code>True</code> 和 <code>False</code>，与 js 的 <code>true</code> 和 <code>false</code> 相对应。并增加 Array 和 Object 使之适配 Python 风格的。<a href="https://github.com/mozilla/nunjucks/blob/master/src/jinja-compat.js">查看源码</a>能看到所有功能。</p>
+<p>增加了 <code>True</code> 和 <code>False</code>，与 js 的 <code>true</code> 和 <code>false</code> 相对应。并增加 Array 和 Object 使之适配 Python 风格的。<a href="https://github.com/mozilla/nunjucks/blob/master/nunjucks/src/jinja-compat.js">查看源码</a>能看到所有功能。</p>
 </div>
 
 <p>就是这么简单，如果希望自己定义模板加载等更多的个性化设置，那么可以继续往下看。</p>
@@ -810,7 +810,7 @@ mytag foo, bar, baz=10 %}</code>。</p></li>
 <li><p><code>parseUntilBlocks(names)</code> - 解析内容直到下一个名为 <code>names</code> 的标签，非常有用解析标签之间的内容。</p></li>
 </ul>
 
-<p>parser API 还需要更多的文档，但现在对照上面的文档和下面的例子，你还可以看下<a href="https://github.com/mozilla/nunjucks/blob/master/src/parser.js">源码</a>。</p>
+<p>parser API 还需要更多的文档，但现在对照上面的文档和下面的例子，你还可以看下<a href="https://github.com/mozilla/nunjucks/blob/master/nunjucks/src/parser.js">源码</a>。</p>
 
 <p>最常用使用的是在运行时解析标签间的内容，就像过滤器一样，但是更灵活，因为不只是局限在一个表达式中。通常情况下你会解析模板，然后将内容传入回调。你可以使用 <code>CallExtension</code>，需要传扩展的实例，方法名，解析的参数和内容（使用 <code>parseUntilBlocks</code> 解析的）。</p>
 
