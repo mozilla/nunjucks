@@ -209,6 +209,7 @@
     module.exports.finish = finish;
     module.exports.normEOL = normEOL;
     module.exports.isSlim = isSlim;
+    module.exports.Loader = Loader;
   } else {
     window.util = {
       render: render,
@@ -216,7 +217,8 @@
       jinjaEqual: jinjaEqual,
       finish: finish,
       normEOL: normEOL,
-      isSlim: isSlim
+      isSlim: isSlim,
+      Loader: Loader,
     };
   }
 }());

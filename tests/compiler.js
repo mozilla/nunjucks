@@ -4,6 +4,8 @@
   var expect;
   var util;
   var Template;
+  var Loader;
+  var Environment;
   var fs;
   var render;
   var equal;
@@ -14,17 +16,20 @@
     expect = require('expect.js');
     util = require('./util');
     Template = require('../nunjucks/src/environment').Template;
+    Environment = require('../nunjucks/src/environment').Environment;
     fs = require('fs');
   } else {
     expect = window.expect;
     util = window.util;
     Template = nunjucks.Template;
+    Environment = nunjucks.Environment;
   }
 
   render = util.render;
   equal = util.equal;
   finish = util.finish;
   isSlim = util.isSlim;
+  Loader = util.Loader;
 
   describe('compiler', function() {
     it('should compile templates', function(done) {
@@ -783,6 +788,28 @@
 
       finish(done);
     });
+
+    if (!isSlim) {
+      it('should include error line in raised TemplateError', function(done) {
+        var tmplStr = [
+          '{% set items = ["a", "b",, "c"] %}',
+          '{{ items | join(",") }}',
+        ].join('\n');
+
+        var loader = new Loader('tests/templates');
+        var env = new Environment(loader);
+        var tmpl = new Template(tmplStr, env, 'parse-error.njk');
+
+        tmpl.render({}, function(err, res) {
+          expect(res).to.be(undefined);
+          expect(err.toString()).to.be([
+            'Template render error: (parse-error.njk) [Line 1, Column 24]',
+            '  unexpected token: ,',
+          ].join('\n'));
+          done();
+        });
+      });
+    }
 
     it('should compile string concatenations with tilde', function(done) {
       equal('{{ 4 ~ \'hello\' }}', '4hello');

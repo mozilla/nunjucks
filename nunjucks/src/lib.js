@@ -87,7 +87,7 @@ function TemplateError(message, lineno, colno) {
   }
 
   Object.defineProperty(err, 'stack', {
-    get: () => getStack.call(this),
+    get: () => getStack.call(err),
   });
 
   Object.defineProperty(err, 'cause', {
@@ -98,7 +98,7 @@ function TemplateError(message, lineno, colno) {
   err.colno = colno;
   err.firstUpdate = true;
 
-  err.Update = (path) => {
+  err.Update = function Update(path) {
     let msg = '(' + (path || 'unknown path') + ')';
 
     // only show lineno + colno next to path of template
