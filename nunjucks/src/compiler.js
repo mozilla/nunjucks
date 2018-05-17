@@ -166,6 +166,7 @@ class Compiler extends Obj {
       nodes.Compare,
       nodes.InlineIf,
       nodes.In,
+      nodes.Is,
       nodes.And,
       nodes.Or,
       nodes.Not,

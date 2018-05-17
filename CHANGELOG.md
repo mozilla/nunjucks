@@ -2,6 +2,8 @@ Changelog
 =========
 
 * Add `forceescape` filter. Fixes [#782](https://github.com/mozilla/nunjucks/issues/782)
+* Fix "Invalid type: Is" error for `{% if value is defined %}. Fixes
+  [#1110](https://github.com/mozilla/nunjucks/issues/1110)
 
 3.1.2 (Feb 23 2018)
 -------------------
