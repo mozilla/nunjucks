@@ -1,4 +1,4 @@
-/*! Browser bundle of nunjucks 3.1.2 (slim, only works with precompiled templates) */
+/*! Browser bundle of nunjucks 3.1.3 (slim, only works with precompiled templates) */
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
 		module.exports = factory();
@@ -130,8 +130,6 @@ function _prettifyError(path, withInternals, err) {
 _exports._prettifyError = _prettifyError;
 
 function TemplateError(message, lineno, colno) {
-  var _this = this;
-
   var err;
   var cause;
 
@@ -184,7 +182,7 @@ function TemplateError(message, lineno, colno) {
 
   Object.defineProperty(err, 'stack', {
     get: function get() {
-      return getStack.call(_this);
+      return getStack.call(err);
     }
   });
   Object.defineProperty(err, 'cause', {
@@ -194,27 +192,27 @@ function TemplateError(message, lineno, colno) {
   err.colno = colno;
   err.firstUpdate = true;
 
-  err.Update = function (path) {
+  err.Update = function Update(path) {
     var msg = '(' + (path || 'unknown path') + ')'; // only show lineno + colno next to path of template
     // where error occurred
 
-    if (_this.firstUpdate) {
-      if (_this.lineno && _this.colno) {
-        msg += " [Line " + _this.lineno + ", Column " + _this.colno + "]";
-      } else if (_this.lineno) {
-        msg += " [Line " + _this.lineno + "]";
+    if (this.firstUpdate) {
+      if (this.lineno && this.colno) {
+        msg += " [Line " + this.lineno + ", Column " + this.colno + "]";
+      } else if (this.lineno) {
+        msg += " [Line " + this.lineno + "]";
       }
     }
 
     msg += '\n ';
 
-    if (_this.firstUpdate) {
+    if (this.firstUpdate) {
       msg += ' ';
     }
 
-    _this.message = msg + (_this.message || '');
-    _this.firstUpdate = false;
-    return _this;
+    this.message = msg + (this.message || '');
+    this.firstUpdate = false;
+    return this;
   };
 
   return err;
@@ -879,15 +877,13 @@ module.exports = {
 "use strict";
 
 
-function _inheritsLoose(subClass, superClass) { subClass.prototype = Object.create(superClass.prototype); subClass.prototype.constructor = subClass; subClass.__proto__ = superClass; }
+function _inheritsLoose(subClass, superClass) { subClass.prototype.__proto__ = superClass && superClass.prototype; subClass.__proto__ = superClass; }
 
 var Loader = __webpack_require__(4);
 
 var PrecompiledLoader =
 /*#__PURE__*/
 function (_Loader) {
-  _inheritsLoose(PrecompiledLoader, _Loader);
-
   function PrecompiledLoader(compiledTemplates) {
     var _this;
 
@@ -912,6 +908,8 @@ function (_Loader) {
     return null;
   };
 
+  _inheritsLoose(PrecompiledLoader, _Loader);
+
   return PrecompiledLoader;
 }(Loader);
 
@@ -926,7 +924,7 @@ module.exports = {
 "use strict";
 
 
-function _inheritsLoose(subClass, superClass) { subClass.prototype = Object.create(superClass.prototype); subClass.prototype.constructor = subClass; subClass.__proto__ = superClass; }
+function _inheritsLoose(subClass, superClass) { subClass.prototype.__proto__ = superClass && superClass.prototype; subClass.__proto__ = superClass; }
 
 var path = __webpack_require__(0);
 
@@ -935,8 +933,6 @@ var Obj = __webpack_require__(5);
 module.exports =
 /*#__PURE__*/
 function (_Obj) {
-  _inheritsLoose(Loader, _Obj);
-
   function Loader() {
     return _Obj.apply(this, arguments) || this;
   }
@@ -969,6 +965,8 @@ function (_Obj) {
     return filename.indexOf('./') === 0 || filename.indexOf('../') === 0;
   };
 
+  _inheritsLoose(Loader, _Obj);
+
   return Loader;
 }(Obj);
 
@@ -979,11 +977,11 @@ function (_Obj) {
 "use strict";
  // A simple class system, more documentation to come
 
+function _inheritsLoose(subClass, superClass) { subClass.prototype.__proto__ = superClass && superClass.prototype; subClass.__proto__ = superClass; }
+
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _inheritsLoose(subClass, superClass) { subClass.prototype = Object.create(superClass.prototype); subClass.prototype.constructor = subClass; subClass.__proto__ = superClass; }
 
 var lib = __webpack_require__(1);
 
@@ -1012,8 +1010,6 @@ function extendClass(cls, name, props) {
   var subclass =
   /*#__PURE__*/
   function (_cls) {
-    _inheritsLoose(subclass, _cls);
-
     function subclass() {
       return _cls.apply(this, arguments) || this;
     }
@@ -1024,6 +1020,8 @@ function extendClass(cls, name, props) {
         return name;
       }
     }]);
+
+    _inheritsLoose(subclass, _cls);
 
     return subclass;
   }(cls);
@@ -1181,7 +1179,7 @@ module.exports = {
 "use strict";
 
 
-function _inheritsLoose(subClass, superClass) { subClass.prototype = Object.create(superClass.prototype); subClass.prototype.constructor = subClass; subClass.__proto__ = superClass; }
+function _inheritsLoose(subClass, superClass) { subClass.prototype.__proto__ = superClass && superClass.prototype; subClass.__proto__ = superClass; }
 
 var asap = __webpack_require__(8);
 
@@ -1239,8 +1237,6 @@ var noopTmplSrc = {
 var Environment =
 /*#__PURE__*/
 function (_Obj) {
-  _inheritsLoose(Environment, _Obj);
-
   function Environment() {
     return _Obj.apply(this, arguments) || this;
   }
@@ -1549,14 +1545,14 @@ function (_Obj) {
     return _waterfall(tasks, callback, forceAsync);
   };
 
+  _inheritsLoose(Environment, _Obj);
+
   return Environment;
 }(Obj);
 
 var Context =
 /*#__PURE__*/
 function (_Obj2) {
-  _inheritsLoose(Context, _Obj2);
-
   function Context() {
     return _Obj2.apply(this, arguments) || this;
   }
@@ -1635,14 +1631,14 @@ function (_Obj2) {
     return exported;
   };
 
+  _inheritsLoose(Context, _Obj2);
+
   return Context;
 }(Obj);
 
 var Template =
 /*#__PURE__*/
 function (_Obj3) {
-  _inheritsLoose(Template, _Obj3);
-
   function Template() {
     return _Obj3.apply(this, arguments) || this;
   }
@@ -1814,6 +1810,8 @@ function (_Obj3) {
     });
     return blocks;
   };
+
+  _inheritsLoose(Template, _Obj3);
 
   return Template;
 }(Obj);

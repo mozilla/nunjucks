@@ -1,4 +1,4 @@
-/*! Browser bundle of nunjucks 3.1.2  */
+/*! Browser bundle of nunjucks 3.1.3  */
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
 		module.exports = factory();
@@ -124,8 +124,6 @@ function _prettifyError(path, withInternals, err) {
 _exports._prettifyError = _prettifyError;
 
 function TemplateError(message, lineno, colno) {
-  var _this = this;
-
   var err;
   var cause;
 
@@ -178,7 +176,7 @@ function TemplateError(message, lineno, colno) {
 
   Object.defineProperty(err, 'stack', {
     get: function get() {
-      return getStack.call(_this);
+      return getStack.call(err);
     }
   });
   Object.defineProperty(err, 'cause', {
@@ -188,27 +186,27 @@ function TemplateError(message, lineno, colno) {
   err.colno = colno;
   err.firstUpdate = true;
 
-  err.Update = function (path) {
+  err.Update = function Update(path) {
     var msg = '(' + (path || 'unknown path') + ')'; // only show lineno + colno next to path of template
     // where error occurred
 
-    if (_this.firstUpdate) {
-      if (_this.lineno && _this.colno) {
-        msg += " [Line " + _this.lineno + ", Column " + _this.colno + "]";
-      } else if (_this.lineno) {
-        msg += " [Line " + _this.lineno + "]";
+    if (this.firstUpdate) {
+      if (this.lineno && this.colno) {
+        msg += " [Line " + this.lineno + ", Column " + this.colno + "]";
+      } else if (this.lineno) {
+        msg += " [Line " + this.lineno + "]";
       }
     }
 
     msg += '\n ';
 
-    if (_this.firstUpdate) {
+    if (this.firstUpdate) {
       msg += ' ';
     }
 
-    _this.message = msg + (_this.message || '');
-    _this.firstUpdate = false;
-    return _this;
+    this.message = msg + (this.message || '');
+    this.firstUpdate = false;
+    return this;
   };
 
   return err;
@@ -458,11 +456,11 @@ _exports.inOperator = inOperator;
 "use strict";
  // A simple class system, more documentation to come
 
+function _inheritsLoose(subClass, superClass) { subClass.prototype.__proto__ = superClass && superClass.prototype; subClass.__proto__ = superClass; }
+
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _inheritsLoose(subClass, superClass) { subClass.prototype = Object.create(superClass.prototype); subClass.prototype.constructor = subClass; subClass.__proto__ = superClass; }
 
 var lib = __webpack_require__(0);
 
@@ -491,8 +489,6 @@ function extendClass(cls, name, props) {
   var subclass =
   /*#__PURE__*/
   function (_cls) {
-    _inheritsLoose(subclass, _cls);
-
     function subclass() {
       return _cls.apply(this, arguments) || this;
     }
@@ -503,6 +499,8 @@ function extendClass(cls, name, props) {
         return name;
       }
     }]);
+
+    _inheritsLoose(subclass, _cls);
 
     return subclass;
   }(cls);
@@ -971,7 +969,7 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
-function _inheritsLoose(subClass, superClass) { subClass.prototype = Object.create(superClass.prototype); subClass.prototype.constructor = subClass; subClass.__proto__ = superClass; }
+function _inheritsLoose(subClass, superClass) { subClass.prototype.__proto__ = superClass && superClass.prototype; subClass.__proto__ = superClass; }
 
 var Obj = __webpack_require__(1);
 
@@ -988,8 +986,6 @@ function traverseAndCheck(obj, type, results) {
 var Node =
 /*#__PURE__*/
 function (_Obj) {
-  _inheritsLoose(Node, _Obj);
-
   function Node() {
     return _Obj.apply(this, arguments) || this;
   }
@@ -1045,6 +1041,8 @@ function (_Obj) {
     });
   };
 
+  _inheritsLoose(Node, _Obj);
+
   return Node;
 }(Obj); // Abstract nodes
 
@@ -1052,8 +1050,6 @@ function (_Obj) {
 var Value =
 /*#__PURE__*/
 function (_Node) {
-  _inheritsLoose(Value, _Node);
-
   function Value() {
     return _Node.apply(this, arguments) || this;
   }
@@ -1070,6 +1066,8 @@ function (_Node) {
     }
   }]);
 
+  _inheritsLoose(Value, _Node);
+
   return Value;
 }(Node); // Concrete nodes
 
@@ -1077,8 +1075,6 @@ function (_Node) {
 var NodeList =
 /*#__PURE__*/
 function (_Node2) {
-  _inheritsLoose(NodeList, _Node2);
-
   function NodeList() {
     return _Node2.apply(this, arguments) || this;
   }
@@ -1104,6 +1100,8 @@ function (_Node2) {
       return ['children'];
     }
   }]);
+
+  _inheritsLoose(NodeList, _Node2);
 
   return NodeList;
 }(Node);
@@ -1143,8 +1141,6 @@ var Import = Node.extend('Import', {
 var FromImport =
 /*#__PURE__*/
 function (_Node3) {
-  _inheritsLoose(FromImport, _Node3);
-
   function FromImport() {
     return _Node3.apply(this, arguments) || this;
   }
@@ -1166,6 +1162,8 @@ function (_Node3) {
       return ['template', 'names', 'withContext'];
     }
   }]);
+
+  _inheritsLoose(FromImport, _Node3);
 
   return FromImport;
 }(Node);
@@ -1378,7 +1376,7 @@ module.exports = {
 "use strict";
 
 
-function _inheritsLoose(subClass, superClass) { subClass.prototype = Object.create(superClass.prototype); subClass.prototype.constructor = subClass; subClass.__proto__ = superClass; }
+function _inheritsLoose(subClass, superClass) { subClass.prototype.__proto__ = superClass && superClass.prototype; subClass.__proto__ = superClass; }
 
 var parser = __webpack_require__(8);
 
@@ -1410,8 +1408,6 @@ var compareOps = {
 var Compiler =
 /*#__PURE__*/
 function (_Obj) {
-  _inheritsLoose(Compiler, _Obj);
-
   function Compiler() {
     return _Obj.apply(this, arguments) || this;
   }
@@ -1575,7 +1571,7 @@ function (_Obj) {
   _proto._compileExpression = function _compileExpression(node, frame) {
     // TODO: I'm not really sure if this type check is worth it or
     // not.
-    this.assertType(node, nodes.Literal, nodes.Symbol, nodes.Group, nodes.Array, nodes.Dict, nodes.FunCall, nodes.Caller, nodes.Filter, nodes.LookupVal, nodes.Compare, nodes.InlineIf, nodes.In, nodes.And, nodes.Or, nodes.Not, nodes.Add, nodes.Concat, nodes.Sub, nodes.Mul, nodes.Div, nodes.FloorDiv, nodes.Mod, nodes.Pow, nodes.Neg, nodes.Pos, nodes.Compare, nodes.NodeList);
+    this.assertType(node, nodes.Literal, nodes.Symbol, nodes.Group, nodes.Array, nodes.Dict, nodes.FunCall, nodes.Caller, nodes.Filter, nodes.LookupVal, nodes.Compare, nodes.InlineIf, nodes.In, nodes.Is, nodes.And, nodes.Or, nodes.Not, nodes.Add, nodes.Concat, nodes.Sub, nodes.Mul, nodes.Div, nodes.FloorDiv, nodes.Mod, nodes.Pow, nodes.Neg, nodes.Pos, nodes.Compare, nodes.NodeList);
     this.compile(node, frame);
   };
 
@@ -2799,6 +2795,8 @@ function (_Obj) {
     return this.codebuf.join('');
   };
 
+  _inheritsLoose(Compiler, _Obj);
+
   return Compiler;
 }(Obj);
 
@@ -2831,7 +2829,7 @@ module.exports = {
 "use strict";
 
 
-function _inheritsLoose(subClass, superClass) { subClass.prototype = Object.create(superClass.prototype); subClass.prototype.constructor = subClass; subClass.__proto__ = superClass; }
+function _inheritsLoose(subClass, superClass) { subClass.prototype.__proto__ = superClass && superClass.prototype; subClass.__proto__ = superClass; }
 
 var path = __webpack_require__(4);
 
@@ -2840,8 +2838,6 @@ var Obj = __webpack_require__(1);
 module.exports =
 /*#__PURE__*/
 function (_Obj) {
-  _inheritsLoose(Loader, _Obj);
-
   function Loader() {
     return _Obj.apply(this, arguments) || this;
   }
@@ -2874,6 +2870,8 @@ function (_Obj) {
     return filename.indexOf('./') === 0 || filename.indexOf('../') === 0;
   };
 
+  _inheritsLoose(Loader, _Obj);
+
   return Loader;
 }(Obj);
 
@@ -2884,7 +2882,7 @@ function (_Obj) {
 "use strict";
 
 
-function _inheritsLoose(subClass, superClass) { subClass.prototype = Object.create(superClass.prototype); subClass.prototype.constructor = subClass; subClass.__proto__ = superClass; }
+function _inheritsLoose(subClass, superClass) { subClass.prototype.__proto__ = superClass && superClass.prototype; subClass.__proto__ = superClass; }
 
 var asap = __webpack_require__(12);
 
@@ -2942,8 +2940,6 @@ var noopTmplSrc = {
 var Environment =
 /*#__PURE__*/
 function (_Obj) {
-  _inheritsLoose(Environment, _Obj);
-
   function Environment() {
     return _Obj.apply(this, arguments) || this;
   }
@@ -3252,14 +3248,14 @@ function (_Obj) {
     return _waterfall(tasks, callback, forceAsync);
   };
 
+  _inheritsLoose(Environment, _Obj);
+
   return Environment;
 }(Obj);
 
 var Context =
 /*#__PURE__*/
 function (_Obj2) {
-  _inheritsLoose(Context, _Obj2);
-
   function Context() {
     return _Obj2.apply(this, arguments) || this;
   }
@@ -3338,14 +3334,14 @@ function (_Obj2) {
     return exported;
   };
 
+  _inheritsLoose(Context, _Obj2);
+
   return Context;
 }(Obj);
 
 var Template =
 /*#__PURE__*/
 function (_Obj3) {
-  _inheritsLoose(Template, _Obj3);
-
   function Template() {
     return _Obj3.apply(this, arguments) || this;
   }
@@ -3518,6 +3514,8 @@ function (_Obj3) {
     return blocks;
   };
 
+  _inheritsLoose(Template, _Obj3);
+
   return Template;
 }(Obj);
 
@@ -3533,7 +3531,7 @@ module.exports = {
 "use strict";
 
 
-function _inheritsLoose(subClass, superClass) { subClass.prototype = Object.create(superClass.prototype); subClass.prototype.constructor = subClass; subClass.__proto__ = superClass; }
+function _inheritsLoose(subClass, superClass) { subClass.prototype.__proto__ = superClass && superClass.prototype; subClass.__proto__ = superClass; }
 
 var lexer = __webpack_require__(9);
 
@@ -3546,8 +3544,6 @@ var lib = __webpack_require__(0);
 var Parser =
 /*#__PURE__*/
 function (_Obj) {
-  _inheritsLoose(Parser, _Obj);
-
   function Parser() {
     return _Obj.apply(this, arguments) || this;
   }
@@ -4772,6 +4768,8 @@ function (_Obj) {
     return new nodes.Root(0, 0, this.parseNodes());
   };
 
+  _inheritsLoose(Parser, _Obj);
+
   return Parser;
 }(Obj); // var util = require('util');
 // var l = lexer.lex('{%- if x -%}\n hello {% endif %}');
@@ -5356,7 +5354,7 @@ module.exports = {
 "use strict";
 
 
-function _inheritsLoose(subClass, superClass) { subClass.prototype = Object.create(superClass.prototype); subClass.prototype.constructor = subClass; subClass.__proto__ = superClass; }
+function _inheritsLoose(subClass, superClass) { subClass.prototype.__proto__ = superClass && superClass.prototype; subClass.__proto__ = superClass; }
 
 var Loader = __webpack_require__(6);
 
@@ -5366,8 +5364,6 @@ var _require = __webpack_require__(18),
 var WebLoader =
 /*#__PURE__*/
 function (_Loader) {
-  _inheritsLoose(WebLoader, _Loader);
-
   function WebLoader(baseURL, opts) {
     var _this;
 
@@ -5452,6 +5448,8 @@ function (_Loader) {
     ajax.open('GET', url, this.async);
     ajax.send();
   };
+
+  _inheritsLoose(WebLoader, _Loader);
 
   return WebLoader;
 }(Loader);
@@ -6852,15 +6850,13 @@ _exports.e = _exports.escape;
 "use strict";
 
 
-function _inheritsLoose(subClass, superClass) { subClass.prototype = Object.create(superClass.prototype); subClass.prototype.constructor = subClass; subClass.__proto__ = superClass; }
+function _inheritsLoose(subClass, superClass) { subClass.prototype.__proto__ = superClass && superClass.prototype; subClass.__proto__ = superClass; }
 
 var Loader = __webpack_require__(6);
 
 var PrecompiledLoader =
 /*#__PURE__*/
 function (_Loader) {
-  _inheritsLoose(PrecompiledLoader, _Loader);
-
   function PrecompiledLoader(compiledTemplates) {
     var _this;
 
@@ -6884,6 +6880,8 @@ function (_Loader) {
 
     return null;
   };
+
+  _inheritsLoose(PrecompiledLoader, _Loader);
 
   return PrecompiledLoader;
 }(Loader);
