@@ -10,11 +10,11 @@ Changelog
   Fixes [#1087](https://github.com/mozilla/nunjucks/issues/1087) and
   [#1095](https://github.com/mozilla/nunjucks/issues/1095).
 
-* Fix "Invalid type: Is" error for `{% if value is defined %}. Fixes
+* Fix "Invalid type: Is" error for `{% if value is defined %}`. Fixes
   [#1110](https://github.com/mozilla/nunjucks/issues/1110)
 
-* Formally drop support for node v4 (the upgrade to babel 7 made the build
-  process incompatible with node < 6.9.0).
+* Formally drop support for node v4 (the upgrade to babel 7 in 3.1.0 made the
+  build process incompatible with node < 6.9.0).
 
 3.1.2 (Feb 23 2018)
 -------------------
