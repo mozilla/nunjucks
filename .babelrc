@@ -4,7 +4,7 @@
       "loose": true,
       "targets": {
         "browsers": ["last 2 versions", "safari >= 7", "ie 9"],
-        "node": "4"
+        "node": "6"
       }
     }]
   ],
