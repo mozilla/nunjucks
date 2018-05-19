@@ -39,6 +39,28 @@
       })).to.be('false');
     });
 
+    it('should support "is defined" in {% if %} expressions', function() {
+      expect(
+        render('{% if foo is defined %}defined{% else %}undefined{% endif %}',
+          {})
+      ).to.be('undefined');
+      expect(
+        render('{% if foo is defined %}defined{% else %}undefined{% endif %}',
+          {foo: null})
+      ).to.be('defined');
+    });
+
+    it('should support "is not defined" in {% if %} expressions', function() {
+      expect(
+        render('{% if foo is not defined %}undefined{% else %}defined{% endif %}',
+          {})
+      ).to.be('undefined');
+      expect(
+        render('{% if foo is not defined %}undefined{% else %}defined{% endif %}',
+          {foo: null})
+      ).to.be('defined');
+    });
+
     it('undefined should detect undefinedness', function() {
       expect(render('{{ foo is undefined }}')).to.be('true');
       expect(render('{{ foo is not undefined }}')).to.be('false');
