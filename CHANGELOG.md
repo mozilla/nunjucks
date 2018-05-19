@@ -1,6 +1,9 @@
 Changelog
 =========
 
+3.1.3 (May 19 2018)
+-------------------
+
 * Add `forceescape` filter. Fixes [#782](https://github.com/mozilla/nunjucks/issues/782)
 
 * Fix regression that prevented template errors from reporting line and column number.
