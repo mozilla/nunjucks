@@ -4,6 +4,10 @@ const asap = require('asap');
 const waterfall = require('a-sync-waterfall');
 const lib = require('./lib');
 const compiler = require('./compiler');
+const Compiler = compiler.Compiler;
+const parser = require('./parser');
+const Parser = parser.Parser;
+const lexer = require('./lexer');
 const filters = require('./filters');
 const {FileSystemLoader, WebLoader, PrecompiledLoader} = require('./loaders');
 const tests = require('./tests');
@@ -317,6 +321,54 @@ class Environment extends Obj {
 
     const tmpl = new Template(src, this, opts.path);
     return tmpl.render(ctx, cb);
+  }
+
+  compileExpression(src) {
+    let tokenizer = lexer.lex(''); // creating a new tokenizer just to get VARIABLE_START and VARIABLE_END?
+    let source = `${tokenizer.tags.VARIABLE_START}${src}${tokenizer.tags.VARIABLE_END}`;
+    let props;
+    try {
+      let p = new Parser(lexer.lex(source));
+      let nodes = p.parseAsExpressionRoot();
+
+      const c = new Compiler('<template>', this.opts.throwOnUndefined);
+      c.compile(nodes);
+
+      const func = new Function(c.getCode()); // eslint-disable-line no-new-func
+
+      props = func();
+    } catch (e) {
+      const err = lib._prettifyError(this.path, this.opts.dev, e);
+      throw err;
+    }
+
+    return (ctx, cb) => {
+      const context = new Context(ctx || {}, [], this);
+      let syncResult = null;
+      let didError = false;
+
+      props.root(this, context, new Frame(), globalRuntime, (err, res) => {
+        if (didError) {
+          // prevent multiple calls to cb
+          return;
+        }
+        if (err) {
+          err = lib._prettifyError('<template-path>', this.opts.dev, err);
+          didError = true;
+        }
+
+        if (cb) {
+          callbackAsap(cb, err, res);
+        } else {
+          if (err) {
+            throw err;
+          }
+          syncResult = res;
+        }
+      });
+
+      return syncResult;
+    };
   }
 
   waterfall(tasks, callback, forceAsync) {

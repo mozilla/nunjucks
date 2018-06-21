@@ -77,6 +77,16 @@ class Compiler extends Obj {
     this._emitLine('try {');
   }
 
+  _emitExpressionFuncBegin(name) {
+    this.buffer = 'output';
+    this._scopeClosers = '';
+    this._emitLine('function ' + name + '(env, context, frame, runtime, cb) {');
+    this._emitLine('var lineno = null;');
+    this._emitLine('var colno = null;');
+    this._emitLine('var ' + this.buffer + ' = null;');
+    this._emitLine('try {');
+  }
+
   _emitFuncEnd(noReturn) {
     if (!noReturn) {
       this._emitLine('cb(null, ' + this.buffer + ');');
@@ -1115,6 +1125,21 @@ class Compiler extends Obj {
     });
   }
 
+  compileExpressionOutput(node, frame) {
+    if (node.children.length > 0) {
+      const child = node.children[0];
+      this._emit(`${this.buffer} = `);
+      if (this.throwOnUndefined) {
+        this._emit('runtime.ensureDefined(');
+      }
+      this.compile(child, frame);
+      if (this.throwOnUndefined) {
+        this._emit(`,${node.lineno},${node.colno})`);
+      }
+      this._emit(';\n');
+    }
+  }
+
   compileRoot(node, frame) {
     if (frame) {
       this.fail('compileRoot: root node can\'t have frame');
@@ -1160,6 +1185,23 @@ class Compiler extends Obj {
       const blockName = `b_${block.name.value}`;
       this._emitLine(`${blockName}: ${blockName},`);
     });
+
+    this._emitLine('root: root\n};');
+  }
+
+  compileExpressionRoot(node, frame) {
+    if (frame) {
+      this.fail('compileExpressionRoot: root node can\'t have frame');
+    }
+
+    frame = new Frame();
+
+    this._emitExpressionFuncBegin('root');
+    this._compileChildren(node, frame);
+    this._emitLine(`cb(null, ${this.buffer});`);
+    this._emitFuncEnd(true);
+
+    this._emitLine('return {');
 
     this._emitLine('root: root\n};');
   }

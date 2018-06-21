@@ -2257,4 +2257,24 @@
       finish(done);
     });
   });
+
+  describe('compile expressions', function() {
+    it('should compile expressions', function(done) {
+      let env = new Environment();
+      let expr = env.compileExpression('foo');
+      expect(expr()).to.equal(undefined);
+      expect(expr({foo: 42})).to.equal(42);
+      let expr2 = env.compileExpression('42 + foo | string | int');
+      expect(expr2({foo: 42})).to.equal(84);
+      finish(done);
+    });
+
+    it('should throw when {throwOnUndefined: true}', function(done) {
+      expect(function() {
+        let env = new Environment(null, {throwOnUndefined: true});
+        env.compileExpression('foo')();
+      }).to.throwError();
+      finish(done);
+    });
+  });
 }());
