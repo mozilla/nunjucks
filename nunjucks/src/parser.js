@@ -1349,9 +1349,9 @@ class Parser extends Obj {
       this.dropLeadingWhitespace = false;
       this.advanceAfterVariableEnd();
       buf.push(new nodes.ExpressionOutput(tok.lineno, tok.colno, [e]));
-    }
-    if (this.nextToken()) {
-      this.fail('Unexpected token following expression: ' + tok.type, tok.lineno, tok.colno);
+      if (this.nextToken()) {
+        this.fail('Unexpected token following expression: ' + tok.type, tok.lineno, tok.colno);
+      }
     }
     return new nodes.ExpressionRoot(0, 0, buf);
   }
