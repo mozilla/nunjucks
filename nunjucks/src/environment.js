@@ -6,7 +6,7 @@ const lib = require('./lib');
 const compiler = require('./compiler');
 const Compiler = compiler.Compiler;
 const Parser = require('./parser').Parser;
-const lexer = require('./lexer');
+const { lex, VARIABLE_START, VARIABLE_END } = require('./lexer');
 const filters = require('./filters');
 const {FileSystemLoader, WebLoader, PrecompiledLoader} = require('./loaders');
 const tests = require('./tests');
@@ -323,11 +323,10 @@ class Environment extends Obj {
   }
 
   compileExpression(src) {
-    let tokenizer = lexer.lex(''); // creating a new tokenizer just to get VARIABLE_START and VARIABLE_END?
-    let source = `${tokenizer.tags.VARIABLE_START}${src}${tokenizer.tags.VARIABLE_END}`;
+    let source = `${VARIABLE_START} ${src} ${VARIABLE_END}`;
     let props;
     try {
-      let p = new Parser(lexer.lex(source));
+      let p = new Parser(lex(source));
       let nodes = p.parseAsExpressionRoot();
 
       const c = new Compiler('<template>', this.opts.throwOnUndefined);

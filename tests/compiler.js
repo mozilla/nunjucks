@@ -2259,13 +2259,46 @@
   });
 
   describe('compile expressions', function() {
-    it('should compile expressions', function(done) {
+    it('should compile expressions - literals', function(done) {
       let env = new Environment();
-      let expr = env.compileExpression('foo');
-      expect(expr()).to.equal(undefined);
-      expect(expr({foo: 42})).to.equal(42);
-      let expr2 = env.compileExpression('42 + foo | string | int');
-      expect(expr2({foo: 42})).to.equal(84);
+      expect(env.compileExpression('3')()).to.equal(3);
+      expect(env.compileExpression('   3')()).to.equal(3);
+      expect(env.compileExpression('3   ')()).to.equal(3);
+      expect(env.compileExpression('    3   ')()).to.equal(3);
+      expect(env.compileExpression('"a string"')()).to.equal('a string');
+      expect(env.compileExpression('[1, 2, 3]')()).to.eql([1, 2, 3]);
+      expect(env.compileExpression('{foo: "bar"}')()).to.eql({foo: 'bar'});
+      expect(env.compileExpression('true')()).to.equal(true);
+      finish(done);
+    });
+
+    it('should compile expressions - math', function(done) {
+      let env = new Environment();
+      expect(env.compileExpression('42 + 11')()).to.equal(53);
+      expect(env.compileExpression('42 - 11')()).to.equal(31);
+      expect(env.compileExpression('21 * 3')()).to.equal(63);
+      expect(env.compileExpression('21 / 3')()).to.equal(7);
+      expect(env.compileExpression('3 ** 2')()).to.equal(9);
+      finish(done);
+    });
+
+    it('should compile expressions - context variables', function(done) {
+      let env = new Environment();
+      expect(env.compileExpression('foo')()).to.equal(undefined);
+      expect(env.compileExpression('foo')({foo: 42})).to.equal(42);
+      finish(done);
+    });
+
+    it('should compile expressions - context functions', function(done) {
+      let env = new Environment();
+      expect(env.compileExpression('addTwo(7)')({addTwo: n => n + 2})).to.equal(9);
+      finish(done);
+    });
+
+    it('should compile expressions - filters', function(done) {
+      let env = new Environment();
+      expect(env.compileExpression('42 | string')()).to.equal('42');
+      expect(env.compileExpression('42 | string | int')()).to.equal(42);
       finish(done);
     });
 

@@ -1200,10 +1200,7 @@ class Compiler extends Obj {
     this._compileChildren(node, frame);
     this._emitLine(`cb(null, ${this.buffer});`);
     this._emitFuncEnd(true);
-
-    this._emitLine('return {');
-
-    this._emitLine('root: root\n};');
+    this._emitLine('return {\nroot: root\n};');
   }
 
   compile(node, frame) {
