@@ -278,6 +278,7 @@ class Compiler extends Obj {
       val = val.replace(/\n/g, '\\n');
       val = val.replace(/\r/g, '\\r');
       val = val.replace(/\t/g, '\\t');
+      val = val.replace(/\u2028/g, '\\u2028');
       this._emit(`"${val}"`);
     } else if (node.value === null) {
       this._emit('null');

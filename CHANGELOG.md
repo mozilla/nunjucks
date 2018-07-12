@@ -1,6 +1,8 @@
 Changelog
 =========
 
+* Fix "Unexpected token" error for U+2028 unicode newline. Fixes [#126](https://github.com/mozilla/nunjucks/issues/126) and [#736](https://github.com/mozilla/nunjucks/issues/736)
+
 3.1.3 (May 19 2018)
 -------------------
 
