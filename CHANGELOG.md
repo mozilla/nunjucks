@@ -1,6 +1,11 @@
 Changelog
 =========
 
+3.1.4 (September 2 2018)
+-------------------
+
+* Add `with` keyword for the include template.
+
 3.1.3 (May 19 2018)
 -------------------
 

@@ -502,6 +502,16 @@ You can even include templates in the middle of loops:
 {% endfor %}
 ```
 
+The include templates have access to the variables of the active context. You can add additional variables in the passages after the keyword `with`:
+
+```jinja
+{% include "item.html" with { 'foo': 'bar' } %}
+{% set vars = {'foo': 'bar'} %}
+{% include "item.html" with vars %}
+{% include 'item.html' ignore missing with {'foo': 'bar'} %}
+```
+
+
 This is especially useful for cutting up templates into pieces so that the
 browser-side environment can render the small chunks when it needs to change
 the page.

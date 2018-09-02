@@ -1047,12 +1047,26 @@ class Compiler extends Obj {
   }
 
   compileInclude(node, frame) {
+    var _id;
     this._emitLine('var tasks = [];');
     this._emitLine('tasks.push(');
     this._emitLine('function(callback) {');
     const id = this._compileGetTemplate(node, frame, false, node.ignoreMissing);
     this._emitLine(`callback(null,${id});});`);
     this._emitLine('});');
+
+    if (node.value) {
+      if (_id === null || _id === undefined) {
+        _id = this._tmpid();
+        this._emitLine('var ' + _id + ';');
+      }
+      this._emit(_id + ' = ');
+      this._compileExpression(node.value, frame);
+      this._emitLine(';');
+      this._emitLine('if(frame.topLevel) {');
+      this._emitLine(`context.setVariable("--include--data--", ${_id});`);
+      this._emitLine('}');
+    }
 
     const id2 = this._tmpid();
     this._emitLine('tasks.push(');

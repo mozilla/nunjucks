@@ -465,6 +465,16 @@ class Template extends Obj {
     let syncResult = null;
     let didError = false;
 
+    // With for include template
+    let contextIncludeData = context.ctx['--include--data--'];
+    if (contextIncludeData) {
+      Object.keys(contextIncludeData).forEach(function ctxInterate(key) {
+        context.ctx[key] = contextIncludeData[key];
+        frame.set(key, contextIncludeData[key], true);
+      });
+      delete context.ctx['--include--data--'];
+    }
+
     this.rootRenderFunc(this.env, context, frame, globalRuntime, (err, res) => {
       if (didError) {
         // prevent multiple calls to cb
