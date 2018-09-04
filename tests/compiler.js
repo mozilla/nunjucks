@@ -55,6 +55,11 @@
       finish(done);
     });
 
+    it('should escape Unicode line seperators', function(done) {
+      equal('\u2028', '\u2028');
+      finish(done);
+    });
+
     it('should compile references', function(done) {
       equal('{{ foo.bar }}',
         {
