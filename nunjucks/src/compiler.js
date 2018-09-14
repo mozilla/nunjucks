@@ -1055,8 +1055,8 @@ class Compiler extends Obj {
     this._emitLine(`callback(null,${id});});`);
     this._emitLine('});');
 
-    this._emitLine('var data;')
-    
+    this._emitLine('var data;');
+
     if (node.value) {
       this._emitLine('data=');
       this._compileExpression(node.value, frame);
