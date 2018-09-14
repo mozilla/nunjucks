@@ -1048,7 +1048,6 @@ class Compiler extends Obj {
   }
 
   compileInclude(node, frame) {
-    var _id;
     this._emitLine('var tasks = [];');
     this._emitLine('tasks.push(');
     this._emitLine('function(callback) {');
@@ -1056,24 +1055,19 @@ class Compiler extends Obj {
     this._emitLine(`callback(null,${id});});`);
     this._emitLine('});');
 
+    this._emitLine('var data;')
+    
     if (node.value) {
-      if (_id === null || _id === undefined) {
-        _id = this._tmpid();
-        this._emitLine('var ' + _id + ';');
-      }
-      this._emit(_id + ' = ');
+      this._emitLine('data=');
       this._compileExpression(node.value, frame);
       this._emitLine(';');
-      this._emitLine('if(frame.topLevel) {');
-      this._emitLine(`context.setVariable("--include--data--", ${_id});`);
-      this._emitLine('}');
     }
 
     const id2 = this._tmpid();
     this._emitLine('tasks.push(');
     this._emitLine('function(template, callback){');
     this._emitLine('template.render(context.getVariables(), frame, ' + this._makeCallback(id2));
-    this._emitLine('callback(null,' + id2 + ');});');
+    this._emitLine('callback(null,' + id2 + ');}, data);');
     this._emitLine('});');
 
     this._emitLine('tasks.push(');

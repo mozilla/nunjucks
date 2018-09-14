@@ -432,7 +432,7 @@ class Template extends Obj {
     }
   }
 
-  render(ctx, parentFrame, cb) {
+  render(ctx, parentFrame, cb, data) {
     if (typeof ctx === 'function') {
       cb = ctx;
       ctx = {};
@@ -466,13 +466,10 @@ class Template extends Obj {
     let didError = false;
 
     // With for include template
-    let contextIncludeData = context.ctx['--include--data--'];
-    if (contextIncludeData) {
-      Object.keys(contextIncludeData).forEach(function ctxInterate(key) {
-        context.ctx[key] = contextIncludeData[key];
-        frame.set(key, contextIncludeData[key], true);
+    if (data) {
+      Object.keys(data).forEach((key) => {
+        frame.set(key, data[key]);
       });
-      delete context.ctx['--include--data--'];
     }
 
     this.rootRenderFunc(this.env, context, frame, globalRuntime, (err, res) => {
