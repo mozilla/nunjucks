@@ -63,7 +63,7 @@
     "babel-register": "@babel/register"
   },
   "engines": {
-    "node": ">= 6.9.0 <= 11.0.0"
+    "node": ">= 6.9.0 <= 11.1.0"
   },
   "scripts": {
     "build:transpile": "babel nunjucks --out-dir .",
