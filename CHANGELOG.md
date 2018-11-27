@@ -1,6 +1,17 @@
 Changelog
 =========
 
+* Fix engine dependency version for Node versions > 11.1.0;
+  now there is only a minimum Node dependency and not a maximum dependency;
+  the engine dependency is now a blacklist rather than a whitelist;
+  it indicates Node versions that are known NOT to work, and unknown future
+  versions are accepted by default rather than rejected by default.
+  This fixes a systematic problem where Nunjucks and all of its downstream
+  dependencies break every time a new Node version is released, despite the
+  Node update being backwards compatible, thus forcing a new Nunjucks
+  release such as 3.1.4 until the goalpost is soon moved again.
+  Fixes [#1168](https://github.com/mozilla/nunjucks/issues/1168).
+
 3.1.4 (Nov 9 2018)
 ------------------
 
