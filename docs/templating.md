@@ -1436,13 +1436,13 @@ and replacing them surrounding an item:
 
 ```jinja
 {% set letters = aaabbbccc%}
-{{ "letters" | replace("", ".") }}
+{{ letters | replace("", ".") }}
 ```
 
 **Output**
 
 ```jinja
-.l.e.t.t.e.r.s.
+.a.a.a.b.b.b.c.c.c.
 
 ```
 
