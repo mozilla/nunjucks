@@ -6,7 +6,6 @@
   "dependencies": {
     "a-sync-waterfall": "^1.0.0",
     "asap": "^2.0.3",
-    "postinstall-build": "^5.0.1",
     "yargs": "^3.32.0"
   },
   "browser": "./browser/nunjucks.js",
@@ -72,7 +71,7 @@
     "codecov": "codecov",
     "mocha": "mocha -R spec tests",
     "lint": "eslint nunjucks scripts tests",
-    "postinstall": "node postinstall-build.js src",
+    "prepare": "npm run build",
     "test:instrument": "cross-env NODE_ENV=test scripts/bundle.js",
     "test:runner": "cross-env NODE_ENV=test scripts/testrunner.js",
     "test": "npm run lint && npm run test:instrument && npm run test:runner"
