@@ -468,7 +468,11 @@ class Template extends Obj {
     this.rootRenderFunc(this.env, context, frame, globalRuntime, (err, res) => {
       if (didError) {
         // prevent multiple calls to cb
-        return;
+        if (cb) {
+          return;
+        } else {
+          throw err;
+        }
       }
       if (err) {
         err = lib._prettifyError(this.path, this.env.opts.dev, err);

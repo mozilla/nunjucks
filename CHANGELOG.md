@@ -1,6 +1,15 @@
 Changelog
 =========
 
+3.1.6 (unreleased)
+------------------
+
+* Fix bug where exceptions were silently swallowed with synchronous render.
+  Fixes [#678](https://github.com/mozilla/nunjucks/issues/678),
+  [#1116](https://github.com/mozilla/nunjucks/issues/1116),
+  [#1127](https://github.com/mozilla/nunjucks/issues/1127), and
+  [#1164](https://github.com/mozilla/nunjucks/issues/1164)
+
 3.1.5 (Dec 13 2018)
 -------------------
 
