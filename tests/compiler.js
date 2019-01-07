@@ -795,6 +795,14 @@
     });
 
     if (!isSlim) {
+      it('should throw exceptions when called synchronously', function() {
+        var tmpl = new Template('{% from "doesnotexist" import foo %}');
+        function templateRender() {
+          tmpl.render();
+        }
+        expect(templateRender).to.throwException(/template not found: doesnotexist/);
+      });
+
       it('should include error line in raised TemplateError', function(done) {
         var tmplStr = [
           '{% set items = ["a", "b",, "c"] %}',
