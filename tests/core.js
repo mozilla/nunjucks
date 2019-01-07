@@ -20,7 +20,7 @@
 
   function rmdir(dirPath) {
     fs.emptyDirSync(dirPath);
-    fs.rmdir(dirPath);
+    fs.rmdirSync(dirPath);
   }
 
   describe('nunjucks.configure', function() {
