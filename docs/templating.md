@@ -43,6 +43,7 @@ Plugins are available in various editors to support the `jinja` syntax highlight
 * brackets <https://github.com/axelboc/nunjucks-brackets>
 * sublime <https://github.com/mogga/sublime-nunjucks/blob/master/Nunjucks.tmLanguage>
 * emacs <http://web-mode.org>
+* vscode <https://github.com/ronnidc/vscode-nunjucks>
 
 ## Variables
 
