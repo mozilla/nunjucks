@@ -1,4 +1,4 @@
-/*! Browser bundle of nunjucks 3.1.3 (slim, only works with precompiled templates) */
+/*! Browser bundle of nunjucks 3.1.7 (slim, only works with precompiled templates) */
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
 		module.exports = factory();
@@ -97,14 +97,13 @@ var escapeMap = {
   '>': '&gt;'
 };
 var escapeRegex = /[&"'<>]/g;
-
-var _exports = module.exports = {};
+var exports = module.exports = {};
 
 function hasOwnProp(obj, k) {
   return ObjProto.hasOwnProperty.call(obj, k);
 }
 
-_exports.hasOwnProp = hasOwnProp;
+exports.hasOwnProp = hasOwnProp;
 
 function lookupEscape(ch) {
   return escapeMap[ch];
@@ -113,7 +112,7 @@ function lookupEscape(ch) {
 function _prettifyError(path, withInternals, err) {
   if (!err.Update) {
     // not one of ours, cast it
-    err = new _exports.TemplateError(err);
+    err = new exports.TemplateError(err);
   }
 
   err.Update(path); // Unless they marked the dev flag, show them a trace from here
@@ -127,7 +126,7 @@ function _prettifyError(path, withInternals, err) {
   return err;
 }
 
-_exports._prettifyError = _prettifyError;
+exports._prettifyError = _prettifyError;
 
 function TemplateError(message, lineno, colno) {
   var err;
@@ -228,37 +227,37 @@ if (Object.setPrototypeOf) {
   });
 }
 
-_exports.TemplateError = TemplateError;
+exports.TemplateError = TemplateError;
 
 function escape(val) {
   return val.replace(escapeRegex, lookupEscape);
 }
 
-_exports.escape = escape;
+exports.escape = escape;
 
 function isFunction(obj) {
   return ObjProto.toString.call(obj) === '[object Function]';
 }
 
-_exports.isFunction = isFunction;
+exports.isFunction = isFunction;
 
 function isArray(obj) {
   return ObjProto.toString.call(obj) === '[object Array]';
 }
 
-_exports.isArray = isArray;
+exports.isArray = isArray;
 
 function isString(obj) {
   return ObjProto.toString.call(obj) === '[object String]';
 }
 
-_exports.isString = isString;
+exports.isString = isString;
 
 function isObject(obj) {
   return ObjProto.toString.call(obj) === '[object Object]';
 }
 
-_exports.isObject = isObject;
+exports.isObject = isObject;
 
 function groupBy(obj, val) {
   var result = {};
@@ -275,13 +274,13 @@ function groupBy(obj, val) {
   return result;
 }
 
-_exports.groupBy = groupBy;
+exports.groupBy = groupBy;
 
 function toArray(obj) {
   return Array.prototype.slice.call(obj);
 }
 
-_exports.toArray = toArray;
+exports.toArray = toArray;
 
 function without(array) {
   var result = [];
@@ -303,7 +302,7 @@ function without(array) {
   return result;
 }
 
-_exports.without = without;
+exports.without = without;
 
 function repeat(char_, n) {
   var str = '';
@@ -315,7 +314,7 @@ function repeat(char_, n) {
   return str;
 }
 
-_exports.repeat = repeat;
+exports.repeat = repeat;
 
 function each(obj, func, context) {
   if (obj == null) {
@@ -331,7 +330,7 @@ function each(obj, func, context) {
   }
 }
 
-_exports.each = each;
+exports.each = each;
 
 function map(obj, func) {
   var results = [];
@@ -355,7 +354,7 @@ function map(obj, func) {
   return results;
 }
 
-_exports.map = map;
+exports.map = map;
 
 function asyncIter(arr, iter, cb) {
   var i = -1;
@@ -373,7 +372,7 @@ function asyncIter(arr, iter, cb) {
   next();
 }
 
-_exports.asyncIter = asyncIter;
+exports.asyncIter = asyncIter;
 
 function asyncFor(obj, iter, cb) {
   var keys = keys_(obj || {});
@@ -394,13 +393,13 @@ function asyncFor(obj, iter, cb) {
   next();
 }
 
-_exports.asyncFor = asyncFor;
+exports.asyncFor = asyncFor;
 
 function indexOf(arr, searchElement, fromIndex) {
   return Array.prototype.indexOf.call(arr || [], searchElement, fromIndex);
 }
 
-_exports.indexOf = indexOf;
+exports.indexOf = indexOf;
 
 function keys_(obj) {
   /* eslint-disable no-restricted-syntax */
@@ -415,7 +414,7 @@ function keys_(obj) {
   return arr;
 }
 
-_exports.keys = keys_;
+exports.keys = keys_;
 
 function _entries(obj) {
   return keys_(obj).map(function (k) {
@@ -423,7 +422,7 @@ function _entries(obj) {
   });
 }
 
-_exports._entries = _entries;
+exports._entries = _entries;
 
 function _values(obj) {
   return keys_(obj).map(function (k) {
@@ -431,7 +430,7 @@ function _values(obj) {
   });
 }
 
-_exports._values = _values;
+exports._values = _values;
 
 function extend(obj1, obj2) {
   obj1 = obj1 || {};
@@ -441,7 +440,7 @@ function extend(obj1, obj2) {
   return obj1;
 }
 
-_exports._assign = _exports.extend = extend;
+exports._assign = exports.extend = extend;
 
 function inOperator(key, val) {
   if (isArray(val) || isString(val)) {
@@ -453,7 +452,7 @@ function inOperator(key, val) {
   throw new Error('Cannot use "in" operator to search for "' + key + '" in unexpected types.');
 }
 
-_exports.inOperator = inOperator;
+exports.inOperator = inOperator;
 
 /***/ }),
 /* 2 */
@@ -877,13 +876,15 @@ module.exports = {
 "use strict";
 
 
-function _inheritsLoose(subClass, superClass) { subClass.prototype.__proto__ = superClass && superClass.prototype; subClass.__proto__ = superClass; }
+function _inheritsLoose(subClass, superClass) { subClass.prototype = Object.create(superClass.prototype); subClass.prototype.constructor = subClass; subClass.__proto__ = superClass; }
 
 var Loader = __webpack_require__(4);
 
 var PrecompiledLoader =
 /*#__PURE__*/
 function (_Loader) {
+  _inheritsLoose(PrecompiledLoader, _Loader);
+
   function PrecompiledLoader(compiledTemplates) {
     var _this;
 
@@ -908,8 +909,6 @@ function (_Loader) {
     return null;
   };
 
-  _inheritsLoose(PrecompiledLoader, _Loader);
-
   return PrecompiledLoader;
 }(Loader);
 
@@ -924,7 +923,7 @@ module.exports = {
 "use strict";
 
 
-function _inheritsLoose(subClass, superClass) { subClass.prototype.__proto__ = superClass && superClass.prototype; subClass.__proto__ = superClass; }
+function _inheritsLoose(subClass, superClass) { subClass.prototype = Object.create(superClass.prototype); subClass.prototype.constructor = subClass; subClass.__proto__ = superClass; }
 
 var path = __webpack_require__(0);
 
@@ -933,6 +932,8 @@ var Obj = __webpack_require__(5);
 module.exports =
 /*#__PURE__*/
 function (_Obj) {
+  _inheritsLoose(Loader, _Obj);
+
   function Loader() {
     return _Obj.apply(this, arguments) || this;
   }
@@ -965,8 +966,6 @@ function (_Obj) {
     return filename.indexOf('./') === 0 || filename.indexOf('../') === 0;
   };
 
-  _inheritsLoose(Loader, _Obj);
-
   return Loader;
 }(Obj);
 
@@ -977,11 +976,11 @@ function (_Obj) {
 "use strict";
  // A simple class system, more documentation to come
 
-function _inheritsLoose(subClass, superClass) { subClass.prototype.__proto__ = superClass && superClass.prototype; subClass.__proto__ = superClass; }
-
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _inheritsLoose(subClass, superClass) { subClass.prototype = Object.create(superClass.prototype); subClass.prototype.constructor = subClass; subClass.__proto__ = superClass; }
 
 var lib = __webpack_require__(1);
 
@@ -1010,6 +1009,8 @@ function extendClass(cls, name, props) {
   var subclass =
   /*#__PURE__*/
   function (_cls) {
+    _inheritsLoose(subclass, _cls);
+
     function subclass() {
       return _cls.apply(this, arguments) || this;
     }
@@ -1020,8 +1021,6 @@ function extendClass(cls, name, props) {
         return name;
       }
     }]);
-
-    _inheritsLoose(subclass, _cls);
 
     return subclass;
   }(cls);
@@ -1179,7 +1178,7 @@ module.exports = {
 "use strict";
 
 
-function _inheritsLoose(subClass, superClass) { subClass.prototype.__proto__ = superClass && superClass.prototype; subClass.__proto__ = superClass; }
+function _inheritsLoose(subClass, superClass) { subClass.prototype = Object.create(superClass.prototype); subClass.prototype.constructor = subClass; subClass.__proto__ = superClass; }
 
 var asap = __webpack_require__(8);
 
@@ -1237,6 +1236,8 @@ var noopTmplSrc = {
 var Environment =
 /*#__PURE__*/
 function (_Obj) {
+  _inheritsLoose(Environment, _Obj);
+
   function Environment() {
     return _Obj.apply(this, arguments) || this;
   }
@@ -1545,14 +1546,14 @@ function (_Obj) {
     return _waterfall(tasks, callback, forceAsync);
   };
 
-  _inheritsLoose(Environment, _Obj);
-
   return Environment;
 }(Obj);
 
 var Context =
 /*#__PURE__*/
 function (_Obj2) {
+  _inheritsLoose(Context, _Obj2);
+
   function Context() {
     return _Obj2.apply(this, arguments) || this;
   }
@@ -1631,14 +1632,14 @@ function (_Obj2) {
     return exported;
   };
 
-  _inheritsLoose(Context, _Obj2);
-
   return Context;
 }(Obj);
 
 var Template =
 /*#__PURE__*/
 function (_Obj3) {
+  _inheritsLoose(Template, _Obj3);
+
   function Template() {
     return _Obj3.apply(this, arguments) || this;
   }
@@ -1717,7 +1718,11 @@ function (_Obj3) {
     this.rootRenderFunc(this.env, context, frame, globalRuntime, function (err, res) {
       if (didError) {
         // prevent multiple calls to cb
-        return;
+        if (cb) {
+          return;
+        } else {
+          throw err;
+        }
       }
 
       if (err) {
@@ -1810,8 +1815,6 @@ function (_Obj3) {
     });
     return blocks;
   };
-
-  _inheritsLoose(Template, _Obj3);
 
   return Template;
 }(Obj);
@@ -2253,7 +2256,7 @@ var lib = __webpack_require__(1);
 
 var r = __webpack_require__(2);
 
-var _exports = module.exports = {};
+var exports = module.exports = {};
 
 function normalize(value, defaultValue) {
   if (value === null || value === undefined || value === false) {
@@ -2263,7 +2266,7 @@ function normalize(value, defaultValue) {
   return value;
 }
 
-_exports.abs = Math.abs;
+exports.abs = Math.abs;
 
 function isNaN(num) {
   return num !== num; // eslint-disable-line no-self-compare
@@ -2296,7 +2299,7 @@ function batch(arr, linecount, fillWith) {
   return res;
 }
 
-_exports.batch = batch;
+exports.batch = batch;
 
 function capitalize(str) {
   str = normalize(str, '');
@@ -2304,7 +2307,7 @@ function capitalize(str) {
   return r.copySafeness(str, ret.charAt(0).toUpperCase() + ret.slice(1));
 }
 
-_exports.capitalize = capitalize;
+exports.capitalize = capitalize;
 
 function center(str, width) {
   str = normalize(str, '');
@@ -2320,7 +2323,7 @@ function center(str, width) {
   return r.copySafeness(str, pre + str + post);
 }
 
-_exports.center = center;
+exports.center = center;
 
 function default_(val, def, bool) {
   if (bool) {
@@ -2331,7 +2334,7 @@ function default_(val, def, bool) {
 } // TODO: it is confusing to export something called 'default'
 
 
-_exports['default'] = default_; // eslint-disable-line dot-notation
+exports['default'] = default_; // eslint-disable-line dot-notation
 
 function dictsort(val, caseSensitive, by) {
   if (!lib.isObject(val)) {
@@ -2374,13 +2377,13 @@ function dictsort(val, caseSensitive, by) {
   return array;
 }
 
-_exports.dictsort = dictsort;
+exports.dictsort = dictsort;
 
 function dump(obj, spaces) {
   return JSON.stringify(obj, null, spaces);
 }
 
-_exports.dump = dump;
+exports.dump = dump;
 
 function escape(str) {
   if (str instanceof r.SafeString) {
@@ -2391,7 +2394,7 @@ function escape(str) {
   return r.markSafe(lib.escape(str.toString()));
 }
 
-_exports.escape = escape;
+exports.escape = escape;
 
 function safe(str) {
   if (str instanceof r.SafeString) {
@@ -2402,26 +2405,26 @@ function safe(str) {
   return r.markSafe(str.toString());
 }
 
-_exports.safe = safe;
+exports.safe = safe;
 
 function first(arr) {
   return arr[0];
 }
 
-_exports.first = first;
+exports.first = first;
 
 function forceescape(str) {
   str = str === null || str === undefined ? '' : str;
   return r.markSafe(lib.escape(str.toString()));
 }
 
-_exports.forceescape = forceescape;
+exports.forceescape = forceescape;
 
 function groupby(arr, attr) {
   return lib.groupBy(arr, attr);
 }
 
-_exports.groupby = groupby;
+exports.groupby = groupby;
 
 function indent(str, width, indentfirst) {
   str = normalize(str, '');
@@ -2440,7 +2443,7 @@ function indent(str, width, indentfirst) {
   return r.copySafeness(str, res);
 }
 
-_exports.indent = indent;
+exports.indent = indent;
 
 function join(arr, del, attr) {
   del = del || '';
@@ -2454,13 +2457,13 @@ function join(arr, del, attr) {
   return arr.join(del);
 }
 
-_exports.join = join;
+exports.join = join;
 
 function last(arr) {
   return arr[arr.length - 1];
 }
 
-_exports.last = last;
+exports.last = last;
 
 function lengthFilter(val) {
   var value = normalize(val, '');
@@ -2482,7 +2485,7 @@ function lengthFilter(val) {
   return 0;
 }
 
-_exports.length = lengthFilter;
+exports.length = lengthFilter;
 
 function list(val) {
   if (lib.isString(val)) {
@@ -2503,14 +2506,14 @@ function list(val) {
   }
 }
 
-_exports.list = list;
+exports.list = list;
 
 function lower(str) {
   str = normalize(str, '');
   return str.toLowerCase();
 }
 
-_exports.lower = lower;
+exports.lower = lower;
 
 function nl2br(str) {
   if (str === null || str === undefined) {
@@ -2520,13 +2523,13 @@ function nl2br(str) {
   return r.copySafeness(str, str.replace(/\r\n|\n/g, '<br />\n'));
 }
 
-_exports.nl2br = nl2br;
+exports.nl2br = nl2br;
 
 function random(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
-_exports.random = random;
+exports.random = random;
 
 function rejectattr(arr, attr) {
   return arr.filter(function (item) {
@@ -2534,7 +2537,7 @@ function rejectattr(arr, attr) {
   });
 }
 
-_exports.rejectattr = rejectattr;
+exports.rejectattr = rejectattr;
 
 function selectattr(arr, attr) {
   return arr.filter(function (item) {
@@ -2542,7 +2545,7 @@ function selectattr(arr, attr) {
   });
 }
 
-_exports.selectattr = selectattr;
+exports.selectattr = selectattr;
 
 function replace(str, old, new_, maxCount) {
   var originalStr = str;
@@ -2614,7 +2617,7 @@ function replace(str, old, new_, maxCount) {
   return r.copySafeness(originalStr, res);
 }
 
-_exports.replace = replace;
+exports.replace = replace;
 
 function reverse(val) {
   var arr;
@@ -2637,7 +2640,7 @@ function reverse(val) {
   return arr;
 }
 
-_exports.reverse = reverse;
+exports.reverse = reverse;
 
 function round(val, precision, method) {
   precision = precision || 0;
@@ -2655,7 +2658,7 @@ function round(val, precision, method) {
   return rounder(val * factor) / factor;
 }
 
-_exports.round = round;
+exports.round = round;
 
 function slice(arr, slices, fillWith) {
   var sliceLength = Math.floor(arr.length / slices);
@@ -2683,7 +2686,7 @@ function slice(arr, slices, fillWith) {
   return res;
 }
 
-_exports.slice = slice;
+exports.slice = slice;
 
 function sum(arr, attr, start) {
   if (start === void 0) {
@@ -2701,8 +2704,8 @@ function sum(arr, attr, start) {
   }, 0);
 }
 
-_exports.sum = sum;
-_exports.sort = r.makeMacro(['value', 'reverse', 'case_sensitive', 'attribute'], [], function (arr, reversed, caseSens, attr) {
+exports.sum = sum;
+exports.sort = r.makeMacro(['value', 'reverse', 'case_sensitive', 'attribute'], [], function (arr, reversed, caseSens, attr) {
   // Copy it
   var array = lib.map(arr, function (v) {
     return v;
@@ -2731,7 +2734,7 @@ function string(obj) {
   return r.copySafeness(obj, obj);
 }
 
-_exports.string = string;
+exports.string = string;
 
 function striptags(input, preserveLinebreaks) {
   input = normalize(input, '');
@@ -2751,7 +2754,7 @@ function striptags(input, preserveLinebreaks) {
   return r.copySafeness(input, res);
 }
 
-_exports.striptags = striptags;
+exports.striptags = striptags;
 
 function title(str) {
   str = normalize(str, '');
@@ -2761,13 +2764,13 @@ function title(str) {
   return r.copySafeness(str, words.join(' '));
 }
 
-_exports.title = title;
+exports.title = title;
 
 function trim(str) {
   return r.copySafeness(str, str.replace(/^\s*|\s*$/g, ''));
 }
 
-_exports.trim = trim;
+exports.trim = trim;
 
 function truncate(input, length, killwords, end) {
   var orig = input;
@@ -2794,14 +2797,14 @@ function truncate(input, length, killwords, end) {
   return r.copySafeness(orig, input);
 }
 
-_exports.truncate = truncate;
+exports.truncate = truncate;
 
 function upper(str) {
   str = normalize(str, '');
   return str.toUpperCase();
 }
 
-_exports.upper = upper;
+exports.upper = upper;
 
 function urlencode(obj) {
   var enc = encodeURIComponent;
@@ -2818,7 +2821,7 @@ function urlencode(obj) {
   }
 }
 
-_exports.urlencode = urlencode; // For the jinja regexp, see
+exports.urlencode = urlencode; // For the jinja regexp, see
 // https://github.com/mitsuhiko/jinja2/blob/f15b814dcba6aa12bc74d1f7d0c881d55f7126be/jinja2/utils.py#L20-L23
 
 var puncRe = /^(?:\(|<|&lt;)?(.*?)(?:\.|,|\)|\n|&gt;)?$/; // from http://blog.gerv.net/2011/05/html5_email_address_regexp/
@@ -2867,7 +2870,7 @@ function urlize(str, length, nofollow) {
   return words.join('');
 }
 
-_exports.urlize = urlize;
+exports.urlize = urlize;
 
 function wordcount(str) {
   str = normalize(str, '');
@@ -2875,24 +2878,24 @@ function wordcount(str) {
   return words ? words.length : null;
 }
 
-_exports.wordcount = wordcount;
+exports.wordcount = wordcount;
 
 function float(val, def) {
   var res = parseFloat(val);
   return isNaN(res) ? def : res;
 }
 
-_exports.float = float;
+exports.float = float;
 
 function int(val, def) {
   var res = parseInt(val, 10);
   return isNaN(res) ? def : res;
 }
 
-_exports.int = int; // Aliases
+exports.int = int; // Aliases
 
-_exports.d = _exports.default;
-_exports.e = _exports.escape;
+exports.d = exports.default;
+exports.e = exports.escape;
 
 /***/ }),
 /* 13 */
@@ -3268,9 +3271,6 @@ module.exports = globals;
 /* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
-"use strict";
-
-
 var path = __webpack_require__(0);
 
 module.exports = function express(env, app) {
@@ -3301,9 +3301,6 @@ module.exports = function express(env, app) {
 /***/ }),
 /* 16 */
 /***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
 
 function installCompat() {
   'use strict';

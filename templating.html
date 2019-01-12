@@ -343,6 +343,7 @@ include recognition of the <code>.njk</code> extension.</p>
 <li>brackets <a href="https://github.com/axelboc/nunjucks-brackets">https://github.com/axelboc/nunjucks-brackets</a></li>
 <li>sublime <a href="https://github.com/mogga/sublime-nunjucks/blob/master/Nunjucks.tmLanguage">https://github.com/mogga/sublime-nunjucks/blob/master/Nunjucks.tmLanguage</a></li>
 <li>emacs <a href="http://web-mode.org">http://web-mode.org</a></li>
+<li>vscode <a href="https://github.com/ronnidc/vscode-nunjucks">https://github.com/ronnidc/vscode-nunjucks</a></li>
 </ul>
 
 <h2 id="variables">Variables</h2>
@@ -1408,10 +1409,10 @@ and replacing them surrounding an item:</p>
 
 <p><strong>Input</strong></p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">set</span> <span class="nv">letters</span> <span class="o">=</span> <span class="nv">aaabbbccc</span><span class="cp">%}</span><span class="x"></span>
-<span class="cp">{{</span> <span class="s2">&quot;letters&quot;</span> <span class="o">|</span> <span class="nf">replace</span><span class="o">(</span><span class="s2">&quot;&quot;</span><span class="o">,</span> <span class="s2">&quot;.&quot;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
+<span class="cp">{{</span> <span class="nv">letters</span> <span class="o">|</span> <span class="nf">replace</span><span class="o">(</span><span class="s2">&quot;&quot;</span><span class="o">,</span> <span class="s2">&quot;.&quot;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
 </code></pre></div>
 <p><strong>Output</strong></p>
-<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="x">.l.e.t.t.e.r.s.</span>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="x">.a.a.a.b.b.b.c.c.c.</span>
 </code></pre></div>
 <p>Every instance of an item up to a given number (item to be replaced,
 item replacement, number to be replaced):</p>
