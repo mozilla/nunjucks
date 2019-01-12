@@ -1,7 +1,7 @@
 Changelog
 =========
 
-3.1.6 (unreleased)
+3.1.7 (Jan 12 2019)
 ------------------
 
 * Fix bug where exceptions were silently swallowed with synchronous render.
@@ -9,6 +9,18 @@ Changelog
   [#1116](https://github.com/mozilla/nunjucks/issues/1116),
   [#1127](https://github.com/mozilla/nunjucks/issues/1127), and
   [#1164](https://github.com/mozilla/nunjucks/issues/1164)
+* Removes deprecated postinstall-build package in favor of
+  [npm prepare](https://docs.npmjs.com/misc/scripts#prepublish-and-prepare).
+  Merge of [#1172](https://github.com/mozilla/nunjucks/pull/1172).
+  Fixes [#1167](https://github.com/mozilla/nunjucks/issues/1167).
+
+    - Note: this means that npm@5 or later is required to install nunjucks
+      directly from github.
+
+3.1.6 (Dec 13 2018)
+-------------------
+
+No code changes; fixed npm packaging issue.
 
 3.1.5 (Dec 13 2018)
 -------------------
