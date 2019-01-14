@@ -254,7 +254,7 @@ The [`dictsort`](http://jinja.pocoo.org/docs/templates/#dictsort) filter is
 available for sorting objects when iterating over them.
 
 ES iterators are supported, like the new builtin Map and Set. But also
-anything implementing the iterator protocal.
+anything implementing the iterable protocol.
 
 ```js
 var fruits = new Map([
