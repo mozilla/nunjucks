@@ -87,6 +87,8 @@ nunjucks.configure('views', { autoescape: true });
 nunjucks.render('index.html', { foo: 'bar' });
 ```
 
+See the [hello world example on github](https://github.com/mozilla/nunjucks/tree/master/samples/hello-world).
+
 In node, `'views'` would be a path relative to the current working
 directory. In the browser, it would be a relative URL, and you
 probably want it to be absolute, like `'/views'`.
