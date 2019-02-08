@@ -816,7 +816,7 @@
         tmpl.render({}, function(err, res) {
           expect(res).to.be(undefined);
           expect(err.toString()).to.be([
-            'Template render error: (parse-error.njk) [Line 1, Column 24]',
+            'Template render error: (parse-error.njk) [Line 1, Column 26]',
             '  unexpected token: ,',
           ].join('\n'));
           done();

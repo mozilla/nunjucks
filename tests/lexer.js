@@ -32,6 +32,17 @@
       if (lib.isArray(type)) {
         expect(tok.type).to.be(type[0]);
         expect(tok.value).to.be(type[1]);
+      } else if (lib.isObject(type)) {
+        expect(tok.type).to.be(type.type);
+        if (type.value != null) {
+          expect(tok.value).to.be(type.value);
+        }
+        if (type.lineno != null) {
+          expect(tok.lineno).to.be(type.lineno);
+        }
+        if (type.colno != null) {
+          expect(tok.colno).to.be(type.colno);
+        }
       } else {
         expect(tok.type).to.be(type);
       }
@@ -435,6 +446,290 @@
         lexer.TOKEN_REGEX,
         lexer.TOKEN_SYMBOL,
         lexer.TOKEN_VARIABLE_END);
+    });
+
+    it('should keep track of token positions', function() {
+      hasTokens(lexer.lex('{{ 3 != 4 == 5 <= 6 >= 7 < 8 > 9 }}'),
+        {
+          type: lexer.TOKEN_VARIABLE_START,
+          lineno: 0,
+          colno: 0,
+        },
+        {
+          type: lexer.TOKEN_INT,
+          value: '3',
+          lineno: 0,
+          colno: 3,
+        },
+        {
+          type: lexer.TOKEN_OPERATOR,
+          value: '!=',
+          lineno: 0,
+          colno: 5,
+        },
+        {
+          type: lexer.TOKEN_INT,
+          value: '4',
+          lineno: 0,
+          colno: 8,
+        },
+        {
+          type: lexer.TOKEN_OPERATOR,
+          value: '==',
+          lineno: 0,
+          colno: 10,
+        },
+        {
+          type: lexer.TOKEN_INT,
+          value: '5',
+          lineno: 0,
+          colno: 13,
+        },
+        {
+          type: lexer.TOKEN_OPERATOR,
+          value: '<=',
+          lineno: 0,
+          colno: 15,
+        },
+        {
+          type: lexer.TOKEN_INT,
+          value: '6',
+          lineno: 0,
+          colno: 18,
+        },
+        {
+          type: lexer.TOKEN_OPERATOR,
+          lineno: 0,
+          colno: 20,
+          value: '>=',
+        },
+        {
+          type: lexer.TOKEN_INT,
+          lineno: 0,
+          colno: 23,
+          value: '7',
+        },
+        {
+          type: lexer.TOKEN_OPERATOR,
+          value: '<',
+          lineno: 0,
+          colno: 25,
+        },
+        {
+          type: lexer.TOKEN_INT,
+          value: '8',
+          lineno: 0,
+          colno: 27,
+        },
+        {
+          type: lexer.TOKEN_OPERATOR,
+          value: '>',
+          lineno: 0,
+          colno: 29,
+        },
+        {
+          type: lexer.TOKEN_INT,
+          value: '9',
+          lineno: 0,
+          colno: 31,
+        },
+        {
+          type: lexer.TOKEN_VARIABLE_END,
+          lineno: 0,
+          colno: 33,
+        });
+
+      hasTokens(lexer.lex('{% if something %}{{ value }}{% else %}{{ otherValue }}{% endif %}'),
+        {
+          type: lexer.TOKEN_BLOCK_START,
+          lineno: 0,
+          colno: 0,
+        },
+        {
+          type: lexer.TOKEN_SYMBOL,
+          value: 'if',
+          lineno: 0,
+          colno: 3,
+        },
+        {
+          type: lexer.TOKEN_SYMBOL,
+          value: 'something',
+          lineno: 0,
+          colno: 6,
+        },
+        {
+          type: lexer.TOKEN_BLOCK_END,
+          lineno: 0,
+          colno: 16,
+        },
+        {
+          type: lexer.TOKEN_VARIABLE_START,
+          lineno: 0,
+          colno: 18,
+        },
+        {
+          type: lexer.TOKEN_SYMBOL,
+          value: 'value',
+          lineno: 0,
+          colno: 21,
+        },
+        {
+          type: lexer.TOKEN_VARIABLE_END,
+          lineno: 0,
+          colno: 27,
+        },
+        {
+          type: lexer.TOKEN_BLOCK_START,
+          lineno: 0,
+          colno: 29,
+        },
+        {
+          type: lexer.TOKEN_SYMBOL,
+          value: 'else',
+          lineno: 0,
+          colno: 32,
+        },
+        {
+          type: lexer.TOKEN_BLOCK_END,
+          lineno: 0,
+          colno: 37,
+        },
+        {
+          type: lexer.TOKEN_VARIABLE_START,
+          lineno: 0,
+          colno: 39,
+        },
+        {
+          type: lexer.TOKEN_SYMBOL,
+          value: 'otherValue',
+          lineno: 0,
+          colno: 42,
+        },
+        {
+          type: lexer.TOKEN_VARIABLE_END,
+          lineno: 0,
+          colno: 53,
+        },
+        {
+          type: lexer.TOKEN_BLOCK_START,
+          lineno: 0,
+          colno: 55,
+        },
+        {
+          type: lexer.TOKEN_SYMBOL,
+          value: 'endif',
+          lineno: 0,
+          colno: 58,
+        },
+        {
+          type: lexer.TOKEN_BLOCK_END,
+          lineno: 0,
+          colno: 64,
+        });
+
+      hasTokens(lexer.lex('{% if something %}\n{{ value }}\n{% else %}\n{{ otherValue }}\n{% endif %}'),
+        {
+          type: lexer.TOKEN_BLOCK_START,
+          lineno: 0,
+          colno: 0,
+        },
+        {
+          type: lexer.TOKEN_SYMBOL,
+          value: 'if',
+          lineno: 0,
+          colno: 3,
+        },
+        {
+          type: lexer.TOKEN_SYMBOL,
+          value: 'something',
+          lineno: 0,
+          colno: 6,
+        },
+        {
+          type: lexer.TOKEN_BLOCK_END,
+          lineno: 0,
+          colno: 16,
+        },
+        {
+          type: lexer.TOKEN_DATA,
+          value: '\n',
+        },
+        {
+          type: lexer.TOKEN_VARIABLE_START,
+          lineno: 1,
+          colno: 0,
+        },
+        {
+          type: lexer.TOKEN_SYMBOL,
+          value: 'value',
+          lineno: 1,
+          colno: 3,
+        },
+        {
+          type: lexer.TOKEN_VARIABLE_END,
+          lineno: 1,
+          colno: 9,
+        },
+        {
+          type: lexer.TOKEN_DATA,
+          value: '\n',
+        },
+        {
+          type: lexer.TOKEN_BLOCK_START,
+          lineno: 2,
+          colno: 0,
+        },
+        {
+          type: lexer.TOKEN_SYMBOL,
+          value: 'else',
+          lineno: 2,
+          colno: 3,
+        },
+        {
+          type: lexer.TOKEN_BLOCK_END,
+          lineno: 2,
+          colno: 8,
+        },
+        {
+          type: lexer.TOKEN_DATA,
+          value: '\n',
+        },
+        {
+          type: lexer.TOKEN_VARIABLE_START,
+          lineno: 3,
+          colno: 0,
+        },
+        {
+          type: lexer.TOKEN_SYMBOL,
+          value: 'otherValue',
+          lineno: 3,
+          colno: 3,
+        },
+        {
+          type: lexer.TOKEN_VARIABLE_END,
+          lineno: 3,
+          colno: 14,
+        },
+        {
+          type: lexer.TOKEN_DATA,
+          value: '\n',
+        },
+        {
+          type: lexer.TOKEN_BLOCK_START,
+          lineno: 4,
+          colno: 0,
+        },
+        {
+          type: lexer.TOKEN_SYMBOL,
+          value: 'endif',
+          lineno: 4,
+          colno: 3,
+        },
+        {
+          type: lexer.TOKEN_BLOCK_END,
+          lineno: 4,
+          colno: 9,
+        });
     });
   });
 }());
