@@ -375,7 +375,7 @@ class Tokenizer {
 
   _extractString(str) {
     if (this._matches(str)) {
-      this.index += str.length;
+      this.forwardN(str.length);
       return str;
     }
     return null;
