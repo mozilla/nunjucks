@@ -45,7 +45,7 @@ class FileSystemLoader extends Loader {
       watcher.on('all', (event, fullname) => {
         fullname = path.resolve(fullname);
         if (event === 'change' && fullname in this.pathsToNames) {
-          this.emit('update', this.pathsToNames[fullname]);
+          this.emit('update', this.pathsToNames[fullname], fullname);
         }
       });
       watcher.on('error', (error) => {
@@ -76,11 +76,13 @@ class FileSystemLoader extends Loader {
 
     this.pathsToNames[fullpath] = name;
 
-    return {
+    const source = {
       src: fs.readFileSync(fullpath, 'utf-8'),
       path: fullpath,
       noCache: this.noCache
     };
+    this.emit('load', name, source);
+    return source;
   }
 }
 

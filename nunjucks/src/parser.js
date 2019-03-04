@@ -2,7 +2,7 @@
 
 var lexer = require('./lexer');
 var nodes = require('./nodes');
-var Obj = require('./object');
+var Obj = require('./object').Obj;
 var lib = require('./lib');
 
 class Parser extends Obj {

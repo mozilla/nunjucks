@@ -1,23 +1,9 @@
 'use strict';
 
 const path = require('path');
-const Obj = require('./object');
+const {EmitterObj} = require('./object');
 
-module.exports = class Loader extends Obj {
-  on(name, func) {
-    this.listeners = this.listeners || {};
-    this.listeners[name] = this.listeners[name] || [];
-    this.listeners[name].push(func);
-  }
-
-  emit(name, ...args) {
-    if (this.listeners && this.listeners[name]) {
-      this.listeners[name].forEach((listener) => {
-        listener(...args);
-      });
-    }
-  }
-
+module.exports = class Loader extends EmitterObj {
   resolve(from, to) {
     return path.resolve(path.dirname(from), to);
   }

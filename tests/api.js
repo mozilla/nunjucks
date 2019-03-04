@@ -82,5 +82,14 @@
         path: path.resolve(templatesPath, 'string.njk')
       })).to.be('FooTest3BazFizzle');
     });
+
+    it('should emit "load" event on Environment instance', function(done) {
+      var env = new Environment(new Loader(templatesPath));
+      env.on('load', function(name, source) {
+        expect(name).to.equal('item.njk');
+        done();
+      });
+      env.render('item.njk', {});
+    });
   });
 }());

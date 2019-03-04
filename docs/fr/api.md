@@ -344,6 +344,22 @@ de rares circonstances.
 {% endapi %}
 {% raw %}
 
+{% api %}
+'load' événement
+env.on('load', function(name, source, loader))
+
+Quand une instance 'Loader' charge un template, elle émet l'événement
+'load'. On peut utiliser cette événement pour détérminer les dépendances
+à l'exécution. Ses arguments sont :
+
+* **name** *(String)* Le nom du template
+* **source** *(Object)* Le resultat de l'appel de `Loader.getSource`
+  * **src** *(String)* Le code source du template
+  * **path** *(String)* Le chemin d'accèss du fichier ou l'URL
+  * **noCache** *(Bool)* Si la valeur n'est pas mise en cache.
+* **loader** L'instance du Loader qui a émetté l'événement
+{% endapi %}
+
 ## Template
 
 Un `Template` est un objet qui gère la compilation des chaînes de template

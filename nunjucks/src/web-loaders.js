@@ -45,6 +45,7 @@ class WebLoader extends Loader {
           path: name,
           noCache: !useCache
         };
+        this.emit('load', name, result);
         if (cb) {
           cb(null, result);
         }
