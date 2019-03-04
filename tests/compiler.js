@@ -822,6 +822,29 @@
           done();
         });
       });
+
+      it('should include error line when exception raised in user function', function(done) {
+        var tmplStr = [
+          '{% block content %}',
+          '<div>{{ foo() }}</div>',
+          '{% endblock %}',
+        ].join('\n');
+        var env = new Environment(new Loader('tests/templates'));
+        var tmpl = new Template(tmplStr, env, 'user-error.njk');
+
+        function foo() {
+          throw new Error('ERROR');
+        }
+
+        tmpl.render({foo: foo}, function(err, res) {
+          expect(res).to.be(undefined);
+          expect(err.toString()).to.be([
+            'Template render error: (user-error.njk) [Line 1, Column 11]',
+            '  Error: ERROR',
+          ].join('\n'));
+          done();
+        });
+      });
     }
 
     it('should compile string concatenations with tilde', function(done) {
