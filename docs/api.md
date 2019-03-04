@@ -353,6 +353,23 @@ SafeString (to be documented) if one was passed in, so the output will
 copy the safeness of the input, but this property is helpful in rare
 circumstances.
 {% endapi %}
+
+{% api %}
+'load' event
+env.on('load', function(name, source, loader))
+
+The 'load' event gets emitted whenever a Loader retrieves the source of a
+template. It can be listened to in order to determine template dependencies
+at runtime. The arguments emitted to the callback are:
+
+* **name** *(String)* The template name, as passed to the loader
+* **source** *(Object)* The object that gets returned from Loader.getSource
+  * **src** *(String)* The template source
+  * **path** *(String)* The full path to the template
+  * **noCache** *(Bool)* If `true`, the template wasn't cached.
+* **loader** The Loader instance that triggered the event.
+{% endapi %}
+
 {% raw %}
 
 ## Template

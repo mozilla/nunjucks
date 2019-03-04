@@ -1,6 +1,6 @@
 'use strict';
 
-const Obj = require('./object');
+const {Obj} = require('./object');
 
 function traverseAndCheck(obj, type, results) {
   if (obj instanceof type) {

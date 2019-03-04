@@ -5,7 +5,7 @@ const transformer = require('./transformer');
 const nodes = require('./nodes');
 const {TemplateError} = require('./lib');
 const {Frame} = require('./runtime');
-const Obj = require('./object');
+const {Obj} = require('./object');
 
 // These are all the same for now, but shouldn't be passed straight
 // through

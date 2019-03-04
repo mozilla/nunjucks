@@ -1,6 +1,9 @@
 Changelog
 =========
 
+* Emit 'load' events on `Environment` instances, to allow runtime dependency
+  tracking. Fixes [#1153](https://github.com/mozilla/nunjucks/issues/1153).
+
 3.1.7 (Jan 12 2019)
 ------------------
 
