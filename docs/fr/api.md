@@ -182,6 +182,13 @@ utilisez l'API de configuration simplifiée, nunjucks crée  pour vous
 automatiquement le chargeur approprié, selon si vous êtes dans node ou dans
 le navigateur. Voir [`Chargeur`](#chargeur) pour plus d'informations.
 
+Aussi dans node, le [`NodeResolveLoader`](#noderesolveloader) est disponible
+pour charger depuis le système de fichiers selon l'algorithme de résolution
+du module node, ce qui est fait par
+[`require.resolve`](https://nodejs.org/api/modules.html#modules_all_together).
+Cet chargeur n'est pas activé par défaut; il faut passer éxplicitement au
+constructeur de `Environment`.
+
 ```js
 // Le FileSystemLoader est disponible si on est dans node
 var env = new nunjucks.Environment(new nunjucks.FileSystemLoader('views'));
@@ -429,6 +436,19 @@ tous les templates et il est par défaut dans le répertoire de travail courant.
 var env = new nunjucks.Environment(new nunjucks.FileSystemLoader('views'));
 ```
 
+{% endapi %}
+
+{% api %}
+NodeResolveLoader
+new NodeResolveLoader([opts])
+
+Comme le nom le suggère, cet chargeur n'est disponible que dans node.
+Il chargera les templates depuis le système de fichiers selon l'algorithme de
+résolution du module node, ce qui est fait par
+[`require.resolve`](https://nodejs.org/api/modules.html#modules_all_together).
+
+**opts** est un object avec les même propriétés que
+[`FileSystemLoader`](#filesystemloader).
 {% endapi %}
 
 {% api %}

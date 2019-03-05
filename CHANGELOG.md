@@ -1,6 +1,10 @@
 Changelog
 =========
 
+* Adds [`NodeResolveLoader`](http://mozilla.github.io/nunjucks/api.html#noderesolveloader),
+  a Loader that loads templates using node's
+  [`require.resolve`](https://nodejs.org/api/modules.html#modules_all_together).
+  Fixes [#1175](https://github.com/mozilla/nunjucks/issues/1175).
 * Emit 'load' events on `Environment` instances, to allow runtime dependency
   tracking. Fixes [#1153](https://github.com/mozilla/nunjucks/issues/1153).
 
