@@ -119,6 +119,9 @@
 <li>
 <a href="#opts-autoescape">opts.autoescape</a>
 </li>
+<li>
+<a href="#load-event">'load' event</a>
+</li>
 </ul>
 </li>
 <li>
@@ -137,6 +140,9 @@
 <ul>
 <li>
 <a href="#filesystemloader">FileSystemLoader</a>
+</li>
+<li>
+<a href="#noderesolveloader">NodeResolveLoader</a>
 </li>
 <li>
 <a href="#webloader">WebLoader</a>
@@ -399,6 +405,12 @@ is available to load over HTTP (or use precompiled templates). If you
 use the simple <a href="#configure"><code>configure</code></a> API, nunjucks automatically
 creates the appropriate loader for you, depending if you&#39;re in node or
 the browser. See <a href="#loader"><code>Loader</code></a> for more information.</p>
+
+<p>Also only in node, <a href="#noderesolveloader"><code>NodeResolveLoader</code></a> is
+provided to allow templates to be included using
+<a href="https://nodejs.org/api/modules.html#modules_all_together">node <code>require</code> resolution</a>.
+This is not enabled by default with <a href="#configure"><code>configure</code></a>, it must be
+explicitly passed into the <code>Environment</code> constructor.</p>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="c1">// the FileSystemLoader is available if in node</span>
 <span class="kd">var</span> <span class="nx">env</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">Environment</span><span class="p">(</span><span class="k">new</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">FileSystemLoader</span><span class="p">(</span><span class="s1">&#39;views&#39;</span><span class="p">));</span>
 
@@ -550,6 +562,27 @@ copy the safeness of the input, but this property is helpful in rare
 circumstances.</p>
 </div>
 
+<h3 id="load-event">&#39;load&#39; event</h3>
+
+<div class="api-sig"><code>env.on('load', function(name, source, loader))</code></div>
+
+<div class="api-desc"><p>The &#39;load&#39; event gets emitted whenever a Loader retrieves the source of a
+template. It can be listened to in order to determine template dependencies
+at runtime. The arguments emitted to the callback are:</p>
+
+<ul>
+<li><strong>name</strong> <em>(String)</em> The template name, as passed to the loader</li>
+<li><strong>source</strong> <em>(Object)</em> The object that gets returned from Loader.getSource
+
+<ul>
+<li><strong>src</strong> <em>(String)</em> The template source</li>
+<li><strong>path</strong> <em>(String)</em> The full path to the template</li>
+<li><strong>noCache</strong> <em>(Bool)</em> If <code>true</code>, the template wasn&#39;t cached.</li>
+</ul></li>
+<li><strong>loader</strong> The Loader instance that triggered the event.</li>
+</ul>
+</div>
+
 <h2 id="template">Template</h2>
 
 <p>A <code>Template</code> is an object that handles the compiling of template
@@ -609,6 +642,18 @@ will be recompiled every single time</li>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="c1">// Loads templates from the &quot;views&quot; folder</span>
 <span class="kd">var</span> <span class="nx">env</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">Environment</span><span class="p">(</span><span class="k">new</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">FileSystemLoader</span><span class="p">(</span><span class="s1">&#39;views&#39;</span><span class="p">));</span>
 </code></pre></div>
+</div>
+
+<h3 id="noderesolveloader">NodeResolveLoader</h3>
+
+<div class="api-sig"><code>new NodeResolveLoader([opts])</code></div>
+
+<div class="api-desc"><p>As the name suggests, this is also only available in node. It will load
+templates from the filesystem using node&#39;s
+<a href="https://nodejs.org/api/modules.html#modules_all_together"><code>require.resolve</code></a>.</p>
+
+<p><strong>opts</strong> is an object which takes the same properties as
+<a href="#filesystemloader"><code>FileSystemLoader</code></a>.</p>
 </div>
 
 <h3 id="webloader">WebLoader</h3>

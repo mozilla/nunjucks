@@ -116,6 +116,9 @@
 <li>
 <a href="#opts-autoescape">opts.autoescape</a>
 </li>
+<li>
+<a href="#load-v-nement">'load' événement</a>
+</li>
 </ul>
 </li>
 <li>
@@ -134,6 +137,9 @@
 <ul>
 <li>
 <a href="#filesystemloader">FileSystemLoader</a>
+</li>
+<li>
+<a href="#noderesolveloader">NodeResolveLoader</a>
 </li>
 <li>
 <a href="#webloader">WebLoader</a>
@@ -385,6 +391,13 @@ est disponible pour charger via HTTP (ou utilise des templates précompilés). S
 utilisez l&#39;API de configuration simplifiée, nunjucks crée  pour vous
 automatiquement le chargeur approprié, selon si vous êtes dans node ou dans
 le navigateur. Voir <a href="#chargeur"><code>Chargeur</code></a> pour plus d&#39;informations.</p>
+
+<p>Aussi dans node, le <a href="#noderesolveloader"><code>NodeResolveLoader</code></a> est disponible
+pour charger depuis le système de fichiers selon l&#39;algorithme de résolution
+du module node, ce qui est fait par
+<a href="https://nodejs.org/api/modules.html#modules_all_together"><code>require.resolve</code></a>.
+Cet chargeur n&#39;est pas activé par défaut; il faut passer éxplicitement au
+constructeur de <code>Environment</code>.</p>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="c1">// Le FileSystemLoader est disponible si on est dans node</span>
 <span class="kd">var</span> <span class="nx">env</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">Environment</span><span class="p">(</span><span class="k">new</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">FileSystemLoader</span><span class="p">(</span><span class="s1">&#39;views&#39;</span><span class="p">));</span>
 
@@ -536,6 +549,27 @@ une  copie sécurisée de l&#39;entrée, mais cette propriété est utile dans
 de rares circonstances.</p>
 </div>
 
+<p>{% api %}
+&#39;load&#39; événement
+env.on(&#39;load&#39;, function(name, source, loader))</p>
+
+<p>Quand une instance &#39;Loader&#39; charge un template, elle émet l&#39;événement
+&#39;load&#39;. On peut utiliser cette événement pour détérminer les dépendances
+à l&#39;exécution. Ses arguments sont :</p>
+
+<ul>
+<li><strong>name</strong> <em>(String)</em> Le nom du template</li>
+<li><strong>source</strong> <em>(Object)</em> Le resultat de l&#39;appel de <code>Loader.getSource</code>
+
+<ul>
+<li><strong>src</strong> <em>(String)</em> Le code source du template</li>
+<li><strong>path</strong> <em>(String)</em> Le chemin d&#39;accèss du fichier ou l&#39;URL</li>
+<li><strong>noCache</strong> <em>(Bool)</em> Si la valeur n&#39;est pas mise en cache.</li>
+</ul></li>
+<li><strong>loader</strong> L&#39;instance du Loader qui a émetté l&#39;événement
+{% endapi %}</li>
+</ul>
+
 <h2 id="template">Template</h2>
 
 <p>Un <code>Template</code> est un objet qui gère la compilation des chaînes de template
@@ -595,6 +629,19 @@ templates seront recompilés à chaque fois</li>
 <div class="highlight"><pre><code class="js language-js" data-lang="js"><span class="c1">// Charge les templates depuis le répertoire &quot;views&quot;</span>
 <span class="kd">var</span> <span class="nx">env</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">Environment</span><span class="p">(</span><span class="k">new</span> <span class="nx">nunjucks</span><span class="p">.</span><span class="nx">FileSystemLoader</span><span class="p">(</span><span class="s1">&#39;views&#39;</span><span class="p">));</span>
 </code></pre></div>
+</div>
+
+<h3 id="noderesolveloader">NodeResolveLoader</h3>
+
+<div class="api-sig"><code>new NodeResolveLoader([opts])</code></div>
+
+<div class="api-desc"><p>Comme le nom le suggère, cet chargeur n&#39;est disponible que dans node.
+Il chargera les templates depuis le système de fichiers selon l&#39;algorithme de
+résolution du module node, ce qui est fait par
+<a href="https://nodejs.org/api/modules.html#modules_all_together"><code>require.resolve</code></a>.</p>
+
+<p><strong>opts</strong> est un object avec les même propriétés que
+<a href="#filesystemloader"><code>FileSystemLoader</code></a>.</p>
 </div>
 
 <h3 id="webloader">WebLoader</h3>

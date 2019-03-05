@@ -512,7 +512,7 @@ contents of the optional <code>else</code> clause would instead be rendered.</p>
 available for sorting objects when iterating over them.</p>
 
 <p>ES iterators are supported, like the new builtin Map and Set. But also
-anything implementing the iterator protocal.</p>
+anything implementing the iterable protocol.</p>
 <div class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">fruits</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Map</span><span class="p">([</span>
   <span class="p">[</span><span class="s2">&quot;banana&quot;</span><span class="p">,</span> <span class="s2">&quot;yellow&quot;</span><span class="p">],</span>
   <span class="p">[</span><span class="s2">&quot;apple&quot;</span><span class="p">,</span> <span class="s2">&quot;red&quot;</span><span class="p">],</span>
@@ -1054,8 +1054,9 @@ it is called except for the first time.</p>
 
 <p><strong>Input</strong></p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">set</span> <span class="nv">items</span> <span class="o">=</span> <span class="o">[</span><span class="m">1</span><span class="o">,</span><span class="m">2</span><span class="o">,</span><span class="m">3</span><span class="o">,</span><span class="m">4</span><span class="o">,</span><span class="m">5</span><span class="o">,</span><span class="m">6</span><span class="o">]</span> <span class="cp">%}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">set</span> <span class="nv">dash</span> <span class="o">=</span> <span class="nv">joiner</span><span class="o">(</span><span class="s2">&quot;-&quot;</span><span class="o">)</span> <span class="cp">%}</span><span class="x"></span>
 <span class="cp">{%</span> <span class="k">for</span> <span class="nv">item</span> <span class="k">in</span> <span class="nv">items</span> <span class="o">|</span> <span class="nf">batch</span><span class="o">(</span><span class="m">2</span><span class="o">)</span> <span class="cp">%}</span><span class="x"></span>
-<span class="x">    -</span><span class="cp">{%</span> <span class="k">for</span> <span class="nv">items</span> <span class="k">in</span> <span class="nv">item</span> <span class="cp">%}</span><span class="x"></span>
+<span class="x">    </span><span class="cp">{{</span> <span class="nv">dash</span><span class="o">()</span> <span class="cp">}}</span><span class="x"> </span><span class="cp">{%</span> <span class="k">for</span> <span class="nv">items</span> <span class="k">in</span> <span class="nv">item</span> <span class="cp">%}</span><span class="x"></span>
 <span class="x">       </span><span class="cp">{{</span> <span class="nv">items</span> <span class="cp">}}</span><span class="x"></span>
 <span class="x">    </span><span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span><span class="x"></span>
 <span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span><span class="x"></span>

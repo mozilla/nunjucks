@@ -1,4 +1,4 @@
-/*! Browser bundle of nunjucks 3.1.7  */
+/*! Browser bundle of nunjucks 3.2.0  */
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
 		module.exports = factory();
@@ -461,6 +461,8 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
 function _inheritsLoose(subClass, superClass) { subClass.prototype = Object.create(superClass.prototype); subClass.prototype.constructor = subClass; subClass.__proto__ = superClass; }
 
+var EventEmitter = __webpack_require__(16);
+
 var lib = __webpack_require__(0);
 
 function parentWrap(parent, prop) {
@@ -540,7 +542,50 @@ function () {
   return Obj;
 }();
 
-module.exports = Obj;
+var EmitterObj =
+/*#__PURE__*/
+function (_EventEmitter) {
+  _inheritsLoose(EmitterObj, _EventEmitter);
+
+  function EmitterObj() {
+    var _this2;
+
+    var _this;
+
+    _this = _EventEmitter.call(this) || this; // Unfortunately necessary for backwards compatibility
+
+    (_this2 = _this).init.apply(_this2, arguments);
+
+    return _this;
+  }
+
+  var _proto2 = EmitterObj.prototype;
+
+  _proto2.init = function init() {};
+
+  EmitterObj.extend = function extend(name, props) {
+    if (typeof name === 'object') {
+      props = name;
+      name = 'anonymous';
+    }
+
+    return extendClass(this, name, props);
+  };
+
+  _createClass(EmitterObj, [{
+    key: "typename",
+    get: function get() {
+      return this.constructor.name;
+    }
+  }]);
+
+  return EmitterObj;
+}(EventEmitter);
+
+module.exports = {
+  Obj: Obj,
+  EmitterObj: EmitterObj
+};
 
 /***/ }),
 /* 2 */
@@ -970,7 +1015,8 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
 function _inheritsLoose(subClass, superClass) { subClass.prototype = Object.create(superClass.prototype); subClass.prototype.constructor = subClass; subClass.__proto__ = superClass; }
 
-var Obj = __webpack_require__(1);
+var _require = __webpack_require__(1),
+    Obj = _require.Obj;
 
 function traverseAndCheck(obj, type, results) {
   if (obj instanceof type) {
@@ -1379,7 +1425,7 @@ function _inheritsLoose(subClass, superClass) { subClass.prototype = Object.crea
 
 var parser = __webpack_require__(8);
 
-var transformer = __webpack_require__(16);
+var transformer = __webpack_require__(17);
 
 var nodes = __webpack_require__(3);
 
@@ -1389,7 +1435,8 @@ var _require = __webpack_require__(0),
 var _require2 = __webpack_require__(2),
     Frame = _require2.Frame;
 
-var Obj = __webpack_require__(1); // These are all the same for now, but shouldn't be passed straight
+var _require3 = __webpack_require__(1),
+    Obj = _require3.Obj; // These are all the same for now, but shouldn't be passed straight
 // through
 
 
@@ -1473,17 +1520,17 @@ function (_Obj) {
     });
   };
 
-  _proto._emitFuncBegin = function _emitFuncBegin(name) {
+  _proto._emitFuncBegin = function _emitFuncBegin(node, name) {
     this.buffer = 'output';
     this._scopeClosers = '';
 
-    this._emitLine('function ' + name + '(env, context, frame, runtime, cb) {');
+    this._emitLine("function " + name + "(env, context, frame, runtime, cb) {");
 
-    this._emitLine('var lineno = null;');
+    this._emitLine("var lineno = " + node.lineno + ";");
 
-    this._emitLine('var colno = null;');
+    this._emitLine("var colno = " + node.colno + ";");
 
-    this._emitLine('var ' + this.buffer + ' = "";');
+    this._emitLine("var " + this.buffer + " = \"\";");
 
     this._emitLine('try {');
   };
@@ -2731,7 +2778,7 @@ function (_Obj) {
 
     frame = new Frame();
 
-    this._emitFuncBegin('root');
+    this._emitFuncBegin(node, 'root');
 
     this._emitLine('var parentTemplate = null;');
 
@@ -2761,7 +2808,7 @@ function (_Obj) {
 
       blockNames.push(name);
 
-      _this16._emitFuncBegin("b_" + name);
+      _this16._emitFuncBegin(block, "b_" + name);
 
       var tmpFrame = new Frame();
 
@@ -2833,36 +2880,19 @@ function _inheritsLoose(subClass, superClass) { subClass.prototype = Object.crea
 
 var path = __webpack_require__(4);
 
-var Obj = __webpack_require__(1);
+var _require = __webpack_require__(1),
+    EmitterObj = _require.EmitterObj;
 
 module.exports =
 /*#__PURE__*/
-function (_Obj) {
-  _inheritsLoose(Loader, _Obj);
+function (_EmitterObj) {
+  _inheritsLoose(Loader, _EmitterObj);
 
   function Loader() {
-    return _Obj.apply(this, arguments) || this;
+    return _EmitterObj.apply(this, arguments) || this;
   }
 
   var _proto = Loader.prototype;
-
-  _proto.on = function on(name, func) {
-    this.listeners = this.listeners || {};
-    this.listeners[name] = this.listeners[name] || [];
-    this.listeners[name].push(func);
-  };
-
-  _proto.emit = function emit(name) {
-    for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-      args[_key - 1] = arguments[_key];
-    }
-
-    if (this.listeners && this.listeners[name]) {
-      this.listeners[name].forEach(function (listener) {
-        listener.apply(void 0, args);
-      });
-    }
-  };
 
   _proto.resolve = function resolve(from, to) {
     return path.resolve(path.dirname(from), to);
@@ -2873,7 +2903,7 @@ function (_Obj) {
   };
 
   return Loader;
-}(Obj);
+}(EmitterObj);
 
 /***/ }),
 /* 7 */
@@ -2892,25 +2922,27 @@ var lib = __webpack_require__(0);
 
 var compiler = __webpack_require__(5);
 
-var filters = __webpack_require__(17);
+var filters = __webpack_require__(18);
 
 var _require = __webpack_require__(10),
     FileSystemLoader = _require.FileSystemLoader,
     WebLoader = _require.WebLoader,
     PrecompiledLoader = _require.PrecompiledLoader;
 
-var tests = __webpack_require__(19);
+var tests = __webpack_require__(20);
 
-var globals = __webpack_require__(20);
+var globals = __webpack_require__(21);
 
-var Obj = __webpack_require__(1);
+var _require2 = __webpack_require__(1),
+    Obj = _require2.Obj,
+    EmitterObj = _require2.EmitterObj;
 
 var globalRuntime = __webpack_require__(2);
 
 var handleError = globalRuntime.handleError,
     Frame = globalRuntime.Frame;
 
-var expressApp = __webpack_require__(21); // If the user is using the async API, *always* call it
+var expressApp = __webpack_require__(22); // If the user is using the async API, *always* call it
 // asynchronously even if the template was synchronous.
 
 
@@ -2939,11 +2971,11 @@ var noopTmplSrc = {
 
 var Environment =
 /*#__PURE__*/
-function (_Obj) {
-  _inheritsLoose(Environment, _Obj);
+function (_EmitterObj) {
+  _inheritsLoose(Environment, _EmitterObj);
 
   function Environment() {
-    return _Obj.apply(this, arguments) || this;
+    return _EmitterObj.apply(this, arguments) || this;
   }
 
   var _proto = Environment.prototype;
@@ -2989,7 +3021,8 @@ function (_Obj) {
       this.loaders.unshift(new PrecompiledLoader(window.nunjucksPrecompiled));
     }
 
-    this.initCache();
+    this._initLoaders();
+
     this.globals = globals();
     this.filters = {};
     this.tests = {};
@@ -3010,16 +3043,29 @@ function (_Obj) {
     });
   };
 
-  _proto.initCache = function initCache() {
-    // Caching and cache busting
+  _proto._initLoaders = function _initLoaders() {
+    var _this2 = this;
+
     this.loaders.forEach(function (loader) {
+      // Caching and cache busting
       loader.cache = {};
 
       if (typeof loader.on === 'function') {
-        loader.on('update', function (template) {
-          loader.cache[template] = null;
+        loader.on('update', function (name, fullname) {
+          loader.cache[name] = null;
+
+          _this2.emit('update', name, fullname, loader);
+        });
+        loader.on('load', function (name, source) {
+          _this2.emit('load', name, source, loader);
         });
       }
+    });
+  };
+
+  _proto.invalidateCache = function invalidateCache() {
+    this.loaders.forEach(function (loader) {
+      loader.cache = {};
     });
   };
 
@@ -3100,7 +3146,7 @@ function (_Obj) {
   };
 
   _proto.getTemplate = function getTemplate(name, eagerCompile, parentName, ignoreMissing, cb) {
-    var _this2 = this;
+    var _this3 = this;
 
     var that = this;
     var tmpl = null;
@@ -3168,9 +3214,9 @@ function (_Obj) {
       var newTmpl;
 
       if (!info) {
-        newTmpl = new Template(noopTmplSrc, _this2, '', eagerCompile);
+        newTmpl = new Template(noopTmplSrc, _this3, '', eagerCompile);
       } else {
-        newTmpl = new Template(info.src, _this2, info.path, eagerCompile);
+        newTmpl = new Template(info.src, _this3, info.path, eagerCompile);
 
         if (!info.noCache) {
           info.loader.cache[name] = newTmpl;
@@ -3251,21 +3297,21 @@ function (_Obj) {
   };
 
   return Environment;
-}(Obj);
+}(EmitterObj);
 
 var Context =
 /*#__PURE__*/
-function (_Obj2) {
-  _inheritsLoose(Context, _Obj2);
+function (_Obj) {
+  _inheritsLoose(Context, _Obj);
 
   function Context() {
-    return _Obj2.apply(this, arguments) || this;
+    return _Obj.apply(this, arguments) || this;
   }
 
   var _proto2 = Context.prototype;
 
   _proto2.init = function init(ctx, blocks, env) {
-    var _this3 = this;
+    var _this4 = this;
 
     // Has to be tied to an environment so we can tap into its globals.
     this.env = env || new Environment(); // Make a duplicate of ctx
@@ -3274,7 +3320,7 @@ function (_Obj2) {
     this.blocks = {};
     this.exported = [];
     lib.keys(blocks).forEach(function (name) {
-      _this3.addBlock(name, blocks[name]);
+      _this4.addBlock(name, blocks[name]);
     });
   };
 
@@ -3327,11 +3373,11 @@ function (_Obj2) {
   };
 
   _proto2.getExported = function getExported() {
-    var _this4 = this;
+    var _this5 = this;
 
     var exported = {};
     this.exported.forEach(function (name) {
-      exported[name] = _this4.ctx[name];
+      exported[name] = _this5.ctx[name];
     });
     return exported;
   };
@@ -3341,11 +3387,11 @@ function (_Obj2) {
 
 var Template =
 /*#__PURE__*/
-function (_Obj3) {
-  _inheritsLoose(Template, _Obj3);
+function (_Obj2) {
+  _inheritsLoose(Template, _Obj2);
 
   function Template() {
-    return _Obj3.apply(this, arguments) || this;
+    return _Obj2.apply(this, arguments) || this;
   }
 
   var _proto3 = Template.prototype;
@@ -3386,7 +3432,7 @@ function (_Obj3) {
   };
 
   _proto3.render = function render(ctx, parentFrame, cb) {
-    var _this5 = this;
+    var _this6 = this;
 
     if (typeof ctx === 'function') {
       cb = ctx;
@@ -3430,7 +3476,7 @@ function (_Obj3) {
       }
 
       if (err) {
-        err = lib._prettifyError(_this5.path, _this5.env.opts.dev, err);
+        err = lib._prettifyError(_this6.path, _this6.env.opts.dev, err);
         didError = true;
       }
 
@@ -3541,7 +3587,7 @@ var lexer = __webpack_require__(9);
 
 var nodes = __webpack_require__(3);
 
-var Obj = __webpack_require__(1);
+var Obj = __webpack_require__(1).Obj;
 
 var lib = __webpack_require__(0);
 
@@ -5190,7 +5236,7 @@ function () {
 
   _proto._extractString = function _extractString(str) {
     if (this._matches(str)) {
-      this.index += str.length;
+      this.forwardN(str.length);
       return str;
     }
 
@@ -5362,7 +5408,7 @@ function _inheritsLoose(subClass, superClass) { subClass.prototype = Object.crea
 
 var Loader = __webpack_require__(6);
 
-var _require = __webpack_require__(18),
+var _require = __webpack_require__(19),
     PrecompiledLoader = _require.PrecompiledLoader;
 
 var WebLoader =
@@ -5397,6 +5443,8 @@ function (_Loader) {
   };
 
   _proto.getSource = function getSource(name, cb) {
+    var _this2 = this;
+
     var useCache = this.useCache;
     var result;
     this.fetch(this.baseURL + '/' + name, function (err, src) {
@@ -5414,6 +5462,8 @@ function (_Loader) {
           path: name,
           noCache: !useCache
         };
+
+        _this2.emit('load', name, result);
 
         if (cb) {
           cb(null, result);
@@ -5480,7 +5530,7 @@ var Loader = __webpack_require__(6);
 
 var loaders = __webpack_require__(10);
 
-var precompile = __webpack_require__(22);
+var precompile = __webpack_require__(23);
 
 var compiler = __webpack_require__(5);
 
@@ -5492,7 +5542,7 @@ var runtime = __webpack_require__(2);
 
 var nodes = __webpack_require__(3);
 
-var installJinjaCompat = __webpack_require__(24); // A single instance of an environment, since this is so commonly used
+var installJinjaCompat = __webpack_require__(25); // A single instance of an environment, since this is so commonly used
 
 
 var e;
@@ -5533,6 +5583,7 @@ module.exports = {
   Template: Template,
   Loader: Loader,
   FileSystemLoader: loaders.FileSystemLoader,
+  NodeResolveLoader: loaders.NodeResolveLoader,
   PrecompiledLoader: loaders.PrecompiledLoader,
   WebLoader: loaders.WebLoader,
   compiler: compiler,
@@ -5997,6 +6048,461 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;// MIT license (
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
+// Copyright Joyent, Inc. and other Node contributors.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to permit
+// persons to whom the Software is furnished to do so, subject to the
+// following conditions:
+//
+// The above copyright notice and this permission notice shall be included
+// in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+// USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+
+var R = typeof Reflect === 'object' ? Reflect : null
+var ReflectApply = R && typeof R.apply === 'function'
+  ? R.apply
+  : function ReflectApply(target, receiver, args) {
+    return Function.prototype.apply.call(target, receiver, args);
+  }
+
+var ReflectOwnKeys
+if (R && typeof R.ownKeys === 'function') {
+  ReflectOwnKeys = R.ownKeys
+} else if (Object.getOwnPropertySymbols) {
+  ReflectOwnKeys = function ReflectOwnKeys(target) {
+    return Object.getOwnPropertyNames(target)
+      .concat(Object.getOwnPropertySymbols(target));
+  };
+} else {
+  ReflectOwnKeys = function ReflectOwnKeys(target) {
+    return Object.getOwnPropertyNames(target);
+  };
+}
+
+function ProcessEmitWarning(warning) {
+  if (console && console.warn) console.warn(warning);
+}
+
+var NumberIsNaN = Number.isNaN || function NumberIsNaN(value) {
+  return value !== value;
+}
+
+function EventEmitter() {
+  EventEmitter.init.call(this);
+}
+module.exports = EventEmitter;
+
+// Backwards-compat with node 0.10.x
+EventEmitter.EventEmitter = EventEmitter;
+
+EventEmitter.prototype._events = undefined;
+EventEmitter.prototype._eventsCount = 0;
+EventEmitter.prototype._maxListeners = undefined;
+
+// By default EventEmitters will print a warning if more than 10 listeners are
+// added to it. This is a useful default which helps finding memory leaks.
+var defaultMaxListeners = 10;
+
+Object.defineProperty(EventEmitter, 'defaultMaxListeners', {
+  enumerable: true,
+  get: function() {
+    return defaultMaxListeners;
+  },
+  set: function(arg) {
+    if (typeof arg !== 'number' || arg < 0 || NumberIsNaN(arg)) {
+      throw new RangeError('The value of "defaultMaxListeners" is out of range. It must be a non-negative number. Received ' + arg + '.');
+    }
+    defaultMaxListeners = arg;
+  }
+});
+
+EventEmitter.init = function() {
+
+  if (this._events === undefined ||
+      this._events === Object.getPrototypeOf(this)._events) {
+    this._events = Object.create(null);
+    this._eventsCount = 0;
+  }
+
+  this._maxListeners = this._maxListeners || undefined;
+};
+
+// Obviously not all Emitters should be limited to 10. This function allows
+// that to be increased. Set to zero for unlimited.
+EventEmitter.prototype.setMaxListeners = function setMaxListeners(n) {
+  if (typeof n !== 'number' || n < 0 || NumberIsNaN(n)) {
+    throw new RangeError('The value of "n" is out of range. It must be a non-negative number. Received ' + n + '.');
+  }
+  this._maxListeners = n;
+  return this;
+};
+
+function $getMaxListeners(that) {
+  if (that._maxListeners === undefined)
+    return EventEmitter.defaultMaxListeners;
+  return that._maxListeners;
+}
+
+EventEmitter.prototype.getMaxListeners = function getMaxListeners() {
+  return $getMaxListeners(this);
+};
+
+EventEmitter.prototype.emit = function emit(type) {
+  var args = [];
+  for (var i = 1; i < arguments.length; i++) args.push(arguments[i]);
+  var doError = (type === 'error');
+
+  var events = this._events;
+  if (events !== undefined)
+    doError = (doError && events.error === undefined);
+  else if (!doError)
+    return false;
+
+  // If there is no 'error' event listener then throw.
+  if (doError) {
+    var er;
+    if (args.length > 0)
+      er = args[0];
+    if (er instanceof Error) {
+      // Note: The comments on the `throw` lines are intentional, they show
+      // up in Node's output if this results in an unhandled exception.
+      throw er; // Unhandled 'error' event
+    }
+    // At least give some kind of context to the user
+    var err = new Error('Unhandled error.' + (er ? ' (' + er.message + ')' : ''));
+    err.context = er;
+    throw err; // Unhandled 'error' event
+  }
+
+  var handler = events[type];
+
+  if (handler === undefined)
+    return false;
+
+  if (typeof handler === 'function') {
+    ReflectApply(handler, this, args);
+  } else {
+    var len = handler.length;
+    var listeners = arrayClone(handler, len);
+    for (var i = 0; i < len; ++i)
+      ReflectApply(listeners[i], this, args);
+  }
+
+  return true;
+};
+
+function _addListener(target, type, listener, prepend) {
+  var m;
+  var events;
+  var existing;
+
+  if (typeof listener !== 'function') {
+    throw new TypeError('The "listener" argument must be of type Function. Received type ' + typeof listener);
+  }
+
+  events = target._events;
+  if (events === undefined) {
+    events = target._events = Object.create(null);
+    target._eventsCount = 0;
+  } else {
+    // To avoid recursion in the case that type === "newListener"! Before
+    // adding it to the listeners, first emit "newListener".
+    if (events.newListener !== undefined) {
+      target.emit('newListener', type,
+                  listener.listener ? listener.listener : listener);
+
+      // Re-assign `events` because a newListener handler could have caused the
+      // this._events to be assigned to a new object
+      events = target._events;
+    }
+    existing = events[type];
+  }
+
+  if (existing === undefined) {
+    // Optimize the case of one listener. Don't need the extra array object.
+    existing = events[type] = listener;
+    ++target._eventsCount;
+  } else {
+    if (typeof existing === 'function') {
+      // Adding the second element, need to change to array.
+      existing = events[type] =
+        prepend ? [listener, existing] : [existing, listener];
+      // If we've already got an array, just append.
+    } else if (prepend) {
+      existing.unshift(listener);
+    } else {
+      existing.push(listener);
+    }
+
+    // Check for listener leak
+    m = $getMaxListeners(target);
+    if (m > 0 && existing.length > m && !existing.warned) {
+      existing.warned = true;
+      // No error code for this since it is a Warning
+      // eslint-disable-next-line no-restricted-syntax
+      var w = new Error('Possible EventEmitter memory leak detected. ' +
+                          existing.length + ' ' + String(type) + ' listeners ' +
+                          'added. Use emitter.setMaxListeners() to ' +
+                          'increase limit');
+      w.name = 'MaxListenersExceededWarning';
+      w.emitter = target;
+      w.type = type;
+      w.count = existing.length;
+      ProcessEmitWarning(w);
+    }
+  }
+
+  return target;
+}
+
+EventEmitter.prototype.addListener = function addListener(type, listener) {
+  return _addListener(this, type, listener, false);
+};
+
+EventEmitter.prototype.on = EventEmitter.prototype.addListener;
+
+EventEmitter.prototype.prependListener =
+    function prependListener(type, listener) {
+      return _addListener(this, type, listener, true);
+    };
+
+function onceWrapper() {
+  var args = [];
+  for (var i = 0; i < arguments.length; i++) args.push(arguments[i]);
+  if (!this.fired) {
+    this.target.removeListener(this.type, this.wrapFn);
+    this.fired = true;
+    ReflectApply(this.listener, this.target, args);
+  }
+}
+
+function _onceWrap(target, type, listener) {
+  var state = { fired: false, wrapFn: undefined, target: target, type: type, listener: listener };
+  var wrapped = onceWrapper.bind(state);
+  wrapped.listener = listener;
+  state.wrapFn = wrapped;
+  return wrapped;
+}
+
+EventEmitter.prototype.once = function once(type, listener) {
+  if (typeof listener !== 'function') {
+    throw new TypeError('The "listener" argument must be of type Function. Received type ' + typeof listener);
+  }
+  this.on(type, _onceWrap(this, type, listener));
+  return this;
+};
+
+EventEmitter.prototype.prependOnceListener =
+    function prependOnceListener(type, listener) {
+      if (typeof listener !== 'function') {
+        throw new TypeError('The "listener" argument must be of type Function. Received type ' + typeof listener);
+      }
+      this.prependListener(type, _onceWrap(this, type, listener));
+      return this;
+    };
+
+// Emits a 'removeListener' event if and only if the listener was removed.
+EventEmitter.prototype.removeListener =
+    function removeListener(type, listener) {
+      var list, events, position, i, originalListener;
+
+      if (typeof listener !== 'function') {
+        throw new TypeError('The "listener" argument must be of type Function. Received type ' + typeof listener);
+      }
+
+      events = this._events;
+      if (events === undefined)
+        return this;
+
+      list = events[type];
+      if (list === undefined)
+        return this;
+
+      if (list === listener || list.listener === listener) {
+        if (--this._eventsCount === 0)
+          this._events = Object.create(null);
+        else {
+          delete events[type];
+          if (events.removeListener)
+            this.emit('removeListener', type, list.listener || listener);
+        }
+      } else if (typeof list !== 'function') {
+        position = -1;
+
+        for (i = list.length - 1; i >= 0; i--) {
+          if (list[i] === listener || list[i].listener === listener) {
+            originalListener = list[i].listener;
+            position = i;
+            break;
+          }
+        }
+
+        if (position < 0)
+          return this;
+
+        if (position === 0)
+          list.shift();
+        else {
+          spliceOne(list, position);
+        }
+
+        if (list.length === 1)
+          events[type] = list[0];
+
+        if (events.removeListener !== undefined)
+          this.emit('removeListener', type, originalListener || listener);
+      }
+
+      return this;
+    };
+
+EventEmitter.prototype.off = EventEmitter.prototype.removeListener;
+
+EventEmitter.prototype.removeAllListeners =
+    function removeAllListeners(type) {
+      var listeners, events, i;
+
+      events = this._events;
+      if (events === undefined)
+        return this;
+
+      // not listening for removeListener, no need to emit
+      if (events.removeListener === undefined) {
+        if (arguments.length === 0) {
+          this._events = Object.create(null);
+          this._eventsCount = 0;
+        } else if (events[type] !== undefined) {
+          if (--this._eventsCount === 0)
+            this._events = Object.create(null);
+          else
+            delete events[type];
+        }
+        return this;
+      }
+
+      // emit removeListener for all listeners on all events
+      if (arguments.length === 0) {
+        var keys = Object.keys(events);
+        var key;
+        for (i = 0; i < keys.length; ++i) {
+          key = keys[i];
+          if (key === 'removeListener') continue;
+          this.removeAllListeners(key);
+        }
+        this.removeAllListeners('removeListener');
+        this._events = Object.create(null);
+        this._eventsCount = 0;
+        return this;
+      }
+
+      listeners = events[type];
+
+      if (typeof listeners === 'function') {
+        this.removeListener(type, listeners);
+      } else if (listeners !== undefined) {
+        // LIFO order
+        for (i = listeners.length - 1; i >= 0; i--) {
+          this.removeListener(type, listeners[i]);
+        }
+      }
+
+      return this;
+    };
+
+function _listeners(target, type, unwrap) {
+  var events = target._events;
+
+  if (events === undefined)
+    return [];
+
+  var evlistener = events[type];
+  if (evlistener === undefined)
+    return [];
+
+  if (typeof evlistener === 'function')
+    return unwrap ? [evlistener.listener || evlistener] : [evlistener];
+
+  return unwrap ?
+    unwrapListeners(evlistener) : arrayClone(evlistener, evlistener.length);
+}
+
+EventEmitter.prototype.listeners = function listeners(type) {
+  return _listeners(this, type, true);
+};
+
+EventEmitter.prototype.rawListeners = function rawListeners(type) {
+  return _listeners(this, type, false);
+};
+
+EventEmitter.listenerCount = function(emitter, type) {
+  if (typeof emitter.listenerCount === 'function') {
+    return emitter.listenerCount(type);
+  } else {
+    return listenerCount.call(emitter, type);
+  }
+};
+
+EventEmitter.prototype.listenerCount = listenerCount;
+function listenerCount(type) {
+  var events = this._events;
+
+  if (events !== undefined) {
+    var evlistener = events[type];
+
+    if (typeof evlistener === 'function') {
+      return 1;
+    } else if (evlistener !== undefined) {
+      return evlistener.length;
+    }
+  }
+
+  return 0;
+}
+
+EventEmitter.prototype.eventNames = function eventNames() {
+  return this._eventsCount > 0 ? ReflectOwnKeys(this._events) : [];
+};
+
+function arrayClone(arr, n) {
+  var copy = new Array(n);
+  for (var i = 0; i < n; ++i)
+    copy[i] = arr[i];
+  return copy;
+}
+
+function spliceOne(list, index) {
+  for (; index + 1 < list.length; index++)
+    list[index] = list[index + 1];
+  list.pop();
+}
+
+function unwrapListeners(arr) {
+  var ret = new Array(arr.length);
+  for (var i = 0; i < ret.length; ++i) {
+    ret[i] = arr[i].listener || arr[i];
+  }
+  return ret;
+}
+
+
+/***/ }),
+/* 17 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
 
 
 var nodes = __webpack_require__(3);
@@ -6196,7 +6702,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 17 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6848,7 +7354,7 @@ exports.d = exports.default;
 exports.e = exports.escape;
 
 /***/ }),
-/* 18 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6895,7 +7401,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 19 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7187,7 +7693,7 @@ function mapping(value) {
 exports.mapping = mapping;
 
 /***/ }),
-/* 20 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7265,7 +7771,7 @@ function globals() {
 module.exports = globals;
 
 /***/ }),
-/* 21 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var path = __webpack_require__(4);
@@ -7296,7 +7802,7 @@ module.exports = function express(env, app) {
 };
 
 /***/ }),
-/* 22 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7314,7 +7820,7 @@ var compiler = __webpack_require__(5);
 var _require2 = __webpack_require__(7),
     Environment = _require2.Environment;
 
-var precompileGlobal = __webpack_require__(23);
+var precompileGlobal = __webpack_require__(24);
 
 function match(filename, patterns) {
   if (!Array.isArray(patterns)) {
@@ -7433,7 +7939,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 23 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7461,7 +7967,7 @@ function precompileGlobal(templates, opts) {
 module.exports = precompileGlobal;
 
 /***/ }),
-/* 24 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 function installCompat() {
