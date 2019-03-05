@@ -1,6 +1,9 @@
 Changelog
 =========
 
+3.2.0 (Mar 5 2019)
+------------------
+
 * Adds [`NodeResolveLoader`](http://mozilla.github.io/nunjucks/api.html#noderesolveloader),
   a Loader that loads templates using node's
   [`require.resolve`](https://nodejs.org/api/modules.html#modules_all_together).
