@@ -193,6 +193,12 @@ use the simple [`configure`](#configure) API, nunjucks automatically
 creates the appropriate loader for you, depending if you're in node or
 the browser. See [`Loader`](#loader) for more information.
 
+Also only in node, [`NodeResolveLoader`](#noderesolveloader) is
+provided to allow templates to be included using
+[node `require` resolution](https://nodejs.org/api/modules.html#modules_all_together).
+This is not enabled by default with [`configure`](#configure), it must be
+explicitly passed into the `Environment` constructor.
+
 ```js
 // the FileSystemLoader is available if in node
 var env = new nunjucks.Environment(new nunjucks.FileSystemLoader('views'));
@@ -441,6 +447,18 @@ templates live, and it defaults to the current working directory.
 var env = new nunjucks.Environment(new nunjucks.FileSystemLoader('views'));
 ```
 
+{% endapi %}
+
+{% api %}
+NodeResolveLoader
+new NodeResolveLoader([opts])
+
+As the name suggests, this is also only available in node. It will load
+templates from the filesystem using node's
+[`require.resolve`](https://nodejs.org/api/modules.html#modules_all_together).
+
+**opts** is an object which takes the same properties as
+[`FileSystemLoader`](#filesystemloader).
 {% endapi %}
 
 {% api %}

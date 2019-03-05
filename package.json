@@ -73,7 +73,7 @@
     "lint": "eslint nunjucks scripts tests",
     "prepare": "npm run build",
     "test:instrument": "cross-env NODE_ENV=test scripts/bundle.js",
-    "test:runner": "cross-env NODE_ENV=test scripts/testrunner.js",
+    "test:runner": "cross-env NODE_ENV=test NODE_PATH=tests/test-node-pkgs scripts/testrunner.js",
     "test": "npm run lint && npm run test:instrument && npm run test:runner"
   },
   "bin": {

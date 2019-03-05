@@ -86,7 +86,64 @@ class FileSystemLoader extends Loader {
   }
 }
 
+class NodeResolveLoader extends Loader {
+  constructor(opts) {
+    super();
+    opts = opts || {};
+    this.pathsToNames = {};
+    this.noCache = !!opts.noCache;
+
+    if (opts.watch) {
+      if (!chokidar) {
+        throw new Error('watch requires chokidar to be installed');
+      }
+      this.watcher = chokidar.watch();
+
+      this.watcher.on('change', (fullname) => {
+        this.emit('update', this.pathsToNames[fullname], fullname);
+      });
+      this.watcher.on('error', (error) => {
+        console.log('Watcher error: ' + error);
+      });
+
+      this.on('load', (name, source) => {
+        this.watcher.add(source.path);
+      });
+    }
+  }
+
+  getSource(name) {
+    // Don't allow file-system traversal
+    if ((/^\.?\.?(\/|\\)/).test(name)) {
+      return null;
+    }
+    if ((/^[A-Z]:/).test(name)) {
+      return null;
+    }
+
+    let fullpath;
+
+    try {
+      fullpath = require.resolve(name);
+    } catch (e) {
+      return null;
+    }
+
+    this.pathsToNames[fullpath] = name;
+
+    const source = {
+      src: fs.readFileSync(fullpath, 'utf-8'),
+      path: fullpath,
+      noCache: this.noCache,
+    };
+
+    this.emit('load', name, source);
+    return source;
+  }
+}
+
 module.exports = {
   FileSystemLoader: FileSystemLoader,
-  PrecompiledLoader: PrecompiledLoader
+  PrecompiledLoader: PrecompiledLoader,
+  NodeResolveLoader: NodeResolveLoader,
 };

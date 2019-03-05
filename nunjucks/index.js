@@ -49,6 +49,7 @@ module.exports = {
   Template: Template,
   Loader: Loader,
   FileSystemLoader: loaders.FileSystemLoader,
+  NodeResolveLoader: loaders.NodeResolveLoader,
   PrecompiledLoader: loaders.PrecompiledLoader,
   WebLoader: loaders.WebLoader,
   compiler: compiler,
