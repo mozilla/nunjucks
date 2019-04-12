@@ -8,7 +8,6 @@ docs/files
 /index.js.map
 /tests/browser/nunjucks*
 .nyc_output
-/browser
 /tests/browser/precompiled-templates.js
 /samples/express/js/nunjucks.js
 /samples/express/js/templates.js
