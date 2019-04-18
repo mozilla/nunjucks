@@ -544,8 +544,8 @@ render of the included template, and the results of that render are included.
 values. Macros and top-level assignments (done with [`set`](#set)) are exported
 from templates, allowing you to access them in a different template.
 
-Imported templates are processed without the current context, so they do not
-have access to any of the current template variables.
+Imported templates are processed without the current context by default, so
+they do not have access to any of the current template variables.
 
 Let's start with a template called `forms.html` that has the following in it:
 
@@ -586,6 +586,13 @@ with `from import`:
 {{ field('user') }}
 {{ description('Password') }}
 {{ field('pass', type='password') }}
+```
+
+By adding `with context` to the end of an `import` directive, the imported
+template is processed with the current context.
+
+```jinja
+{% from "forms.html" import field with context %}
 ```
 
 `import` actually accepts any arbitrary expression, so you can pass anything
