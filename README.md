@@ -1,5 +1,11 @@
 # Nunjucks
 
+  [![NPM Version][npm-image]][npm-url]
+  [![NPM Downloads][downloads-image]][downloads-url]
+  [![Linux Build][travis-image]][travis-url]
+  [![Windows Build][appveyor-image]][appveyor-url]
+  [![Test Codecov][codecov-image]][codecov-url]
+
 [Nunjucks](https://mozilla.github.io/nunjucks/) is a full featured
 templating engine for javascript. It is heavily inspired by
 [jinja2](http://jinja.pocoo.org/). View the docs
@@ -35,3 +41,14 @@ https://groups.google.com/forum/?fromgroups#!forum/nunjucks
 Contributions are always welcome! Before you submit an issue or pull request, please read our [contribution guidelines](CONTRIBUTING.md).
 
 [Contributors](https://github.com/mozilla/nunjucks/graphs/contributors)
+
+[npm-image]: https://img.shields.io/npm/v/nunjucks.svg
+[npm-url]: https://npmjs.org/package/nunjucks
+[downloads-image]: https://img.shields.io/npm/dm/nunjucks.svg
+[downloads-url]: https://npmjs.org/package/nunjucks
+[travis-image]: https://img.shields.io/travis/mozilla/nunjucks/master.svg?label=linux
+[travis-url]: https://travis-ci.org/mozilla/nunjucks
+[appveyor-image]: https://img.shields.io/appveyor/ci/fdintino/nunjucks/master.svg?label=windows
+[appveyor-url]: https://ci.appveyor.com/project/fdintino/nunjucks
+[codecov-image]: https://img.shields.io/codecov/c/gh/mozilla/nunjucks.svg
+[codecov-url]: https://codecov.io/gh/mozilla/nunjucks/branch/master
