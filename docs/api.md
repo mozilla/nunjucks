@@ -33,9 +33,11 @@ nunjucks.render(name, [context], [callback])
 
 Renders the template named **name** with the **context** hash. If
 **callback** is provided, it will be called when done with any
-possible error as the first argument and the result as the second.
-Otherwise, the result is returned from `render` and errors are thrown.
-See [asynchronous support](#asynchronous-support) for more info.
+possible error as the first argument (or `null` if there were no
+errors) and the result as the second (or `null` if there were
+errors). Otherwise, the result is returned from `render` and errors
+are thrown. See [asynchronous support](#asynchronous-support) for
+more info.
 
 See the warning about **not allowing [users to define their own
 templates](#user-defined-templates-warning).**
@@ -313,11 +315,13 @@ getTemplate
 env.getTemplate(name, [eagerCompile], [callback])
 
 Retrieve the template named **name**. If **eagerCompile** is `true`,
-compile it now instead of on render. If **callback** is supplied, call
-it with any errors and a template (if found), otherwise return
-synchronously. If using any async loaders, you must use the async API.
-The builtin loaders do not require this. See
-[asynchronous support](#asynchronous-support) and [loaders](#loader).
+compile it now instead of on render. If **callback** is supplied,
+call it with an errors as the first argument (if any errors are
+present) or `null` otherwise, and a template as the second argument,
+or `null` if no template is found; otherwise, return synchronously.
+If using any async loaders, you must use the async API. The builtin
+loaders do not require this. See [asynchronous
+support](#asynchronous-support) and [loaders](#loader).
 
 ```js
 var tmpl = env.getTemplate('page.html');
@@ -417,6 +421,27 @@ result (see [asynchronous support](#asynchronous-support)), otherwise
 return the rendered string.
 
 {% endapi %}
+
+{% api %}
+TemplateError
+nunjucks.TemplateError(err, lineno, colno)
+
+An error raised during template rendering. `err` can be an `Error`
+instance, in which case it is used as the new `TemplateError`'s
+source, or a string, in which case it is a message used to describe
+the error.
+
+In addition to the standard `Error` string properties `name`,
+`message`, and `stack`, `TemplateError` instances will have the
+following properties:
+
+* **lineno** and **colno**, integers indicating where the error was
+  created.
+* **value**, the `Error` which caused the `TemplateError`, or
+  `undefined` if no source error was given.
+
+{% endapi %}
+
 {% raw %}
 
 ## Loader
