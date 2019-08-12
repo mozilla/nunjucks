@@ -242,7 +242,7 @@ class Environment extends EmitterObj {
 
       if (err) {
         if (cb) {
-          cb(err);
+          cb(err, null);
           return;
         } else {
           throw err;
@@ -523,7 +523,7 @@ class Template extends Obj {
       this.compile();
     } catch (e) {
       if (cb) {
-        return cb(e);
+        return cb(e, null);
       } else {
         throw e;
       }

@@ -33,7 +33,7 @@ class WebLoader extends Loader {
     this.fetch(this.baseURL + '/' + name, (err, src) => {
       if (err) {
         if (cb) {
-          cb(err.content);
+          cb(err.content, null);
         } else if (err.status === 404) {
           result = null;
         } else {
@@ -76,7 +76,7 @@ class WebLoader extends Loader {
           cb({
             status: ajax.status,
             content: ajax.responseText
-          });
+          }, null);
         }
       }
     };
