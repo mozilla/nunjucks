@@ -65,7 +65,7 @@
       env = new Environment(new MyLoader(templatesPath));
       env.getTemplate('fake.njk', function(err, parent) {
         expect(err).to.be.a(Error);
-        expect(parent).to.be(undefined);
+        expect(parent).to.be(null);
 
         done();
       });
