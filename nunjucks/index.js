@@ -57,6 +57,7 @@ module.exports = {
   lexer: lexer,
   runtime: runtime,
   lib: lib,
+  TemplateError: lib.TemplateError,
   nodes: nodes,
   installJinjaCompat: installJinjaCompat,
   configure: configure,
