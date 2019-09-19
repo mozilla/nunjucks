@@ -473,20 +473,20 @@ class Template extends Obj {
     const frame = parentFrame ? parentFrame.push(true) : new Frame();
     frame.topLevel = true;
     let syncResult = null;
-    let didError = false;
+    let existingError = false;
 
     this.rootRenderFunc(this.env, context, frame, globalRuntime, (err, res) => {
-      if (didError) {
+      if (existingError) {
         // prevent multiple calls to cb
         if (cb) {
           return;
         } else {
-          throw err;
+          throw err || existingError;
         }
       }
       if (err) {
         err = lib._prettifyError(this.path, this.env.opts.dev, err);
-        didError = true;
+        existingError = err;
       }
 
       if (cb) {
