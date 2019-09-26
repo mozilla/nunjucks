@@ -1,11 +1,10 @@
-var mochaPhantom = require('./mocha-phantomjs');
+var {runner} = require('mocha-headless-chrome');
 var spawn = require('child_process').spawn;
 var getStaticServer = require('./static-server');
 var path = require('path');
 
 var utils = require('./utils');
 var lookup = utils.lookup;
-var promiseSequence = utils.promiseSequence;
 
 function mochaRun() {
   return new Promise((resolve, reject) => {
@@ -51,11 +50,19 @@ function runtests() {
       return getStaticServer().then((args) => {
         server = args[0];
         const port = args[1];
-        const promises = ['index', 'slim'].map(
-          f => (() => mochaPhantom(`http://localhost:${port}/tests/browser/${f}.html`)));
-        return promiseSequence(promises).then(() => {
-          server.close();
-          resolve();
+        const options1 = {
+          file: `http://localhost:${port}/tests/browser/index.html`,
+          args: ['no-sandbox']
+        };
+        return runner(options1).then(() => {
+          const options2 = {
+            file: `http://localhost:${port}/tests/browser/slim.html`,
+            args: ['no-sandbox']
+          };
+          return runner(options2).then(() => {
+            server.close();
+            resolve();
+          });
         });
       });
     }).catch((err) => {
