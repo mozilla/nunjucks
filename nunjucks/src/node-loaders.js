@@ -7,9 +7,6 @@ const path = require('path');
 const Loader = require('./loader');
 const {PrecompiledLoader} = require('./precompiled-loader.js');
 let chokidar;
-try {
-  chokidar = require('chokidar'); // eslint-disable-line global-require
-} catch (e) {} // eslint-disable-line no-empty
 
 class FileSystemLoader extends Loader {
   constructor(searchPaths, opts) {
@@ -37,7 +34,9 @@ class FileSystemLoader extends Loader {
     if (opts.watch) {
       // Watch all the templates in the paths and fire an event when
       // they change
-      if (!chokidar) {
+      try {
+        chokidar = require('chokidar'); // eslint-disable-line global-require
+      } catch (e) {
         throw new Error('watch requires chokidar to be installed');
       }
       const paths = this.searchPaths.filter(fs.existsSync);
@@ -94,7 +93,9 @@ class NodeResolveLoader extends Loader {
     this.noCache = !!opts.noCache;
 
     if (opts.watch) {
-      if (!chokidar) {
+      try {
+        chokidar = require('chokidar'); // eslint-disable-line global-require
+      } catch (e) {
         throw new Error('watch requires chokidar to be installed');
       }
       this.watcher = chokidar.watch();
