@@ -1,6 +1,7 @@
 (function() {
   'use strict';
 
+  var nunjucks;
   var expect;
   var util;
   var lib;
@@ -10,17 +11,17 @@
   var finish;
 
   if (typeof require !== 'undefined') {
+    nunjucks = require('nunjucks/test');
     expect = require('expect.js');
     util = require('./util');
-    lib = require('../nunjucks/src/lib');
-    r = require('../nunjucks/src/runtime');
   } else {
+    nunjucks = window.nunjucks;
     expect = window.expect;
     util = window.util;
-    lib = nunjucks.lib;
-    r = nunjucks.runtime;
   }
 
+  lib = nunjucks.lib;
+  r = nunjucks.runtime;
   render = util.render;
   equal = util.equal;
   finish = util.finish;

@@ -14,7 +14,7 @@
     expect;
 
   if (typeof window === 'undefined') {
-    nunjucks = nunjucksFull = require('../nunjucks/index.js');
+    nunjucks = nunjucksFull = require('nunjucks/test');
     Loader = nunjucks.FileSystemLoader;
     templatesPath = 'tests/templates';
     expect = require('expect.js');

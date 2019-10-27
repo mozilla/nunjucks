@@ -4,7 +4,7 @@ var path = require('path');
 var express = require('express');
 var expect = require('expect.js');
 var request = require('supertest');
-var nunjucks = require('../nunjucks/index');
+var nunjucks = require('nunjucks/test');
 
 var VIEWS = path.join(__dirname, '../samples/express/views');
 

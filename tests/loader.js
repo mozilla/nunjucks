@@ -1,7 +1,8 @@
 (function() {
   'use strict';
 
-  var expect,
+  var nunjucks,
+    expect,
     Environment,
     WebLoader,
     FileSystemLoader,
@@ -9,20 +10,18 @@
     templatesPath;
 
   if (typeof require !== 'undefined') {
+    nunjucks = require('nunjucks/test');
     expect = require('expect.js');
-    Environment = require('../nunjucks/src/environment').Environment;
-    WebLoader = require('../nunjucks/src/web-loaders').WebLoader;
-    FileSystemLoader = require('../nunjucks/src/node-loaders').FileSystemLoader;
-    NodeResolveLoader = require('../nunjucks/src/node-loaders').NodeResolveLoader;
     templatesPath = 'tests/templates';
   } else {
+    nunjucks = window.nunjucks;
     expect = window.expect;
-    Environment = nunjucks.Environment;
-    WebLoader = nunjucks.WebLoader;
-    FileSystemLoader = nunjucks.FileSystemLoader;
-    NodeResolveLoader = nunjucks.NodeResolveLoader;
     templatesPath = '../templates';
   }
+  Environment = nunjucks.Environment;
+  WebLoader = nunjucks.WebLoader;
+  FileSystemLoader = nunjucks.FileSystemLoader;
+  NodeResolveLoader = nunjucks.NodeResolveLoader;
 
   describe('loader', function() {
     it('should allow a simple loader to be created', function() {
@@ -71,29 +70,31 @@
       });
     });
 
-    describe('WebLoader', function() {
-      it('should have default opts for WebLoader', function() {
-        var webLoader = new WebLoader(templatesPath);
-        expect(webLoader).to.be.a(WebLoader);
-        expect(webLoader.useCache).to.be(false);
-        expect(webLoader.async).to.be(false);
-      });
-
-      it('should emit a "load" event', function(done) {
-        var loader = new WebLoader(templatesPath);
-
-        if (typeof window === 'undefined') {
-          this.skip();
-        }
-
-        loader.on('load', function(name, source) {
-          expect(name).to.equal('simple-base.njk');
-          done();
+    if (typeof WebLoader !== 'undefined') {
+      describe('WebLoader', function() {
+        it('should have default opts for WebLoader', function() {
+          var webLoader = new WebLoader(templatesPath);
+          expect(webLoader).to.be.a(WebLoader);
+          expect(webLoader.useCache).to.be(false);
+          expect(webLoader.async).to.be(false);
         });
 
-        loader.getSource('simple-base.njk');
+        it('should emit a "load" event', function(done) {
+          var loader = new WebLoader(templatesPath);
+
+          if (typeof window === 'undefined') {
+            this.skip();
+          }
+
+          loader.on('load', function(name, source) {
+            expect(name).to.equal('simple-base.njk');
+            done();
+          });
+
+          loader.getSource('simple-base.njk');
+        });
       });
-    });
+    }
 
     if (typeof FileSystemLoader !== 'undefined') {
       describe('FileSystemLoader', function() {

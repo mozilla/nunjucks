@@ -1,22 +1,23 @@
 (function() {
   'use strict';
 
-  var expect,
+  var nunjucks,
+    expect,
     lib,
     nodes,
     parser;
 
   if (typeof require !== 'undefined') {
+    nunjucks = require('nunjucks/test');
     expect = require('expect.js');
-    lib = require('../nunjucks/src/lib');
-    nodes = require('../nunjucks/src/nodes');
-    parser = require('../nunjucks/src/parser');
   } else {
+    nunjucks = window.nunjucks;
     expect = window.expect;
-    lib = nunjucks.lib;
-    nodes = nunjucks.nodes;
-    parser = nunjucks.parser;
   }
+
+  lib = nunjucks.lib;
+  nodes = nunjucks.nodes;
+  parser = nunjucks.parser;
 
   function _isAST(node1, node2) {
     // Compare ASTs

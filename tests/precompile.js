@@ -1,19 +1,21 @@
 (function() {
   'use strict';
 
-  var expect,
+  var nunjucks,
+    expect,
     precompile,
     precompileString;
 
   if (typeof require !== 'undefined') {
+    nunjucks = require('nunjucks/test');
     expect = require('expect.js');
-    precompile = require('../nunjucks/src/precompile').precompile;
-    precompileString = require('../nunjucks/src/precompile').precompileString;
   } else {
+    nunjucks = window.nunjucks;
     expect = window.expect;
-    precompile = nunjucks.precompile;
-    precompileString = nunjucks.precompileString;
   }
+
+  precompile = nunjucks.precompile;
+  precompileString = nunjucks.precompileString;
 
   describe('precompile', function() {
     it('should return a string', function() {

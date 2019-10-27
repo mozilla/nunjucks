@@ -1,0 +1,17 @@
+{
+  "name": "nunjucks",
+  "main": "dist/index.min.js",
+  "ignore": [
+    "package.json",
+    "src",
+    "lib",
+    "test"
+  ],
+  "keywords": [
+    "jinja",
+    "template",
+    "templates",
+    "templating",
+    "browser"
+  ]
+}

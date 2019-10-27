@@ -8,14 +8,14 @@
     path;
 
   if (typeof require !== 'undefined') {
+    nunjucks = require('nunjucks/test');
     expect = require('expect.js');
-    nunjucks = require('../nunjucks/index');
     fs = require('fs-extra');
     path = require('path');
     os = require('os');
   } else {
-    expect = window.expect;
     nunjucks = window.nunjucks;
+    expect = window.expect;
   }
 
   function rmdir(dirPath) {

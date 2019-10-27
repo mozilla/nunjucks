@@ -2,7 +2,6 @@ node_modules
 coverage
 .nyc_output
 docs
+test
 tests
-bench
-nunjucks
 scripts

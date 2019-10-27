@@ -3,7 +3,7 @@
 'use strict';
 
 var path = require('path');
-var nunjucks = require('../..');
+var nunjucks = require('nunjucks');
 var express = require('express');
 
 var app = express();

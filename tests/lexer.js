@@ -1,19 +1,21 @@
 (function() {
   'use strict';
 
+  var nunjucks;
   var expect;
   var lib;
   var lexer;
 
   if (typeof require !== 'undefined') {
+    nunjucks = require('nunjucks/test');
     expect = require('expect.js');
-    lib = require('../nunjucks/src/lib');
-    lexer = require('../nunjucks/src/lexer');
   } else {
+    nunjucks = window.nunjucks;
     expect = window.expect;
-    lib = nunjucks.lib;
-    lexer = nunjucks.lexer;
   }
+
+  lib = nunjucks.lib;
+  lexer = nunjucks.lexer;
 
   function _hasTokens(ws, tokens, types) {
     var i;

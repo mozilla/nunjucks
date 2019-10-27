@@ -2,26 +2,32 @@ module.exports = {
   'extends': [
     'airbnb-base/legacy',
   ],
+  'parser': 'babel-eslint',
   'parserOptions': {
     'sourceType': 'module',
-    'ecmaVersion': 2017,
+    'ecmaVersion': 2018,
+    'allowImportExportEverywhere': true,
   },
   'env': {
     'node': true,
     'es6': true,
   },
   "rules": {
-    // The one assertion of personal preference: no spaces before parentheses
-    // of anonymous functions
+    'quotes': 'off',
+    'consistent-return': 'off',
+    'no-lonely-if': 'off',
+    'no-return-assign': 'off',
+    'no-restricted-syntax': 'off',
+    'object-curly-newline': 'off',
+    'one-var': 'off',
+    'one-var-declaration-per-line': 'off',
+    'no-continue': 'off',
+    'operator-linebreak': 'off',
     'space-before-function-paren': ['error', {
       anonymous: 'never',
       named: 'never',
       asyncArrow: 'always',
     }],
-    // Temporarily disabled rules
-    //
-    // no-use-before-define is a good rule, but it would make the diff for
-    // linting the code even more inscrutible than it already is.
     'no-use-before-define': 'off',
     // Relax some rules
     'no-cond-assign': ['error', 'except-parens'],
@@ -45,8 +51,5 @@ module.exports = {
     // I'm inclined to reverse this rule to be ['error', 'always'], but not just yet
     // IE 8 is a thing of the past and trailing commas are useful.
     'comma-dangle': 'off',
-  },
-  'globals': {
-    'nunjucks': false,
   },
 };

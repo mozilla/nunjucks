@@ -12,20 +12,29 @@
   <script src="../../node_modules/mocha/mocha.js"></script>
   <script>
     delete window.require;
-    typeof initMochaPhantomJS === 'function' && initMochaPhantomJS();
-    mocha.setup({
-      ui: 'bdd',
-      timeout: 10000
-    });
+    var isPhantom = typeof callPhantom === 'function';
+    var isChrome = typeof __mochaFinish === 'function';
+    var isAutomated = isPhantom || isChrome;
+
+    if (isPhantom) {
+      typeof initMochaPhantomJS === 'function' && initMochaPhantomJS();
+    }
+
+    if (isAutomated) {
+      mocha.setup({ui: 'bdd', timeout: 60000, reporter: 'spec'});
+      mocha.useColors(true);
+    } else {
+      mocha.setup({ui: 'bdd'});
+    }
   </script>
 
   <!-- Load full nunjucks lib as window.nunjucksFull, so tests can run -->
-  <script src="nunjucks.min.js"></script>
+  <script src="../../packages/core/test/index.min.js"></script>
   <script type="text/javascript">
     window.nunjucksFull = window.nunjucks;
     window.nunjucks = undefined;
   </script>
-  <script src="nunjucks-slim.min.js"></script>
+  <script src="../../packages/core/test/index.slim.min.js"></script>
   <script src="../util.js"></script>
   <script src="precompiled-templates.js"></script>
   <script>
@@ -57,9 +66,24 @@
   <script src="../tests.js"></script>
 
   <script>
+    if (typeof window.__mochaFinish === 'undefined') {
+      window.__mochaFinish = function(err, res) {
+        if (err) {
+          throw err;
+        }
+      };
+    }
+
     nunjucks.testing = true;
     mocha.checkLeaks();
-    mocha.run();
+    var runner;
+    try {
+      runner = mocha.run(function(failures) {
+        __mochaFinish(undefined, {stats: runner.stats, coverage: window.__coverage__});
+      });
+    } catch (e) {
+      __mochaFinish(e);
+    }
   </script>
 </body>
 </html>

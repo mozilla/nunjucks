@@ -2,7 +2,7 @@
 
 'use strict';
 
-var precompileString = require('../..').precompileString;
+var precompileString = require('nunjucks').precompileString;
 var fs = require('fs');
 var path = require('path');
 

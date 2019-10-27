@@ -1,6 +1,7 @@
 (function() {
   'use strict';
 
+  var nunjucks;
   var expect;
   var util;
   var Environment;
@@ -9,18 +10,19 @@
   var path;
 
   if (typeof require !== 'undefined') {
+    nunjucks = require('nunjucks/test');
     expect = require('expect.js');
     util = require('./util');
-    Environment = require('../nunjucks/src/environment').Environment;
-    Loader = require('../nunjucks/src/node-loaders').FileSystemLoader;
+    Loader = nunjucks.FileSystemLoader;
     templatesPath = 'tests/templates';
     path = require('path');
   } else {
+    nunjucks = window.nunjucks;
     expect = window.expect;
-    Environment = nunjucks.Environment;
     Loader = nunjucks.WebLoader;
     templatesPath = '../templates';
   }
+  Environment = nunjucks.Environment;
 
   describe('api', function() {
     it('should always force compilation of parent template', function() {

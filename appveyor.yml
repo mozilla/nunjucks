@@ -2,6 +2,9 @@
 init:
   - git config --global core.autocrlf input
 
+# Do not build on gh tags
+skip_tags: true
+
 # Test against these versions of Node.js.
 environment:
   matrix:
@@ -13,9 +16,11 @@ environment:
 install:
   # Get the latest stable version of Node.js or io.js
   - ps: Install-Product node $env:nodejs_version
+  # Install chrome
+  - choco install -y googlechrome --ignore-checksums
   # install modules
-  - npm install
-  - npm install codecov
+  - set PATH=%APPDATA%\yarn;%PATH%
+  - yarn install
 
 # Post-install test scripts.
 test_script:
@@ -23,8 +28,11 @@ test_script:
   - node --version
   - npm --version
   # run tests
-  - npm test
-  - npm run codecov
+  - yarn build
+  - yarn test
 
 # Don't actually build.
 build: off
+
+on_success:
+    yarn codecov
