@@ -28,7 +28,7 @@ var yargs = require('yargs')
 
     .describe('include', 'Include a file or folder which match the regex but would otherwise be excluded. You can use this flag multiple times')
         .string('include' )
-        .default('include', ['\\.html$', '\\.jinja$'])
+        .default('include', ['\\.html$', '\\.jinja$', '\\.njk$'])
         .alias('i', 'include')
 
     .describe('exclude', 'Exclude a file or folder which match the regex but would otherwise be included. You can use this flag multiple times')
