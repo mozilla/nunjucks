@@ -1,5 +1,3 @@
-import alias from 'rollup-plugin-alias';
-
 import rollupConfigBase from '../../rollup.config';
 
 import pjson from './package.json';
@@ -9,13 +7,17 @@ const pjsonOutputFiles = {
   cjs: 'main',
   es: 'module',
 };
+const isTest = process.env.NODE_ENV === 'test';
 
 export default ['umd', 'cjs', 'es', 'slim'].map((format, i) => {
+  if (isTest && format === 'es') {
+    return;
+  }
+
   const base = rollupConfigBase[i % 3];
   const outputFormat = (format === 'slim') ? 'umd' : format;
   const isBrowser = (outputFormat === 'umd');
   const {name} = pjson;
-  const isTest = process.env.NODE_ENV === 'test';
 
   let file = pjson[pjsonOutputFiles[outputFormat]];
 
@@ -51,4 +53,4 @@ export default ['umd', 'cjs', 'es', 'slim'].map((format, i) => {
       sourcemap: true,
     },
   };
-});
+}).filter(Boolean);

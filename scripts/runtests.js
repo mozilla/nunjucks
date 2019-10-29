@@ -10,6 +10,11 @@ const createServer = require('./testrunner/server');
 const chromeRun = require('./testrunner/chrome');
 const phantomjsRun = require('./testrunner/phantomjs');
 
+const nyc = global.nyc = new NYC({
+  produceSourceMap: true,
+});
+nyc.reset();
+
 const precompile = require('nunjucks/test').precompile;
 
 const mocha = new Mocha({
@@ -20,12 +25,9 @@ const mocha = new Mocha({
 
 const testDir = path.resolve(__dirname, '../tests');
 
-fs.readdirSync(testDir).filter(f => f !== 'util.js' && f !== '.eslintrc.js' && f.indexOf('.js') !== -1).forEach(
+fs.readdirSync(testDir).filter(f => f.indexOf('test.') === 0).forEach(
   f => mocha.addFile(path.join(testDir, f)));
 
-const nyc = global.nyc = new NYC({produceSourceMap: true});
-nyc.reset();
-nyc.wrap();
 
 function precompileTestTemplates() {
   return new Promise((resolve, reject) => {
@@ -96,10 +98,8 @@ async function runBrowserTests(server, {isSlim} = {}) {
     process.exitCode = 1;
     return;
   }
-  // const address = `http://localhost:${server.address().port}/tests/browser/`;
 
   server.close();
-
 
   nyc.writeCoverageFile();
   nyc.report();
