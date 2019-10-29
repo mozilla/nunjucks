@@ -1,6 +1,6 @@
 'use strict';
 
-import {Obj} from './object';
+import {Obj} from '@nunjucks/common';
 
 function traverseAndCheck(obj, type, results) {
   if (obj instanceof type) {

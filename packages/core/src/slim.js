@@ -1,11 +1,12 @@
 'use strict';
 
-import * as lib from './lib';
+import * as lib from '@nunjucks/common';
+import runtime from '@nunjucks/runtime';
+import {nodes} from '@nunjucks/parser';
+
 import {Environment, Template} from './environment-slim';
 import {Loader} from './loader';
 import {PrecompiledLoader} from './precompiled-loader';
-import runtime from './runtime';
-import * as nodes from './nodes';
 import installJinjaCompat from './jinja-compat';
 
 // A single instance of an environment, since this is so commonly used

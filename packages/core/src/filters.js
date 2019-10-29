@@ -1,7 +1,7 @@
 'use strict';
 
-import * as lib from './lib';
-import runtime from './runtime';
+import * as lib from '@nunjucks/common';
+import runtime from '@nunjucks/runtime';
 
 function normalize(value, defaultValue) {
   if (value === null || value === undefined || value === false) {

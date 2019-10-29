@@ -2,8 +2,10 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-import {_prettifyError} from './lib';
-import * as compiler from './compiler';
+
+import {_prettifyError} from '@nunjucks/common';
+import * as compiler from '@nunjucks/compiler';
+
 import {Environment} from './environment';
 import {precompileGlobal} from './precompile-global';
 

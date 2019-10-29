@@ -2,12 +2,14 @@
 
 import asap from 'asap';
 import waterfall from 'a-sync-waterfall';
-import * as lib from './lib';
+
+import * as lib from '@nunjucks/common';
+import {Obj, EmitterObj} from '@nunjucks/common';
+import globalRuntime from '@nunjucks/runtime';
+
 import * as filters from './filters';
 import * as tests from './tests';
 import {globals} from './globals';
-import {Obj, EmitterObj} from './object';
-import globalRuntime from './runtime';
 
 const {handleError, Frame} = globalRuntime;
 

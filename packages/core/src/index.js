@@ -1,14 +1,13 @@
 'use strict';
 
-import * as lib from './lib';
+import * as lib from '@nunjucks/common';
+import * as compiler from '@nunjucks/compiler';
+import {lexer, parser, nodes} from '@nunjucks/parser';
+import runtime from '@nunjucks/runtime';
+
 import {Environment, Template} from './environment';
 import {Loader} from './loader';
 import * as loaders from './loaders';
-import * as compiler from './compiler';
-import * as parser from './parser';
-import * as lexer from './lexer';
-import runtime from './runtime';
-import * as nodes from './nodes';
 import installJinjaCompat from './jinja-compat';
 
 // A single instance of an environment, since this is so commonly used

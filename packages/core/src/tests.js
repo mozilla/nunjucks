@@ -1,7 +1,7 @@
-import runtime from './runtime';
+import runtime from '@nunjucks/runtime';
 
 const {SafeString} = runtime;
-// import {SafeString} from './runtime';
+// import {SafeString} from '@nunjucks/runtime';
 
 /**
  * Returns `true` if the object is a function, otherwise `false`.

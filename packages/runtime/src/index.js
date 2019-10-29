@@ -1,6 +1,6 @@
-import * as lib from './lib';
+import * as lib from '@nunjucks/common';
 
-export {inOperator, isArray, keys} from './lib';
+export {inOperator, isArray, keys} from '@nunjucks/common';
 
 const arrayFrom = Array.from;
 const supportsIterators = (

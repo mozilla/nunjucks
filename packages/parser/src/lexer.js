@@ -1,6 +1,6 @@
 'use strict';
 
-import * as lib from './lib';
+import * as lib from '@nunjucks/common';
 
 let whitespaceChars = ' \n\t\r\u00A0';
 let delimChars = '()[]{}%*-+~/#,:|.<>=!';

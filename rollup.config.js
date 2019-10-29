@@ -1,5 +1,6 @@
 import path from 'path';
 
+import alias from 'rollup-plugin-alias';
 import commonjs from 'rollup-plugin-commonjs';
 import nodeResolve from 'rollup-plugin-node-resolve';
 import babel from 'rollup-plugin-babel';
@@ -14,6 +15,7 @@ const isTest = (process.env.NODE_ENV === 'test');
 const {plugins, presets: [[, envConfig]]} = pjson.babel;
 
 export default ['umd', 'cjs', 'es'].map(format => ({
+  output: {format},
   treeshake: {
     moduleSideEffects: 'no-external',
   },
@@ -26,6 +28,14 @@ export default ['umd', 'cjs', 'es'].map(format => ({
         return undefined;
       },
     },
+    alias({
+      ...((!isTest && format !== 'umd') ? {} : {
+        '@nunjucks/common': require.resolve('@nunjucks/common/src'),
+        '@nunjucks/compiler': require.resolve('@nunjucks/compiler/src'),
+        '@nunjucks/runtime': require.resolve('@nunjucks/runtime/src'),
+        '@nunjucks/parser': require.resolve('@nunjucks/parser/src'),
+      }),
+    }),
     json(),
     babel({
       plugins: [

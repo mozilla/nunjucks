@@ -1,4 +1,4 @@
-import {EmitterObj} from './object';
+import {EmitterObj} from '@nunjucks/common';
 
 export class Loader extends EmitterObj {
   isRelative(filename) {

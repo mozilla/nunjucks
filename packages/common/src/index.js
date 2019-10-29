@@ -1,9 +1,13 @@
-'use strict';
+import {Obj, EmitterObj} from './object';
+import {keys, extend, hasOwnProp, _assign} from './lib';
 
-var ArrayProto = Array.prototype;
-var ObjProto = Object.prototype;
+export {Obj, EmitterObj};
+export {keys, extend, hasOwnProp, _assign};
 
-var escapeMap = {
+const ArrayProto = Array.prototype;
+const ObjProto = Object.prototype;
+
+const escapeMap = {
   '&': '&amp;',
   '"': '&quot;',
   '\'': '&#39;',
@@ -11,11 +15,8 @@ var escapeMap = {
   '>': '&gt;'
 };
 
-var escapeRegex = /[&"'<>]/g;
+const escapeRegex = /[&"'<>]/g;
 
-export function hasOwnProp(obj, k) {
-  return ObjProto.hasOwnProperty.call(obj, k);
-}
 
 function lookupEscape(ch) {
   return escapeMap[ch];
@@ -241,13 +242,13 @@ export function asyncIter(arr, iter, cb) {
 }
 
 export function asyncFor(obj, iter, cb) {
-  const keys = keys_(obj || {});
-  const len = keys.length;
+  const props = keys(obj || {});
+  const len = props.length;
   let i = -1;
 
   function next() {
     i++;
-    const k = keys[i];
+    const k = props[i];
 
     if (i < len) {
       iter(k, obj[k], i, len, next);
@@ -263,36 +264,13 @@ export function indexOf(arr, searchElement, fromIndex) {
   return Array.prototype.indexOf.call(arr || [], searchElement, fromIndex);
 }
 
-function keys_(obj) {
-  /* eslint-disable no-restricted-syntax */
-  const arr = [];
-  for (let k in obj) {
-    if (hasOwnProp(obj, k)) {
-      arr.push(k);
-    }
-  }
-  return arr;
-}
-
-export {keys_ as keys};
-
 export function _entries(obj) {
-  return keys_(obj).map((k) => [k, obj[k]]);
+  return keys(obj).map((k) => [k, obj[k]]);
 }
 
 export function _values(obj) {
-  return keys_(obj).map((k) => obj[k]);
+  return keys(obj).map((k) => obj[k]);
 }
-
-export function extend(obj1, obj2) {
-  obj1 = obj1 || {};
-  keys_(obj2).forEach(k => {
-    obj1[k] = obj2[k];
-  });
-  return obj1;
-}
-
-export {extend as _assign};
 
 export function inOperator(key, val) {
   if (isArray(val) || isString(val)) {

@@ -1,7 +1,8 @@
 'use strict';
 
-import * as lib from './lib';
-import * as compiler from './compiler';
+import * as lib from '@nunjucks/common';
+import * as compiler from '@nunjucks/compiler';
+
 import {FileSystemLoader, WebLoader, PrecompiledLoader} from './loaders';
 import {express as expressApp} from './express-app';
 

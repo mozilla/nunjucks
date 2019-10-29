@@ -1,7 +1,7 @@
 'use strict';
 
 import * as nodes from './nodes';
-import * as lib from './lib';
+import * as lib from '@nunjucks/common';
 
 var sym = 0;
 function gensym() {

@@ -1,8 +1,8 @@
 'use strict';
 
-import * as lib from './lib';
-import {PrecompiledLoader} from './loaders';
+import * as lib from '@nunjucks/common';
 
+import {PrecompiledLoader} from './loaders';
 import {BaseTemplate, BaseEnvironment} from './environment-base';
 export {Context} from './environment-base';
 

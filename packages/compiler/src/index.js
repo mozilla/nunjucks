@@ -1,11 +1,8 @@
 'use strict';
 
-import * as parser from './parser';
-import * as transformer from './transformer';
-import * as nodes from './nodes';
-import {TemplateError} from './lib';
-import runtime from './runtime';
-import {Obj} from './object';
+import {TemplateError, Obj} from '@nunjucks/common';
+import runtime from '@nunjucks/runtime';
+import {parser, transformer, nodes} from '@nunjucks/parser';
 
 const {Frame} = runtime;
 

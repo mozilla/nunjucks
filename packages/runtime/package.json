@@ -1,7 +1,7 @@
 {
-  "name": "nunjucks",
+  "name": "@nunjucks/runtime",
   "version": "4.0.0-beta.1",
-  "description": "A powerful templating engine with inheritance, asynchronous control, and more (jinja2 inspired)",
+  "description": "Runtime for nunjucks templates",
   "main": "dist/index.js",
   "module": "dist/index.es.js",
   "jsnext:main": "dist/index.es.js",
@@ -16,15 +16,12 @@
     "watch:babel": "babel -w src/ --out-dir lib/",
     "watch:instrument": "cross-env NODE_ENV=test rollup -c -w"
   },
-  "bin": {
-    "nunjucks-precompile": "./bin/precompile"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/mozilla/nunjucks.git"
   },
   "author": "Frankie Dintino <fdintino@gmail.com> (https://www.frankiedintino.com/)",
-  "license": "BSD-2-Clause",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/mozilla/nunjucks/issues"
   },
@@ -33,16 +30,7 @@
     "node": ">=8.0.0"
   },
   "dependencies": {
-    "@nunjucks/common": "^4.0.0-beta.1",
-    "@nunjucks/compiler": "^4.0.0-beta.1",
-    "@nunjucks/parser": "^4.0.0-beta.1",
-    "@nunjucks/runtime": "^4.0.0-beta.1",
-    "a-sync-waterfall": "^1.0.0",
-    "asap": "^2.0.3",
-    "es6-symbol": "^3.1.2",
-    "pregenerator": "^1.0.0-beta.3",
-    "regenerator-runtime": "^0.13.3",
-    "yargs": "^14.2.0"
+    "@nunjucks/common": "^4.0.0-beta.1"
   },
   "devDependencies": {},
   "keywords": [

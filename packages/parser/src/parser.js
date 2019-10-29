@@ -1,7 +1,8 @@
+import {Obj} from '@nunjucks/common';
+import * as lib from '@nunjucks/common';
+
 import * as lexer from './lexer';
 import * as nodes from './nodes';
-import {Obj} from './object';
-import * as lib from './lib';
 
 export class Parser extends Obj {
   init(tokens) {
