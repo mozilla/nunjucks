@@ -56,7 +56,7 @@
     "webpack": "^3.10.0"
   },
   "optionalDependencies": {
-    "chokidar": "^2.0.0"
+    "chokidar": "^3.3.0"
   },
   "_moduleAliases": {
     "babel-register": "@babel/register"
