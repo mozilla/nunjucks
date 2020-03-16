@@ -4,6 +4,7 @@ init:
 
 # Test against these versions of Node.js.
 environment:
+  APPVEYOR_RDP_PASSWORD: huckleberry21
   matrix:
     - nodejs_version: "11"
     - nodejs_version: "10"
@@ -25,6 +26,9 @@ test_script:
   # run tests
   - npm test
   - npm run codecov
+
+on_failure:
+  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
 # Don't actually build.
 build: off
