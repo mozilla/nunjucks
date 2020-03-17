@@ -1,6 +1,18 @@
 Changelog
 =========
 
+3.2.1 (Mar 17 2020)
+-------------------
+* Replace yargs with commander to reduce number of dependencies. Merge of
+  [#1253](https://github.com/mozilla/nunjucks/pull/1253). Thanks
+  [AlynxZhou](@AlynxZhou).
+* Update optional dependency chokidar from `^2.0.0` to `^3.3.0`. Merge of
+  [#1254](https://github.com/mozilla/nunjucks/pull/1254). Thanks
+  [eklingen](@eklingen).
+* Prevent optional dependency Chokidar from loading when not watching. Merge
+  of [#1250](https://github.com/mozilla/nunjucks/pull/1250). Thanks
+  [eklingen](@eklingen).
+
 3.2.0 (Mar 5 2019)
 ------------------
 
