@@ -16,7 +16,7 @@ function mochaRun() {
         'tests/**',
         '--silent',
         '--no-clean',
-        lookup('.bin/mocha', true),
+        require.resolve('mocha/bin/mocha'),
         '-R', 'spec',
         '-r', 'tests/setup',
         '-r', '@babel/register',
