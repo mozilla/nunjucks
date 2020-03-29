@@ -12,6 +12,12 @@ Changelog
   [ogonkov](https://github.com/ogonkovv)!
 * Fix precompile binary script `TypeError: name.replace is not a function`.
   Fixes [#1295](https://github.com/mozilla/nunjucks/issues/1295).
+* Add support for nested attributes on
+  [`groupby` filter](https://mozilla.github.io/nunjucks/templating.html#groupby);
+  respect `throwOnUndefined` option, if the groupby attribute is undefined.
+  Merge of [#1276](https://github.com/mozilla/nunjucks/pull/1276); fixes
+  [#1198](https://github.com/mozilla/nunjucks/issues/1198). Thanks
+  [ogonkov](https://github.com/ogonkovv)!
 
 3.2.1 (Mar 17 2020)
 -------------------

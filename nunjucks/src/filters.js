@@ -164,7 +164,7 @@ function forceescape(str) {
 exports.forceescape = forceescape;
 
 function groupby(arr, attr) {
-  return lib.groupBy(arr, attr);
+  return lib.groupBy(arr, attr, this.env.opts.throwOnUndefined);
 }
 
 exports.groupby = groupby;

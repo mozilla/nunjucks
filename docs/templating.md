@@ -1160,6 +1160,48 @@ green : james jessie
 blue : john jim
 ```
 
+Attribute can use dot notation to use nested attribute, like `date.year`.
+
+**Input**
+
+```jinja
+{% set posts = [
+      {
+        date: {
+          year: 2019
+        },
+        title: 'Post 1'
+      },
+      {
+        date: {
+          year: 2018
+        },
+        title: 'Post 2'
+      },
+      {
+        date: {
+          year: 2019
+        },
+        title: 'Post 3'
+      }
+    ]
+%}
+
+{% for year, posts in posts | groupby("date.year") %}
+    :{{ year }}:
+    {% for post in posts %}
+        {{ post.title }}
+    {% endfor %}
+{% endfor %}
+```
+
+**Output**
+:2018:
+Post 2
+:2019:
+Post 1
+Post 3
+
 ### indent
 
 Indent a string using spaces.

@@ -167,12 +167,58 @@ function isObject(obj) {
 
 exports.isObject = isObject;
 
-function groupBy(obj, val) {
+/**
+ * @param {string|number} attr
+ * @returns {(string|number)[]}
+ * @private
+ */
+function _prepareAttributeParts(attr) {
+  if (!attr) {
+    return [];
+  }
+
+  if (typeof attr === 'string') {
+    return attr.split('.');
+  }
+
+  return [attr];
+}
+
+/**
+ * @param {string}   attribute      Attribute value. Dots allowed.
+ * @returns {function(Object): *}
+ */
+function getAttrGetter(attribute) {
+  const parts = _prepareAttributeParts(attribute);
+
+  return function attrGetter(item) {
+    let _item = item;
+
+    for (let i = 0; i < parts.length; i++) {
+      const part = parts[i];
+
+      // If item is not an object, and we still got parts to handle, it means
+      // that something goes wrong. Just roll out to undefined in that case.
+      if (hasOwnProp(_item, part)) {
+        _item = _item[part];
+      } else {
+        return undefined;
+      }
+    }
+
+    return _item;
+  };
+}
+
+function groupBy(obj, val, throwOnUndefined) {
   const result = {};
-  const iterator = isFunction(val) ? val : (o) => o[val];
+  const iterator = isFunction(val) ? val : getAttrGetter(val);
   for (let i = 0; i < obj.length; i++) {
     const value = obj[i];
     const key = iterator(value, i);
+    if (key === undefined && throwOnUndefined === true) {
+      throw new TypeError(`groupby: attribute "${val}" resolved to undefined`);
+    }
     (result[key] || (result[key] = [])).push(value);
   }
   return result;

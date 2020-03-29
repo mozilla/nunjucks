@@ -248,6 +248,34 @@
     });
 
     it('groupby', function(done) {
+      const namesContext = {
+        items: [{
+          name: 'james',
+          type: 'green'
+        },
+        {
+          name: 'john',
+          type: 'blue'
+        },
+        {
+          name: 'jim',
+          type: 'blue'
+        },
+        {
+          name: 'jessie',
+          type: 'green'
+        }]
+      };
+      equal(
+        '{% for type, items in items | groupby("type") %}' +
+        ':{{ type }}:' +
+        '{% for item in items %}' +
+        '{{ item.name }}' +
+        '{% endfor %}' +
+        '{% endfor %}',
+        namesContext,
+        ':green:jamesjessie:blue:johnjim');
+
       equal(
         '{% for type, items in items | groupby("type") %}' +
         ':{{ type }}:' +
@@ -270,10 +298,107 @@
           },
           {
             name: 'jessie',
-            type: 'green'
+            color: 'green'
           }]
         },
-        ':green:jamesjessie:blue:johnjim');
+        ':green:james:blue:johnjim:undefined:jessie');
+
+      equal(
+        '{% for year, posts in posts | groupby("date.year") %}' +
+        ':{{ year }}:' +
+        '{% for post in posts %}' +
+        '{{ post.title }}' +
+        '{% endfor %}' +
+        '{% endfor %}',
+        {
+          posts: [
+            {
+              date: {
+                year: 2019
+              },
+              title: 'Post 1'
+            },
+            {
+              date: {
+                year: 2018
+              },
+              title: 'Post 2'
+            },
+            {
+              date: {
+                year: 2019
+              },
+              title: 'Post 3'
+            }
+          ]
+        },
+        ':2018:Post 2:2019:Post 1Post 3');
+
+      equal(
+        '{% for year, posts in posts | groupby("date.year") %}' +
+        ':{{ year }}:' +
+        '{% for post in posts %}' +
+        '{{ post.title }}' +
+        '{% endfor %}' +
+        '{% endfor %}',
+        {
+          posts: [
+            {
+              date: {
+                year: 2019
+              },
+              title: 'Post 1'
+            },
+            {
+              date: {
+                year: 2018
+              },
+              title: 'Post 2'
+            },
+            {
+              meta: {
+                month: 2
+              },
+              title: 'Post 3'
+            }
+          ]
+        },
+        ':2018:Post 2:2019:Post 1:undefined:Post 3');
+
+      equal(
+        '{% for type, items in items | groupby({}) %}' +
+        ':{{ type }}:' +
+        '{% for item in items %}' +
+        '{{ item.name }}' +
+        '{% endfor %}' +
+        '{% endfor %}',
+        namesContext,
+        ':undefined:jamesjohnjimjessie'
+      );
+
+      const undefinedTemplate = (
+        '{% for type, items in items | groupby("a.b.c") %}' +
+        ':{{ type }}:' +
+        '{% for item in items %}' +
+        '{{ item.name }}' +
+        '{% endfor %}' +
+        '{% endfor %}'
+      );
+      equal(
+        undefinedTemplate,
+        namesContext,
+        ':undefined:jamesjohnjimjessie'
+      );
+
+      expect(function() {
+        render(
+          undefinedTemplate,
+          namesContext,
+          {
+            throwOnUndefined: true
+          }
+        );
+      }).to.throwError(/groupby: attribute "a\.b\.c" resolved to undefined/);
 
       finish(done);
     });
