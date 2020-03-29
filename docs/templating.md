@@ -1572,6 +1572,33 @@ escaping enabled this variable will not be escaped.
 foo <a href="http://www.example.com/">http://www.example.com/</a> bar
 ```
 
+### select
+
+Filters a sequence of objects by applying a test to each object, and only
+selecting the objects with the test succeeding.
+
+If no test is specified, each object will be evaluated as a boolean.
+
+**Input**
+
+```jinja
+{% set numbers=[0, 1, 2, 3, 4, 5] %}
+
+{{ numbers | select("odd") | join }}
+{{ numbers | select("even") | join }}
+{{ numbers | select("divisibleby", 3) | join }}
+{{ numbers | select() | join }}
+```
+
+**Output**
+
+```jinja
+135
+024
+03
+12345
+```
+
 ### selectattr (only the single-argument form)
 
 Filter a sequence of objects by applying a test to the specified attribute
