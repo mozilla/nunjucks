@@ -274,14 +274,10 @@ function rejectattr(arr, attr) {
 exports.rejectattr = rejectattr;
 
 function select(arr, testName = 'truthy', secondArg) {
-  const test = tests[testName];
+  const test = tests[testName] || tests.truthy;
 
   return arr.filter(function applyToTest(item) {
-    if (test) {
-      return test(item, secondArg);
-    }
-
-    return tests.truthy(item);
+    return test(item, secondArg);
   });
 }
 
