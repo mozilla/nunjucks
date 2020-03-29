@@ -1724,9 +1724,10 @@ foo
 
 Return a truncated copy of the string. The length is specified with the first
 parameter, which defaults to 255. If the second parameter is unset or set to false,
-the last word will be discarded, otherwise the filter will cut the text at length.
-If the text was in fact truncated it will append an ellipsis ("..."). A different
-set of characters other than "..."  can be specified using the third parameter.
+the last word will be discarded if cut in half, otherwise the filter will cut the
+text at length. If the text is successfully truncated an ellipsis ("...") will be
+appended to the final string. A different set of characters other than "..."  can
+be specified using the third parameter.
 
 Truncate to 3 characters:
 
@@ -1770,7 +1771,7 @@ Truncate to 5 characters, keeping words cut in half:
 foo b...
 ```
 
-Truncate to 6 characters and replace "..." with a  "?":
+Truncate to 6 characters and append a question mark ("?") to the final string:
 
 **Input**
 
@@ -1781,7 +1782,7 @@ Truncate to 6 characters and replace "..." with a  "?":
 **Output**
 
 ```jinja
-foo ba ?
+foo ba?
 ```
 
 ### upper
