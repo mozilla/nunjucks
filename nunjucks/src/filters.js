@@ -2,6 +2,7 @@
 
 var lib = require('./lib');
 var r = require('./runtime');
+var tests = require('./tests');
 
 var exports = module.exports = {};
 
@@ -271,6 +272,20 @@ function rejectattr(arr, attr) {
 }
 
 exports.rejectattr = rejectattr;
+
+function select(arr, testName = 'truthy', secondArg) {
+  const test = tests[testName];
+
+  return arr.filter(function applyToTest(item) {
+    if (test) {
+      return test(item, secondArg);
+    }
+
+    return tests.truthy(item);
+  });
+}
+
+exports.select = select;
 
 function selectattr(arr, attr) {
   return arr.filter((item) => !!item[attr]);
