@@ -1723,23 +1723,51 @@ foo
 ### truncate
 
 Return a truncated copy of the string. The length is specified with the first
-parameter which defaults to 255. If the second parameter is true the filter
-will cut the text at length. Otherwise it will discard the last word. If the
-text was in fact truncated it will append an ellipsis sign ("...").
-A different ellipsis sign than "(...)"  can be specified using the third parameter.
+parameter, which defaults to 255. If the second parameter is unset or set to false,
+the last word will be discarded, otherwise the filter will cut the text at length.
+If the text was in fact truncated it will append an ellipsis ("..."). A different
+set of characters other than "..."  can be specified using the third parameter.
 
 Truncate to 3 characters:
 
 **Input**
 
 ```jinja
-{{ "foo bar" | truncate(3) }}
+{{ "example" | truncate(3) }}
 ```
 
 **Output**
 
 ```jinja
-foo(...)
+exa...
+```
+
+Truncate to 5 characters, discarding any words cut in half (default behavior):
+
+**Input**
+
+```jinja
+{{ "foo bar" | truncate(5, false) }}
+```
+
+**Output**
+
+```jinja
+foo...
+```
+
+Truncate to 5 characters, keeping words cut in half:
+
+**Input**
+
+```jinja
+{{ "foo bar" | truncate(5, true) }}
+```
+
+**Output**
+
+```jinja
+foo b...
 ```
 
 Truncate to 6 characters and replace "..." with a  "?":
