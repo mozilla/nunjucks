@@ -490,6 +490,22 @@
       finish(done);
     });
 
+    it('reject', function(done) {
+      var context = {
+        numbers: [0, 1, 2, 3, 4, 5]
+      };
+
+      equal('{{ numbers | reject("odd") | join }}', context, '024');
+
+      equal('{{ numbers | reject("even") | join }}', context, '135');
+
+      equal('{{ numbers | reject("divisibleby", 3) | join }}', context, '1245');
+
+      equal('{{ numbers | reject() | join }}', context, '0');
+
+      finish(done);
+    });
+
     it('rejectattr', function(done) {
       var foods = [{
         tasty: true

@@ -1389,6 +1389,32 @@ Select a random value from an array.
 
 A random value between 1-9 (inclusive).
 
+### reject
+
+Filters a sequence of objects by applying a test to each object, and rejecting
+the objects with the test succeeding.
+
+If no test is specified, each object will be evaluated as a boolean.
+
+**Input**
+
+```jinja
+{% set numbers=[0, 1, 2, 3, 4, 5] %}
+
+{{ numbers | reject("odd") | join }}
+{{ numbers | reject("even") | join }}
+{{ numbers | reject("divisibleby", 3) | join }}
+{{ numbers | reject() | join }}
+```
+
+**Output**
+
+```jinja
+024
+135
+1245
+0
+```
 
 ### rejectattr (only the single-argument form)
 

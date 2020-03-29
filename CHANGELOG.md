@@ -2,6 +2,7 @@ Changelog
 =========
 
 * Add [`select` filter](https://mozilla.github.io/nunjucks/templating.html#select).
+* Add [`reject` filter](https://mozilla.github.io/nunjucks/templating.html#reject).
 
 3.2.1 (Mar 17 2020)
 -------------------

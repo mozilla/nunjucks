@@ -266,22 +266,34 @@ function random(arr) {
 
 exports.random = random;
 
+/**
+ * Construct select or reject filter
+ *
+ * @param {boolean} expectedTestResult
+ * @returns {function(array, string, *): array}
+ */
+function getSelectOrReject(expectedTestResult) {
+  function filter(arr, testName = 'truthy', secondArg) {
+    const context = this;
+    const test = context.env.getTest(testName);
+
+    return lib.toArray(arr).filter(function examineTestResult(item) {
+      return test.call(context, item, secondArg) === expectedTestResult;
+    });
+  }
+
+  return filter;
+}
+
+exports.reject = getSelectOrReject(false);
+
 function rejectattr(arr, attr) {
   return arr.filter((item) => !item[attr]);
 }
 
 exports.rejectattr = rejectattr;
 
-function select(arr, testName = 'truthy', secondArg) {
-  const context = this;
-  const test = context.env.getTest(testName);
-
-  return arr.filter(function applyToTest(item) {
-    return test.call(context, item, secondArg);
-  });
-}
-
-exports.select = select;
+exports.select = getSelectOrReject(true);
 
 function selectattr(arr, attr) {
   return arr.filter((item) => !!item[attr]);
