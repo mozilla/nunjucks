@@ -1,6 +1,8 @@
 Changelog
 =========
 
+* Add [`select` filter](https://mozilla.github.io/nunjucks/templating.html#select).
+
 3.2.1 (Mar 17 2020)
 -------------------
 * Replace yargs with commander to reduce number of dependencies. Merge of

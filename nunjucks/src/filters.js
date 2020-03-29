@@ -272,6 +272,17 @@ function rejectattr(arr, attr) {
 
 exports.rejectattr = rejectattr;
 
+function select(arr, testName = 'truthy', secondArg) {
+  const context = this;
+  const test = context.env.getTest(testName);
+
+  return arr.filter(function applyToTest(item) {
+    return test.call(context, item, secondArg);
+  });
+}
+
+exports.select = select;
+
 function selectattr(arr, attr) {
   return arr.filter((item) => !!item[attr]);
 }

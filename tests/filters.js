@@ -504,6 +504,22 @@
       finish(done);
     });
 
+    it('select', function(done) {
+      var context = {
+        numbers: [0, 1, 2, 3, 4, 5]
+      };
+
+      equal('{{ numbers | select("odd") | join }}', context, '135');
+
+      equal('{{ numbers | select("even") | join }}', context, '024');
+
+      equal('{{ numbers | select("divisibleby", 3) | join }}', context, '03');
+
+      equal('{{ numbers | select() | join }}', context, '12345');
+
+      finish(done);
+    });
+
     it('selectattr', function(done) {
       var foods = [{
         tasty: true
