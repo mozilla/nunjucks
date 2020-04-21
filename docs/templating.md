@@ -206,6 +206,18 @@ and `else`:
 {% endif %}
 ```
 
+You can specify multiple conditions with `and` and `or`:
+
+```jinja
+{% if happy and hungry %}
+  I am happy *and* hungry; both are true.
+{% endif %}
+
+{% if happy or hungry %}
+  I am either happy *or* hungry; one or the other is true.
+{% endif %}
+```
+
 You can also use if as an [inline expression](#if-expression).
 
 ### for
