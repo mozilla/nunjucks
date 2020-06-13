@@ -48,8 +48,8 @@ export function equalto(one, two) {
 }
 
 // Aliases
-export const eq = equalto;
-export const sameas = equalto;
+export { equalto as eq };
+export { equalto as sameas };
 
 /**
  * Returns `true` if the value is evenly divisible by 2.
@@ -95,7 +95,7 @@ export function greaterthan(one, two) {
 }
 
 // alias
-export const gt = greaterthan;
+export { greaterthan as gt };
 
 /**
  * Returns `true` if the operand (one) is less than or equal to the test's
@@ -120,7 +120,7 @@ export function lessthan(one, two) {
 }
 
 // alias
-export const lt = lessthan;
+export { lessthan as lt };
 
 /**
  * Returns `true` if the string is lowercased.

@@ -70,7 +70,7 @@ function default_(val, def, bool) {
 }
 
 // TODO: it is confusing to export something called 'default'
-export {default_ as default}; // eslint-disable-line dot-notation
+export {default_ as default};
 
 export function dictsort(val, caseSensitive, by) {
   if (!lib.isObject(val)) {
@@ -572,5 +572,5 @@ const intFilter = r.makeMacro(
 export {intFilter as int};
 
 // Aliases
-export const d = default_;
-export const e = escape;
+export {default_ as d};
+export {escape as e};
