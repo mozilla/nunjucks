@@ -27,7 +27,7 @@
     "express": "4.x",
     "fs-extra": "^5.0.0",
     "get-port": "^3.2.0",
-    "mocha": "*",
+    "mocha": "^7.2.0",
     "mocha-phantomjs-core": "^2.1.2",
     "mocha-phantomjs-istanbul": "0.0.2",
     "module-alias": "^2.0.3",
