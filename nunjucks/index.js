@@ -13,7 +13,7 @@ import installJinjaCompat from './src/jinja-compat';
 // A single instance of an environment, since this is so commonly used
 let e;
 
-export function configure(templatesPath, opts) {
+function configure(templatesPath, opts) {
   opts = opts || {};
   if (lib.isObject(templatesPath)) {
     opts = templatesPath;
@@ -57,6 +57,7 @@ export default {
   lib: lib,
   nodes: nodes,
   installJinjaCompat: installJinjaCompat,
+  configure: configure,
   reset() {
     e = undefined;
   },
