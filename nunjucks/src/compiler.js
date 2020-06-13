@@ -1,5 +1,3 @@
-'use strict';
-
 import * as parser from './parser';
 import * as transformer from './transformer';
 import * as nodes from './nodes';

@@ -1,5 +1,3 @@
-'use strict';
-
 import * as lib from './lib';
 
 let whitespaceChars = ' \n\t\r\u00A0';

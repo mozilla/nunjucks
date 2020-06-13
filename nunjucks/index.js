@@ -1,5 +1,3 @@
-'use strict';
-
 import * as lib from './src/lib';
 import {Environment, Template} from './src/environment';
 import Loader from './src/loader';

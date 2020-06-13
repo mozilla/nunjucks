@@ -1,5 +1,3 @@
-'use strict';
-
 import asap from 'asap';
 import waterfall from 'a-sync-waterfall';
 import expressApp from './express-app';

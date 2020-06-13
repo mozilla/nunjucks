@@ -1,5 +1,3 @@
-'use strict';
-
 // A simple class system, more documentation to come
 import EventEmitter from 'events';
 import * as lib from './lib';

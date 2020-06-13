@@ -1,5 +1,3 @@
-'use strict';
-
 import * as lib from './lib';
 
 var arrayFrom = Array.from;

@@ -1,5 +1,3 @@
-'use strict';
-
 export default function precompileGlobal(templates, opts) {
   var out = '';
   opts = opts || {};

@@ -1,7 +1,5 @@
 /* eslint-disable no-console */
 
-'use strict';
-
 import fs from 'fs';
 import path from 'path';
 import Loader from './loader';

@@ -1,6 +1,4 @@
 export default function installCompat() {
-  'use strict';
-
   /* eslint-disable camelcase */
 
   // This must be called like `nunjucks.installCompat` so that `this`

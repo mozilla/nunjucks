@@ -1,5 +1,3 @@
-'use strict';
-
 import Loader from './loader';
 
 export class WebLoader extends Loader {

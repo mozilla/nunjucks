@@ -1,5 +1,3 @@
-'use strict';
-
 import {Obj} from './object';
 
 function traverseAndCheck(obj, type, results) {

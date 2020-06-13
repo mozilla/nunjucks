@@ -1,5 +1,3 @@
-'use strict';
-
 import * as nodes from './nodes';
 import * as lib from './lib';
 

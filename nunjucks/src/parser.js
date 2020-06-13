@@ -1,5 +1,3 @@
-'use strict';
-
 import * as lexer from './lexer';
 import * as nodes from './nodes';
 import {Obj} from './object';
