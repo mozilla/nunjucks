@@ -179,7 +179,7 @@ function nullTest(value) {
   return value === null;
 }
 
-exports.null = nullTest;
+exports.nullTest = nullTest;
 
 /**
  * Returns true if value is a number.
@@ -235,7 +235,7 @@ function undefinedTest(value) {
   return value === undefined;
 }
 
-exports.undefined = undefinedTest;
+exports.undefinedTest = undefinedTest;
 
 /**
  * Returns `true` if the string is uppercased.

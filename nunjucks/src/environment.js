@@ -37,6 +37,21 @@ const noopTmplSrc = {
   }
 };
 
+const testNameMap = {
+  nullTest: 'null',
+  undefinedTest: 'undefined'
+};
+
+/**
+ * Map test names to reserved JS names
+ *
+ * @param {string} name
+ * @returns {string}
+ */
+function mapTestName(name) {
+  return name in testNameMap ? testNameMap[name] : name;
+}
+
 class Environment extends EmitterObj {
   init(loaders, opts) {
     // The dev flag determines the trace that'll be shown on errors.
@@ -92,7 +107,10 @@ class Environment extends EmitterObj {
     this.extensionsList = [];
 
     lib._entries(filters).forEach(([name, filter]) => this.addFilter(name, filter));
-    lib._entries(tests).forEach(([name, test]) => this.addTest(name, test));
+    lib._entries(tests).forEach(([name, test]) => this.addTest(
+      mapTestName(name),
+      test
+    ));
   }
 
   _initLoaders() {
