@@ -1,9 +1,10 @@
 'use strict';
 
-const path = require('path');
-const {EmitterObj} = require('./object');
+import path from 'path';
+import {EmitterObj} from './object';
 
-module.exports = class Loader extends EmitterObj {
+
+export default class Loader extends EmitterObj {
   resolve(from, to) {
     return path.resolve(path.dirname(from), to);
   }
@@ -11,4 +12,4 @@ module.exports = class Loader extends EmitterObj {
   isRelative(filename) {
     return (filename.indexOf('./') === 0 || filename.indexOf('../') === 0);
   }
-};
+}

@@ -1,4 +1,4 @@
-function installCompat() {
+export default function installCompat() {
   'use strict';
 
   /* eslint-disable camelcase */
@@ -301,5 +301,3 @@ function installCompat() {
 
   return uninstall;
 }
-
-module.exports = installCompat;

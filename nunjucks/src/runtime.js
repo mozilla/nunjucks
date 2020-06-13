@@ -1,6 +1,7 @@
 'use strict';
 
-var lib = require('./lib');
+import * as lib from './lib';
+
 var arrayFrom = Array.from;
 var supportsIterators = (
   typeof Symbol === 'function' && Symbol.iterator && typeof arrayFrom === 'function'
@@ -10,7 +11,7 @@ var supportsIterators = (
 // Frames keep track of scoping both at compile-time and run-time so
 // we know how to access variables. Block tags can introduce special
 // variables, for example.
-class Frame {
+export class Frame {
   constructor(parent, isolateWrites) {
     this.variables = Object.create(null);
     this.parent = parent;
@@ -81,7 +82,7 @@ class Frame {
   }
 }
 
-function makeMacro(argNames, kwargNames, func) {
+export function makeMacro(argNames, kwargNames, func) {
   return function macro(...macroArgs) {
     var argCount = numArgs(macroArgs);
     var args;
@@ -119,7 +120,7 @@ function makeMacro(argNames, kwargNames, func) {
   };
 }
 
-function makeKeywordArgs(obj) {
+export function makeKeywordArgs(obj) {
   obj.__keywords = true;
   return obj;
 }
@@ -139,7 +140,7 @@ function getKeywordArgs(args) {
   return {};
 }
 
-function numArgs(args) {
+export function numArgs(args) {
   var len = args.length;
   if (len === 0) {
     return 0;
@@ -156,7 +157,7 @@ function numArgs(args) {
 // A SafeString object indicates that the string should not be
 // autoescaped. This happens magically because autoescaping only
 // occurs on primitive string objects.
-function SafeString(val) {
+export function SafeString(val) {
   if (typeof val !== 'string') {
     return val;
   }
@@ -179,14 +180,14 @@ SafeString.prototype.toString = function toString() {
   return this.val;
 };
 
-function copySafeness(dest, target) {
+export function copySafeness(dest, target) {
   if (dest instanceof SafeString) {
     return new SafeString(target);
   }
   return target.toString();
 }
 
-function markSafe(val) {
+export function markSafe(val) {
   var type = typeof val;
 
   if (type === 'string') {
@@ -206,7 +207,7 @@ function markSafe(val) {
   }
 }
 
-function suppressValue(val, autoescape) {
+export function suppressValue(val, autoescape) {
   val = (val !== undefined && val !== null) ? val : '';
 
   if (autoescape && !(val instanceof SafeString)) {
@@ -216,7 +217,7 @@ function suppressValue(val, autoescape) {
   return val;
 }
 
-function ensureDefined(val, lineno, colno) {
+export function ensureDefined(val, lineno, colno) {
   if (val === null || val === undefined) {
     throw new lib.TemplateError(
       'attempted to output null or undefined value',
@@ -227,7 +228,7 @@ function ensureDefined(val, lineno, colno) {
   return val;
 }
 
-function memberLookup(obj, val) {
+export function memberLookup(obj, val) {
   if (obj === undefined || obj === null) {
     return undefined;
   }
@@ -239,7 +240,7 @@ function memberLookup(obj, val) {
   return obj[val];
 }
 
-function callWrap(obj, name, context, args) {
+export function callWrap(obj, name, context, args) {
   if (!obj) {
     throw new Error('Unable to call `' + name + '`, which is undefined or falsey');
   } else if (typeof obj !== 'function') {
@@ -249,14 +250,14 @@ function callWrap(obj, name, context, args) {
   return obj.apply(context, args);
 }
 
-function contextOrFrameLookup(context, frame, name) {
+export function contextOrFrameLookup(context, frame, name) {
   var val = frame.lookup(name);
   return (val !== undefined) ?
     val :
     context.lookup(name);
 }
 
-function handleError(error, lineno, colno) {
+export function handleError(error, lineno, colno) {
   if (error.lineno) {
     return error;
   } else {
@@ -264,7 +265,7 @@ function handleError(error, lineno, colno) {
   }
 }
 
-function asyncEach(arr, dimen, iter, cb) {
+export function asyncEach(arr, dimen, iter, cb) {
   if (lib.isArray(arr)) {
     const len = arr.length;
 
@@ -291,7 +292,7 @@ function asyncEach(arr, dimen, iter, cb) {
   }
 }
 
-function asyncAll(arr, dimen, func, cb) {
+export function asyncAll(arr, dimen, func, cb) {
   var finished = 0;
   var len;
   var outputArr;
@@ -347,7 +348,7 @@ function asyncAll(arr, dimen, func, cb) {
   }
 }
 
-function fromIterator(arr) {
+export function fromIterator(arr) {
   if (typeof arr !== 'object' || arr === null || lib.isArray(arr)) {
     return arr;
   } else if (supportsIterators && Symbol.iterator in arr) {
@@ -357,24 +358,5 @@ function fromIterator(arr) {
   }
 }
 
-module.exports = {
-  Frame: Frame,
-  makeMacro: makeMacro,
-  makeKeywordArgs: makeKeywordArgs,
-  numArgs: numArgs,
-  suppressValue: suppressValue,
-  ensureDefined: ensureDefined,
-  memberLookup: memberLookup,
-  contextOrFrameLookup: contextOrFrameLookup,
-  callWrap: callWrap,
-  handleError: handleError,
-  isArray: lib.isArray,
-  keys: lib.keys,
-  SafeString: SafeString,
-  copySafeness: copySafeness,
-  markSafe: markSafe,
-  asyncEach: asyncEach,
-  asyncAll: asyncAll,
-  inOperator: lib.inOperator,
-  fromIterator: fromIterator
-};
+// FIXME: WHY??
+export {isArray, keys, inOperator} from './lib';

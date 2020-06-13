@@ -1,21 +1,21 @@
 'use strict';
 
-const lib = require('./src/lib');
-const {Environment, Template} = require('./src/environment');
-const Loader = require('./src/loader');
-const loaders = require('./src/loaders');
-const precompile = require('./src/precompile');
-const compiler = require('./src/compiler');
-const parser = require('./src/parser');
-const lexer = require('./src/lexer');
-const runtime = require('./src/runtime');
-const nodes = require('./src/nodes');
-const installJinjaCompat = require('./src/jinja-compat');
+import * as lib from './src/lib';
+import {Environment, Template} from './src/environment';
+import Loader from './src/loader';
+import * as loaders from './src/loaders';
+import * as precompile from './src/precompile';
+import * as compiler from './src/compiler';
+import * as parser from './src/parser';
+import * as lexer from './src/lexer';
+import * as runtime from './src/runtime';
+import * as nodes from './src/nodes';
+import installJinjaCompat from './src/jinja-compat';
 
 // A single instance of an environment, since this is so commonly used
 let e;
 
-function configure(templatesPath, opts) {
+export function configure(templatesPath, opts) {
   opts = opts || {};
   if (lib.isObject(templatesPath)) {
     opts = templatesPath;
@@ -44,7 +44,7 @@ function configure(templatesPath, opts) {
   return e;
 }
 
-module.exports = {
+export default {
   Environment: Environment,
   Template: Template,
   Loader: Loader,
@@ -59,7 +59,6 @@ module.exports = {
   lib: lib,
   nodes: nodes,
   installJinjaCompat: installJinjaCompat,
-  configure: configure,
   reset() {
     e = undefined;
   },

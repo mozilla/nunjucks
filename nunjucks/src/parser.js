@@ -1,11 +1,11 @@
 'use strict';
 
-var lexer = require('./lexer');
-var nodes = require('./nodes');
-var Obj = require('./object').Obj;
-var lib = require('./lib');
+import * as lexer from './lexer';
+import * as nodes from './nodes';
+import {Obj} from './object';
+import * as lib from './lib';
 
-class Parser extends Obj {
+export class Parser extends Obj {
   init(tokens) {
     this.tokens = tokens;
     this.peeked = null;
@@ -1356,13 +1356,10 @@ class Parser extends Obj {
 // var n = p.parseAsRoot();
 // nodes.printNodes(n);
 
-module.exports = {
-  parse(src, extensions, opts) {
-    var p = new Parser(lexer.lex(src, opts));
-    if (extensions !== undefined) {
-      p.extensions = extensions;
-    }
-    return p.parseAsRoot();
-  },
-  Parser: Parser
-};
+export function parse(src, extensions, opts) {
+  var p = new Parser(lexer.lex(src, opts));
+  if (extensions !== undefined) {
+    p.extensions = extensions;
+  }
+  return p.parseAsRoot();
+}

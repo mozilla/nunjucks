@@ -1,18 +1,18 @@
 'use strict';
 
-const asap = require('asap');
-const waterfall = require('a-sync-waterfall');
-const lib = require('./lib');
-const compiler = require('./compiler');
-const filters = require('./filters');
-const {FileSystemLoader, WebLoader, PrecompiledLoader} = require('./loaders');
-const tests = require('./tests');
-const globals = require('./globals');
-const {Obj, EmitterObj} = require('./object');
-const globalRuntime = require('./runtime');
-const {handleError, Frame} = globalRuntime;
-const expressApp = require('./express-app');
+import asap from 'asap';
+import waterfall from 'a-sync-waterfall';
+import expressApp from './express-app';
+import * as globalRuntime from './runtime';
+import {EmitterObj, Obj} from './object';
+import globals from './globals';
+import * as tests from './tests';
+import {FileSystemLoader, PrecompiledLoader, WebLoader} from './loaders';
+import * as filters from './filters';
+import * as compiler from './compiler';
+import * as lib from './lib';
 
+const {handleError, Frame} = globalRuntime;
 // If the user is using the async API, *always* call it
 // asynchronously even if the template was synchronous.
 function callbackAsap(cb, err, res) {
@@ -37,7 +37,7 @@ const noopTmplSrc = {
   }
 };
 
-class Environment extends EmitterObj {
+export class Environment extends EmitterObj {
   init(loaders, opts) {
     // The dev flag determines the trace that'll be shown on errors.
     // If set to true, returns the full trace from the error point,
@@ -407,7 +407,7 @@ class Context extends Obj {
   }
 }
 
-class Template extends Obj {
+export class Template extends Obj {
   init(src, env, path, eagerCompile) {
     this.env = env || new Environment();
 
@@ -583,8 +583,3 @@ class Template extends Obj {
     return blocks;
   }
 }
-
-module.exports = {
-  Environment: Environment,
-  Template: Template
-};
