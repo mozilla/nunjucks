@@ -73,7 +73,7 @@ function precompile(input, opts) {
   if (pathStats.isFile()) {
     precompiled.push(_precompile(
       fs.readFileSync(input, 'utf-8'),
-      opts.name || input,
+      opts.name() || input,
       env
     ));
   } else if (pathStats.isDirectory()) {
