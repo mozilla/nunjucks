@@ -1,6 +1,7 @@
 Changelog
 =========
 
+* Fix bug where precompiling a template from a file failed with a TypeError. [#1295](https://github.com/mozilla/nunjucks/issues/1295)
 * Add [`select` filter](https://mozilla.github.io/nunjucks/templating.html#select).
 
 3.2.1 (Mar 17 2020)
