@@ -1,8 +1,16 @@
 Changelog
 =========
 
-* Add [`select` filter](https://mozilla.github.io/nunjucks/templating.html#select).
-* Add [`reject` filter](https://mozilla.github.io/nunjucks/templating.html#reject).
+3.2.2 (unreleased)
+------------------
+
+* Add [`select`](https://mozilla.github.io/nunjucks/templating.html#select) and
+  [`reject`](https://mozilla.github.io/nunjucks/templating.html#reject) filters.
+  Merge of [#1278](https://github.com/mozilla/nunjucks/pull/1278) and
+  [#1279](https://github.com/mozilla/nunjucks/pull/1279); fixes
+  [#282](https://github.com/mozilla/nunjucks/issues/282). Thanks
+  [ogonkov](https://github.com/ogonkovv)!
+  
 
 3.2.1 (Mar 17 2020)
 -------------------
