@@ -10,7 +10,8 @@ Changelog
   [#1279](https://github.com/mozilla/nunjucks/pull/1279); fixes
   [#282](https://github.com/mozilla/nunjucks/issues/282). Thanks
   [ogonkov](https://github.com/ogonkovv)!
-  
+* Fix precompile binary script `TypeError: name.replace is not a function`.
+  Fixes [#1295](https://github.com/mozilla/nunjucks/issues/1295).
 
 3.2.1 (Mar 17 2020)
 -------------------

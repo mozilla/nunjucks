@@ -1,12 +1,16 @@
 #!/usr/bin/env node
-var commander = require('commander');
+var {program} = require('commander');
 var precompile = require('../src/precompile').precompile;
 var Environment = require('../src/environment').Environment;
 var lib = require('../src/lib');
 
 var cmdpath = null;
 
-commander
+program
+  .storeOptionsAsProperties(false)
+  .passCommandToAction(false);
+
+program
   .name('precompile')
   .usage('[-f|--force] [-a|--filters <filters>] [-n|--name <name>] [-i|--include <regex>] [-x|--exclude <regex>] [-w|--wrapper <wrapper>] <path>')
   .arguments('<path>')
@@ -27,26 +31,28 @@ function concat(value, previous) {
 }
 
 if (cmdpath == null) {
-  commander.outputHelp();
+  program.outputHelp();
   console.error('\nerror: no path given');
   process.exit(1);
 }
 
 var env = new Environment([]);
 
-lib.each([].concat(commander.filters).join(',').split(','), function (name) {
+const opts = program.opts();
+
+lib.each([].concat(opts.filters).join(',').split(','), function (name) {
   env.addFilter(name.trim(), function () {}, true);
 });
 
-if (commander.wrapper) {
-  commander.wrapper = require('nunjucks-' + commander.wrapper).wrapper;
+if (opts.wrapper) {
+  opts.wrapper = require('nunjucks-' + opts.wrapper).wrapper;
 }
 
 console.log(precompile(cmdpath, {
   env : env,
-  force : commander.force,
-  name : commander.name,
-  wrapper: commander.wrapper,
-  include : [].concat(commander.include),
-  exclude : [].concat(commander.exclude)
+  force : opts.force,
+  name : opts.name,
+  wrapper: opts.wrapper,
+  include : [].concat(opts.include),
+  exclude : [].concat(opts.exclude)
 }));
