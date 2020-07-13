@@ -193,6 +193,17 @@ et `else` :
 {% endif %}
 ```
 
+Les mots-clefs "and" et "or" correspondent respectivement aux expressions
+logiques `&&` et `||`.
+
+```jinja
+{% if faim and fatigue %}
+  J'ai faim et je suis fatigué. Les deux sont vrais.
+{% elif faim or fatigue %}
+  J'ai faim ou je suis fatigué. L'un ou l'autre est vrai.
+{% endif %}
+```
+
 Vous pouvez également utiliser `if` comme une [expression en ligne](#expression-if).
 
 ### for
