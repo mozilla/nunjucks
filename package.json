@@ -92,6 +92,7 @@
     "sourceMap": false,
     "instrument": false
   },
+  "homepage": "https://mozilla.github.io/nunjucks/",
   "repository": {
     "type": "git",
     "url": "https://github.com/mozilla/nunjucks.git"
