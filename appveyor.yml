@@ -23,6 +23,7 @@ test_script:
   - node --version
   - npm --version
   # run tests
+  - npm run build
   - npm test
   - npm run codecov
 
