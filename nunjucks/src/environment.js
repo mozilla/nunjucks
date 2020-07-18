@@ -476,14 +476,15 @@ class Template extends Obj {
     let didError = false;
 
     this.rootRenderFunc(this.env, context, frame, globalRuntime, (err, res) => {
-      if (didError) {
+      // TODO: this is actually a bug in the compiled template (because waterfall
+      // tasks are both not passing errors up the chain of callbacks AND are not
+      // causing a return from the top-most render function). But fixing that
+      // will require a more substantial change to the compiler.
+      if (didError && cb && typeof res !== 'undefined') {
         // prevent multiple calls to cb
-        if (cb) {
-          return;
-        } else {
-          throw err;
-        }
+        return;
       }
+
       if (err) {
         err = lib._prettifyError(this.path, this.env.opts.dev, err);
         didError = true;

@@ -847,6 +847,25 @@
       });
     }
 
+    it('should throw exceptions from included templates when called synchronously', function() {
+      function templateRender() {
+        render('{% include "broken-import.njk" %}', {str: 'abc'});
+      }
+      expect(templateRender).to.throwException(/template not found: doesnotexist/);
+    });
+
+    it('should pass errors from included templates to callback when async', function(done) {
+      render(
+        '{% include "broken-import.njk" %}',
+        {str: 'abc'},
+        {noThrow: true},
+        function(err, res) {
+          expect(err).to.match(/template not found: doesnotexist/);
+          expect(res).to.be(undefined);
+          done();
+        });
+    });
+
     it('should compile string concatenations with tilde', function(done) {
       equal('{{ 4 ~ \'hello\' }}', '4hello');
       equal('{{ 4 ~ 5 }}', '45');

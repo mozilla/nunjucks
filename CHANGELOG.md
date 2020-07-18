@@ -18,6 +18,9 @@ Changelog
   Merge of [#1276](https://github.com/mozilla/nunjucks/pull/1276); fixes
   [#1198](https://github.com/mozilla/nunjucks/issues/1198). Thanks
   [ogonkov](https://github.com/ogonkovv)!
+* Fix bug that prevented errors in included templates from being raised when
+  rendering templates synchronously. Fixes
+  [#1272](https://github.com/mozilla/nunjucks/pull/1276).
 
 3.2.1 (Mar 17 2020)
 -------------------
