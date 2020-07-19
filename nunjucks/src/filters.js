@@ -182,8 +182,8 @@ function indent(str, width, indentfirst) {
   const sp = lib.repeat(' ', width);
 
   const res = lines.map((l, i) => {
-    return (i === 0 && !indentfirst) ? `${l}\n` : `${sp}${l}\n`;
-  }).join('');
+    return (i === 0 && !indentfirst) ? l : `${sp}${l}`;
+  }).join('\n');
 
   return r.copySafeness(str, res);
 }

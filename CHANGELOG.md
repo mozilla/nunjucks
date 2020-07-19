@@ -21,6 +21,8 @@ Changelog
 * Fix bug that prevented errors in included templates from being raised when
   rendering templates synchronously. Fixes
   [#1272](https://github.com/mozilla/nunjucks/pull/1276).
+* The `indent` filter no longer appends an additional newline. Fixes
+  [#1231](https://github.com/mozilla/nunjucks/issues/1231).
 
 3.2.1 (Mar 17 2020)
 -------------------

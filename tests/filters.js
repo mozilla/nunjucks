@@ -405,15 +405,15 @@
 
     it('indent', function(done) {
       equal('{{ "one\ntwo\nthree" | indent }}',
-        'one\n    two\n    three\n');
+        'one\n    two\n    three');
       equal('{{ "one\ntwo\nthree" | indent(2) }}',
-        'one\n  two\n  three\n');
+        'one\n  two\n  three');
       equal('{{ "one\ntwo\nthree" | indent(2, true) }}',
-        '  one\n  two\n  three\n');
+        '  one\n  two\n  three');
 
       equal('{{ str | indent }}', {
         str: r.markSafe('one\ntwo\nthree')
-      }, 'one\n    two\n    three\n');
+      }, 'one\n    two\n    three');
 
       equal('{{ "" | indent }}', '');
       equal('{{ undefined | indent }}', '');
