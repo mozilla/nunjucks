@@ -513,8 +513,8 @@ du template inclus, et les résultats de ce rendu sont inclus.
 exportées. Les macros et les affectations de haut niveau (faites avec [`set`](#set)) sont exportées
 depuis les templates, ceci vous permet donc d'y accéder dans un template différent.
 
-Les templates importés sont traités sans le contexte actuel, ils n'ont pas
-accès à toutes les variables du template actuel.
+Les templates importés sont traités sans le contexte actuel par défaut, ils
+n'ont pas accès à toutes les variables du template actuel.
 
 Commençons par un template appelé `forms.html` qui contient ce qui suit :
 
@@ -555,6 +555,13 @@ actuel avec `from import` :
 {{ field('user') }}
 {{ description('Password') }}
 {{ field('pass', type='password') }}
+```
+
+Si vous ajoutez `with context` à la balise `import`, le template importé
+sera traité avec le contexte actuel.
+
+```jinja
+{% from "forms.html" import field with context %}
 ```
 
 `import` accepte n'importe quelle expression arbitraire, donc vous pouvez y passer
