@@ -455,6 +455,14 @@ et <code>else</code> :</p>
 <span class="x">  Je suis bien !</span>
 <span class="cp">{%</span> <span class="k">endif</span> <span class="cp">%}</span><span class="x"></span>
 </code></pre></div>
+<p>Les mots-clefs &quot;and&quot; et &quot;or&quot; correspondent respectivement aux expressions
+logiques <code>&amp;&amp;</code> et <code>||</code>.</p>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">if</span> <span class="nv">faim</span> <span class="k">and</span> <span class="nv">fatigue</span> <span class="cp">%}</span><span class="x"></span>
+<span class="x">  J&#39;ai faim et je suis fatigué. Les deux sont vrais.</span>
+<span class="cp">{%</span> <span class="k">elif</span> <span class="nv">faim</span> <span class="k">or</span> <span class="nv">fatigue</span> <span class="cp">%}</span><span class="x"></span>
+<span class="x">  J&#39;ai faim ou je suis fatigué. L&#39;un ou l&#39;autre est vrai.</span>
+<span class="cp">{%</span> <span class="k">endif</span> <span class="cp">%}</span><span class="x"></span>
+</code></pre></div>
 <p>Vous pouvez également utiliser <code>if</code> comme une <a href="#expression-if">expression en ligne</a>.</p>
 
 <h3 id="for">for</h3>
@@ -705,8 +713,8 @@ du template inclus, et les résultats de ce rendu sont inclus.</p>
 exportées. Les macros et les affectations de haut niveau (faites avec <a href="#set"><code>set</code></a>) sont exportées
 depuis les templates, ceci vous permet donc d&#39;y accéder dans un template différent.</p>
 
-<p>Les templates importés sont traités sans le contexte actuel, ils n&#39;ont pas
-accès à toutes les variables du template actuel.</p>
+<p>Les templates importés sont traités sans le contexte actuel par défaut, ils
+n&#39;ont pas accès à toutes les variables du template actuel.</p>
 
 <p>Commençons par un template appelé <code>forms.html</code> qui contient ce qui suit :</p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">macro</span> <span class="nv">field</span><span class="o">(</span><span class="nv">name</span><span class="o">,</span> <span class="nv">value</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="o">,</span> <span class="nv">type</span><span class="o">=</span><span class="s1">&#39;text&#39;</span><span class="o">)</span> <span class="cp">%}</span><span class="x"></span>
@@ -739,6 +747,10 @@ actuel avec <code>from import</code> :</p>
 <span class="cp">{{</span> <span class="nv">field</span><span class="o">(</span><span class="s1">&#39;user&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
 <span class="cp">{{</span> <span class="nv">description</span><span class="o">(</span><span class="s1">&#39;Password&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
 <span class="cp">{{</span> <span class="nv">field</span><span class="o">(</span><span class="s1">&#39;pass&#39;</span><span class="o">,</span> <span class="nv">type</span><span class="o">=</span><span class="s1">&#39;password&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
+</code></pre></div>
+<p>Si vous ajoutez <code>with context</code> à la balise <code>import</code>, le template importé
+sera traité avec le contexte actuel.</p>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">from</span> <span class="s2">&quot;forms.html&quot;</span> <span class="k">import</span> <span class="nv">field</span> <span class="k">with context</span> <span class="cp">%}</span><span class="x"></span>
 </code></pre></div>
 <p><code>import</code> accepte n&#39;importe quelle expression arbitraire, donc vous pouvez y passer
 n&#39;importe quoi, aussi longtemps que cette expression correspond à un string ou un objet

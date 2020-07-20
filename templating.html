@@ -237,6 +237,9 @@
 <a href="#random">random</a>
 </li>
 <li>
+<a href="#reject">reject</a>
+</li>
+<li>
 <a href="#rejectattr-only-the-single-argument-form">rejectattr (only the single-argument form)</a>
 </li>
 <li>
@@ -250,6 +253,9 @@
 </li>
 <li>
 <a href="#safe">safe</a>
+</li>
+<li>
+<a href="#select">select</a>
 </li>
 <li>
 <a href="#selectattr-only-the-single-argument-form">selectattr (only the single-argument form)</a>
@@ -472,6 +478,15 @@ and <code>else</code>:</p>
 <span class="x">  I am tired</span>
 <span class="cp">{%</span> <span class="k">else</span> <span class="cp">%}</span><span class="x"></span>
 <span class="x">  I am good!</span>
+<span class="cp">{%</span> <span class="k">endif</span> <span class="cp">%}</span><span class="x"></span>
+</code></pre></div>
+<p>You can specify multiple conditions with <code>and</code> and <code>or</code>:</p>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">if</span> <span class="nv">happy</span> <span class="k">and</span> <span class="nv">hungry</span> <span class="cp">%}</span><span class="x"></span>
+<span class="x">  I am happy *and* hungry; both are true.</span>
+<span class="cp">{%</span> <span class="k">endif</span> <span class="cp">%}</span><span class="x"></span>
+
+<span class="cp">{%</span> <span class="k">if</span> <span class="nv">happy</span> <span class="k">or</span> <span class="nv">hungry</span> <span class="cp">%}</span><span class="x"></span>
+<span class="x">  I am either happy *or* hungry; one or the other is true.</span>
 <span class="cp">{%</span> <span class="k">endif</span> <span class="cp">%}</span><span class="x"></span>
 </code></pre></div>
 <p>You can also use if as an <a href="#if-expression">inline expression</a>.</p>
@@ -735,8 +750,8 @@ render of the included template, and the results of that render are included.</p
 values. Macros and top-level assignments (done with <a href="#set"><code>set</code></a>) are exported
 from templates, allowing you to access them in a different template.</p>
 
-<p>Imported templates are processed without the current context, so they do not
-have access to any of the current template variables.</p>
+<p>Imported templates are processed without the current context by default, so
+they do not have access to any of the current template variables.</p>
 
 <p>Let&#39;s start with a template called <code>forms.html</code> that has the following in it:</p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">macro</span> <span class="nv">field</span><span class="o">(</span><span class="nv">name</span><span class="o">,</span> <span class="nv">value</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="o">,</span> <span class="nv">type</span><span class="o">=</span><span class="s1">&#39;text&#39;</span><span class="o">)</span> <span class="cp">%}</span><span class="x"></span>
@@ -769,6 +784,10 @@ with <code>from import</code>:</p>
 <span class="cp">{{</span> <span class="nv">field</span><span class="o">(</span><span class="s1">&#39;user&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
 <span class="cp">{{</span> <span class="nv">description</span><span class="o">(</span><span class="s1">&#39;Password&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
 <span class="cp">{{</span> <span class="nv">field</span><span class="o">(</span><span class="s1">&#39;pass&#39;</span><span class="o">,</span> <span class="nv">type</span><span class="o">=</span><span class="s1">&#39;password&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="x"></span>
+</code></pre></div>
+<p>By adding <code>with context</code> to the end of an <code>import</code> directive, the imported
+template is processed with the current context.</p>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">from</span> <span class="s2">&quot;forms.html&quot;</span> <span class="k">import</span> <span class="nv">field</span> <span class="k">with context</span> <span class="cp">%}</span><span class="x"></span>
 </code></pre></div>
 <p><code>import</code> actually accepts any arbitrary expression, so you can pass anything
 into it, as long as the expression evaluates to a string or a compiled Template
@@ -1224,6 +1243,45 @@ This default can be overridden by using the first parameter.</p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="x">green : james jessie</span>
 <span class="x">blue : john jim</span>
 </code></pre></div>
+<p>Attribute can use dot notation to use nested attribute, like <code>date.year</code>.</p>
+
+<p><strong>Input</strong></p>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">set</span> <span class="nv">posts</span> <span class="o">=</span> <span class="o">[</span>
+      <span class="o">{</span>
+        <span class="nv">date</span><span class="o">:</span> <span class="o">{</span>
+          <span class="nv">year</span><span class="o">:</span> <span class="m">2019</span>
+        <span class="o">},</span>
+        <span class="nv">title</span><span class="o">:</span> <span class="s1">&#39;Post 1&#39;</span>
+      <span class="o">},</span>
+      <span class="o">{</span>
+        <span class="nv">date</span><span class="o">:</span> <span class="o">{</span>
+          <span class="nv">year</span><span class="o">:</span> <span class="m">2018</span>
+        <span class="o">},</span>
+        <span class="nv">title</span><span class="o">:</span> <span class="s1">&#39;Post 2&#39;</span>
+      <span class="o">},</span>
+      <span class="o">{</span>
+        <span class="nv">date</span><span class="o">:</span> <span class="o">{</span>
+          <span class="nv">year</span><span class="o">:</span> <span class="m">2019</span>
+        <span class="o">},</span>
+        <span class="nv">title</span><span class="o">:</span> <span class="s1">&#39;Post 3&#39;</span>
+      <span class="o">}</span>
+    <span class="o">]</span>
+<span class="cp">%}</span><span class="x"></span>
+
+<span class="cp">{%</span> <span class="k">for</span> <span class="nv">year</span><span class="o">,</span> <span class="nv">posts</span> <span class="k">in</span> <span class="nv">posts</span> <span class="o">|</span> <span class="nf">groupby</span><span class="o">(</span><span class="s2">&quot;date.year&quot;</span><span class="o">)</span> <span class="cp">%}</span><span class="x"></span>
+<span class="x">    :</span><span class="cp">{{</span> <span class="nv">year</span> <span class="cp">}}</span><span class="x">:</span>
+<span class="x">    </span><span class="cp">{%</span> <span class="k">for</span> <span class="nv">post</span> <span class="k">in</span> <span class="nv">posts</span> <span class="cp">%}</span><span class="x"></span>
+<span class="x">        </span><span class="cp">{{</span> <span class="nv">post.title</span> <span class="cp">}}</span><span class="x"></span>
+<span class="x">    </span><span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span><span class="x"></span>
+</code></pre></div>
+<p><strong>Output</strong>
+:2018:
+Post 2
+:2019:
+Post 1
+Post 3</p>
+
 <h3 id="indent">indent</h3>
 
 <p>Indent a string using spaces.
@@ -1377,6 +1435,27 @@ If it was a string the returned list will be a list of characters.</p>
 
 <p>A random value between 1-9 (inclusive).</p>
 
+<h3 id="reject">reject</h3>
+
+<p>Filters a sequence of objects by applying a test to each object, and rejecting
+the objects with the test succeeding.</p>
+
+<p>If no test is specified, each object will be evaluated as a boolean.</p>
+
+<p><strong>Input</strong></p>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">set</span> <span class="nv">numbers</span><span class="o">=[</span><span class="m">0</span><span class="o">,</span> <span class="m">1</span><span class="o">,</span> <span class="m">2</span><span class="o">,</span> <span class="m">3</span><span class="o">,</span> <span class="m">4</span><span class="o">,</span> <span class="m">5</span><span class="o">]</span> <span class="cp">%}</span><span class="x"></span>
+
+<span class="cp">{{</span> <span class="nv">numbers</span> <span class="o">|</span> <span class="nf">reject</span><span class="o">(</span><span class="s2">&quot;odd&quot;</span><span class="o">)</span> <span class="o">|</span> <span class="nf">join</span> <span class="cp">}}</span><span class="x"></span>
+<span class="cp">{{</span> <span class="nv">numbers</span> <span class="o">|</span> <span class="nf">reject</span><span class="o">(</span><span class="s2">&quot;even&quot;</span><span class="o">)</span> <span class="o">|</span> <span class="nf">join</span> <span class="cp">}}</span><span class="x"></span>
+<span class="cp">{{</span> <span class="nv">numbers</span> <span class="o">|</span> <span class="nf">reject</span><span class="o">(</span><span class="s2">&quot;divisibleby&quot;</span><span class="o">,</span> <span class="m">3</span><span class="o">)</span> <span class="o">|</span> <span class="nf">join</span> <span class="cp">}}</span><span class="x"></span>
+<span class="cp">{{</span> <span class="nv">numbers</span> <span class="o">|</span> <span class="nf">reject</span><span class="o">()</span> <span class="o">|</span> <span class="nf">join</span> <span class="cp">}}</span><span class="x"></span>
+</code></pre></div>
+<p><strong>Output</strong></p>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="x">024</span>
+<span class="x">135</span>
+<span class="x">1245</span>
+<span class="x">0</span>
+</code></pre></div>
 <h3 id="rejectattr-only-the-single-argument-form">rejectattr (only the single-argument form)</h3>
 
 <p>Filter a sequence of objects by applying a test to the specified attribute
@@ -1492,6 +1571,27 @@ escaping enabled this variable will not be escaped.</p>
 </code></pre></div>
 <p><strong>Output</strong></p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="x">foo &lt;a href=&quot;http://www.example.com/&quot;&gt;http://www.example.com/&lt;/a&gt; bar</span>
+</code></pre></div>
+<h3 id="select">select</h3>
+
+<p>Filters a sequence of objects by applying a test to each object, and only
+selecting the objects with the test succeeding.</p>
+
+<p>If no test is specified, each object will be evaluated as a boolean.</p>
+
+<p><strong>Input</strong></p>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{%</span> <span class="k">set</span> <span class="nv">numbers</span><span class="o">=[</span><span class="m">0</span><span class="o">,</span> <span class="m">1</span><span class="o">,</span> <span class="m">2</span><span class="o">,</span> <span class="m">3</span><span class="o">,</span> <span class="m">4</span><span class="o">,</span> <span class="m">5</span><span class="o">]</span> <span class="cp">%}</span><span class="x"></span>
+
+<span class="cp">{{</span> <span class="nv">numbers</span> <span class="o">|</span> <span class="nf">select</span><span class="o">(</span><span class="s2">&quot;odd&quot;</span><span class="o">)</span> <span class="o">|</span> <span class="nf">join</span> <span class="cp">}}</span><span class="x"></span>
+<span class="cp">{{</span> <span class="nv">numbers</span> <span class="o">|</span> <span class="nf">select</span><span class="o">(</span><span class="s2">&quot;even&quot;</span><span class="o">)</span> <span class="o">|</span> <span class="nf">join</span> <span class="cp">}}</span><span class="x"></span>
+<span class="cp">{{</span> <span class="nv">numbers</span> <span class="o">|</span> <span class="nf">select</span><span class="o">(</span><span class="s2">&quot;divisibleby&quot;</span><span class="o">,</span> <span class="m">3</span><span class="o">)</span> <span class="o">|</span> <span class="nf">join</span> <span class="cp">}}</span><span class="x"></span>
+<span class="cp">{{</span> <span class="nv">numbers</span> <span class="o">|</span> <span class="nf">select</span><span class="o">()</span> <span class="o">|</span> <span class="nf">join</span> <span class="cp">}}</span><span class="x"></span>
+</code></pre></div>
+<p><strong>Output</strong></p>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="x">135</span>
+<span class="x">024</span>
+<span class="x">03</span>
+<span class="x">12345</span>
 </code></pre></div>
 <h3 id="selectattr-only-the-single-argument-form">selectattr (only the single-argument form)</h3>
 
