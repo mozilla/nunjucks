@@ -20,7 +20,7 @@ Changelog
   [ogonkov](https://github.com/ogonkovv)!
 * Fix bug that prevented errors in included templates from being raised when
   rendering templates synchronously. Fixes
-  [#1272](https://github.com/mozilla/nunjucks/pull/1276).
+  [#1272](https://github.com/mozilla/nunjucks/issues/1272).
 * The `indent` filter no longer appends an additional newline. Fixes
   [#1231](https://github.com/mozilla/nunjucks/issues/1231).
 
