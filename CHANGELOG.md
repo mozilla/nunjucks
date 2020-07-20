@@ -1,8 +1,8 @@
 Changelog
 =========
 
-3.2.2 (unreleased)
-------------------
+3.2.2 (Jul 20 2020)
+-------------------
 
 * Add [`select`](https://mozilla.github.io/nunjucks/templating.html#select) and
   [`reject`](https://mozilla.github.io/nunjucks/templating.html#reject) filters.
