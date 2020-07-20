@@ -82,7 +82,7 @@ class Frame {
 }
 
 function makeMacro(argNames, kwargNames, func) {
-  return (...macroArgs) => {
+  return function macro(...macroArgs) {
     var argCount = numArgs(macroArgs);
     var args;
     var kwargs = getKeywordArgs(macroArgs);

@@ -210,6 +210,8 @@ function getAttrGetter(attribute) {
   };
 }
 
+exports.getAttrGetter = getAttrGetter;
+
 function groupBy(obj, val, throwOnUndefined) {
   const result = {};
   const iterator = isFunction(val) ? val : getAttrGetter(val);

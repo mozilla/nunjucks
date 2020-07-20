@@ -447,13 +447,21 @@ exports.sum = sum;
 
 exports.sort = r.makeMacro(
   ['value', 'reverse', 'case_sensitive', 'attribute'], [],
-  (arr, reversed, caseSens, attr) => {
+  function sortFilter(arr, reversed, caseSens, attr) {
     // Copy it
     let array = lib.map(arr, v => v);
+    let getAttribute = lib.getAttrGetter(attr);
 
     array.sort((a, b) => {
-      let x = (attr) ? a[attr] : a;
-      let y = (attr) ? b[attr] : b;
+      let x = (attr) ? getAttribute(a) : a;
+      let y = (attr) ? getAttribute(b) : b;
+
+      if (
+        this.env.opts.throwOnUndefined &&
+        attr && (x === undefined || y === undefined)
+      ) {
+        throw new TypeError(`sort: attribute "${attr}" resolved to undefined`);
+      }
 
       if (!caseSens && lib.isString(x) && lib.isString(y)) {
         x = x.toLowerCase();

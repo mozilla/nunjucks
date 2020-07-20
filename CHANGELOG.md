@@ -1,6 +1,13 @@
 Changelog
 =========
 
+Unreleased
+----------
+
+* Add support for nested attributes on
+  [`sort` filter](https://mozilla.github.io/nunjucks/templating.html#sort-arr-reverse-casesens-attr);
+  respect `throwOnUndefined` if sort attribute is undefined.
+
 3.2.2 (Jul 20 2020)
 -------------------
 

@@ -825,6 +825,35 @@
       equal('{% for i in [ {n:3},{n:5},{n:2},{n:1},{n:4},{n:6}] | sort(attribute="n") %}{{ i.n }}{% endfor %}',
         '123456');
 
+      const nestedAttributeSortTemplate = '{% for item in items | sort(attribute="meta.age") %}{{ item.name }}{% endfor %}';
+      equal(
+        nestedAttributeSortTemplate,
+        {
+          items: [
+            {name: 'james', meta: {age: 25}},
+            {name: 'fred', meta: {age: 18}},
+            {name: 'john', meta: {age: 19}}
+          ]
+        },
+        'fredjohnjames'
+      );
+
+      expect(function() {
+        render(
+          nestedAttributeSortTemplate,
+          {
+            items: [
+              {name: 'james', meta: {age: 25}},
+              {name: 'fred', meta: {age: 18}},
+              {name: 'john', meta: {title: 'Developer'}}
+            ]
+          },
+          {
+            throwOnUndefined: true
+          }
+        );
+      }).to.throwError(/sort: attribute "meta\.age" resolved to undefined/);
+
       finish(done);
     });
 
