@@ -1215,11 +1215,14 @@ Attribute can use dot notation to use nested attribute, like `date.year`.
 ```
 
 **Output**
+
+```jinja
 :2018:
 Post 2
 :2019:
 Post 1
 Post 3
+```
 
 ### indent
 
