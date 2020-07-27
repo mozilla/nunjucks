@@ -1276,7 +1276,9 @@ Change default indentation to 6 spaces and indent the first line:
 ### int
 
 Convert the value into an integer.
-If the conversion fails 0 is returned.
+If the conversion fails 0 is returned. You can override this default using the
+first parameter. You can also override the default base (10) in the second
+parameter.
 
 **Input**
 

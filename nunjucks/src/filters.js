@@ -632,12 +632,16 @@ function float(val, def) {
 
 exports.float = float;
 
-function int(val, def) {
-  var res = parseInt(val, 10);
-  return (isNaN(res)) ? def : res;
-}
+const intFilter = r.makeMacro(
+  ['value', 'default', 'base'],
+  [],
+  function doInt(value, defaultValue, base = 10) {
+    var res = parseInt(value, base);
+    return (isNaN(res)) ? defaultValue : res;
+  }
+);
 
-exports.int = int;
+exports.int = intFilter;
 
 // Aliases
 exports.d = exports.default;

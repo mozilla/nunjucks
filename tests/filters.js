@@ -237,6 +237,9 @@
     it('int', function() {
       equal('{{ "3.5" | int }}', '3');
       equal('{{ "0" | int }}', '0');
+      equal('{{ "foobar" | int("42") }}', '42');
+      equal('{{ "0x4d32" | int(base=16) }}', '19762');
+      equal('{{ "011" | int(base=8) }}', '9');
     });
 
     it('int (default value)', function() {
