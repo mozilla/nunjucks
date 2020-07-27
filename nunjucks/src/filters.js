@@ -229,6 +229,7 @@ function lengthFilter(val) {
 }
 
 exports.length = lengthFilter;
+exports.count = lengthFilter;
 
 function list(val) {
   if (lib.isString(val)) {
