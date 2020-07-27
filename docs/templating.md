@@ -1372,6 +1372,8 @@ c
 
 ### length
 
+Aliases: `count`
+
 Return the length of an array or string, or the number of keys in an object:
 
 **Input**
