@@ -86,7 +86,7 @@ const dictsort = r.makeMacro(
   ['value', 'case_sensitive', 'by', 'reverse'],
   [],
   // eslint-disable-next-line no-shadow
-  function dictsortFilter(val, caseSensitive, by, reverse) {
+  function dictsortFilter(val, caseSensitive, by, reverse = false) {
     if (!lib.isObject(val)) {
       throw new lib.TemplateError('dictsort filter: val must be an object');
     }
