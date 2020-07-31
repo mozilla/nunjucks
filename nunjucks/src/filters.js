@@ -169,24 +169,28 @@ function groupby(arr, attr) {
 
 exports.groupby = groupby;
 
-function indent(str, width, indentfirst) {
-  str = normalize(str, '');
+const indent = r.makeMacro(
+  ['string', 'width', 'first'],
+  [],
+  function indent(str, width, indentfirst) {
+    str = normalize(str, '');
 
-  if (str === '') {
-    return '';
+    if (str === '') {
+      return '';
+    }
+
+    width = width || 4;
+    // let res = '';
+    const lines = str.split('\n');
+    const sp = lib.repeat(' ', width);
+
+    const res = lines.map((l, i) => {
+      return (i === 0 && !indentfirst) ? l : `${sp}${l}`;
+    }).join('\n');
+
+    return r.copySafeness(str, res);
   }
-
-  width = width || 4;
-  // let res = '';
-  const lines = str.split('\n');
-  const sp = lib.repeat(' ', width);
-
-  const res = lines.map((l, i) => {
-    return (i === 0 && !indentfirst) ? l : `${sp}${l}`;
-  }).join('\n');
-
-  return r.copySafeness(str, res);
-}
+);
 
 exports.indent = indent;
 
