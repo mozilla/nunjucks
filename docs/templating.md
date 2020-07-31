@@ -1010,8 +1010,8 @@ etc)
 
 Arguments:
  * `case_sensitive`
- * `by`, `'key'` (default) or `'value'`
- * `reverse`, sort dict in reverse order
+ * `by`: `'key'` (default) or `'value'`
+ * `reverse`: sort dict in reverse order
 
 Sort a dict and yield (key, value) pairs:
 
