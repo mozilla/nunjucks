@@ -180,7 +180,6 @@ const indent = r.makeMacro(
     }
 
     width = width || 4;
-    // let res = '';
     const lines = str.split('\n');
     const sp = lib.repeat(' ', width);
 
