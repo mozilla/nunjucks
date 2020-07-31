@@ -83,9 +83,10 @@ function default_(val, def, bool) {
 exports['default'] = default_; // eslint-disable-line dot-notation
 
 const dictsort = r.makeMacro(
-  ['value', 'case_sensitive', 'by'],
+  ['value', 'case_sensitive', 'by', 'reverse'],
   [],
-  function dictsortFilter(val, caseSensitive, by) {
+  // eslint-disable-next-line no-shadow
+  function dictsortFilter(val, caseSensitive, by, reverse) {
     if (!lib.isObject(val)) {
       throw new lib.TemplateError('dictsort filter: val must be an object');
     }
@@ -119,7 +120,9 @@ const dictsort = r.makeMacro(
         }
       }
 
-      return a > b ? 1 : (a === b ? 0 : -1); // eslint-disable-line no-nested-ternary
+      const sortOrder = a > b ? 1 : (a === b ? 0 : -1); // eslint-disable-line no-nested-ternary
+
+      return sortOrder * (reverse === true ? -1 : 1);
     });
 
     return array;
