@@ -82,45 +82,49 @@ function default_(val, def, bool) {
 // TODO: it is confusing to export something called 'default'
 exports['default'] = default_; // eslint-disable-line dot-notation
 
-function dictsort(val, caseSensitive, by) {
-  if (!lib.isObject(val)) {
-    throw new lib.TemplateError('dictsort filter: val must be an object');
-  }
-
-  let array = [];
-  // deliberately include properties from the object's prototype
-  for (let k in val) { // eslint-disable-line guard-for-in, no-restricted-syntax
-    array.push([k, val[k]]);
-  }
-
-  let si;
-  if (by === undefined || by === 'key') {
-    si = 0;
-  } else if (by === 'value') {
-    si = 1;
-  } else {
-    throw new lib.TemplateError(
-      'dictsort filter: You can only sort by either key or value');
-  }
-
-  array.sort((t1, t2) => {
-    var a = t1[si];
-    var b = t2[si];
-
-    if (!caseSensitive) {
-      if (lib.isString(a)) {
-        a = a.toUpperCase();
-      }
-      if (lib.isString(b)) {
-        b = b.toUpperCase();
-      }
+const dictsort = r.makeMacro(
+  ['value', 'case_sensitive', 'by'],
+  [],
+  function dictsortFilter(val, caseSensitive, by) {
+    if (!lib.isObject(val)) {
+      throw new lib.TemplateError('dictsort filter: val must be an object');
     }
 
-    return a > b ? 1 : (a === b ? 0 : -1); // eslint-disable-line no-nested-ternary
-  });
+    let array = [];
+    // deliberately include properties from the object's prototype
+    for (let k in val) { // eslint-disable-line guard-for-in, no-restricted-syntax
+      array.push([k, val[k]]);
+    }
 
-  return array;
-}
+    let si;
+    if (by === undefined || by === 'key') {
+      si = 0;
+    } else if (by === 'value') {
+      si = 1;
+    } else {
+      throw new lib.TemplateError(
+        'dictsort filter: You can only sort by either key or value');
+    }
+
+    array.sort((t1, t2) => {
+      var a = t1[si];
+      var b = t2[si];
+
+      if (!caseSensitive) {
+        if (lib.isString(a)) {
+          a = a.toUpperCase();
+        }
+        if (lib.isString(b)) {
+          b = b.toUpperCase();
+        }
+      }
+
+      return a > b ? 1 : (a === b ? 0 : -1); // eslint-disable-line no-nested-ternary
+    });
+
+    return array;
+  }
+);
 
 exports.dictsort = dictsort;
 
