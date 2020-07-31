@@ -9,6 +9,8 @@ Unreleased
   respect `throwOnUndefined` if sort attribute is undefined.
 * Add `base` arg to
   [`int` filter](https://mozilla.github.io/nunjucks/templating.html#int).
+* Add `blank` option for
+  [`indent` filter](https://mozilla.github.io/nunjucks/templating.html#indent).
 
 3.2.2 (Jul 20 2020)
 -------------------
