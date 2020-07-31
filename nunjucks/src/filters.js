@@ -170,9 +170,9 @@ function groupby(arr, attr) {
 exports.groupby = groupby;
 
 const indent = r.makeMacro(
-  ['string', 'width', 'first'],
+  ['string', 'width', 'first', 'blank'],
   [],
-  function indent(str, width, indentfirst) {
+  function indent(str, width, indentfirst, blank) {
     str = normalize(str, '');
 
     if (str === '') {
@@ -185,6 +185,10 @@ const indent = r.makeMacro(
     const sp = lib.repeat(' ', width);
 
     const res = lines.map((l, i) => {
+      if (l === '' && blank === false) {
+        return l;
+      }
+
       return (i === 0 && !indentfirst) ? l : `${sp}${l}`;
     }).join('\n');
 
