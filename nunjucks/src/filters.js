@@ -195,8 +195,19 @@ const join = r.makeMacro(
   [],
   function joinFilter(arr, del = '', attr) {
     if (attr) {
+      const {throwOnUndefined} = this.env.opts;
       const getAttr = lib.getAttrGetter(attr);
-      arr = lib.map(arr, getAttr);
+      arr = lib.map(arr, function toAttribute(item) {
+        const itemAttribute = getAttr(item);
+
+        if (throwOnUndefined === true && itemAttribute === undefined) {
+          throw new TypeError(
+            `join: attribute "${attr}" resolved to undefined`
+          );
+        }
+
+        return itemAttribute;
+      });
     }
 
     if (this.env.opts.autoescape === true) {

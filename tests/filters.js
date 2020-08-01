@@ -487,6 +487,29 @@
         '2019,1996,2030'
       );
 
+      expect(function() {
+        render(
+          '{{ items | join(",", "meta.date") }}',
+          {
+            items: [
+              {
+                meta: {
+                  date: 2019
+                }
+              },
+              {
+                date: {
+                  year: 2020
+                }
+              }
+            ]
+          },
+          {
+            throwOnUndefined: true
+          }
+        );
+      }).to.throwError(/join: attribute "meta\.date" resolved to undefined/);
+
       equal(
         '{{ ["<foo>", "<span>foo</span>"|safe]|join }}',
         '&lt;foo&gt;<span>foo</span>'
