@@ -459,6 +459,81 @@
           }]
         },
         'foo,bar,bear');
+
+      equal(
+        '{{ items | join(",", "meta.date") }}',
+        {
+          items: [
+            {
+              meta: {
+                date: 2019
+              },
+              name: 'foo'
+            },
+            {
+              meta: {
+                date: 1996
+              },
+              name: 'bar'
+            },
+            {
+              meta: {
+                date: 2030
+              },
+              name: 'bear'
+            }
+          ]
+        },
+        '2019,1996,2030'
+      );
+
+      expect(function() {
+        render(
+          '{{ items | join(",", "meta.date") }}',
+          {
+            items: [
+              {
+                meta: {
+                  date: 2019
+                }
+              },
+              {
+                date: {
+                  year: 2020
+                }
+              }
+            ]
+          },
+          {
+            throwOnUndefined: true
+          }
+        );
+      }).to.throwError(/join: attribute "meta\.date" resolved to undefined/);
+
+      equal(
+        '{{ ["<foo>", "<span>foo</span>"|safe]|join }}',
+        '&lt;foo&gt;<span>foo</span>'
+      );
+
+      equal(
+        '{{ ["<foo>", "<span>foo</span>"|safe]|join("<br>") }}',
+        '&lt;foo&gt;&lt;br&gt;<span>foo</span>'
+      );
+
+      equal(
+        '{{ ["<foo>", "<span>foo</span>"|safe]|join("<br>"|safe) }}',
+        '&lt;foo&gt;<br><span>foo</span>'
+      );
+
+      equal(
+        '{{ ["<foo>", "<span>foo</span>"|safe]|join("<br>"|safe) }}',
+        {},
+        {
+          autoescape: false
+        },
+        '<foo><br><span>foo</span>'
+      );
+
       finish(done);
     });
 

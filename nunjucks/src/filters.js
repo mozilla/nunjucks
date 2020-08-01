@@ -190,15 +190,35 @@ function indent(str, width, indentfirst) {
 
 exports.indent = indent;
 
-function join(arr, del, attr) {
-  del = del || '';
+const join = r.makeMacro(
+  ['value', 'd', 'attribute'],
+  [],
+  function joinFilter(arr, del = '', attr) {
+    if (attr) {
+      const {throwOnUndefined} = this.env.opts;
+      const getAttr = lib.getAttrGetter(attr);
+      arr = lib.map(arr, function toAttribute(item) {
+        const itemAttribute = getAttr(item);
 
-  if (attr) {
-    arr = lib.map(arr, (v) => v[attr]);
+        if (throwOnUndefined === true && itemAttribute === undefined) {
+          throw new TypeError(
+            `join: attribute "${attr}" resolved to undefined`
+          );
+        }
+
+        return itemAttribute;
+      });
+    }
+
+    if (this.env.opts.autoescape === true) {
+      const result = arr.map(escape).join(escape(del));
+
+      return r.markSafe(result);
+    }
+
+    return arr.join(del);
   }
-
-  return arr.join(del);
-}
+);
 
 exports.join = join;
 
