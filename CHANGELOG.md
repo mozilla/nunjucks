@@ -9,6 +9,11 @@ Unreleased
   respect `throwOnUndefined` if sort attribute is undefined.
 * Add `base` arg to
   [`int` filter](https://mozilla.github.io/nunjucks/templating.html#int).
+* Improve
+  [`join` filter](https://mozilla.github.io/nunjucks/templating.html#join)
+  behaviour: add support for nested attributes; respect `safe` strings in
+  joined values; respect `throwOnUndefined` option, if joined attribute is
+  undefined.
 
 3.2.2 (Jul 20 2020)
 -------------------
