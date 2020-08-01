@@ -190,15 +190,19 @@ function indent(str, width, indentfirst) {
 
 exports.indent = indent;
 
-function join(arr, del, attr) {
-  del = del || '';
+const join = r.makeMacro(
+  ['value', 'd', 'attribute'],
+  [],
+  function joinFilter(arr, del, attr) {
+    del = del || '';
 
-  if (attr) {
-    arr = lib.map(arr, (v) => v[attr]);
+    if (attr) {
+      arr = lib.map(arr, (v) => v[attr]);
+    }
+
+    return arr.join(del);
   }
-
-  return arr.join(del);
-}
+);
 
 exports.join = join;
 
