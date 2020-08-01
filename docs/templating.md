@@ -1348,6 +1348,26 @@ This  behaviour is applicable to arrays:
 foo,bar,bear
 ```
 
+To join by nested attribute use dot-notation for `attribute`.
+
+**Input**
+
+```jinja
+{% set items = [
+    { name: {first: 'foo'} },
+    { name: {first: 'bar'} },
+    { name: {first: 'bear'} }]
+%}
+
+{{ items | join(attribute="name.first") }}
+```
+
+**Output**
+
+```jinja
+foobarbear
+```
+
 ### last
 
 Get the last item in an array or the last letter if it's a string:
