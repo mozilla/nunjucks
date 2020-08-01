@@ -525,6 +525,15 @@
         '&lt;foo&gt;<br><span>foo</span>'
       );
 
+      equal(
+        '{{ ["<foo>", "<span>foo</span>"|safe]|join("<br>"|safe) }}',
+        {},
+        {
+          autoescape: false
+        },
+        '<foo><br><span>foo</span>'
+      );
+
       finish(done);
     });
 
