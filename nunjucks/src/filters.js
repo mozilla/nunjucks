@@ -193,9 +193,7 @@ exports.indent = indent;
 const join = r.makeMacro(
   ['value', 'd', 'attribute'],
   [],
-  function joinFilter(arr, del, attr) {
-    del = del || '';
-
+  function joinFilter(arr, del = '', attr) {
     if (attr) {
       const getAttr = lib.getAttrGetter(attr);
       arr = lib.map(arr, getAttr);
