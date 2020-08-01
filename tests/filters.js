@@ -487,6 +487,21 @@
         '2019,1996,2030'
       );
 
+      equal(
+        '{{ ["<foo>", "<span>foo</span>"|safe]|join }}',
+        '&lt;foo&gt;<span>foo</span>'
+      );
+
+      equal(
+        '{{ ["<foo>", "<span>foo</span>"|safe]|join("<br>") }}',
+        '&lt;foo&gt;&lt;br&gt;<span>foo</span>'
+      );
+
+      equal(
+        '{{ ["<foo>", "<span>foo</span>"|safe]|join("<br>"|safe) }}',
+        '&lt;foo&gt;<br><span>foo</span>'
+      );
+
       finish(done);
     });
 

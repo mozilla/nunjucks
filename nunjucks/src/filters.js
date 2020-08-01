@@ -199,6 +199,12 @@ const join = r.makeMacro(
       arr = lib.map(arr, getAttr);
     }
 
+    if (this.env.opts.autoescape === true) {
+      const result = arr.map(escape).join(escape(del));
+
+      return r.markSafe(result);
+    }
+
     return arr.join(del);
   }
 );
