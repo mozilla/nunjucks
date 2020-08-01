@@ -430,6 +430,22 @@
       equal('{{ nothing | indent }}', '');
       equal('{{ nothing | indent(2) }}', '');
       equal('{{ nothing | indent(2, true) }}', '');
+
+      equal(
+        '{{ "one\n\ntwo\nthree" | indent }}',
+        'one\n    \n    two\n    three'
+      );
+
+      equal(
+        '{{ "one\n\ntwo\nthree" | indent(blank=true) }}',
+        'one\n    \n    two\n    three'
+      );
+
+      equal(
+        '{{ "one\n\ntwo\nthree" | indent(blank=false) }}',
+        'one\n\n    two\n    three'
+      );
+
       finish(done);
     });
 

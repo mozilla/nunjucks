@@ -1226,9 +1226,15 @@ Post 3
 
 ### indent
 
+Arguments:
+ * `width`: number of spaces to indent by (`4` by default)
+ * `first`: don't skip indenting the first line (`false` by default)
+ * `blank`: don’t skip indenting empty lines (`true` by default)
+
 Indent a string using spaces.
-Default behaviour is *not* to indent the first line.
-Default indentation is 4 spaces.
+
+For historical reasons `blank` is `true` by default. This is didn't match
+Jinja2 behaviour, and could be changed to `false` in next major version.
 
 **Input**
 
