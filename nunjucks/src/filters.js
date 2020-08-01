@@ -197,7 +197,8 @@ const join = r.makeMacro(
     del = del || '';
 
     if (attr) {
-      arr = lib.map(arr, (v) => v[attr]);
+      const getAttr = lib.getAttrGetter(attr);
+      arr = lib.map(arr, getAttr);
     }
 
     return arr.join(del);

@@ -459,6 +459,34 @@
           }]
         },
         'foo,bar,bear');
+
+      equal(
+        '{{ items | join(",", "meta.date") }}',
+        {
+          items: [
+            {
+              meta: {
+                date: 2019
+              },
+              name: 'foo'
+            },
+            {
+              meta: {
+                date: 1996
+              },
+              name: 'bar'
+            },
+            {
+              meta: {
+                date: 2030
+              },
+              name: 'bear'
+            }
+          ]
+        },
+        '2019,1996,2030'
+      );
+
       finish(done);
     });
 
