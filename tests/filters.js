@@ -595,6 +595,38 @@
         '6'
       );
 
+      equal(
+        '{{ [[1,2], [3], [4,5,6]]|map("sum")|list }}',
+        '3,3,15'
+      );
+
+      const users = [
+        {name: 'john'},
+        {name: 'jane'},
+        {name: 'mike'}
+      ];
+
+      equal(
+        '{{ users|map(attribute="name")|join("|") }}',
+        {
+          users
+        },
+        'john|jane|mike'
+      );
+
+      equal(
+        '{{ users|map(attribute="lastname", default="smith")|join(", ") }}',
+        {
+          users: [
+            {firstname: 'john', lastname: 'lennon'},
+            {firstname: 'jane', lastname: 'edwards'},
+            {firstname: 'jon', lastname: null},
+            {firstname: 'mike'}
+          ]
+        },
+        'lennon, edwards, , smith'
+      );
+
       finish(done);
     });
 
