@@ -316,6 +316,10 @@ function map(...args) {
     };
   }
 
+  if (!seq || !lib.isArray(seq)) {
+    return undefined;
+  }
+
   return seq.map(func);
 }
 
