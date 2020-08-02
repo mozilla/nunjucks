@@ -204,6 +204,8 @@ function getAttrGetter(attribute, defaultValue) {
         _item = _item[part];
       } else {
         _item = undefined;
+
+        break;
       }
     }
 
