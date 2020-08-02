@@ -393,3 +393,32 @@ function inOperator(key, val) {
 }
 
 exports.inOperator = inOperator;
+
+/**
+ * @param {Object} obj
+ * @returns {boolean}
+ */
+function isKeywordArgs(obj) {
+  return obj && Object.prototype.hasOwnProperty.call(obj, '__keywords');
+}
+
+exports.isKeywordArgs = isKeywordArgs;
+
+/**
+ * Get kwargs object from arguments
+ *
+ * @param {*[]} args
+ * @returns {Object} Kwargs object
+ */
+function getKeywordArgs(args) {
+  var len = args.length;
+  if (len) {
+    const lastArg = args[len - 1];
+    if (isKeywordArgs(lastArg)) {
+      return lastArg;
+    }
+  }
+  return {};
+}
+
+exports.getKeywordArgs = getKeywordArgs;
