@@ -251,6 +251,76 @@ function lower(str) {
 
 exports.lower = lower;
 
+/**
+ * Removes given kwargs
+ *
+ * @param {Object} kwargs
+ * @param {string[]} [remove]
+ * @returns {Object}
+ */
+function removeKwargs(kwargs, remove = []) {
+  let nextKwargs = lib.extend({}, kwargs);
+
+  return Object.keys(nextKwargs).reduce(function removeKey(acc, key) {
+    if (!remove.includes(key)) {
+      return acc;
+    }
+
+    delete acc[key];
+
+    return acc;
+  }, nextKwargs);
+}
+
+function numKwargs(kwargs) {
+  if (!lib.isKeywordArgs(kwargs)) {
+    throw new TypeError('numKwargs: argument is not a kwargs');
+  }
+
+  return Object.keys(kwargs).reduce(function count(acc, kwarg) {
+    return kwarg === '__keywords' ? acc : acc + 1;
+  }, 0);
+}
+
+function map(...args) {
+  const seq = args[0];
+  const argLength = r.numArgs(args);
+  const kwargs = lib.getKeywordArgs(args);
+  let func;
+
+  if (argLength === 1 && 'attribute' in kwargs) {
+    const {attribute, default: def = null} = kwargs;
+    const restKwargs = removeKwargs(kwargs, ['attribute', 'default']);
+    const restKwargsLength = numKwargs(restKwargs);
+
+    if (restKwargsLength !== 0) {
+      const restKwarg = Object.keys(restKwargs).find(
+        (kwarg) => kwarg !== '__keywords'
+      );
+
+      throw new lib.TemplateError(`Unexpected keyword argument ${restKwarg}`);
+    }
+
+    func = lib.getAttrGetter(attribute, def);
+  } else {
+    const [, name, ...filterArgs] = args;
+
+    if (typeof name !== 'string') {
+      throw new lib.TemplateError('map requires a filter argument');
+    }
+
+    const filter = this.env.getFilter(name);
+    const ctx = this;
+    func = function mapWithFilter(item) {
+      return filter.apply(ctx, [item, ...filterArgs]);
+    };
+  }
+
+  return seq.map(func);
+}
+
+exports.map = map;
+
 function nl2br(str) {
   if (str === null || str === undefined) {
     return '';

@@ -589,6 +589,15 @@
       finish(done);
     });
 
+    it('map', function(done) {
+      equal(
+        '{{ ["1", "2", "3"]|map("int")|sum }}',
+        '6'
+      );
+
+      finish(done);
+    });
+
     it('nl2br', function(done) {
       equal('{{ null | nl2br }}', '');
       equal('{{ undefined | nl2br }}', '');
