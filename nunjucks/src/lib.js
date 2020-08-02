@@ -185,10 +185,11 @@ function _prepareAttributeParts(attr) {
 }
 
 /**
- * @param {string}   attribute      Attribute value. Dots allowed.
+ * @param {string} attribute      Attribute value. Dots allowed.
+ * @param {*}      defaultValue
  * @returns {function(Object): *}
  */
-function getAttrGetter(attribute) {
+function getAttrGetter(attribute, defaultValue) {
   const parts = _prepareAttributeParts(attribute);
 
   return function attrGetter(item) {
@@ -202,8 +203,12 @@ function getAttrGetter(attribute) {
       if (hasOwnProp(_item, part)) {
         _item = _item[part];
       } else {
-        return undefined;
+        _item = undefined;
       }
+    }
+
+    if (_item === undefined && defaultValue !== undefined) {
+      return defaultValue;
     }
 
     return _item;
