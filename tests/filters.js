@@ -627,6 +627,24 @@
         'lennon, edwards, , smith'
       );
 
+      expect(function() {
+        render(
+          '{{ users|map(attribute="lastname", foo="bar") }}',
+          {
+            users: []
+          }
+        );
+      }).to.throwError(/Unexpected keyword argument foo/);
+
+      expect(function() {
+        render(
+          '{{ users|map(foo="bar") }}',
+          {
+            users: []
+          }
+        );
+      }).to.throwError(/map requires a filter argument/);
+
       finish(done);
     });
 
