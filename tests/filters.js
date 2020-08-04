@@ -645,6 +645,18 @@
         );
       }).to.throwError(/map requires a filter argument/);
 
+      expect(function() {
+        render(
+          '{{ users|map(attribute="foo")|join("|") }}',
+          {
+            users
+          },
+          {
+            throwOnUndefined: true
+          }
+        );
+      }).to.throwError(/map: attribute "foo" resolved to undefined/);
+
       finish(done);
     });
 

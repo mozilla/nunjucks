@@ -287,9 +287,11 @@ function map(...args) {
   const argLength = r.numArgs(args);
   const kwargs = lib.getKeywordArgs(args);
   let func;
+  let throwOnUndefined = false;
 
   if (argLength === 1 && 'attribute' in kwargs) {
-    const {attribute, default: def = null} = kwargs;
+    throwOnUndefined = this.env.opts.throwOnUndefined === true;
+    const {attribute, default: def} = kwargs;
     const restKwargs = removeKwargs(kwargs, ['attribute', 'default']);
     const restKwargsLength = numKwargs(restKwargs);
 
@@ -320,7 +322,17 @@ function map(...args) {
     return undefined;
   }
 
-  return seq.map(func);
+  return seq.map(function toValue(item) {
+    const result = func(item);
+
+    if (result === undefined && throwOnUndefined) {
+      throw new TypeError(
+        `map: attribute "${kwargs.attribute}" resolved to undefined`
+      );
+    }
+
+    return result;
+  });
 }
 
 exports.map = map;
