@@ -589,6 +589,77 @@
       finish(done);
     });
 
+    it('map', function(done) {
+      equal(
+        '{{ ["1", "2", "3"]|map("int")|sum }}',
+        '6'
+      );
+
+      equal(
+        '{{ [[1,2], [3], [4,5,6]]|map("sum")|list }}',
+        '3,3,15'
+      );
+
+      const users = [
+        {name: 'john'},
+        {name: 'jane'},
+        {name: 'mike'}
+      ];
+
+      equal(
+        '{{ users|map(attribute="name")|join("|") }}',
+        {
+          users
+        },
+        'john|jane|mike'
+      );
+
+      equal(
+        '{{ users|map(attribute="lastname", default="smith")|join(", ") }}',
+        {
+          users: [
+            {firstname: 'john', lastname: 'lennon'},
+            {firstname: 'jane', lastname: 'edwards'},
+            {firstname: 'jon', lastname: null},
+            {firstname: 'mike'}
+          ]
+        },
+        'lennon, edwards, , smith'
+      );
+
+      expect(function() {
+        render(
+          '{{ users|map(attribute="lastname", foo="bar") }}',
+          {
+            users: []
+          }
+        );
+      }).to.throwError(/Unexpected keyword argument foo/);
+
+      expect(function() {
+        render(
+          '{{ users|map(foo="bar") }}',
+          {
+            users: []
+          }
+        );
+      }).to.throwError(/map requires a filter argument/);
+
+      expect(function() {
+        render(
+          '{{ users|map(attribute="foo")|join("|") }}',
+          {
+            users
+          },
+          {
+            throwOnUndefined: true
+          }
+        );
+      }).to.throwError(/map: attribute "foo" resolved to undefined/);
+
+      finish(done);
+    });
+
     it('nl2br', function(done) {
       equal('{{ null | nl2br }}', '');
       equal('{{ undefined | nl2br }}', '');

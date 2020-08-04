@@ -85,7 +85,7 @@ function makeMacro(argNames, kwargNames, func) {
   return function macro(...macroArgs) {
     var argCount = numArgs(macroArgs);
     var args;
-    var kwargs = getKeywordArgs(macroArgs);
+    var kwargs = lib.getKeywordArgs(macroArgs);
 
     if (argCount > argNames.length) {
       args = macroArgs.slice(0, argNames.length);
@@ -124,21 +124,6 @@ function makeKeywordArgs(obj) {
   return obj;
 }
 
-function isKeywordArgs(obj) {
-  return obj && Object.prototype.hasOwnProperty.call(obj, '__keywords');
-}
-
-function getKeywordArgs(args) {
-  var len = args.length;
-  if (len) {
-    const lastArg = args[len - 1];
-    if (isKeywordArgs(lastArg)) {
-      return lastArg;
-    }
-  }
-  return {};
-}
-
 function numArgs(args) {
   var len = args.length;
   if (len === 0) {
@@ -146,7 +131,7 @@ function numArgs(args) {
   }
 
   const lastArg = args[len - 1];
-  if (isKeywordArgs(lastArg)) {
+  if (lib.isKeywordArgs(lastArg)) {
     return len - 1;
   } else {
     return len;
