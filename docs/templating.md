@@ -1424,6 +1424,44 @@ Convert string to all lower case:
 foobar
 ```
 
+### map
+
+Arguments:
+
+* `attribute`: attribute that would be taken from object
+* `default`: optional, default value, if `attribute` is resolved to undefined
+
+or:
+
+* filter name: any filter name that would be invoked for each item in sequence
+* optional arguments for filter above
+
+Applies a filter on a sequence of objects or looks up an attribute. This is
+useful when dealing with lists of objects, but you are really only interested
+in a certain value of it.
+
+The basic usage is mapping on an attribute. Imagine you have a list of users,
+but you are only interested in a list of usernames:
+
+```jinja
+Users on this page: {{ users|map(attribute='username')|join(', ') }}
+```
+
+You can specify a `default` value to use if an object in the list does not have
+the given attribute.
+
+```jinja
+{{ users|map(attribute="username", default="Anonymous")|join(", ") }}
+```
+
+Alternatively you can let it invoke a filter by passing the name of the filter
+and the arguments afterwards. A good example would be applying a text
+conversion filter on a sequence:
+
+```jinja
+Users on this page: {{ titles|map('lower')|join(', ') }}
+```
+
 ### nl2br
 
 Replace new lines with `<br />` HTML elements:
