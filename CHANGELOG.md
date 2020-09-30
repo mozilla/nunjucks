@@ -1,6 +1,12 @@
 Changelog
 =========
 
+3.2.4 (Unreleased)
+------------------
+
+* Add `-j/--jinja-compat` switch to the `precompile` script. Merge of
+  [#1319](https://github.com/mozilla/nunjucks/pull/1319).
+
 3.2.3 (Feb 15 2021)
 -------------------
 
