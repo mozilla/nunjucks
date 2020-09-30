@@ -9,6 +9,8 @@ Unreleased
   respect `throwOnUndefined` if sort attribute is undefined.
 * Add `base` arg to
   [`int` filter](https://mozilla.github.io/nunjucks/templating.html#int).
+* Add `-j/--jinja-compat` switch to the `precompile` script. Merge of
+  [#1319](https://github.com/mozilla/nunjucks/pull/1319).
 
 3.2.2 (Jul 20 2020)
 -------------------
