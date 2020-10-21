@@ -130,6 +130,12 @@ function dump(obj, spaces) {
 
 exports.dump = dump;
 
+function toJSON(str) {
+	return JSON.parse(str);
+}
+
+_exports.toJSON = toJSON;
+
 function escape(str) {
   if (str instanceof r.SafeString) {
     return str;
