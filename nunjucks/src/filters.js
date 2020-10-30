@@ -134,7 +134,7 @@ function toJSON(str) {
 	return JSON.parse(str);
 }
 
-_exports.toJSON = toJSON;
+exports.toJSON = toJSON;
 
 function escape(str) {
   if (str instanceof r.SafeString) {
