@@ -279,6 +279,9 @@
 <a href="#title">title</a>
 </li>
 <li>
+<a href="#toJSON">toJSON</a>
+</li>
+<li>
 <a href="#trim">trim</a>
 </li>
 <li>
@@ -1696,6 +1699,26 @@ Use default one otherwise.</p>
 <p><strong>Output</strong></p>
 <div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="x">Foo Bar Baz</span>
 </code></pre></div>
+
+<h3 id="toJSON">toJSON</h3>
+
+<p>Call <a href="https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/JSON/parse"><code>JSON.parse</code></a> on a string and parse it into a JSON Object, so that you can iterate over it in the template.
+
+<p><strong>Input</strong></p>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="cp">{{</span> <span class="k">set</span> <span class="nv">jsonObject</span> <span class="o">=</span> <span class="s2">'{ &quot;title&quot;: &quot;Person Schema&quot;, &quot;type&quot;: &quot;object&quot;, &quot;properties&quot;: { &quot;firstName&quot;: { &quot;type&quot;: &quot;string&quot; }, &quot;lastName&quot;: { &quot;type&quot;: &quot;string&quot; }, &quot;age&quot;: { &quot;description&quot;: &quot;Age in years&quot;, &quot;type&quot;: &quot;integer&quot;, &quot;minimum&quot;: 0 } } }'</span> <span class="o">|</span> <span class="nf">toJSON</span> <span class="cp">}}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">if</span> <span class="nv">jsonObject.properties</span> <span class="cp">%}</span><span class="x"></span>
+  <span class="cp">{%</span> <span class="k">for</span> <span class="nv">key</span>,<span class="nv">value</span> <span class="k">in</span> <span class="nv">jsonObject.properties</span> <span class="cp">%}</span><span class="x"></span>
+    <span class="cp">{{</span> <span class="nv">key + ' - ' + value.type + '&lt;br&gt;'</span> <span class="cp">}}</span><span class="x"></span>
+  <span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">endif</span> <span class="cp">%}</span><span class="x"></span>
+</code></pre></div>
+
+<p><strong>Output</strong></p>
+<div class="highlight"><pre><code class="language-jinja" data-lang="jinja"><span class="x">firstName - string</span>
+<span class="x">lastName - string</span>
+<span class="x">age - integer</span>
+</code></pre></div>
+
 <h3 id="trim">trim</h3>
 
 <p>Strip leading and trailing whitespace:</p>
