@@ -107,8 +107,8 @@
     });
 
     it('toJSON', function() {
-      equal('{{ [&quot;a&quot;,1,{&quot;b&quot;:true}] | toJSON  }}',
-        '[\'a\', 1, {b: true}]');
+      equal('{{ \'["a",1,{"b":true}]\' | toJSON | dump }}',
+        '[&quot;a&quot;,1,{&quot;b&quot;:true}]');
     });
 
     it('escape', function() {
