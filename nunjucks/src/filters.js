@@ -131,7 +131,7 @@ function dump(obj, spaces) {
 exports.dump = dump;
 
 function toJSON(str) {
-	return JSON.parse(str);
+  return JSON.parse(str);
 }
 
 exports.toJSON = toJSON;
@@ -240,7 +240,7 @@ function list(val) {
   if (lib.isString(val)) {
     return val.split('');
   } else if (lib.isObject(val)) {
-    return lib._entries(val || {}).map(([key, value]) => ({key, value}));
+    return lib._entries(val || {}).map(([key, value]) => ({ key, value }));
   } else if (lib.isArray(val)) {
     return val;
   } else {
