@@ -106,6 +106,11 @@
         '[\n\t&quot;a&quot;,\n\t1,\n\t{\n\t\t&quot;b&quot;: true\n\t}\n]');
     });
 
+    it('toJSON', function() {
+      equal('{{ \'["a",1,{"b":true}]\' | toJSON | dump }}',
+        '[&quot;a&quot;,1,{&quot;b&quot;:true}]');
+    });
+
     it('escape', function() {
       equal(
         '{{ "<html>" | escape }}', {},

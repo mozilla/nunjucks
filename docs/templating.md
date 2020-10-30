@@ -1822,6 +1822,29 @@ Make the first letter of the string uppercase:
 ```jinja
 Foo Bar Baz
 ```
+### toJSON
+
+Call [`JSON.parse`](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/JSON/parse) on a string and parse it into a JSON Object, so that you can iterate over it in the template.
+
+**Input**
+
+```jinja
+{% set jsonObject = '{ "title": "Person Schema", "type": "object", "properties": { "firstName": { "type": "string" }, "lastName": { "type": "string" }, "age": { "description": "Age in years", "type": "integer", "minimum": 0 } } }' | toJSON %}
+
+{% if jsonObject.properties %}
+  {% for key,value in jsonObject.properties %}
+    {{ key + ' - ' + value.type + '<br>' }}
+  {% endfor %}
+{% endif %}
+```
+
+**Output**
+
+```jinja
+firstName - string
+lastName - string
+age - integer
+```
 
 ### trim
 
