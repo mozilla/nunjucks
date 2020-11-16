@@ -1,10 +1,10 @@
 # Nunjucks
 
-  [![NPM Version][npm-image]][npm-url]
-  [![NPM Downloads][downloads-image]][downloads-url]
-  [![Linux Build][travis-image]][travis-url]
-  [![Windows Build][appveyor-image]][appveyor-url]
-  [![Test Codecov][codecov-image]][codecov-url]
+[![NPM Version][npm-image]][npm-url]
+[![NPM Downloads][downloads-image]][downloads-url]
+[![Linux Build][travis-image]][travis-url]
+[![Windows Build][appveyor-image]][appveyor-url]
+[![Test Codecov][codecov-image]][codecov-url]
 
 [Nunjucks](https://mozilla.github.io/nunjucks/) is a full featured
 templating engine for javascript. It is heavily inspired by
@@ -14,6 +14,10 @@ templating engine for javascript. It is heavily inspired by
 ## Installation
 
 `npm install nunjucks`
+
+To use the file watcher built-in to Nunjucks, Chokidar must be installed separately.
+
+`npm install nunjucks chokidar`
 
 (View the [CHANGELOG](https://github.com/mozilla/nunjucks/releases))
 
