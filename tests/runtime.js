@@ -110,5 +110,21 @@
 
       finish(done);
     });
+
+    it('should not read variables property from Object.prototype', function(done) {
+      var payload = 'function(){ return 1+2; }()';
+      var data = {};
+      Object.getPrototypeOf(data).payload = payload;
+
+      render('{{ payload }}', data, {
+        noThrow: true
+      }, function(err, res) {
+        expect(err).to.equal(null);
+        expect(res).to.equal(payload);
+      });
+      delete Object.getPrototypeOf(data).payload;
+
+      finish(done);
+    });
   });
 }());

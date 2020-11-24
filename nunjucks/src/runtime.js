@@ -12,7 +12,7 @@ var supportsIterators = (
 // variables, for example.
 class Frame {
   constructor(parent, isolateWrites) {
-    this.variables = {};
+    this.variables = Object.create(null);
     this.parent = parent;
     this.topLevel = false;
     // if this is true, writes (set) should never propagate upwards past

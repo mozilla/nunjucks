@@ -10,6 +10,10 @@ Unreleased
 * Add `base` arg to
   [`int` filter](https://mozilla.github.io/nunjucks/templating.html#int).
 * Move `chokidar` to `peerDependencies` and mark it `optional` in `peerDependenciesMeta`.
+* Fix prototype pollution issue for template variables. Merge of
+  [#1330](https://github.com/mozilla/nunjucks/pull/1330); fixes
+  [#1331](https://github.com/mozilla/nunjucks/issues/1331). Thanks
+  [ChenKS12138](https://github.com/ChenKS12138)!
 
 3.2.2 (Jul 20 2020)
 -------------------
