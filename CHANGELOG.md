@@ -9,6 +9,7 @@ Unreleased
   respect `throwOnUndefined` if sort attribute is undefined.
 * Add `base` arg to
   [`int` filter](https://mozilla.github.io/nunjucks/templating.html#int).
+* Move `chokidar` to `peerDependencies` and mark it `optional` in `peerDependenciesMeta`.
 
 3.2.2 (Jul 20 2020)
 -------------------
