@@ -1,0 +1,42 @@
+name: Tests
+
+on:
+  push:
+    branches:
+      - master
+      - develop
+  pull_request:
+    branches:
+      - master
+    paths:
+      - '**/*.js'
+      - 'package.json'
+
+jobs:
+  tests:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        node-version: [11.x, 10.x, 8.x]
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - uses: actions/cache@v2
+        id: cache-node-modules
+        with:
+          path: node_modules
+          key: ${{ matrix.os }}-node-${{ matrix.node-version }}-${{ hashFiles('**/package.json') }}
+          restore-keys: |
+            ${{ matrix.os }}-node-${{ matrix.node-version }}-
+      - run: npm install
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+      - run: npm test
+      - name: Report coverage
+        if: success()
+        run: codecov/codecov-action@v1
