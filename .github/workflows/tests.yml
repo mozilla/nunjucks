@@ -3,14 +3,16 @@ name: Tests
 on:
   push:
     branches:
-      - master
-      - develop
+      - '**'
   pull_request:
     branches:
       - master
     paths:
       - '**/*.js'
       - 'package.json'
+      - '**/*.njk'
+      - '**/*.yml'
+      - 'tests/**/*.html'
 
 jobs:
   tests:
@@ -32,11 +34,9 @@ jobs:
         with:
           path: node_modules
           key: ${{ matrix.os }}-node-${{ matrix.node-version }}-${{ hashFiles('**/package.json') }}
-          restore-keys: |
-            ${{ matrix.os }}-node-${{ matrix.node-version }}-
       - run: npm install
         if: steps.cache-node-modules.outputs.cache-hit != 'true'
       - run: npm test
       - name: Report coverage
         if: success()
-        run: codecov/codecov-action@v1
+        uses: codecov/codecov-action@v1
