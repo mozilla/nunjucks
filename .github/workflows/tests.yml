@@ -37,6 +37,7 @@ jobs:
       - run: npm install
         if: steps.cache-node-modules.outputs.cache-hit != 'true'
       - run: npm test
-      - name: Report coverage
-        if: success()
-        uses: codecov/codecov-action@v1
+      # Commented out until this action is added in organization settings
+      # - name: Report coverage
+      #   if: success()
+      #   uses: codecov/codecov-action@v1
