@@ -2,7 +2,7 @@
 
 [![NPM Version][npm-image]][npm-url]
 [![NPM Downloads][downloads-image]][downloads-url]
-[![Linux Build][travis-image]][travis-url]
+[![Linux Build][github-actions-image]][github-actions-url]
 [![Windows Build][appveyor-image]][appveyor-url]
 [![Test Codecov][codecov-image]][codecov-url]
 
@@ -50,8 +50,8 @@ Contributions are always welcome! Before you submit an issue or pull request, pl
 [npm-url]: https://npmjs.org/package/nunjucks
 [downloads-image]: https://img.shields.io/npm/dm/nunjucks.svg
 [downloads-url]: https://npmjs.org/package/nunjucks
-[travis-image]: https://img.shields.io/travis/mozilla/nunjucks/master.svg?label=linux
-[travis-url]: https://travis-ci.org/mozilla/nunjucks
+[github-actions-image]: https://img.shields.io/github/workflow/status/mozilla/nunjucks/Tests/master.svg?label=linux
+[github-actions-url]: https://github.com/mozilla/nunjucks/actions
 [appveyor-image]: https://img.shields.io/appveyor/ci/fdintino/nunjucks/master.svg?label=windows
 [appveyor-url]: https://ci.appveyor.com/project/fdintino/nunjucks
 [codecov-image]: https://img.shields.io/codecov/c/gh/mozilla/nunjucks.svg
