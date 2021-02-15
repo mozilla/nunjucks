@@ -1,6 +1,6 @@
-const path = require('path');
+import path from 'path';
 
-module.exports = function express(env, app) {
+export default function express(env, app) {
   function NunjucksView(name, opts) {
     this.name = name;
     this.path = name;
@@ -21,4 +21,4 @@ module.exports = function express(env, app) {
   app.set('view', NunjucksView);
   app.set('nunjucksEnv', env);
   return env;
-};
+}

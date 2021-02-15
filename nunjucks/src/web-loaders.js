@@ -1,9 +1,6 @@
-'use strict';
+import Loader from './loader';
 
-const Loader = require('./loader');
-const {PrecompiledLoader} = require('./precompiled-loader.js');
-
-class WebLoader extends Loader {
+export class WebLoader extends Loader {
   constructor(baseURL, opts) {
     super();
     this.baseURL = baseURL || '.';
@@ -89,7 +86,4 @@ class WebLoader extends Loader {
   }
 }
 
-module.exports = {
-  WebLoader: WebLoader,
-  PrecompiledLoader: PrecompiledLoader
-};
+export {PrecompiledLoader} from './precompiled-loader';

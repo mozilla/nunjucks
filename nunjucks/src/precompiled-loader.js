@@ -1,8 +1,6 @@
-'use strict';
+import Loader from './loader';
 
-const Loader = require('./loader');
-
-class PrecompiledLoader extends Loader {
+export class PrecompiledLoader extends Loader {
   constructor(compiledTemplates) {
     super();
     this.precompiled = compiledTemplates || {};
@@ -21,7 +19,3 @@ class PrecompiledLoader extends Loader {
     return null;
   }
 }
-
-module.exports = {
-  PrecompiledLoader: PrecompiledLoader,
-};
