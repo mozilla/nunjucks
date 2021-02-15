@@ -395,6 +395,9 @@ Keyword/default arguments are available. See
 You can [import](#import) macros from other templates, allowing you to reuse
 them freely across your project.
 
+If you want to inject content in the macro's body (e.g. a block of HTML), 
+you might want to have a look at [call](#call).
+
 **Important note**: If you are using the asynchronous API, please be aware that
 you **cannot** do anything asynchronous inside macros. This is because macros
 are called like normal functions. In the future we may have a way to call a
@@ -635,15 +638,20 @@ content is available inside the macro as `caller()`.
 
 ```jinja
 {% macro add(x, y) %}
-{{ caller() }}: {{ x + y }}
+{{ caller() }}{{ x + y }}
 {% endmacro%}
 
 {% call add(1, 2) -%}
-The result is
+<span>Thanks for doing a calculation!</span>
+<span>The result is: </span>
 {%- endcall %}
 ```
 
-The above example would output "The result is: 3".
+The above example would output:
+```html
+<span>Thanks for doing a calculation!</span>
+<span>The result is: </span>3
+```
 
 ## Keyword Arguments
 
