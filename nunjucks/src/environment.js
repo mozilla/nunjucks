@@ -442,7 +442,7 @@ class Template extends Obj {
     }
   }
 
-  render(ctx, parentFrame, cb) {
+  render(ctx, parentFrame, cb, data) {
     if (typeof ctx === 'function') {
       cb = ctx;
       ctx = {};
@@ -474,6 +474,13 @@ class Template extends Obj {
     frame.topLevel = true;
     let syncResult = null;
     let didError = false;
+
+    // With for include template
+    if (data) {
+      Object.keys(data).forEach((key) => {
+        frame.set(key, data[key]);
+      });
+    }
 
     this.rootRenderFunc(this.env, context, frame, globalRuntime, (err, res) => {
       // TODO: this is actually a bug in the compiled template (because waterfall
