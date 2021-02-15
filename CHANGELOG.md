@@ -1,8 +1,8 @@
 Changelog
 =========
 
-Unreleased
-----------
+3.2.3 (Feb 15 2021)
+-------------------
 
 * Add support for nested attributes on
   [`sort` filter](https://mozilla.github.io/nunjucks/templating.html#sort-arr-reverse-casesens-attr);
