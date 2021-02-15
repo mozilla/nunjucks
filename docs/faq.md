@@ -36,7 +36,7 @@ features, it should be easy to make templates compatible.
 
 Nunjucks has experimental support for installing APIs into the
 templating environment to help with Jinja compatibility. See
-[installJinjaCompat](api.html#installjinjacompat).
+[installJinjaCompat](http://mozilla.github.io/nunjucks/api.html#installjinjacompat).
 
 Additionally, there are few jinja2 features not implemented in nunjucks:
 
