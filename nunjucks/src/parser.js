@@ -1340,6 +1340,21 @@ class Parser extends Obj {
   parseAsRoot() {
     return new nodes.Root(0, 0, this.parseNodes());
   }
+
+  parseAsExpressionRoot() {
+    const buf = [];
+    let tok = this.nextToken();
+    if (tok && tok.type === lexer.TOKEN_VARIABLE_START) {
+      const e = this.parseExpression();
+      this.dropLeadingWhitespace = false;
+      this.advanceAfterVariableEnd();
+      buf.push(new nodes.ExpressionOutput(tok.lineno, tok.colno, [e]));
+      if (this.nextToken()) {
+        this.fail('Unexpected token following expression: ' + tok.type, tok.lineno, tok.colno);
+      }
+    }
+    return new nodes.ExpressionRoot(0, 0, buf);
+  }
 }
 
 // var util = require('util');
