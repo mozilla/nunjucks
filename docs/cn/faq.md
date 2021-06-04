@@ -19,7 +19,7 @@ pageid: faq
 
 但是，如果你避免使用原生语言的特性（如 `{{ str.trim() }}`） 而完全使用模板的特性和过滤器，那么两者的模块可以兼容。
 
-Nunjucks 支持与 Jinja 兼容，查看 [installJinjaCompat](/api.html#installjinjacompat) 获取更多信息。
+Nunjucks 支持与 Jinja 兼容，查看 [installJinjaCompat](api.html#installjinjacompat) 获取更多信息。
 
 除此之外，nunjucks 还有一些未实现的功能：
 
