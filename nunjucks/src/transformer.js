@@ -80,7 +80,7 @@ function _liftFilters(node, asyncFilters, prop) {
       return descNode;
     } else if ((descNode instanceof nodes.Filter &&
       lib.indexOf(asyncFilters, descNode.name.value) !== -1) ||
-      descNode instanceof nodes.CallExtensionAsync) {
+      descNode instanceof nodes.FilterAsync) {
       symbol = new nodes.Symbol(descNode.lineno,
         descNode.colno,
         gensym());
