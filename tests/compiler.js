@@ -1871,9 +1871,7 @@
 
         this.run = function(context, content) {
           // Reverse the string
-          return content((err, body) => {
-            console.log(body.split('').reverse().join(''));
-          }).split('').reverse().join('');
+          return content().split('').reverse().join('');
         };
       }
 
@@ -1901,7 +1899,7 @@
       }
 
       equal('{% testsync %}123456789{% testasync %}abcdefghi{% endtestasync %}{% endtestsync %}', null,
-        { 
+        {
           extensions: {
             TestSyncExtension: new TestSyncExtension(),
             TestAsyncExtension: new TestAsyncExtension()
