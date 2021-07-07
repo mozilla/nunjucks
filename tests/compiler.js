@@ -1853,6 +1853,65 @@
       finish(done);
     });
 
+    it('should allow async custom tag within sync custom tag compilation', function(done) {
+      function TestSyncExtension() {
+        this.tags = ['testsync'];
+
+        this.parse = function(parser, nodes) {
+          var content;
+          var tag;
+          parser.advanceAfterBlockEnd();
+
+          content = parser.parseUntilBlocks('endtestsync');
+          tag = new nodes.CallExtension(this, 'run', null, [content]);
+          parser.advanceAfterBlockEnd();
+
+          return tag;
+        };
+
+        this.run = function(context, content) {
+          // Reverse the string
+          return content((err, body) => {
+            console.log(body.split('').reverse().join(''));
+          }).split('').reverse().join('');
+        };
+      }
+
+      function TestAsyncExtension() {
+        this.tags = ['testasync'];
+
+        this.parse = function(parser, nodes) {
+          var content;
+          var tag;
+          parser.advanceAfterBlockEnd();
+
+          content = parser.parseUntilBlocks('endtestasync');
+          tag = new nodes.CallExtension(this, 'run', null, [content]);
+          parser.advanceAfterBlockEnd();
+
+          return tag;
+        };
+
+        this.run = function(context, content, callback) {
+          // Uppercase the string
+          setTimeout(() => {
+            callback(null, content().toUpperCase());
+          }, 1);
+        };
+      }
+
+      equal('{% testsync %}123456789{% testasync %}abcdefghi{% endtestasync %}{% endtestsync %}', null,
+        { 
+          extensions: {
+            TestSyncExtension: new TestSyncExtension(),
+            TestAsyncExtension: new TestAsyncExtension()
+          }
+        },
+        'IHGFEDCBA987654321');
+
+      finish(done);
+    });
+
     it('should autoescape by default', function(done) {
       equal('{{ foo }}', {
         foo: '"\'<>&'
