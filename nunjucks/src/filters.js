@@ -156,6 +156,12 @@ function first(arr) {
 
 exports.first = first;
 
+function limit(arr, n) {
+  return array.slice(0, n);
+}
+
+exports.limit = limit;
+
 function forceescape(str) {
   str = (str === null || str === undefined) ? '' : str;
   return r.markSafe(lib.escape(str.toString()));
