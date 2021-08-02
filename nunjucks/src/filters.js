@@ -157,7 +157,7 @@ function first(arr) {
 exports.first = first;
 
 function limit(arr, n) {
-  return array.slice(0, n);
+  return arr.slice(0, n);
 }
 
 exports.limit = limit;
