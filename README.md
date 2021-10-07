@@ -2,8 +2,7 @@
 
 [![NPM Version][npm-image]][npm-url]
 [![NPM Downloads][downloads-image]][downloads-url]
-[![Linux Build][github-actions-image]][github-actions-url]
-[![Windows Build][appveyor-image]][appveyor-url]
+[![CI Build][github-actions-image]][github-actions-url]
 [![Test Codecov][codecov-image]][codecov-url]
 
 [Nunjucks](https://mozilla.github.io/nunjucks/) is a full featured
@@ -50,9 +49,7 @@ Contributions are always welcome! Before you submit an issue or pull request, pl
 [npm-url]: https://npmjs.org/package/nunjucks
 [downloads-image]: https://img.shields.io/npm/dm/nunjucks.svg
 [downloads-url]: https://npmjs.org/package/nunjucks
-[github-actions-image]: https://img.shields.io/github/workflow/status/mozilla/nunjucks/Tests/master.svg?label=linux
+[github-actions-image]: https://img.shields.io/github/workflow/status/mozilla/nunjucks/Tests/master.svg?label=CI
 [github-actions-url]: https://github.com/mozilla/nunjucks/actions
-[appveyor-image]: https://img.shields.io/appveyor/ci/fdintino/nunjucks/master.svg?label=windows
-[appveyor-url]: https://ci.appveyor.com/project/fdintino/nunjucks
 [codecov-image]: https://img.shields.io/codecov/c/gh/mozilla/nunjucks.svg
 [codecov-url]: https://codecov.io/gh/mozilla/nunjucks/branch/master

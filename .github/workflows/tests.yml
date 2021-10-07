@@ -2,17 +2,7 @@ name: Tests
 
 on:
   push:
-    branches:
-      - '**'
   pull_request:
-    branches:
-      - master
-    paths:
-      - '**/*.js'
-      - 'package.json'
-      - '**/*.njk'
-      - '**/*.yml'
-      - 'tests/**/*.html'
 
 jobs:
   tests:
@@ -20,23 +10,40 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-latest]
-        node-version: [11.x, 10.x, 8.x]
+        os: [ubuntu-latest, windows-latest]
+        node-version: [10, 12, 14, 15]
+        include:
+          - os: ubuntu-latest
+            os-name: linux
+          - os: windows-latest
+            os-name: windows
+
+    name: Test ${{ matrix.node-version }} (${{ matrix.os-name }})
 
     steps:
       - uses: actions/checkout@v2
+
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
+
+      - name: Store node version variable
+        id: node
+        run: |
+          echo "::set-output name=version::$(node -v)"
+
       - uses: actions/cache@v2
         id: cache-node-modules
         with:
           path: node_modules
-          key: ${{ matrix.os }}-node-${{ matrix.node-version }}-${{ hashFiles('**/package.json') }}
+          key: ${{ matrix.os }}-node-${{ steps.node.outputs.version }}-${{ hashFiles('**/package-lock.json') }}
+
       - run: npm install
         if: steps.cache-node-modules.outputs.cache-hit != 'true'
+
       - run: npm test
+
       # Commented out until this action is added in organization settings
       # - name: Report coverage
       #   if: success()
