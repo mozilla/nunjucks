@@ -1884,30 +1884,61 @@
           parser.advanceAfterBlockEnd();
 
           content = parser.parseUntilBlocks('endtestasync');
-          tag = new nodes.CallExtension(this, 'run', null, [content]);
+          tag = new nodes.CallExtensionAsync(this, 'run', null, [content]);
           parser.advanceAfterBlockEnd();
 
           return tag;
         };
 
-        this.run = function(context, content, callback) {
+        this.run = function(context, body, callback) {
           // Uppercase the string
           setTimeout(() => {
-            callback(null, content().toUpperCase());
+            callback(null, body().toUpperCase());
           }, 1);
         };
       }
 
-      equal('{% testsync %}123456789{% testasync %}abcdefghi{% endtestasync %}{% endtestsync %}', null,
+      // First prove it works normally
+      render(
+        '{% testasync %}abcdefghi{% endtestasync %}',
+        null,
         {
-          extensions: {
-            TestSyncExtension: new TestSyncExtension(),
-            TestAsyncExtension: new TestAsyncExtension()
-          }
+          extensions: { TestAsyncExtension: new TestAsyncExtension()},
+          autoescape: true
         },
-        'IHGFEDCBA987654321');
+        function(err1, res1) {
+          expect(res1).to.be('ABCDEFGHI');
 
-      finish(done);
+          render(
+            '{% testsync %}abcdefghi{% endtestsync %}',
+            null,
+            {
+              extensions: { TestSyncExtension: new TestSyncExtension()},
+              autoescape: true
+            },
+            function(err2, res2) {
+              expect(res2).to.be('ihgfedcba');
+
+              // Then fails with custom tag
+              render(
+                '{% testsync %}{% testasync %}abcdefghi{% endtestasync %}{% endtestsync %}',
+                null,
+                {
+                  extensions: {
+                    TestExtension: new TestAsyncExtension(),
+                    TestSyncExtension: new TestSyncExtension()
+                  },
+                  autoescape: true
+                },
+                function(err3, res3) {
+                  expect(res3).to.be('IHGFEDCBA');
+                  finish(done);
+                }
+              );
+            }
+          );
+        }
+      );
     });
 
     it('should autoescape by default', function(done) {
