@@ -51,7 +51,7 @@ if (opts.wrapper) {
 
 if (opts.jinjaCompat) {
   var nunjucks = require('nunjucks');
-  nunjucks.installJinjaCompat();
+  uninstallJinjaCompat = nunjucks.installJinjaCompat();
 }
 
 console.log(precompile(cmdpath, {
@@ -62,3 +62,7 @@ console.log(precompile(cmdpath, {
   include : [].concat(opts.include),
   exclude : [].concat(opts.exclude)
 }));
+
+if (opts.jinjaCompat) {
+   uninstallJinjaCompat();
+}
