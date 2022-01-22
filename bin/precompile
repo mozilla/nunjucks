@@ -50,7 +50,7 @@ if (opts.wrapper) {
 }
 
 if (opts.jinjaCompat) {
-  var nunjucks = require('nunjucks');
+  var nunjucks = require('../index.js');
   uninstallJinjaCompat = nunjucks.installJinjaCompat();
 }
 
