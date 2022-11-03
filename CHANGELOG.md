@@ -1,6 +1,12 @@
 Changelog
 =========
 
+Unreleased
+-------------------
+
+* Updates "Who's using it" section of the documentation.
+
+
 3.2.3 (Feb 15 2021)
 -------------------
 
