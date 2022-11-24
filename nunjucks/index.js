@@ -1,7 +1,7 @@
 'use strict';
 
 const lib = require('./src/lib');
-const {Environment, Template} = require('./src/environment');
+const {Environment, Template, Context} = require('./src/environment');
 const Loader = require('./src/loader');
 const loaders = require('./src/loaders');
 const precompile = require('./src/precompile');
@@ -47,6 +47,7 @@ function configure(templatesPath, opts) {
 module.exports = {
   Environment: Environment,
   Template: Template,
+  Context: Context,
   Loader: Loader,
   FileSystemLoader: loaders.FileSystemLoader,
   NodeResolveLoader: loaders.NodeResolveLoader,
