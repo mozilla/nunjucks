@@ -108,9 +108,9 @@
 
     it('escape', function() {
       equal(
-        '{{ "<html>" | escape }}', {},
+        '{{ "<html>\\\\" | escape }}', {},
         { autoescape: false },
-        '&lt;html&gt;');
+        '&lt;html&gt;&#92;');
     });
 
     it('escape skip safe', function() {

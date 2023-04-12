@@ -8,10 +8,11 @@ var escapeMap = {
   '"': '&quot;',
   '\'': '&#39;',
   '<': '&lt;',
-  '>': '&gt;'
+  '>': '&gt;',
+  '\\': '&#92;',
 };
 
-var escapeRegex = /[&"'<>]/g;
+var escapeRegex = /[&"'<>\\]/g;
 
 var exports = module.exports = {};
 
