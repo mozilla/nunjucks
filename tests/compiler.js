@@ -1976,6 +1976,16 @@
       finish(done);
     });
 
+    it('should autoescape backslashes', function(done) {
+      equal(
+        '{{ foo }}',
+        { foo: 'foo \\\' bar' },
+        { autoescape: true },
+        'foo &#92;&#39; bar');
+
+      finish(done);
+    });
+
     it('should not autoescape when extension set false', function(done) {
       function TestExtension() {
         // jshint validthis: true
@@ -2031,7 +2041,7 @@
     });
 
     it('should render regexs', function(done) {
-      equal('{{ r/name [0-9] \\// }}',
+      equal('{{ r/name [0-9] \\// }}', {}, { autoescape: false },
         '/name [0-9] \\//');
 
       equal('{{ r/x/gi }}',

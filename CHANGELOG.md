@@ -1,6 +1,13 @@
 Changelog
 =========
 
+3.2.4 (unreleased)
+------------------
+
+* HTML encode backslashes when expressions are passed through the escape
+  filter (including when this is done automatically with autoescape). Merge
+  of [#1427](https://github.com/mozilla/nunjucks/pull/1427).
+
 3.2.3 (Feb 15 2021)
 -------------------
 
