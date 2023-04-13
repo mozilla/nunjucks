@@ -1,7 +1,7 @@
 Changelog
 =========
 
-3.2.4 (unreleased)
+3.2.4 (Apr 13 2023)
 ------------------
 
 * HTML encode backslashes when expressions are passed through the escape
