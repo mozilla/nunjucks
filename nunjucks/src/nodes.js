@@ -73,6 +73,7 @@ class NodeList extends Node {
 }
 
 const Root = NodeList.extend('Root');
+const ExpressionRoot = NodeList.extend('ExpressionRoot');
 const Literal = Value.extend('Literal');
 const Symbol = Value.extend('Symbol');
 const Group = NodeList.extend('Group');
@@ -112,6 +113,7 @@ const Set = Node.extend('Set', { fields: ['targets', 'value'] });
 const Switch = Node.extend('Switch', { fields: ['expr', 'cases', 'default'] });
 const Case = Node.extend('Case', { fields: ['cond', 'body'] });
 const Output = NodeList.extend('Output');
+const ExpressionOutput = NodeList.extend('ExpressionOutput');
 const Capture = Node.extend('Capture', { fields: ['body'] });
 const TemplateData = Literal.extend('TemplateData');
 const UnaryOp = Node.extend('UnaryOp', { fields: ['target'] });
@@ -211,6 +213,7 @@ function printNodes(node, indent) {
 module.exports = {
   Node: Node,
   Root: Root,
+  ExpressionRoot: ExpressionRoot,
   NodeList: NodeList,
   Value: Value,
   Literal: Literal,
@@ -220,6 +223,7 @@ module.exports = {
   Pair: Pair,
   Dict: Dict,
   Output: Output,
+  ExpressionOutput: ExpressionOutput,
   Capture: Capture,
   TemplateData: TemplateData,
   If: If,
