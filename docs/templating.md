@@ -538,6 +538,16 @@ an `include` is _not_ a pre-processor that pulls the included template code
 into the including template before rendering; instead, it fires off a separate
 render of the included template, and the results of that render are included.
 
+Set var from file
+You can also create a var from a file's content. For example a .json file, which you can then stringify using dump.
+```jinja
+{% set fileAsVar %}
+     {% include 'example.json' %}
+{% endset %}
+
+{{- fileAsVar | dump -}}
+```
+
 ### import
 
 `import` loads a different template and allows you to access its exported
