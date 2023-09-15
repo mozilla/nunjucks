@@ -237,7 +237,7 @@ var items = [{ title: "foo", id: 1 }, { title: "bar", id: 2}];
 {% for item in items %}
   <li>{{ item.title }}</li>
 {% else %}
-  <li>This would display if the 'item' collection were empty</li>
+  <li>This would display if the 'items' collection were empty</li>
 {% endfor %}
 </ul>
 ```
