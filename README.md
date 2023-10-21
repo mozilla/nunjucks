@@ -50,7 +50,7 @@ Contributions are always welcome! Before you submit an issue or pull request, pl
 [npm-url]: https://npmjs.org/package/nunjucks
 [downloads-image]: https://img.shields.io/npm/dm/nunjucks.svg
 [downloads-url]: https://npmjs.org/package/nunjucks
-[github-actions-image]: https://img.shields.io/github/workflow/status/mozilla/nunjucks/Tests/master.svg?label=linux
+[github-actions-image]: https://img.shields.io/github/actions/workflow/status/mozilla/nunjucks/tests.yml?branch=master&label=linux
 [github-actions-url]: https://github.com/mozilla/nunjucks/actions
 [appveyor-image]: https://img.shields.io/appveyor/ci/fdintino/nunjucks/master.svg?label=windows
 [appveyor-url]: https://ci.appveyor.com/project/fdintino/nunjucks
