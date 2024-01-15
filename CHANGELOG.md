@@ -1,6 +1,11 @@
 Changelog
 =========
 
+3.2.4 (Jan 15 2024)
+------------------
+
+* Add support for running nunjucks in GraalJS environments.
+
 3.2.4 (Apr 13 2023)
 ------------------
 
