@@ -93,6 +93,26 @@
 
         loader.getSource('simple-base.njk');
       });
+
+      it('should have default opts for WebLoader in graaljs', function(done) {
+        var loader;
+
+        if (typeof window === 'undefined') {
+          this.skip();
+        }
+
+        window.Graal = true;
+        window.read = (src) => src;
+
+        loader = new WebLoader(templatesPath);
+
+        loader.on('load', function(name, source) {
+          expect(name).to.equal('simple-base.njk');
+          done();
+        });
+
+        loader.getTemplate('simple-base.njk');
+      });
     });
 
     if (typeof FileSystemLoader !== 'undefined') {
