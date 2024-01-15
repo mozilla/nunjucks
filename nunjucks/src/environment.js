@@ -16,9 +16,21 @@ const expressApp = require('./express-app');
 // If the user is using the async API, *always* call it
 // asynchronously even if the template was synchronous.
 function callbackAsap(cb, err, res) {
-  asap(() => {
+
+  // Check if running in graaljs
+  if (typeof Graal != 'undefined') {
+
+    // Callback immediately.
     cb(err, res);
-  });
+
+  } else {
+
+    asap(() => {
+      cb(err, res);
+    });
+
+  }
+
 }
 
 /**
