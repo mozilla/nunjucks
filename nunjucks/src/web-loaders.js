@@ -30,27 +30,45 @@ class WebLoader extends Loader {
   getSource(name, cb) {
     var useCache = this.useCache;
     var result;
-    this.fetch(this.baseURL + '/' + name, (err, src) => {
-      if (err) {
-        if (cb) {
-          cb(err.content);
-        } else if (err.status === 404) {
-          result = null;
-        } else {
-          throw err.content;
-        }
-      } else {
-        result = {
-          src: src,
-          path: name,
-          noCache: !useCache
-        };
-        this.emit('load', name, result);
-        if (cb) {
-          cb(null, result);
-        }
+    var emitResult = function() {
+      result = {
+        src: src,
+        path: name,
+        noCache: !useCache
+      };
+      this.emit('load', name, result);
+      if (cb) {
+        cb(null, result);
       }
-    });
+    };
+
+    // Check if running in graaljs.
+    if (typeof Graal != 'undefined') {
+
+      // Use graal's read(file) to get contents from another file.
+      var path = _this2.baseURL + "/" + name;
+      var src = read(path);
+
+      // Skip fetch.
+      emitResult();
+
+    } else {
+
+      this.fetch(this.baseURL + '/' + name, (err, src) => {
+        if (err) {
+          if (cb) {
+            cb(err.content);
+          } else if (err.status === 404) {
+            result = null;
+          } else {
+            throw err.content;
+          }
+        } else {
+          emitResult();
+        }
+      });
+
+    }
 
     // if this WebLoader isn't running asynchronously, the
     // fetch above would actually run sync and we'll have a
