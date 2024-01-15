@@ -94,24 +94,22 @@
         loader.getSource('simple-base.njk');
       });
 
-      it('should have default opts for WebLoader in graaljs', function(done) {
-        var loader;
+      it('should have default opts for WebLoader in graaljs', function() {
+        var env;
+        var parent;
 
-        if (typeof window === 'undefined') {
+        if (typeof global === 'undefined') {
           this.skip();
         }
 
-        window.Graal = true;
-        window.read = (src) => src;
+        global.Graal = true;
+        global.read = (src) => 'Hello World';
 
-        loader = new WebLoader(templatesPath);
-
-        loader.on('load', function(name, source) {
-          expect(name).to.equal('simple-base.njk');
-          done();
-        });
-
-        loader.getTemplate('simple-base.njk');
+        env = new Environment(new WebLoader(templatesPath));
+        parent = env.getTemplate('fake.njk');
+        expect(parent.render()).to.be('Hello World');
+        delete global.Graal;
+        delete global.read;
       });
     });
 
