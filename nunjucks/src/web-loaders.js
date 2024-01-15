@@ -30,7 +30,8 @@ class WebLoader extends Loader {
   getSource(name, cb) {
     var useCache = this.useCache;
     var result;
-    var emitResult = function() {
+    var content;
+    var emitResult = (src) => {
       result = {
         src: src,
         path: name,
@@ -43,17 +44,11 @@ class WebLoader extends Loader {
     };
 
     // Check if running in graaljs.
-    if (typeof Graal != 'undefined') {
-
+    if (typeof Graal !== 'undefined') {
       // Use graal's read(file) to get contents from another file.
-      var path = _this2.baseURL + "/" + name;
-      var src = read(path);
-
-      // Skip fetch.
-      emitResult();
-
+      content = read(this.baseURL + '/' + name); // eslint-disable-line func-names, no-undef
+      emitResult(content);
     } else {
-
       this.fetch(this.baseURL + '/' + name, (err, src) => {
         if (err) {
           if (cb) {
@@ -64,10 +59,9 @@ class WebLoader extends Loader {
             throw err.content;
           }
         } else {
-          emitResult();
+          emitResult(content);
         }
       });
-
     }
 
     // if this WebLoader isn't running asynchronously, the
