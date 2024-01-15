@@ -41,6 +41,17 @@ Grab [nunjucks.js](files/nunjucks.js) ([min](files/nunjucks.min.js)) for the ful
 [nunjucks-slim.js](files/nunjucks-slim.js) ([min](files/nunjucks-slim.min.js)) for the slim version
 which only works with precompiled templates.
 
+## When in a GraalJS environment...
+
+Grab [nunjucks.js](files/nunjucks.js) ([min](files/nunjucks.min.js)) and add this as a script to an
+instance of the GraalJS Script Engine. You will need to ensure the script engine has the following enabled:
+* Allow IO
+* Allow Experimental Options
+* The `js.shell` option
+
+Depending on your setup, you may need to add a polyfill script to be loaded before nunjucks which adds a 
+global `window` object.
+
 ### Which file should you use?
 
 * Use **nunjucks.js** to dynamically load templates, auto-reload
