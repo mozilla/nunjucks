@@ -24,7 +24,23 @@ class WebLoader extends Loader {
   }
 
   resolve(from, to) {
-    throw new Error('relative templates not support in the browser yet');
+    var stack;
+    var parts;
+    if (typeof Graal !== 'undefined') {
+      stack = from.split('/');
+      parts = to.split('/');
+      stack.pop();
+      for (let i = 0; i < parts.length; i++) {
+        if (parts[i] === '..') {
+          stack.pop();
+        } else if (parts[i] !== '.') {
+          stack.push(parts[i]);
+        }
+      }
+      return stack.join('/');
+    } else {
+      throw new Error('relative templates not support in the browser yet');
+    }
   }
 
   getSource(name, cb) {

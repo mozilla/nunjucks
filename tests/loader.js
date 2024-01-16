@@ -108,8 +108,26 @@
         env = new Environment(new WebLoader(templatesPath));
         parent = env.getTemplate('fake.njk');
         expect(parent.render()).to.be('Hello World');
+
         delete global.Graal;
         delete global.read;
+      });
+
+      it('should resolve in graaljs', function() {
+        var loader;
+        var resolved;
+
+        if (typeof global === 'undefined') {
+          this.skip();
+        }
+
+        global.Graal = true;
+
+        loader = new WebLoader(templatesPath);
+        resolved = loader.resolve('components/fragments/origin.njk', './../fake.njk');
+        expect(resolved).to.be('components/fake.njk');
+
+        delete global.Graal;
       });
     });
 
