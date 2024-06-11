@@ -23,7 +23,7 @@ To use the file watcher built-in to Nunjucks, Chokidar must be installed separat
 
 ## Documentation
 
-See [here](https://mozilla.github.io/nunjucks/).
+To learn more about nunjucks, please visit our [documentation](https://mozilla.github.io/nunjucks/)
 
 ## Browser Support
 
