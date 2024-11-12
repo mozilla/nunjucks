@@ -15,8 +15,8 @@
   if (typeof require !== 'undefined') {
     expect = require('expect.js');
     util = require('./util');
-    Template = require('../govjucks/src/environment').Template;
-    Environment = require('../govjucks/src/environment').Environment;
+    Template = require('../src/environment').Template;
+    Environment = require('../src/environment').Environment;
     fs = require('fs');
   } else {
     expect = window.expect;

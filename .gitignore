@@ -3,9 +3,6 @@ coverage
 .#*
 docs/_site
 docs/files
-/src/
-/index.js
-/index.js.map
 /tests/browser/govjucks*
 .nyc_output
 /browser

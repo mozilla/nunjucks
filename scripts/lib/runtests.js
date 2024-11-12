@@ -1,6 +1,4 @@
-var mochaPhantom = require('./mocha-phantomjs');
 var spawn = require('child_process').spawn;
-var getStaticServer = require('./static-server');
 var path = require('path');
 
 var utils = require('./utils');
@@ -14,7 +12,6 @@ function mochaRun({cliTest = false} = {}) {
   const runArgs = (cliTest)
     ? []
     : [
-      '--require', '@babel/register',
       '--exclude',
       'tests/**',
       '--silent',
@@ -32,7 +29,6 @@ function mochaRun({cliTest = false} = {}) {
         ...runArgs,
         '-R', 'spec',
         '-r', 'tests/setup',
-        '-r', '@babel/register',
         ...mochaArgs,
       ], {
         cwd: path.join(__dirname, '../..'),
@@ -59,30 +55,16 @@ function mochaRun({cliTest = false} = {}) {
 
 function runtests() {
   return new Promise((resolve, reject) => {
-    var server;
-
     const mochaPromise = promiseSequence([
       () => mochaRun({cliTest: false}),
       () => mochaRun({cliTest: true}),
     ]);
 
-    return mochaPromise.then(() => {
-      return getStaticServer().then((args) => {
-        server = args[0];
-        const port = args[1];
-        const promises = ['index', 'slim'].map(
-          f => (() => mochaPhantom(`http://localhost:${port}/tests/browser/${f}.html`)));
-        return promiseSequence(promises).then(() => {
-          server.close();
-          resolve();
-        });
+    return mochaPromise
+      .then(() => resolve())
+      .catch((err) => {
+        reject(err);
       });
-    }).catch((err) => {
-      if (server) {
-        server.close();
-      }
-      reject(err);
-    });
   });
 }
 

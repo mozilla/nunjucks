@@ -7,8 +7,8 @@
 
   if (typeof require !== 'undefined') {
     expect = require('expect.js');
-    lib = require('../govjucks/src/lib');
-    lexer = require('../govjucks/src/lexer');
+    lib = require('../src/lib');
+    lexer = require('../src/lexer');
   } else {
     expect = window.expect;
     lib = govjucks.lib;

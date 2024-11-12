@@ -7,8 +7,8 @@
 
   if (typeof require !== 'undefined') {
     expect = require('expect.js');
-    precompile = require('../govjucks/src/precompile').precompile;
-    precompileString = require('../govjucks/src/precompile').precompileString;
+    precompile = require('../src/precompile').precompile;
+    precompileString = require('../src/precompile').precompileString;
   } else {
     expect = window.expect;
     precompile = govjucks.precompile;

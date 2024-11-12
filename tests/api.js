@@ -11,8 +11,8 @@
   if (typeof require !== 'undefined') {
     expect = require('expect.js');
     util = require('./util');
-    Environment = require('../govjucks/src/environment').Environment;
-    Loader = require('../govjucks/src/node-loaders').FileSystemLoader;
+    Environment = require('../src/environment').Environment;
+    Loader = require('../src/node-loaders').FileSystemLoader;
     templatesPath = 'tests/templates';
     path = require('path');
   } else {

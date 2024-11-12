@@ -9,7 +9,7 @@
 
   if (typeof require !== 'undefined') {
     expect = require('expect.js');
-    govjucks = require('../govjucks/index');
+    govjucks = require('../index');
     fs = require('fs-extra');
     path = require('path');
     os = require('os');

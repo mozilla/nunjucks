@@ -14,7 +14,7 @@
     expect;
 
   if (typeof window === 'undefined') {
-    govjucks = govjucksFull = require('../govjucks/index.js');
+    govjucks = govjucksFull = require('../index.js');
     Loader = govjucks.FileSystemLoader;
     templatesPath = 'tests/templates';
     expect = require('expect.js');

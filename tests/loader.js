@@ -10,10 +10,10 @@
 
   if (typeof require !== 'undefined') {
     expect = require('expect.js');
-    Environment = require('../govjucks/src/environment').Environment;
-    WebLoader = require('../govjucks/src/web-loaders').WebLoader;
-    FileSystemLoader = require('../govjucks/src/node-loaders').FileSystemLoader;
-    NodeResolveLoader = require('../govjucks/src/node-loaders').NodeResolveLoader;
+    Environment = require('../src/environment').Environment;
+    WebLoader = require('../src/web-loaders').WebLoader;
+    FileSystemLoader = require('../src/node-loaders').FileSystemLoader;
+    NodeResolveLoader = require('../src/node-loaders').NodeResolveLoader;
     templatesPath = 'tests/templates';
   } else {
     expect = window.expect;

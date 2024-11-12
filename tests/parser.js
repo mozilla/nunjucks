@@ -8,9 +8,9 @@
 
   if (typeof require !== 'undefined') {
     expect = require('expect.js');
-    lib = require('../govjucks/src/lib');
-    nodes = require('../govjucks/src/nodes');
-    parser = require('../govjucks/src/parser');
+    lib = require('../src/lib');
+    nodes = require('../src/nodes');
+    parser = require('../src/parser');
   } else {
     expect = window.expect;
     lib = govjucks.lib;

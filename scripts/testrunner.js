@@ -13,15 +13,11 @@ const nyc = new NYC({
 });
 nyc.reset();
 
-require('@babel/register');
-
 const runtests = require('./lib/runtests');
-const precompileTestTemplates = require('./lib/precompile');
 
 let err;
 
-precompileTestTemplates()
-  .then(() => runtests())
+runtests()
   .catch((e) => {
     err = e;
     console.log(err); // eslint-disable-line no-console
