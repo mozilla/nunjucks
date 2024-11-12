@@ -434,7 +434,7 @@ v1.3.4 (Apr 27 2015)
 --------------------
 
 This is an extremely minor release that only adds an .npmignore so that the
-bench, tests, and docs folders do not get published to npm. Nunjucks should
+bench, tests, and docs folders do not get published to npm. nunjucks should
 download a lot faster now.
 
 

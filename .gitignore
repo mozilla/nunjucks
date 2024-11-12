@@ -6,9 +6,9 @@ docs/files
 /src/
 /index.js
 /index.js.map
-/tests/browser/nunjucks*
+/tests/browser/govjucks*
 .nyc_output
 /browser
 /tests/browser/precompiled-templates.js
-/samples/express/js/nunjucks.js
+/samples/express/js/govjucks.js
 /samples/express/js/templates.js

@@ -1,5 +1,5 @@
 
-nunjucks.configure('views', {
+govjucks.configure('views', {
   autoescape: true
 });
 

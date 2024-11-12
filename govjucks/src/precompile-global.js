@@ -9,11 +9,11 @@ function precompileGlobal(templates, opts) {
     const template = templates[i].template;
 
     out += '(function() {' +
-      '(window.nunjucksPrecompiled = window.nunjucksPrecompiled || {})' +
+      '(window.govjucksPrecompiled = window.govjucksPrecompiled || {})' +
       '[' + name + '] = (function() {\n' + template + '\n})();\n';
 
     if (opts.asFunction) {
-      out += 'return function(ctx, cb) { return nunjucks.render(' + name + ', ctx, cb); }\n';
+      out += 'return function(ctx, cb) { return govjucks.render(' + name + ', ctx, cb); }\n';
     }
 
     out += '})();\n';

@@ -47,6 +47,6 @@ module.exports = {
     'comma-dangle': 'off',
   },
   'globals': {
-    'nunjucks': false,
+    'govjucks': false,
   },
 };

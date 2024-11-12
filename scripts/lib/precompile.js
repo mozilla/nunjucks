@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const precompile = require('../../nunjucks/src/precompile').precompile;
+const precompile = require('../../govjucks/src/precompile').precompile;
 
 var testDir = path.join(__dirname, '../../tests');
 

@@ -10,23 +10,23 @@
 
   if (typeof require !== 'undefined') {
     expect = require('expect.js');
-    Environment = require('../nunjucks/src/environment').Environment;
-    WebLoader = require('../nunjucks/src/web-loaders').WebLoader;
-    FileSystemLoader = require('../nunjucks/src/node-loaders').FileSystemLoader;
-    NodeResolveLoader = require('../nunjucks/src/node-loaders').NodeResolveLoader;
+    Environment = require('../govjucks/src/environment').Environment;
+    WebLoader = require('../govjucks/src/web-loaders').WebLoader;
+    FileSystemLoader = require('../govjucks/src/node-loaders').FileSystemLoader;
+    NodeResolveLoader = require('../govjucks/src/node-loaders').NodeResolveLoader;
     templatesPath = 'tests/templates';
   } else {
     expect = window.expect;
-    Environment = nunjucks.Environment;
-    WebLoader = nunjucks.WebLoader;
-    FileSystemLoader = nunjucks.FileSystemLoader;
-    NodeResolveLoader = nunjucks.NodeResolveLoader;
+    Environment = govjucks.Environment;
+    WebLoader = govjucks.WebLoader;
+    FileSystemLoader = govjucks.FileSystemLoader;
+    NodeResolveLoader = govjucks.NodeResolveLoader;
     templatesPath = '../templates';
   }
 
   describe('loader', function() {
     it('should allow a simple loader to be created', function() {
-      // From Docs: http://mozilla.github.io/nunjucks/api.html#writing-a-loader
+      // From Docs: http://mozilla.github.io/govjucks/api.html#writing-a-loader
       // We should be able to create a loader that only exposes getSource
       var env, parent;
 
@@ -47,7 +47,7 @@
     });
 
     it('should catch loader error', function(done) {
-      // From Docs: http://mozilla.github.io/nunjucks/api.html#writing-a-loader
+      // From Docs: http://mozilla.github.io/govjucks/api.html#writing-a-loader
       // We should be able to create a loader that only exposes getSource
       var env;
 

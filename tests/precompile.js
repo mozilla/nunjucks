@@ -7,12 +7,12 @@
 
   if (typeof require !== 'undefined') {
     expect = require('expect.js');
-    precompile = require('../nunjucks/src/precompile').precompile;
-    precompileString = require('../nunjucks/src/precompile').precompileString;
+    precompile = require('../govjucks/src/precompile').precompile;
+    precompileString = require('../govjucks/src/precompile').precompileString;
   } else {
     expect = window.expect;
-    precompile = nunjucks.precompile;
-    precompileString = nunjucks.precompileString;
+    precompile = govjucks.precompile;
+    precompileString = govjucks.precompileString;
   }
 
   describe('precompile', function() {

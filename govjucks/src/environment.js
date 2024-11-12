@@ -42,7 +42,7 @@ class Environment extends EmitterObj {
     // The dev flag determines the trace that'll be shown on errors.
     // If set to true, returns the full trace from the error point,
     // otherwise will return trace starting from Template.render
-    // (the full trace from within nunjucks may confuse developers using
+    // (the full trace from within govjucks may confuse developers using
     //  the library)
     // defaults to false
     opts = this.opts = opts || {};
@@ -74,11 +74,11 @@ class Environment extends EmitterObj {
     }
 
     // It's easy to use precompiled templates: just include them
-    // before you configure nunjucks and this will automatically
+    // before you configure govjucks and this will automatically
     // pick it up and use it
-    if (typeof window !== 'undefined' && window.nunjucksPrecompiled) {
+    if (typeof window !== 'undefined' && window.govjucksPrecompiled) {
       this.loaders.unshift(
-        new PrecompiledLoader(window.nunjucksPrecompiled)
+        new PrecompiledLoader(window.govjucksPrecompiled)
       );
     }
 

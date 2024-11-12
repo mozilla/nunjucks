@@ -11,14 +11,14 @@
   if (typeof require !== 'undefined') {
     expect = require('expect.js');
     util = require('./util');
-    Environment = require('../nunjucks/src/environment').Environment;
-    Loader = require('../nunjucks/src/node-loaders').FileSystemLoader;
+    Environment = require('../govjucks/src/environment').Environment;
+    Loader = require('../govjucks/src/node-loaders').FileSystemLoader;
     templatesPath = 'tests/templates';
     path = require('path');
   } else {
     expect = window.expect;
-    Environment = nunjucks.Environment;
-    Loader = nunjucks.WebLoader;
+    Environment = govjucks.Environment;
+    Loader = govjucks.WebLoader;
     templatesPath = '../templates';
   }
 

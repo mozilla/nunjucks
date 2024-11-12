@@ -3,11 +3,11 @@
 'use strict';
 
 var path = require('path');
-var nunjucks = require('../..');
+var govjucks = require('../..');
 var express = require('express');
 
 var app = express();
-nunjucks.configure(path.join(__dirname, 'views'), {
+govjucks.configure(path.join(__dirname, 'views'), {
   autoescape: true,
   express: app,
   watch: true

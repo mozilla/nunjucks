@@ -6,19 +6,19 @@ title: API
 
 # API
 
-The API for nunjucks covers rendering templates, adding filters and
+The API for govjucks covers rendering templates, adding filters and
 extensions, customizing template loading, and more.
 
 ## User-Defined Templates Warning
 
-  nunjucks does not sandbox execution so **it is not safe to run
+  govjucks does not sandbox execution so **it is not safe to run
   user-defined templates or inject user-defined content into template
   definitions**. On the server, you can expose attack vectors for
   accessing sensitive data and remote code execution. On the client,
   you can expose cross-site scripting vulnerabilities even for
   precompiled templates (which can be mitigated with a strong
   [CSP](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy)). See
-  [this issue](https://github.com/mozilla/nunjucks-docs/issues/17) for
+  [this issue](https://github.com/gunjam/govjucks-docs/issues/17) for
   more information.
 
 ## Simple API
@@ -29,7 +29,7 @@ higher-level API for loading and rendering templates.
 {% endraw %}
 {% api %}
 render
-nunjucks.render(name, [context], [callback])
+govjucks.render(name, [context], [callback])
 
 Renders the template named **name** with the **context** hash. If
 **callback** is provided, it will be called when done with any
@@ -41,18 +41,18 @@ See the warning about **not allowing [users to define their own
 templates](#user-defined-templates-warning).**
 
 ```js
-var res = nunjucks.render('foo.html');
+var res = govjucks.render('foo.html');
 
-var res = nunjucks.render('foo.html', { username: 'James' });
+var res = govjucks.render('foo.html', { username: 'James' });
 
-nunjucks.render('async.html', function(err, res) {
+govjucks.render('async.html', function(err, res) {
 });
 ```
 {% endapi %}
 
 {% api %}
 renderString
-nunjucks.renderString(str, context, [callback])
+govjucks.renderString(str, context, [callback])
 
 Same as [`render`](#render), but renders a raw string instead of
 loading a template.
@@ -63,20 +63,20 @@ templates](#user-defined-templates-warning)** applies.
 
 {% raw %}
 ```js
-var res = nunjucks.renderString('Hello {{ username }}', { username: 'James' });
+var res = govjucks.renderString('Hello {{ username }}', { username: 'James' });
 ```
 {% endraw %}
 {% endapi %}
 
 {% api %}
 compile
-nunjucks.compile(str, [env], [path])
+govjucks.compile(str, [env], [path])
 
-Compile the given string into a reusable nunjucks Template object.
+Compile the given string into a reusable govjucks Template object.
 
 {% raw %}
 ```js
-var template = nunjucks.compile('Hello {{ username }}');
+var template = govjucks.compile('Hello {{ username }}');
 template.render({ username: 'James' });
 ```
 {% endraw %}
@@ -84,9 +84,9 @@ template.render({ username: 'James' });
 
 {% api %}
 configure
-nunjucks.configure([path], [opts]);
+govjucks.configure([path], [opts]);
 
-Tell nunjucks that your templates live at **path** and flip any
+Tell govjucks that your templates live at **path** and flip any
 feature on or off with the **opts** hash. You can provide both
 arguments or either of them. **path** defaults to the current working
 directory, and the following options are available in **opts**:
@@ -101,36 +101,36 @@ directory, and the following options are available in **opts**:
 * **web** an object for configuring loading templates in the browser:
   * **useCache** *(default: false)* will enable cache and templates will never see updates.
   * **async** *(default: false)* will load templates asynchronously instead of synchronously (requires use of the [asynchronous API](#asynchronous-support) for rendering).
-* **express** an express app that nunjucks should install to
-* **tags:** *(default: see nunjucks syntax)* defines the syntax for
-    nunjucks tags. See [Customizing Syntax](#customizing-syntax)
+* **express** an express app that govjucks should install to
+* **tags:** *(default: see govjucks syntax)* defines the syntax for
+    govjucks tags. See [Customizing Syntax](#customizing-syntax)
 
 `configure` returns an `Environment` instance, which lets you add
 filters and extensions while still using the simple API. See below for
 more information on `Environment`.
 
-**Warning**: The simple API (above; e.g. `nunjucks.render`) always uses the
-  configuration from the most recent call to `nunjucks.configure`. Since this
+**Warning**: The simple API (above; e.g. `govjucks.render`) always uses the
+  configuration from the most recent call to `govjucks.configure`. Since this
   is implicit and can result in unexpected side effects, use of the simple API
   is discouraged in most cases (especially if `configure` is used); instead,
-  explicitly create an environment using `var env = nunjucks.configure(...)`
+  explicitly create an environment using `var env = govjucks.configure(...)`
   and then call `env.render(...)` etc.
 
 ```js
-nunjucks.configure('views');
+govjucks.configure('views');
 
 // if in the browser, you probably want to use an absolute URL
-nunjucks.configure('/views');
+govjucks.configure('/views');
 
-nunjucks.configure({ autoescape: true });
+govjucks.configure({ autoescape: true });
 
-nunjucks.configure('views', {
+govjucks.configure('views', {
     autoescape: true,
     express: app,
     watch: true
 });
 
-var env = nunjucks.configure('views');
+var env = govjucks.configure('views');
 // do stuff with env
 ```
 
@@ -138,17 +138,17 @@ var env = nunjucks.configure('views');
 
 {% api %}
 installJinjaCompat
-nunjucks.installJinjaCompat()
+govjucks.installJinjaCompat()
 
 This installs experimental support for more consistent Jinja
 compatibility by adding Pythonic APIs to the environment. While
-nunjucks does not aim for complete Jinja/Python compatibility, this
+govjucks does not aim for complete Jinja/Python compatibility, this
 might help users seeking just that.
 
 This adds `True` and `False` which map to the JS `true` and `false`
 values, allows use of Python slice syntax, and augments arrays and
 objects with Python-style methods.
-[Check out the source](https://github.com/mozilla/nunjucks/blob/master/nunjucks/src/jinja-compat.js)
+[Check out the source](https://github.com/gunjam/govjucks/blob/master/govjucks/src/jinja-compat.js)
 to see everything it adds.
 {% endapi %}
 {% raw %}
@@ -177,7 +177,7 @@ The constructor takes a list of **loaders** and a hash of
 configuration parameters as **opts**. If **loaders** is null, it
 defaults to loading from the current directory or URL. You can pass a
 single loader or an array of loaders. If you pass an array of loaders,
-nunjucks will walk through them in order until one of them finds a
+govjucks will walk through them in order until one of them finds a
 template. See [`Loader`](#loader) for more info about loaders.
 
 The available flags in **opts** is **autoescape**,
@@ -189,7 +189,7 @@ elsewhere like [`env.express`](#express)).
 In node, the [`FileSystemLoader`](#filesystemloader) is available to
 load templates off the filesystem, and in the browser the [`WebLoader`](#webloader)
 is available to load over HTTP (or use precompiled templates). If you
-use the simple [`configure`](#configure) API, nunjucks automatically
+use the simple [`configure`](#configure) API, govjucks automatically
 creates the appropriate loader for you, depending if you're in node or
 the browser. See [`Loader`](#loader) for more information.
 
@@ -201,16 +201,16 @@ explicitly passed into the `Environment` constructor.
 
 ```js
 // the FileSystemLoader is available if in node
-var env = new nunjucks.Environment(new nunjucks.FileSystemLoader('views'));
+var env = new govjucks.Environment(new govjucks.FileSystemLoader('views'));
 
-var env = new nunjucks.Environment(new nunjucks.FileSystemLoader('views'),
+var env = new govjucks.Environment(new govjucks.FileSystemLoader('views'),
                           { autoescape: false });
 
-var env = new nunjucks.Environment([new nunjucks.FileSystemLoader('views'),
+var env = new govjucks.Environment([new govjucks.FileSystemLoader('views'),
                            new MyCustomLoader()]);
 
 // the WebLoader is available if in the browser
-var env = new nunjucks.Environment(new nunjucks.WebLoader('/views'));
+var env = new govjucks.Environment(new govjucks.WebLoader('/views'));
 ```
 {% endapi %}
 
@@ -224,11 +224,11 @@ result (see [asynchronous support](#asynchronous-support)), otherwise
 return the rendered string.
 
 ```js
-var res = nunjucks.render('foo.html');
+var res = govjucks.render('foo.html');
 
-var res = nunjucks.render('foo.html', { username: 'James' });
+var res = govjucks.render('foo.html', { username: 'James' });
 
-nunjucks.render('async.html', function(err, res) {
+govjucks.render('async.html', function(err, res) {
 });
 ```
 
@@ -243,7 +243,7 @@ loading a template.
 
 {% raw %}
 ```js
-var res = nunjucks.renderString('Hello {{ username }}', { username: 'James' });
+var res = govjucks.renderString('Hello {{ username }}', { username: 'James' });
 ```
 {% endraw %}
 {% endapi %}
@@ -333,7 +333,7 @@ env.getTemplate('from-async-loader.html', function(err, tmpl) {
 express
 env.express(app)
 
-Install nunjucks as the rendering engine for the express **app**.
+Install govjucks as the rendering engine for the express **app**.
 After doing this, you can use express normally. Note that you can do
 this automatically with the simple API call [`configure`](#configure)
 by passing in the app as the **express** option. Returns `env` for further method chaining.
@@ -399,7 +399,7 @@ immediately instead of waiting until the template is rendered.
 
 {% raw %}
 ```js
-var tmpl = new nunjucks.Template('Hello {{ username }}');
+var tmpl = new govjucks.Template('Hello {{ username }}');
 
 tmpl.render({ username: "James" }); // -> "Hello James"
 ```
@@ -444,7 +444,7 @@ templates live, and it defaults to the current working directory.
 
 ```js
 // Loads templates from the "views" folder
-var env = new nunjucks.Environment(new nunjucks.FileSystemLoader('views'));
+var env = new govjucks.Environment(new govjucks.FileSystemLoader('views'));
 ```
 
 {% endapi %}
@@ -486,7 +486,7 @@ production, this should always be the case. See
 
 ```js
 // Load templates from /views
-var env = new nunjucks.Environment(new nunjucks.WebLoader('/views'))
+var env = new govjucks.Environment(new govjucks.WebLoader('/views'))
 ```
 {% endapi %}
 {% raw %}
@@ -517,7 +517,7 @@ need to extend the `Loader` class. This gives you `emit` method that
 can fire events. You need to call it
 
 ```js
-var MyLoader = nunjucks.Loader.extend({
+var MyLoader = govjucks.Loader.extend({
     init: function() {
         // setup a process which watches templates here
         // and call `this.emit('update', name)` when a template
@@ -542,7 +542,7 @@ Just add an `async: true` property to your loader and it will be used
 asynchronously.
 
 ```js
-var MyLoader = nunjucks.Loader.extend({
+var MyLoader = govjucks.Loader.extend({
     async: true,
 
     getSource: function(name, callback) {
@@ -565,7 +565,7 @@ Remember that you now have to use the asynchronous API. See
 
 ## Browser Usage
 
-Using nunjucks in the browser takes a little more thought because you
+Using govjucks in the browser takes a little more thought because you
 care about load and compile time. On the server-side, templates are
 compiled once and cached in memory and you never have to worry about
 it. On the client-side however, you don't want to compile templates
@@ -576,19 +576,19 @@ them as a simple `.js` file on page load.
 
 Maybe you do want to dynamically load templates while developing,
 however, so that you can see changes immediately without recompiling.
-Nunjucks tries to adapt to whatever workflow you want.
+Govjucks tries to adapt to whatever workflow you want.
 
 The only rule you must follow: **always precompile your templates in
 production**. Why? Not only is it slow to compile all your templates
 on page load, they are loaded *synchronously* over HTTP, blocking the
-whole page. It is slow. It does this because nunjucks isn't async by
+whole page. It is slow. It does this because govjucks isn't async by
 default.
 
 ### Recommended Setups
 
-These are two of the most popular ways to set up nunjucks on the
+These are two of the most popular ways to set up govjucks on the
 client-side. Note that there are two different js files: one with the
-compiler, nunjucks.js, and one without the compiler, nunjucks-slim.js.
+compiler, govjucks.js, and one without the compiler, govjucks-slim.js.
 Read [Getting Started](getting-started.html) for a brief overview of
 the differences.
 
@@ -601,13 +601,13 @@ This method will give you a setup that dynamically loads templates
 while developing (you can see changes immediately), but uses
 precompiled templates in production.
 
-1. Load [nunjucks.js](files/nunjucks.js) with either a script tag or a module loader.
+1. Load [govjucks.js](files/govjucks.js) with either a script tag or a module loader.
 2. Render templates ([example](#simple-api))!
 3. When pushing to production, [precompile](#precompiling) the templates into a js file
    and load it on the page
 
-> An optimization is to use `nunjucks-slim.js` instead of
-> `nunjucks.js` in production since you are using precompiled
+> An optimization is to use `govjucks-slim.js` instead of
+> `govjucks.js` in production since you are using precompiled
 > templates there. It's 8K instead of 20K because it doesn't contain
 > the compiler. This complicates the setup though because you are
 > using different js files between dev and prod, so it may or may not
@@ -620,10 +620,10 @@ production, which simplifies the setup. However, you're going to want
 something that automatically recompiles templates while developing
 unless you want to manually recompile them after every change.
 
-1. For development, use the [grunt](https://github.com/jlongster/grunt-nunjucks) or
-[gulp](https://github.com/sindresorhus/gulp-nunjucks) tasks to watch your template
+1. For development, use the [grunt](https://github.com/jlongster/grunt-govjucks) or
+[gulp](https://github.com/sindresorhus/gulp-govjucks) tasks to watch your template
 directory for changes and automatically [precompile](#precompiling) them into a js file
-2. Load [nunjucks-slim.js](files/nunjucks-slim.js) and `templates.js`, or whatever you named
+2. Load [govjucks-slim.js](files/govjucks-slim.js) and `templates.js`, or whatever you named
 the precompiled js file, with either a script tag or a module loader.
 3. Render templates ([example](#simple-api))!
 
@@ -633,18 +633,18 @@ same code to production.
 
 ## Precompiling
 
-To precompile your templates, use the `nunjucks-precompile` script
-that comes with nunjucks. You can pass it a directory or a file and it
+To precompile your templates, use the `govjucks-precompile` script
+that comes with govjucks. You can pass it a directory or a file and it
 will generate all the JavaScript for your templates.
 
 ```
 // Precompiling a whole directory
-$ nunjucks-precompile views > templates.js
+$ govjucks-precompile views > templates.js
 
 // Precompiling individual templates
-$ nunjucks-precompile views/base.html >> templates.js
-$ nunjucks-precompile views/index.html >> templates.js
-$ nunjucks-precompile views/about.html >> templates.js
+$ govjucks-precompile views/base.html >> templates.js
+$ govjucks-precompile views/index.html >> templates.js
+$ govjucks-precompile views/about.html >> templates.js
 ```
 
 All you have to do is simply load `templates.js` on the page, and the
@@ -652,7 +652,7 @@ system will automatically use the precompiled templates. There are
 zero changes necessary.
 
 There are various options available to the script. Simply invoke
-`nunjucks-precompile` to see more info about them. Note that **names
+`govjucks-precompile` to see more info about them. Note that **names
 of all asynchronous filters need to passed to the script** since they
 need to be known at compile-time. You can pass a comma-delimited list
 of async filters with `-a`, like `-a foo,bar,baz`. If you only use
@@ -674,7 +674,7 @@ everything in sync.
 {% endraw %}
 {% api %}
 precompile
-nunjucks.precompile(path, [opts])
+govjucks.precompile(path, [opts])
 
 Precompile a file or directory at **path**. **opts** is a hash with any of the following options:
 
@@ -693,7 +693,7 @@ Precompile a file or directory at **path**. **opts** is a hash with any of the f
     * **opts**: object of all the above options
 
 ```js
-var env = new nunjucks.Environment();
+var env = new govjucks.Environment();
 
 // extensions must be known at compile-time
 env.addExtension('MyExtension', new MyExtension());
@@ -703,13 +703,13 @@ env.addFilter('asyncFilter', function(val, cb) {
   // do something
 }, true);
 
-nunjucks.precompile('/dir/to/views', { env: env });
+govjucks.precompile('/dir/to/views', { env: env });
 ```
 {% endapi %}
 
 {% api %}
 precompileString
-nunjucks.precompileString(str, [opts])
+govjucks.precompileString(str, [opts])
 
 Exactly the same as [`precompile`](#precompile), but compiles a raw string.
 
@@ -726,7 +726,7 @@ you don't care about this, you should simply use the normal API like
 `callback` on you, and it's why it's optional in all the rendering
 functions.
 
-As of version 1.0, nunjucks provides a way to render templates
+As of version 1.0, govjucks provides a way to render templates
 asynchronously. This means that custom filters and extensions can do
 stuff like fetch things from the database, and template rendering is
 "paused" until the callback is called.
@@ -742,7 +742,7 @@ you should precompile your templates and never use HTTP in production.
 If you are using anything async, you need to use the async API like this:
 
 ```js
-nunjucks.render('foo.html', function(err, res) {
+govjucks.render('foo.html', function(err, res) {
    // check err and handle result
 });
 ```
@@ -752,7 +752,7 @@ Read more about async [`filters`](#asynchronous1), [`extensions`](#asynchronous2
 
 ### Be Careful!
 
-Nunjucks is synchronous by default. Because of this, you need to
+Govjucks is synchronous by default. Because of this, you need to
 follow a few rules when writing asynchronous templates:
 
 * Always use the async API. `render` should take a function that takes
@@ -768,15 +768,15 @@ follow a few rules when writing asynchronous templates:
 
 ## Autoescaping
 
-By default, nunjucks will escape all output. It's recommended
+By default, govjucks will escape all output. It's recommended
 that you do this for security reasons. If you turn off autoescaping,
-nunjucks will render all output as it is by default.
+govjucks will render all output as it is by default.
 
 To deactivate it, all you have to do is pass the `autoescape` option as
 `false` to the `Environment` object.
 
 ```js
-var env = nunjucks.configure('/path/to/templates', { autoescape: false });
+var env = govjucks.configure('/path/to/templates', { autoescape: false });
 ```
 
 ## Customizing Syntax
@@ -786,7 +786,7 @@ blocks, and comments, you can specify different tokens as the `tags`
 option:
 
 ```js
-var env = nunjucks.configure('/path/to/templates', {
+var env = govjucks.configure('/path/to/templates', {
   tags: {
     blockStart: '<%',
     blockEnd: '%>',
@@ -816,8 +816,8 @@ first argument and any arguments passed to the filter as the other
 arguments, in order.
 
 ```js
-var nunjucks = require('nunjucks');
-var env = new nunjucks.Environment();
+var govjucks = require('govjucks');
+var env = new govjucks.Environment();
 
 env.addFilter('shorten', function(str, count) {
     return str.slice(0, count || 5);
@@ -839,7 +839,7 @@ A message for you: {{ message|shorten(20) }}
 ### Keyword/Default Arguments
 
 As described in the
-[templating section](templating#keyword-arguments), nunjucks supports
+[templating section](templating#keyword-arguments), govjucks supports
 keyword/default arguments. You can write a normal javascript filter
 that leverages them.
 
@@ -870,7 +870,7 @@ Asynchronous filters receive a callback to resume rendering, and are
 created by passing `true` as the third argument to `addFilter`.
 
 ```js
-var env = nunjucks.configure('views');
+var env = govjucks.configure('views');
 
 env.addFilter('lookup', function(name, callback) {
     db.getItem(name, callback);
@@ -895,8 +895,8 @@ with the template.
 
 Note: When precompiling, **you must install the extensions at
 compile-time**. You have to use the [precompiling API](#api1) (or the
-[grunt](https://github.com/jlongster/grunt-nunjucks) or
-[gulp](https://github.com/sindresorhus/gulp-nunjucks) tasks) instead of
+[grunt](https://github.com/jlongster/grunt-govjucks) or
+[gulp](https://github.com/sindresorhus/gulp-govjucks) tasks) instead of
 the script. You'll want to create an [`Environment`](#environment)
 object, install your extensions, and pass it to the precompiler.
 
@@ -929,7 +929,7 @@ you'll want to use:
 
 The parser API needs to be more documented, but for now read the above
 and check out the example below. You can also look at the
-[source](https://github.com/mozilla/nunjucks/blob/master/nunjucks/src/parser.js).
+[source](https://github.com/gunjam/govjucks/blob/master/govjucks/src/parser.js).
 
 The most common usage is to process the content within some tags at
 runtime. It's like filters, but on steroids because you aren't
@@ -973,7 +973,7 @@ function RemoteExtension() {
 
     this.run = function(context, url, body, errorBody) {
         var id = 'el' + Math.floor(Math.random() * 10000);
-        var ret = new nunjucks.runtime.SafeString('<div id="' + id + '">' + body() + '</div>');
+        var ret = new govjucks.runtime.SafeString('<div id="' + id + '">' + body() + '</div>');
         var ajax = new XMLHttpRequest();
 
         ajax.onreadystatechange = function() {
@@ -1023,6 +1023,6 @@ this.run = function(context, url, body, errorBody, callback) {
 ```
 
 If you create anything interesting, make sure to
-[add it to the wiki!](https://github.com/mozilla/nunjucks/wiki/Custom-Tags)
+[add it to the wiki!](https://github.com/gunjam/govjucks/wiki/Custom-Tags)
 
 {% endraw %}

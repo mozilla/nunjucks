@@ -5,7 +5,7 @@ Thanks for your interest in contributing! The advice below will help you get you
 
 ## Purpose
 
-Nunjucks has the following purpose:
+Govjucks has the following purpose:
 
 * Aim for templating feature parity with Jinja2.
 * Aim for templating feature parity with Twig, but only when not conflicting with Jinja2 parity.
@@ -22,7 +22,7 @@ Notes:
 * We don't aim for parity of all language specific syntax.
 * We don't aim for parity of language specific filters like [Twig's PHP date format](http://twig.sensiolabs.org/doc/functions/date.html).
 
-Issues and pull requests contributing to this purpose have the best chance to make it into Nunjucks.
+Issues and pull requests contributing to this purpose have the best chance to make it into Govjucks.
 
 
 ## Questions?

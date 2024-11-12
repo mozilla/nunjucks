@@ -1,20 +1,21 @@
 {
-    "name": "Nunjucks",
-    "description": "Nunjucks is a full featured templating engine for javascript. It is heavily inspired by jinja2.",
+    "name": "Govjucks",
+    "description": "Govjucks is a full featured templating engine for javascript. It is heavily inspired by jinja2.",
     "repository": {
-        "url": "https://github.com/mozilla/nunjucks",
+        "url": "https://github.com/gunjam/govjucks",
         "license": "BSD 2-Clause",
-        "tests": "https://travis-ci.org/mozilla/nunjucks"
+        "tests": "https://travis-ci.org/gunjam/govjucks"
     },
     "participate": {
-        "home": "https://github.com/mozilla/nunjucks",
-        "docs": "https://github.com/mozilla/nunjucks"
+        "home": "https://github.com/gunjam/govjucks",
+        "docs": "https://github.com/gunjam/govjucks"
     },
     "bugs": {
-        "list": "https://github.com/mozilla/nunjucks/issues",
-        "report": "https://github.com/mozilla/nunjucks/issues/new"
+        "list": "https://github.com/gunjam/govjucks/issues",
+        "report": "https://github.com/gunjam/govjucks/issues/new"
     },
     "keywords": [
+        "nunjucks",
         "javascript",
         "node.js",
         "jinja"

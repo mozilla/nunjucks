@@ -2,20 +2,20 @@
   'use strict';
 
   var expect,
-    nunjucks,
+    govjucks,
     fs,
     os,
     path;
 
   if (typeof require !== 'undefined') {
     expect = require('expect.js');
-    nunjucks = require('../nunjucks/index');
+    govjucks = require('../govjucks/index');
     fs = require('fs-extra');
     path = require('path');
     os = require('os');
   } else {
     expect = window.expect;
-    nunjucks = window.nunjucks;
+    govjucks = window.govjucks;
   }
 
   function rmdir(dirPath) {
@@ -23,7 +23,7 @@
     fs.rmdirSync(dirPath);
   }
 
-  describe('nunjucks.configure', function() {
+  describe('govjucks.configure', function() {
     var tempdir;
 
     before(function() {
@@ -39,7 +39,7 @@
     });
 
     after(function() {
-      nunjucks.reset();
+      govjucks.reset();
       if (typeof tempdir !== 'undefined') {
         rmdir(tempdir);
       }
@@ -50,13 +50,13 @@
         this.skip();
         return;
       }
-      nunjucks.configure(tempdir);
+      govjucks.configure(tempdir);
 
       fs.writeFileSync(tempdir + '/test.html', '{{ name }}', 'utf-8');
-      expect(nunjucks.render('test.html', {name: 'foo'})).to.be('foo');
+      expect(govjucks.render('test.html', {name: 'foo'})).to.be('foo');
 
       fs.writeFileSync(tempdir + '/test.html', '{{ name }}-changed', 'utf-8');
-      expect(nunjucks.render('test.html', {name: 'foo'})).to.be('foo');
+      expect(govjucks.render('test.html', {name: 'foo'})).to.be('foo');
     });
 
     it('should not cache templates with {noCache: true}', function() {
@@ -64,13 +64,13 @@
         this.skip();
         return;
       }
-      nunjucks.configure(tempdir, {noCache: true});
+      govjucks.configure(tempdir, {noCache: true});
 
       fs.writeFileSync(tempdir + '/test.html', '{{ name }}', 'utf-8');
-      expect(nunjucks.render('test.html', {name: 'foo'})).to.be('foo');
+      expect(govjucks.render('test.html', {name: 'foo'})).to.be('foo');
 
       fs.writeFileSync(tempdir + '/test.html', '{{ name }}-changed', 'utf-8');
-      expect(nunjucks.render('test.html', {name: 'foo'})).to.be('foo-changed');
+      expect(govjucks.render('test.html', {name: 'foo'})).to.be('foo-changed');
     });
   });
 }());

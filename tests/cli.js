@@ -23,7 +23,7 @@
           done(err);
           return;
         }
-        expect(stdout).to.contain('window.nunjucksPrecompiled');
+        expect(stdout).to.contain('window.govjucksPrecompiled');
         expect(stderr).to.equal('');
         done();
       });

@@ -15,14 +15,14 @@
   if (typeof require !== 'undefined') {
     expect = require('expect.js');
     util = require('./util');
-    Template = require('../nunjucks/src/environment').Template;
-    Environment = require('../nunjucks/src/environment').Environment;
+    Template = require('../govjucks/src/environment').Template;
+    Environment = require('../govjucks/src/environment').Environment;
     fs = require('fs');
   } else {
     expect = window.expect;
     util = window.util;
-    Template = nunjucks.Template;
-    Environment = nunjucks.Environment;
+    Template = govjucks.Template;
+    Environment = govjucks.Environment;
   }
 
   render = util.render;
@@ -1458,7 +1458,7 @@
     });
 
     /**
-     * This test checks that this issue is resolved: http://stackoverflow.com/questions/21777058/loop-index-in-included-nunjucks-file
+     * This test checks that this issue is resolved: http://stackoverflow.com/questions/21777058/loop-index-in-included-govjucks-file
      */
     it('should have access to "loop" inside an include', function(done) {
       equal('{% for item in [1,2,3] %}{% include "include-in-loop.njk" %}{% endfor %}',
@@ -1607,7 +1607,7 @@
 
       /**
        * Capture blocks inside macros were printing to the main buffer instead of
-       * the temporary one, see https://github.com/mozilla/nunjucks/issues/914.
+       * the temporary one, see https://github.com/gunjam/govjucks/issues/914.
        **/
       equal(
         '{%- macro foo(bar) -%}' +

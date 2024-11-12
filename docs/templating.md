@@ -6,44 +6,44 @@ title: Templates
 
 # Templating
 
-This is an overview of the templating features available in Nunjucks.
+This is an overview of the templating features available in Govjucks.
 
-> Nunjucks is essentially a port of
+> Govjucks is essentially a port of
 > [jinja2](http://jinja.pocoo.org/docs/), so you can read their
 > [docs](http://jinja.pocoo.org/docs/templates/) if you find anything
 > lacking here. Read about the differences
-> [here](http://mozilla.github.io/nunjucks/faq.html#can-i-use-the-same-templates-between-nunjucks-and-jinja2-what-are-the-differences).
+> [here](http://mozilla.github.io/govjucks/faq.html#can-i-use-the-same-templates-between-govjucks-and-jinja2-what-are-the-differences).
 
 ## User-Defined Templates Warning
 
-  nunjucks does not sandbox execution so **it is not safe to run
+  govjucks does not sandbox execution so **it is not safe to run
   user-defined templates or inject user-defined content into template
   definitions**. On the server, you can expose attack vectors for
   accessing sensitive data and remote code execution. On the client,
   you can expose cross-site scripting vulnerabilities even for
   precompiled templates (which can be mitigated with a strong
   [CSP](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy)). See
-  [this issue](https://github.com/mozilla/nunjucks-docs/issues/17) for
+  [this issue](https://github.com/gunjam/govjucks-docs/issues/17) for
   more information.
 
 ## File Extensions
 
 Although you are free to use any file extension you wish for your
-Nunjucks template files, the Nunjucks community has adopted  `.njk`.
+Govjucks template files, the Govjucks community has adopted  `.njk`.
 
-If you are developing tools or editor syntax helpers for Nunjucks, please
+If you are developing tools or editor syntax helpers for Govjucks, please
 include recognition of the `.njk` extension.
 
 ## Syntax Highlighting
 
-Plugins are available in various editors to support the `jinja` syntax highlighting of Nunjucks.
+Plugins are available in various editors to support the `jinja` syntax highlighting of Govjucks.
 
-* atom <https://github.com/alohaas/language-nunjucks>
+* atom <https://github.com/alohaas/language-govjucks>
 * vim <https://github.com/niftylettuce/vim-jinja>
-* brackets <https://github.com/axelboc/nunjucks-brackets>
-* sublime <https://github.com/mogga/sublime-nunjucks/blob/master/Nunjucks.tmLanguage>
+* brackets <https://github.com/axelboc/govjucks-brackets>
+* sublime <https://github.com/mogga/sublime-govjucks/blob/master/Govjucks.tmLanguage>
 * emacs <http://web-mode.org>
-* vscode <https://github.com/ronnidc/vscode-nunjucks>
+* vscode <https://github.com/ronnidc/vscode-govjucks>
 
 ## Variables
 
@@ -84,7 +84,7 @@ They are called with a pipe operator (`|`) and can take arguments.
 The third example shows how you can chain filters. It would display
 "Bar", by first replacing "foo" with "bar" and then capitalizing it.
 
-Nunjucks comes with several
+Govjucks comes with several
 [builtin filters](#builtin-filters), and you can
 [add your own](api#custom-filters) as well.
 
@@ -177,7 +177,7 @@ Right side!
 ## Tags
 
 Tags are special blocks that perform operations on sections of the template.
-Nunjucks comes with several builtin, but [you can add your own](api.html#custom-tags).
+Govjucks comes with several builtin, but [you can add your own](api.html#custom-tags).
 
 ### if
 
@@ -282,7 +282,7 @@ var fruits = new Map([
 {% endfor %}
 ```
 
-Additionally, Nunjucks will unpack arrays into variables:
+Additionally, Govjucks will unpack arrays into variables:
 
 ```js
 var points = [[0, 1, 2], [5, 6, 7], [12, 13, 14]];
@@ -321,7 +321,7 @@ asynchronous control of the loop. The reason those tags are separate
 is performance; most people use templates synchronously and it's
 much faster for `for` to compile to a straight JavaScript `for` loop.
 
-At compile-time, Nunjucks is not aware how templates are loaded so
+At compile-time, Govjucks is not aware how templates are loaded so
 it's unable to determine if an `include` block is asynchronous or not.
 That's why it can't automatically convert loops for you, and you must
 use `asyncEach` for iteration if you are loading templates
@@ -329,7 +329,7 @@ asynchronously inside the loop.
 
 ```js
 // If you are using a custom loader that is async, you need asyncEach
-var env = new nunjucks.Environment(AsyncLoaderFromDatabase, opts);
+var env = new govjucks.Environment(AsyncLoaderFromDatabase, opts);
 ```
 ```jinja
 <h1>Posts</h1>
@@ -601,7 +601,7 @@ object: `{% import name + ".html" as obj %}`.
 
 ### raw
 
-If you want to output any of the special Nunjucks tags like `{{`, you can use
+If you want to output any of the special Govjucks tags like `{{`, you can use
 a `{% raw %}` block and anything inside of it will be output as plain text.
 
 ### verbatim
@@ -648,7 +648,7 @@ The above example would output "The result is: 3".
 ## Keyword Arguments
 
 jinja2 uses Python's keyword arguments support to allow keyword arguments in
-functions, filters, and macros. Nunjucks supports keyword arguments as well by
+functions, filters, and macros. Govjucks supports keyword arguments as well by
 introducing a new calling convention.
 
 Keyword arguments look like this:
@@ -657,7 +657,7 @@ Keyword arguments look like this:
 {{ foo(1, 2, bar=3, baz=4) }}
 ```
 
-`bar` and `baz` are keyword arguments. Nunjucks converts them into a hash and
+`bar` and `baz` are keyword arguments. Govjucks converts them into a hash and
 passes it as the last argument. It's equivalent to this call in javascript:
 
 ```js
@@ -669,7 +669,7 @@ filters if they are written to expect them. [Read more](api#Keyword-Arguments)
 about this in the API section.
 
 Macros allow you to also use keyword arguments in the definition, which allows
-you to specify default values. Nunjucks automatically maps the keyword
+you to specify default values. Govjucks automatically maps the keyword
 arguments to the ones defined with the macro.
 
 ```
@@ -744,7 +744,7 @@ You can use many types of literal expressions that you are used to in javascript
 
 ### Math
 
-Nunjucks allows you to operate on values (though it should be used sparingly,
+Govjucks allows you to operate on values (though it should be used sparingly,
 as most of your logic should be in code). The following operators are
 available:
 
@@ -852,7 +852,7 @@ for more information.
 
 If autoescaping is turned on in the environment, all output will automatically
 be escaped for safe output. To manually mark output as safe, use the `safe`
-filter. Nunjucks will not escape this output.
+filter. Govjucks will not escape this output.
 
 ```jinja
 {{ foo }}           // &lt;span%gt;
@@ -919,7 +919,7 @@ If `tags` was `["food", "beer", "dessert"]`, the above example would output `foo
 
 ## Builtin Filters
 
-Nunjucks has ported most of [jinja's filters](http://jinja.pocoo.org/docs/dev/templates/#builtin-filters), and has a few of its own:
+Govjucks has ported most of [jinja's filters](http://jinja.pocoo.org/docs/dev/templates/#builtin-filters), and has a few of its own:
 
 ### abs
 
@@ -1957,7 +1957,7 @@ Count and output the number of words in a string:
 ```
 
 Alternatively, it's easy to [read the JavaScript
-code](https://github.com/mozilla/nunjucks/blob/master/nunjucks/src/filters.js)
+code](https://github.com/gunjam/govjucks/blob/master/govjucks/src/filters.js)
 that implements these filters.
 
 {% endraw %}

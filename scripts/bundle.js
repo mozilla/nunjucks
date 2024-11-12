@@ -22,17 +22,17 @@ function runWebpack(opts) {
   if (opts.slim) {
     ext = '-slim' + ext;
   }
-  var filename = 'nunjucks' + ext;
+  var filename = 'govjucks' + ext;
 
   return new Promise(function(resolve, reject) {
     try {
       var config = {
-        entry: './nunjucks/index.js',
+        entry: './govjucks/index.js',
         devtool: 'source-map',
         output: {
           path: destDir,
           filename: filename,
-          library: 'nunjucks',
+          library: 'govjucks',
           libraryTarget: 'umd',
           devtoolModuleFilenameTemplate: function(info) {
             return path.relative(destDir, info.absoluteResourcePath);
@@ -44,7 +44,7 @@ function runWebpack(opts) {
         },
         module: {
           rules: [{
-            test: /nunjucks/,
+            test: /govjucks/,
             exclude: /(node_modules|browser|tests)(?!\.js)/,
             use: {
               loader: 'babel-loader',
@@ -72,7 +72,7 @@ function runWebpack(opts) {
         },
         plugins: [
           new webpack.BannerPlugin(
-            'Browser bundle of nunjucks ' + pjson.version + ' ' + type
+            'Browser bundle of govjucks ' + pjson.version + ' ' + type
           ),
           new webpack.DefinePlugin({
             'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'production'),

@@ -1,14 +1,14 @@
 {
-  "name": "nunjucks",
+  "name": "govjucks",
   "description": "A powerful templating engine with inheritance, asynchronous control, and more (jinja2 inspired)",
-  "version": "3.2.4",
+  "version": "0.1.0",
   "author": "James Long <longster@gmail.com>",
   "dependencies": {
     "a-sync-waterfall": "^1.0.0",
     "asap": "^2.0.3",
     "commander": "^5.1.0"
   },
-  "browser": "./browser/nunjucks.js",
+  "browser": "./browser/govjucks.js",
   "devDependencies": {
     "@babel/cli": "^7.0.0-beta.38",
     "@babel/core": "^7.0.0-beta.38",
@@ -70,19 +70,19 @@
     "node": ">= 6.9.0"
   },
   "scripts": {
-    "build:transpile": "babel nunjucks --out-dir .",
+    "build:transpile": "babel govjucks --out-dir .",
     "build:bundle": "node scripts/bundle.js",
     "build": "npm run build:transpile && npm run build:bundle",
     "codecov": "codecov",
     "mocha": "mocha -R spec tests",
-    "lint": "eslint nunjucks scripts tests",
+    "lint": "eslint govjucks scripts tests",
     "prepare": "npm run build",
     "test:instrument": "cross-env NODE_ENV=test scripts/bundle.js",
     "test:runner": "cross-env NODE_ENV=test NODE_PATH=tests/test-node-pkgs scripts/testrunner.js",
     "test": "npm run lint && npm run test:instrument && npm run test:runner"
   },
   "bin": {
-    "nunjucks-precompile": "./bin/precompile"
+    "govjucks-precompile": "./bin/precompile"
   },
   "main": "index.js",
   "files": [
@@ -99,7 +99,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/mozilla/nunjucks.git"
+    "url": "https://github.com/gunjam/govjucks.git"
   },
   "keywords": [
     "template",
@@ -107,6 +107,6 @@
   ],
   "license": "BSD-2-Clause",
   "bugs": {
-    "url": "https://github.com/mozilla/nunjucks/issues"
+    "url": "https://github.com/gunjam/govjucks/issues"
   }
 }

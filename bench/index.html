@@ -6,7 +6,7 @@
     <button id="start">Start</button>
     <button id="stop">Stop</button>
 
-    <script type="text/javascript" src="../browser/nunjucks-dev.js"></script>
+    <script type="text/javascript" src="../browser/govjucks-dev.js"></script>
     <script>
     var tmpl = '<h1>{{ header }}</h1>' +
 '<h1>{{ header }}</h1>' +
@@ -24,14 +24,14 @@
 '<p>The list is empty.</p>' +
 '{% endif %}';
 
-      var env = new nunjucks.Environment();
+      var env = new govjucks.Environment();
       var running = false;
       var timer = null;
       var t;
 
       function start() {
           for(var i=0; i<20000; i++) {
-            t = new nunjucks.Template(tmpl, env, null, null, true);
+            t = new govjucks.Template(tmpl, env, null, null, true);
           }
       }
 

@@ -27,7 +27,7 @@ function RemoteExtension() {
 
   this.run = function(context, url, body, errorBody) {
     var id = 'el' + Math.floor(Math.random() * 10000);
-    var ret = new nunjucks.runtime.SafeString('<div id="' + id + '">' + body() + '</div>');
+    var ret = new govjucks.runtime.SafeString('<div id="' + id + '">' + body() + '</div>');
     var ajax = new XMLHttpRequest();
 
     ajax.onreadystatechange = function() {

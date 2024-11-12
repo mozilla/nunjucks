@@ -7,12 +7,12 @@
 
   if (typeof require !== 'undefined') {
     expect = require('expect.js');
-    lib = require('../nunjucks/src/lib');
-    lexer = require('../nunjucks/src/lexer');
+    lib = require('../govjucks/src/lib');
+    lexer = require('../govjucks/src/lexer');
   } else {
     expect = window.expect;
-    lib = nunjucks.lib;
-    lexer = nunjucks.lexer;
+    lib = govjucks.lib;
+    lexer = govjucks.lexer;
   }
 
   function _hasTokens(ws, tokens, types) {
@@ -394,7 +394,7 @@
     });
 
     /**
-     * Test that this bug is fixed: https://github.com/mozilla/nunjucks/issues/235
+     * Test that this bug is fixed: https://github.com/gunjam/govjucks/issues/235
      */
     it('should have individual lexer tag settings for each environment', function() {
       tokens = lexer.lex('{=', {

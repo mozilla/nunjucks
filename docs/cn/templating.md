@@ -8,14 +8,14 @@ title: Templates
 
 这里包括 Nunjuck 所有可用的功能。
 
-> Nunjucks 是
-> [jinja2](http://jinja.pocoo.org/docs/) 的 javascript 的实现，所以如果此文档有什么缺失，你可以直接查看 [jinja2 的文档](http://jinja.pocoo.org/docs/templates/)，不过两者之间还存在一些[差异](http://mozilla.github.io/nunjucks/cn/faq.html)。
+> Govjucks 是
+> [jinja2](http://jinja.pocoo.org/docs/) 的 javascript 的实现，所以如果此文档有什么缺失，你可以直接查看 [jinja2 的文档](http://jinja.pocoo.org/docs/templates/)，不过两者之间还存在一些[差异](http://mozilla.github.io/govjucks/cn/faq.html)。
 
 ## 文件扩展名
 
-虽然你可以用任意扩展名来命名你的Nunjucks模版或文件，但Nunjucks社区还是推荐使用`.njk`。
+虽然你可以用任意扩展名来命名你的Govjucks模版或文件，但Govjucks社区还是推荐使用`.njk`。
 
-如果你在给Nunjucks开发工具或是编辑器上的语法插件时，请记得使用`.njk`扩展名。
+如果你在给Govjucks开发工具或是编辑器上的语法插件时，请记得使用`.njk`扩展名。
 
 ## 变量
 
@@ -47,7 +47,7 @@ foo.bar }}`, `{{ foo.bar.baz }}` 也不显示)。
 
 第三个例子展示了链式过滤器，最终会显示 "Bar"，第一个过滤器将 "foo" 替换成 "bar"，第二个过滤器将首字母大写。
 
-Nunjucks 提供了一些[内置的过滤器](#内置的过滤器)，你也可以[自定义过滤器](api#custom-filters)。
+Govjucks 提供了一些[内置的过滤器](#内置的过滤器)，你也可以[自定义过滤器](api#custom-filters)。
 
 ## 模板继承
 
@@ -127,7 +127,7 @@ Right side!
 
 ## 标签
 
-标签是一些特殊的区块，它们可以对模板执行一些操作。Nunjucks 包含一些内置的标签，你也可以[自定义](api.html#custom-tags)。
+标签是一些特殊的区块，它们可以对模板执行一些操作。Govjucks 包含一些内置的标签，你也可以[自定义](api.html#custom-tags)。
 
 ### if
 
@@ -194,7 +194,7 @@ var food = {
 
 [`dictsort`](http://jinja.pocoo.org/docs/templates/#dictsort) 过滤器可将对象排序 (*new in 0.1.8*)
 
-除此之外，Nunjucks 会将数组解开，数组内的值对应到变量 (*new in 0.1.8*)
+除此之外，Govjucks 会将数组解开，数组内的值对应到变量 (*new in 0.1.8*)
 
 ```js
 var points = [[0, 1, 2], [5, 6, 7], [12, 13, 14]];
@@ -220,15 +220,15 @@ var points = [[0, 1, 2], [5, 6, 7], [12, 13, 14]];
 
 > 这个是适用于异步模板，请读[文档](api.html#asynchronous-support)。
 
-`asyncEach` 为 `for` 的异步版本，只有当使用[自定义异步模板加载器](#asynchronous)的时候才使用，否则请不要使用。异步过滤器和扩展也需要他。如果你在循环中使用了异步过滤器的话，Nunjucks就会在内部自动将循环转换成 `asyncEach`。
+`asyncEach` 为 `for` 的异步版本，只有当使用[自定义异步模板加载器](#asynchronous)的时候才使用，否则请不要使用。异步过滤器和扩展也需要他。如果你在循环中使用了异步过滤器的话，Govjucks就会在内部自动将循环转换成 `asyncEach`。
 
 `asyncEach` 和 `for` 的使用方式一致，但他支持循环的异步控制。将两者区分的原因是性能，大部分人使用同步模板，将 `for` 转换成原生的 for 语句会快很多。
 
-编译时 nunjuck 不用关心模板是如何加载的，所以无法决定 `include` 是同步或异步。这也是为什么Nunjucks无法自动将普通的循环语句转换成异步循环语句的原因，所以如果你要使用异步模板加载器的话，就需要使用 `asyncEach`。
+编译时 nunjuck 不用关心模板是如何加载的，所以无法决定 `include` 是同步或异步。这也是为什么Govjucks无法自动将普通的循环语句转换成异步循环语句的原因，所以如果你要使用异步模板加载器的话，就需要使用 `asyncEach`。
 
 ```js
 // If you are using a custom loader that is async, you need asyncEach
-var env = new nunjucks.Environment(AsyncLoaderFromDatabase, opts);
+var env = new govjucks.Environment(AsyncLoaderFromDatabase, opts);
 ```
 ```jinja
 <h1>Posts</h1>
@@ -449,7 +449,7 @@ The name of the item is: {{ item.name }}
 
 ### raw
 
-如果你想输出一些 Nunjucks 特殊的标签 (如 `{{`)，可以使用 `{% raw %}` 将所有的内容输出为纯文本。
+如果你想输出一些 Govjucks 特殊的标签 (如 `{{`)，可以使用 `{% raw %}` 将所有的内容输出为纯文本。
 
 ### filter
 
@@ -485,7 +485,7 @@ The result is
 
 ## 关键字参数
 
-jinja2 使用 Python 的关键字参数，支持函数，过滤器和宏。Nunjucks 会通过一个调用转换 (calling convention) 来支持。
+jinja2 使用 Python 的关键字参数，支持函数，过滤器和宏。Govjucks 会通过一个调用转换 (calling convention) 来支持。
 
 关键字参数如下：
 
@@ -493,7 +493,7 @@ jinja2 使用 Python 的关键字参数，支持函数，过滤器和宏。Nunju
 {{ foo(1, 2, bar=3, baz=4) }}
 ```
 
-`bar` 和 `baz` 为关键字参数，Nunjucks 将他们转换成一个对象作为最后一个参数传入，等价于 javascript 的如下调用：
+`bar` 和 `baz` 为关键字参数，Govjucks 将他们转换成一个对象作为最后一个参数传入，等价于 javascript 的如下调用：
 
 ```js
 foo(1, 2, { bar: 3, baz: 4})
@@ -501,7 +501,7 @@ foo(1, 2, { bar: 3, baz: 4})
 
 因为这使一个标准的调用转换，所以适用于所有的符合预期的函数和过滤器。查看 [API 章节](api#Keyword-Arguments)获得更多信息。
 
-定义宏的时候也可以使用关键字参数，定义参数值时可设置默认值。Nunjucks 会自动将关键字参数与宏里定义的值做匹配。
+定义宏的时候也可以使用关键字参数，定义参数值时可设置默认值。Govjucks 会自动将关键字参数与宏里定义的值做匹配。
 
 ```jinja
 {% macro foo(x, y, z=5, w=6) %}
@@ -565,7 +565,7 @@ foo(1, 2, { bar: 3, baz: 4})
 
 ### 运算 (Math)
 
-Nunjucks 支持运算 (但尽量少用，把逻辑放在代码中)，可使用以下操作符：
+Govjucks 支持运算 (但尽量少用，把逻辑放在代码中)，可使用以下操作符：
 
 * Addition: `+`
 * Subtraction: `-`
@@ -656,7 +656,7 @@ Examples:
 
 ## 自动转义 (Autoescaping)
 
-如果在环境变量中设置了 autoescaping，所有的输出都会自动转义，但可以使用 `safe` 过滤器，Nunjucks 就不会转义了。
+如果在环境变量中设置了 autoescaping，所有的输出都会自动转义，但可以使用 `safe` 过滤器，Govjucks 就不会转义了。
 
 ```jinja
 {{ foo }}           // &lt;span%gt;
@@ -714,7 +714,7 @@ Examples:
 
 ## 内置的过滤器
 
-Nunjucks已经实现了jinja中的大部分过滤器，同时也新增了一些属于自己的过滤器。
+Govjucks已经实现了jinja中的大部分过滤器，同时也新增了一些属于自己的过滤器。
 我们需要为这些过滤器编写文档。下面是一部分过滤器的文档，其他的你可以点击链接查看jinja上的文档。
 
 ### default(value, default, [boolean])
@@ -784,6 +784,6 @@ Nunjucks已经实现了jinja中的大部分过滤器，同时也新增了一些�
 * [urlize](http://jinja.pocoo.org/docs/templates/#urlize)
 * [wordcount](http://jinja.pocoo.org/docs/templates/#wordcount)
 
-你也可以直接[看代码](https://github.com/mozilla/nunjucks/blob/master/nunjucks/src/filters.js)。
+你也可以直接[看代码](https://github.com/gunjam/govjucks/blob/master/govjucks/src/filters.js)。
 
 {% endraw %}

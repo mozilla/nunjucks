@@ -8,14 +8,14 @@
 
   if (typeof require !== 'undefined') {
     expect = require('expect.js');
-    lib = require('../nunjucks/src/lib');
-    nodes = require('../nunjucks/src/nodes');
-    parser = require('../nunjucks/src/parser');
+    lib = require('../govjucks/src/lib');
+    nodes = require('../govjucks/src/nodes');
+    parser = require('../govjucks/src/parser');
   } else {
     expect = window.expect;
-    lib = nunjucks.lib;
-    nodes = nunjucks.nodes;
-    parser = nunjucks.parser;
+    lib = govjucks.lib;
+    nodes = govjucks.nodes;
+    parser = govjucks.parser;
   }
 
   function _isAST(node1, node2) {

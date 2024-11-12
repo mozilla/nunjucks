@@ -12,13 +12,13 @@
   if (typeof require !== 'undefined') {
     expect = require('expect.js');
     util = require('./util');
-    lib = require('../nunjucks/src/lib');
-    r = require('../nunjucks/src/runtime');
+    lib = require('../govjucks/src/lib');
+    r = require('../govjucks/src/runtime');
   } else {
     expect = window.expect;
     util = window.util;
-    lib = nunjucks.lib;
-    r = nunjucks.runtime;
+    lib = govjucks.lib;
+    r = govjucks.runtime;
   }
 
   render = util.render;

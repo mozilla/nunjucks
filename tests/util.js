@@ -3,8 +3,8 @@
 
   'use strict';
 
-  var nunjucks,
-    nunjucksFull,
+  var govjucks,
+    govjucksFull,
     isSlim = false,
     Environment,
     Template,
@@ -14,27 +14,27 @@
     expect;
 
   if (typeof window === 'undefined') {
-    nunjucks = nunjucksFull = require('../nunjucks/index.js');
-    Loader = nunjucks.FileSystemLoader;
+    govjucks = govjucksFull = require('../govjucks/index.js');
+    Loader = govjucks.FileSystemLoader;
     templatesPath = 'tests/templates';
     expect = require('expect.js');
   } else {
-    nunjucks = window.nunjucks;
-    if (window.nunjucksFull) {
+    govjucks = window.govjucks;
+    if (window.govjucksFull) {
       isSlim = true;
-      nunjucksFull = window.nunjucksFull;
+      govjucksFull = window.govjucksFull;
       // These must be the same for instanceof checks to succeed
-      nunjucksFull.runtime.SafeString.prototype = nunjucks.runtime.SafeString.prototype;
+      govjucksFull.runtime.SafeString.prototype = govjucks.runtime.SafeString.prototype;
     } else {
-      nunjucksFull = window.nunjucksFull = nunjucks;
+      govjucksFull = window.govjucksFull = govjucks;
     }
-    Loader = nunjucksFull.WebLoader;
+    Loader = govjucksFull.WebLoader;
     templatesPath = '../templates';
     expect = window.expect;
   }
-  precompileString = nunjucksFull.precompileString;
-  Environment = nunjucks.Environment;
-  Template = nunjucks.Template;
+  precompileString = govjucksFull.precompileString;
+  Environment = govjucks.Environment;
+  Template = govjucks.Template;
 
   var numAsyncs;
   var doneHandler;
@@ -62,9 +62,9 @@
   }
 
   function jinjaEqual(str, ctx, str2, env) {
-    var jinjaUninstalls = [nunjucks.installJinjaCompat()];
-    if (nunjucksFull !== nunjucks) {
-      jinjaUninstalls.push(nunjucksFull.installJinjaCompat());
+    var jinjaUninstalls = [govjucks.installJinjaCompat()];
+    if (govjucksFull !== govjucks) {
+      jinjaUninstalls.push(govjucksFull.installJinjaCompat());
     }
     try {
       return equal(str, ctx, str2, env);

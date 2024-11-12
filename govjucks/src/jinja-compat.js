@@ -3,8 +3,8 @@ function installCompat() {
 
   /* eslint-disable camelcase */
 
-  // This must be called like `nunjucks.installCompat` so that `this`
-  // references the nunjucks instance
+  // This must be called like `govjucks.installCompat` so that `this`
+  // references the govjucks instance
   var runtime = this.runtime;
   var lib = this.lib;
   // Handle slim case where these 'modules' are excluded from the built source

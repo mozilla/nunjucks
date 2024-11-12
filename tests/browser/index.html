@@ -23,11 +23,11 @@
     Tests do not indicate performance. They are much slower because a
     new environment is created for every single template and is
     recompiled from scratch, and you can see there are
-    <a href="https://github.com/mozilla/nunjucks/blob/master/tests/compiler.js">quite</a>
+    <a href="https://github.com/gunjam/govjucks/blob/master/tests/compiler.js">quite</a>
     a
-    <a href="https://github.com/mozilla/nunjucks/blob/master/tests/parser.js">lot</a>
+    <a href="https://github.com/gunjam/govjucks/blob/master/tests/parser.js">lot</a>
     of
-    <a href="https://github.com/mozilla/nunjucks/tree/master/tests">tests</a>.
+    <a href="https://github.com/gunjam/govjucks/tree/master/tests">tests</a>.
   </div>
 
   <div id="mocha"></div>
@@ -43,7 +43,7 @@
     });
   </script>
 
-  <script src="nunjucks.min.js"></script>
+  <script src="govjucks.min.js"></script>
   <script src="../util.js"></script>
 
   <script src="../api.js"></script>
@@ -58,7 +58,7 @@
   <script src="../tests.js"></script>
 
   <script>
-    nunjucks.testing = true;
+    govjucks.testing = true;
     mocha.checkLeaks();
     mocha.run();
   </script>

@@ -19,13 +19,13 @@
     });
   </script>
 
-  <!-- Load full nunjucks lib as window.nunjucksFull, so tests can run -->
-  <script src="nunjucks.min.js"></script>
+  <!-- Load full govjucks lib as window.govjucksFull, so tests can run -->
+  <script src="govjucks.min.js"></script>
   <script type="text/javascript">
-    window.nunjucksFull = window.nunjucks;
-    window.nunjucks = undefined;
+    window.govjucksFull = window.govjucks;
+    window.govjucks = undefined;
   </script>
-  <script src="nunjucks-slim.min.js"></script>
+  <script src="govjucks-slim.min.js"></script>
   <script src="../util.js"></script>
   <script src="precompiled-templates.js"></script>
   <script>
@@ -36,17 +36,17 @@
       };
     })(window.describe || window.suite);
 
-    // Reset window.nunjucksPrecompiled so that it doesn't leak between tests
+    // Reset window.govjucksPrecompiled so that it doesn't leak between tests
     (function(precompiled) {
       beforeEach(function(done) {
-        window.nunjucksPrecompiled = precompiled;
+        window.govjucksPrecompiled = precompiled;
         done();
       });
       afterEach(function(done) {
-        window.nunjucksPrecompiled = precompiled;
+        window.govjucksPrecompiled = precompiled;
         done();
       });
-    })(window.nunjucksPrecompiled);
+    })(window.govjucksPrecompiled);
   </script>
 
   <script src="../compiler.js"></script>
@@ -57,7 +57,7 @@
   <script src="../tests.js"></script>
 
   <script>
-    nunjucks.testing = true;
+    govjucks.testing = true;
     mocha.checkLeaks();
     mocha.run();
   </script>
