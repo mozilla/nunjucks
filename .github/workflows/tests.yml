@@ -3,46 +3,25 @@ name: Tests
 on:
   push:
   pull_request:
+  workflow_dispatch:
 
 jobs:
   tests:
     runs-on: ${{ matrix.os }}
-
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
-        node-version: [10, 12, 14, 15]
-        include:
-          - os: ubuntu-latest
-            os-name: linux
-          - os: windows-latest
-            os-name: windows
+        node-version: [12, 14, 16]
 
-    name: Test ${{ matrix.node-version }} (${{ matrix.os-name }})
+    name: Test (Node ${{ matrix.node-version }} ${{ matrix.os }})
 
     steps:
-      - uses: actions/checkout@v2
-
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v1
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-
-      - name: Store node version variable
-        id: node
-        shell: bash
-        run: |
-          echo "::set-output name=version::$(node -v)"
-
-      - uses: actions/cache@v2
-        id: cache-node-modules
-        with:
-          path: node_modules
-          key: ${{ matrix.os }}-node-${{ steps.node.outputs.version }}-${{ hashFiles('**/package-lock.json') }}
-
+          cache: npm
       - run: npm ci
-        if: steps.cache-node-modules.outputs.cache-hit != 'true'
-
       - run: npm test
 
       # Commented out until this action is added in organization settings
