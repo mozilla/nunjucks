@@ -10,10 +10,21 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
-        node-version: [12, 16, 18]
+        include:
+          - node: 16
+            os: windows-2022
+          - node: 16
+            os: windows-2025  # TODO: spawn node18+/win: github.com/nodejs/nodejs.org/pull/6660
+          - node: 18
+            os: ubuntu-22.04
+          - node: 20
+            os: ubuntu-latest
+          - node: 22
+            os: ubuntu-24.04
+          - node: 24
+            os: ubuntu-latest
 
-    name: Test (node-${{ matrix.node-version }}/${{ matrix.os }})
+    name: Test (node-${{ matrix.node }}/${{ matrix.os }})
 
     steps:
       - if: runner.os == 'Linux'  # PhantomJS OpenSSL 1.1.1 vs 3.x Ubuntu 22+ compat
@@ -23,7 +34,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: ${{ matrix.node }}
           cache: npm
       - run: npm ci
       - run: npm test
