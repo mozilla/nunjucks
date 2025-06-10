@@ -66,9 +66,6 @@
   "_moduleAliases": {
     "babel-register": "@babel/register"
   },
-  "engines": {
-    "node": ">= 6.9.0"
-  },
   "scripts": {
     "build:transpile": "babel nunjucks --out-dir .",
     "build:bundle": "node scripts/bundle.js",
