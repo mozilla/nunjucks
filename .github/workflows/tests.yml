@@ -15,16 +15,22 @@ jobs:
             os: windows-2022
           - node: 16
             os: windows-2025
-          - node: 18.20.0  # TODO: spawn node18+/win: github.com/nodejs/nodejs.org/pull/6660
-            os: windows-2022
           - node: 18
             os: ubuntu-22.04
-          - node: 20.12.0  # TODO: spawn node18+/win: github.com/nodejs/nodejs.org/pull/6660
-            os: windows-2025
+          - node: 18.20.1  # TODO: spawn node18+/win: github.com/nodejs/nodejs.org/pull/6660
+            os: windows-2022
+          - node: 20
+            os: macos-13
           - node: 20
             os: ubuntu-latest
+          - node: 20.12.1  # TODO: spawn node18+/win: github.com/nodejs/nodejs.org/pull/6660
+            os: windows-2025
+          - node: 22
+            os: macos-14
           - node: 22
             os: ubuntu-24.04
+          - node: 24
+            os: macos-latest
           - node: 24
             os: ubuntu-latest
 
