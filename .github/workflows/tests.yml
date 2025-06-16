@@ -2,42 +2,53 @@ name: Tests
 
 on:
   push:
-    branches:
-      - '**'
   pull_request:
-    branches:
-      - master
-    paths:
-      - '**/*.js'
-      - 'package.json'
-      - '**/*.njk'
-      - '**/*.yml'
-      - 'tests/**/*.html'
+  workflow_dispatch:
 
 jobs:
   tests:
     runs-on: ${{ matrix.os }}
-
     strategy:
       matrix:
-        os: [ubuntu-latest]
-        node-version: [11.x, 10.x, 8.x]
+        include:
+          - node: 16
+            os: windows-2022
+          - node: 16
+            os: windows-2025
+          - node: 18
+            os: ubuntu-22.04
+          - node: 18.20.1  # TODO: spawn node18+/win: github.com/nodejs/nodejs.org/pull/6660
+            os: windows-2022
+          - node: 20
+            os: macos-13
+          - node: 20
+            os: ubuntu-latest
+          - node: 20.12.1  # TODO: spawn node18+/win: github.com/nodejs/nodejs.org/pull/6660
+            os: windows-2025
+          - node: 22
+            os: macos-14
+          - node: 22
+            os: ubuntu-24.04
+          - node: 24
+            os: macos-latest
+          - node: 24
+            os: ubuntu-latest
+
+    name: Test (node-${{ matrix.node }}/${{ matrix.os }})
 
     steps:
-      - uses: actions/checkout@v2
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v1
+      - if: runner.os == 'Linux'  # PhantomJS OpenSSL 1.1.1 vs 3.x Ubuntu 22+ compat
+        run: echo "OPENSSL_CONF=/dev/null" >> "$GITHUB_ENV"
+      - if: runner.os == 'Windows'  # Tests would fail LF vs CRLF linebreak-style
+        run: git config --global core.autocrlf false && git config --global core.eol lf
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
-      - uses: actions/cache@v2
-        id: cache-node-modules
-        with:
-          path: node_modules
-          key: ${{ matrix.os }}-node-${{ matrix.node-version }}-${{ hashFiles('**/package.json') }}
-      - run: npm install
-        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - run: npm ci
       - run: npm test
-      # Commented out until this action is added in organization settings
-      # - name: Report coverage
-      #   if: success()
-      #   uses: codecov/codecov-action@v1
+      - if: success()
+        uses: codecov/codecov-action@v5
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
