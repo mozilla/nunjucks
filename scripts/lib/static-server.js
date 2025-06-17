@@ -4,7 +4,6 @@ var serveStatic = require('serve-static');
 var http = require('http');
 var path = require('path');
 
-
 function getStaticServer(port) {
   var staticRoot = path.join(__dirname, '../..');
   var portPromise = (typeof port === 'undefined') ? getPort() : Promise.resolve(port);

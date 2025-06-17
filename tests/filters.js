@@ -717,7 +717,7 @@
       equal('{{ "<img src=" | replace("<img", "<img alt=val") | safe }}',
         '<img alt=val src=');
       equal('{{ "<img src=\\"http://www.example.com\\" />" | replace("<img", "replacement text") | safe }}',
-        'replacement text src=\"http://www.example.com\" />');
+        'replacement text src="http://www.example.com" />');
 
       // Regex
       equal('{{ "aabbbb" | replace(r/ab{2}/, "z") }}', 'azbb');
