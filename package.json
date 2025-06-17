@@ -14,7 +14,7 @@
     "@babel/core": "^7.0.0-beta.38",
     "@babel/preset-env": "^7.0.0-beta.38",
     "@babel/register": "^7.0.0-beta.38",
-    "babel-loader": "^8.0.0-beta.0",
+    "babel-loader": "^8.4.1",
     "babel-plugin-istanbul": "^7.0.0",
     "babel-plugin-module-resolver": "3.0.0-beta.5",
     "connect": "^3.6.5",
@@ -36,8 +36,8 @@
     "phantomjs-prebuilt": "^2.1.16",
     "serve-static": "^1.13.1",
     "supertest": "*",
+    "terser-webpack-plugin": "^5.3.14",
     "uglify-js": "^2.8.29",
-    "uglifyjs-webpack-plugin": "^1.1.6",
     "webpack": "^5.99.9"
   },
   "buildDependencies": {
