@@ -38,7 +38,7 @@
     "supertest": "*",
     "uglify-js": "^2.8.29",
     "uglifyjs-webpack-plugin": "^1.1.6",
-    "webpack": "^3.10.0"
+    "webpack": "^5.99.9"
   },
   "buildDependencies": {
     "@babel/cli": "^7.0.0-beta.38",
