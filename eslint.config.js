@@ -1,3 +1,9 @@
+if (!global.structuredClone) {
+  global.structuredClone = function structuredClone(val) {
+    return JSON.parse(JSON.stringify(val));
+  };
+}
+
 const { defineConfig, globalIgnores } = require('eslint/config');
 const { configs } = require('eslint-config-airbnb-extended/legacy');
 
