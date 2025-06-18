@@ -1,11 +1,9 @@
-'use strict';
-
-const fs = require('fs');
-const path = require('path');
-const {_prettifyError} = require('./lib');
-const compiler = require('./compiler');
-const {Environment} = require('./environment');
-const precompileGlobal = require('./precompile-global');
+import fs from 'fs';
+import path from 'path';
+import {_prettifyError} from './lib';
+import * as compiler from './compiler';
+import {Environment} from './environment';
+import precompileGlobal from './precompile-global';
 
 function match(filename, patterns) {
   if (!Array.isArray(patterns)) {
@@ -14,7 +12,7 @@ function match(filename, patterns) {
   return patterns.some((pattern) => filename.match(pattern));
 }
 
-function precompileString(str, opts) {
+export function precompileString(str, opts) {
   opts = opts || {};
   opts.isString = true;
   const env = opts.env || new Environment([]);
@@ -26,7 +24,7 @@ function precompileString(str, opts) {
   return wrapper([_precompile(str, opts.name, env)], opts);
 }
 
-function precompile(input, opts) {
+export function precompile(input, opts) {
   // The following options are available:
   //
   // * name: name of the template (auto-generated when compiling a directory)
@@ -127,8 +125,3 @@ function _precompile(str, name, env) {
     template: template
   };
 }
-
-module.exports = {
-  precompile: precompile,
-  precompileString: precompileString
-};

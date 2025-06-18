@@ -1,5 +1,3 @@
-'use strict';
-
 function cycler(items) {
   var index = -1;
 
@@ -36,7 +34,7 @@ function joiner(sep) {
 // Making this a function instead so it returns a new object
 // each time it's called. That way, if something like an environment
 // uses it, they will each have their own copy.
-function globals() {
+export default function globals() {
   return {
     range(start, stop, step) {
       if (typeof stop === 'undefined') {
@@ -69,5 +67,3 @@ function globals() {
     }
   };
 }
-
-module.exports = globals;
