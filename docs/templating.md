@@ -1633,6 +1633,20 @@ Round to the nearest whole number (which rounds down):
 4
 ```
 
+Round to the nearest whole number (which rounds up):
+
+**Input**
+
+```jinja
+{{ 4.1 | round(0, "ceil") }}
+```
+
+**Output**
+
+```jinja
+5
+```
+
 Specify the number of  digits to round:
 
 **Input**
