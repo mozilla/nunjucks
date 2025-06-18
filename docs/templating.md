@@ -461,7 +461,7 @@ anything into it, as long as that expression evaluates to a string or
 a compiled Template object:
 
 ```jinja
-{% extends name + ".html" %}`.
+{% extends name + ".html" %}
 ```
 
 ### block
