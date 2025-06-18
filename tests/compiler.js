@@ -1853,6 +1853,94 @@
       finish(done);
     });
 
+    it('should allow async custom tag within sync custom tag compilation', function(done) {
+      function TestSyncExtension() {
+        this.tags = ['testsync'];
+
+        this.parse = function(parser, nodes) {
+          var content;
+          var tag;
+          parser.advanceAfterBlockEnd();
+
+          content = parser.parseUntilBlocks('endtestsync');
+          tag = new nodes.CallExtension(this, 'run', null, [content]);
+          parser.advanceAfterBlockEnd();
+
+          return tag;
+        };
+
+        this.run = function(context, content) {
+          // Reverse the string
+          return content().split('').reverse().join('');
+        };
+      }
+
+      function TestAsyncExtension() {
+        this.tags = ['testasync'];
+
+        this.parse = function(parser, nodes) {
+          var content;
+          var tag;
+          parser.advanceAfterBlockEnd();
+
+          content = parser.parseUntilBlocks('endtestasync');
+          tag = new nodes.CallExtensionAsync(this, 'run', null, [content]);
+          parser.advanceAfterBlockEnd();
+
+          return tag;
+        };
+
+        this.run = function(context, body, callback) {
+          // Uppercase the string
+          setTimeout(() => {
+            callback(null, body().toUpperCase());
+          }, 1);
+        };
+      }
+
+      // First prove it works normally
+      render(
+        '{% testasync %}abcdefghi{% endtestasync %}',
+        null,
+        {
+          extensions: { TestAsyncExtension: new TestAsyncExtension()},
+          autoescape: true
+        },
+        function(err1, res1) {
+          expect(res1).to.be('ABCDEFGHI');
+
+          render(
+            '{% testsync %}abcdefghi{% endtestsync %}',
+            null,
+            {
+              extensions: { TestSyncExtension: new TestSyncExtension()},
+              autoescape: true
+            },
+            function(err2, res2) {
+              expect(res2).to.be('ihgfedcba');
+
+              // Then fails with custom tag
+              render(
+                '{% testsync %}{% testasync %}abcdefghi{% endtestasync %}{% endtestsync %}',
+                null,
+                {
+                  extensions: {
+                    TestExtension: new TestAsyncExtension(),
+                    TestSyncExtension: new TestSyncExtension()
+                  },
+                  autoescape: true
+                },
+                function(err3, res3) {
+                  expect(res3).to.be('IHGFEDCBA');
+                  finish(done);
+                }
+              );
+            }
+          );
+        }
+      );
+    });
+
     it('should autoescape by default', function(done) {
       equal('{{ foo }}', {
         foo: '"\'<>&'
