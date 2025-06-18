@@ -440,6 +440,10 @@ class Parser extends Obj {
       node.ignoreMissing = true;
     }
 
+    if (this.skipSymbol('with')) {
+      node.value = this.parseExpression();
+    }
+
     this.advanceAfterBlockEnd(tag.value);
     return node;
   }

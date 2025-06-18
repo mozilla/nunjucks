@@ -484,6 +484,15 @@ Vous pouvez même inclure des templates à l'intérieur des boucles :
 {% endfor %}
 ```
 
+Les templates inclus ont accès aux variables du context actif. Vous pouvez ajouter des variables supplémentaires en les passant après le mot-clé `with`:
+
+```jinja
+{% include "item.html" with { 'foo': 'bar' } %}
+{% set vars = {'foo': 'bar'} %}
+{% include "item.html" with vars %}
+{% include 'item.html' ignore missing with {'foo': 'bar'} %}
+```
+
 Ceci est particulièrement utile pour découper des templates en petits morceaux afin que l'environnement du
 côté du navigateur puisse rendre les petits morceaux quand il est nécessaire de changer
 de page.
