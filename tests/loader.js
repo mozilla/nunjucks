@@ -6,6 +6,7 @@
     WebLoader,
     FileSystemLoader,
     NodeResolveLoader,
+    PrecompiledLoader,
     templatesPath;
 
   if (typeof require !== 'undefined') {
@@ -14,6 +15,7 @@
     WebLoader = require('../nunjucks/src/web-loaders').WebLoader;
     FileSystemLoader = require('../nunjucks/src/node-loaders').FileSystemLoader;
     NodeResolveLoader = require('../nunjucks/src/node-loaders').NodeResolveLoader;
+    PrecompiledLoader = require('../nunjucks/src/precompiled-loader').PrecompiledLoader;
     templatesPath = 'tests/templates';
   } else {
     expect = window.expect;
@@ -21,6 +23,7 @@
     WebLoader = nunjucks.WebLoader;
     FileSystemLoader = nunjucks.FileSystemLoader;
     NodeResolveLoader = nunjucks.NodeResolveLoader;
+    PrecompiledLoader = nunjucks.PrecompiledLoader;
     templatesPath = '../templates';
   }
 
@@ -152,5 +155,11 @@
         });
       });
     }
+
+    it('PrecompiledLoader.resolve should work with relative from', function() {
+      const loader = new PrecompiledLoader();
+      expect(loader.resolve('/parent/template1.foo', './template2.bar')).to.be('/parent/template2.bar');
+      expect(loader.resolve('parent/template1.foo', './template2.bar')).to.be('parent/template2.bar');
+    });
   });
 }());

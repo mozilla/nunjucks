@@ -1,6 +1,7 @@
 'use strict';
 
 const Loader = require('./loader');
+const path = require('path').posix;
 
 class PrecompiledLoader extends Loader {
   constructor(compiledTemplates) {
@@ -19,6 +20,10 @@ class PrecompiledLoader extends Loader {
       };
     }
     return null;
+  }
+
+  resolve(from, to) {
+    return path.normalize(path.dirname(from) + '/' + to);
   }
 }
 
