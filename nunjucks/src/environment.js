@@ -277,7 +277,7 @@ class Environment extends EmitterObj {
       }
 
       // Resolve name relative to parentName
-      name = that.resolveTemplate(loader, parentName, name);
+      name = that.resolveTemplate(loader, parentName, name.trim());
 
       if (loader.async) {
         loader.getSource(name, handle);
