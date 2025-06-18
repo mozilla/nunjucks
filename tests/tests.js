@@ -255,5 +255,49 @@
       expect(render('{{ "FOOBAR" is upper }}')).to.be('true');
       expect(render('{{ "Foobar" is upper }}')).to.be('false');
     });
+
+    it('should render async extensions inside macro', function(done) {
+      function AsyncExtension() {
+        this.tags = ['asyncextension'];
+
+        this.parse = function(parser, nodes, lexer) {
+          var tok, args, body, errorBody;
+          tok = parser.nextToken();
+          args = parser.parseSignature(null, true);
+          parser.advanceAfterBlockEnd(tok.value);
+          body = parser.parseUntilBlocks('error', 'endasyncextension');
+          errorBody = null;
+
+          if (parser.skipSymbol('error')) {
+            parser.skip(lexer.TOKEN_BLOCK_END);
+            errorBody = parser.parseUntilBlocks('endasyncextension');
+          }
+
+          parser.advanceAfterBlockEnd();
+
+          return new nodes.CallExtensionAsync(this, 'run', args, [body, errorBody]);
+        };
+
+        this.run = function(context, url, body, errorBody, callback) {
+          callback(null, 'Foo async extension content');
+        };
+      }
+
+      render(
+        '{% macro wrap() %}{{ caller() }}{% endmacro %}' +
+        '{% call wrap() %}{% asyncextension "foobar" %}1{% error %}2{% endasyncextension %}{% endcall %}',
+        {},
+        {
+          extensions: {
+            AsyncExtension: new AsyncExtension()
+          }
+        },
+        function(err, str) {
+          expect(str).to.be('Foo async extension content');
+
+          done();
+        }
+      );
+    });
   });
 }());
