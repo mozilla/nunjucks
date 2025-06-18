@@ -38,12 +38,22 @@ include recognition of the `.njk` extension.
 
 Plugins are available in various editors to support the `jinja` syntax highlighting of Nunjucks.
 
-* atom <https://github.com/alohaas/language-nunjucks>
-* vim <https://github.com/niftylettuce/vim-jinja>
-* brackets <https://github.com/axelboc/nunjucks-brackets>
-* sublime <https://github.com/mogga/sublime-nunjucks/blob/master/Nunjucks.tmLanguage>
-* emacs <http://web-mode.org>
-* vscode <https://github.com/ronnidc/vscode-nunjucks>
+| Editor       | Plugins                                        |
+|--------------|------------------------------------------------|
+| Atom         | [language-nunjucks][atom-1]                    |
+| Vim          | [Vim-Jinja2-Syntax][vim-1], [vim-jinja][vim-2] |
+| Brackets     | [nunjucks-brackets][bracket-1]                 |
+| Sublime Text | [sublime-nunjucks][sublime-1]                  |
+| Emacs        | [web-mode.el][emacs-1]                         |
+| VS Code      | [vscode-nunjucks][vscode-1]                    |
+
+[atom-1]:https://github.com/alohaas/language-nunjucks
+[vim-1]:https://github.com/Glench/Vim-Jinja2-Syntax
+[vim-2]:https://github.com/niftylettuce/vim-jinja
+[bracket-1]:https://github.com/axelboc/nunjucks-brackets
+[sublime-1]:https://github.com/mogga/sublime-nunjucks
+[emacs-1]:http://web-mode.org/
+[vscode-1]:https://github.com/ronnidc/vscode-nunjucks
 
 ## Variables
 
