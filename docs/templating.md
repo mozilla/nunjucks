@@ -1809,7 +1809,7 @@ Output the sum of items in the array:
 
 ### title
 
-Make the first letter of the string uppercase:
+Make the first letter of each word in the string uppercase:
 
 **Input**
 
