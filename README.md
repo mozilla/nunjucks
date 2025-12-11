@@ -6,7 +6,7 @@
 [![Codecov][codecov-image]][codecov-url]
 
 [Nunjucks](https://mozilla.github.io/nunjucks/) is a full featured
-templating engine for javascript. It is heavily inspired by
+templating engine for JavaScript. It is heavily inspired by
 [jinja2](https://jinja.palletsprojects.com/). View the docs
 [here](https://mozilla.github.io/nunjucks/).
 
