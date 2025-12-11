@@ -488,7 +488,7 @@ exports.string = string;
 
 function striptags(input, preserveLinebreaks) {
   input = normalize(input, '');
-  let tags = /<\/?([a-z][a-z0-9]*)\b[^>]*>|<!--[\s\S]*?-->/gi;
+  let tags = /<\/?([a-z][a-z0-9]*)\b[^>]*>|<!--(?:(?!<!--[\s\S])*?)-->/gi;
   let trimmedInput = trim(input.replace(tags, ''));
   let res = '';
   if (preserveLinebreaks) {
