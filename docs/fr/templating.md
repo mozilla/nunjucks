@@ -27,7 +27,7 @@ veuillez inclure la reconnaissance de l'extension `.njk`.
 Des plugins sont disponibles pour les différents éditeurs pour prendre en charge la coloration syntaxique de `jinja` de Nunjucks.
 
 * atom <https://github.com/alohaas/language-nunjucks>
-* vim <https://github.com/niftylettuce/vim-jinja>
+* vim <https://github.com/lepture/vim-jinja>
 * brackets <https://github.com/axelboc/nunjucks-brackets>
 * sublime <https://github.com/mogga/sublime-nunjucks/blob/master/Nunjucks.tmLanguage>
 * emacs <http://web-mode.org>
