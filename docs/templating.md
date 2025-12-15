@@ -63,7 +63,7 @@ javascript. You can also use the square bracket syntax.
 {{ foo["bar"] }}
 ```
 
-These two forms to the exact same thing, just like javascript.
+These two forms do the exact same thing, just like javascript.
 
 If a value is `undefined` or `null`, nothing is displayed. The same
 behavior occurs when referencing undefined or null objects. The
