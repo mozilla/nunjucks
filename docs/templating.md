@@ -855,7 +855,7 @@ be escaped for safe output. To manually mark output as safe, use the `safe`
 filter. Nunjucks will not escape this output.
 
 ```jinja
-{{ foo }}           // &lt;span%gt;
+{{ foo }}           // &lt;span&gt;
 {{ foo | safe }}    // <span>
 ```
 
