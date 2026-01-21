@@ -928,7 +928,7 @@ Return the absolute value of the argument:
 **Input**
 
 ```jinja
-{{ -3|abs }}
+{{ -3 | abs }}
 ```
 
 **Output**
