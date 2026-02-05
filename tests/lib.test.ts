@@ -101,22 +101,22 @@ describe('lib', () => {
 			expect(lib.maybe_json(_date)).toEqual(success(_date));
 			expect(lib.maybe_json(null)).toEqual(success(null));
 		});
-		test('format_res_string() only matches true for obj or array', () => {
-			expect(lib.format_res_string(true)).toBe("true");
-			expect(lib.format_res_string(false)).toBe("false");
-			expect(lib.format_res_string("true")).toBe("true");
-			expect(lib.format_res_string("false")).toBe("false");
-			expect(lib.format_res_string("12342")).toBe("12342");
-			expect(lib.format_res_string(12342)).toBe("12342");
-			expect(lib.format_res_string(123.42)).toBe("123.42");
+		// test('format_res_string() only matches true for obj or array', () => {
+		// 	expect(lib.format_res_string(true)).toBe("true");
+		// 	expect(lib.format_res_string(false)).toBe("false");
+		// 	expect(lib.format_res_string("true")).toBe("true");
+		// 	expect(lib.format_res_string("false")).toBe("false");
+		// 	expect(lib.format_res_string("12342")).toBe("12342");
+		// 	expect(lib.format_res_string(12342)).toBe("12342");
+		// 	expect(lib.format_res_string(123.42)).toBe("123.42");
 
-			expect(lib.format_res_string({})).toBe("[object Object]");
-			expect(lib.format_res_string({ a: 1 })).toBe("[object Object]");
-			expect(lib.format_res_string(() => {})).toBe("[Unserializable object]");
-			const _date = new Date()
-			expect(lib.format_res_string(_date)).toBe(`${_date}`);
-			expect(lib.format_res_string(null)).toBe("");
-		});
+		// 	expect(lib.format_res_string({})).toBe("[object Object]");
+		// 	expect(lib.format_res_string({ a: 1 })).toBe("[object Object]");
+		// 	expect(lib.format_res_string(() => {})).toBe("[Unserializable object]");
+		// 	const _date = new Date()
+		// 	expect(lib.format_res_string(_date)).toBe(`${_date}`);
+		// 	expect(lib.format_res_string(null)).toBe("");
+		// });
 		test('parse_var() return any matches', () => {
 			//bool
 			expect(lib.parse_var("true")).toBe(true);

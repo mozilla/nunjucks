@@ -1,6 +1,26 @@
 indet:
+  {% extends "base.yaml" %}
+  {% block content %}
   {% for i in [1,2,3] %}
-  - name": "{{ user }}-{{ i }}"
+  - name": "{{ user.name }}-{{ i }}"
     yesthatsright: "{{ user }}"
   {% endfor %}
-  
+  {% client "/user-info" | GET %}
+  - name": "{{ user }}-{{ i }}"
+    yesthatsright: "{{ user }}"
+  {% endclient %}
+  {% endblock %}
+{% only [/index] %}
+other: {{ "null" or "hello" }}
+{% endonly %}
+
+{% only [index, test] %}
+other: {{ "null" or "hello" }}
+{% endonly %}
+
+{% only [index, test] | GET %}
+other: {{ "null" or "hello" }}
+{% endonly %}
+{% only [index, test] | POST %}
+other: {{ "null" or "hello" }}
+{% endonly %}

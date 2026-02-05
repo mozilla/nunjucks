@@ -5,7 +5,7 @@ import { FileSystemLoader, type Loader } from "./loader";
 import { lex_init } from "./lexer";
 import { _eval, fns } from "./eval";
 import { p, randomId, spanInner } from "./lib";
-import { compileTemplate } from "./compiler";
+import { compileTemplate } from "./render";
 
 interface IConfigureOptions {
   path?: string;

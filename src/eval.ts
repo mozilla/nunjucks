@@ -4,44 +4,44 @@ import { combiner, StepWithArgs, PipelineStep } from "./pipe";
 import { p, is_keyword_func, unquote, is_callable, _lower, _upper, parse_var, cleanIdent } from "./lib";
 import type { GlobalOpts } from "./types";
 
-const is_ident = (s: string) => /^[A-Za-z_$][\w$]*(\.[A-Za-z_$][\w$]*)*$/.test(s);
+// const is_ident = (s: string) => /^[A-Za-z_$][\w$]*(\.[A-Za-z_$][\w$]*)*$/.test(s);
 
-const get_path = (obj: any, path: string) => {
-  const parts = path.split(".");
-  let cur = obj;
-  for (const p of parts) {
-    if (cur == null) return undefined;
-    cur = cur[p];
-  }
-  return cur;
-};
+// const get_path = (obj: any, path: string) => {
+//   const parts = path.split(".");
+//   let cur = obj;
+//   for (const p of parts) {
+//     if (cur == null) return undefined;
+//     cur = cur[p];
+//   }
+//   return cur;
+// };
 
-const get_var = (str: string, _opts: GlobalOpts) => {
-	const key = str.trim();
-  if (key in _opts.vars) return { value: _opts.vars[key] };
-  if (key in _opts.ctx) return { value: _opts.ctx[key] };
-	if (str.includes(".")) {
-    const get = (o: any, p: string) => p.split(".").reduce((a, k) => (a == null ? undefined : a[k]), o);
-    const v = get(_opts.vars, str);
-    if (v !== undefined) return { value: v };
-    const c = get(_opts.ctx, str);
-    if (c !== undefined) return { value: c };
-  }
-	return key
-}
+// const get_var = (str: string, _opts: GlobalOpts) => {
+// 	const key = str.trim();
+//   if (key in _opts.vars) return { value: _opts.vars[key] };
+//   if (key in _opts.ctx) return { value: _opts.ctx[key] };
+// 	if (str.includes(".")) {
+//     const get = (o: any, p: string) => p.split(".").reduce((a, k) => (a == null ? undefined : a[k]), o);
+//     const v = get(_opts.vars, str);
+//     if (v !== undefined) return { value: v };
+//     const c = get(_opts.ctx, str);
+//     if (c !== undefined) return { value: c };
+//   }
+// 	return key
+// }
 
-const resolve_ident = (name: string, _opts: GlobalOpts) => {
-  if (!is_ident(name)) return undefined;
+// const resolve_ident = (name: string, _opts: GlobalOpts) => {
+//   if (!is_ident(name)) return undefined;
 
-  // vars wins (loop vars etc)
-  const v = get_path(_opts.vars, name);
-  if (v !== undefined) return v;
+//   // vars wins (loop vars etc)
+//   const v = get_path(_opts.vars, name);
+//   if (v !== undefined) return v;
 
-  const c = get_path(_opts.ctx, name);
-  if (c !== undefined) return c;
+//   const c = get_path(_opts.ctx, name);
+//   if (c !== undefined) return c;
 
-  return undefined;
-};
+//   return undefined;
+// };
 
 export const extension = {
   extends: "extends",
@@ -106,7 +106,6 @@ export const fns = (_opts: GlobalOpts) => ({
 const get_fn = (name: string, _opts: GlobalOpts) => _opts.fns?.[name];
 
 export const _eval_fn = (src: string, _opts: GlobalOpts): { step?: StepWithArgs; value?: any } => {
-	console.log('Src is here: ', src)
   const callable = is_callable(src);
   if (callable) {
     const fn = get_fn(callable.name, _opts);

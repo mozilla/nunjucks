@@ -1,6 +1,7 @@
 import { unquote, spanInner } from "./lib";
 import type { GlobalOpts } from "./types";
 import { renderString, readByChar } from "./render";
+import { matchExtends, matchIncludes } from "./regex";
 
 type Replacement = { start: number; end: number; value: string };
 
@@ -9,11 +10,6 @@ const applyReplacements = (src: string, reps: Replacement[]) => {
   let out = src;
   for (const r of reps) out = out.slice(0, r.start) + r.value + out.slice(r.end);
   return out;
-};
-
-const findExtends = (src: string) => {
-  const m = src.match(/{%\s*extends\s+["']([^"']+)["']\s*%}/);
-  return m ? m[1] : null;
 };
 
 type BlockBody = { bodyStart: number; bodyEnd: number };
@@ -105,7 +101,7 @@ export const compileTemplate = (entryName: string, ctx: any, opts: GlobalOpts) =
   prepassStatements(childSrc, opts);
 
   // 2) merge extends
-  const baseRel = findExtends(childSrc);
+  const baseRel = matchExtends(childSrc);
   if (baseRel) {
     const baseName = unquote(baseRel);
     const baseSrc = opts.files[baseName] ?? opts.loader.read(baseName).res;

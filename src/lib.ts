@@ -1,4 +1,5 @@
 import { GlobalOpts, LexerCurr } from './types';
+import { matchCallable } from './regex';
 
 const RESET = "\x1b[0m";
 const WARN = "\x1b[33m";
@@ -40,17 +41,7 @@ export function unquote(t: string) {
 
 export const extract_comments = (str: string) => str.replace(/\{#[\s\S]*?#\}/g, "");
 
-// export const is_callable = (str: string) => {
-//   const re = /\b([A-Za-z_$][\w$]*)\s*\(([\s\S]*?)\)/;
-//   const m = re.exec(str);
-//   return m ? { name: m[1], args: (m[2] ?? "").split(",").map((s) => s.trim()).filter(Boolean) } : null;
-// };
-export const is_callable = (str: string) => {
-  const s = str.trim();
-  const re = /^([A-Za-z_$][\w$]*)\s*\(([\s\S]*?)\)\s*$/;
-  const m = re.exec(s);
-  return m ? { name: m[1], args: m[2].split(",").map(a => a.trim()).filter(Boolean) } : null;
-};
+export const is_callable = (str: string) => matchCallable(str)
 
 export const is_boolean = (src: unknown) =>
   typeof src === "boolean" || (typeof src === "string" && (src === "true" || src === "false"));
@@ -131,9 +122,6 @@ export const spanInner = (src: string, it: LexerCurr) => {
 	if(inner.includes('user'))console.log('user:', inner, ' raw:', raw)
   return { raw, inner };
 };
-
-export const spanStatements = (spans: LexerCurr[], opts: GlobalOpts) => spans.filter(
-    (s) => s.start && s.end && s.start.type === opts.lexer.symbols.statement.start_type);
 
 export const cleanIdent = (s: string) =>
   s.trim().match(/^[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*)*/)?.[0] ?? "";

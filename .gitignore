@@ -14,4 +14,4 @@ docs/files
 /dist/
 *.tgz
 tmp/*
-chatgpt.input.txt
+chatgpt.input.*

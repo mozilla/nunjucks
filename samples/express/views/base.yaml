@@ -1,0 +1,7 @@
+{% extends "test.yaml" %}
+{{ super() }}
+{% block test %}
+someotherthing:
+  {% block content %}
+  {% endblock %}
+{% endblock %}
