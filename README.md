@@ -5,6 +5,10 @@
 [![CI][github-actions-image]][github-actions-url]
 [![Codecov][codecov-image]][codecov-url]
 
+
+I guess Nunjucks 2? templating engine for javascript but taking it further.
+Still called Nunjucks, syntax inspured by - 
+
 [Nunjucks](https://mozilla.github.io/nunjucks/) is a full featured
 templating engine for javascript. It is heavily inspired by
 [jinja2](https://jinja.palletsprojects.com/). View the docs
@@ -14,37 +18,32 @@ templating engine for javascript. It is heavily inspired by
 
 `npm install nunjucks`
 
-To use the file watcher built-in to Nunjucks, Chokidar must be installed separately.
-
-`npm install nunjucks chokidar`
-
-(View the [CHANGELOG](https://github.com/mozilla/nunjucks/releases))
+(View the [CHANGELOG](https://github.com/SamuelDBines/nunjucks/releases))
 
 ## Documentation
 
-Nunjucks info and documentation source is in [`/docs`](/docs) and publishes to https://mozilla.github.io/nunjucks/
+Will update when I am done
 
 ## Browser Support
 
-Supported in all modern browsers. For IE8 support, use [es5-shim](https://github.com/es-shims/es5-shim).
+Supported in all modern browsers.
 
 ## Tests
 
-Run the tests with `npm test`.
+Run the tests with `npm test`. Don't do this yeet.
 
 ## Get in touch
 
-If you have ideas or questions, or need help, you can reach us in the [#nunjucks:mozilla.org](https://matrix.to/#/#nunjucks:mozilla.org) room on [Matrix](https://wiki.mozilla.org/Matrix).
+Its just me at the moment check my github username in the path. Raise an issue.
 
 ## Want to help?
 
-Contributions are always welcome! Before you submit an issue or pull request, please read our [contribution guidelines](CONTRIBUTING.md).
+<!-- Contributions are always welcome! Before you submit an issue or pull request, please read our [contribution guidelines](CONTRIBUTING.md). -->
 
 ## Contributors
 
-[![Contributors graph. Avatars provided by https://contrib.rocks](https://contrib.rocks/image?repo=mozilla/nunjucks)](https://github.com/mozilla/nunjucks/graphs/contributors)
-
-
+Removed contributors since I rewrote the entire library in the end.
+<!-- 
 [npm-image]: https://img.shields.io/npm/v/nunjucks.svg
 [npm-url]: https://npmjs.org/package/nunjucks
 [downloads-image]: https://img.shields.io/npm/dm/nunjucks.svg
@@ -52,9 +51,9 @@ Contributions are always welcome! Before you submit an issue or pull request, pl
 [github-actions-image]: https://github.com/mozilla/nunjucks/actions/workflows/tests.yml/badge.svg
 [github-actions-url]: https://github.com/mozilla/nunjucks/actions
 [codecov-image]: https://img.shields.io/codecov/c/gh/mozilla/nunjucks.svg
-[codecov-url]: https://codecov.io/gh/mozilla/nunjucks/branch/master
+[codecov-url]: https://codecov.io/gh/mozilla/nunjucks/branch/master -->
 
 
 
-Nunjucks extend
+<!-- Nunjucks extend -->
 <!-- https://github.com/douglaszaltron/nunjucks-vscode-extensionpack/blob/master/assets/syntaxes/njk.json -->
