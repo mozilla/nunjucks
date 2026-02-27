@@ -10,7 +10,7 @@
   if (typeof require !== 'undefined') {
     expect = require('expect.js');
     nunjucks = require('../nunjucks/index');
-    fs = require('fs-extra');
+    fs = require('fs');
     path = require('path');
     os = require('os');
   } else {
@@ -19,8 +19,7 @@
   }
 
   function rmdir(dirPath) {
-    fs.emptyDirSync(dirPath);
-    fs.rmdirSync(dirPath);
+    fs.rmSync(dirPath, { recursive: true, force: true });
   }
 
   describe('nunjucks.configure', function() {
@@ -30,7 +29,6 @@
       if (fs && path && os) {
         try {
           tempdir = fs.mkdtempSync(path.join(os.tmpdir(), 'templates'));
-          fs.emptyDirSync(tempdir);
         } catch (e) {
           rmdir(tempdir);
           throw e;
