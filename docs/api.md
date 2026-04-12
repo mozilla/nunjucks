@@ -72,7 +72,7 @@ var res = nunjucks.renderString('Hello {{ username }}', { username: 'James' });
 compile
 nunjucks.compile(str, [env], [path])
 
-Compile the given string into a reusable nunjucks Template object.
+Compile the given string into a reusable nunjucks [Template](#template) object.
 
 {% raw %}
 ```js
@@ -91,23 +91,23 @@ feature on or off with the **opts** hash. You can provide both
 arguments or either of them. **path** defaults to the current working
 directory, and the following options are available in **opts**:
 
-* **autoescape** *(default: true)* controls if output with dangerous characters are
+* **autoescape** *(default: `true`)* controls if output with dangerous characters are
     escaped automatically. See [Autoescaping](#autoescaping)
-* **throwOnUndefined** *(default: false)* throw errors when outputting a null/undefined value
-* **trimBlocks** *(default: false)* automatically remove trailing newlines from a block/tag
-* **lstripBlocks** *(default: false)* automatically remove leading whitespace from a block/tag
-* **watch** *(default: false)* reload templates when they are changed (server-side). To use watch, make sure optional dependency *chokidar* is installed.
-* **noCache** *(default: false)* never use a cache and recompile templates each time (server-side)
+* **throwOnUndefined** *(default: `false`)* throw errors when outputting a `null`/`undefined` value
+* **trimBlocks** *(default: `false`)* automatically remove trailing newlines from a block/tag
+* **lstripBlocks** *(default: `false`)* automatically remove leading whitespace from a block/tag
+* **watch** *(default: `false`)* reload templates when they are changed (server-side). To use watch, make sure optional dependency *chokidar* is installed.
+* **noCache** *(default: `false`)* never use a cache and recompile templates each time (server-side)
 * **web** an object for configuring loading templates in the browser:
-  * **useCache** *(default: false)* will enable cache and templates will never see updates.
-  * **async** *(default: false)* will load templates asynchronously instead of synchronously (requires use of the [asynchronous API](#asynchronous-support) for rendering).
+  * **useCache** *(default: `false`)* will enable cache and templates will never see updates.
+  * **async** *(default: `false`)* will load templates asynchronously instead of synchronously (requires use of the [asynchronous API](#asynchronous-support) for rendering).
 * **express** an express app that nunjucks should install to
 * **tags:** *(default: see nunjucks syntax)* defines the syntax for
     nunjucks tags. See [Customizing Syntax](#customizing-syntax)
 
 `configure` returns an `Environment` instance, which lets you add
 filters and extensions while still using the simple API. See below for
-more information on `Environment`.
+more information on [`Environment`](#environment).
 
 **Warning**: The simple API (above; e.g. `nunjucks.render`) always uses the
   configuration from the most recent call to `nunjucks.configure`. Since this
@@ -153,9 +153,15 @@ to see everything it adds.
 {% endapi %}
 {% raw %}
 
+
+----
+
 *That's it for the simple API! If you want total control over how
 templates are loaded, and more customization, you need to manually
 set up the system as seen below.*
+
+----
+
 
 ## Environment
 
@@ -174,7 +180,7 @@ constructor
 new Environment([loaders], [opts])
 
 The constructor takes a list of **loaders** and a hash of
-configuration parameters as **opts**. If **loaders** is null, it
+configuration parameters as **opts**. If **loaders** is `null`, it
 defaults to loading from the current directory or URL. You can pass a
 single loader or an array of loaders. If you pass an array of loaders,
 nunjucks will walk through them in order until one of them finds a
@@ -182,21 +188,21 @@ template. See [`Loader`](#loader) for more info about loaders.
 
 The available flags in **opts** is **autoescape**,
 **throwOnUndefined**, **trimBlocks**, and **lstripBlocks**.
-Read more about those options in [`configure`](#configure) (the
-express and watch options are not applicable here and configured
+Read more about those options in [`configure`](#configure). (The
+express and watch options are not applicable here; they are configured
 elsewhere like [`env.express`](#express)).
 
-In node, the [`FileSystemLoader`](#filesystemloader) is available to
+In Node, the [`FileSystemLoader`](#filesystemloader) is available to
 load templates off the filesystem, and in the browser the [`WebLoader`](#webloader)
 is available to load over HTTP (or use precompiled templates). If you
 use the simple [`configure`](#configure) API, nunjucks automatically
 creates the appropriate loader for you, depending if you're in node or
 the browser. See [`Loader`](#loader) for more information.
 
-Also only in node, [`NodeResolveLoader`](#noderesolveloader) is
+Also only in Node, [`NodeResolveLoader`](#noderesolveloader) is
 provided to allow templates to be included using
-[node `require` resolution](https://nodejs.org/api/modules.html#modules_all_together).
-This is not enabled by default with [`configure`](#configure), it must be
+[Node `require` resolution](https://nodejs.org/api/modules.html#modules_all_together).
+This is not enabled by default with [`configure`](#configure); it must be
 explicitly passed into the `Environment` constructor.
 
 ```js
@@ -220,7 +226,7 @@ env.render(name, [context], [callback])
 
 Render the template named **name** with the optional **context** hash.
 If **callback** is supplied, call it when done with any errors and the
-result (see [asynchronous support](#asynchronous-support)), otherwise
+result (see [asynchronous support](#asynchronous-support)); otherwise,
 return the rendered string.
 
 ```js
@@ -252,10 +258,10 @@ var res = nunjucks.renderString('Hello {{ username }}', { username: 'James' });
 addFilter
 env.addFilter(name, func, [async])
 
-Add a custom filter named **name** which calls **func** whenever
+Add a custom filter named **name**, which calls **func** whenever
 invoked. If the filter needs to be async, **async** must be `true`
-(see [asynchronous support](#asynchronous-support)). Returns `env` for further method chaining. See
-[Custom Filters](#custom-filters).
+(see [asynchronous support](#asynchronous-support)). Returns `env` 
+for further method chaining. See [Custom Filters](#custom-filters).
 
 {% endapi %}
 
@@ -270,8 +276,8 @@ addExtension
 env.addExtension(name, ext)
 
 Add the custom extension **ext** named **name**. **ext** is an object
-with a few specific methods that are called by the extension system. Returns `env` for further method chaining.
-See [Custom Tags](#custom-tags).
+with a few specific methods that are called by the extension system. 
+Returns `env` for further method chaining. See [Custom Tags](#custom-tags).
 
 {% endapi %}
 
@@ -292,13 +298,14 @@ Get an extension named **name**.
 {% api %}
 hasExtension
 env.hasExtension(name)
-Return true if a custom extension named **name** has been added.
+Return `true` if a custom extension named **name** has been added.
 {% endapi %}
 
 {% api %}
 addGlobal
 env.addGlobal(name, value)
-Add a global value that will be available to all templates. Note: this will overwrite any existing global called `name`.
+Add a global value that will be available to all templates. 
+**Note:** This will overwrite any existing global called `name`.
 Returns `env` for further method chaining.
 {% endapi %}
 
@@ -316,8 +323,8 @@ Retrieve the template named **name**. If **eagerCompile** is `true`,
 compile it now instead of on render. If **callback** is supplied, call
 it with any errors and a template (if found), otherwise return
 synchronously. If using any async loaders, you must use the async API.
-The builtin loaders do not require this. See
-[asynchronous support](#asynchronous-support) and [loaders](#loader).
+The builtin loaders do not require this.
+See [asynchronous support](#asynchronous-support) and [loaders](#loader).
 
 ```js
 var tmpl = env.getTemplate('page.html');
@@ -333,10 +340,11 @@ env.getTemplate('from-async-loader.html', function(err, tmpl) {
 express
 env.express(app)
 
-Install nunjucks as the rendering engine for the express **app**.
-After doing this, you can use express normally. Note that you can do
+Install nunjucks as the rendering engine for the Express **app**.
+After doing this, you can use Express normally. Note that you can do
 this automatically with the simple API call [`configure`](#configure)
-by passing in the app as the **express** option. Returns `env` for further method chaining.
+by passing in the app as the **express** option. 
+Returns `env` for further method chaining.
 
 ```js
 var app = express();
@@ -356,7 +364,7 @@ You can use this boolean property to see if autoescaping is turned on
 globally or not. This may be helpful in creating advanced filtering
 that do HTML manipulation. Normally you should simply return a
 SafeString (to be documented) if one was passed in, so the output will
-copy the safeness of the input, but this property is helpful in rare
+copy the safety of the input, but this property is helpful in rare
 circumstances.
 {% endapi %}
 
@@ -364,15 +372,15 @@ circumstances.
 'load' event
 env.on('load', function(name, source, loader))
 
-The 'load' event gets emitted whenever a Loader retrieves the source of a
+The `'load'` event is emitted whenever a [Loader](#loader) retrieves the source of a
 template. It can be listened to in order to determine template dependencies
 at runtime. The arguments emitted to the callback are:
 
-* **name** *(String)* The template name, as passed to the loader
-* **source** *(Object)* The object that gets returned from Loader.getSource
-  * **src** *(String)* The template source
-  * **path** *(String)* The full path to the template
-  * **noCache** *(Bool)* If `true`, the template wasn't cached.
+* **name** *(`String`)* The template name, as passed to the loader
+* **source** *(`Object`)* The object that gets returned from `Loader.getSource`
+  * **src** *(`String`)* The template source
+  * **path** *(`String`)* The full path to the template
+  * **noCache** *(`Boolean`)* If `true`, the template wasn't cached.
 * **loader** The Loader instance that triggered the event.
 {% endapi %}
 
@@ -430,7 +438,7 @@ loaders exist, each for different contexts.
 FileSystemLoader
 new FileSystemLoader([searchPaths], [opts])
 
-This is only available to node. It will load templates from the
+This is only available to Node. It will load templates from the
 filesystem, using the **searchPaths** array as paths to look for
 templates. **searchPaths** can also be a single path for where
 templates live, and it defaults to the current working directory.
@@ -454,7 +462,7 @@ NodeResolveLoader
 new NodeResolveLoader([opts])
 
 As the name suggests, this is also only available in node. It will load
-templates from the filesystem using node's
+templates from the filesystem using Node's
 [`require.resolve`](https://nodejs.org/api/modules.html#modules_all_together).
 
 **opts** is an object which takes the same properties as
@@ -474,15 +482,15 @@ current relative directory.
 * **useCache** if `true`, templates will be forever cached and you
     won't see updates to them. The cache is disabled by default
     because there is no way to watch for changes and dirty the cache.
-    Remember, you should be precompiling your templates for production.
+    (Remember, you should be precompiling your templates for production.)
 * **async** if `true`, templates will be loaded asynchronously instead
     synchronously. You must use the asynchronous render API when using
     this (pass a callback to `render`).
 
 This loader also recognizes when precompiled templates are available
-and automatically uses them instead of fetching over HTTP. In
-production, this should always be the case. See
-[Precompiling](#precompiling).
+and automatically uses them instead of fetching over HTTP. 
+In production, this should always be the case. 
+See [Precompiling](#precompiling).
 
 ```js
 // Load templates from /views
@@ -556,8 +564,8 @@ var MyLoader = nunjucks.Loader.extend({
 Remember that you now have to use the asynchronous API. See
 [asynchronous support](#asynchronous-support).
 
-**Warning**: if you are using an asynchronous loader, you can't load
-  templates inside `for` loops. You need to explicitly use the
+**Warning**: If you are using an asynchronous loader, you can't load
+  templates inside `for` loops. You must explicitly use the
   `asyncEach` tag if you need to load templates, which is exactly the
   same as `for` but asynchronous. More info can be found at
   [Be Careful!](#be-careful).
@@ -566,29 +574,32 @@ Remember that you now have to use the asynchronous API. See
 ## Browser Usage
 
 Using nunjucks in the browser takes a little more thought because you
-care about load and compile time. On the server-side, templates are
-compiled once and cached in memory and you never have to worry about
-it. On the client-side however, you don't want to compile templates
-even once, as it would result in slow page render time.
+care about load and compile time. 
 
-The solution is to precompile your templates into JavaScript, and load
+On the server-side, templates are compiled once, cached in memory, and 
+you never have to worry about it. On the client-side however, you don't 
+want to compile templates even once, as it would result in slow page 
+render time.
+
+The solution? Precompile your templates into JavaScript, and load
 them as a simple `.js` file on page load.
 
-Maybe you do want to dynamically load templates while developing,
-however, so that you can see changes immediately without recompiling.
+When developing, however, you may want to dynamically load templates
+so that you can see changes immediately without recompiling.
 Nunjucks tries to adapt to whatever workflow you want.
 
 The only rule you must follow: **always precompile your templates in
-production**. Why? Not only is it slow to compile all your templates
-on page load, they are loaded *synchronously* over HTTP, blocking the
-whole page. It is slow. It does this because nunjucks isn't async by
-default.
+production**. 
+
+Why? Not only is it slow to compile all your templates on page load, 
+they are loaded *synchronously* over HTTP, blocking the whole page. 
+It is slow. It does this because nunjucks isn't async by default.
 
 ### Recommended Setups
 
 These are two of the most popular ways to set up nunjucks on the
 client-side. Note that there are two different js files: one with the
-compiler, nunjucks.js, and one without the compiler, nunjucks-slim.js.
+compiler, `nunjucks.js`, and one without the compiler, `nunjucks-slim.js`.
 Read [Getting Started](getting-started.html) for a brief overview of
 the differences.
 
@@ -601,34 +612,34 @@ This method will give you a setup that dynamically loads templates
 while developing (you can see changes immediately), but uses
 precompiled templates in production.
 
-1. Load [nunjucks.js](files/nunjucks.js) with either a script tag or a module loader.
+1. Load [`nunjucks.js`](files/nunjucks.js) with either a `script` tag or a module loader.
 2. Render templates ([example](#simple-api))!
 3. When pushing to production, [precompile](#precompiling) the templates into a js file
    and load it on the page
 
 > An optimization is to use `nunjucks-slim.js` instead of
-> `nunjucks.js` in production since you are using precompiled
+> `nunjucks.js` in production, since you are using precompiled
 > templates there. It's 8K instead of 20K because it doesn't contain
-> the compiler. This complicates the setup though because you are
-> using different js files between dev and prod, so it may or may not
+> the compiler. This complicates the setup, though, because you are
+> using different js files between dev and production, so it may or may not
 > be worth it.
 
 #### Setup #2: always precompile
 
 This method always uses precompiled templates while developing and in
 production, which simplifies the setup. However, you're going to want
-something that automatically recompiles templates while developing
+something that automatically recompiles templates while developing,
 unless you want to manually recompile them after every change.
 
 1. For development, use the [grunt](https://github.com/jlongster/grunt-nunjucks) or
 [gulp](https://github.com/sindresorhus/gulp-nunjucks) tasks to watch your template
 directory for changes and automatically [precompile](#precompiling) them into a js file
-2. Load [nunjucks-slim.js](files/nunjucks-slim.js) and `templates.js`, or whatever you named
-the precompiled js file, with either a script tag or a module loader.
+2. Load [`nunjucks-slim.js`](files/nunjucks-slim.js) and `templates.js`, or whatever you named
+the precompiled js file, with either a `script` tag or a module loader.
 3. Render templates ([example](#simple-api))!
 
 With this method, there are no differences between development and
-production code. Simply commit the templates.js file and deploy the
+production code. Simply commit the `templates.js` file and deploy the
 same code to production.
 
 ## Precompiling
@@ -683,7 +694,7 @@ Precompile a file or directory at **path**. **opts** is a hash with any of the f
     auto-generated when compiling a directory.
 * **asFunction**: generate a callable function
 * **force**: keep compiling on error
-* **env**: the Environment to use (gets extensions and async filters from it)
+* **env**: the [`Environment`](#environment) to use (gets extensions and async filters from it)
 * **include**: array of file/folders to include (folders are auto-included, files are auto-excluded)
 * **exclude**: array of file/folders to exclude (folders are auto-included, files are auto-excluded)
 * **wrapper**: `function(templates, opts)` Customize the output format of the precompiled templates. This function must return a string
@@ -723,10 +734,10 @@ asynchronous rendering. There is no performance benefit to this, it is
 solely to allow custom filters and extensions to make async calls. If
 you don't care about this, you should simply use the normal API like
 `var res = env.render('foo.html');`. There's no need to force the
-`callback` on you, and it's why it's optional in all the rendering
-functions.
+`callback` on you (which is it's why it's optional in all the rendering
+functions).
 
-As of version 1.0, nunjucks provides a way to render templates
+Since version 1.0, nunjucks provides a way to render templates
 asynchronously. This means that custom filters and extensions can do
 stuff like fetch things from the database, and template rendering is
 "paused" until the callback is called.
@@ -770,7 +781,7 @@ follow a few rules when writing asynchronous templates:
 
 By default, nunjucks will escape all output. It's recommended
 that you do this for security reasons. If you turn off autoescaping,
-nunjucks will render all output as it is by default.
+nunjucks will render all output as-is by default.
 
 To deactivate it, all you have to do is pass the `autoescape` option as
 `false` to the `Environment` object.
@@ -825,8 +836,8 @@ env.addFilter('shorten', function(str, count) {
 ```
 
 This adds a filter `shorten` which returns the first `count`
-characters in a string, with `count` defaulting to 5. Here is how it
-is used:
+characters in a string, with `count` defaulting to `5`. 
+Here is how it is used:
 
 ```jinja
 {# Show the first 5 characters #}
@@ -840,7 +851,7 @@ A message for you: {{ message|shorten(20) }}
 
 As described in the
 [templating section](templating#keyword-arguments), nunjucks supports
-keyword/default arguments. You can write a normal javascript filter
+keyword/default arguments. You can write a normal Javascript filter
 that leverages them.
 
 All keyword arguments are passed in as a hash as the last argument.
@@ -860,9 +871,9 @@ The template can use it like this:
 ```
 
 You *must* pass all of the positional arguments before keyword
-arguments (`foo(1)` is valid but `foo(1, bar=10)` is not). Also, you
-cannot set a positional argument with a keyword argument like you can
-in Python (such as `foo(1, y=1)`)
+arguments (`foo(1)` is valid but `foo(1, bar=10)` is not). 
+Also, you cannot set a positional argument with a keyword argument 
+like you can in Python (such as `foo(1, y=1)`).
 
 ### Asynchronous
 
@@ -881,9 +892,10 @@ env.renderString('{{ item|lookup }}', function(err, res) {
 });
 ```
 
-Make sure to call the callback with two arguments: `callback(err, res)`. `err` can be null, of course.
+Make sure to call the callback with two arguments: `callback(err, res)`. 
+`err` can be `null`, of course.
 
-Note: When precompiling, **you must tell the precompiler the names of
+**Note:** When precompiling, **you must tell the precompiler the names of
 all asynchronous filters**. See
 [Precompiling](#precompiling).
 
@@ -893,14 +905,14 @@ You can create more complicated extensions by creating custom tags.
 This exposes the parser API and allows you to do anything you want
 with the template.
 
-Note: When precompiling, **you must install the extensions at
+**Note:** When precompiling, **you must install the extensions at
 compile-time**. You have to use the [precompiling API](#api1) (or the
 [grunt](https://github.com/jlongster/grunt-nunjucks) or
 [gulp](https://github.com/sindresorhus/gulp-nunjucks) tasks) instead of
 the script. You'll want to create an [`Environment`](#environment)
 object, install your extensions, and pass it to the precompiler.
 
-An extension is a javascript object with at least two fields: `tags`
+An extension is a Javascript object with at least two fields: `tags`
 and `parse`. Extensions basically register new tag names and take
 control of the parser when they are hit.
 
@@ -916,23 +928,23 @@ do really complex stuff, however. Here are a few key parser methods
 you'll want to use:
 
 * `parseSignature([throwErrors], [noParens])` - Parse a list of
-  arguments. By default it requires the parser to be pointing at the
+  arguments. By default, it requires the parser to be pointing at the
   left opening parenthesis, and parses up the right one. However, for
   custom tags you shouldn't use parentheses, so passing `true` to the
   second argument tells it to parse a list of arguments up until the
-  block end tag. A comma is required between arguments. Example: `{%
-  mytag foo, bar, baz=10 %}`
+  block end tag. A comma is required between arguments. 
+  Example: `{% mytag foo, bar, baz=10 %}`
 
 * `parseUntilBlocks(names)` - Parse content up until it hits a block
   with a name in the `names` array. This is useful for parsing content
   between tags.
 
-The parser API needs to be more documented, but for now read the above
+The parser API needs more documentation, but for now read the above
 and check out the example below. You can also look at the
 [source](https://github.com/mozilla/nunjucks/blob/master/nunjucks/src/parser.js).
 
 The most common usage is to process the content within some tags at
-runtime. It's like filters, but on steroids because you aren't
+runtime. It's like filters on steroids, because you aren't
 confined to a single expression. You basically want to lightly parse
 the template and then get a callback into your extension with the
 content. This is done with the `CallExtension` node, which takes an
