@@ -176,6 +176,13 @@ function indent(str, width, indentfirst) {
     return '';
   }
 
+  // Cast numbers to string (same as replace); passthrough other non-strings
+  if (typeof str === 'number') {
+    str = '' + str;
+  } else if (typeof str !== 'string' && !(str instanceof r.SafeString)) {
+    return str;
+  }
+
   width = width || 4;
   // let res = '';
   const lines = str.split('\n');
