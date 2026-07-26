@@ -15,7 +15,7 @@ $ npm install nunjucks
 
 ## 浏览器端使用
 
-可直接使用 [nunjucks.js](files/nunjucks.js) ([min](files/nunjucks.min.js))，如果针对编译后的模板可使用 [nunjucks-slim.js](files/nunjucks-slim.js) ([min](files/nunjucks-slim.min.js))。
+可直接使用 [nunjucks.js](https://unpkg.com/nunjucks@latest/browser/nunjucks.js) ([min](https://unpkg.com/nunjucks@latest/browser/nunjucks.min.js))，如果针对编译后的模板可使用 [nunjucks-slim.js](https://unpkg.com/nunjucks@latest/browser/nunjucks-slim.js) ([min](https://unpkg.com/nunjucks@latest/browser/nunjucks-slim.min.js))。
 
 ### 你应该使用哪个文件
 

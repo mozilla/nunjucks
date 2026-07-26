@@ -37,8 +37,8 @@ This includes the most recent version and all versions still in maintenance.
 
 ## When in the Browser...
 
-Grab [nunjucks.js](files/nunjucks.js) ([min](files/nunjucks.min.js)) for the full library, or
-[nunjucks-slim.js](files/nunjucks-slim.js) ([min](files/nunjucks-slim.min.js)) for the slim version
+Grab [nunjucks.js](https://unpkg.com/nunjucks@latest/browser/nunjucks.js) ([min](https://unpkg.com/nunjucks@latest/browser/nunjucks.min.js)) for the full library, or
+[nunjucks-slim.js](https://unpkg.com/nunjucks@latest/browser/nunjucks-slim.js) ([min](https://unpkg.com/nunjucks@latest/browser/nunjucks-slim.min.js)) for the slim version
 which only works with precompiled templates.
 
 ### Which file should you use?
