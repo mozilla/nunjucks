@@ -333,6 +333,12 @@ function replace(str, old, new_, maxCount) {
     return str;
   }
 
+  // When substituting into an already-safe string, escape the replacement so
+  // untrusted data can't smuggle unescaped markup through autoescaping
+  if (originalStr instanceof r.SafeString && !(new_ instanceof r.SafeString)) {
+    new_ = lib.escape('' + new_);
+  }
+
   // ShortCircuits
   if (old === '') {
     // Mimic the python behaviour: empty string is replaced
