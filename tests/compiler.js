@@ -1382,6 +1382,36 @@
       finish(done);
     });
 
+    it('should throw a concise error for circular includes', function() {
+      function templateRender() {
+        render('{% include "cycle-a.njk" %}');
+      }
+      expect(templateRender).to.throwException(
+        /Circular template dependency detected: cycle-a\.njk -> cycle-b\.njk -> cycle-a\.njk/);
+    });
+
+    it('should throw a concise error for a template that includes itself', function() {
+      function templateRender() {
+        render('{% include "cycle-self.njk" %}');
+      }
+      expect(templateRender).to.throwException(
+        /Circular template dependency detected: cycle-self\.njk -> cycle-self\.njk/);
+    });
+
+    it('should pass circular include errors to the callback when async', function(done) {
+      render(
+        '{% include "cycle-a.njk" %}',
+        {},
+        {noThrow: true},
+        function(err, res) {
+          expect(err).to.match(
+            /Circular template dependency detected: cycle-a\.njk -> cycle-b\.njk -> cycle-a\.njk/);
+          expect(String(err).length).to.be.below(500);
+          expect(res).to.be(undefined);
+          done();
+        });
+    });
+
     it('should include templates with context', function(done) {
       equal('hello world {% include "include.njk" %}',
         {

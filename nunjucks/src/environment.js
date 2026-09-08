@@ -21,6 +21,41 @@ function callbackAsap(cb, err, res) {
   });
 }
 
+function templateDisplayName(templatePath) {
+  if (!templatePath) {
+    return 'unknown path';
+  }
+  const parts = String(templatePath).split(/[/\\]/);
+  return parts[parts.length - 1] || templatePath;
+}
+
+function beginTemplateRender(frame, templatePath) {
+  if (!templatePath) {
+    return;
+  }
+  const stack = frame.templateStack;
+  if (stack.indexOf(templatePath) !== -1) {
+    const cycle = stack.concat([templatePath]).map(templateDisplayName).join(' -> ');
+    throw new lib.TemplateError(`Circular template dependency detected: ${cycle}`);
+  }
+  stack.push(templatePath);
+}
+
+function endTemplateRender(frame, templatePath) {
+  if (!templatePath) {
+    return;
+  }
+  const stack = frame.templateStack;
+  if (stack.length && stack[stack.length - 1] === templatePath) {
+    stack.pop();
+    return;
+  }
+  const idx = stack.lastIndexOf(templatePath);
+  if (idx !== -1) {
+    stack.splice(idx, 1);
+  }
+}
+
 /**
  * A no-op template, for use with {% include ignore missing %}
  */
@@ -475,34 +510,63 @@ class Template extends Obj {
     let syncResult = null;
     let didError = false;
 
-    this.rootRenderFunc(this.env, context, frame, globalRuntime, (err, res) => {
-      // TODO: this is actually a bug in the compiled template (because waterfall
-      // tasks are both not passing errors up the chain of callbacks AND are not
-      // causing a return from the top-most render function). But fixing that
-      // will require a more substantial change to the compiler.
-      if (didError && cb && typeof res !== 'undefined') {
-        // prevent multiple calls to cb
-        return;
+    const templatePath = this.path;
+    let released = false;
+    const release = () => {
+      if (!released) {
+        released = true;
+        endTemplateRender(frame, templatePath);
       }
+    };
 
-      if (err) {
-        err = lib._prettifyError(this.path, this.env.opts.dev, err);
-        didError = true;
-      }
-
+    try {
+      beginTemplateRender(frame, templatePath);
+    } catch (e) {
+      const err = lib._prettifyError(templatePath, this.env.opts.dev, e);
       if (cb) {
         if (forceAsync) {
-          callbackAsap(cb, err, res);
-        } else {
-          cb(err, res);
+          return callbackAsap(cb, err);
         }
-      } else {
-        if (err) {
-          throw err;
-        }
-        syncResult = res;
+        cb(err);
+        return undefined;
       }
-    });
+      throw err;
+    }
+
+    try {
+      this.rootRenderFunc(this.env, context, frame, globalRuntime, (err, res) => {
+        release();
+        // TODO: this is actually a bug in the compiled template (because waterfall
+        // tasks are both not passing errors up the chain of callbacks AND are not
+        // causing a return from the top-most render function). But fixing that
+        // will require a more substantial change to the compiler.
+        if (didError && cb && typeof res !== 'undefined') {
+          // prevent multiple calls to cb
+          return;
+        }
+
+        if (err) {
+          err = lib._prettifyError(this.path, this.env.opts.dev, err);
+          didError = true;
+        }
+
+        if (cb) {
+          if (forceAsync) {
+            callbackAsap(cb, err, res);
+          } else {
+            cb(err, res);
+          }
+        } else {
+          if (err) {
+            throw err;
+          }
+          syncResult = res;
+        }
+      });
+    } catch (e) {
+      release();
+      throw e;
+    }
 
     return syncResult;
   }
@@ -533,15 +597,39 @@ class Template extends Obj {
     const frame = parentFrame ? parentFrame.push() : new Frame();
     frame.topLevel = true;
 
+    const templatePath = this.path;
+    let released = false;
+    const release = () => {
+      if (!released) {
+        released = true;
+        endTemplateRender(frame, templatePath);
+      }
+    };
+
+    try {
+      beginTemplateRender(frame, templatePath);
+    } catch (e) {
+      if (cb) {
+        return cb(e);
+      }
+      throw e;
+    }
+
     // Run the rootRenderFunc to populate the context with exported vars
     const context = new Context(ctx || {}, this.blocks, this.env);
-    this.rootRenderFunc(this.env, context, frame, globalRuntime, (err) => {
-      if (err) {
-        cb(err, null);
-      } else {
-        cb(null, context.getExported());
-      }
-    });
+    try {
+      this.rootRenderFunc(this.env, context, frame, globalRuntime, (err) => {
+        release();
+        if (err) {
+          cb(err, null);
+        } else {
+          cb(null, context.getExported());
+        }
+      });
+    } catch (e) {
+      release();
+      throw e;
+    }
   }
 
   compile() {

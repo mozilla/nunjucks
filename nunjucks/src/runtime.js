@@ -18,6 +18,11 @@ class Frame {
     // if this is true, writes (set) should never propagate upwards past
     // this frame to its parent (though reads may).
     this.isolateWrites = isolateWrites;
+    // Copied on push so sibling includes of the same file (asyncAll, etc.)
+    // do not look like a cycle. Nested includes still see ancestor paths.
+    this.templateStack = parent && parent.templateStack
+      ? parent.templateStack.slice()
+      : [];
   }
 
   set(name, val, resolveUp) {

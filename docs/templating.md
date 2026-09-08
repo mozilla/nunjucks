@@ -538,6 +538,10 @@ an `include` is _not_ a pre-processor that pulls the included template code
 into the including template before rendering; instead, it fires off a separate
 render of the included template, and the results of that render are included.
 
+If templates include each other in a cycle, rendering throws a template error
+that names the cycle (for example `a.njk -> b.njk -> a.njk`) instead of
+overflowing the call stack.
+
 ### import
 
 `import` loads a different template and allows you to access its exported
