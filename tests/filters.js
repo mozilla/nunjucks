@@ -636,15 +636,21 @@
 
     it('rejectattr', function(done) {
       var foods = [{
+        category: 'fruit',
         tasty: true
       }, {
+        category: 'fruit',
         tasty: false
       }, {
+        category: 'vegetable',
         tasty: true
       }];
       equal('{{ foods | rejectattr("tasty") | length }}', {
         foods: foods
       }, '1');
+      equal('{{ foods | rejectattr("category", "eq", "vegetable") | length }}', {
+        foods: foods
+      }, '2');
       finish(done);
     });
 
@@ -666,15 +672,21 @@
 
     it('selectattr', function(done) {
       var foods = [{
+        category: 'fruit',
         tasty: true
       }, {
+        category: 'fruit',
         tasty: false
       }, {
+        category: 'vegetable',
         tasty: true
       }];
       equal('{{ foods | selectattr("tasty") | length }}', {
         foods: foods
       }, '2');
+      equal('{{ foods | selectattr("category", "eq", "vegetable") | length }}', {
+        foods: foods
+      }, '1');
       finish(done);
     });
 

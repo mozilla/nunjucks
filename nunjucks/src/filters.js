@@ -270,36 +270,31 @@ exports.random = random;
  * Construct select or reject filter
  *
  * @param {boolean} expectedTestResult
+ * @param {boolean} isAttr
  * @returns {function(array, string, *): array}
  */
-function getSelectOrReject(expectedTestResult) {
-  function filter(arr, testName = 'truthy', secondArg) {
+function getSelectOrReject(expectedTestResult, isAttr) {
+  function filter(arr, arg0, arg1, arg2) {
+    const [attr, testName = 'truthy', secondArg] = isAttr
+      ? [arg0, arg1, arg2] : [null, arg0, arg1];
     const context = this;
     const test = context.env.getTest(testName);
 
     return lib.toArray(arr).filter(function examineTestResult(item) {
-      return test.call(context, item, secondArg) === expectedTestResult;
+      return test.call(context, isAttr ? item[attr] : item, secondArg) === expectedTestResult;
     });
   }
 
   return filter;
 }
 
-exports.reject = getSelectOrReject(false);
+exports.reject = getSelectOrReject(false, false);
 
-function rejectattr(arr, attr) {
-  return arr.filter((item) => !item[attr]);
-}
+exports.rejectattr = getSelectOrReject(false, true);
 
-exports.rejectattr = rejectattr;
+exports.select = getSelectOrReject(true, false);
 
-exports.select = getSelectOrReject(true);
-
-function selectattr(arr, attr) {
-  return arr.filter((item) => !!item[attr]);
-}
-
-exports.selectattr = selectattr;
+exports.selectattr = getSelectOrReject(true, true);
 
 function replace(str, old, new_, maxCount) {
   var originalStr = str;
