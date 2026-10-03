@@ -430,6 +430,13 @@
       equal('{{ nothing | indent }}', '');
       equal('{{ nothing | indent(2) }}', '');
       equal('{{ nothing | indent(2, true) }}', '');
+
+      // Non-strings: coerce numbers; return other values unchanged (see replace)
+      equal('{{ 42 | indent }}', '42');
+      equal('{{ testArray | indent(8) }}', {
+        testArray: ['one', 'two']
+      }, 'one,two');
+      equal('{{ {} | indent }}', '[object Object]');
       finish(done);
     });
 
