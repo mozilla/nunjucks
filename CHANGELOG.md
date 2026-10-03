@@ -1,6 +1,13 @@
 Changelog
 =========
 
+Unreleased
+==========
+
+* Docs: point browser download links at unpkg `@latest` so published site
+  assets stay current. Fixes
+  [#1472](https://github.com/mozilla/nunjucks/issues/1472).
+
 3.2.4 (Apr 13 2023)
 ------------------
 
