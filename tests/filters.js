@@ -727,6 +727,13 @@
       equal('{{ str | replace("a", "x") }}', {
         str: r.markSafe('aaabbbccc')
       }, 'xxxbbbccc');
+      // The replacement is escaped when substituted into an already-safe
+      // string, so untrusted data can't smuggle unescaped markup through
+      // autoescaping.
+      equal('{{ str | replace("NAME", user) }}', {
+        str: r.markSafe('<b>Hello NAME</b>'),
+        user: '<script>alert(1)</script>'
+      }, '<b>Hello &lt;script&gt;alert(1)&lt;/script&gt;</b>');
       finish(done);
     });
 
