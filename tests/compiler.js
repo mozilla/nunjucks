@@ -1391,6 +1391,12 @@
       finish(done);
     });
 
+    it('should include templates with custom variables', function(done) {
+      equal('hello world {% include "include.njk" with { "name": "james" } %}',
+        'hello world FooInclude james');
+      finish(done);
+    });
+
     it('should include templates that can see including scope, but not write to it', function(done) {
       equal('{% set var = 1 %}{% include "include-set.njk" %}{{ var }}', '12\n1');
       finish(done);

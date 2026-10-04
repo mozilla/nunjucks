@@ -100,6 +100,11 @@ No code changes; fixed npm packaging issue.
 * Fix engine version for Node v11.1.0
 * Fix "Unexpected token" error for U+2028 unicode newline. Fixes [#126](https://github.com/mozilla/nunjucks/issues/126) and [#736](https://github.com/mozilla/nunjucks/issues/736)
 
+3.1.4 (September 2 2018)
+-------------------
+
+* Add `with` keyword for the include template.
+
 3.1.3 (May 19 2018)
 -------------------
 
