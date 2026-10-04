@@ -586,5 +586,6 @@ class Template extends Obj {
 
 module.exports = {
   Environment: Environment,
-  Template: Template
+  Template: Template,
+  Context: Context
 };
