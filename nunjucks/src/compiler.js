@@ -1,11 +1,9 @@
-'use strict';
-
-const parser = require('./parser');
-const transformer = require('./transformer');
-const nodes = require('./nodes');
-const {TemplateError} = require('./lib');
-const {Frame} = require('./runtime');
-const {Obj} = require('./object');
+import * as parser from './parser';
+import * as transformer from './transformer';
+import * as nodes from './nodes';
+import {TemplateError} from './lib';
+import {Frame} from './runtime';
+import {Obj} from './object';
 
 // These are all the same for now, but shouldn't be passed straight
 // through
@@ -20,7 +18,7 @@ const compareOps = {
   '>=': '>='
 };
 
-class Compiler extends Obj {
+export class Compiler extends Obj {
   init(templateName, throwOnUndefined) {
     this.templateName = templateName;
     this.codebuf = [];
@@ -1179,22 +1177,18 @@ class Compiler extends Obj {
   }
 }
 
-module.exports = {
-  compile: function compile(src, asyncFilters, extensions, name, opts = {}) {
-    const c = new Compiler(name, opts.throwOnUndefined);
+export function compile(src, asyncFilters, extensions, name, opts = {}) {
+  const c = new Compiler(name, opts.throwOnUndefined);
 
-    // Run the extension preprocessors against the source.
-    const preprocessors = (extensions || []).map(ext => ext.preprocess).filter(f => !!f);
+  // Run the extension preprocessors against the source.
+  const preprocessors = (extensions || []).map(ext => ext.preprocess).filter(f => !!f);
 
-    const processedSrc = preprocessors.reduce((s, processor) => processor(s), src);
+  const processedSrc = preprocessors.reduce((s, processor) => processor(s), src);
 
-    c.compile(transformer.transform(
-      parser.parse(processedSrc, extensions, opts),
-      asyncFilters,
-      name
-    ));
-    return c.getCode();
-  },
-
-  Compiler: Compiler
-};
+  c.compile(transformer.transform(
+    parser.parse(processedSrc, extensions, opts),
+    asyncFilters,
+    name
+  ));
+  return c.getCode();
+}

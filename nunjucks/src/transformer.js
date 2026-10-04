@@ -1,7 +1,5 @@
-'use strict';
-
-var nodes = require('./nodes');
-var lib = require('./lib');
+import * as nodes from './nodes';
+import * as lib from './lib';
 
 var sym = 0;
 function gensym() {
@@ -203,7 +201,7 @@ function cps(ast, asyncFilters) {
   return convertStatements(liftSuper(liftFilters(ast, asyncFilters)));
 }
 
-function transform(ast, asyncFilters) {
+export function transform(ast, asyncFilters) {
   return cps(ast, asyncFilters || []);
 }
 
@@ -211,7 +209,3 @@ function transform(ast, asyncFilters) {
 // var src = 'hello {% foo %}{% endfoo %} end';
 // var ast = transform(parser.parse(src, [new FooExtension()]), ['bar']);
 // nodes.printNodes(ast);
-
-module.exports = {
-  transform: transform
-};
