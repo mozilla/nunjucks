@@ -26,7 +26,6 @@
     "eslint-plugin-import": "^2.31.0",
     "expect.js": "*",
     "express": "4.x",
-    "fs-extra": "^5.0.0",
     "get-port": "^3.2.0",
     "globals": "^16.2.0",
     "mocha": "< 8.x",
