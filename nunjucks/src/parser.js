@@ -655,22 +655,36 @@ class Parser extends Obj {
   parseRaw(tagName) {
     tagName = tagName || 'raw';
     const endTagName = 'end' + tagName;
-    // Look for upcoming raw blocks (ignore all other kinds of blocks)
-    const rawBlockRegex = new RegExp('([\\s\\S]*?){%\\s*(' + tagName + '|' + endTagName + ')\\s*(?=%})%}');
+    // Look for upcoming raw blocks (ignore all other kinds of blocks).
+    // The optional `-` markers allow whitespace-control trimming
+    // (`{%- raw -%}` / `{%- endraw -%}`) on the raw/endraw tags.
+    const rawBlockRegex = new RegExp('([\\s\\S]*?){%(-?)\\s*(' + tagName + '|' + endTagName + ')\\s*(?=(-?)%})-?%}');
     let rawLevel = 1;
     let str = '';
     let matches = null;
 
     // Skip opening raw token
-    // Keep this token to track line and column numbers
+    // Keep this token to track line and column numbers.
+    // `{% raw -%}` sets dropLeadingWhitespace, trimming the start of the body.
     const begun = this.advanceAfterBlockEnd();
+    let trimLeadingWhitespace = this.dropLeadingWhitespace;
+    this.dropLeadingWhitespace = false;
 
     // Exit when there's nothing to match
     // or when we've found the matching "endraw" block
     while ((matches = this.tokens._extractRegex(rawBlockRegex)) && rawLevel > 0) {
       const all = matches[0];
       const pre = matches[1];
-      const blockName = matches[2];
+      const startTrim = matches[2];
+      const blockName = matches[3];
+      const endTrim = matches[4];
+
+      // `{% raw -%}` / a preceding `{%- raw %}` trims the start of the body
+      let body = pre;
+      if (trimLeadingWhitespace) {
+        body = body.replace(/^\s*/, '');
+        trimLeadingWhitespace = false;
+      }
 
       // Adjust rawlevel
       if (blockName === tagName) {
@@ -681,12 +695,17 @@ class Parser extends Obj {
 
       // Add to str
       if (rawLevel === 0) {
-        // We want to exclude the last "endraw"
-        str += pre;
+        // We want to exclude the last "endraw".
+        // `{%- endraw %}` trims trailing whitespace of the raw content.
+        str += (startTrim ? body.replace(/\s*$/, '') : body);
+        // `{% endraw -%}` trims leading whitespace of the following data.
+        if (endTrim) {
+          this.dropLeadingWhitespace = true;
+        }
         // Move tokenizer to beginning of endraw block
         this.tokens.backN(all.length - pre.length);
       } else {
-        str += all;
+        str += body + all.slice(pre.length);
       }
     }
 

@@ -2127,6 +2127,16 @@
       finish(done);
     });
 
+    it('should honor whitespace control on raw/verbatim tags', function(done) {
+      equal('{% raw %}foo  {%- endraw %}', 'foo');
+      equal('{% raw %}foo{% endraw -%}   bar', 'foobar');
+      equal('{% raw %}foo  {%- endraw -%}   bar', 'foobar');
+      equal('{% raw -%}  {{x}}{% endraw %}', '{{x}}');
+      equal('{% verbatim %}foo  {%- endverbatim %}', 'foo');
+
+      finish(done);
+    });
+
     it('should control expression whitespaces correctly', function(done) {
       equal(
         'Well, {{- \' hello, \' -}} my friend',
