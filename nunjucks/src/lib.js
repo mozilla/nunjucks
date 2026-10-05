@@ -384,7 +384,9 @@ function extend(obj1, obj2) {
 exports._assign = exports.extend = extend;
 
 function inOperator(key, val) {
-  if (isArray(val) || isString(val)) {
+  if (typeof val === 'undefined') {
+    return false;
+  } else if (isArray(val) || isString(val)) {
     return val.indexOf(key) !== -1;
   } else if (isObject(val)) {
     return key in val;
