@@ -1,6 +1,13 @@
 Changelog
 =========
 
+Unreleased
+----------
+
+* Throw a concise error when `{% include %}` or `{% import %}` templates
+  form a cycle, instead of overflowing the call stack. Fixes
+  [#1522](https://github.com/mozilla/nunjucks/issues/1522).
+
 3.2.4 (Apr 13 2023)
 ------------------
 
