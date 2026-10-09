@@ -1054,6 +1054,16 @@
       equal('{{ "what\nup" | urlize | safe }}', 'what\nup');
       equal('{{ "what\tup" | urlize | safe }}', 'what\tup');
 
+      // XSS: escape URL before interpolating into href / link text (#1525)
+      // Note: urlize's punctuation regex may strip a trailing ')', so avoid that here.
+      equal('{{ url | urlize | safe }}', {
+        url: 'http://evil.com/"onmouseover="alert(1)x'
+      }, '<a href="http://evil.com/&quot;onmouseover=&quot;alert(1)x">http://evil.com/&quot;onmouseover=&quot;alert(1)x</a>');
+      equal('{{ url | urlize | safe }}', {
+        url: 'http://a"><script>alert(1)</script>x'
+      }, '<a href="http://a&quot;&gt;&lt;script&gt;alert(1)&lt;/script&gt;x">' +
+        'http://a&quot;&gt;&lt;script&gt;alert(1)&lt;/script&gt;x</a>');
+
       finish(done);
     });
 

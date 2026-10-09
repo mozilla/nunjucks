@@ -588,25 +588,30 @@ function urlize(str, length, nofollow) {
     var matches = word.match(puncRe);
     var possibleUrl = (matches) ? matches[1] : word;
     var shortUrl = possibleUrl.substr(0, length);
+    // Escape before interpolating into href/mailto and link text so a
+    // crafted URL cannot break out of the attribute or inject markup
+    // when the result is marked safe.
+    var hrefUrl = lib.escape(possibleUrl);
+    var linkText = lib.escape(shortUrl);
 
     // url that starts with http or https
     if (httpHttpsRe.test(possibleUrl)) {
-      return `<a href="${possibleUrl}"${noFollowAttr}>${shortUrl}</a>`;
+      return `<a href="${hrefUrl}"${noFollowAttr}>${linkText}</a>`;
     }
 
     // url that starts with www.
     if (wwwRe.test(possibleUrl)) {
-      return `<a href="http://${possibleUrl}"${noFollowAttr}>${shortUrl}</a>`;
+      return `<a href="http://${hrefUrl}"${noFollowAttr}>${linkText}</a>`;
     }
 
     // an email address of the form username@domain.tld
     if (emailRe.test(possibleUrl)) {
-      return `<a href="mailto:${possibleUrl}">${possibleUrl}</a>`;
+      return `<a href="mailto:${hrefUrl}">${lib.escape(possibleUrl)}</a>`;
     }
 
     // url that ends in .com, .org or .net that is not an email address
     if (tldRe.test(possibleUrl)) {
-      return `<a href="http://${possibleUrl}"${noFollowAttr}>${shortUrl}</a>`;
+      return `<a href="http://${hrefUrl}"${noFollowAttr}>${linkText}</a>`;
     }
 
     return word;
