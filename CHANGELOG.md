@@ -1,6 +1,14 @@
 Changelog
 =========
 
+Unreleased
+----------
+
+* Escape URLs produced by the `urlize` filter before inserting them into
+  `href` / `mailto` attributes and link text, preventing XSS when the
+  result is marked safe. Fixes
+  [#1525](https://github.com/mozilla/nunjucks/issues/1525).
+
 3.2.4 (Apr 13 2023)
 ------------------
 
