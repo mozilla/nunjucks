@@ -182,10 +182,14 @@ function indent(str, width, indentfirst) {
   const sp = lib.repeat(' ', width);
 
   const res = lines.map((l, i) => {
-    return (i === 0 && !indentfirst) ? l : `${sp}${l}`;
+    return shouldSkipIndent(l, i, indentfirst) ? l : `${sp}${l}`;
   }).join('\n');
 
   return r.copySafeness(str, res);
+}
+
+function shouldSkipIndent(line, index, indentfirst) {
+  return !line || (index === 0 && !indentfirst);
 }
 
 exports.indent = indent;

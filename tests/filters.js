@@ -413,6 +413,7 @@
         'one\n  two\n  three');
       equal('{{ "one\ntwo\nthree" | indent(2, true) }}',
         '  one\n  two\n  three');
+      equal('{{ "one\n\nthree" | indent }}', 'one\n\n    three');
 
       equal('{{ str | indent }}', {
         str: r.markSafe('one\ntwo\nthree')
