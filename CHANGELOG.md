@@ -1,6 +1,13 @@
 Changelog
 =========
 
+Unreleased
+----------
+
+* Copy environment options before applying defaults so constructing an
+  environment does not modify the caller's options or share top-level settings
+  with another environment. Fixes [#1122](https://github.com/mozilla/nunjucks/issues/1122).
+
 3.2.4 (Apr 13 2023)
 ------------------
 

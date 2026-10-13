@@ -180,6 +180,12 @@ single loader or an array of loaders. If you pass an array of loaders,
 nunjucks will walk through them in order until one of them finds a
 template. See [`Loader`](#loader) for more info about loaders.
 
+The environment makes a shallow copy of **opts** before applying defaults.
+Creating an environment does not modify the supplied options, and later changes
+to their top-level properties do not affect that environment. Nested objects,
+such as **tags**, are still shared by reference. To change an existing
+environment's settings, update **env.opts** directly.
+
 The available flags in **opts** is **autoescape**,
 **throwOnUndefined**, **trimBlocks**, and **lstripBlocks**.
 Read more about those options in [`configure`](#configure) (the

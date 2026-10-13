@@ -17,12 +17,60 @@
     path = require('path');
   } else {
     expect = window.expect;
+    util = window.util;
     Environment = nunjucks.Environment;
     Loader = nunjucks.WebLoader;
     templatesPath = '../templates';
   }
 
   describe('api', function() {
+    it('should not modify the options passed to an environment', function() {
+      var tags = { variableStart: '[[', variableEnd: ']]' };
+      var opts = {
+        autoescape: null,
+        dev: 1,
+        trimBlocks: 1,
+        tags: tags
+      };
+      var env = new Environment([], opts);
+
+      expect(opts).to.eql({
+        autoescape: null,
+        dev: 1,
+        trimBlocks: 1,
+        tags: tags
+      });
+      expect(env.opts.autoescape).to.be(true);
+      expect(env.opts.dev).to.be(true);
+      expect(env.opts.trimBlocks).to.be(true);
+      expect(env.opts.tags).to.be(tags);
+      util.equal('[[ value ]]', { value: '<b>' }, {}, '&lt;b&gt;', env);
+    });
+
+    it('should accept frozen environment options', function() {
+      var opts = Object.freeze({ autoescape: null, trimBlocks: true });
+      var env = new Environment([], opts);
+
+      expect(env.opts.autoescape).to.be(true);
+      expect(env.opts.trimBlocks).to.be(true);
+      util.equal('{{ value }}', { value: '<b>' }, {}, '&lt;b&gt;', env);
+    });
+
+    it('should keep environments independent when options are reused', function() {
+      var opts = { autoescape: true };
+      var escaped = new Environment([], opts);
+      var unescaped;
+
+      opts.autoescape = false;
+      unescaped = new Environment([], opts);
+
+      util.equal('{{ value }}', { value: '<b>' }, {}, '&lt;b&gt;', escaped);
+      util.equal('{{ value }}', { value: '<b>' }, {}, '<b>', unescaped);
+
+      unescaped.opts.autoescape = true;
+      expect(opts.autoescape).to.be(false);
+    });
+
     it('should always force compilation of parent template', function() {
       var env = new Environment(new Loader(templatesPath));
 

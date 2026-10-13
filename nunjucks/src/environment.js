@@ -45,7 +45,7 @@ class Environment extends EmitterObj {
     // (the full trace from within nunjucks may confuse developers using
     //  the library)
     // defaults to false
-    opts = this.opts = opts || {};
+    opts = this.opts = lib.extend({}, opts || {});
     this.opts.dev = !!opts.dev;
 
     // The autoescape flag sets global autoescaping. If true,
