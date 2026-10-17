@@ -12,6 +12,18 @@ function normalize(value, defaultValue) {
   return value;
 }
 
+// Coerce numeric and boolean input to a string so that the string filters
+// below behave like `replace` (which already casts numbers) instead of
+// throwing a TypeError on e.g. `{{ 123 | capitalize }}`. Other non-string
+// values (objects, SafeStrings) pass through unchanged.
+function normalizeString(value) {
+  const str = normalize(value, '');
+  if (typeof str === 'number' || typeof str === 'boolean') {
+    return '' + str;
+  }
+  return str;
+}
+
 exports.abs = Math.abs;
 
 function isNaN(num) {
@@ -48,7 +60,7 @@ function batch(arr, linecount, fillWith) {
 exports.batch = batch;
 
 function capitalize(str) {
-  str = normalize(str, '');
+  str = normalizeString(str);
   const ret = str.toLowerCase();
   return r.copySafeness(str, ret.charAt(0).toUpperCase() + ret.slice(1));
 }
@@ -56,7 +68,7 @@ function capitalize(str) {
 exports.capitalize = capitalize;
 
 function center(str, width) {
-  str = normalize(str, '');
+  str = normalizeString(str);
   width = width || 80;
 
   if (str.length >= width) {
@@ -245,16 +257,14 @@ function list(val) {
 exports.list = list;
 
 function lower(str) {
-  str = normalize(str, '');
+  str = normalizeString(str);
   return str.toLowerCase();
 }
 
 exports.lower = lower;
 
 function nl2br(str) {
-  if (str === null || str === undefined) {
-    return '';
-  }
+  str = normalizeString(str);
   return r.copySafeness(str, str.replace(/\r\n|\n/g, '<br />\n'));
 }
 
@@ -487,7 +497,7 @@ function string(obj) {
 exports.string = string;
 
 function striptags(input, preserveLinebreaks) {
-  input = normalize(input, '');
+  input = normalizeString(input);
   let tags = /<\/?([a-z][a-z0-9]*)\b[^>]*>|<!--[\s\S]*?-->/gi;
   let trimmedInput = trim(input.replace(tags, ''));
   let res = '';
@@ -506,7 +516,7 @@ function striptags(input, preserveLinebreaks) {
 exports.striptags = striptags;
 
 function title(str) {
-  str = normalize(str, '');
+  str = normalizeString(str);
   let words = str.split(' ').map(word => capitalize(word));
   return r.copySafeness(str, words.join(' '));
 }
@@ -514,6 +524,7 @@ function title(str) {
 exports.title = title;
 
 function trim(str) {
+  str = normalizeString(str);
   return r.copySafeness(str, str.replace(/^\s*|\s*$/g, ''));
 }
 
@@ -521,7 +532,7 @@ exports.trim = trim;
 
 function truncate(input, length, killwords, end) {
   var orig = input;
-  input = normalize(input, '');
+  input = normalizeString(input);
   length = length || 255;
 
   if (input.length <= length) {
@@ -546,7 +557,7 @@ function truncate(input, length, killwords, end) {
 exports.truncate = truncate;
 
 function upper(str) {
-  str = normalize(str, '');
+  str = normalizeString(str);
   return str.toUpperCase();
 }
 
@@ -618,7 +629,7 @@ function urlize(str, length, nofollow) {
 exports.urlize = urlize;
 
 function wordcount(str) {
-  str = normalize(str, '');
+  str = normalizeString(str);
   const words = (str) ? str.match(/\w+/g) : null;
   return (words) ? words.length : null;
 }

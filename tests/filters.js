@@ -1068,5 +1068,22 @@
       equal('{{ nothing | wordcount }}', '');
       finish(done);
     });
+
+    it('should coerce numeric and boolean input in string filters', function(done) {
+      equal('{{ 123 | capitalize }}', '123');
+      equal('{{ 123 | lower }}', '123');
+      equal('{{ 123 | upper }}', '123');
+      equal('{{ 123 | trim }}', '123');
+      equal('{{ 123 | title }}', '123');
+      equal('{{ 123 | striptags }}', '123');
+      equal('{{ 123 | wordcount }}', '1');
+      equal('{{ 123 | nl2br }}', '123');
+      equal('{{ 12345 | truncate(2) }}', '12...');
+      equal('{{ 123 | center(10) }}', '   123    ');
+      equal('{{ 1.5 | upper }}', '1.5');
+      equal('{{ true | capitalize }}', 'True');
+      equal('{{ false | upper }}', '');
+      finish(done);
+    });
   });
 }());
