@@ -1528,7 +1528,7 @@ and replacing them surrounding an item:
 **Input**
 
 ```jinja
-{% set letters = aaabbbccc%}
+{% set letters = "aaabbbccc" %}
 {{ letters | replace("", ".") }}
 ```
 
