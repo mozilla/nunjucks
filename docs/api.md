@@ -442,6 +442,10 @@ templates live, and it defaults to the current working directory.
 * **noCache** - if `true`, the system will avoid using a cache and templates
   will be recompiled every single time
 
+With **watch** enabled, `loader.watcher` exposes the Chokidar watcher.
+Call `loader.watcher.close()` to stop watching when the loader is no longer
+needed, and wait for its returned promise before completing shutdown.
+
 ```js
 // Loads templates from the "views" folder
 var env = new nunjucks.Environment(new nunjucks.FileSystemLoader('views'));

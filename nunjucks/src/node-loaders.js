@@ -41,6 +41,7 @@ class FileSystemLoader extends Loader {
       }
       const paths = this.searchPaths.filter(fs.existsSync);
       const watcher = chokidar.watch(paths);
+      this.watcher = watcher;
       watcher.on('all', (event, fullname) => {
         fullname = path.resolve(fullname);
         if (event === 'change' && fullname in this.pathsToNames) {

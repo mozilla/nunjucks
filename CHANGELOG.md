@@ -1,6 +1,12 @@
 Changelog
 =========
 
+Unreleased
+----------
+
+* Expose the FileSystemLoader watcher as `loader.watcher` when watching is
+  enabled, so callers can close it during shutdown. Fixes #1476.
+
 3.2.4 (Apr 13 2023)
 ------------------
 
