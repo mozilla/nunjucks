@@ -58,6 +58,7 @@ class Tokenizer {
     this.colno = 0;
 
     this.in_code = false;
+    this.aggregateDepth = 0;
 
     opts = opts || {};
 
@@ -93,8 +94,9 @@ class Tokenizer {
       } else if ((tok = this._extract(whitespaceChars))) {
         // We hit some whitespace
         return token(TOKEN_WHITESPACE, tok, lineno, colno);
-      } else if ((tok = this._extractString(this.tags.BLOCK_END)) ||
-        (tok = this._extractString('-' + this.tags.BLOCK_END))) {
+      } else if (this.aggregateDepth === 0 &&
+        ((tok = this._extractString(this.tags.BLOCK_END)) ||
+        (tok = this._extractString('-' + this.tags.BLOCK_END)))) {
         // Special check for the block end tag
         //
         // It is a requirement that start and end tags are composed of
@@ -120,8 +122,9 @@ class Tokenizer {
           }
         }
         return token(TOKEN_BLOCK_END, tok, lineno, colno);
-      } else if ((tok = this._extractString(this.tags.VARIABLE_END)) ||
-        (tok = this._extractString('-' + this.tags.VARIABLE_END))) {
+      } else if (this.aggregateDepth === 0 &&
+        ((tok = this._extractString(this.tags.VARIABLE_END)) ||
+        (tok = this._extractString('-' + this.tags.VARIABLE_END)))) {
         // Special check for variable end tag (see above)
         this.in_code = false;
         return token(TOKEN_VARIABLE_END, tok, lineno, colno);
@@ -175,6 +178,14 @@ class Tokenizer {
             cur = curComplex + this.current();
             this.forward();
           }
+        }
+
+        // Brackets inside strings and regexes are consumed by their own paths.
+        // Only recognize tag endings outside expression aggregates.
+        if (cur === '(' || cur === '[' || cur === '{') {
+          this.aggregateDepth += 1;
+        } else if (cur === ')' || cur === ']' || cur === '}') {
+          this.aggregateDepth = Math.max(0, this.aggregateDepth - 1);
         }
 
         switch (cur) {
@@ -259,10 +270,12 @@ class Tokenizer {
       } else if ((tok = this._extractString(this.tags.BLOCK_START + '-')) ||
         (tok = this._extractString(this.tags.BLOCK_START))) {
         this.in_code = true;
+        this.aggregateDepth = 0;
         return token(TOKEN_BLOCK_START, tok, lineno, colno);
       } else if ((tok = this._extractString(this.tags.VARIABLE_START + '-')) ||
         (tok = this._extractString(this.tags.VARIABLE_START))) {
         this.in_code = true;
+        this.aggregateDepth = 0;
         return token(TOKEN_VARIABLE_START, tok, lineno, colno);
       } else {
         tok = '';

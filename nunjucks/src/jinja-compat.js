@@ -56,7 +56,8 @@ function installCompat() {
     return {
       index: tokens.index,
       lineno: tokens.lineno,
-      colno: tokens.colno
+      colno: tokens.colno,
+      aggregateDepth: tokens.aggregateDepth
     };
   }
 
@@ -92,6 +93,7 @@ function installCompat() {
       // Set back one accounting for opening bracket/parens
       origState.colno--;
       origState.index--;
+      origState.aggregateDepth = Math.max(0, origState.aggregateDepth - 1);
       try {
         return orig_Parser_parseAggregate.apply(this);
       } catch (e) {

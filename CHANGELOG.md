@@ -1,6 +1,13 @@
 Changelog
 =========
 
+Unreleased
+----------
+
+* Keep template end delimiters separate from closing expression brackets, so
+  nested dictionaries can use adjacent closing braces in expressions and custom
+  tag arguments. Fixes #1349.
+
 3.2.4 (Apr 13 2023)
 ------------------
 
