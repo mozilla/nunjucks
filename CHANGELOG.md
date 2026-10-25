@@ -1,6 +1,12 @@
 Changelog
 =========
 
+Unreleased
+----------
+
+* Apply filters on block assignment headers to the captured content, including
+  asynchronous header filters when rendering with a callback. Fixes #1422.
+
 3.2.4 (Apr 13 2023)
 ------------------
 

@@ -426,6 +426,18 @@ It is also possible to capture the contents of a block into a variable using
 block assignments.  The syntax is similar to the standard `set`, except that
 the `=` is omitted, and everything until the `{% endset %}` is captured.
 
+Filters on the block assignment header are applied to the captured content
+before it is assigned. Filters can be chained and accept the same arguments
+as expression filters:
+
+```jinja
+{% set message | trim | upper %} hello {% endset %}
+{{ message }}
+```
+
+This outputs `HELLO`. Asynchronous header filters use the usual render callback.
+This does not add support for asynchronous filters inside the captured content.
+
 This can be useful in some situations as an alternative for macros:
 
 ```jinja

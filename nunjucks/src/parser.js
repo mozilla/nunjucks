@@ -503,7 +503,14 @@ class Parser extends Obj {
     }
 
     if (!this.skipValue(lexer.TOKEN_OPERATOR, '=')) {
-      if (!this.skip(lexer.TOKEN_BLOCK_END)) {
+      const tok = this.peekToken();
+      if (tok && tok.type === lexer.TOKEN_PIPE) {
+        const body = new nodes.Capture(tag.lineno, tag.colno, null);
+        node.value = this.parseFilter(body);
+        this.advanceAfterBlockEnd(tag.value);
+        body.body = this.parseUntilBlocks('endset');
+        this.advanceAfterBlockEnd();
+      } else if (!this.skip(lexer.TOKEN_BLOCK_END)) {
         this.fail('parseSet: expected = or block end in set tag',
           tag.lineno,
           tag.colno);
