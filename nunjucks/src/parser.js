@@ -1159,7 +1159,11 @@ class Parser extends Obj {
     }
 
     while (1) { // eslint-disable-line no-constant-condition
-      const type = this.peekToken().type;
+      const next = this.peekToken();
+      if (!next) {
+        this.fail('parseAggregate: unexpected end of file', tok.lineno, tok.colno);
+      }
+      const type = next.type;
       if (type === lexer.TOKEN_RIGHT_PAREN ||
         type === lexer.TOKEN_RIGHT_BRACKET ||
         type === lexer.TOKEN_RIGHT_CURLY) {

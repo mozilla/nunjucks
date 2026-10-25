@@ -1,6 +1,13 @@
 Changelog
 =========
 
+Unreleased
+----------
+
+* Report a template syntax error with the opening aggregate location when an
+  unclosed array, dictionary or group reaches end of input, instead of throwing
+  a JavaScript TypeError. Fixes #1454.
+
 3.2.4 (Apr 13 2023)
 ------------------
 
