@@ -437,8 +437,7 @@ templates live, and it defaults to the current working directory.
 
 **opts** is an object with the following optional properties:
 
-* **watch** - if `true`, the system will automatically update templates. To use watch, make sure optional dependency *chokidar* is installed.
-  when they are changed on the filesystem
+* **watch** - if `true`, the system will automatically update templates when they are changed on the filesystem. To use watch, make sure optional dependency *chokidar* is installed. when they are changed on the filesystem
 * **noCache** - if `true`, the system will avoid using a cache and templates
   will be recompiled every single time
 
