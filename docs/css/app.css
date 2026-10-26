@@ -6,6 +6,12 @@
 	font-style: normal;
 }
 
+body {
+    position: relative;
+    min-height: 100vh;
+    padding-bottom: 3em;
+}
+
 code {
     color: inherit;
     background-color: #f0f0f0;
@@ -465,6 +471,9 @@ section.whos-using .user {
 }
 
 footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
     background-color: #f8f8f8;
     font-size: .9em;
     text-align: center;
