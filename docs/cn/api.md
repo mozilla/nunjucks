@@ -104,7 +104,7 @@ var env = nunjucks.configure('views');
 installJinjaCompat
 nunjucks.installJinjaCompat()
 
-这个方法为了与 Jinja 更好的兼容，增加了一些适配 Python 的 API。但是 nunjucks 不是为了完全兼容 Jinja/Pyhton，这只为了帮助使用者查看。
+这个方法为了与 Jinja 更好的兼容，增加了一些适配 Python 的 API。但是 nunjucks 不是为了完全兼容 Jinja/Python，这只为了帮助使用者查看。
 
 增加了 `True` 和 `False`，与 js 的 `true` 和 `false` 相对应。并增加 Array 和 Object 使之适配 Python 风格的。[查看源码](https://github.com/mozilla/nunjucks/blob/master/nunjucks/src/jinja-compat.js)能看到所有功能。
 {% endapi %}
