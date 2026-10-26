@@ -97,20 +97,8 @@ In node, `'views'` would be a path relative to the current working
 directory. In the browser, it would be a relative URL, and you
 probably want it to be absolute, like `'/views'`.
 
-Using express? Simply pass your express app into `configure`:
 
-```js
-var app = express();
-
-nunjucks.configure('views', {
-    autoescape: true,
-    express: app
-});
-
-app.get('/', function(req, res) {
-    res.render('index.html');
-});
-```
+## Using express?
 
 The above API works in node and in the browser (express is only in
 node, obviously). In node, nunjucks loads templates from the
@@ -121,6 +109,52 @@ automatically be picked up by the system and nothing more has
 to be changed. This makes it easy to use the same code in
 development and production, while using precompiled templates in
 production.
+
+### Basic usage
+
+Simply pass your express app into configure:
+
+```js
+var app = express();
+
+nunjucks.configure('views', {
+     autoescape: true,
+     express: app
+});
+ 
+app.get('/', function(req, res) {
+     res.render('index.html');
+});
+```
+
+### With app.engine function and consolidate.js
+
+
+[Consolidate.js](https://github.com/tj/consolidate.js) using the
+Express signature `(path[, locals], callback)` to be used directly
+with `app.engine`.
+
+
+```js
+var cons = require('consolidate');
+var app = express();
+
+// set your own config like that
+cons.requires.nunjucks = nunjucks.configure({
+     autoescape: true
+});
+
+// assign the nunjucks engine to .njk files
+app.engine('njk', cons.nunjucks);
+
+// set njk to default engine
+app.set('view engine', 'njk');
+ 
+app.get('/', function(req, res) {
+     res.render('index'); // load index.njk
+});
+```
+
 
 ## More Information
 
