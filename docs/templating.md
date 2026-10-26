@@ -1754,6 +1754,25 @@ Slice an iterator and return a list of lists containing those items:
     </ul>
 </div>
 ```
+
+### split
+
+Split a string by a given separator and return a list of resulting strings:
+
+**Input**
+
+```jinja
+{% set str = "/foo/bar/baz/" %}
+
+{% str.split('/') %}
+```
+
+**Output**
+
+```jinja
+,foo,bar,baz,
+```
+
 ### sort(arr, reverse, caseSens, attr)
 
 Sort `arr` with JavaScript's `arr.sort` function. If `reverse` is true, result
