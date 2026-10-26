@@ -7,8 +7,7 @@ var lib = require('../src/lib');
 var cmdpath = null;
 
 program
-  .storeOptionsAsProperties(false)
-  .passCommandToAction(false);
+  .storeOptionsAsProperties(false);
 
 program
   .name('precompile')
