@@ -122,6 +122,45 @@ to be changed. This makes it easy to use the same code in
 development and production, while using precompiled templates in
 production.
 
+## When Using Webpack...
+
+```
+$ npm install html-bundler-webpack-plugin nunjucks --save-dev
+```
+
+The [HTML bundler plugin for Webpack](https://github.com/webdiscus/html-bundler-webpack-plugin) compiles [nunjucks templates](https://github.com/webdiscus/html-bundler-webpack-plugin#using-template-nunjucks) into static HTML files.
+
+Configurate the _webpack.config.js_ for using nunjucks tempaltes:
+```js
+const HtmlBundlerPlugin = require('html-bundler-webpack-plugin');
+
+module.exports = {
+  plugins: [
+    new HtmlBundlerPlugin({
+      entry: {
+        // define templates as entriypoints here, e.g.:
+        index: 'src/views/pages/index.njk', // output to dist/index.html
+        'news/sport': 'src/views/pages/news/sport/index.njk', // output to dist/news/sport.html
+      },
+      preprocessor: 'nunjucks', // use nunjucks templating engine
+      preprocessorOptions: {
+        // paths to templates
+        views: [
+          'src/views/includes',
+          'src/views/partials',
+        ],
+        jinjaCompatibility: false, // installs support for Jinja compatibility, defaults 'false'
+        // define nunjucks options here, e.g.:
+        autoescape: true,
+        // ...
+      },
+    }),
+  ],
+};
+```
+
+For all available options, see the nunjucks [API configure](https://mozilla.github.io/nunjucks/api.html#configure).
+
 ## More Information
 
 That's only the tip of the iceberg. See [API](api.html) for API docs
