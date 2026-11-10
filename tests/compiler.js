@@ -55,7 +55,7 @@
       finish(done);
     });
 
-    it('should escape Unicode line seperators', function(done) {
+    it('should escape Unicode line separators', function(done) {
       equal('\u2028', '\u2028');
       finish(done);
     });

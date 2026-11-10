@@ -23,7 +23,7 @@
     });
 
     describe('templates', function() {
-      it('should return *NIX path seperators', function() {
+      it('should return *NIX path separators', function() {
         var fileName;
 
         precompile('./tests/templates/item.njk', {
@@ -35,7 +35,7 @@
         expect(fileName).to.equal('./tests/templates/item.njk');
       });
 
-      it('should return *NIX path seperators, when name is passed as option', function() {
+      it('should return *NIX path separators, when name is passed as option', function() {
         var fileName;
 
         precompile('<span>test</span>', {
