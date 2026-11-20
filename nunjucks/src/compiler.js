@@ -824,11 +824,10 @@ class Compiler extends Obj {
     this._compileAsyncLoop(node, frame, true);
   }
 
-  _compileMacro(node, frame) {
+  _compileMacro(node, frame, callerFrameId) {
     var args = [];
     var kwargs = null;
     var funcId = 'macro_' + this._tmpid();
-    var keepFrame = (frame !== undefined);
 
     // Type check the definition of the args
     node.args.children.forEach((arg, i) => {
@@ -850,19 +849,20 @@ class Compiler extends Obj {
     // arguments so support setting positional args with keywords
     // args and passing keyword args as positional args
     // (essentially default values). See runtime.js.
-    let currFrame;
-    if (keepFrame) {
-      currFrame = frame.push(true);
-    } else {
-      currFrame = new Frame();
-    }
+    const currFrame = frame ? frame.push(true) : new Frame();
     this._emitLines(
       `var ${funcId} = runtime.makeMacro(`,
       `[${argNames.join(', ')}], `,
       `[${kwargNames.join(', ')}], `,
-      `function (${realNames.join(', ')}) {`,
-      'var callerFrame = frame;',
-      'frame = ' + ((keepFrame) ? 'frame.push(true);' : 'new runtime.Frame();'),
+      `function (${realNames.join(', ')}) {`);
+
+    if (callerFrameId) {
+      this._emitLine(`var frame = ${callerFrameId}.push(true);`);
+    } else {
+      this._emitLines('var callerFrame = frame;', 'frame = new runtime.Frame();');
+    }
+
+    this._emitLines(
       'kwargs = kwargs || {};',
       'if (Object.prototype.hasOwnProperty.call(kwargs, "caller")) {',
       'frame.set("caller", kwargs.caller); }');
@@ -893,7 +893,9 @@ class Compiler extends Obj {
       this.compile(node.body, currFrame);
     });
 
-    this._emitLine('frame = ' + ((keepFrame) ? 'frame.pop();' : 'callerFrame;'));
+    if (!callerFrameId) {
+      this._emitLine('frame = callerFrame;');
+    }
     this._emitLine(`return new runtime.SafeString(${bufferId});`);
     this._emitLine('});');
     this._popBuffer();
@@ -919,10 +921,11 @@ class Compiler extends Obj {
   }
 
   compileCaller(node, frame) {
-    // basically an anonymous "macro expression"
-    this._emit('(function (){');
-    const funcId = this._compileMacro(node, frame);
-    this._emit(`return ${funcId};})()`);
+    // Capture the frame where the call block is defined, before the callee runs.
+    const callerFrameId = this._tmpid();
+    this._emit(`(function (${callerFrameId}) {`);
+    const funcId = this._compileMacro(node, frame, callerFrameId);
+    this._emit(`return ${funcId};})(frame)`);
   }
 
   _compileGetTemplate(node, frame, eagerCompile, ignoreMissing) {

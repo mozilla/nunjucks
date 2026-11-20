@@ -2198,6 +2198,25 @@
       finish(done);
     });
 
+    it('should read keyword arguments from the outer macro in a call block', function() {
+      equal(
+        '{% macro inside(label="inner") %}{{ caller() }}:{{ label }}{% endmacro %}' +
+        '{% macro outside(label="outer") %}' +
+        '{% call inside() %}{{ label }}{% endcall %}' +
+        '{% endmacro %}' +
+        '{{ outside() }} {{ outside(label="explicit") }}',
+        'outer:inner explicit:inner');
+    });
+
+    it('should read outer macro locals without changing them from a call block', function() {
+      equal(
+        '{% macro inside() %}{{ caller() }}{% endmacro %}' +
+        '{% macro outside() %}{% set label = "outer" %}' +
+        '{% call inside() %}{{ label }}{% set label = "changed" %}:{{ label }}{% endcall %}' +
+        ':{{ label }}{% endmacro %}{{ outside() }}',
+        'outer:changed:outer');
+    });
+
     it('should not leak scope from call blocks to parent', function(done) {
       render(
         '{% set var = "expected" %}' +

@@ -1,6 +1,12 @@
 Changelog
 =========
 
+Unreleased
+----------
+
+* Fix call blocks losing access to keyword arguments and local variables in
+  the enclosing macro. Fixes [#1131](https://github.com/mozilla/nunjucks/issues/1131).
+
 3.2.4 (Apr 13 2023)
 ------------------
 
