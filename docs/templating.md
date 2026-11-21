@@ -632,6 +632,7 @@ NOTE: You cannot do anything asynchronous inside these blocks.
 A `call` block enables you to call a macro with all the text inside the
 tag. This is helpful if you want to pass a lot of content into a macro. The
 content is available inside the macro as `caller()`.
+The call block can read variables from the scope where it is defined.
 
 ```jinja
 {% macro add(x, y) %}
