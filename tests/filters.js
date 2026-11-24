@@ -108,9 +108,9 @@
 
     it('escape', function() {
       equal(
-        '{{ "<html>" | escape }}', {},
+        '{{ "<html>\\\\" | escape }}', {},
         { autoescape: false },
-        '&lt;html&gt;');
+        '&lt;html&gt;&#92;');
     });
 
     it('escape skip safe', function() {
@@ -717,7 +717,7 @@
       equal('{{ "<img src=" | replace("<img", "<img alt=val") | safe }}',
         '<img alt=val src=');
       equal('{{ "<img src=\\"http://www.example.com\\" />" | replace("<img", "replacement text") | safe }}',
-        'replacement text src=\"http://www.example.com\" />');
+        'replacement text src="http://www.example.com" />');
 
       // Regex
       equal('{{ "aabbbb" | replace(r/ab{2}/, "z") }}', 'azbb');

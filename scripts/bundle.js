@@ -9,7 +9,7 @@ var path = require('path');
 var webpack = require('webpack');
 var pjson = require('../package.json');
 var promiseSequence = require('./lib/utils').promiseSequence;
-var UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+var TerserPlugin = require('terser-webpack-plugin');
 var TEST_ENV = (process.env.NODE_ENV === 'test');
 
 var destDir = path.resolve(path.join(
@@ -29,6 +29,8 @@ function runWebpack(opts) {
       var config = {
         entry: './nunjucks/index.js',
         devtool: 'source-map',
+        mode: TEST_ENV ? 'none' : 'production',
+        target: ['web', 'es5'],
         output: {
           path: destDir,
           filename: filename,
@@ -37,10 +39,6 @@ function runWebpack(opts) {
           devtoolModuleFilenameTemplate: function(info) {
             return path.relative(destDir, info.absoluteResourcePath);
           }
-        },
-        node: {
-          process: false,
-          setImmediate: false
         },
         module: {
           rules: [{
@@ -83,16 +81,15 @@ function runWebpack(opts) {
 
       if (opts.min) {
         config.plugins.push(
-          new UglifyJsPlugin({
-            sourceMap: true,
-            uglifyOptions: {
+          new TerserPlugin({
+            terserOptions: {
               mangle: {
                 properties: {
                   regex: /^_[^_]/
                 }
               },
               compress: {
-                unsafe: true
+                arrows: false
               }
             }
           })

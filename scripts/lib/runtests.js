@@ -66,7 +66,7 @@ function runtests() {
       () => mochaRun({cliTest: true}),
     ]);
 
-    return mochaPromise.then(() => {
+    mochaPromise.then(() => {
       return getStaticServer().then((args) => {
         server = args[0];
         const port = args[1];

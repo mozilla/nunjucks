@@ -7,8 +7,7 @@ var lookup = require('./utils').lookup;
 module.exports = function mochaPhantomJS(url, options) {
   options = options || {};
   const coverageFile = path.join(
-    __dirname, '../../.nyc_output',
-    (url.indexOf('slim') > -1) ? 'browser-slim.json' : 'browser-std.json');
+    __dirname, '../../.nyc_output', (url.indexOf('slim') > -1) ? 'browser-slim.json' : 'browser-std.json');
 
   return new Promise((resolve, reject) => {
     try {

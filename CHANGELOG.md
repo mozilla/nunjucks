@@ -1,11 +1,18 @@
 Changelog
 =========
 
-3.2.4 (Unreleased)
+3.2.5 (Unreleased)
 ------------------
 
 * Add `-j/--jinja-compat` switch to the `precompile` script. Merge of
   [#1319](https://github.com/mozilla/nunjucks/pull/1319).
+
+3.2.4 (Apr 13 2023)
+------------------
+
+* HTML encode backslashes when expressions are passed through the escape
+  filter (including when this is done automatically with autoescape). Merge
+  of [#1437](https://github.com/mozilla/nunjucks/pull/1437).
 
 3.2.3 (Feb 15 2021)
 -------------------

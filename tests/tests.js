@@ -200,7 +200,6 @@
     });
 
     it('iterable should detect that a Map is iterable', function() {
-      /* global Map */
       if (typeof Map === 'undefined') {
         this.skip();
       } else {

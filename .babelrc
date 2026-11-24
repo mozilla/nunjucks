@@ -10,7 +10,7 @@
   ],
   "env": {
     "test": {
-      "plugins": ["./scripts/lib/arrow-function-coverage-fix", "istanbul"]
+      "plugins": ["istanbul"]
     }
   },
   "ignore": [
