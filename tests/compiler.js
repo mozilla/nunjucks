@@ -274,6 +274,16 @@
       finish(done);
     });
 
+    it('should compile an inline conditional without else as undefined', function(done) {
+      var env = new Environment();
+      env.addFilter('type', function(value) {
+        return typeof value;
+      });
+      equal('{{ ("foo" if false) | type }}', {}, 'undefined', env);
+
+      finish(done);
+    });
+
     it('should compile inline conditionals', function(done) {
       var tmpl = 'Give me some {{ "pizza" if hungry else "water" }}';
 
